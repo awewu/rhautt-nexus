@@ -5,11 +5,11 @@ import { SsoAuditLogService } from './sso-audit-log.service';
 
 export const DEFAULT_OIDC_ISSUER = 'https://ai.rhautt.com';
 const DEFAULT_SCOPE = 'openid profile email roles org';
-const DEFAULT_POST_LOGIN_REDIRECT = '/brand';
-const LOCAL_CLIENT_ID = 'cli_mrvdz1yr8jfzrb8u';
+const DEFAULT_POST_LOGIN_REDIRECT = '/cockpit';
+const LOCAL_CLIENT_ID = 'cli_mslla90sk9xd8vewl421';
 const PRODUCTION_CLIENT_ID = 'cli_mrve0bgvgnl2gkjg';
 const LOCAL_REDIRECT_URI = 'http://localhost:5000/api/v2/auth/sso/callback';
-const PRODUCTION_REDIRECT_URI = 'https://nexus.rhautt.com/api/v2/auth/sso/callback';
+const PRODUCTION_REDIRECT_URI = 'https://gtm.rhautt.com/api/v2/auth/sso/callback';
 export const SSO_COOKIE_PATH = '/api/v2/auth/sso';
 const SSO_COOKIE_MAX_AGE_SECONDS = 5 * 60;
 

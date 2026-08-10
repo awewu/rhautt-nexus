@@ -51,7 +51,7 @@ function adminConnConfig() {
     port: Number(process.env.POSTGRES_ADMIN_PORT || process.env.POSTGRES_PORT || 5459),
     user: process.env.POSTGRES_ADMIN_USER || process.env.POSTGRES_OWNER_USER || 'rhautt',
     password: process.env.POSTGRES_ADMIN_PASSWORD || process.env.POSTGRES_OWNER_PASSWORD || 'rhautt2026',
-    database: process.env.POSTGRES_ADMIN_DB || process.env.POSTGRES_DB || 'rhautt_nexus',
+    database: process.env.POSTGRES_ADMIN_DB || process.env.POSTGRES_DB || 'rhautt_GOT',
   };
 }
 

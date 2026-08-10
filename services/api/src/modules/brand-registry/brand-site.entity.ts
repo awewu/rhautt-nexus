@@ -104,6 +104,79 @@ export class SiteNewsArticleEntity {
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
 }
 
+@Entity('site_document_categories')
+@Index(['tenantId', 'siteId', 'slug'], { unique: true, where: 'deleted_at IS NULL' })
+@Index(['tenantId', 'siteId', 'scope', 'status'])
+export class SiteDocumentCategoryEntity {
+  @PrimaryGeneratedColumn('uuid') id: string;
+  @Column({ name: 'tenant_id' }) @Index() tenantId: string;
+  @Column({ name: 'site_id' }) @Index() siteId: string;
+  @Column() slug: string;
+  @Column() name: string;
+  @Column({ default: 'all' }) scope: 'residential' | 'commercial' | 'all';
+  @Column({ name: 'sort_order', default: 0 }) sortOrder: number;
+  @Column({ default: 'active' }) status: 'active' | 'inactive';
+  @Column({ name: 'created_by', type: 'uuid', nullable: true }) createdBy: string | null;
+  @Column({ name: 'updated_by', type: 'uuid', nullable: true }) updatedBy: string | null;
+  @Column({ name: 'deleted_by', type: 'uuid', nullable: true }) deletedBy: string | null;
+  @Column({ name: 'deleted_at', type: 'timestamptz', nullable: true }) deletedAt: Date | null;
+  @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
+  @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
+}
+
+@Entity('site_documents')
+@Index(['tenantId', 'siteId', 'scope', 'status'])
+@Index(['tenantId', 'siteId', 'categoryId'])
+export class SiteDocumentEntity {
+  @PrimaryGeneratedColumn('uuid') id: string;
+  @Column({ name: 'tenant_id' }) @Index() tenantId: string;
+  @Column({ name: 'site_id' }) @Index() siteId: string;
+  @Column({ name: 'category_id' }) @Index() categoryId: string;
+  @Column({ name: 'artifact_id', type: 'uuid' }) artifactId: string;
+  @Column({ name: 'display_name' }) displayName: string;
+  @Column({ name: 'original_filename' }) originalFilename: string;
+  @Column({ name: 'mime_type', type: 'varchar', nullable: true }) mimeType: string | null;
+  @Column({ name: 'size_bytes', type: 'bigint' }) sizeBytes: number;
+  @Column({ default: 'residential' }) scope: 'residential' | 'commercial';
+  @Column({ name: 'sort_order', default: 0 }) sortOrder: number;
+  @Column({ default: 'draft' }) status: 'draft' | 'published' | 'hidden' | 'archived';
+  @Column({ name: 'published_at', type: 'timestamptz', nullable: true }) publishedAt: Date | null;
+  @Column({ name: 'created_by', type: 'uuid', nullable: true }) createdBy: string | null;
+  @Column({ name: 'updated_by', type: 'uuid', nullable: true }) updatedBy: string | null;
+  @Column({ name: 'deleted_by', type: 'uuid', nullable: true }) deletedBy: string | null;
+  @Column({ name: 'deleted_at', type: 'timestamptz', nullable: true }) deletedAt: Date | null;
+  @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
+  @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
+}
+
+@Entity('site_dealers')
+@Index(['tenantId', 'siteId', 'status', 'sortOrder'])
+export class SiteDealerEntity {
+  @PrimaryGeneratedColumn('uuid') id: string;
+  @Column({ name: 'tenant_id' }) @Index() tenantId: string;
+  @Column({ name: 'site_id' }) @Index() siteId: string;
+  @Column({ name: 'site_code' }) @Index() siteCode: string;
+  @Column() name: string;
+  @Column({ type: 'varchar', nullable: true }) province: string | null;
+  @Column({ type: 'varchar', nullable: true }) city: string | null;
+  @Column({ type: 'varchar', nullable: true }) district: string | null;
+  @Column({ type: 'text', nullable: true }) address: string | null;
+  @Column({ type: 'varchar', nullable: true }) phone: string | null;
+  @Column({ name: 'dealer_type', type: 'varchar', nullable: true }) dealerType: string | null;
+  @Column({ type: 'jsonb', default: () => "'[]'::jsonb" }) services: string[];
+  @Column({ type: 'jsonb', default: () => "'[]'::jsonb" }) certifications: string[];
+  @Column({ type: 'decimal', precision: 10, scale: 6, nullable: true }) latitude: number | null;
+  @Column({ type: 'decimal', precision: 10, scale: 6, nullable: true }) longitude: number | null;
+  @Column({ name: 'sort_order', default: 0 }) sortOrder: number;
+  @Column({ default: 'active' }) @Index() status: 'active' | 'inactive';
+  @Column({ name: 'created_by', type: 'uuid', nullable: true }) createdBy: string | null;
+  @Column({ name: 'updated_by', type: 'uuid', nullable: true }) updatedBy: string | null;
+  @Column({ name: 'deleted_by', type: 'uuid', nullable: true }) deletedBy: string | null;
+  @Column({ name: 'deleted_at', type: 'timestamptz', nullable: true }) deletedAt: Date | null;
+  @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
+  @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
+}
+
 @Entity('site_inquiries')
 @Index(['tenantId', 'siteId', 'kind', 'createdAt'])
 export class SiteInquiryEntity {

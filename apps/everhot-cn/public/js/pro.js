@@ -10,7 +10,14 @@
    ═══════════════════════════════════════════════════════════ */
 (function () {
   var BASE='';
+  var SITE_CODE=window.EVERHOT_SITE_CODE||'everhot';
+  var API_BASE=String(window.EVERHOT_API_BASE||'').replace(/\/$/,'');
   function e(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function apiUrl(value){
+    var url=String(value||'');
+    if(!url||url==='#'||/^(https?:)?\/\//i.test(url)) return url||'#';
+    return API_BASE+(url.charAt(0)==='/'?url:'/'+url);
+  }
   function productsReady(){
     if(typeof window.EVERHOT_LOAD_PRODUCTS==='function') return window.EVERHOT_LOAD_PRODUCTS();
     return window.EVERHOT_PRODUCTS_READY || Promise.resolve(false);
@@ -86,18 +93,26 @@
   }
 
   /* ---------- 文档 / 资源库 ---------- */
-  function renderLib(host, data, scopeAttr){
+  function renderLib(host, data, scopeAttr, categoryNames){
     var scope=host.getAttribute(scopeAttr)||'all';
     var all=data.filter(function(d){return scope==='all'||d.cat===scope;});
-    var types=[]; all.forEach(function(d){ if(types.indexOf(d.type)<0) types.push(d.type); });
+    var types=Array.isArray(categoryNames)?categoryNames.slice():[];
+    all.forEach(function(d){ if(types.indexOf(d.type)<0) types.push(d.type); });
     var state={q:'',type:''};
+    var composing=false,countNode=null,listNode=null,filterTimer=null;
+    function scheduleResults(){ if(filterTimer) clearTimeout(filterTimer); filterTimer=setTimeout(drawResults,0); }
+    function drawResults(){
+      var list=results();
+      if(countNode) countNode.innerHTML='共 <strong>'+list.length+'</strong> 份资料';
+      if(listNode) listNode.innerHTML=list.length?list.map(row).join(''):'<div class="dl-empty"><p>暂无匹配资料。</p></div>';
+    }
     function results(){
       return all.filter(function(d){
         return (!state.q||(d.title.toLowerCase().indexOf(state.q.toLowerCase())>-1)) && (!state.type||d.type===state.type);
       });
     }
     function row(d){
-      return '<a class="doc-row" href="'+e(d.url||'#')+'"'+((d.url&&d.url!=='#')?' target="_blank" rel="noopener"':'')+'>'
+      return '<a class="doc-row" href="'+e(apiUrl(d.url))+'"'+((d.url&&d.url!=='#')?' download':'')+'>'
         +'<span class="doc-ic">'+e(d.fmt||'PDF')+'</span>'
         +'<span class="doc-main"><span class="doc-title">'+e(d.title)+'</span>'
         +'<span class="doc-meta">'+e(d.type)+' · '+e(d.size||'')+'</span></span>'
@@ -106,17 +121,38 @@
     function draw(){
       var list=results(),h='';
       h+='<form class="pl-filters" role="search" onsubmit="return false">';
-      h+='<input type="search" class="dl-search" placeholder="搜索文档名称" value="'+e(state.q)+'" aria-label="搜索文档">';
+      h+='<input type="text" class="dl-search" placeholder="搜索文档名称" value="'+e(state.q)+'" aria-label="搜索文档" autocomplete="off" spellcheck="false" inputmode="text">';
       h+='<select class="dl-select" aria-label="按类型筛选"><option value="">全部类型</option>'+types.map(function(t){return '<option value="'+e(t)+'"'+(state.type===t?' selected':'')+'>'+e(t)+'</option>';}).join('')+'</select>';
       h+='</form>';
       h+='<p class="dl-count">共 <strong>'+list.length+'</strong> 份资料</p>';
       h+='<div class="doc-list">'+(list.length?list.map(row).join(''):'<div class="dl-empty"><p>暂无匹配资料。</p></div>')+'</div>';
-      h+='<p class="ev-form-note" style="margin-top:14px">资料链接为占位，正式 PDF/文件上线后将自动可下载。</p>';
       host.innerHTML=h;
-      host.querySelector('.dl-search').addEventListener('input',function(){state.q=this.value;draw();});
-      host.querySelector('.dl-select').addEventListener('change',function(){state.type=this.value;draw();});
+      countNode=host.querySelector('.dl-count'); listNode=host.querySelector('.doc-list');
+      var searchInput=host.querySelector('.dl-search');
+      searchInput.addEventListener('compositionstart',function(){composing=true;});
+      searchInput.addEventListener('compositionend',function(){composing=false;state.q=this.value;scheduleResults();});
+      searchInput.addEventListener('input',function(event){state.q=this.value;if(composing||event.isComposing)return;scheduleResults();});
+      host.querySelector('.dl-select').addEventListener('change',function(){state.type=this.value;scheduleResults();});
     }
     draw();
+  }
+
+  function loadDocumentLibrary(host){
+    var scope=host.getAttribute('data-doc-library')||'all';
+    var requestedScope=scope==='commercial'?'commercial':'residential';
+    var url=apiUrl('/api/v2/sites/'+encodeURIComponent(SITE_CODE)+'/documents?scope='+encodeURIComponent(requestedScope));
+    fetch(url,{cache:'no-store',headers:{Accept:'application/json'}})
+      .then(function(response){if(!response.ok)throw new Error('document library request failed');return response.json();})
+      .then(function(payload){
+        var data=payload&&payload.data?payload.data:payload||{};
+        var categories=Array.isArray(data.categories)?data.categories:[];
+        var items=Array.isArray(data.items)?data.items:[];
+        renderLib(host,items.map(function(item){return {
+          title:item.title||item.filename||'',cat:item.scope||requestedScope,type:item.category||item.type||'',
+          fmt:item.fmt||'FILE',size:item.size||'',url:apiUrl(item.url||'#')
+        };}),'data-doc-library',categories.map(function(category){return category.name;}).filter(Boolean));
+      })
+      .catch(function(){renderLib(host,window.EVERHOT_DOCS||[],'data-doc-library');});
   }
 
   /* ---------- 培训课程 ---------- */
@@ -145,7 +181,7 @@
 
   function boot(){
     document.querySelectorAll('[data-pro-lookup]').forEach(renderLookup);
-    document.querySelectorAll('[data-doc-library]').forEach(function(h){renderLib(h, window.EVERHOT_DOCS, 'data-doc-library');});
+    document.querySelectorAll('[data-doc-library]').forEach(loadDocumentLibrary);
     document.querySelectorAll('[data-resource-library]').forEach(function(h){renderLib(h, window.EVERHOT_RESOURCES, 'data-resource-library');});
     document.querySelectorAll('[data-course-catalog]').forEach(renderCourses);
     document.querySelectorAll('[data-solutions]').forEach(renderSolutions);

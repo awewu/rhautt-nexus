@@ -1,5 +1,5 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductEntity, PriceListItemEntity, ProductContentEntity, ProductContentEventEntity, ProductRelationEntity, BrandPublishGrantEntity } from './product-catalog.entity';
+import { ProductEntity, ProductSkuEntity, ProductWebsitePricingEntity, ProductBrandBindingEntity, PriceListItemEntity, ProductContentEntity, ProductContentEventEntity, ProductRelationEntity, BrandPublishGrantEntity } from './product-catalog.entity';
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { BrandProductCategoryEntity } from '../brand-product-category/brand-product-category.entity';
@@ -14,7 +14,7 @@ import { FileArtifactModule } from '../file-artifact/file-artifact.module';
 
 @Module({
   imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([ProductEntity, PriceListItemEntity, ProductContentEntity, ProductContentEventEntity, ProductRelationEntity, BrandProductCategoryEntity, BrandPublishGrantEntity, ProductLaunchEntity, ProductSellingPointEntity, PricingPolicyEntity])]),
+    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([ProductEntity, ProductSkuEntity, ProductWebsitePricingEntity, ProductBrandBindingEntity, PriceListItemEntity, ProductContentEntity, ProductContentEventEntity, ProductRelationEntity, BrandProductCategoryEntity, BrandPublishGrantEntity, ProductLaunchEntity, ProductSellingPointEntity, PricingPolicyEntity])]),
     AuthModule,
     FileArtifactModule,
   ],
@@ -26,6 +26,9 @@ import { FileArtifactModule } from '../file-artifact/file-artifact.module';
     ...(TARGET_API_BOOT_SMOKE
       ? [
         bootSmokeRepositoryProvider(ProductEntity),
+        bootSmokeRepositoryProvider(ProductSkuEntity),
+        bootSmokeRepositoryProvider(ProductWebsitePricingEntity),
+        bootSmokeRepositoryProvider(ProductBrandBindingEntity),
         bootSmokeRepositoryProvider(PriceListItemEntity),
         bootSmokeRepositoryProvider(ProductContentEntity),
         bootSmokeRepositoryProvider(ProductContentEventEntity),

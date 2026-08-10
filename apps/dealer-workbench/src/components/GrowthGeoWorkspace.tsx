@@ -1030,8 +1030,8 @@ export function GrowthGeoWorkspace() {
             <p className="workbench-section-header__description">统一维护监测问题、推荐问题、手动回答和 Hermes 批量探测。</p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button className="btn btn-outline btn-sm" type="button" onClick={refreshQuestionFlow} disabled={saving || loading}><Play size={14} />生成推荐问题</button>
-            <button className="btn btn-outline btn-sm" type="button" onClick={saveGeneratedQuestions} disabled={saving || !(questionSet?.generated || []).length}><CheckCircle2 size={14} />保存推荐</button>
+            <button className="btn btn-outline btn-sm" type="button" onClick={refreshQuestionFlow} disabled={saving || loading}><Play size={14} />预览标准题库</button>
+            <button className="btn btn-outline btn-sm" type="button" onClick={saveGeneratedQuestions} disabled={saving || !(questionSet?.generated || []).length}><CheckCircle2 size={14} />初始化标准题库</button>
             <button className="btn btn-brand btn-sm" type="button" onClick={runBatchProbe} disabled={autoRunning || !(questionSet?.questions || []).length}>{autoRunning ? <Loader2 size={14} className="animate-spin" /> : <Bot size={14} />}Hermes 批量探测</button>
           </div>
         </div>

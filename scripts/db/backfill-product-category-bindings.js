@@ -37,7 +37,7 @@ function clientConfig(env) {
     port: Number(env.POSTGRES_PORT || 5432),
     user: env.POSTGRES_USER || env.USER || 'rhautt',
     password: env.POSTGRES_PASSWORD,
-    database: env.POSTGRES_DB || 'rhautt_nexus',
+    database: env.POSTGRES_DB || 'rhautt_GOT',
   };
 }
 

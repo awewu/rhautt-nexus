@@ -1,4 +1,6 @@
 (function () {
+  var SITE_CODE = window.EVERHOT_SITE_CODE || 'everhot';
+  var API_BASE = String(window.EVERHOT_API_BASE || '').replace(/\/$/, '');
   var DEFAULT_MANIFEST = {
     'brand-story': {
       src: '/assets/img/site-materials/home-audience-residential-bg.webp',
@@ -104,6 +106,29 @@
     node.style.backgroundImage = 'url("' + src + '")';
   }
 
+  function remoteMaterialUrl(src) {
+    var value = String(src || '');
+    if (!value || !API_BASE || /^(https?:|data:|blob:)/i.test(value)) return value;
+    if (value.indexOf('/assets/img/site-materials/') === 0) {
+      return API_BASE + '/api/v2/site-materials/' + encodeURIComponent(SITE_CODE) + '?asset=' + encodeURIComponent(value);
+    }
+    return value.indexOf('/api/v2/') === 0 ? API_BASE + value : value;
+  }
+
+  function normalizeRemoteManifest(manifest) {
+    var normalized = Object.assign({}, manifest && typeof manifest === 'object' ? manifest : {});
+    ['home-hero', 'brand-story', 'service-banner', 'footer-cert'].forEach(function (key) {
+      var asset = normalized[key];
+      if (asset && typeof asset === 'object') normalized[key] = Object.assign({}, asset, { src: remoteMaterialUrl(asset.src) });
+    });
+    if (Array.isArray(normalized['home-hero-carousel'])) {
+      normalized['home-hero-carousel'] = normalized['home-hero-carousel'].map(function (item) {
+        return Object.assign({}, item, { src: remoteMaterialUrl(item && item.src) });
+      });
+    }
+    return normalized;
+  }
+
   function applyMaterials(manifest) {
     manifest = Object.assign({}, DEFAULT_MANIFEST, manifest && typeof manifest === 'object' ? manifest : {});
     applyHeroCarousel(manifest['home-hero-carousel']);
@@ -206,12 +231,21 @@
   }
 
   function initSiteMaterials() {
-    fetch('/assets/img/site-materials/manifest.json', { cache: 'no-store' })
+    var runtimeUrl = API_BASE + '/api/v2/site-materials/' + encodeURIComponent(SITE_CODE);
+    fetch(runtimeUrl, { cache: 'no-store', headers: { Accept: 'application/json' } })
       .then(function (response) {
-        return response.ok ? response.json() : null;
+        if (!response.ok) throw new Error('site materials request failed');
+        return response.json();
       })
-      .then(applyMaterials)
-      .catch(function () { applyMaterials(DEFAULT_MANIFEST); });
+      .then(function (payload) {
+        applyMaterials(normalizeRemoteManifest(payload && payload.data ? payload.data : payload));
+      })
+      .catch(function () {
+        fetch('/assets/img/site-materials/manifest.json', { cache: 'no-store' })
+          .then(function (response) { return response.ok ? response.json() : null; })
+          .then(applyMaterials)
+          .catch(function () { applyMaterials(DEFAULT_MANIFEST); });
+      });
   }
 
   if (document.readyState === 'loading') {

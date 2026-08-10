@@ -1,8 +1,11 @@
-import { Injectable, BadRequestException, ForbiddenException, Logger, NotFoundException, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, BadRequestException, ConflictException, ForbiddenException, Logger, NotFoundException, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import {
   ProductEntity,
+  ProductSkuEntity,
+  ProductWebsitePricingEntity,
+  ProductBrandBindingEntity,
   PriceListItemEntity,
   ProductContentEntity,
   ProductContentEventEntity,
@@ -29,6 +32,23 @@ import {
 import { rankProductRecommendationCandidates } from './product-catalog-recommend';
 
 type ProductMutationActor = Pick<JwtPayload, 'userId' | 'role'>;
+type WebsitePricingInput = {
+  brandCode?: unknown;
+  siteCode?: unknown;
+  locale?: unknown;
+  priceDisplayMode?: unknown;
+  websitePrice?: unknown;
+  websitePriceMin?: unknown;
+  websitePriceMax?: unknown;
+  promoPrice?: unknown;
+  currency?: unknown;
+  priceUnit?: unknown;
+  priceLabel?: unknown;
+  priceNote?: unknown;
+  taxIncluded?: unknown;
+  validFrom?: unknown;
+  validTo?: unknown;
+};
 type ProductCategoryBinding = {
   primaryCategoryId: string | null;
   categoryLevel1Id: string | null;
@@ -143,6 +163,18 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     return resolved;
   }
 
+  private productLibraryTenantId(tenantId?: string): string {
+    const resolved = process.env.PRODUCT_LIBRARY_TENANT_ID
+      || process.env.RHAUTT_COMFORT_TENANT_ID
+      || tenantId
+      || process.env.EVERHOT_TENANT_ID
+      || '';
+    if (!ProductCatalogService.UUID_RE.test(resolved)) {
+      throw new BadRequestException('产品库写入必须使用公共产品库实例 tenantId(UUID)，请配置 PRODUCT_LIBRARY_TENANT_ID 或 RHAUTT_COMFORT_TENANT_ID。');
+    }
+    return resolved;
+  }
+
   /**
    * RLS-ready 执行：当 tenantId 为 UUID（品牌运营/RLS 租户）时，在租户作用域
    * 事务内运行（SET LOCAL app.tenant_id），使 RLS 覆盖表与触发器（audit_logs/
@@ -175,6 +207,118 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       .toLowerCase()
       .replace(/[^a-z0-9-]+/g, '-')
       .replace(/^-+|-+$/g, '');
+  }
+
+  private normalizeProductModel(value: unknown): string {
+    return String(value || '')
+      .normalize('NFKC')
+      .trim()
+      .replace(/\s+/g, '')
+      .toLowerCase();
+  }
+
+  private normalizeSkuCode(value: unknown): string {
+    return String(value || '')
+      .normalize('NFKC')
+      .trim()
+      .replace(/\s+/g, '')
+      .toLowerCase();
+  }
+
+  private productModelFromDto(dto: Record<string, unknown>, brandCode: string): string {
+    const spec = this.metaObject(dto.spec);
+    const meta = this.metaObject(dto.meta);
+    const brandMeta = this.metaObject(meta[brandCode]);
+    return String(
+      dto.model
+      || spec.officialModel
+      || spec.model
+      || brandMeta.model
+      || meta.model
+      || dto.sku
+      || '',
+    ).trim();
+  }
+
+  private brandCodesFromDto(dto: Record<string, unknown>): string[] {
+    const out = new Set<string>();
+    const push = (value: unknown) => {
+      const code = String(value || '').trim().toLowerCase();
+      if (code) out.add(code);
+    };
+    if (Array.isArray(dto.brandCodes)) dto.brandCodes.forEach(push);
+    if (Array.isArray(dto.brands)) dto.brands.forEach(push);
+    if (Array.isArray(dto.brandBindings)) {
+      for (const item of dto.brandBindings) {
+        if (item && typeof item === 'object' && !Array.isArray(item)) push((item as Record<string, unknown>).brandCode);
+      }
+    }
+    push(dto.brandCode);
+    push(dto.brand);
+    return [...out];
+  }
+
+  private skuCodeFromDto(dto: Record<string, unknown>, model: string): string {
+    return String(dto.sku || dto.materialCode || dto.sourceRecordKey || model || '').trim();
+  }
+
+  private websitePricingFromDto(dto: Record<string, unknown>): WebsitePricingInput | null {
+    const raw = dto.websitePricing;
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+    return raw as WebsitePricingInput;
+  }
+
+  private nullableNumber(value: unknown): number | null {
+    if (value === undefined || value === null || value === '') return null;
+    return Number(value);
+  }
+
+  private nullableDate(value: unknown): Date | null {
+    if (value === undefined || value === null || value === '') return null;
+    const date = new Date(String(value));
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private async upsertWebsitePricing(
+    manager: EntityManager,
+    tenantId: string,
+    productId: string,
+    brandCode: string,
+    input: WebsitePricingInput | null,
+    actor?: ProductMutationActor,
+  ) {
+    if (!input) return null;
+    const repo = manager.getRepository(ProductWebsitePricingEntity);
+    const pricingBrandCode = String(input.brandCode || brandCode || 'official').trim().toLowerCase();
+    const siteCode = String(input.siteCode || 'official').trim().toLowerCase();
+    const locale = String(input.locale || 'zh-CN').trim() || 'zh-CN';
+    const existing = await repo.findOne({
+      where: { tenantId, productId, brandCode: pricingBrandCode, siteCode, locale, deletedAt: null } as any,
+    });
+    const saved = await repo.save(repo.create({
+      ...(existing ?? {}),
+      tenantId,
+      productId,
+      brandCode: pricingBrandCode,
+      siteCode,
+      locale,
+      priceDisplayMode: String(input.priceDisplayMode || existing?.priceDisplayMode || 'not_shown'),
+      websitePrice: this.nullableNumber(input.websitePrice),
+      websitePriceMin: this.nullableNumber(input.websitePriceMin),
+      websitePriceMax: this.nullableNumber(input.websitePriceMax),
+      promoPrice: this.nullableNumber(input.promoPrice),
+      currency: String(input.currency || existing?.currency || 'CNY'),
+      priceUnit: input.priceUnit ? String(input.priceUnit) : existing?.priceUnit || null,
+      priceLabel: input.priceLabel ? String(input.priceLabel) : existing?.priceLabel || null,
+      priceNote: input.priceNote ? String(input.priceNote) : existing?.priceNote || null,
+      taxIncluded: input.taxIncluded === undefined ? existing?.taxIncluded ?? true : input.taxIncluded !== false,
+      validFrom: this.nullableDate(input.validFrom),
+      validTo: this.nullableDate(input.validTo),
+      status: 'active',
+      updatedBy: actor?.userId || existing?.updatedBy || null,
+      createdBy: existing?.createdBy || actor?.userId || null,
+    }));
+    return saved;
   }
 
   private brandMeta(product: ProductEntity): Record<string, any> {
@@ -814,6 +958,202 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
   async listRawByBrand(brand: string): Promise<Record<string, unknown>[]> {
     const rows = await this.products.find({ where: { brand } as any });
     return rows as unknown as Record<string, unknown>[];
+  }
+
+  async upsertWithIdentityGuard(dto: Record<string, unknown>, actor?: ProductMutationActor) {
+    validateProductUpsertInput(dto);
+    const tenantId = this.productLibraryTenantId(dto.tenantId as string | undefined);
+    const confirmExistingProduct = dto.confirmExistingProduct === true;
+    const categoryBindingPatch = this.categoryBindingInput(dto);
+    return withRlsTransaction(this.ds, async (manager) => {
+      const repo = manager.getRepository(ProductEntity);
+      const skuRepo = manager.getRepository(ProductSkuEntity);
+      const bindingRepo = manager.getRepository(ProductBrandBindingEntity);
+      const brandCodes = this.brandCodesFromDto(dto);
+      if (!brandCodes.length) throw new BadRequestException('新增产品必须至少选择一个品牌绑定');
+      const tenantBrand = brandCodes[0];
+      /*
+      const tenantBrand = await this.resolveTenantBrand(manager, tenantId);
+      const requestedBrand = String(dto.brandCode || dto.brand || '').trim().toLowerCase();
+      if (requestedBrand && requestedBrand !== tenantBrand) {
+        throw new BadRequestException(`产品品牌必须与当前租户一致（${tenantBrand}）`);
+      }
+
+      */
+      const model = this.productModelFromDto({ ...dto, brand: tenantBrand, brandCode: tenantBrand }, tenantBrand);
+      const normalizedModel = this.normalizeProductModel(model);
+      const skuCode = this.skuCodeFromDto(dto, model);
+      const normalizedSkuCode = this.normalizeSkuCode(skuCode);
+      if (!model || !normalizedModel) throw new BadRequestException('新增产品必须提供 model');
+      if (!skuCode || !normalizedSkuCode) throw new BadRequestException('新增产品必须提供 sku 或 materialCode');
+
+      const existingByModel = await repo.findOne({
+        where: ['active', 'withdrawn'].map((recordStatus) => ({
+          tenantId,
+          normalizedModel,
+          recordStatus,
+          deletedAt: null,
+        })) as any,
+      });
+      const existingBySku = await skuRepo.findOne({
+        where: { tenantId, normalizedSkuCode, deletedAt: null } as any,
+      });
+
+      if (existingBySku && (!existingByModel || existingBySku.productId !== existingByModel.id)) {
+        const boundProduct = await repo.findOne({ where: { id: existingBySku.productId } as any });
+        throw new ConflictException({
+          code: 'SKU_ALREADY_BOUND_TO_ANOTHER_PRODUCT',
+          message: `SKU/物料编码 ${skuCode} 已绑定到其他产品，不能自动合并。`,
+          data: {
+            skuCode,
+            existingSku: {
+              id: existingBySku.id,
+              productId: existingBySku.productId,
+              skuCode: existingBySku.skuCode,
+            },
+            boundProduct: boundProduct ? {
+              id: boundProduct.id,
+              brandCode: boundProduct.brandCode || boundProduct.brand,
+              model: boundProduct.model,
+              name: boundProduct.name,
+            } : null,
+            targetProduct: existingByModel ? {
+              id: existingByModel.id,
+              brandCode: existingByModel.brandCode || existingByModel.brand,
+              model: existingByModel.model,
+              name: existingByModel.name,
+            } : null,
+          },
+        });
+      }
+
+      if (existingByModel && !confirmExistingProduct) {
+        throw new ConflictException({
+          code: 'PRODUCT_MODEL_EXISTS',
+          message: `产品型号已存在：${tenantBrand} / ${model}。请确认是更新该产品并追加/更新 SKU，还是取消录入。`,
+          data: {
+            existingProduct: {
+              id: existingByModel.id,
+              brandCode: existingByModel.brandCode || existingByModel.brand,
+              model: existingByModel.model,
+              normalizedModel: existingByModel.normalizedModel,
+              name: existingByModel.name,
+              sku: existingByModel.sku,
+              status: existingByModel.status,
+            },
+            proposedSku: {
+              skuCode,
+              materialCode: String(dto.materialCode || skuCode),
+              alreadyExists: Boolean(existingBySku),
+            },
+            resolution: {
+              confirmField: 'confirmExistingProduct',
+              confirmValue: true,
+            },
+          },
+        });
+      }
+
+      const spec = this.metaObject(dto.spec);
+      const patch: Partial<ProductEntity> = {
+        tenantId,
+        sku: existingByModel?.sku || skuCode,
+        name: String(dto.name || existingByModel?.name || model).trim(),
+        brand: tenantBrand,
+        brandCode: tenantBrand,
+        model,
+        normalizedModel,
+        workingName: String(dto.workingName || dto.name || existingByModel?.workingName || existingByModel?.name || model).trim(),
+        category: Object.prototype.hasOwnProperty.call(dto, 'category') ? String(dto.category || '') : existingByModel?.category || null,
+        spec: Object.prototype.hasOwnProperty.call(dto, 'spec') ? spec : existingByModel?.spec || {},
+        productKey: existingByModel?.productKey || `common:${normalizedModel}`,
+        listPrice: Object.prototype.hasOwnProperty.call(dto, 'listPrice') ? Number(dto.listPrice || 0) : existingByModel?.listPrice || 0,
+        costPrice: Object.prototype.hasOwnProperty.call(dto, 'costPrice') ? Number(dto.costPrice || 0) : existingByModel?.costPrice || 0,
+        currency: String(dto.currency || existingByModel?.currency || 'CNY'),
+        status: String(dto.status || existingByModel?.status || 'active'),
+        recordStatus: String(dto.recordStatus || existingByModel?.recordStatus || 'active'),
+        dataReadinessStatus: String(dto.dataReadinessStatus || existingByModel?.dataReadinessStatus || 'imported_draft'),
+        sourceSystem: String(dto.sourceSystem || existingByModel?.sourceSystem || 'manual_create'),
+        sourceRecordKey: String(dto.sourceRecordKey || existingByModel?.sourceRecordKey || skuCode),
+        meta: this.applyCategoryBindingInput(dto.meta ?? existingByModel?.meta ?? {}, tenantBrand, categoryBindingPatch),
+        positioning: existingByModel?.positioning || EMPTY_POSITIONING,
+        assetRefs: existingByModel?.assetRefs || [],
+      };
+      if (Object.prototype.hasOwnProperty.call(dto, 'positioning')) patch.positioning = sanitizePositioning(dto.positioning);
+      if (Object.prototype.hasOwnProperty.call(dto, 'assetRefs')) patch.assetRefs = sanitizeAssetRefs(dto.assetRefs);
+      if (categoryBindingPatch || this.metaHasCategoryBindingInput(dto.meta, tenantBrand)) {
+        patch.meta = await this.validateCategoryBinding(manager, repo.create({ ...(existingByModel ?? {}), ...patch } as any));
+      }
+      await this.assertBrandSlugUnique(repo, tenantId, tenantBrand, (patch.meta as any)?.[tenantBrand]?.slug || existingByModel?.sku || skuCode, existingByModel?.id);
+
+      const saved = await repo.save(repo.create({ ...(existingByModel ?? {}), ...patch }));
+      for (const brandCode of brandCodes) {
+        const existingBinding = await bindingRepo.findOne({
+          where: { tenantId, brandCode, normalizedModel, deletedAt: null } as any,
+        });
+        if (existingBinding && existingBinding.productId !== saved.id) {
+          throw new ConflictException({
+            code: 'PRODUCT_MODEL_BINDING_CONFLICT',
+            message: `${brandCode} / ${model} 已绑定到其他产品，不能自动覆盖。`,
+            data: { brandCode, model, productId: existingBinding.productId, targetProductId: saved.id },
+          });
+        }
+        await bindingRepo.save(bindingRepo.create({
+          ...(existingBinding ?? {}),
+          tenantId,
+          productId: saved.id,
+          brandCode,
+          brandModel: model,
+          normalizedModel,
+          brandDisplayName: String(dto.name || existingBinding?.brandDisplayName || saved.name || model).trim(),
+          status: 'active',
+          updatedBy: actor?.userId || existingBinding?.updatedBy || null,
+          createdBy: existingBinding?.createdBy || actor?.userId || null,
+        }));
+      }
+      const existingSkuForProduct = existingBySku?.productId === saved.id ? existingBySku : null;
+      await skuRepo.save(skuRepo.create({
+        ...(existingSkuForProduct ?? {}),
+        tenantId,
+        productId: saved.id,
+        skuCode,
+        normalizedSkuCode,
+        materialCode: String(dto.materialCode || existingSkuForProduct?.materialCode || skuCode),
+        gtin: dto.gtin ? String(dto.gtin) : existingSkuForProduct?.gtin || null,
+        mpn: dto.mpn ? String(dto.mpn) : existingSkuForProduct?.mpn || null,
+        recordStatus: String(dto.skuRecordStatus || existingSkuForProduct?.recordStatus || 'active'),
+        sourceSystem: String(dto.sourceSystem || existingSkuForProduct?.sourceSystem || 'manual_create'),
+        sourceRecordKey: String(dto.sourceRecordKey || existingSkuForProduct?.sourceRecordKey || skuCode),
+        updatedBy: actor?.userId || existingSkuForProduct?.updatedBy || null,
+        createdBy: existingSkuForProduct?.createdBy || actor?.userId || null,
+      }));
+      const websitePricing = await this.upsertWebsitePricing(
+        manager,
+        tenantId,
+        saved.id,
+        tenantBrand,
+        this.websitePricingFromDto(dto),
+        actor,
+      );
+
+      await this.recordProductMutation(manager, actor, existingByModel ? 'product.update' : 'product.create', existingByModel, saved);
+      return {
+        success: true,
+        data: saved,
+        meta: {
+          operation: existingByModel ? 'updated_existing_product' : 'created_product',
+          skuOperation: existingSkuForProduct ? 'updated_sku' : 'created_sku',
+          brandBindings: brandCodes,
+          websitePricing: websitePricing ? {
+            id: websitePricing.id,
+            brandCode: websitePricing.brandCode,
+            siteCode: websitePricing.siteCode,
+            locale: websitePricing.locale,
+            priceDisplayMode: websitePricing.priceDisplayMode,
+          } : null,
+        },
+      };
+    }, { tenantId, actorId: actor?.userId, role: actor?.role });
   }
 
   async upsert(dto: Partial<ProductEntity>, actor?: ProductMutationActor) {

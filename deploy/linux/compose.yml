@@ -19,7 +19,7 @@ x-runtime: &runtime
     POSTGRES_PORT: ${POSTGRES_PORT:-5432}
     POSTGRES_USER: ${POSTGRES_USER:-postgres}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-    POSTGRES_DB: ${POSTGRES_DB:-rhautt_nexus}
+    POSTGRES_DB: ${POSTGRES_DB:-rhautt_GOT}
     POSTGRES_SYNCHRONIZE: 'false'
     MONGODB_URI: mongodb://rysnova:${MONGO_PASSWORD:?MONGO_PASSWORD is required}@mongodb:27017/rysnova-hvac?authSource=admin
     REQUIRE_MONGODB: 'true'
@@ -52,7 +52,7 @@ services:
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-      POSTGRES_DB: ${POSTGRES_DB:-rhautt_nexus}
+      POSTGRES_DB: ${POSTGRES_DB:-rhautt_GOT}
       PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     volumes:
       - ./backups:/backups

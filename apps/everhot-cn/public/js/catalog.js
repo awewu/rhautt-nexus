@@ -107,7 +107,8 @@
 
   function imageUrl(path) {
     if (!path || /^(?:https?:|data:)/.test(path)) return path;
-    return RUNTIME_API_BASE + path;
+    if (/^\/(?:api\/v2|uploads)\//i.test(path)) return RUNTIME_API_BASE + path;
+    return path;
   }
 
   function officialDetailHtml(product) {
@@ -176,7 +177,7 @@
 
   function iconSrc(p){
     var v=p&&p.icon ? String(p.icon) : '';
-    return (/^https?:\/\//.test(v) || v.indexOf('/api/')===0 || v.indexOf('/assets/')===0 || v.indexOf('data:image/')===0) ? v : '';
+    return (/^https?:\/\//.test(v) || v.indexOf('/api/')===0 || v.indexOf('/assets/')===0 || v.indexOf('data:image/')===0) ? imageUrl(v) : '';
   }
   function art(p){
     var icon=iconSrc(p);
@@ -198,16 +199,16 @@
   // 图片解析优先级：products-data 显式 image > 抓取生成的图片映射 > SVG 矢量插画
   // 后期替换：编辑 data/product-image-manifest.json 并重跑 scripts/fetch-product-images.mjs 即可。
   function imgSrc(p){
-    if(p && p.image) return p.image;
+    if(p && p.image) return imageUrl(p.image);
     var map = window.EVERHOT_PRODUCT_IMAGES;
-    if(map && p && map[p.slug]) return map[p.slug];
+    if(map && p && map[p.slug]) return imageUrl(map[p.slug]);
     return '';
   }
   // 参数长图（仅详情页「产品参数」区用）：products-data.specImage > 参数长图映射
   function specImg(p){
-    if(p && p.specImage) return p.specImage;
+    if(p && p.specImage) return imageUrl(p.specImage);
     var map = window.EVERHOT_PRODUCT_SPECIMAGES;
-    if(map && p && map[p.slug]) return map[p.slug];
+    if(map && p && map[p.slug]) return imageUrl(map[p.slug]);
     return '';
   }
   function media(p){

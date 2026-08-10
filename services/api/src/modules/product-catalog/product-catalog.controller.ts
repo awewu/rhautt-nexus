@@ -102,7 +102,7 @@ export class ProductCatalogController {
   upsert(@Req() req: AuthRequest, @Body() body: Record<string, unknown>) {
     requireProductWrite(req.user);
     const tenantId = resolveProductTenant(req.user, body.tenantId);
-    return this.svc.upsert({ ...body, tenantId } as any, req.user);
+    return this.svc.upsertWithIdentityGuard({ ...body, tenantId }, req.user);
   }
 
   @Roles('platform_admin', 'hq_admin', 'brand_admin')

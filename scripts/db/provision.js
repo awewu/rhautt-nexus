@@ -7,7 +7,7 @@
  *   4) seed-dev-admin   建初始可登录管理员(仅当 SEED_ADMIN=1 时)
  *
  * 用法(指向生产库 env):
- *   POSTGRES_HOST=... POSTGRES_USER=rhautt POSTGRES_PASSWORD=... POSTGRES_DB=rhautt_nexus \
+ *   POSTGRES_HOST=... POSTGRES_USER=rhautt POSTGRES_PASSWORD=... POSTGRES_DB=rhautt_GOT \
  *   POSTGRES_ADMIN_USER=rhautt POSTGRES_ADMIN_PASSWORD=... SEED_ADMIN=1 npm run prod:provision
  *
  * 注:迁移/体检用属主 rhautt;应用【运行时】仍用最小权限 rhautt_app(见 .env.production)。

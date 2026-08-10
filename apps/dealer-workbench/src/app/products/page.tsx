@@ -179,11 +179,25 @@ function FloatingDialog({ dialog, onClose }: { dialog: FloatingDialogState; onCl
 }
 type CreateProductDraft = {
   brand: ProductBrand | '';
+  brands: ProductBrand[];
   name: string;
+  model: string;
+  materialCode: string;
   skuSeed: string;
   categoryLevel1Id: string;
   categoryLevel2Id: string;
   categoryLevel3Id: string;
+  listPrice: string;
+  currency: string;
+  websitePriceDisplayMode: string;
+  websitePrice: string;
+  websitePriceMin: string;
+  websitePriceMax: string;
+  promoPrice: string;
+  priceUnit: string;
+  priceLabel: string;
+  priceNote: string;
+  taxIncluded: boolean;
   publicSlug: string;
   series: string;
   tagline: string;
@@ -247,6 +261,12 @@ type NormalizedProduct = Product & {
   marginRate: number;
   raw?: Record<string, any>;
 };
+type ProductPilotSummary = {
+  products: number;
+  categories: number;
+  websitePublished: number;
+  needsCompletion: number;
+};
 type ProductCategoryNode = {
   id: string;
   parentId: string | null;
@@ -257,6 +277,7 @@ type ProductCategoryNode = {
   nameEn: string;
   slug: string;
   status: string;
+  showOnWebsite: boolean;
   sortOrder: number;
   description: string;
   hasChildren: boolean;
@@ -271,6 +292,7 @@ type ProductCategoryDraft = {
   slug: string;
   sortOrder: string;
   status: 'active' | 'inactive';
+  showOnWebsite: boolean;
   description: string;
 };
 type ProductCategoryUsage = {
@@ -296,6 +318,11 @@ const BRAND_PRODUCT_TENANTS: Record<string, string | undefined> = {
   ruud: process.env.NEXT_PUBLIC_RUUD_TENANT_ID || '7aad0000-0000-4000-8000-000000000001',
   everhot: process.env.NEXT_PUBLIC_EVERHOT_TENANT_ID || 'e5e40000-0000-4000-8000-000000000001',
 };
+const PRODUCT_LIBRARY_TENANT_ID =
+  process.env.NEXT_PUBLIC_PRODUCT_LIBRARY_TENANT_ID
+  || process.env.NEXT_PUBLIC_RHAUTT_COMFORT_TENANT_ID
+  || process.env.NEXT_PUBLIC_EVERHOT_TENANT_ID
+  || 'e5e40000-0000-4000-8000-000000000001';
 const STATUS_OPTIONS: Array<{ value: StatusFilter; label: string }> = [
   { value: 'all', label: '全部产品库状态' },
   { value: 'active', label: '启用' },
@@ -575,6 +602,7 @@ function normalizeProductCategoryTree(result: unknown): ProductCategoryNode[] {
         nameEn: text(item.nameEn),
         slug: text(item.slug),
         status: text(item.status || 'active'),
+        showOnWebsite: item.showOnWebsite !== false && item.show_on_website !== false,
         sortOrder: Number(item.sortOrder ?? item.sort_order ?? 0),
         description: text(item.description),
         hasChildren: Boolean(item.hasChildren || (Array.isArray(item.children) && item.children.length)),
@@ -623,11 +651,25 @@ function internalCategoryCode(prefix = 'cat'): string {
 function emptyCreateDraft(): CreateProductDraft {
   return {
     brand: '',
+    brands: [],
     name: '',
+    model: '',
+    materialCode: '',
     skuSeed: '',
     categoryLevel1Id: '',
     categoryLevel2Id: '',
     categoryLevel3Id: '',
+    listPrice: '',
+    currency: 'CNY',
+    websitePriceDisplayMode: 'not_shown',
+    websitePrice: '',
+    websitePriceMin: '',
+    websitePriceMax: '',
+    promoPrice: '',
+    priceUnit: '台',
+    priceLabel: '官网参考价',
+    priceNote: '',
+    taxIncluded: true,
     publicSlug: '',
     series: '',
     tagline: '',
@@ -674,6 +716,38 @@ function productBrandMeta(product: NormalizedProduct): Record<string, any> {
   return objectOrEmpty(meta[normalizeBrand(product.brand)]);
 }
 
+function productLibraryMeta(product: NormalizedProduct): Record<string, any> {
+  return objectOrEmpty(objectOrEmpty(product.raw?.meta).productLibrary);
+}
+
+const PRODUCT_READINESS_LABELS: Record<string, string> = {
+  identity: '身份',
+  taxonomy: '分类',
+  sku: 'SKU',
+  technical: '技术',
+  compliance: '合规',
+  content: '内容',
+  assets: '素材',
+  market: '市场',
+};
+
+function productReadinessSummary(product: NormalizedProduct) {
+  const libraryMeta = productLibraryMeta(product);
+  const dimensions = objectOrEmpty(libraryMeta.readinessDimensions);
+  const entries = Object.entries(PRODUCT_READINESS_LABELS).map(([key, label]) => {
+    const value = dimensions[key];
+    const detail = typeof value === 'string' ? { status: value } : objectOrEmpty(value);
+    return { key, label, status: text(detail.status) || 'incomplete', note: text(detail.note) };
+  });
+  const ready = entries.filter((item) => item.status === 'ready' || item.status === 'not_applicable').length;
+  return {
+    status: text(libraryMeta.dataReadinessStatus),
+    ready,
+    total: entries.length,
+    details: entries.map((item) => `${item.label}：${item.status === 'ready' ? '就绪' : item.status === 'not_applicable' ? '不适用' : '待补全'}${item.note ? `（${item.note}）` : ''}`).join('\n'),
+  };
+}
+
 function productCategoryBinding(product: NormalizedProduct): {
   categoryLevel1Id: string;
   categoryLevel2Id: string;
@@ -693,6 +767,13 @@ function productCategoryBinding(product: NormalizedProduct): {
 function nonNegativeInt(value: unknown): number {
   const n = Number(value);
   return Number.isInteger(n) && n >= 0 ? n : 0;
+}
+
+function optionalNonNegativeNumber(value: unknown): number | undefined {
+  const raw = text(value);
+  if (!raw) return undefined;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : undefined;
 }
 
 function splitBadges(value: string): string[] {
@@ -938,56 +1019,97 @@ function createCategorySelection(draft: CreateProductDraft, tree: ProductCategor
   return { level1, level2, level3, leaf, path };
 }
 
-function createProductPayload(draft: CreateProductDraft, categoryTree: ProductCategoryNode[]): Record<string, unknown> {
-  if (!draft.brand) throw new Error('请选择产品品牌。');
-  const tenantId = BRAND_PRODUCT_TENANTS[draft.brand];
+function createProductPayload(
+  draft: CreateProductDraft,
+  categoryTree: ProductCategoryNode[],
+  brandOverride?: ProductBrand,
+  options: { includeCategoryBinding?: boolean } = {},
+): Record<string, unknown> {
+  const brand = brandOverride || draft.brand;
+  if (!brand) throw new Error('请选择产品品牌。');
+  const selectedBrands = draft.brands.length ? draft.brands : [brand];
+  const includeCategoryBinding = options.includeCategoryBinding !== false;
+  const tenantId = PRODUCT_LIBRARY_TENANT_ID;
   const name = text(draft.name);
-  const skuSeed = text(draft.skuSeed);
+  const model = text(draft.model || draft.skuSeed);
+  const materialCode = text(draft.materialCode) || model;
   const categorySelection = createCategorySelection(draft, categoryTree);
   const category = text(categorySelection.leaf?.code);
   const categoryLevel1Id = text(categorySelection.level1?.id);
   const categoryLevel2Id = text(categorySelection.level2?.id);
   const categoryLevel3Id = text(categorySelection.level3?.id);
-  const publicSlug = slug(draft.publicSlug || skuSeed);
+  const publicSlug = slug(draft.publicSlug || model);
   const websiteCategory = text(draft.websiteCategory) || category;
   const displayOrder = nonNegativeInt(draft.displayOrder);
   if (!name) throw new Error('请填写产品名称。');
-  if (!skuSeed) throw new Error('请填写型号或编码种子。');
+  if (!model) throw new Error('请填写产品型号。');
+  if (!materialCode) throw new Error('请填写 SKU/物料编码。');
   if (!categoryLevel1Id) throw new Error('请选择一级产品分类。');
   if (!categoryLevel2Id) throw new Error('请选择二级产品分类。');
   if (!category) throw new Error('请选择产品分类。');
   const system = category;
-  const sku = skeletonSku(draft.brand, skuSeed);
+  const sku = materialCode;
+  const listPrice = optionalNonNegativeNumber(draft.listPrice);
+  const websitePrice = optionalNonNegativeNumber(draft.websitePrice);
+  const websitePriceMin = optionalNonNegativeNumber(draft.websitePriceMin);
+  const websitePriceMax = optionalNonNegativeNumber(draft.websitePriceMax);
+  const promoPrice = optionalNonNegativeNumber(draft.promoPrice);
   return {
     ...(tenantId ? { tenantId } : {}),
     sku,
+    materialCode: sku,
     name,
-    brand: draft.brand,
+    brand,
+    brandCode: brand,
+    brands: selectedBrands,
+    brandCodes: selectedBrands,
+    model,
     category,
-    categoryLevel1Id,
-    categoryLevel2Id,
-    categoryLevel3Id: categoryLevel3Id || null,
-    categoryPath: categorySelection.path,
+    ...(includeCategoryBinding ? {
+      categoryLevel1Id,
+      categoryLevel2Id,
+      categoryLevel3Id: categoryLevel3Id || null,
+      categoryPath: categorySelection.path,
+    } : {}),
+    ...(listPrice !== undefined ? { listPrice } : {}),
+    currency: text(draft.currency) || 'CNY',
+    websitePricing: {
+      brandCode: brand,
+      siteCode: brand,
+      locale: PRODUCT_DETAIL_LOCALE,
+      priceDisplayMode: text(draft.websitePriceDisplayMode) || 'not_shown',
+      ...(websitePrice !== undefined ? { websitePrice } : {}),
+      ...(websitePriceMin !== undefined ? { websitePriceMin } : {}),
+      ...(websitePriceMax !== undefined ? { websitePriceMax } : {}),
+      ...(promoPrice !== undefined ? { promoPrice } : {}),
+      currency: text(draft.currency) || 'CNY',
+      priceUnit: text(draft.priceUnit),
+      priceLabel: text(draft.priceLabel),
+      priceNote: text(draft.priceNote),
+      taxIncluded: draft.taxIncluded,
+    },
     status: 'active',
     spec: {
-      officialModel: skuSeed,
-      model: skuSeed,
+      officialModel: model,
+      model,
       system,
     },
     meta: {
-      [draft.brand]: {
+      [brand]: {
         slug: publicSlug || slug(sku),
         name,
-        model: skuSeed,
+        model,
         cat: websiteCategory,
         websiteCategory,
         websiteMenuCategory: websiteCategory,
         sys: system,
         displayOrder,
         sortOrder: displayOrder,
-        categoryLevel1Id,
-        categoryLevel2Id,
-        categoryLevel3Id: categoryLevel3Id || null,
+        ...(includeCategoryBinding ? {
+          categoryLevel1Id,
+          categoryLevel2Id,
+          categoryLevel3Id: categoryLevel3Id || null,
+        } : {}),
         series: text(draft.series),
         tagline: text(draft.tagline),
         en: text(draft.officialEnglishName),
@@ -995,6 +1117,25 @@ function createProductPayload(draft: CreateProductDraft, categoryTree: ProductCa
       },
     },
   };
+}
+
+function isProductModelExistsError(error: unknown): boolean {
+  const details = (error as any)?.details;
+  return Number((error as any)?.status) === 409 && details?.code === 'PRODUCT_MODEL_EXISTS';
+}
+
+function productModelExistsMessage(error: unknown): string {
+  const details = (error as any)?.details || {};
+  const existing = details?.data?.existingProduct || {};
+  const proposed = details?.data?.proposedSku || {};
+  const lines = [
+    String(details.message || (error as Error)?.message || '产品型号已存在。'),
+    existing.name ? `已有产品：${existing.name}` : '',
+    existing.model ? `已有型号：${existing.model}` : '',
+    proposed.skuCode ? `本次 SKU/物料编码：${proposed.skuCode}` : '',
+    '确认后会更新该产品资料，并追加/更新本次 SKU；取消则不写入。',
+  ].filter(Boolean);
+  return lines.join('\n');
 }
 
 function objectOrEmpty(value: unknown): Record<string, any> {
@@ -1131,11 +1272,16 @@ function ProductsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeModule = normalizeModule(searchParams.get('module'));
+  const requestedBrand = text(searchParams.get('brand'));
+  const requestedStatus = text(searchParams.get('status')) as StatusFilter;
   const [category, setCategory] = useState<CatalogCategoryFilter>('all');
   const [keyword, setKeyword] = useState('');
   const [deferredKeyword, setDeferredKeyword] = useState('');
-  const [brandFilter, setBrandFilter] = useState<BrandFilter>('all');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('active');
+  const [brandFilter, setBrandFilter] = useState<BrandFilter>(requestedBrand || 'all');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(
+    STATUS_OPTIONS.some((item) => item.value === requestedStatus) ? requestedStatus : 'active',
+  );
+  const [batchFilter, setBatchFilter] = useState(text(searchParams.get('batch')));
   const [pageSize, setPageSize] = useState(20);
   const [catalogPage, setCatalogPage] = useState(1);
   const [productPermissions, setProductPermissions] = useState<BrandProductPermissions>(EMPTY_BRAND_PRODUCT_PERMISSIONS);
@@ -1163,7 +1309,7 @@ function ProductsContent() {
     if (q) query.q = q;
     if (brandFilter !== 'all') {
       query.brand = brandFilter;
-      const tenantId = BRAND_PRODUCT_TENANTS[brandFilter];
+      const tenantId = PRODUCT_LIBRARY_TENANT_ID;
       if (tenantId) query.tenantId = tenantId;
     }
     if (status !== 'all') query.status = status;
@@ -1172,7 +1318,7 @@ function ProductsContent() {
     return (supportedProductBrands.length ? supportedProductBrands : DEFAULT_PRODUCT_BRANDS).map((brand) => ({
       ...query,
       brand,
-      tenantId: BRAND_PRODUCT_TENANTS[brand] || '',
+      tenantId: PRODUCT_LIBRARY_TENANT_ID,
     }));
   };
 
@@ -1319,12 +1465,33 @@ function ProductsContent() {
     const filtered = liveProductList.filter((product) => {
       if (brandFilter !== 'all' && normalizeBrand(product.brand) !== brandFilter) return false;
       if (statusFilter !== 'all' && product.status !== statusFilter) return false;
+      if (batchFilter && text(productLibraryMeta(product).batchCode) !== batchFilter) return false;
       if (!productMatchesCatalogCategory(product, category)) return false;
       if (!query) return true;
-      return [product.sku, product.name, product.model].join(' ').toLowerCase().includes(query);
+      const libraryMeta = productLibraryMeta(product);
+      return [product.sku, product.name, product.model, productBrandMeta(product).series, libraryMeta.sourceCategory, ...(Array.isArray(libraryMeta.reviewNotes) ? libraryMeta.reviewNotes : [])]
+        .join(' ')
+        .toLowerCase()
+        .includes(query);
     });
     return sortProductsByStatusThenOrder(filtered);
-  }, [brandFilter, category, deferredKeyword, liveProductList, statusFilter]);
+  }, [batchFilter, brandFilter, category, deferredKeyword, liveProductList, statusFilter]);
+
+  const pilotSummary = useMemo<ProductPilotSummary | null>(() => {
+    const pilotProducts = visibleCatalogProducts.filter((product) => productLibraryMeta(product).pilot === true);
+    if (!pilotProducts.length) return null;
+    const categories = new Set(pilotProducts.map((product) => text(productLibraryMeta(product).sourceCategory) || product.category).filter(Boolean));
+    const websitePublished = pilotProducts.filter((product) => {
+      const assignment = assignmentByProductKey.get(assignmentKey(product.id, tenantIdForProduct(product))) || assignmentByProductKey.get(product.id);
+      return assignment?.status === 'published' && !assignment.deletedAt;
+    }).length;
+    return {
+      products: pilotProducts.length,
+      categories: categories.size,
+      websitePublished,
+      needsCompletion: pilotProducts.filter((product) => productLibraryMeta(product).dataReadinessStatus === 'needs_completion').length,
+    };
+  }, [assignmentByProductKey, visibleCatalogProducts]);
 
   const catalogTotalPages = Math.max(Math.ceil(visibleCatalogProducts.length / pageSize), 1);
 
@@ -1336,7 +1503,7 @@ function ProductsContent() {
 
   useEffect(() => {
     setCatalogPage(1);
-  }, [brandFilter, category, deferredKeyword, pageSize, statusFilter]);
+  }, [batchFilter, brandFilter, category, deferredKeyword, pageSize, statusFilter]);
 
   const productByModel = useMemo(() => {
     const map = new Map<string, NormalizedProduct>();
@@ -1531,6 +1698,21 @@ function ProductsContent() {
                         </option>
                       ))}
                     </select>
+                    {batchFilter ? (
+                      <span className="badge badge-info" style={{ display: 'inline-flex', gap: 6, alignItems: 'center', maxWidth: 260 }}>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>试导入批次：{batchFilter}</span>
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => setBatchFilter('')}
+                          aria-label="清除试导入批次筛选"
+                          title="清除试导入批次筛选"
+                          style={{ width: 24, minWidth: 24, height: 24, padding: 0 }}
+                        >
+                          <X size={13} />
+                        </button>
+                      </span>
+                    ) : null}
                   </>
                 )}
                 <span
@@ -1561,6 +1743,7 @@ function ProductsContent() {
             canDeleteProduct={productPermissions.canDeleteProduct}
             brandOptions={createBrandOptions}
             assignmentByProductKey={assignmentByProductKey}
+            pilotSummary={pilotSummary}
             actionNotice={actionNotice}
             onNotice={setActionNotice}
             onCreated={(brand) => {
@@ -1577,6 +1760,7 @@ function ProductsContent() {
               setCategory('all');
               setBrandFilter('all');
               setStatusFilter('all');
+              setBatchFilter('');
               setKeyword('');
             }}
           />
@@ -1705,6 +1889,7 @@ function ProductCatalogShell({
   canDeleteProduct,
   brandOptions,
   assignmentByProductKey,
+  pilotSummary,
   actionNotice,
   onNotice,
   onCreated,
@@ -1727,6 +1912,7 @@ function ProductCatalogShell({
   canDeleteProduct: boolean;
   brandOptions: Array<{ value: ProductBrand; label: string }>;
   assignmentByProductKey: Map<string, WebsiteShelfAssignment>;
+  pilotSummary: ProductPilotSummary | null;
   actionNotice: string;
   onNotice: (text: string) => void;
   onCreated: (brand: ProductBrand) => Promise<unknown>;
@@ -1741,6 +1927,7 @@ function ProductCatalogShell({
   const [creating, setCreating] = useState(false);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [bulkStatus, setBulkStatus] = useState<'active' | 'inactive' | ''>('');
+  const { confirmFloating, floatingDialog } = useFloatingDialog();
   const createBrandCode = normalizeBrand(createDraft.brand);
   const { data: createCategoryData, error: createCategoryError, isLoading: createCategoryLoading } = useSWR(
     showCreate && createBrandCode ? ['/api/v2/brand-product-categories', createBrandCode, 'product-create'] : null,
@@ -1795,23 +1982,48 @@ function ProductCatalogShell({
     setCreating(true);
     setCreateError('');
     try {
-      const basePayload = createProductPayload(createDraft, createCategoryTree);
-      const entityId = String(basePayload.sku || createDraft.skuSeed);
+      const selectedBrands = createDraft.brands.length ? createDraft.brands : (createDraft.brand ? [createDraft.brand] : []);
+      if (!selectedBrands.length) throw new Error('请选择至少一个产品品牌。');
+      const primaryBrand = createDraft.brand || selectedBrands[0];
+      const entityId = String(createDraft.materialCode || createDraft.model || createDraft.name);
       const mainImageRef = await uploadProductMainImageRef(createDraft.mainImage, entityId);
       const manualPdfRefs = await uploadProductManualPdfRefs(createDraft.manualPdfs, entityId);
       const assetRefs = [mainImageRef, ...manualPdfRefs].filter(Boolean);
-      const payload = assetRefs.length ? { ...basePayload, assetRefs } : basePayload;
-      const created = await products.create(payload);
-      const createdId = text((created as any)?.id);
-      if (createdId && text(createDraft.officialDetailHtml)) {
-        await saveOfficialProductDetailContent(createdId, text((payload as any).tenantId), createDraft.officialDetailHtml);
+      const createdRows: Array<{ brand: ProductBrand; payload: Record<string, unknown>; created: unknown }> = [];
+      for (const brand of [primaryBrand]) {
+        const basePayload = createProductPayload(createDraft, createCategoryTree, brand, {
+          includeCategoryBinding: brand === primaryBrand,
+        });
+        const payload = assetRefs.length ? { ...basePayload, assetRefs } : basePayload;
+        let created: unknown;
+        try {
+          created = await products.create(payload);
+        } catch (error) {
+          if (!isProductModelExistsError(error)) throw error;
+          const confirmed = await confirmFloating({
+            title: '产品型号已存在',
+            message: `${displayBrand(brand)}：\n${productModelExistsMessage(error)}`,
+            confirmLabel: '更新并追加 SKU',
+            cancelLabel: '取消录入',
+          });
+          if (!confirmed) {
+            setCreateError(`已取消 ${displayBrand(brand)} 的录入，后续品牌未继续提交。`);
+            return;
+          }
+          created = await products.create({ ...payload, confirmExistingProduct: true });
+        }
+        createdRows.push({ brand, payload, created });
+        const createdId = text((created as any)?.id);
+        if (createdId && text(createDraft.officialDetailHtml)) {
+          await saveOfficialProductDetailContent(createdId, text((payload as any).tenantId), createDraft.officialDetailHtml);
+        }
       }
       createDraft.manualPdfs.forEach((manual) => URL.revokeObjectURL(manual.previewUrl));
       if (createDraft.mainImage) URL.revokeObjectURL(createDraft.mainImage.previewUrl);
       setCreateDraft(emptyCreateDraft());
       setShowCreate(false);
-      onNotice(`Created ${String(payload.name)} for ${displayBrand(String(payload.brand))}.`);
-      await onCreated(payload.brand as ProductBrand);
+      onNotice(`已创建/更新 ${createdRows.length} 个品牌的产品：${selectedBrands.map(displayBrand).join('、')}。`);
+      await Promise.all(selectedBrands.map((brand) => onCreated(brand)));
     } catch (e) {
       const message = (e as Error)?.message || 'Create product failed.';
       setCreateError(message);
@@ -1863,6 +2075,28 @@ function ProductCatalogShell({
           </span>
         )}
       </div>
+
+      {pilotSummary ? (
+        <div
+          role="status"
+          style={{
+            padding: '10px 18px',
+            borderBottom: '1px solid var(--border)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 18,
+            flexWrap: 'wrap',
+            background: 'var(--surface-2)',
+            color: 'var(--t-secondary)',
+            fontSize: 12,
+          }}
+        >
+          <strong style={{ color: 'var(--t-primary)' }}>{pilotSummary.products} 个试导入产品</strong>
+          <span>{pilotSummary.categories} 个品类</span>
+          <span>{pilotSummary.websitePublished} 个官网上架</span>
+          <span>{pilotSummary.needsCompletion} 个待补全</span>
+        </div>
+      ) : null}
 
       {canCreateProduct && showCreate && (
           <CreateProductForm
@@ -1971,7 +2205,7 @@ function ProductCatalogShell({
             </div>
           ) : null}
           <div style={{ overflowX: 'auto' }}>
-            <table className="table product-catalog-table" style={{ minWidth: 1360 }}>
+            <table className="table product-catalog-table" style={{ minWidth: 1480 }}>
               <thead>
                 <tr>
                   <th style={{ width: 44 }}>
@@ -1988,10 +2222,11 @@ function ProductCatalogShell({
                   </th>
                   <th>产品库分类</th>
                   <th>产品</th>
-                  <th>产品型号</th>
+                  <th>型号与 SKU</th>
+                  <th>系列</th>
+                  <th>资料完整度</th>
                   <th>品牌</th>
                   <th>图片</th>
-                  <th>排序</th>
                   <th>产品库状态</th>
                   <th>官网上架状态</th>
                   <th style={{ textAlign: 'right' }}>操作</th>
@@ -2041,6 +2276,7 @@ function ProductCatalogShell({
           />
         </WorkbenchTableShell>
       )}
+      {floatingDialog}
     </section>
   );
 }
@@ -2069,7 +2305,7 @@ function CreateProductForm({
   onSubmit: (event: FormEvent) => void;
 }) {
   const patch = (next: Partial<CreateProductDraft>) => onChange({ ...draft, ...next });
-  const tenantId = draft.brand ? BRAND_PRODUCT_TENANTS[draft.brand] : '';
+  const tenantId = draft.brand ? PRODUCT_LIBRARY_TENANT_ID : '';
   const categoryFlat = useMemo(() => flattenCategoryTree(categoryTree), [categoryTree]);
   const selectedLevel1 = categoryFlat.find((item) => item.id === draft.categoryLevel1Id) || null;
   const selectedLevel2 = categoryFlat.find((item) => item.id === draft.categoryLevel2Id) || null;
@@ -2078,6 +2314,22 @@ function CreateProductForm({
   const level2Options = activeCategoryOptions(selectedLevel1?.children || [], selectedLevel2);
   const level3Options = activeCategoryOptions(selectedLevel2?.children || [], selectedLevel3);
   const selectedPath = [selectedLevel1, selectedLevel2, selectedLevel3].filter(Boolean).map((item) => item?.name || item?.code).join(' / ');
+  const selectedBrands = draft.brands.length ? draft.brands : (draft.brand ? [draft.brand] : []);
+  const createBrandOptions = brandOptions.length ? brandOptions : DEFAULT_CREATE_BRAND_OPTIONS;
+  function toggleDraftBrand(brand: ProductBrand, checked: boolean) {
+    const next = checked
+      ? [...new Set([...selectedBrands, brand])]
+      : selectedBrands.filter((item) => item !== brand);
+    onChange({
+      ...draft,
+      brands: next,
+      brand: next[0] || '',
+      categoryLevel1Id: next[0] === draft.brand ? draft.categoryLevel1Id : '',
+      categoryLevel2Id: next[0] === draft.brand ? draft.categoryLevel2Id : '',
+      categoryLevel3Id: next[0] === draft.brand ? draft.categoryLevel3Id : '',
+      officialEnglishName: next[0] ? String(next[0]).toUpperCase() : draft.officialEnglishName,
+    });
+  }
   const { alertFloating, floatingDialog } = useFloatingDialog();
   async function selectMainImage(file: File | null) {
     if (!file) return;
@@ -2157,36 +2409,33 @@ function CreateProductForm({
             <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
               <label style={{ display: 'grid', gap: 6 }}>
                 <span className="t-label">品牌</span>
-                <select
-                  className="input"
-                  value={draft.brand}
-                  required
-                  onChange={(event) =>
-                    onChange({
-                      ...draft,
-                      brand: event.target.value as ProductBrand,
-                      categoryLevel1Id: '',
-                      categoryLevel2Id: '',
-                      categoryLevel3Id: '',
-                      officialEnglishName: String(event.target.value || '').toUpperCase(),
-                    })
-                  }
-                >
-                  <option value="">选择品牌</option>
-                  {brandOptions.map((brand) => (
-                    <option key={brand.value} value={brand.value}>
+                <div className="inset" style={{ padding: 10, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                  {createBrandOptions.map((brand) => (
+                    <label key={brand.value} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 800 }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedBrands.includes(brand.value)}
+                        onChange={(event) => toggleDraftBrand(brand.value, event.target.checked)}
+                      />
                       {brand.label}
-                    </option>
+                    </label>
                   ))}
-                </select>
+                </div>
+                <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+                  可选择一个或多个品牌；提交后只保存一条公共产品记录，并建立多个品牌绑定。
+                </span>
               </label>
               <label style={{ display: 'grid', gap: 6 }}>
                 <span className="t-label">产品名称</span>
-                <input className="input" value={draft.name} required onChange={(event) => patch({ name: event.target.value })} placeholder="Rheem heat pump 16kW" />
+                <input className="input" value={draft.name} required onChange={(event) => patch({ name: event.target.value })} placeholder="恒热燃气热水器 RGS-A" />
               </label>
               <label style={{ display: 'grid', gap: 6 }}>
-                <span className="t-label">型号 / 编码种子</span>
-                <input className="input" value={draft.skuSeed} required onChange={(event) => patch({ skuSeed: event.target.value })} placeholder="RP-16kW-INV" />
+                <span className="t-label">产品型号</span>
+                <input className="input" value={draft.model} required onChange={(event) => patch({ model: event.target.value })} placeholder="RGS-A" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">SKU / 物料编码</span>
+                <input className="input" value={draft.materialCode} required onChange={(event) => patch({ materialCode: event.target.value })} placeholder="10012345" />
               </label>
             </div>
           </section>
@@ -2248,6 +2497,65 @@ function CreateProductForm({
                 </label>
               </div>
             )}
+          </section>
+
+          <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+            <div className="product-edit-section-head">
+              <h3>价格信息</h3>
+              <span className="badge badge-grey">目录价与官网展示价分开维护</span>
+            </div>
+            <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">产品库目录价</span>
+                <input className="input" type="number" min={0} step="0.01" value={draft.listPrice} onChange={(event) => patch({ listPrice: event.target.value })} placeholder="不填则为 0" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">币种</span>
+                <input className="input" value={draft.currency} onChange={(event) => patch({ currency: event.target.value || 'CNY' })} placeholder="CNY" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">官网价格展示方式</span>
+                <select className="input" value={draft.websitePriceDisplayMode} onChange={(event) => patch({ websitePriceDisplayMode: event.target.value })}>
+                  <option value="not_shown">不展示价格</option>
+                  <option value="show_price">显示官网参考价</option>
+                  <option value="price_range">显示价格区间</option>
+                  <option value="inquiry">面议</option>
+                  <option value="contact_dealer">联系经销商</option>
+                </select>
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">官网参考价</span>
+                <input className="input" type="number" min={0} step="0.01" value={draft.websitePrice} disabled={draft.websitePriceDisplayMode !== 'show_price'} onChange={(event) => patch({ websitePrice: event.target.value })} placeholder="选择显示官网参考价时填写" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">官网最低价</span>
+                <input className="input" type="number" min={0} step="0.01" value={draft.websitePriceMin} disabled={draft.websitePriceDisplayMode !== 'price_range'} onChange={(event) => patch({ websitePriceMin: event.target.value })} placeholder="价格区间最低价" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">官网最高价</span>
+                <input className="input" type="number" min={0} step="0.01" value={draft.websitePriceMax} disabled={draft.websitePriceDisplayMode !== 'price_range'} onChange={(event) => patch({ websitePriceMax: event.target.value })} placeholder="价格区间最高价" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">活动价</span>
+                <input className="input" type="number" min={0} step="0.01" value={draft.promoPrice} onChange={(event) => patch({ promoPrice: event.target.value })} placeholder="可选" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">价格单位</span>
+                <input className="input" value={draft.priceUnit} onChange={(event) => patch({ priceUnit: event.target.value })} placeholder="台 / 套 / 件" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">价格标签</span>
+                <input className="input" value={draft.priceLabel} onChange={(event) => patch({ priceLabel: event.target.value })} placeholder="官网参考价 / 起售价" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">价格说明</span>
+                <input className="input" value={draft.priceNote} onChange={(event) => patch({ priceNote: event.target.value })} placeholder="例如：最终成交价以经销商报价为准" />
+              </label>
+              <label style={{ display: 'flex', gap: 8, alignItems: 'center', paddingTop: 22 }}>
+                <input type="checkbox" checked={draft.taxIncluded} onChange={(event) => patch({ taxIncluded: event.target.checked })} />
+                <span className="t-label">价格含税</span>
+              </label>
+            </div>
           </section>
 
           <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
@@ -2338,7 +2646,7 @@ function CreateProductForm({
             <OfficialProductDetailEditor
               value={draft.officialDetailHtml}
               onChange={(officialDetailHtml) => patch({ officialDetailHtml })}
-              entityId={draft.skuSeed || draft.name || 'new-product'}
+              entityId={draft.materialCode || draft.model || draft.name || 'new-product'}
               disabled={submitting}
             />
           </section>
@@ -2564,9 +2872,11 @@ function ProductCatalogRow({
   const statusTarget = product.status === 'active' ? 'inactive' : 'active';
   const customCategory = draft.category && !CATEGORY_KEYS.has(draft.category);
   const brandMeta = productBrandMeta(product);
+  const libraryMeta = productLibraryMeta(product);
+  const readiness = productReadinessSummary(product);
+  const reviewNotes = Array.isArray(libraryMeta.reviewNotes) ? libraryMeta.reviewNotes.map(text).filter(Boolean) : [];
   const websiteCategory = text(brandMeta.websiteCategory || brandMeta.websiteMenuCategory || brandMeta.cat);
   const shelfMeta = websiteShelfMeta(assignment);
-  const displayOrder = nonNegativeInt(brandMeta.displayOrder ?? brandMeta.sortOrder);
   const imageSrc = productImageSrc(product);
   const editDialog = canUpdateProduct && editing && typeof document !== 'undefined'
     ? createPortal(
@@ -2857,6 +3167,11 @@ function ProductCatalogRow({
           </div>
         </td>
         <td>
+          {libraryMeta.pilot === true ? (
+            <div style={{ marginBottom: 6 }}>
+              <StatusPill tone="info">试导入</StatusPill>
+            </div>
+          ) : null}
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', minWidth: 0 }}>
             {rowState.dirty && <span className="badge badge-warning">有未保存修改</span>}
             {rowState.saving && <span className="badge badge-info">保存中...</span>}
@@ -2879,7 +3194,30 @@ function ProductCatalogRow({
           </h3>
         </td>
         <td>
-          <span className="mono-cell">{product.model || '待补齐'}</span>
+          <div style={{ display: 'grid', gap: 5, minWidth: 150 }}>
+            <span className="mono-cell" title="产品型号">{product.model || '待补齐'}</span>
+            <span style={{ color: 'var(--t-tertiary)', fontSize: 11 }}>SKU · <span className="mono-cell">{product.sku || '待补齐'}</span></span>
+          </div>
+        </td>
+        <td>
+          <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>{text(brandMeta.series || libraryMeta.series) || '待补齐'}</span>
+        </td>
+        <td>
+          {readiness.status ? (
+            <div style={{ display: 'grid', gap: 5, minWidth: 150 }} title={readiness.details}>
+              <StatusPill tone={readiness.status === 'needs_completion' ? 'warning' : 'success'}>
+                {readiness.status === 'needs_completion' ? '待补全' : '资料就绪'}
+              </StatusPill>
+              <span style={{ color: 'var(--t-secondary)', fontSize: 11 }}>{readiness.ready} / {readiness.total} 个维度就绪</span>
+              {reviewNotes.length ? (
+                <span style={{ color: 'var(--warning)', fontSize: 11, lineHeight: 1.35 }} title={reviewNotes.join('\n')}>
+                  {reviewNotes[0]}
+                </span>
+              ) : null}
+            </div>
+          ) : (
+            <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>未评估</span>
+          )}
         </td>
         <td>
           <span className="pill-brand" style={{ maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -2888,9 +3226,6 @@ function ProductCatalogRow({
         </td>
         <td>
           <ProductCatalogImagePreview src={imageSrc} alt={product.name || product.model || '产品图片'} />
-        </td>
-        <td>
-          <span className="mono-cell">{displayOrder}</span>
         </td>
         <td>
           <StatusPill tone={statusTone(product.status)}>
@@ -2946,7 +3281,7 @@ function ProductCatalogRow({
 
       {(rowState.success || rowState.error) && (
         <tr>
-          <td colSpan={9}>
+          <td colSpan={11}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {rowState.success && (
                 <span className="badge badge-success" role="status" style={{ whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
@@ -4044,6 +4379,9 @@ function CategoryNodeCard({ node, parentName }: { node: ProductCategoryNode; par
         <StatusPill tone={node.status === 'inactive' ? 'warning' : 'success'}>
           {node.status === 'inactive' ? '停用' : '启用'}
         </StatusPill>
+        <StatusPill tone={node.showOnWebsite ? 'info' : 'neutral'}>
+          {node.showOnWebsite ? '官网显示' : '官网隐藏'}
+        </StatusPill>
       </div>
       <p style={{ marginTop: 5, color: 'var(--t-tertiary)', fontSize: 11, overflowWrap: 'anywhere' }}>
         {node.code || '未设置编码'} · 排序 {node.sortOrder}
@@ -4619,6 +4957,9 @@ function CategoryCrudTreePanel({
                   <StatusPill tone={node.status === 'inactive' ? 'warning' : 'success'}>
                     {node.status === 'inactive' ? '停用' : '启用'}
                   </StatusPill>
+                  <StatusPill tone={node.showOnWebsite ? 'info' : 'neutral'}>
+                    {node.showOnWebsite ? '官网显示' : '官网隐藏'}
+                  </StatusPill>
                   <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>{node.code}</span>
                 </button>
               </div>
@@ -4747,6 +5088,11 @@ function CategoryCrudTreeTable({
                   <StatusPill tone={node.status === 'inactive' ? 'warning' : 'success'}>
                     {node.status === 'inactive' ? '停用' : '启用'}
                   </StatusPill>
+                  <div style={{ marginTop: 6 }}>
+                    <StatusPill tone={node.showOnWebsite ? 'info' : 'neutral'}>
+                      {node.showOnWebsite ? '官网显示' : '官网隐藏'}
+                    </StatusPill>
+                  </div>
                 </td>
                 <td>{node.descendantProductCount}</td>
                 <td>{node.directProductCount}</td>
@@ -4966,6 +5312,11 @@ function CategoryCrudEditor({
               {selected.status === 'inactive' ? '停用' : '启用'}
             </StatusPill>
           ) : null}
+          {mode === 'edit' && selected ? (
+            <StatusPill tone={draft.showOnWebsite ? 'info' : 'neutral'}>
+              {draft.showOnWebsite ? '官网显示' : '官网隐藏'}
+            </StatusPill>
+          ) : null}
           <button type="button" className="btn btn-ghost btn-sm" onClick={onClose} disabled={saving} aria-label="关闭">
             <XCircle size={14} />
           </button>
@@ -4993,6 +5344,32 @@ function CategoryCrudEditor({
             </select>
           </label>
         </div>
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            padding: '10px 12px',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--r-md)',
+            background: 'var(--surface-2)',
+          }}
+        >
+          <span>
+            <span className="t-label" style={{ display: 'block' }}>显示到官网</span>
+            <span style={{ display: 'block', marginTop: 3, color: 'var(--t-secondary)', fontSize: 12 }}>
+              关闭后，该分类及其下级不会进入官网公开目录。
+            </span>
+          </span>
+          <input
+            type="checkbox"
+            checked={draft.showOnWebsite}
+            disabled={disabled}
+            onChange={(event) => onDraft({ ...draft, showOnWebsite: event.target.checked })}
+            style={{ width: 18, height: 18, accentColor: 'var(--brand)', flexShrink: 0 }}
+          />
+        </label>
         <label style={{ display: 'grid', gap: 6 }}>
           <span className="t-label">说明</span>
           <textarea className="textarea" value={draft.description} disabled={disabled} onChange={(event) => onDraft({ ...draft, description: event.target.value })} />
@@ -5039,6 +5416,7 @@ function emptyCategoryDraft(sortOrder = 0, code = ''): ProductCategoryDraft {
     slug: '',
     sortOrder: String(sortOrder),
     status: 'active',
+    showOnWebsite: true,
     description: '',
   };
 }
@@ -5050,6 +5428,7 @@ function categoryDraftFromNode(node: ProductCategoryNode): ProductCategoryDraft 
     slug: node.slug,
     sortOrder: String(node.sortOrder),
     status: node.status === 'inactive' ? 'inactive' : 'active',
+    showOnWebsite: node.showOnWebsite,
     description: node.description,
   };
 }
@@ -5064,6 +5443,7 @@ function categoryDraftPayload(draft: ProductCategoryDraft): Record<string, unkno
     slug: draft.slug ? slug(draft.slug) : null,
     sortOrder,
     status: draft.status,
+    showOnWebsite: draft.showOnWebsite,
     description: text(draft.description) || null,
   };
 }

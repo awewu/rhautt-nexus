@@ -174,3 +174,8 @@ src-tauri/gen/
 .guard-ledger.json
 .guard-ledger.txt
 .guard-ledger2.txt
+
+# Local package/cache scratch and generated runtime bundles
+.scratch/
+backups/
+release-runtime/

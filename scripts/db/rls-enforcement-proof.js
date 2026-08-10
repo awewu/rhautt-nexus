@@ -39,7 +39,7 @@ async function main() {
     host: process.env.POSTGRES_HOST || 'localhost',
     port: Number(process.env.POSTGRES_PORT || 5432),
     user, password,
-    database: process.env.POSTGRES_DB || 'rhautt_nexus',
+    database: process.env.POSTGRES_DB || 'rhautt_GOT',
   });
   await client.connect();
 

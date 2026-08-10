@@ -9,17 +9,17 @@ export const OIDC_REQUIRED_ENV_KEYS = [
 
 export const OIDC_LOCAL_REFERENCE = {
   issuer: 'https://ai.rhautt.com',
-  clientId: 'cli_mrvdz1yr8jfzrb8u',
+  clientId: 'cli_mslla90sk9xd8vewl421',
   redirectUri: 'http://localhost:5000/api/v2/auth/sso/callback',
-  postLoginRedirect: '/brand',
+  postLoginRedirect: '/cockpit',
   scopes: 'openid profile email roles org',
 } as const;
 
 export const OIDC_PRODUCTION_REFERENCE = {
   issuer: 'https://ai.rhautt.com',
   clientId: 'cli_mrve0bgvgnl2gkjg',
-  redirectUri: 'https://nexus.rhautt.com/api/v2/auth/sso/callback',
-  postLoginRedirect: '/brand',
+  redirectUri: 'https://gtm.rhautt.com/api/v2/auth/sso/callback',
+  postLoginRedirect: '/cockpit',
   scopes: 'openid profile email roles org',
 } as const;
 
@@ -58,7 +58,7 @@ export function readOidcRuntimeConfig(env: NodeJS.ProcessEnv = process.env): Oid
     clientSecret: read(env, 'OIDC_CLIENT_SECRET'),
     redirectUri: read(env, 'OIDC_REDIRECT_URI'),
     scopes: splitList(read(env, 'OIDC_SCOPES', DEFAULT_SCOPES)),
-    postLoginRedirect: read(env, 'OIDC_POST_LOGIN_REDIRECT', '/brand'),
+    postLoginRedirect: read(env, 'OIDC_POST_LOGIN_REDIRECT', '/cockpit'),
     userinfoEnabled: read(env, 'OIDC_USERINFO_ENABLED', 'true') !== 'false',
     allowedRedirectHosts: splitList(read(env, 'OIDC_ALLOWED_REDIRECT_HOSTS')),
     roleClaim: read(env, 'OIDC_ROLES_CLAIM', 'roles'),

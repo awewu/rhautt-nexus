@@ -16,6 +16,8 @@ const JSON_OUTPUT = path.join(OUTPUT_DIR, 'official-product-preview.json');
 const REPORT_OUTPUT = path.join(OUTPUT_DIR, 'official-product-preview.md');
 const USER_AGENT = 'RhauttProductCatalogResearch/1.0 (+public official product data only)';
 const REQUEST_DELAY_MS = Number(process.env.OFFICIAL_CRAWL_DELAY_MS || 250);
+const BRAND_ARG_INDEX = process.argv.indexOf('--brand');
+const SELECTED_BRAND = BRAND_ARG_INDEX >= 0 ? String(process.argv[BRAND_ARG_INDEX + 1] || '').trim() : '';
 
 function sleep(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -251,11 +253,17 @@ function renderReport(payload) {
 async function main() {
   console.log('Official product crawl: preview-only; database writes are disabled.');
   const fetchedAt = new Date().toISOString();
-  const crawlers = [
+  const allCrawlers = [
     ['Rheem', crawlRheem],
     ['Ruud', crawlRuud],
     ['Everhot', crawlEverhot],
   ];
+  const crawlers = SELECTED_BRAND
+    ? allCrawlers.filter(([brand]) => brand.toLowerCase() === SELECTED_BRAND.toLowerCase())
+    : allCrawlers;
+  if (!crawlers.length) {
+    throw new Error(`unsupported brand: ${SELECTED_BRAND}`);
+  }
   const records = [];
   const errors = [];
   for (const [brand, crawler] of crawlers) {
@@ -274,6 +282,7 @@ async function main() {
       mode: 'dry-run-preview',
       databaseWrites: false,
       officialPublicSourcesOnly: true,
+      selectedBrand: SELECTED_BRAND || null,
       totalProducts: records.length,
       errors,
     },

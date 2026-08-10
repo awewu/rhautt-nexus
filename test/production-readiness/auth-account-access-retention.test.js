@@ -26,7 +26,7 @@ describe('auth/account access retention smoke', () => {
     expect(loginPage).toContain('setToken(res.token)');
     expect(loginPage).toContain("new URLSearchParams(window.location.search).get('returnUrl')");
     expect(loginPage).toContain("window.location.href = decodeURIComponent(returnUrl)");
-    expect(loginPage).toContain("'/api/v2/auth/sso/login?redirect=/brand'");
+    expect(loginPage).toContain("'/api/v2/auth/sso/login?redirect=/cockpit'");
     expect(dealerApi).toContain("apiFetch('/api/v2/auth/login'");
   });
 

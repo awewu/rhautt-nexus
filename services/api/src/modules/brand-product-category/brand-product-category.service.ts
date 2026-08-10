@@ -21,6 +21,7 @@ export interface BrandProductCategoryInput {
   slug?: string | null;
   sortOrder?: number;
   status?: BrandProductCategoryStatus;
+  showOnWebsite?: boolean;
   description?: string | null;
 }
 
@@ -39,6 +40,7 @@ export interface PublicBrandProductCategoryNode {
   nameEn: string | null;
   sortOrder: number;
   status: BrandProductCategoryStatus;
+  showOnWebsite: boolean;
   ancestry: PublicBrandProductCategoryNode[];
   path: string;
   children: PublicBrandProductCategoryNode[];
@@ -109,7 +111,7 @@ export class BrandProductCategoryService {
       where: { brandCode, status: 'active', deletedAt: IsNull() } as any,
       order: { level: 'ASC', sortOrder: 'ASC', createdAt: 'ASC' } as any,
     });
-    const items = rows.sort(compareCategories);
+    const items = rows.filter((row) => categoryWebsiteChainVisible(row, rows)).sort(compareCategories);
     const publicItems = withPublicAncestry(items);
     return {
       success: true,
@@ -233,6 +235,7 @@ export class BrandProductCategoryService {
     if (input.slug !== undefined) patch.slug = normalizeNullableText(input.slug);
     if (creating || input.sortOrder !== undefined) patch.sortOrder = normalizeSortOrder(input.sortOrder);
     if (creating || input.status !== undefined) patch.status = normalizeStatus(input.status);
+    if (creating || input.showOnWebsite !== undefined) patch.showOnWebsite = normalizeBoolean(input.showOnWebsite, true);
     if (input.description !== undefined) patch.description = normalizeNullableText(input.description);
     return patch;
   }
@@ -436,6 +439,15 @@ function normalizeStatus(value: unknown): BrandProductCategoryStatus {
   return status;
 }
 
+function normalizeBoolean(value: unknown, defaultValue: boolean): boolean {
+  if (value === undefined || value === null || value === '') return defaultValue;
+  if (typeof value === 'boolean') return value;
+  const text = String(value).trim().toLowerCase();
+  if (['true', '1', 'yes', 'on'].includes(text)) return true;
+  if (['false', '0', 'no', 'off'].includes(text)) return false;
+  throw new BadRequestException('showOnWebsite must be a boolean.');
+}
+
 function compareCategories(a: BrandProductCategoryEntity, b: BrandProductCategoryEntity): number {
   return a.level - b.level
     || (a.parentId || '').localeCompare(b.parentId || '')
@@ -452,6 +464,12 @@ function categoryPath(row: BrandProductCategoryEntity, byId: Map<string, BrandPr
     ancestry.unshift(cursor);
   }
   return ancestry;
+}
+
+function categoryWebsiteChainVisible(row: BrandProductCategoryEntity, rows: BrandProductCategoryEntity[]): boolean {
+  const byId = new Map(rows.map((item) => [item.id, item]));
+  const ancestry = categoryPath(row, byId);
+  return ancestry.length > 0 && ancestry.every((item) => item.status === 'active' && item.showOnWebsite === true && !item.deletedAt);
 }
 
 function withAncestry(rows: BrandProductCategoryEntity[]) {
@@ -498,6 +516,7 @@ function publicCategoryProjection(
     nameEn: row.nameEn,
     sortOrder: row.sortOrder,
     status: row.status,
+    showOnWebsite: row.showOnWebsite,
     ancestry: ancestry.map((item) => ({
       id: item.id,
       brandCode: item.brandCode,
@@ -509,6 +528,7 @@ function publicCategoryProjection(
       nameEn: item.nameEn,
       sortOrder: item.sortOrder,
       status: item.status,
+      showOnWebsite: item.showOnWebsite,
       ancestry: [],
       path: '',
       children: [],

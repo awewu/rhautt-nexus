@@ -78,6 +78,39 @@ export function assertOptionalFiniteNumber(v: unknown, field: string): void {
   if (!Number.isFinite(n)) throw new BadRequestException(`${field} 必须是数字`);
 }
 
+function assertOptionalBoolean(v: unknown, field: string): void {
+  if (v === undefined || v === null) return;
+  if (typeof v !== 'boolean') throw new BadRequestException(`${field} must be a boolean`);
+}
+
+function validateWebsitePricingInput(v: unknown): void {
+  if (v === undefined || v === null) return;
+  const pricing = assertPlainObject(v, 'websitePricing');
+  assertOptionalString(pricing.siteCode, 'websitePricing.siteCode');
+  assertOptionalString(pricing.brandCode, 'websitePricing.brandCode');
+  assertOptionalString(pricing.locale, 'websitePricing.locale');
+  assertOptionalString(pricing.priceDisplayMode, 'websitePricing.priceDisplayMode');
+  assertOptionalString(pricing.currency, 'websitePricing.currency');
+  assertOptionalString(pricing.priceUnit, 'websitePricing.priceUnit');
+  assertOptionalString(pricing.priceLabel, 'websitePricing.priceLabel');
+  assertOptionalString(pricing.priceNote, 'websitePricing.priceNote');
+  assertOptionalString(pricing.validFrom, 'websitePricing.validFrom');
+  assertOptionalString(pricing.validTo, 'websitePricing.validTo');
+  assertOptionalBoolean(pricing.taxIncluded, 'websitePricing.taxIncluded');
+  for (const field of ['websitePrice', 'websitePriceMin', 'websitePriceMax', 'promoPrice']) {
+    assertOptionalFiniteNumber(pricing[field], `websitePricing.${field}`);
+    if (pricing[field] !== undefined && Number(pricing[field]) < 0) {
+      throw new BadRequestException(`websitePricing.${field} 不能小于 0`);
+    }
+  }
+  if (
+    pricing.priceDisplayMode !== undefined
+    && !['show_price', 'price_range', 'inquiry', 'contact_dealer', 'not_shown'].includes(String(pricing.priceDisplayMode))
+  ) {
+    throw new BadRequestException('websitePricing.priceDisplayMode only supports show_price, price_range, inquiry, contact_dealer or not_shown');
+  }
+}
+
 /**
  * L7 内容 upsert 输入校验：只校验类型，不做词表归一（归一仍由 sanitize* 负责）。
  * 保持对合法输入完全透明——仅拦截错误类型。
@@ -123,8 +156,23 @@ export function validateProductUpsertInput(dto: unknown): Record<string, unknown
   const body = assertPlainObject(dto, 'product body');
   assertOptionalString(body.tenantId, 'tenantId');
   assertOptionalString(body.sku, 'sku');
+  assertOptionalString(body.materialCode, 'materialCode');
+  assertOptionalString(body.skuRecordStatus, 'skuRecordStatus');
+  assertOptionalString(body.gtin, 'gtin');
+  assertOptionalString(body.mpn, 'mpn');
   assertOptionalString(body.name, 'name');
   assertOptionalString(body.brand, 'brand');
+  assertOptionalString(body.brandCode, 'brandCode');
+  assertOptionalStringArray(body.brands, 'brands');
+  assertOptionalStringArray(body.brandCodes, 'brandCodes');
+  assertOptionalObjectArray(body.brandBindings, 'brandBindings', ['brandCode', 'brandModel', 'brandDisplayName']);
+  assertOptionalString(body.model, 'model');
+  assertOptionalString(body.normalizedModel, 'normalizedModel');
+  assertOptionalString(body.workingName, 'workingName');
+  assertOptionalString(body.recordStatus, 'recordStatus');
+  assertOptionalString(body.dataReadinessStatus, 'dataReadinessStatus');
+  assertOptionalString(body.sourceSystem, 'sourceSystem');
+  assertOptionalString(body.sourceRecordKey, 'sourceRecordKey');
   assertOptionalString(body.category, 'category');
   assertOptionalString(body.categoryLevel1Id, 'categoryLevel1Id');
   assertOptionalString(body.categoryLevel2Id, 'categoryLevel2Id');
@@ -139,10 +187,21 @@ export function validateProductUpsertInput(dto: unknown): Record<string, unknown
   assertOptionalObject(body.spec, 'spec');
   assertOptionalObject(body.meta, 'meta');
   validateEverhotStructuredLists(body.meta);
+  validateWebsitePricingInput(body.websitePricing);
   assertOptionalObject(body.positioning, 'positioning');
   assertOptionalArray(body.assetRefs, 'assetRefs');
+  assertOptionalBoolean(body.confirmExistingProduct, 'confirmExistingProduct');
   if (body.status !== undefined && !['active', 'inactive', 'archived'].includes(String(body.status))) {
     throw new BadRequestException('status 仅支持 active、inactive 或 archived');
+  }
+  if (body.recordStatus !== undefined && !['active', 'withdrawn', 'archived'].includes(String(body.recordStatus))) {
+    throw new BadRequestException('recordStatus only supports active, withdrawn or archived');
+  }
+  if (body.dataReadinessStatus !== undefined && !['imported_draft', 'needs_completion', 'fact_verified'].includes(String(body.dataReadinessStatus))) {
+    throw new BadRequestException('dataReadinessStatus only supports imported_draft, needs_completion or fact_verified');
+  }
+  if (body.skuRecordStatus !== undefined && !['active', 'archived'].includes(String(body.skuRecordStatus))) {
+    throw new BadRequestException('skuRecordStatus only supports active or archived');
   }
   for (const field of ['listPrice', 'costPrice']) {
     if (body[field] !== undefined && Number(body[field]) < 0) {

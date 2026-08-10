@@ -5,6 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   BrandSiteBasicSettingsEntity,
   BrandSiteEntity,
+  SiteDocumentCategoryEntity,
+  SiteDocumentEntity,
+  SiteDealerEntity,
   SiteInquiryEntity,
   SiteNewsArticleEntity,
   SiteProductAssignmentEntity,
@@ -30,6 +33,10 @@ import {
   BrandSiteBasicSettingsPublicController,
 } from './brand-site-basic-settings.controller';
 import { BrandSiteBasicSettingsService } from './brand-site-basic-settings.service';
+import { SiteDocumentController, SiteDocumentPublicController } from './site-document.controller';
+import { SiteDocumentService } from './site-document.service';
+import { SiteDealerController, SiteDealerPublicController } from './site-dealer.controller';
+import { SiteDealerService } from './site-dealer.service';
 
 /**
  * 品牌注册表模块（配置驱动的品牌基础要素 API）。
@@ -44,6 +51,9 @@ import { BrandSiteBasicSettingsService } from './brand-site-basic-settings.servi
       BrandSiteBasicSettingsEntity,
       SiteProductAssignmentEntity,
       SiteNewsArticleEntity,
+      SiteDocumentCategoryEntity,
+      SiteDocumentEntity,
+      SiteDealerEntity,
       SiteInquiryEntity,
       AuditLogEntity,
     ])]),
@@ -52,6 +62,8 @@ import { BrandSiteBasicSettingsService } from './brand-site-basic-settings.servi
     BrandRegistryController, BrandSiteController, SiteProductAssignmentController, SiteProductPublicController,
     SiteNewsController, SiteNewsPublicController, BrandSiteBasicSettingsController,
     BrandSiteBasicSettingsPublicController, SiteInquiryController, SiteInquiryPublicController,
+    SiteDocumentController, SiteDocumentPublicController,
+    SiteDealerController, SiteDealerPublicController,
   ],
   providers: [
     BrandRegistryService,
@@ -60,6 +72,8 @@ import { BrandSiteBasicSettingsService } from './brand-site-basic-settings.servi
     BrandSiteBasicSettingsService,
     SiteProductAssignmentService,
     SiteNewsService,
+    SiteDocumentService,
+    SiteDealerService,
     SiteInquiryService,
     PublicRateLimitGuard,
     ...(TARGET_API_BOOT_SMOKE ? [
@@ -67,6 +81,9 @@ import { BrandSiteBasicSettingsService } from './brand-site-basic-settings.servi
       bootSmokeRepositoryProvider(BrandSiteBasicSettingsEntity),
       bootSmokeRepositoryProvider(SiteProductAssignmentEntity),
       bootSmokeRepositoryProvider(SiteNewsArticleEntity),
+      bootSmokeRepositoryProvider(SiteDocumentCategoryEntity),
+      bootSmokeRepositoryProvider(SiteDocumentEntity),
+      bootSmokeRepositoryProvider(SiteDealerEntity),
       bootSmokeRepositoryProvider(SiteInquiryEntity),
       bootSmokeRepositoryProvider(AuditLogEntity),
     ] : []),

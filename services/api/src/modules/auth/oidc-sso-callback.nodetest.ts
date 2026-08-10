@@ -50,7 +50,7 @@ function config(overrides: Record<string, string | undefined> = {}) {
     OIDC_CLIENT_SECRET: CLIENT_SECRET_PLACEHOLDER,
     OIDC_REDIRECT_URI: REDIRECT_URI,
     OIDC_SCOPES: 'openid profile email roles org',
-    OIDC_POST_LOGIN_REDIRECT: '/brand',
+    OIDC_POST_LOGIN_REDIRECT: '/cockpit',
     OIDC_USERINFO_ENABLED: 'true',
     ...overrides,
   };
@@ -120,7 +120,7 @@ function binding(overrides: Partial<ExternalIdentityBindingEntity> = {}): Extern
   } as ExternalIdentityBindingEntity;
 }
 
-function cookieHeader(state = STATE, redirect = '/brand') {
+function cookieHeader(state = STATE, redirect = '/cockpit') {
   return `${SSO_STATE_COOKIE}=${encodeURIComponent(state)}; ${SSO_REDIRECT_COOKIE}=${encodeURIComponent(redirect)}`;
 }
 
@@ -461,7 +461,7 @@ test('Issue 05 callback failures emit reason codes, redact secrets, and never is
   await expectCallbackFailure({ bindings: [] }, 'pending_authorization');
 });
 
-test('Issue 05 unsafe callback redirect is normalized to /brand without trusting external URL', async () => {
+test('Issue 05 unsafe callback redirect is normalized to /cockpit without trusting external URL', async () => {
   const f = fixture();
   try {
     const result = await f.service.handleCallback({
@@ -471,7 +471,7 @@ test('Issue 05 unsafe callback redirect is normalized to /brand without trusting
       requestId: 'req-safe-redirect',
     });
 
-    assert.equal(result.location, '/brand');
+    assert.equal(result.location, '/cockpit');
     assert.equal(f.issuedSessions, 1);
     assert.equal(f.auditEvents.at(-1)?.eventType, 'sso.callback.succeeded');
     assert.equal(f.auditEvents.at(-1)?.subjectHash.startsWith('sha256:'), true);
@@ -537,7 +537,7 @@ test('AuthController exposes public GET SSO callback and redirects terminal fail
   assert.deepEqual(headers['Set-Cookie'], [
     'nx_sso_state=; Path=/api/v2/auth/sso; Max-Age=0; HttpOnly; SameSite=Lax',
   ]);
-  assert.equal(headers.Location, '/?returnUrl=%2Fbrand&ssoError=sso_callback_failed');
+    assert.equal(headers.Location, '/?returnUrl=%2Fcockpit&ssoError=sso_callback_failed');
   assert.equal(result.body, undefined);
 });
 
@@ -575,5 +575,5 @@ test('AuthController maps pending authorization to a support-diagnostic unauthor
   const result = await controller.ssoCallback(CODE, STATE, { headers: { cookie: '' } }, response);
 
   assert.equal(result.statusCode, 302);
-  assert.equal(headers.Location, '/?returnUrl=%2Fbrand&ssoError=unauthorized');
+  assert.equal(headers.Location, '/?returnUrl=%2Fcockpit&ssoError=unauthorized');
 });

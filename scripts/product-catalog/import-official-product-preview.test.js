@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { buildDto, validatePreview } = require('./import-official-product-preview');
+const { OFFICIAL_PRODUCT_IMPORTER_ID, buildDto, validatePreview } = require('./import-official-product-preview');
 
 function previewProduct() {
   return {
@@ -53,4 +53,11 @@ test('builds active API DTO without overwriting authored fields', () => {
   assert.equal('positioning' in dto, false);
   assert.equal('assetRefs' in dto, false);
   assert.equal('costPrice' in dto, false);
+});
+
+test('uses a UUID actor id so product audit writes remain valid', () => {
+  assert.match(
+    OFFICIAL_PRODUCT_IMPORTER_ID,
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+  );
 });

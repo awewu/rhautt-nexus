@@ -138,8 +138,34 @@ window.EVERHOT_DEALERS = [
     drawResults();
   }
 
+  function normalizeRemoteDealer(row){
+    row=row||{};
+    return {id:row.id||'',name:row.name||'',city:row.city||'',province:row.province||'',district:row.district||'',
+      addr:row.addr||row.address||'',tel:row.tel||row.phone||'',type:row.type||row.dealerType||'',
+      services:Array.isArray(row.services)?row.services:[],
+      cert:Array.isArray(row.cert)?row.cert:(Array.isArray(row.certifications)?row.certifications:[]),
+      lat:row.lat==null?row.latitude:row.lat,lng:row.lng==null?row.longitude:row.lng};
+  }
+
+  function loadRuntimeDealers(){
+    if(window.EVERHOT_RUNTIME_DEALERS===false||!window.fetch)return Promise.resolve(false);
+    var siteCode=window.EVERHOT_SITE_CODE||'everhot';
+    var apiBase=String(window.EVERHOT_API_BASE||'').replace(/\/$/,'');
+    var url=apiBase+'/api/v2/sites/'+encodeURIComponent(siteCode)+'/dealers?page=1&pageSize=200';
+    return fetch(url,{cache:'no-store',headers:{Accept:'application/json'}})
+      .then(function(response){if(!response.ok)throw new Error('HTTP '+response.status);return response.json();})
+      .then(function(payload){
+        var items=payload&&payload.data&&Array.isArray(payload.data.items)?payload.data.items:[];
+        if(!items.length)return false;
+        window.EVERHOT_DEALERS=items.map(normalizeRemoteDealer).filter(function(row){return row.name;});
+        return true;
+      }).catch(function(){return false;});
+  }
+
   function boot(){
-    document.querySelectorAll('[data-dealer-locator]').forEach(render);
+    var hosts=Array.prototype.slice.call(document.querySelectorAll('[data-dealer-locator]'));
+    if(!hosts.length)return;
+    loadRuntimeDealers().then(function(){hosts.forEach(render);});
   }
   if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',boot); }
   else { boot(); }

@@ -27,7 +27,7 @@ const DIRECTORY = [
 async function main() {
   const client = new Client({
     host: process.env.PGHOST || '/tmp',
-    database: process.env.PGDATABASE || process.env.POSTGRES_DB || 'rhautt_nexus',
+    database: process.env.PGDATABASE || process.env.POSTGRES_DB || 'rhautt_GOT',
     port: Number(process.env.PGPORT || 5432),
     user: process.env.PGUSER || undefined,
   });

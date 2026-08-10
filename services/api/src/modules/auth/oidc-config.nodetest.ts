@@ -17,20 +17,20 @@ test('OIDC config reads the local client reference without exposing a secret def
   });
 
   assert.equal(config.issuer, 'https://ai.rhautt.com');
-  assert.equal(config.clientId, 'cli_mrvdz1yr8jfzrb8u');
+  assert.equal(config.clientId, 'cli_mslla90sk9xd8vewl421');
   assert.equal(config.clientSecret, '');
   assert.equal(config.redirectUri, 'http://localhost:5000/api/v2/auth/sso/callback');
   assert.deepEqual(config.scopes, ['openid', 'profile', 'email', 'roles', 'org']);
-  assert.equal(config.postLoginRedirect, '/brand');
+  assert.equal(config.postLoginRedirect, '/cockpit');
 });
 
 test('OIDC config documents the production client reference', () => {
   assert.equal(OIDC_PRODUCTION_REFERENCE.clientId, 'cli_mrve0bgvgnl2gkjg');
   assert.equal(
     OIDC_PRODUCTION_REFERENCE.redirectUri,
-    'https://nexus.rhautt.com/api/v2/auth/sso/callback'
+    'https://gtm.rhautt.com/api/v2/auth/sso/callback'
   );
-  assert.equal(OIDC_PRODUCTION_REFERENCE.postLoginRedirect, '/brand');
+  assert.equal(OIDC_PRODUCTION_REFERENCE.postLoginRedirect, '/cockpit');
 });
 
 test('OIDC config requires a server-side client secret for activation', () => {

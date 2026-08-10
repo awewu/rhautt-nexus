@@ -7,6 +7,7 @@ import {
   Gauge,
   Globe2,
   Landmark,
+  Library,
   Megaphone,
   Package,
   Route,
@@ -110,9 +111,11 @@ export const WORKBENCH_NAV: WorkbenchNavItem[] = [
     children: [
       { key: 'content', label: '内容工厂', href: '/content', icon: PenTool },
       { key: 'copywriter', label: '文案 Copilot', href: '/growth/copywriter', icon: PenTool },
+      { key: 'content-assets', label: '素材库', href: '/growth/content-assets', icon: FolderOpen },
       { key: 'wechat-review', label: '内容审核', href: '/growth/wechat-review', icon: BadgeCheck },
       { key: 'wechat-accounts', label: '发布账号配置', href: '/growth/wechat-accounts', icon: Settings2 },
       { key: 'wechat-drafts', label: '发布记录', href: '/growth/wechat-drafts', icon: Send },
+      { key: 'prompts', label: '提示词库', href: '/growth/prompts', icon: Library },
     ],
   },
   {
@@ -213,7 +216,7 @@ export function navItemForPath(path: string | null): WorkbenchNavItem {
   // 增长功能一级菜单
   if (path?.startsWith('/agentic-geo') || path?.startsWith('/geo-focus') || path?.startsWith('/growth/geo')) return byKey('geo');
   if (path?.startsWith('/insight')) return byKey('insight');
-  if (path?.startsWith('/content') || path?.startsWith('/growth/copywriter') || path?.startsWith('/growth/wechat')) return byKey('content');
+  if (path?.startsWith('/content') || path?.startsWith('/growth/copywriter') || path?.startsWith('/growth/content-assets') || path?.startsWith('/growth/prompts') || path?.startsWith('/growth/wechat')) return byKey('content');
   if (path?.startsWith('/channel')) return byKey('channel');
   if (path?.startsWith('/activation')) return byKey('activation');
   if (path?.startsWith('/gtm')) return byKey('gtm');

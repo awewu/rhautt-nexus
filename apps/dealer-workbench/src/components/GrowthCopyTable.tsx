@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
+  BookmarkPlus,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
   ChevronsUpDown,
   Loader2,
+  PenLine,
   RefreshCw,
   Save,
   Search,
@@ -31,6 +33,22 @@ type CopyAsset = {
   complianceFlags: string[];
   createdAt: string;
   updatedAt: string;
+  promptTemplateId: string | null;
+};
+
+type PromptTemplate = {
+  id: string;
+  name: string;
+  promptBody: string;
+  brandSlug: string | null;
+  category: string | null;
+  channel: string | null;
+  usageCount: number;
+  verifiedCount: number;
+  positiveCount: number;
+  negativeCount: number;
+  averageLift: number | string;
+  evidenceState: 'unverified' | 'promising' | 'proven' | 'negative' | 'inconclusive';
 };
 
 type SortBy = 'channel' | 'brandSlug' | 'status' | 'createdAt';
@@ -71,6 +89,13 @@ const CHANNEL_HEADINGS: Record<string, string[]> = {
   wechat: ['公众号', '微信公众号', 'wechat'],
   seo: ['seo'],
   ad: ['广告投放', '广告', 'ad'],
+};
+const PROMPT_EVIDENCE: Record<PromptTemplate['evidenceState'], { label: string; className: string }> = {
+  unverified: { label: '待验证', className: 'badge badge-grey' },
+  promising: { label: '初步有效', className: 'badge badge-info' },
+  proven: { label: '已验证', className: 'badge badge-success' },
+  negative: { label: '负向', className: 'badge badge-danger' },
+  inconclusive: { label: '无明显变化', className: 'badge badge-warning' },
 };
 
 function formatDate(value?: string | null) {
@@ -133,6 +158,7 @@ function truncate(value: string, max = 150) {
 
 export default function GrowthCopyTable() {
   const [allItems, setAllItems] = useState<CopyAsset[]>([]);
+  const [promptTemplates, setPromptTemplates] = useState<PromptTemplate[]>([]);
   const [keyword, setKeyword] = useState('');
   const [debouncedKeyword, setDebouncedKeyword] = useState('');
   const [channelFilter, setChannelFilter] = useState('all');
@@ -143,7 +169,7 @@ export default function GrowthCopyTable() {
   const [sortBy, setSortBy] = useState<SortBy>('createdAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('DESC');
   const [brandOptions, setBrandOptions] = useState<BrandOption[]>(DEFAULT_BRANDS);
-  const [generateForm, setGenerateForm] = useState({ channel: 'xiaohongshu', brandSlug: DEFAULT_BRANDS[0].id, prompt: '' });
+  const [generateForm, setGenerateForm] = useState({ channel: 'xiaohongshu', brandSlug: DEFAULT_BRANDS[0].id, prompt: '', promptTemplateId: '' });
   const [generateBusy, setGenerateBusy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -153,11 +179,13 @@ export default function GrowthCopyTable() {
   const [previewItem, setPreviewItem] = useState<CopyAsset | null>(null);
   const [previewDraft, setPreviewDraft] = useState('');
   const [saveBusy, setSaveBusy] = useState(false);
+  const [promptBusy, setPromptBusy] = useState(false);
   const [wechatSubmitOpen, setWechatSubmitOpen] = useState(false);
   const [wechatAccounts, setWechatAccounts] = useState<WechatAccountOption[]>([]);
   const [wechatForm, setWechatForm] = useState({ brandId: DEFAULT_BRANDS[0].id, accountIds: [] as string[], digest: '', coverAssetId: '', sourceUrl: '' });
   const [wechatBusy, setWechatBusy] = useState(false);
   const headerCheckboxRef = useRef<HTMLInputElement | null>(null);
+  const urlPromptAppliedRef = useRef(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -171,8 +199,9 @@ export default function GrowthCopyTable() {
     setBusy(true);
     setError('');
     try {
-      const result = await growthCopy.list();
+      const [result, promptResult] = await Promise.all([growthCopy.list(), growthCopy.promptTemplates()]);
       setAllItems(Array.isArray(result?.items) ? result.items : []);
+      setPromptTemplates(Array.isArray(promptResult?.items) ? promptResult.items : []);
     } catch (loadError) {
       setError((loadError as Error).message || '文案加载失败');
     } finally {
@@ -181,6 +210,23 @@ export default function GrowthCopyTable() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    if (urlPromptAppliedRef.current || !promptTemplates.length) return;
+    urlPromptAppliedRef.current = true;
+    const templateId = new URLSearchParams(window.location.search).get('promptTemplateId');
+    if (!templateId) return;
+    const template = promptTemplates.find((item) => item.id === templateId);
+    if (!template) return;
+    setGenerateForm((current) => ({
+      ...current,
+      promptTemplateId: template.id,
+      prompt: template.promptBody,
+      channel: template.channel && CHANNELS.some((item) => item.value === template.channel) ? template.channel : current.channel,
+      brandSlug: template.brandSlug || current.brandSlug,
+    }));
+    setMessage(`已载入提示词：${template.name}`);
+  }, [promptTemplates]);
 
   useEffect(() => {
     let cancelled = false;
@@ -264,6 +310,20 @@ export default function GrowthCopyTable() {
     setGenerateForm((current) => ({ ...current, ...patch }));
   }
 
+  function selectPromptTemplate(id: string) {
+    const template = promptTemplates.find((item) => item.id === id);
+    if (!template) {
+      patchGenerateForm({ promptTemplateId: '', prompt: '' });
+      return;
+    }
+    patchGenerateForm({
+      promptTemplateId: template.id,
+      prompt: template.promptBody,
+      channel: template.channel && CHANNELS.some((item) => item.value === template.channel) ? template.channel : generateForm.channel,
+      brandSlug: template.brandSlug || generateForm.brandSlug,
+    });
+  }
+
   function toggleSort(column: SortBy) {
     if (sortBy === column) setSortOrder((current) => current === 'ASC' ? 'DESC' : 'ASC');
     else { setSortBy(column); setSortOrder('ASC'); }
@@ -289,13 +349,14 @@ export default function GrowthCopyTable() {
         channel: generateForm.channel,
         brandSlug: generateForm.brandSlug || undefined,
         prompt: generateForm.prompt.trim(),
+        promptTemplateId: generateForm.promptTemplateId || undefined,
       });
       if (result?.asset) {
         setPreviewItem(result.asset);
         setPreviewDraft(copyText(result.asset, result.draft));
       }
       setMessage('文案已生成');
-      patchGenerateForm({ prompt: '' });
+      if (!generateForm.promptTemplateId) patchGenerateForm({ prompt: '' });
       await load();
     } catch (generateError) {
       setError((generateError as Error).message || '文案生成失败');
@@ -358,11 +419,38 @@ export default function GrowthCopyTable() {
     finally { setSaveBusy(false); }
   }
 
+  async function savePromptFromPreview() {
+    if (!previewItem || previewItem.promptTemplateId) return;
+    setPromptBusy(true); setError('');
+    try {
+      const result = await growthCopy.savePromptTemplate(previewItem.id);
+      if (result?.template) {
+        setPreviewItem({ ...previewItem, promptTemplateId: result.template.id });
+        setMessage(result.template.verifiedCount > 0 ? '提示词已入池，并已回填实验效果' : '提示词已存入蓄水池，等待 GEO 验证');
+      }
+      await load();
+    } catch (saveError) {
+      setError((saveError as Error).message || '提示词保存失败');
+    } finally {
+      setPromptBusy(false);
+    }
+  }
+
+  async function persistPreviewDraft() {
+    if (!previewItem) return null;
+    if (previewDraft === copyText(previewItem)) return previewItem;
+    const result = await growthCopy.update(previewItem.id, { draft: previewDraft });
+    const asset = result?.asset || previewItem;
+    setPreviewItem(asset);
+    return asset as CopyAsset;
+  }
+
   async function approvePreview() {
     if (!previewItem) return;
     setBusy(true); setError('');
     try {
-      if (previewDraft !== copyText(previewItem)) await growthCopy.update(previewItem.id, { draft: previewDraft });
+      const asset = await persistPreviewDraft();
+      if (asset?.complianceFlags?.length) throw new Error(`合规词命中，禁止核准：${asset.complianceFlags.join('、')}`);
       await growthCopy.approve(previewItem.id);
       setPreviewItem(null); setMessage('文案已审核通过'); await load();
     } catch (approveError) { setError((approveError as Error).message || '审核失败'); }
@@ -408,9 +496,31 @@ export default function GrowthCopyTable() {
     setWechatBusy(true);
     setError('');
     try {
+      const savedAsset = await persistPreviewDraft();
+      if (savedAsset?.complianceFlags?.length) {
+        setError(`合规词命中，请修改后再提交：${savedAsset.complianceFlags.join('、')}`);
+        return;
+      }
+      const accountResult = await wechatPublishing.availableAccounts(wechatForm.brandId);
+      const latestAccounts = Array.isArray(accountResult?.items) ? accountResult.items : [];
+      const latestIds = new Set(latestAccounts.map((account: WechatAccountOption) => account.id));
+      const selectedAccountIds = wechatForm.accountIds.filter((accountId) => latestIds.has(accountId));
+      const effectiveAccountIds = selectedAccountIds.length
+        ? selectedAccountIds
+        : latestAccounts.length === 1
+          ? [latestAccounts[0].id]
+          : [];
+      if (!effectiveAccountIds.length) {
+        setWechatAccounts(latestAccounts);
+        setWechatForm((current) => ({ ...current, accountIds: [] }));
+        setError('\u5df2\u9009\u516c\u4f17\u53f7\u5df2\u5931\u6548\uff0c\u8bf7\u91cd\u65b0\u9009\u62e9\u53ef\u7528\u516c\u4f17\u53f7\u540e\u518d\u63d0\u4ea4');
+        return;
+      }
+      setWechatAccounts(latestAccounts);
+      setWechatForm((current) => ({ ...current, accountIds: effectiveAccountIds }));
       const title = truncate(copyText(previewItem).split(/\n/)[0] || previewItem.prompt, 56);
       const body = copyText({ ...previewItem, draft: previewDraft });
-      await Promise.all(wechatForm.accountIds.map((accountId) => wechatPublishing.createReviewVersion({
+      await Promise.all(effectiveAccountIds.map((accountId) => wechatPublishing.createReviewVersion({
         sourceContentId: previewItem.id,
         brandId: wechatForm.brandId,
         brandName: brandOptions.find((brand) => brand.id === wechatForm.brandId)?.label || wechatForm.brandId,
@@ -423,7 +533,7 @@ export default function GrowthCopyTable() {
         coverImage: { assetId: wechatForm.coverAssetId.trim() },
         bodyImages: [],
       })));
-      setMessage(`已提交 ${wechatForm.accountIds.length} 个公众号审核`);
+      setMessage(`已提交 ${effectiveAccountIds.length} 个公众号审核`);
       setWechatSubmitOpen(false);
       setPreviewItem(null);
       await load();
@@ -433,6 +543,10 @@ export default function GrowthCopyTable() {
       setWechatBusy(false);
     }
   }
+
+  const previewSavedDraft = previewItem ? copyText(previewItem) : '';
+  const previewDirty = Boolean(previewItem && previewDraft !== previewSavedDraft);
+  const previewCanEdit = Boolean(previewItem && previewItem.status !== 'rejected');
 
   return (
     <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
@@ -450,8 +564,9 @@ export default function GrowthCopyTable() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
           <label style={{ display: 'grid', gap: 6 }}><span className="t-label">渠道</span><select className="input" value={generateForm.channel} onChange={(event) => patchGenerateForm({ channel: event.target.value })}>{CHANNELS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
           <label style={{ display: 'grid', gap: 6 }}><span className="t-label">品牌</span><select className="input" value={generateForm.brandSlug} onChange={(event) => patchGenerateForm({ brandSlug: event.target.value })}><option value="">未指定</option>{brandOptions.map((brand) => <option key={brand.id} value={brand.id}>{brand.label}</option>)}</select></label>
+          <label style={{ display: 'grid', gap: 6 }}><span className="t-label">提示词蓄水池</span><select className="input" value={generateForm.promptTemplateId} onChange={(event) => selectPromptTemplate(event.target.value)}><option value="">本次手工填写</option>{promptTemplates.map((template) => <option key={template.id} value={template.id}>{template.name} · {PROMPT_EVIDENCE[template.evidenceState]?.label || '待验证'}</option>)}</select></label>
         </div>
-        <textarea className="input" rows={3} value={generateForm.prompt} onChange={(event) => patchGenerateForm({ prompt: event.target.value })} placeholder="描述需要什么文案，例如：写一条夏季热泵推广文案，突出节能省电和即开即热" style={{ resize: 'vertical' }} />
+        <textarea className="input" rows={3} value={generateForm.prompt} onChange={(event) => patchGenerateForm({ prompt: event.target.value, promptTemplateId: '' })} placeholder="描述需要什么文案，例如：写一条夏季热泵推广文案，突出节能省电和即开即热" style={{ resize: 'vertical' }} />
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
           <button className="btn btn-brand btn-sm" onClick={generate} disabled={generateBusy || busy}>{generateBusy ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}{generateBusy ? '生成中' : '生成文案'}</button>
           {message && <span className="badge badge-success">{message}</span>}
@@ -496,7 +611,7 @@ export default function GrowthCopyTable() {
                 <td>{hasCompliance ? <span className="badge badge-danger" title={item.complianceFlags.join('、')}>{item.complianceFlags.join('、')}</span> : <span style={{ color: 'var(--t-tertiary)' }}>—</span>}</td>
                 <td style={{ fontSize: 12, color: 'var(--t-secondary)' }}>{item.reviewer || '—'}</td>
                 <td><div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap', justifyContent: 'center' }}>
-                  <button className="btn btn-outline btn-sm" onClick={() => { setPreviewItem(item); setPreviewDraft(copyText(item)); }} disabled={busy}><Search size={13} />预览</button>
+                  <button className="btn btn-outline btn-sm" onClick={() => { setPreviewItem(item); setPreviewDraft(copyText(item)); }} disabled={busy}><PenLine size={13} />编辑</button>
                   {item.status === 'draft' && <button className="btn btn-brand btn-sm" onClick={() => approve(item.id)} disabled={busy || hasCompliance} title={hasCompliance ? '合规词命中，禁止核准' : undefined}><CheckCircle2 size={13} />通过</button>}
                   {item.status === 'draft' && <button className="btn btn-outline btn-sm" onClick={() => reject(item.id)} disabled={busy}><XCircle size={13} />拒绝</button>}
                   {item.status === 'rejected' && <button className="btn btn-outline btn-sm" onClick={() => removeRejected(item.id)} disabled={busy}><Trash2 size={13} />删除</button>}
@@ -513,13 +628,18 @@ export default function GrowthCopyTable() {
 
       {previewItem && <div onClick={() => setPreviewItem(null)} style={{ position: 'fixed', inset: 0, zIndex: 50, padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(17,24,39,.46)' }}>
         <div onClick={(event) => event.stopPropagation()} className="card-elevated" style={{ width: 'min(100%,860px)', maxHeight: '92vh', overflow: 'auto', padding: 16, display: 'grid', gap: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><div><p className="t-label">文案预览</p><div style={{ display: 'flex', gap: 8, marginTop: 4 }}>{statusBadge(previewItem.status)}<span className="badge badge-info">{channelLabel(previewItem.channel)}</span>{previewItem.brandSlug && <span className="badge badge-grey">{displayBrand(previewItem.brandSlug)}</span>}</div></div><button className="btn btn-ghost btn-sm icon-only" onClick={() => setPreviewItem(null)} aria-label="关闭预览"><X size={18} /></button></div>
-          <textarea className="input" value={previewDraft} onChange={(event) => setPreviewDraft(event.target.value)} rows={14} style={{ minHeight: 240, resize: 'vertical', lineHeight: 1.7 }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><div><p className="t-label">文案编辑与审核</p><div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>{statusBadge(previewItem.status)}<span className="badge badge-info">{channelLabel(previewItem.channel)}</span>{previewItem.brandSlug && <span className="badge badge-grey">{displayBrand(previewItem.brandSlug)}</span>}{previewDirty && <span className="badge badge-warning">有未保存修改</span>}</div></div><button className="btn btn-ghost btn-sm icon-only" onClick={() => setPreviewItem(null)} aria-label="关闭编辑"><X size={18} /></button></div>
+          <textarea className="input" value={previewDraft} onChange={(event) => setPreviewDraft(event.target.value)} readOnly={!previewCanEdit} aria-label="文案正文编辑器" rows={14} style={{ minHeight: 240, resize: 'vertical', lineHeight: 1.7 }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap', color: 'var(--t-secondary)', fontSize: 12 }}>
+            <span>{previewCanEdit ? '修改后请先保存；审核通过和提交公众号审核会自动保存最新正文并重新校验合规。' : '已拒绝文案不可再编辑，可删除后重新生成。'}</span>
+            <span>{previewDraft.trim().length} 字</span>
+          </div>
           {previewItem.complianceFlags.length > 0 && <div style={{ display: 'flex', gap: 8, color: 'var(--danger)', fontSize: 13 }}><AlertCircle size={16} />合规词命中：{previewItem.complianceFlags.join('、')}</div>}
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-            <button className="btn btn-outline btn-sm" onClick={savePreview} disabled={saveBusy || busy || previewItem.status === 'rejected' || previewDraft === copyText(previewItem)}>{saveBusy ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}保存</button>
-            {previewItem.status === 'draft' && <button className="btn btn-brand btn-sm" onClick={approvePreview} disabled={busy || previewItem.complianceFlags.length > 0}><CheckCircle2 size={14} />审核通过</button>}
-            <button className="btn btn-outline btn-sm" onClick={openWechatSubmit} disabled={busy || wechatBusy}><Send size={14} />提交公众号审核</button>
+            <button className="btn btn-outline btn-sm" onClick={savePromptFromPreview} disabled={promptBusy || busy || Boolean(previewItem.promptTemplateId) || previewItem.status === 'rejected'} title={previewItem.promptTemplateId ? '该提示词已在蓄水池中' : '存入提示词蓄水池'}>{promptBusy ? <Loader2 size={14} className="animate-spin" /> : <BookmarkPlus size={14} />}{previewItem.promptTemplateId ? '已入提示词池' : '存入提示词池'}</button>
+            <button className="btn btn-outline btn-sm" onClick={savePreview} disabled={saveBusy || busy || !previewCanEdit || !previewDirty}>{saveBusy ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}{saveBusy ? '保存中' : '保存修改'}</button>
+            {previewItem.status === 'draft' && <button className="btn btn-brand btn-sm" onClick={approvePreview} disabled={busy || (!previewDirty && previewItem.complianceFlags.length > 0)} title={!previewDirty && previewItem.complianceFlags.length > 0 ? '合规词命中，修改保存后才能核准' : undefined}><CheckCircle2 size={14} />保存并审核通过</button>}
+            <button className="btn btn-outline btn-sm" onClick={openWechatSubmit} disabled={busy || wechatBusy || !previewCanEdit}><Send size={14} />提交公众号审核</button>
             {previewItem.status === 'draft' && <button className="btn btn-outline btn-sm" onClick={() => reject(previewItem.id).then(() => setPreviewItem(null))} disabled={busy}><XCircle size={14} />拒绝</button>}
             {previewItem.status === 'rejected' && <button className="btn btn-outline btn-sm" onClick={() => removeRejected(previewItem.id).then(() => setPreviewItem(null))} disabled={busy}><Trash2 size={14} />删除</button>}
             <button className="btn btn-ghost btn-sm" onClick={() => setPreviewItem(null)}>关闭</button>

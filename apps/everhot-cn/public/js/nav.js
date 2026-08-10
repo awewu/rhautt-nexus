@@ -1,9 +1,12 @@
 /* Everhot unified mega-nav — three-audience model mirroring rheem.com */
 (function () {
   var BASE = '';
+  var SITE_CODE = window.EVERHOT_SITE_CODE || 'everhot';
+  var API_BASE = String(window.EVERHOT_API_BASE || '').replace(/\/$/, '');
 
   /* 埋点单点接入：全站(58 页)经 nav.js 载入合规统计，无第三方、DNT/同意可控 */
   (function(){ var s=document.createElement('script'); s.src=BASE+'/js/analytics.js'; s.defer=true; (document.head||document.documentElement).appendChild(s); })();
+  (function(){ var s=document.createElement('script'); s.src=BASE+'/js/site-basic-settings.js'; s.defer=true; (document.head||document.documentElement).appendChild(s); })();
 
   /* ── 统一线性图标系统（替代 emoji，提升 VI 调性，currentColor 描边）── */
   var ICON_PATHS = {
@@ -82,6 +85,81 @@
 
   function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+  var WEBSITE_CATEGORY_BY_PATH = {
+    'products/residential/heating-cooling/air-conditioning/': 'central-air-conditioning',
+    'products/residential/heating-cooling/underfloor-heating/': 'floor-heating',
+    'products/residential/heating-cooling/fresh-air/': 'total-heat-fresh-air',
+    'products/residential/heating-cooling/geothermal/': 'geothermal-heat-pump',
+    'products/residential/water-heating/condensing-boiler/': 'gas-condensing-wall-hung-boiler',
+    'products/residential/water-heating/zero-cold-water/': 'zero-cold-water-gas-water-heater',
+    'products/residential/water-heating/heat-pump/': 'air-source-water-heater',
+    'products/residential/water-heating/?series=容积式': 'storage-gas-water-heater',
+    'products/residential/water-heating/electric/': 'electric-water-heater',
+    'products/residential/water-heating/combo/': 'heating-hot-water-combi',
+    'products/commercial/heating-cooling/air-source-heat-pump/': 'commercial-air-source-heat-pump',
+    'products/commercial/heating-cooling/modular-chiller/': 'commercial-air-conditioning',
+    'products/commercial/heating-cooling/gas-boiler/': 'commercial-gas-boiler',
+    'products/commercial/heating-cooling/fresh-air/': 'commercial-fresh-air',
+    'products/commercial/heating-cooling/?series=楼宇智控': 'building-control-system',
+    'products/commercial/heating-cooling/?series=运维服务': 'preventive-maintenance-service',
+    'products/commercial/water-heating/high-capacity/': 'high-capacity-gas-water-boiler',
+    'products/commercial/water-heating/air-source/': 'commercial-air-source-water-heater',
+    'products/commercial/water-heating/storage-tank/': 'commercial-storage-tank',
+    'products/commercial/water-heating/central-station/': 'commercial-central-hot-water-station',
+    'products/commercial/water-heating/?series=主备热备': 'backup-hot-water-system',
+    'products/commercial/water-heating/?series=数字运维': 'remote-ops-platform'
+  };
+
+  function websiteCategoryAttr(path){
+    var code=WEBSITE_CATEGORY_BY_PATH[path];
+    return code ? ' data-website-category="'+e(code)+'"' : '';
+  }
+
+  function collectPublicCategoryCodes(items){
+    var codes={};
+    function visit(item){
+      if(!item||!item.code)return;
+      codes[item.code]=true;
+      (item.children||[]).forEach(visit);
+    }
+    (items||[]).forEach(visit);
+    return codes;
+  }
+
+  function applyWebsiteCategoryVisibility(mount, visibleCodes){
+    if(!mount||!visibleCodes)return;
+    mount.querySelectorAll('a[data-website-category]').forEach(function(anchor){
+      var code=anchor.getAttribute('data-website-category');
+      if(!visibleCodes[code]){
+        var row=anchor.closest('li');
+        (row||anchor).remove();
+      }
+    });
+    mount.querySelectorAll('.ev-mega-col:not(.ev-mega-featured)').forEach(function(column){
+      var list=column.querySelector('ul');
+      if(list&&!list.querySelector('li'))column.hidden=true;
+    });
+    mount.querySelectorAll('.ev-acc-panel ul').forEach(function(list){
+      if(list.querySelector('li'))return;
+      var head=list.previousElementSibling;
+      if(head&&head.classList.contains('ev-acc-head'))head.remove();
+      list.remove();
+    });
+  }
+
+  function syncWebsiteCategoryVisibility(mount){
+    if(!window.fetch)return;
+    var url=API_BASE+'/api/v2/brand/'+encodeURIComponent(SITE_CODE)+'/categories';
+    fetch(url,{cache:'no-store',headers:{Accept:'application/json'}})
+      .then(function(response){return response.ok?response.json():null;})
+      .then(function(payload){
+        var data=payload&&payload.data;
+        if(!data)return;
+        applyWebsiteCategoryVisibility(mount,collectPublicCategoryCodes(data.items||data.tree||[]));
+      })
+      .catch(function(){});
+  }
+
   function buildNav(){
     // 极简地区条：仅身份再唤起 + 集团 + 地区（右对齐、安静灰底，支持入口已收进 masthead「支持」下拉）
     var h='<a class="ev-skip" href="#evMain">跳到主要内容</a>'
@@ -135,7 +213,7 @@
           if(col.warranty){ h+='<a class="ev-mega-warranty" href="'+BASE+'/warranty/"><strong>保修与注册</strong><span>产品注册 · 保修查询</span></a>'; }
         } else {
           h+='<ul>';
-          col.items.forEach(function(it){ h+='<li><a href="'+BASE+'/'+it[1]+'">'+e(it[0])+'</a></li>'; });
+          col.items.forEach(function(it){ h+='<li><a href="'+BASE+'/'+it[1]+'"'+websiteCategoryAttr(it[1])+'>'+e(it[0])+'</a></li>'; });
           h+='</ul>';
         }
         h+='</div>';
@@ -165,7 +243,7 @@
           if(col.cta){ h+='<li><a href="'+BASE+'/'+col.cta[1]+'">'+e(col.cta[0])+'</a></li>'; }
           if(col.warranty){ h+='<li><a href="'+BASE+'/warranty/">保修与注册</a></li>'; }
         } else {
-          col.items.forEach(function(it){ h+='<li><a href="'+BASE+'/'+it[1]+'">'+e(it[0])+'</a></li>'; });
+          col.items.forEach(function(it){ h+='<li><a href="'+BASE+'/'+it[1]+'"'+websiteCategoryAttr(it[1])+'>'+e(it[0])+'</a></li>'; });
         }
         h+='</ul>';
       });
@@ -210,6 +288,7 @@
     if(!mount) return;
     mount.innerHTML=buildNav();
     upgradeIcons(mount); upgradeIcons(document);
+    syncWebsiteCategoryVisibility(mount);
 
     // A11y: 把导航与页脚之间的正文包进 <main id="evMain">，作为 skip-link 目标与主地标
     try{
