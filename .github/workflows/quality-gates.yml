@@ -30,9 +30,8 @@ jobs:
         run: npx tsc --noEmit
         working-directory: services/api
 
-      - name: Target API boot smoke (DI wiring)
-        run: npm run guard:target-api-boot-smoke
-
+      # 注：boot-smoke 依赖 gitignored 的 evidence/ 产物，在 CI 全新 checkout 中必然缺失；
+      # 它已包含在下方 guard ledger 中并被分类为 ARTIFACT（不阻断），故不再单独直跑。
       # 门禁红绿账（harness 工程学）：逐项独立执行全部 guard/harness，产出完整账本并分类失败。
       # 取代此前"手写门禁清单 + && 串联"的做法——那种做法有两个致命缺陷：
       #   ① 首个失败即中断，后续门禁的红灯长期不可见（实测曾掩盖 26 个红灯）；
