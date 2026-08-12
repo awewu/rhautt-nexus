@@ -1,4 +1,5 @@
 import { Controller, Get, Headers, HttpException, Query } from '@nestjs/common';
+import { Public } from '../common/public.decorator';
 import type { JwtPayload } from '../auth/auth.service';
 import type { AttributionModel } from './attribution';
 import { GtmDigestService } from './gtm-digest.service';
@@ -54,6 +55,9 @@ export function perceptionActor(tenantId: string): JwtPayload {
 export class GtmDigestController {
   constructor(private readonly digest: GtmDigestService) {}
 
+  // 全局 APP_GUARD 是 deny-by-default; 本端点自带服务令牌鉴权 (checkPerceptionAccess),
+  // 与其它自鉴权公开端点姿势一致, 必须 @Public() 否则用户 JWT 守卫会在进入前拦截。
+  @Public()
   @Get('gtm-digest')
   async gtmDigest(
     @Headers('authorization') authorization: string | undefined,
