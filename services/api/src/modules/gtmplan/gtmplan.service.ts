@@ -5,6 +5,7 @@ import { withRlsTransaction } from '../common/rls';
 import { writeAudit } from '../common/audit';
 import type { JwtPayload } from '../auth/auth.service';
 import { GtmCampaignEntity, GtmOkrEntity } from './gtmplan.entity';
+import { syncCampaignDecision } from './decision-sync';
 
 @Injectable()
 export class GtmplanService {
@@ -21,6 +22,7 @@ export class GtmplanService {
         period: dto.period ?? null, budget: Number(dto.budget) || 0, status: 'planned',
       }));
       await writeAudit(em, { tenantId: actor.tenantId, actorUserId: actor.userId, action: 'gtm.campaign.create', resourceType: 'gtm_campaign', resourceId: row.id, afterState: { name: dto.name, period: dto.period, budget: Number(dto.budget) || 0 } });
+      syncCampaignDecision(row, actor.userId); // Decision 事实上报 Tandem (fail-soft, 不阻断)
       return { campaign: row };
     }, this.scope(actor));
   }
@@ -33,6 +35,8 @@ export class GtmplanService {
       if (patch.status) upd.status = patch.status;
       await em.getRepository(GtmCampaignEntity).update({ id, tenantId: actor.tenantId }, upd);
       await writeAudit(em, { tenantId: actor.tenantId, actorUserId: actor.userId, action: 'gtm.campaign.update', resourceType: 'gtm_campaign', resourceId: id, afterState: { spend: patch.spend, attributedRevenue: patch.attributedRevenue, status: patch.status } });
+      const row = await em.getRepository(GtmCampaignEntity).findOne({ where: { id, tenantId: actor.tenantId } });
+      if (row) syncCampaignDecision(row, actor.userId); // Decision 事实上报 Tandem (fail-soft, 不阻断)
       return { id, updated: true };
     }, this.scope(actor));
   }
