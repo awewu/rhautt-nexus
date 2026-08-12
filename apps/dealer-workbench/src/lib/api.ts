@@ -380,6 +380,17 @@ export const siteProductCategories = {
   },
 };
 
+export const publicSiteProducts = {
+  list: (siteCode: string, query?: Record<string, string | undefined>) => {
+    const params: Record<string, string> = {};
+    for (const [key, value] of Object.entries(query || {})) {
+      if (value !== undefined && value !== '') params[key] = value;
+    }
+    const qs = new URLSearchParams(params).toString();
+    return apiFetch(`/api/v2/sites/${encodeURIComponent(siteCode)}/products${qs ? `?${qs}` : ''}`);
+  },
+};
+
 export const siteNews = {
   list: (siteCode: string, query?: Record<string, string>) => {
     const qs = new URLSearchParams(query || {}).toString();

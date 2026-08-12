@@ -185,6 +185,18 @@ export function validateProductUpsertInput(dto: unknown): Record<string, unknown
   assertOptionalString(body.status, 'status');
   assertOptionalFiniteNumber(body.listPrice, 'listPrice');
   assertOptionalFiniteNumber(body.costPrice, 'costPrice');
+  for (const field of [
+    'lengthMm',
+    'widthMm',
+    'heightMm',
+    'netWeightKg',
+    'packageLengthMm',
+    'packageWidthMm',
+    'packageHeightMm',
+    'grossWeightKg',
+  ]) {
+    assertOptionalFiniteNumber(body[field], field);
+  }
   assertOptionalObject(body.spec, 'spec');
   assertOptionalObject(body.meta, 'meta');
   validateEverhotStructuredLists(body.meta);
@@ -204,7 +216,18 @@ export function validateProductUpsertInput(dto: unknown): Record<string, unknown
   if (body.skuRecordStatus !== undefined && !['active', 'archived'].includes(String(body.skuRecordStatus))) {
     throw new BadRequestException('skuRecordStatus only supports active or archived');
   }
-  for (const field of ['listPrice', 'costPrice']) {
+  for (const field of [
+    'listPrice',
+    'costPrice',
+    'lengthMm',
+    'widthMm',
+    'heightMm',
+    'netWeightKg',
+    'packageLengthMm',
+    'packageWidthMm',
+    'packageHeightMm',
+    'grossWeightKg',
+  ]) {
     if (body[field] !== undefined && Number(body[field]) < 0) {
       throw new BadRequestException(`${field} 不能小于 0`);
     }

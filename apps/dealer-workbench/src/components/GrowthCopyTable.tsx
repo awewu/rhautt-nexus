@@ -24,7 +24,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { WorkbenchPaginationFooter } from './WorkbenchCore';
-import { brandSites, content, fileArtifacts, growthCopy, wechatPublishing } from '../lib/api';
+import { brandSites, content, fileArtifacts, growthContentAssets, growthCopy, wechatPublishing } from '../lib/api';
 
 type CopyAsset = {
   id: string;
@@ -60,7 +60,7 @@ type SortOrder = 'ASC' | 'DESC';
 type WechatAccountOption = { id: string; displayName: string; brandId: string; appIdMasked: string };
 type BrandOption = { id: string; label: string };
 type FactRef = { type: string; id: string; label?: string; verified?: boolean };
-type ProductionProduct = { id: string; label: string; meta?: string; verified?: boolean; factRef?: FactRef };
+type ProductionProduct = { id: string; label: string; meta?: string; brandCode?: string | null; category?: string | null; verified?: boolean; factRef?: FactRef };
 type ProductionSellingPoint = { id: string; label: string; meta?: string; verified?: boolean; productId?: string | null; factRef?: FactRef };
 type ProductionMaterial = {
   id: string;
@@ -93,6 +93,11 @@ const DEFAULT_BRANDS: BrandOption[] = [
   { id: 'ruud', label: 'Ruud' },
   { id: 'everhot', label: 'Everhot' },
 ];
+const PRODUCT_LIBRARY_TENANT_ID =
+  process.env.NEXT_PUBLIC_PRODUCT_LIBRARY_TENANT_ID
+  || process.env.NEXT_PUBLIC_RHAUTT_COMFORT_TENANT_ID
+  || process.env.NEXT_PUBLIC_EVERHOT_TENANT_ID
+  || 'e5e40000-0000-4000-8000-000000000001';
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 const COPY_OBJECTIVES = ['高意向线索', '新品种草', '活动报名', '经销商转发', '官网 SEO'];
 const COPY_AUDIENCES = ['家装/换新用户', '别墅大宅业主', '经销商导购', '设计师/暖通顾问', '商业项目决策人'];
@@ -189,6 +194,19 @@ function truncate(value: string, max = 150) {
   return compact.length > max ? `${compact.slice(0, max)}...` : compact;
 }
 
+function parseDraftSections(value: string) {
+  const source = String(value || '').trim();
+  const matches = Array.from(source.matchAll(/^#{1,6}\s*([^#\n\r]+?)\s*[:：]?\s*$/gm));
+  if (!source || !matches.length) return [];
+  return matches.map((match, index) => {
+    const start = (match.index || 0) + match[0].length;
+    const end = index + 1 < matches.length ? matches[index + 1].index || source.length : source.length;
+    const title = String(match[1] || '').replace(/^渠道\s*[：:]\s*/i, '').trim();
+    const body = source.slice(start, end).trim();
+    return { title, body };
+  }).filter((section) => section.title && section.body);
+}
+
 export default function GrowthCopyTable() {
   const [allItems, setAllItems] = useState<CopyAsset[]>([]);
   const [promptTemplates, setPromptTemplates] = useState<PromptTemplate[]>([]);
@@ -203,7 +221,7 @@ export default function GrowthCopyTable() {
   const [sortOrder, setSortOrder] = useState<SortOrder>('DESC');
   const [generatorOpen, setGeneratorOpen] = useState(false);
   const [brandOptions, setBrandOptions] = useState<BrandOption[]>(DEFAULT_BRANDS);
-  const [generateForm, setGenerateForm] = useState({ channel: 'xiaohongshu', brandSlug: DEFAULT_BRANDS[0].id, prompt: '', promptTemplateId: '' });
+  const [generateForm, setGenerateForm] = useState({ channel: 'xiaohongshu', brandSlug: '', prompt: '', promptTemplateId: '' });
   const [briefForm, setBriefForm] = useState({
     objective: COPY_OBJECTIVES[0],
     audience: COPY_AUDIENCES[0],
@@ -220,6 +238,8 @@ export default function GrowthCopyTable() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [previewItem, setPreviewItem] = useState<CopyAsset | null>(null);
   const [previewDraft, setPreviewDraft] = useState('');
+  const [generationWorkbenchOpen, setGenerationWorkbenchOpen] = useState(false);
+  const [generationStage, setGenerationStage] = useState(0);
   const [saveBusy, setSaveBusy] = useState(false);
   const [promptBusy, setPromptBusy] = useState(false);
   const [factoryBusy, setFactoryBusy] = useState(false);
@@ -295,9 +315,9 @@ export default function GrowthCopyTable() {
           .filter(Boolean) as BrandOption[];
         if (!next.length) return;
         setBrandOptions(next);
-        setGenerateForm((current) => next.some((brand) => brand.id === current.brandSlug)
+        setGenerateForm((current) => !current.brandSlug || next.some((brand) => brand.id === current.brandSlug)
           ? current
-          : { ...current, brandSlug: next[0].id });
+          : { ...current, brandSlug: '' });
         setWechatForm((current) => next.some((brand) => brand.id === current.brandId)
           ? current
           : { ...current, brandId: next[0].id });
@@ -338,6 +358,17 @@ export default function GrowthCopyTable() {
     () => productionContext.materials.find((item) => item.fileArtifactId === wechatForm.coverAssetId || item.id === wechatForm.coverAssetId) || null,
     [productionContext.materials, wechatForm.coverAssetId],
   );
+  const activeBrandLabel = generateForm.brandSlug
+    ? displayBrand(generateForm.brandSlug)
+    : '全部品牌';
+  const activeChannelLabel = channelLabel(generateForm.channel);
+  const generationSteps = [
+    '整理产品事实',
+    '结合素材库',
+    '生成渠道草稿',
+    '合规初筛',
+    '保存草稿',
+  ];
 
   const loadProductionContext = useCallback(async () => {
     setContextBusy(true);
@@ -346,14 +377,21 @@ export default function GrowthCopyTable() {
         brandCode: generateForm.brandSlug || '',
         channel: generateForm.channel || '',
         query: productionQuery.trim(),
+        productTenantId: PRODUCT_LIBRARY_TENANT_ID,
         limit: '18',
       });
+      const nextProducts = Array.isArray(result?.products) ? result.products : [];
+      const nextSellingPoints = Array.isArray(result?.sellingPoints) ? result.sellingPoints : [];
+      const nextMaterials = Array.isArray(result?.materials) ? result.materials : [];
       setProductionContext({
-        products: Array.isArray(result?.products) ? result.products : [],
-        sellingPoints: Array.isArray(result?.sellingPoints) ? result.sellingPoints : [],
-        materials: Array.isArray(result?.materials) ? result.materials : [],
+        products: nextProducts,
+        sellingPoints: nextSellingPoints,
+        materials: nextMaterials,
         factSources: Array.isArray(result?.factSources) ? result.factSources : [],
       });
+      setSelectedProducts((current) => current.filter((id) => nextProducts.some((item: ProductionProduct) => item.id === id)));
+      setSelectedSellingPoints((current) => current.filter((id) => nextSellingPoints.some((item: ProductionSellingPoint) => item.id === id)));
+      setSelectedMaterials((current) => current.filter((id) => nextMaterials.some((item: ProductionMaterial) => item.id === id || item.fileArtifactId === id)));
     } catch (contextError) {
       setError((contextError as Error).message || '生产资料加载失败');
     } finally {
@@ -422,6 +460,30 @@ export default function GrowthCopyTable() {
     setter((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
   }
 
+  function openCopyWorkbench(item: CopyAsset) {
+    setPreviewItem(item);
+    setPreviewDraft(copyText(item));
+    setGenerationWorkbenchOpen(true);
+    setGenerationStage(generationSteps.length);
+    setWechatSubmitOpen(false);
+  }
+
+  function closeCopyWorkbench() {
+    if (generateBusy) return;
+    setGenerationWorkbenchOpen(false);
+    setPreviewItem(null);
+    setPreviewDraft('');
+    setWechatSubmitOpen(false);
+  }
+
+  function toggleProductSelection(item: ProductionProduct) {
+    toggleSelection(item.id, setSelectedProducts);
+    const productBrand = String(item.brandCode || '').trim();
+    if (productBrand && productBrand !== generateForm.brandSlug) {
+      patchGenerateForm({ brandSlug: productBrand });
+    }
+  }
+
   function selectedFactRefs() {
     const refs = [
       ...selectedProductItems.map((item) => item.factRef),
@@ -449,6 +511,11 @@ export default function GrowthCopyTable() {
     });
   }
 
+  function productionFileFormat(file: File) {
+    const ext = file.name.includes('.') ? file.name.split('.').pop() : '';
+    return (ext || file.type.split('/').pop() || 'image').toLowerCase();
+  }
+
   async function uploadProductionImage(file?: File | null, usage: 'cover' | 'body' = 'body') {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
@@ -469,23 +536,39 @@ export default function GrowthCopyTable() {
       const artifact = result?.data || result;
       const artifactId = String(artifact?.id || '');
       if (!artifactId) throw new Error('上传完成但未返回素材');
+      const contentUrl = artifact?.contentUrl || `/api/v2/file-artifact/${encodeURIComponent(artifactId)}/content`;
+      const assetResult = await growthContentAssets.create({
+        title: artifact?.originalName || file.name,
+        assetType: usage === 'cover' ? '封面图' : '正文配图',
+        brandSlug: '',
+        channel: generateForm.channel || '',
+        summary: usage === 'cover' ? '文案 Copilot 上传的公众号封面' : '文案 Copilot 上传的正文配图',
+        tags: ['文案Copilot'],
+        fileArtifactId: artifactId,
+        fileUrl: contentUrl,
+        thumbnailUrl: contentUrl,
+        fileFormat: productionFileFormat(file),
+        usageScene: usage === 'cover' ? '公众号封面' : '文案配图',
+      });
+      const asset = assetResult?.data?.asset || assetResult?.asset || assetResult?.data || assetResult;
+      const assetId = String(asset?.id || artifactId);
       if (usage === 'cover') setWechatForm((current) => ({ ...current, coverAssetId: artifactId }));
-      setSelectedMaterials((current) => Array.from(new Set([...current, artifactId])));
+      setSelectedMaterials((current) => Array.from(new Set([...current, assetId])));
       setProductionContext((current) => ({
         ...current,
         materials: [{
-          id: artifactId,
-          label: artifact?.originalName || file.name,
-          type: usage === 'cover' ? '公众号封面' : '上传图片',
-          meta: file.type,
+          id: assetId,
+          label: asset?.title || artifact?.originalName || file.name,
+          type: asset?.assetType || (usage === 'cover' ? '封面图' : '正文配图'),
+          meta: [asset?.assetType || (usage === 'cover' ? '封面图' : '正文配图'), asset?.usageScene || (usage === 'cover' ? '公众号封面' : '文案配图'), asset?.fileFormat || productionFileFormat(file)].filter(Boolean).join(' · '),
           fileArtifactId: artifactId,
-          thumbnailUrl: artifact?.contentUrl || `/api/v2/file-artifact/${encodeURIComponent(artifactId)}/content`,
-          fileUrl: artifact?.contentUrl || `/api/v2/file-artifact/${encodeURIComponent(artifactId)}/content`,
+          thumbnailUrl: asset?.thumbnailUrl || contentUrl,
+          fileUrl: asset?.fileUrl || contentUrl,
           verified: true,
-          factRef: { type: 'manual', id: artifactId, label: artifact?.originalName || file.name },
+          factRef: { type: 'manual', id: artifactId, label: asset?.title || artifact?.originalName || file.name },
         }, ...current.materials],
       }));
-      setMessage(usage === 'cover' ? '封面图已上传并选中' : '图片已上传并加入素材');
+      setMessage(usage === 'cover' ? '封面图已加入内容素材库并选中' : '图片已加入内容素材库并选中');
     } catch (uploadError) {
       setError((uploadError as Error).message || '上传失败');
     } finally {
@@ -553,22 +636,32 @@ export default function GrowthCopyTable() {
   async function generate() {
     const prompt = generateForm.prompt.trim() || composeMarketingPrompt();
     if (!prompt.trim()) return setError('请填写文案需求');
+    setGenerationWorkbenchOpen(true);
+    setPreviewItem(null);
+    setPreviewDraft('');
+    setWechatSubmitOpen(false);
+    setGenerationStage(0);
     setGenerateBusy(true); setError(''); setMessage('');
     try {
+      setGenerationStage(1);
       const refsPrompt = generateForm.prompt.trim() ? productionReferencePrompt() : '';
+      setGenerationStage(2);
       const result = await growthCopy.generate({
         channel: generateForm.channel,
         brandSlug: generateForm.brandSlug || undefined,
         prompt: `${prompt}${refsPrompt}`,
         promptTemplateId: generateForm.promptTemplateId || undefined,
       });
+      setGenerationStage(3);
       if (result?.asset) {
-        setPreviewItem(result.asset);
+        openCopyWorkbench(result.asset);
         setPreviewDraft(copyText(result.asset, result.draft));
       }
+      setGenerationStage(4);
       setMessage('文案已生成');
       if (!generateForm.promptTemplateId) patchGenerateForm({ prompt: '' });
       await load();
+      setGenerationStage(5);
     } catch (generateError) {
       setError((generateError as Error).message || '文案生成失败');
     } finally { setGenerateBusy(false); }
@@ -674,7 +767,7 @@ export default function GrowthCopyTable() {
         sourceLabel: `文案 Copilot · ${channelLabel(previewItem.channel)}`,
       });
       setMessage('已送入内容工厂草稿池');
-      setPreviewItem(null);
+      closeCopyWorkbench();
     } catch (factoryError) {
       setError((factoryError as Error).message || '送入内容工厂失败');
     } finally {
@@ -698,7 +791,7 @@ export default function GrowthCopyTable() {
       const asset = await persistPreviewDraft();
       if (asset?.complianceFlags?.length) throw new Error(`合规词命中，禁止核准：${asset.complianceFlags.join('、')}`);
       await growthCopy.approve(previewItem.id);
-      setPreviewItem(null); setMessage('文案已审核通过'); await load();
+      closeCopyWorkbench(); setMessage('文案已审核通过'); await load();
     } catch (approveError) { setError((approveError as Error).message || '审核失败'); }
     finally { setBusy(false); }
   }
@@ -793,7 +886,7 @@ export default function GrowthCopyTable() {
       setMessage(`已提交 ${effectiveAccountIds.length} 个公众号审核`);
       await loadWechatTasks();
       setWechatSubmitOpen(false);
-      setPreviewItem(null);
+      closeCopyWorkbench();
       await load();
     } catch (submitError) {
       setError((submitError as Error).message || '提交审核失败');
@@ -805,6 +898,22 @@ export default function GrowthCopyTable() {
   const previewSavedDraft = previewItem ? copyText(previewItem) : '';
   const previewDirty = Boolean(previewItem && previewDraft !== previewSavedDraft);
   const previewCanEdit = Boolean(previewItem && previewItem.status !== 'rejected');
+  const previewSections = useMemo(() => parseDraftSections(previewDraft), [previewDraft]);
+  const previewTitle = useMemo(() => {
+    const section = previewSections.find((item) => /标题|title/i.test(item.title));
+    const source = section?.body || previewDraft.split(/\n/).map((line) => line.trim()).find(Boolean) || previewItem?.prompt || '';
+    return truncate(source.replace(/^#+\s*/, '').replace(/^标题[:：]\s*/, ''), 72);
+  }, [previewDraft, previewItem?.prompt, previewSections]);
+  const previewStatusText = previewItem
+    ? previewItem.complianceFlags.length
+      ? `${previewItem.complianceFlags.length} 项合规命中`
+      : previewDirty
+        ? '修改后待保存'
+        : '可进入下一步'
+    : generateBusy
+      ? '生成中'
+      : '等待生成';
+  const workbenchOpen = generationWorkbenchOpen || Boolean(previewItem);
   const visibleDraftCount = filtered.filter((item) => item.status === 'draft').length;
   const selectedDraftCount = allItems.filter((item) => selectedIds.includes(item.id) && item.status === 'draft').length;
   const todayKey = formatDate(new Date().toISOString());
@@ -844,6 +953,26 @@ export default function GrowthCopyTable() {
         </button>
         <div className="growth-copy-generator__panel" aria-hidden={!generatorOpen}>
           <div className="growth-copy-generator__panel-inner">
+            <div className="growth-copy-contextbar" aria-label="文案生成上下文">
+              <label>
+                <span className="t-label">品牌</span>
+                <select className="input" value={generateForm.brandSlug} onChange={(event) => patchGenerateForm({ brandSlug: event.target.value })} tabIndex={generatorOpen ? undefined : -1}>
+                  <option value="">全部品牌</option>
+                  {brandOptions.map((brand) => <option key={brand.id} value={brand.id}>{brand.label}</option>)}
+                </select>
+              </label>
+              <label>
+                <span className="t-label">渠道</span>
+                <select className="input" value={generateForm.channel} onChange={(event) => patchGenerateForm({ channel: event.target.value })} tabIndex={generatorOpen ? undefined : -1}>
+                  {CHANNELS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                </select>
+              </label>
+              <div className="growth-copy-contextbar__summary" role="status">
+                <span>当前范围</span>
+                <strong>{activeBrandLabel}</strong>
+                <strong>{activeChannelLabel}</strong>
+              </div>
+            </div>
             <div className="growth-copy-commandbar">
               <div className="growth-copy-scenarios" aria-label="常用生成场景">
                 {COPY_SCENARIOS.map((scenario) => (
@@ -872,21 +1001,21 @@ export default function GrowthCopyTable() {
             <div className="growth-copy-production-grid">
               <div className="growth-copy-production-panel">
                 <div className="growth-copy-production-panel__head">
-                  <span><Package size={14} />产品库</span>
+                  <span><Package size={14} />启用产品库</span>
                   {contextBusy ? <Loader2 size={13} className="animate-spin" /> : <span>{selectedProducts.length} 已选</span>}
                 </div>
-                <input className="input" value={productionQuery} onChange={(event) => setProductionQuery(event.target.value)} placeholder="搜索产品、卖点或素材" tabIndex={generatorOpen ? undefined : -1} />
+                <input className="input" value={productionQuery} onChange={(event) => setProductionQuery(event.target.value)} placeholder="搜索启用产品、卖点或内容素材" tabIndex={generatorOpen ? undefined : -1} />
                 <div className="growth-copy-pick-list">
                   {productionContext.products.slice(0, 6).map((item) => {
                     const checked = selectedProducts.includes(item.id);
                     return (
-                      <button key={item.id} type="button" className={`growth-copy-pick ${checked ? 'growth-copy-pick--active' : ''}`} onClick={() => toggleSelection(item.id, setSelectedProducts)} tabIndex={generatorOpen ? undefined : -1}>
+                      <button key={item.id} type="button" className={`growth-copy-pick ${checked ? 'growth-copy-pick--active' : ''}`} onClick={() => toggleProductSelection(item)} tabIndex={generatorOpen ? undefined : -1}>
                         <span><strong>{item.label}</strong><small>{item.meta || '产品事实'}</small></span>
                         <span className={item.verified ? 'badge badge-success' : 'badge badge-warning'}>{item.verified ? '已校验' : '待校验'}</span>
                       </button>
                     );
                   })}
-                  {!contextBusy && !productionContext.products.length ? <span className="growth-copy-empty">暂无匹配产品</span> : null}
+                  {!contextBusy && !productionContext.products.length ? <span className="growth-copy-empty">{generateForm.brandSlug ? `当前品牌 ${activeBrandLabel} 暂无启用产品，可切换品牌或查看产品库发布状态` : '暂无启用产品，请先在产品库启用并发布产品'}</span> : null}
                 </div>
               </div>
               <div className="growth-copy-production-panel">
@@ -909,7 +1038,7 @@ export default function GrowthCopyTable() {
               </div>
               <div className="growth-copy-production-panel">
                 <div className="growth-copy-production-panel__head">
-                  <span><FileImage size={14} />素材库</span>
+                  <span><FileImage size={14} />内容素材库</span>
                   <label className="btn btn-outline btn-sm growth-copy-upload-btn">
                     {uploadBusy ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
                     上传
@@ -926,15 +1055,13 @@ export default function GrowthCopyTable() {
                       </button>
                     );
                   })}
-                  {!contextBusy && !productionContext.materials.length ? <span className="growth-copy-empty">暂无素材，可先上传图片</span> : null}
+                  {!contextBusy && !productionContext.materials.length ? <span className="growth-copy-empty">暂无内容素材，请到素材库上传或在此上传后入库</span> : null}
                 </div>
               </div>
             </div>
             <details className="growth-copy-advanced-prompt">
               <summary>细化设置</summary>
               <div className="growth-copy-settings-row">
-                <label><span className="t-label">渠道</span><select className="input" value={generateForm.channel} onChange={(event) => patchGenerateForm({ channel: event.target.value })} tabIndex={generatorOpen ? undefined : -1}>{CHANNELS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-                <label><span className="t-label">品牌</span><select className="input" value={generateForm.brandSlug} onChange={(event) => patchGenerateForm({ brandSlug: event.target.value })} tabIndex={generatorOpen ? undefined : -1}><option value="">未指定</option>{brandOptions.map((brand) => <option key={brand.id} value={brand.id}>{brand.label}</option>)}</select></label>
                 <label><span className="t-label">产品/主题</span><input className="input" value={briefForm.productFocus} onChange={(event) => patchBriefForm({ productFocus: event.target.value })} placeholder="热水与舒适系统" tabIndex={generatorOpen ? undefined : -1} /></label>
                 <label><span className="t-label">营销目标</span><select className="input" value={briefForm.objective} onChange={(event) => patchBriefForm({ objective: event.target.value })} tabIndex={generatorOpen ? undefined : -1}>{COPY_OBJECTIVES.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
                 <label><span className="t-label">目标人群</span><select className="input" value={briefForm.audience} onChange={(event) => patchBriefForm({ audience: event.target.value })} tabIndex={generatorOpen ? undefined : -1}>{COPY_AUDIENCES.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
@@ -991,7 +1118,7 @@ export default function GrowthCopyTable() {
             {items.map((item) => {
               const hasCompliance = Boolean(item.complianceFlags?.length);
               const selected = selectedIds.includes(item.id);
-              const openPreview = () => { setPreviewItem(item); setPreviewDraft(copyText(item)); };
+              const openPreview = () => openCopyWorkbench(item);
               const actionLabel = item.status === 'draft' ? (hasCompliance ? '处理' : '审核') : '查看';
               const actionClassName = item.status === 'draft' && !hasCompliance
                 ? 'btn btn-brand btn-sm growth-copy-row-action'
@@ -1027,34 +1154,104 @@ export default function GrowthCopyTable() {
 
       <WorkbenchPaginationFooter currentPage={currentPage} totalPages={totalPages} totalItems={sorted.length} pageSize={pageSize} pageSizeOptions={PAGE_SIZE_OPTIONS} onPageSizeChange={(size) => { setPageSize(size); setPage(1); }} onPageChange={busy ? undefined : setPage} onPrevious={busy || currentPage <= 1 ? undefined : () => setPage(currentPage - 1)} onNext={busy || currentPage >= totalPages ? undefined : () => setPage(currentPage + 1)} />
 
-      {previewItem && <div onClick={() => setPreviewItem(null)} style={{ position: 'fixed', inset: 0, zIndex: 50, padding: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(17,24,39,.46)' }}>
-        <div onClick={(event) => event.stopPropagation()} className="card-elevated" style={{ width: 'min(100%,860px)', maxHeight: '92vh', overflow: 'auto', padding: 16, display: 'grid', gap: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><div><p className="t-label">文案编辑与审核</p><div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>{statusBadge(previewItem.status)}<span className="badge badge-info">{channelLabel(previewItem.channel)}</span>{previewItem.brandSlug && <span className="badge badge-grey">{displayBrand(previewItem.brandSlug)}</span>}{previewDirty && <span className="badge badge-warning">有未保存修改</span>}</div></div><button className="btn btn-ghost btn-sm icon-only" onClick={() => setPreviewItem(null)} aria-label="关闭编辑"><X size={18} /></button></div>
-          <textarea className="input" value={previewDraft} onChange={(event) => setPreviewDraft(event.target.value)} readOnly={!previewCanEdit} aria-label="文案正文编辑器" rows={14} style={{ minHeight: 240, resize: 'vertical', lineHeight: 1.7 }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap', color: 'var(--t-secondary)', fontSize: 12 }}>
-            <span>{previewCanEdit ? '修改后请先保存；审核通过和提交公众号审核会自动保存最新正文并重新校验合规。' : '已拒绝文案不可再编辑，可删除后重新生成。'}</span>
-            <span>{previewDraft.trim().length} 字</span>
+      {workbenchOpen && <div className="growth-copy-modal" onClick={closeCopyWorkbench}>
+        <div onClick={(event) => event.stopPropagation()} className="card-elevated growth-copy-draft-workbench" role="dialog" aria-modal="true" aria-labelledby="growth-copy-workbench-title">
+          <div className="growth-copy-draft-workbench__header">
+            <div>
+              <p className="t-label">{'AI \u6587\u6848\u751f\u6210\u5de5\u4f5c\u53f0'}</p>
+              <h3 id="growth-copy-workbench-title">{previewItem ? '\u6587\u6848\u7f16\u8f91\u4e0e\u5ba1\u6838' : '\u6b63\u5728\u751f\u6210\u6587\u6848'}</h3>
+              <div className="growth-copy-draft-workbench__badges">
+                {previewItem ? statusBadge(previewItem.status) : <span className="badge badge-info">{'\u751f\u6210\u4e2d'}</span>}
+                <span className="badge badge-info">{previewItem ? channelLabel(previewItem.channel) : activeChannelLabel}</span>
+                <span className="badge badge-grey">{previewItem?.brandSlug ? displayBrand(previewItem.brandSlug) : activeBrandLabel}</span>
+                {previewDirty ? <span className="badge badge-warning">{'\u6709\u672a\u4fdd\u5b58\u4fee\u6539'}</span> : null}
+              </div>
+            </div>
+            <button className="btn btn-ghost btn-sm icon-only" onClick={closeCopyWorkbench} disabled={generateBusy} aria-label={'\u5173\u95ed\u751f\u6210\u5de5\u4f5c\u53f0'}><X size={18} /></button>
           </div>
-          {previewItem.complianceFlags.length > 0 && <div style={{ display: 'flex', gap: 8, color: 'var(--danger)', fontSize: 13 }}><AlertCircle size={16} />合规词命中：{previewItem.complianceFlags.join('、')}</div>}
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-            <button className="btn btn-brand btn-sm" onClick={sendPreviewToContentFactory} disabled={factoryBusy || busy || !previewCanEdit}>{factoryBusy ? <Loader2 size={14} className="animate-spin" /> : <Factory size={14} />}{factoryBusy ? '送入中' : '送入内容工厂'}</button>
-            <button className="btn btn-outline btn-sm" onClick={savePromptFromPreview} disabled={promptBusy || busy || Boolean(previewItem.promptTemplateId) || previewItem.status === 'rejected'} title={previewItem.promptTemplateId ? '该提示词已在蓄水池中' : '存入提示词蓄水池'}>{promptBusy ? <Loader2 size={14} className="animate-spin" /> : <BookmarkPlus size={14} />}{previewItem.promptTemplateId ? '已入提示词池' : '存入提示词池'}</button>
-            <button className="btn btn-outline btn-sm" onClick={savePreview} disabled={saveBusy || busy || !previewCanEdit || !previewDirty}>{saveBusy ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}{saveBusy ? '保存中' : '保存修改'}</button>
-            {previewItem.status === 'draft' && <button className="btn btn-brand btn-sm" onClick={approvePreview} disabled={busy || (!previewDirty && previewItem.complianceFlags.length > 0)} title={!previewDirty && previewItem.complianceFlags.length > 0 ? '合规词命中，修改保存后才能核准' : undefined}><CheckCircle2 size={14} />保存并审核通过</button>}
-            <button className="btn btn-outline btn-sm" onClick={openWechatSubmit} disabled={busy || wechatBusy || !previewCanEdit}><Send size={14} />提交公众号审核</button>
-            {previewItem.status === 'draft' && <button className="btn btn-outline btn-sm" onClick={() => reject(previewItem.id).then(() => setPreviewItem(null))} disabled={busy}><XCircle size={14} />拒绝</button>}
-            {previewItem.status === 'rejected' && <button className="btn btn-outline btn-sm" onClick={() => removeRejected(previewItem.id).then(() => setPreviewItem(null))} disabled={busy}><Trash2 size={14} />删除</button>}
-            <button className="btn btn-ghost btn-sm" onClick={() => setPreviewItem(null)}>关闭</button>
+
+          <div className="growth-copy-generation-steps" aria-label={'\u751f\u6210\u8fdb\u5ea6'}>
+            {generationSteps.map((step, index) => {
+              const done = Boolean(previewItem) || generationStage > index;
+              const active = generateBusy && generationStage === index;
+              return (
+                <div key={step} className={`growth-copy-generation-step ${done ? 'growth-copy-generation-step--done' : ''} ${active ? 'growth-copy-generation-step--active' : ''}`}>
+                  <span>{done ? <CheckCircle2 size={13} /> : active ? <Loader2 size={13} className="animate-spin" /> : index + 1}</span>
+                  <strong>{step}</strong>
+                </div>
+              );
+            })}
           </div>
-          {wechatSubmitOpen && (
-            <div className="inset" style={{ display: 'grid', gap: 10 }}>
+
+          <div className="growth-copy-draft-workbench__grid">
+            <div className="growth-copy-draft-workbench__main">
+              {!previewItem ? (
+                <div className="growth-copy-stream-placeholder" role="status">
+                  <Loader2 size={22} className="animate-spin" />
+                  <strong>{'AI \u6b63\u5728\u751f\u6210\u6e20\u9053\u8349\u7a3f'}</strong>
+                  <span>{'\u5df2\u8bfb\u53d6\u5f53\u524d\u54c1\u724c\u3001\u4ea7\u54c1\u3001\u7d20\u6750\u548c\u5408\u89c4\u8fb9\u754c\uff0c\u751f\u6210\u5b8c\u6210\u540e\u4f1a\u76f4\u63a5\u5728\u8fd9\u91cc\u5c55\u793a\u5e76\u53ef\u7f16\u8f91\u3002'}</span>
+                  <div className="growth-copy-stream-lines" aria-hidden="true"><i /><i /><i /></div>
+                </div>
+              ) : (
+                <>
+                  <div className="growth-copy-draft-workbench__section-head">
+                    <span><PenLine size={14} />{previewTitle || '\u6587\u6848\u6b63\u6587'}</span>
+                    <small>{previewDraft.trim().length} {'\u5b57'}</small>
+                  </div>
+                  {previewSections.length ? (
+                    <div className="growth-copy-draft-preview" aria-label={'\u7ed3\u6784\u5316\u6587\u6848\u9884\u89c8'}>
+                      {previewSections.slice(0, 6).map((section) => (
+                        <section key={`${section.title}-${section.body.slice(0, 12)}`}>
+                          <span>{section.title}</span>
+                          <p>{section.body}</p>
+                        </section>
+                      ))}
+                    </div>
+                  ) : null}
+                  <textarea className="input growth-copy-draft-editor" value={previewDraft} onChange={(event) => setPreviewDraft(event.target.value)} readOnly={!previewCanEdit} aria-label={'\u6587\u6848\u6b63\u6587\u7f16\u8f91\u5668'} rows={14} />
+                  <p className="growth-copy-draft-workbench__hint">{previewCanEdit ? '\u4fee\u6539\u540e\u8bf7\u5148\u4fdd\u5b58\uff1b\u5ba1\u6838\u901a\u8fc7\u548c\u63d0\u4ea4\u516c\u4f17\u53f7\u5ba1\u6838\u4f1a\u81ea\u52a8\u4fdd\u5b58\u6700\u65b0\u6b63\u6587\u5e76\u91cd\u65b0\u6821\u9a8c\u5408\u89c4\u3002' : '\u5df2\u62d2\u7edd\u6587\u6848\u4e0d\u53ef\u518d\u7f16\u8f91\uff0c\u53ef\u5220\u9664\u540e\u91cd\u65b0\u751f\u6210\u3002'}</p>
+                </>
+              )}
+            </div>
+
+            <aside className="growth-copy-draft-workbench__side" aria-label={'\u751f\u6210\u4f9d\u636e\u4e0e\u5408\u89c4\u72b6\u6001'}>
+              <section>
+                <div className="growth-copy-draft-workbench__section-head"><span><Package size={14} />{'\u751f\u6210\u4e0a\u4e0b\u6587'}</span></div>
+                <div className="growth-copy-context-summary">
+                  <span><strong>{'\u6e20\u9053'}</strong>{previewItem ? channelLabel(previewItem.channel) : activeChannelLabel}</span>
+                  <span><strong>{'\u54c1\u724c'}</strong>{previewItem?.brandSlug ? displayBrand(previewItem.brandSlug) : activeBrandLabel}</span>
+                  <span><strong>{'\u4ea7\u54c1'}</strong>{selectedProductItems.length ? selectedProductItems.map((item) => item.label).join('\u3001') : '\u672a\u624b\u52a8\u9009\u62e9'}</span>
+                  <span><strong>{'\u7d20\u6750'}</strong>{selectedMaterialItems.length ? selectedMaterialItems.map((item) => item.label).join('\u3001') : '\u672a\u9009\u62e9\u7d20\u6750'}</span>
+                  <span><strong>{'\u4eba\u7fa4'}</strong>{briefForm.audience}</span>
+                </div>
+              </section>
+              <section>
+                <div className="growth-copy-draft-workbench__section-head"><span><AlertCircle size={14} />{'\u5408\u89c4\u521d\u7b5b'}</span></div>
+                <div className={`growth-copy-compliance-card ${previewItem?.complianceFlags?.length ? 'growth-copy-compliance-card--danger' : 'growth-copy-compliance-card--ok'}`}>
+                  <strong>{previewStatusText}</strong>
+                  {previewItem?.complianceFlags?.length ? <p>{'\u547d\u4e2d\u8bcd\uff1a'}{previewItem.complianceFlags.join('\u3001')}</p> : <p>{previewItem ? '\u5f53\u524d\u8349\u7a3f\u672a\u547d\u4e2d\u7cfb\u7edf\u5408\u89c4\u8bcd\uff0c\u53ef\u4fdd\u5b58\u540e\u8fdb\u5165\u5ba1\u6838\u3002' : '\u751f\u6210\u5b8c\u6210\u540e\u4f1a\u81ea\u52a8\u663e\u793a\u5408\u89c4\u547d\u4e2d\u7ed3\u679c\u3002'}</p>}
+                </div>
+              </section>
+              <section>
+                <div className="growth-copy-draft-workbench__section-head"><span><Factory size={14} />{'\u4e0b\u4e00\u6b65'}</span></div>
+                <div className="growth-copy-next-steps">
+                  <span className={previewItem ? 'badge badge-success' : 'badge badge-grey'}>{'1 \u8349\u7a3f\u751f\u6210'}</span>
+                  <span className={previewItem && !previewItem.complianceFlags.length ? 'badge badge-success' : 'badge badge-warning'}>{'2 \u5408\u89c4\u5904\u7406'}</span>
+                  <span className="badge badge-info">{'3 \u5165\u5e93\u6216\u63d0\u4ea4\u5ba1\u6838'}</span>
+                </div>
+              </section>
+            </aside>
+          </div>
+
+          {wechatSubmitOpen && previewItem && (
+            <div className="inset growth-copy-wechat-submit-panel">
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center' }}>
-                <span className="t-label">微信公众号审核目标</span>
+                <span className="t-label">{'\u5fae\u4fe1\u516c\u4f17\u53f7\u5ba1\u6838\u76ee\u6807'}</span>
                 {wechatBusy ? <Loader2 size={14} className="animate-spin" style={{ color: 'var(--brand)' }} /> : null}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
                 <label style={{ display: 'grid', gap: 6 }}>
-                  <span className="t-label">品牌</span>
+                  <span className="t-label">{'\u54c1\u724c'}</span>
                   <select className="input" value={wechatForm.brandId} onChange={(event) => {
                     const brandId = event.target.value;
                     setWechatForm({ ...wechatForm, brandId, accountIds: [] });
@@ -1064,16 +1261,16 @@ export default function GrowthCopyTable() {
                   </select>
                 </label>
                 <label style={{ display: 'grid', gap: 6 }}>
-                  <span className="t-label">原文链接</span>
-                  <input className="input" value={wechatForm.sourceUrl} onChange={(event) => setWechatForm({ ...wechatForm, sourceUrl: event.target.value })} placeholder="可选" />
+                  <span className="t-label">{'\u539f\u6587\u94fe\u63a5'}</span>
+                  <input className="input" value={wechatForm.sourceUrl} onChange={(event) => setWechatForm({ ...wechatForm, sourceUrl: event.target.value })} placeholder={'\u53ef\u9009'} />
                 </label>
               </div>
               <div className="growth-copy-cover-picker">
                 <div className="growth-copy-production-panel__head">
-                  <span><FileImage size={14} />公众号封面</span>
+                  <span><FileImage size={14} />{'\u516c\u4f17\u53f7\u5c01\u9762'}</span>
                   <label className="btn btn-outline btn-sm growth-copy-upload-btn">
                     {uploadBusy ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
-                    上传封面
+                    {'\u4e0a\u4f20\u5c01\u9762'}
                     <input type="file" accept="image/*" hidden onChange={(event) => uploadProductionImage(event.target.files?.[0], 'cover')} />
                   </label>
                 </div>
@@ -1087,27 +1284,19 @@ export default function GrowthCopyTable() {
                         setSelectedMaterials((current) => Array.from(new Set([...current, item.id])));
                       }}>
                         <span className="growth-copy-material__thumb">{item.thumbnailUrl ? <img src={item.thumbnailUrl} alt="" loading="lazy" /> : <FileImage size={16} />}</span>
-                        <span><strong>{item.label}</strong><small>{item.type || item.meta || '封面图'}</small></span>
+                        <span><strong>{item.label}</strong><small>{item.type || item.meta || '\u5c01\u9762\u56fe'}</small></span>
                       </button>
                     );
                   })}
-                  {!productionContext.materials.length ? <span className="growth-copy-empty">请从素材库选择，或直接上传封面图</span> : null}
+                  {!productionContext.materials.length ? <span className="growth-copy-empty">{'\u8bf7\u4ece\u5185\u5bb9\u7d20\u6750\u5e93\u9009\u62e9\uff0c\u6216\u4e0a\u4f20\u5c01\u9762\u56fe\u540e\u81ea\u52a8\u5165\u5e93'}</span> : null}
                 </div>
-                {selectedCoverMaterial ? <span className="badge badge-success">已选封面：{selectedCoverMaterial.label}</span> : null}
+                {selectedCoverMaterial ? <span className="badge badge-success">{'\u5df2\u9009\u5c01\u9762\uff1a'}{selectedCoverMaterial.label}</span> : null}
               </div>
               <div style={{ display: 'grid', gap: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>该品牌下可用公众号，支持单选或全选</span>
-                  <button
-                    type="button"
-                    className="btn btn-outline btn-sm"
-                    disabled={!wechatAccounts.length}
-                    onClick={() => setWechatForm({
-                      ...wechatForm,
-                      accountIds: wechatForm.accountIds.length === wechatAccounts.length ? [] : wechatAccounts.map((account) => account.id),
-                    })}
-                  >
-                    {wechatForm.accountIds.length === wechatAccounts.length && wechatAccounts.length ? '取消全选' : '全选'}
+                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>{'\u8be5\u54c1\u724c\u4e0b\u53ef\u7528\u516c\u4f17\u53f7\uff0c\u652f\u6301\u5355\u9009\u6216\u5168\u9009'}</span>
+                  <button type="button" className="btn btn-outline btn-sm" disabled={!wechatAccounts.length} onClick={() => setWechatForm({ ...wechatForm, accountIds: wechatForm.accountIds.length === wechatAccounts.length ? [] : wechatAccounts.map((account) => account.id) })}>
+                    {wechatForm.accountIds.length === wechatAccounts.length && wechatAccounts.length ? '\u53d6\u6d88\u5168\u9009' : '\u5168\u9009'}
                   </button>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 8 }}>
@@ -1115,16 +1304,7 @@ export default function GrowthCopyTable() {
                     const checked = wechatForm.accountIds.includes(account.id);
                     return (
                       <label key={account.id} className="inset" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 10, borderColor: checked ? 'var(--brand)' : 'var(--border)' }}>
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={(event) => setWechatForm({
-                            ...wechatForm,
-                            accountIds: event.target.checked
-                              ? Array.from(new Set([...wechatForm.accountIds, account.id]))
-                              : wechatForm.accountIds.filter((id) => id !== account.id),
-                          })}
-                        />
+                        <input type="checkbox" checked={checked} onChange={(event) => setWechatForm({ ...wechatForm, accountIds: event.target.checked ? Array.from(new Set([...wechatForm.accountIds, account.id])) : wechatForm.accountIds.filter((id) => id !== account.id) })} />
                         <span style={{ display: 'grid', gap: 2 }}>
                           <strong style={{ fontSize: 13 }}>{account.displayName}</strong>
                           <span style={{ color: 'var(--t-tertiary)', fontSize: 11 }}>{account.appIdMasked}</span>
@@ -1132,43 +1312,45 @@ export default function GrowthCopyTable() {
                       </label>
                     );
                   })}
-                  {!wechatBusy && !wechatAccounts.length ? (
-                    <div className="inset" style={{ padding: 10, color: 'var(--danger)', fontSize: 12 }}>
-                      当前品牌没有已启用且连接正常的公众号，请先到“发布账号配置”完成测试并启用。
-                    </div>
-                  ) : null}
+                  {!wechatBusy && !wechatAccounts.length ? <div className="inset" style={{ padding: 10, color: 'var(--danger)', fontSize: 12 }}>{'\u5f53\u524d\u54c1\u724c\u6ca1\u6709\u5df2\u542f\u7528\u4e14\u8fde\u63a5\u6b63\u5e38\u7684\u516c\u4f17\u53f7\uff0c\u8bf7\u5148\u5230\u201c\u53d1\u5e03\u8d26\u53f7\u914d\u7f6e\u201d\u5b8c\u6210\u6d4b\u8bd5\u5e76\u542f\u7528\u3002'}</div> : null}
                 </div>
               </div>
-              <textarea className="input" rows={2} value={wechatForm.digest} onChange={(event) => setWechatForm({ ...wechatForm, digest: event.target.value })} placeholder="公众号摘要" />
+              <textarea className="input" rows={2} value={wechatForm.digest} onChange={(event) => setWechatForm({ ...wechatForm, digest: event.target.value })} placeholder={'\u516c\u4f17\u53f7\u6458\u8981'} />
               {wechatTasks.length ? (
                 <div className="growth-copy-wechat-tasks">
-                  <span className="t-label">最近草稿箱同步</span>
+                  <span className="t-label">{'\u6700\u8fd1\u8349\u7a3f\u7bb1\u540c\u6b65'}</span>
                   {wechatTasks.map((task: any) => (
                     <div key={task.id} className="growth-copy-wechat-task">
-                      <strong>{task.accountName || task.accountDisplayName || task.accountId || '公众号'}</strong>
-                      <span className={`badge ${task.status === 'succeeded' ? 'badge-success' : task.status === 'failed' ? 'badge-danger' : 'badge-info'}`}>
-                        {task.status === 'succeeded' ? '已推送草稿箱' : task.status === 'failed' ? '推送失败' : task.status || '处理中'}
-                      </span>
-                      <small>{task.wechatDraftId ? `草稿编号：${task.wechatDraftId}` : task.errorSummary || '等待公众号返回草稿结果'}</small>
+                      <strong>{task.accountName || task.accountDisplayName || task.accountId || '\u516c\u4f17\u53f7'}</strong>
+                      <span className={`badge ${task.status === 'succeeded' ? 'badge-success' : task.status === 'failed' ? 'badge-danger' : 'badge-info'}`}>{task.status === 'succeeded' ? '\u5df2\u63a8\u9001\u8349\u7a3f\u7bb1' : task.status === 'failed' ? '\u63a8\u9001\u5931\u8d25' : task.status || '\u5904\u7406\u4e2d'}</span>
+                      <small>{task.wechatDraftId ? `\u8349\u7a3f\u7f16\u53f7\uff1a${task.wechatDraftId}` : task.errorSummary || '\u7b49\u5f85\u516c\u4f17\u53f7\u8fd4\u56de\u8349\u7a3f\u7ed3\u679c'}</small>
                     </div>
                   ))}
                 </div>
               ) : null}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span className={wechatSubmitMissingReason(wechatForm) ? 'badge badge-warning' : 'badge badge-success'}>
-                  {wechatSubmitMissingReason(wechatForm) || `将提交到 ${wechatForm.accountIds.length} 个公众号审核`}
-                </span>
-                <button
-                  className="btn btn-brand btn-sm"
-                  onClick={submitWechatReview}
-                  disabled={wechatBusy || Boolean(wechatSubmitMissingReason(wechatForm))}
-                  title={wechatSubmitMissingReason(wechatForm) || undefined}
-                >
-                  <Send size={14} />确认提交审核
-                </button>
+                <span className={wechatSubmitMissingReason(wechatForm) ? 'badge badge-warning' : 'badge badge-success'}>{wechatSubmitMissingReason(wechatForm) || `\u5c06\u63d0\u4ea4\u5230 ${wechatForm.accountIds.length} \u4e2a\u516c\u4f17\u53f7\u5ba1\u6838`}</span>
+                <button className="btn btn-brand btn-sm" onClick={submitWechatReview} disabled={wechatBusy || Boolean(wechatSubmitMissingReason(wechatForm))} title={wechatSubmitMissingReason(wechatForm) || undefined}><Send size={14} />{'\u786e\u8ba4\u63d0\u4ea4\u5ba1\u6838'}</button>
               </div>
             </div>
           )}
+
+          <div className="growth-copy-draft-workbench__footer">
+            <div className="growth-copy-draft-workbench__footer-status">
+              {generateBusy ? <><Loader2 size={14} className="animate-spin" />{'\u6b63\u5728\u751f\u6210\uff0c\u8bf7\u7a0d\u5019'}</> : <>{previewStatusText}</>}
+            </div>
+            <div className="growth-copy-draft-workbench__actions">
+              {generateBusy ? <button className="btn btn-outline btn-sm" disabled><Loader2 size={14} className="animate-spin" />{'\u751f\u6210\u4e2d'}</button> : null}
+              {previewItem ? <button className="btn btn-brand btn-sm" onClick={sendPreviewToContentFactory} disabled={factoryBusy || busy || !previewCanEdit}>{factoryBusy ? <Loader2 size={14} className="animate-spin" /> : <Factory size={14} />}{factoryBusy ? '\u9001\u5165\u4e2d' : '\u9001\u5165\u5185\u5bb9\u5de5\u5382'}</button> : null}
+              {previewItem ? <button className="btn btn-outline btn-sm" onClick={savePromptFromPreview} disabled={promptBusy || busy || Boolean(previewItem.promptTemplateId) || previewItem.status === 'rejected'} title={previewItem.promptTemplateId ? '\u8be5\u63d0\u793a\u8bcd\u5df2\u5728\u84c4\u6c34\u6c60\u4e2d' : '\u5b58\u5165\u63d0\u793a\u8bcd\u84c4\u6c34\u6c60'}>{promptBusy ? <Loader2 size={14} className="animate-spin" /> : <BookmarkPlus size={14} />}{previewItem.promptTemplateId ? '\u5df2\u5165\u63d0\u793a\u8bcd\u6c60' : '\u5b58\u5165\u63d0\u793a\u8bcd\u6c60'}</button> : null}
+              {previewItem ? <button className="btn btn-outline btn-sm" onClick={savePreview} disabled={saveBusy || busy || !previewCanEdit || !previewDirty}>{saveBusy ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}{saveBusy ? '\u4fdd\u5b58\u4e2d' : '\u4fdd\u5b58\u4fee\u6539'}</button> : null}
+              {previewItem?.status === 'draft' ? <button className="btn btn-brand btn-sm" onClick={approvePreview} disabled={busy || (!previewDirty && previewItem.complianceFlags.length > 0)} title={!previewDirty && previewItem.complianceFlags.length > 0 ? '\u5408\u89c4\u8bcd\u547d\u4e2d\uff0c\u4fee\u6539\u4fdd\u5b58\u540e\u624d\u80fd\u6838\u51c6' : undefined}><CheckCircle2 size={14} />{'\u4fdd\u5b58\u5e76\u5ba1\u6838\u901a\u8fc7'}</button> : null}
+              {previewItem ? <button className="btn btn-outline btn-sm" onClick={openWechatSubmit} disabled={busy || wechatBusy || !previewCanEdit}><Send size={14} />{'\u63d0\u4ea4\u516c\u4f17\u53f7\u5ba1\u6838'}</button> : null}
+              {previewItem?.status === 'draft' ? <button className="btn btn-outline btn-sm" onClick={() => reject(previewItem.id).then(closeCopyWorkbench)} disabled={busy}><XCircle size={14} />{'\u62d2\u7edd'}</button> : null}
+              {previewItem?.status === 'rejected' ? <button className="btn btn-outline btn-sm" onClick={() => removeRejected(previewItem.id).then(closeCopyWorkbench)} disabled={busy}><Trash2 size={14} />{'\u5220\u9664'}</button> : null}
+              <button className="btn btn-ghost btn-sm" onClick={closeCopyWorkbench} disabled={generateBusy}>{'\u5173\u95ed'}</button>
+            </div>
+          </div>
         </div>
       </div>}
     </section>

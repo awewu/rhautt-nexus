@@ -11,6 +11,7 @@
   var RUNTIME_SITE_CODE = window.EVERHOT_SITE_CODE || 'everhot';
   var RUNTIME_API_BASE = window.EVERHOT_API_BASE || '';
   var RUNTIME_PRODUCTS_API = '/api/v2/sites/' + RUNTIME_SITE_CODE + '/products?locale=zh-CN';
+  var RUNTIME_CATEGORIES_API = '/api/v2/sites/' + RUNTIME_SITE_CODE + '/product-categories';
 
   function installCatalog(){
     window.EVERHOT_PRODUCTS = Array.isArray(window.EVERHOT_PRODUCTS) ? window.EVERHOT_PRODUCTS : [];
@@ -78,6 +79,92 @@
     var parts = categoryPathValue(product).split('/').map(function(part){return part.trim();}).filter(Boolean);
     return parts[parts.length-1] || '';
   }
+  function productSiteCategory(product){
+    var meta = product && product.siteMeta && typeof product.siteMeta === 'object' ? product.siteMeta : {};
+    return meta.siteProductCategory && typeof meta.siteProductCategory === 'object' ? meta.siteProductCategory : {};
+  }
+  function normToken(value){
+    return String(value || '').trim().replace(/^\/+|\/+$/g,'').toLowerCase();
+  }
+  function normPath(value){
+    return String(value || '').split('/').map(function(part){return part.trim();}).filter(Boolean).join(' / ');
+  }
+  function categoryToken(row){
+    return normToken(row && (row.slug || row.code || row.websiteCategory || row.name));
+  }
+  function flattenSiteCategories(){
+    var tree = Array.isArray(window.EVERHOT_SITE_PRODUCT_CATEGORY_TREE) ? window.EVERHOT_SITE_PRODUCT_CATEGORY_TREE : [];
+    var items = Array.isArray(window.EVERHOT_SITE_PRODUCT_CATEGORIES) ? window.EVERHOT_SITE_PRODUCT_CATEGORIES : [];
+    var out = [];
+    function walk(row, chain){
+      if(!row || typeof row !== 'object') return;
+      var next = chain.concat([row]);
+      out.push({ row: row, chain: next, tokens: next.map(categoryToken).filter(Boolean), path: normPath(next.map(function(item){return item.name || item.websiteCategory || item.code || item.slug;}).filter(Boolean).join(' / ')) });
+      (Array.isArray(row.children) ? row.children : []).forEach(function(child){ walk(child, next); });
+    }
+    if(tree.length){
+      tree.forEach(function(row){ walk(row, []); });
+      return out;
+    }
+    var byId = {}, roots = [];
+    items.forEach(function(row){
+      if(!row || typeof row !== 'object') return;
+      var id = String(row.id || '');
+      byId[id] = Object.assign({}, row, { children: [] });
+    });
+    Object.keys(byId).forEach(function(id){
+      var row = byId[id];
+      var parentId = String(row.parentId || '');
+      if(parentId && byId[parentId]) byId[parentId].children.push(row);
+      else roots.push(row);
+    });
+    roots.forEach(function(row){ walk(row, []); });
+    return out;
+  }
+  function currentCatalogTokens(){
+    var parts = String(location.pathname || '').split('/').map(normToken).filter(Boolean);
+    var idx = parts.indexOf('products');
+    if(idx < 0) return [];
+    var tail = parts.slice(idx + 1).filter(function(part){ return part !== 'detail'; });
+    return tail;
+  }
+  function catalogCategoryContext(){
+    var tokens = currentCatalogTokens();
+    if(!tokens.length) return null;
+    var flat = flattenSiteCategories();
+    if(!flat.length) return null;
+    var target = flat.filter(function(item){
+      return item.tokens.length === tokens.length && item.tokens.every(function(token, index){ return token === tokens[index]; });
+    })[0];
+    if(!target) return null;
+    var ids = {}, paths = {};
+    flat.forEach(function(item){
+      var sameBranch = target.tokens.every(function(token, index){ return item.tokens[index] === token; });
+      if(!sameBranch) return;
+      if(item.row && item.row.id) ids[String(item.row.id)] = true;
+      if(item.path) paths[item.path] = true;
+    });
+    if(target.path) paths[target.path] = true;
+    return { target: target, ids: ids, paths: paths };
+  }
+  function productMatchesCatalogCategory(product, context){
+    if(!context) return true;
+    var meta = product && product.siteMeta && typeof product.siteMeta === 'object' ? product.siteMeta : {};
+    var category = productSiteCategory(product);
+    var id = String(category.id || '');
+    if(id && context.ids[id]) return true;
+    var paths = [
+      product && product.websiteCategoryPath,
+      meta.websiteCategoryPath,
+      category.path
+    ].map(normPath).filter(Boolean);
+    return paths.some(function(path){
+      if(context.paths[path]) return true;
+      return Object.keys(context.paths).some(function(parentPath){
+        return path.indexOf(parentPath + ' / ') === 0;
+      });
+    });
+  }
   function resolveAudience(product){
     var text = categoryText(product);
     if(text.indexOf('\u5546\u7528')>-1 || /commercial/i.test(text)) return 'commercial';
@@ -121,10 +208,24 @@
     if(!window.fetch){ window.EVERHOT_PRODUCTS = []; installCatalog(); setRuntimeStatus('api-error'); return Promise.resolve(false); }
     setRuntimeStatus('loading');
     var apiBase = RUNTIME_API_BASE;
-    window.EVERHOT_PRODUCTS_READY = fetchPublished(apiBase, RUNTIME_PRODUCTS_API, function(json){
+    var categoriesReady = fetchPublished(apiBase, RUNTIME_CATEGORIES_API, function(json){
       return !!(json && json.data && Array.isArray(json.data.items));
-    })
-      .then(function(json){
+    }).then(function(json){
+      var data = json && json.data || {};
+      window.EVERHOT_SITE_PRODUCT_CATEGORIES = Array.isArray(data.items) ? data.items : [];
+      window.EVERHOT_SITE_PRODUCT_CATEGORY_TREE = Array.isArray(data.tree) ? data.tree : [];
+      return true;
+    }).catch(function(){
+      window.EVERHOT_SITE_PRODUCT_CATEGORIES = [];
+      window.EVERHOT_SITE_PRODUCT_CATEGORY_TREE = [];
+      return false;
+    });
+    var productsReady = fetchPublished(apiBase, RUNTIME_PRODUCTS_API, function(json){
+      return !!(json && json.data && Array.isArray(json.data.items));
+    });
+    window.EVERHOT_PRODUCTS_READY = Promise.all([categoriesReady, productsReady])
+      .then(function(results){
+        var json = results[1];
         var items = json && json.data && json.data.items;
         if(Array.isArray(items)){
           window.EVERHOT_PRODUCTS = items.map(normalizeRuntimeProduct).filter(function(p){ return p.slug && isRuntimeProductForSite(p); });
@@ -362,7 +463,9 @@
       var key=g.getAttribute('data-catalog').split(':');
       var list=window.EVERHOT_CATALOG.by(key[0],key[1]);
       // 第三段可选：按 series 过滤，供子类型 SEO 落地页（data-catalog="residential:water-heating:零冷水"）
-      if(key[2]){ list=list.filter(function(p){return (p.series||'')===key[2];}); }
+      var categoryContext = catalogCategoryContext();
+      if(categoryContext){ list=list.filter(function(p){return productMatchesCatalogCategory(p,categoryContext);}); }
+      else if(key[2]){ list=list.filter(function(p){return (p.series||'')===key[2];}); }
       if(!list.length){ g.innerHTML=emptyState(); return; }
       renderCatalogGrid(g, list);
     });

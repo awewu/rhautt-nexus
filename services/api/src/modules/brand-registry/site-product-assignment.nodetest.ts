@@ -451,6 +451,17 @@ test('Everhot public site products return only published shelf assignments with 
     ]) {
       assert.equal(field in items[0], false, `${field} must not be exposed`);
     }
+
+    hydratedProductIds.length = 0;
+    const byProductId = await service.publicList('everhot', 'zh-CN', { productId: ACTIVE_PRODUCT_ID });
+    assert.deepEqual(hydratedProductIds, [[ACTIVE_PRODUCT_ID]]);
+    assert.deepEqual((byProductId.data.items as Record<string, unknown>[]).map((item) => item.slug), ['proterra-active']);
+
+    const bySlug = await service.publicList('everhot', 'zh-CN', { slug: 'proterra-active' });
+    assert.deepEqual((bySlug.data.items as Record<string, unknown>[]).map((item) => item.sku), ['EH-200']);
+
+    const wrongWebsitePath = await service.publicList('everhot', 'zh-CN', { websiteCategoryPath: 'Home / Heating / Central AC' });
+    assert.equal(wrongWebsitePath.data.total, 0);
   } finally {
     if (previous === undefined) delete process.env.SITE_EVERHOT_TENANT_ID;
     else process.env.SITE_EVERHOT_TENANT_ID = previous;

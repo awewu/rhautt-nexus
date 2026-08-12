@@ -13,11 +13,11 @@ import {
   WorkbenchTableShell,
   WorkbenchTableState,
 } from '../../components/WorkbenchCore';
-import { auth, brandProductCategories, brandSites, fileArtifacts, products, siteProductAssignments, siteProductCategories } from '../../lib/api';
+import { auth, brandProductCategories, brandSites, fileArtifacts, products, publicSiteProducts, siteProductAssignments, siteProductCategories } from '../../lib/api';
 import { getBrandProductPermissions, type BrandProductPermissions } from '../../lib/brand-product-adapter';
 import { CATEGORIES, PRODUCTS, SYSTEM_PACKS, type CatKey, type Product } from '../../lib/products-data';
 
-type ProductModule = 'catalog' | 'materials' | 'base' | 'categories';
+type ProductModule = 'dashboard' | 'catalog' | 'materials' | 'base' | 'categories';
 type ProductStock = Product['stock'];
 type BrandFilter = string;
 type ProductBrand = string;
@@ -210,6 +210,14 @@ type CreateProductDraft = {
   launchDate: string;
   discontinueDate: string;
   salesUnit: string;
+  lengthMm: string;
+  widthMm: string;
+  heightMm: string;
+  netWeightKg: string;
+  packageLengthMm: string;
+  packageWidthMm: string;
+  packageHeightMm: string;
+  grossWeightKg: string;
   packageSpec: string;
   configurationNotes: string;
   installationRequirement: string;
@@ -276,6 +284,14 @@ type EditProductDraft = {
   launchDate: string;
   discontinueDate: string;
   salesUnit: string;
+  lengthMm: string;
+  widthMm: string;
+  heightMm: string;
+  netWeightKg: string;
+  packageLengthMm: string;
+  packageWidthMm: string;
+  packageHeightMm: string;
+  grossWeightKg: string;
   packageSpec: string;
   configurationNotes: string;
   installationRequirement: string;
@@ -287,6 +303,15 @@ type EditProductDraft = {
   listPrice: string;
   costPrice: string;
   currency: string;
+  websitePriceDisplayMode: string;
+  websitePrice: string;
+  websitePriceMin: string;
+  websitePriceMax: string;
+  promoPrice: string;
+  priceUnit: string;
+  priceLabel: string;
+  priceNote: string;
+  taxIncluded: boolean;
   publicSlug: string;
   series: string;
   tagline: string;
@@ -305,6 +330,7 @@ type EditProductDraft = {
 type RowActionState = {
   dirty: boolean;
   saving: boolean;
+  savingAction?: 'save' | 'status' | 'archive';
   success: string;
   error: string;
 };
@@ -474,7 +500,7 @@ const fmt = (value: number) => `￥${Math.round(value || 0).toLocaleString('zh-C
 const pct = (value: number) => `${Math.round(value || 0)}%`;
 
 function normalizeModule(value: unknown): ProductModule {
-  return value === 'materials' || value === 'base' || value === 'categories' ? value : 'catalog';
+  return value === 'catalog' || value === 'materials' || value === 'base' || value === 'categories' ? value : 'dashboard';
 }
 
 function normalizeCategory(value: unknown): CatKey {
@@ -725,6 +751,13 @@ function assignmentItems(payload: unknown): WebsiteShelfAssignment[] {
   return [];
 }
 
+function publicSiteProductItems(payload: unknown): Record<string, any>[] {
+  const data = (payload as any)?.data ?? payload;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data)) return data;
+  return [];
+}
+
 function assignmentKey(productId: string, tenantId: string): string {
   return `${tenantId || '-'}:${productId}`;
 }
@@ -758,21 +791,21 @@ function activeWebsiteAssignments(assignments: WebsiteShelfAssignment[]): Websit
 }
 
 function websiteShelfMeta(assignment?: WebsiteShelfAssignment, transition?: WebsiteShelfTransition) {
-  if (transition === 'publishing') return { label: '官网上架中', tone: 'info' as const };
-  if (transition === 'hiding') return { label: '官网下架中', tone: 'warning' as const };
-  if (!assignment) return { label: '官网未上架', tone: 'neutral' as const };
-  if (assignment.deletedAt || assignment.status === 'hidden') return { label: '官网已下架', tone: 'warning' as const };
-  if (assignment.status === 'published') return { label: '官网已上架', tone: 'success' as const };
-  return { label: '官网未上架', tone: 'neutral' as const };
+  if (transition === 'publishing') return { label: '官网发布中', tone: 'info' as const };
+  if (transition === 'hiding') return { label: '官网隐藏中', tone: 'warning' as const };
+  if (!assignment) return { label: '未配置官网', tone: 'neutral' as const };
+  if (assignment.deletedAt || assignment.status === 'hidden') return { label: '官网已隐藏', tone: 'warning' as const };
+  if (assignment.status === 'published') return { label: '官网已发布', tone: 'success' as const };
+  return { label: '草稿待发布', tone: 'neutral' as const };
 }
 
 function websiteShelfSummary(assignments: WebsiteShelfAssignment[]) {
   const active = activeWebsiteAssignments(assignments);
-  if (!active.length) return { label: '官网未配置', tone: 'neutral' as const };
+  if (!active.length) return { label: '未配置官网', tone: 'neutral' as const };
   const published = active.filter((assignment) => assignment.status === 'published').length;
   if (active.length === 1) return websiteShelfMeta(active[0]);
-  if (published === active.length) return { label: `已上架 ${active.length} 个官网`, tone: 'success' as const };
-  if (published > 0) return { label: `已配置 ${active.length} 个官网`, tone: 'info' as const };
+  if (published === active.length) return { label: `已发布 ${active.length} 个官网`, tone: 'success' as const };
+  if (published > 0) return { label: `部分发布 ${published}/${active.length}`, tone: 'info' as const };
   return { label: `待发布 ${active.length} 个官网`, tone: 'neutral' as const };
 }
 
@@ -781,6 +814,335 @@ function websitePublishingStatusMeta(assignment: WebsiteShelfAssignment) {
   if (assignment.status === 'published') return { label: '已发布，官网可见', tone: 'success' as const };
   if (assignment.status === 'hidden') return { label: '已隐藏，官网不可见', tone: 'warning' as const };
   return { label: '草稿，未发布到官网', tone: 'neutral' as const };
+}
+
+function assignmentWebsiteCategoryPath(assignment: WebsiteShelfAssignment): string {
+  const meta = objectOrEmpty(assignment.siteMeta);
+  const categoryMeta = objectOrEmpty(meta.siteProductCategory);
+  return text(meta.websiteCategoryPath || categoryMeta.path || assignment.websiteCategory);
+}
+
+function preferredWebsiteAssignment(assignments: WebsiteShelfAssignment[], productBrand?: string): WebsiteShelfAssignment | null {
+  const active = activeWebsiteAssignments(assignments);
+  const brand = normalizeBrand(productBrand);
+  return active.find((assignment) => assignment.status === 'published' && normalizeBrand(assignment.siteCode) === brand)
+    || active.find((assignment) => assignment.status === 'published')
+    || active.find((assignment) => normalizeBrand(assignment.siteCode) === brand)
+    || active[0]
+    || null;
+}
+
+function WebsiteShelfSummaryCell({ assignments, productBrand }: { assignments: WebsiteShelfAssignment[]; productBrand?: string }) {
+  const active = activeWebsiteAssignments(assignments);
+  const summary = websiteShelfSummary(assignments);
+  const primary = preferredWebsiteAssignment(assignments, productBrand);
+  const categoryPath = primary ? assignmentWebsiteCategoryPath(primary) : '';
+  const nextStep = !active.length
+    ? '下一步：配置官网目录'
+    : active.some((assignment) => assignment.status === 'published')
+      ? '公开展示已可回读'
+      : '下一步：发布到官网';
+
+  return (
+    <div className="product-catalog-website-cell" style={{ display: 'grid', gap: 6, minWidth: 220 }}>
+      <div className="product-catalog-website-cell__status" style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+        <StatusPill tone={summary.tone}>{summary.label}</StatusPill>
+        {active.length > 1 ? <span className="badge badge-grey">{active.length} 个站点</span> : null}
+      </div>
+      {primary ? (
+        <>
+          <span className="product-catalog-website-cell__path" style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+            {displayBrand(normalizeBrand(primary.siteCode))} / {categoryPath || '未选择目录'}
+          </span>
+          <span className="product-catalog-website-cell__slug" style={{ color: 'var(--t-tertiary)', fontSize: 11 }}>
+            slug: {text(primary.publicSlug) || '待生成'}
+          </span>
+        </>
+      ) : (
+        <span className="product-catalog-website-cell__path" style={{ color: 'var(--t-secondary)', fontSize: 12 }}>还没有官网挂载配置</span>
+      )}
+      <span className="product-catalog-website-cell__next" style={{ color: active.some((assignment) => assignment.status === 'published') ? 'var(--success)' : 'var(--warning)', fontSize: 11 }}>
+        {nextStep}
+      </span>
+    </div>
+  );
+}
+
+function MappingCheckItem({
+  label,
+  value,
+  tone = 'neutral',
+  note,
+}: {
+  label: string;
+  value: string;
+  tone?: 'success' | 'warning' | 'info' | 'neutral';
+  note?: string;
+}) {
+  const color = tone === 'success'
+    ? 'var(--success)'
+    : tone === 'warning'
+      ? 'var(--warning)'
+      : tone === 'info'
+        ? 'var(--brand-500, var(--brand))'
+        : 'var(--t-secondary)';
+  return (
+    <div className="product-edit-check-item" style={{ display: 'grid', gap: 4, minWidth: 0 }}>
+      <span className="t-label">{label}</span>
+      <strong style={{ color, fontSize: 13, lineHeight: 1.35, overflowWrap: 'anywhere' }}>{value || '未维护'}</strong>
+      {note ? <span style={{ color: 'var(--t-tertiary)', fontSize: 11, lineHeight: 1.35 }}>{note}</span> : null}
+    </div>
+  );
+}
+
+type ProductEditProgressItem = {
+  label: string;
+  status: 'ready' | 'todo' | 'blocked';
+  detail: string;
+  targetId: string;
+};
+
+type ProductChecklistStatus = 'ready' | 'missing' | 'recommended';
+type ProductChecklistRequirement = 'required' | 'optional';
+type ProductChecklistItem = {
+  key: string;
+  label: string;
+  requirement: ProductChecklistRequirement;
+  status: ProductChecklistStatus;
+  detail: string;
+  targetId: string;
+};
+
+function ProductEditProgressStrip({
+  items,
+  onNavigate,
+}: {
+  items: ProductEditProgressItem[];
+  onNavigate: (targetId: string) => void;
+}) {
+  const readyCount = items.filter((item) => item.status === 'ready').length;
+  const percent = items.length ? Math.round((readyCount / items.length) * 100) : 0;
+  const statusText = readyCount === items.length ? '可进入发布校验' : `还差 ${items.length - readyCount} 项`;
+
+  return (
+    <section className="product-edit-progress" aria-label="运营填报进度">
+      <div className="product-edit-progress__summary">
+        <div>
+          <p className="t-label">运营填报进度</p>
+          <strong>{percent}%</strong>
+          <span>{statusText}</span>
+        </div>
+        <div className="product-edit-progress__bar" aria-hidden="true">
+          <span style={{ width: `${percent}%` }} />
+        </div>
+      </div>
+      <div className="product-edit-progress__items">
+        {items.map((item) => {
+          const ready = item.status === 'ready';
+          return (
+            <button
+              key={item.label}
+              type="button"
+              className={`product-edit-progress__item is-${item.status}`}
+              onClick={() => onNavigate(item.targetId)}
+              aria-label={`定位到${item.label}`}
+            >
+              {ready ? <CheckCircle2 size={15} /> : <XCircle size={15} />}
+              <div>
+                <strong>{item.label}</strong>
+                <span>{item.detail}</span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function ProductReadinessChecklistPanel({
+  items,
+  title = '资料完整度清单',
+  compact = false,
+  saveMode = false,
+  onNavigate,
+}: {
+  items: ProductChecklistItem[];
+  title?: string;
+  compact?: boolean;
+  saveMode?: boolean;
+  onNavigate: (targetId: string) => void;
+}) {
+  const requiredItems = items.filter((item) => item.requirement === 'required');
+  const requiredReady = requiredItems.filter((item) => item.status === 'ready').length;
+  const requiredMissing = requiredItems.filter((item) => item.status !== 'ready');
+  const optionalRecommended = items.filter((item) => item.requirement === 'optional' && item.status !== 'ready');
+  const summary = requiredMissing.length
+    ? `必填项还差 ${requiredMissing.length} 项`
+    : optionalRecommended.length
+      ? `必填项已齐，建议补 ${optionalRecommended.length} 项`
+      : '资料已满足发布检查';
+
+  return (
+    <section className={`product-readiness-checklist ${compact ? 'is-compact' : ''}`} aria-label={title}>
+      <div className="product-readiness-checklist__head">
+        <div>
+          <p className="t-label">{saveMode ? '保存后发布检查' : title}</p>
+          <strong>{summary}</strong>
+          <span>{requiredReady}/{requiredItems.length} 个必填项完成</span>
+        </div>
+        <StatusPill tone={requiredMissing.length ? 'warning' : 'success'}>
+          {requiredMissing.length ? '不可直接发布' : '可进入发布'}
+        </StatusPill>
+      </div>
+      <div className="product-readiness-checklist__grid">
+        {items.map((item) => {
+          const ready = item.status === 'ready';
+          const required = item.requirement === 'required';
+          const tone = ready ? 'success' : required ? 'warning' : 'info';
+          const statusText = ready ? '已完成' : required ? '待补必填' : '建议补齐';
+          return (
+            <button
+              key={item.key}
+              type="button"
+              className={`product-readiness-checklist__item is-${tone}`}
+              onClick={() => onNavigate(item.targetId)}
+            >
+              {ready ? <CheckCircle2 size={15} /> : <XCircle size={15} />}
+              <div>
+                <span>
+                  <strong>{item.label}</strong>
+                  <em>{required ? '必填' : '可填'}</em>
+                </span>
+                <small>{statusText} · {item.detail}</small>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function formatSaveChecklistFeedback(items: ProductChecklistItem[], published: boolean): string {
+  const missing = items.filter((item) => item.requirement === 'required' && item.status !== 'ready');
+  if (missing.length) {
+    return `产品库已保存；发布前还需补齐 ${missing.length} 个必填项：${missing.map((item) => item.label).slice(0, 3).join('、')}${missing.length > 3 ? '等' : ''}。`;
+  }
+  if (published) return '产品库已保存；必填资料已齐，官网已发布，可刷新官网回读校验。';
+  return '产品库已保存；必填资料已齐，下一步发布到官网。';
+}
+
+function buildProductEditChecklist({
+  productId,
+  draft,
+  selectedProductCategoryPath,
+  imageSrc,
+  activeAssignments,
+  hasPublishedWebsite,
+}: {
+  productId: string;
+  draft: EditProductDraft;
+  selectedProductCategoryPath: string;
+  imageSrc: string;
+  activeAssignments: WebsiteShelfAssignment[];
+  hasPublishedWebsite: boolean;
+}): ProductChecklistItem[] {
+  const physicalValues = [
+    draft.lengthMm,
+    draft.widthMm,
+    draft.heightMm,
+    draft.netWeightKg,
+    draft.packageLengthMm,
+    draft.packageWidthMm,
+    draft.packageHeightMm,
+    draft.grossWeightKg,
+  ].filter((value) => text(value));
+  const hasWebsiteCopy = Boolean(text(draft.publicSummary) && (text(draft.featureBenefits) || text(draft.sellingPoints)));
+  const hasMainImage = Boolean(draft.mainImage || imageSrc);
+  const hasDetailAsset = Boolean(text(draft.officialDetailHtml) || draft.manualPdfs.length);
+  return [
+    {
+      key: 'identity',
+      label: '名称与型号',
+      requirement: 'required',
+      status: text(draft.name) && text(draft.model) ? 'ready' : 'missing',
+      detail: text(draft.name) && text(draft.model) ? '产品可被识别' : '需填写产品名称和型号',
+      targetId: `product-edit-section-master-${productId}`,
+    },
+    {
+      key: 'category',
+      label: '产品库分类',
+      requirement: 'required',
+      status: draft.categoryLevel1Id && draft.categoryLevel2Id ? 'ready' : 'missing',
+      detail: draft.categoryLevel2Id ? (selectedProductCategoryPath || '已绑定到二级分类') : '需选择一级和二级分类',
+      targetId: `product-edit-section-category-${productId}`,
+    },
+    {
+      key: 'website-copy',
+      label: '官网摘要与卖点',
+      requirement: 'required',
+      status: hasWebsiteCopy ? 'ready' : 'missing',
+      detail: hasWebsiteCopy ? '官网卡片和详情页可读取' : '需填写官网摘要，并至少维护卖点或功能说明',
+      targetId: `product-edit-section-website-content-${productId}`,
+    },
+    {
+      key: 'main-image',
+      label: '产品主图',
+      requirement: 'required',
+      status: hasMainImage ? 'ready' : 'missing',
+      detail: hasMainImage ? '列表和官网卡片可展示图片' : '需上传或保留一张产品主图',
+      targetId: `product-edit-section-assets-${productId}`,
+    },
+    {
+      key: 'website-directory',
+      label: '官网目录挂载',
+      requirement: 'required',
+      status: activeAssignments.length ? 'ready' : 'missing',
+      detail: activeAssignments.length ? `已配置 ${activeAssignments.length} 个官网挂载` : '需选择官网和展示目录',
+      targetId: `product-edit-section-website-mapping-${productId}`,
+    },
+    {
+      key: 'publish-status',
+      label: '官网发布状态',
+      requirement: 'optional',
+      status: hasPublishedWebsite ? 'ready' : 'recommended',
+      detail: hasPublishedWebsite ? '已有发布记录，可回读校验' : '保存后仍需发布到官网',
+      targetId: `product-edit-section-check-${productId}`,
+    },
+    {
+      key: 'physical',
+      label: '尺寸与重量',
+      requirement: 'optional',
+      status: physicalValues.length ? 'ready' : 'recommended',
+      detail: physicalValues.length ? `已维护 ${physicalValues.length} 个基础规格` : '建议补齐长宽高、净重、包装尺寸和毛重',
+      targetId: `product-edit-section-library-${productId}`,
+    },
+    {
+      key: 'technical',
+      label: '技术参数',
+      requirement: 'optional',
+      status: text(draft.technicalSpecs) ? 'ready' : 'recommended',
+      detail: text(draft.technicalSpecs) ? '参数表已有基础内容' : '建议维护容量、能效、燃气/电源等参数',
+      targetId: `product-edit-section-library-${productId}`,
+    },
+    {
+      key: 'detail-assets',
+      label: '详情长图 / PDF',
+      requirement: 'optional',
+      status: hasDetailAsset ? 'ready' : 'recommended',
+      detail: hasDetailAsset ? '已有详情资料' : '建议补产品详情长图或说明书 PDF',
+      targetId: `product-edit-section-assets-detail-${productId}`,
+    },
+    {
+      key: 'price',
+      label: '价格展示',
+      requirement: 'optional',
+      status: draft.websitePriceDisplayMode !== 'not_shown' || text(draft.listPrice) ? 'ready' : 'recommended',
+      detail: draft.websitePriceDisplayMode !== 'not_shown' ? '已设置官网价格策略' : '可按运营策略选择展示或不展示价格',
+      targetId: `product-edit-section-website-content-${productId}`,
+    },
+  ];
 }
 
 function catalogCategoryFilterOptions(tree: ProductCategoryNode[]) {
@@ -911,6 +1273,14 @@ function emptyCreateDraft(): CreateProductDraft {
     launchDate: '',
     discontinueDate: '',
     salesUnit: '台',
+    lengthMm: '',
+    widthMm: '',
+    heightMm: '',
+    netWeightKg: '',
+    packageLengthMm: '',
+    packageWidthMm: '',
+    packageHeightMm: '',
+    grossWeightKg: '',
     packageSpec: '',
     configurationNotes: '',
     installationRequirement: '',
@@ -953,6 +1323,7 @@ function editDraftFromProduct(product: NormalizedProduct): EditProductDraft {
   const categoryBinding = productCategoryBinding(product);
   const spec = objectOrEmpty(product.raw?.spec);
   const libraryMeta = productLibraryMeta(product);
+  const websitePricing = objectOrEmpty(product.raw?.websitePricing || objectOrEmpty(product.raw?.meta).websitePricing);
   const skuMeta = objectOrEmpty(libraryMeta.sku);
   const lifecycle = objectOrEmpty(libraryMeta.lifecycle);
   const compliance = objectOrEmpty(libraryMeta.compliance);
@@ -975,6 +1346,14 @@ function editDraftFromProduct(product: NormalizedProduct): EditProductDraft {
     launchDate: text(lifecycle.launchDate),
     discontinueDate: text(lifecycle.discontinueDate),
     salesUnit: text(skuMeta.salesUnit) || '台',
+    lengthMm: text((product.raw as any)?.lengthMm),
+    widthMm: text((product.raw as any)?.widthMm),
+    heightMm: text((product.raw as any)?.heightMm),
+    netWeightKg: text((product.raw as any)?.netWeightKg),
+    packageLengthMm: text((product.raw as any)?.packageLengthMm),
+    packageWidthMm: text((product.raw as any)?.packageWidthMm),
+    packageHeightMm: text((product.raw as any)?.packageHeightMm),
+    grossWeightKg: text((product.raw as any)?.grossWeightKg),
     packageSpec: text(skuMeta.packageSpec),
     configurationNotes: text(skuMeta.configurationNotes),
     installationRequirement: text(libraryMeta.installationRequirement),
@@ -992,6 +1371,15 @@ function editDraftFromProduct(product: NormalizedProduct): EditProductDraft {
     listPrice: text((product.raw as any)?.listPrice ?? product.marketPrice),
     costPrice: text((product.raw as any)?.costPrice ?? product.dealerPrice),
     currency: text((product.raw as any)?.currency) || 'CNY',
+    websitePriceDisplayMode: text(websitePricing.priceDisplayMode) || 'not_shown',
+    websitePrice: text(websitePricing.websitePrice),
+    websitePriceMin: text(websitePricing.websitePriceMin),
+    websitePriceMax: text(websitePricing.websitePriceMax),
+    promoPrice: text(websitePricing.promoPrice),
+    priceUnit: text(websitePricing.priceUnit) || '台',
+    priceLabel: text(websitePricing.priceLabel) || '官网参考价',
+    priceNote: text(websitePricing.priceNote),
+    taxIncluded: websitePricing.taxIncluded !== false,
     publicSlug: text(brandMeta.slug) || slug(text(product.sku)),
     series: text(brandMeta.series),
     tagline: text(brandMeta.tagline),
@@ -1050,6 +1438,40 @@ function productReadinessSummary(product: NormalizedProduct) {
   };
 }
 
+function productPublishRequiredReadiness(product: NormalizedProduct): { ready: boolean; missing: string[] } {
+  const categoryBinding = productCategoryBinding(product);
+  const content = productContentItem(product.raw?.publicContent || product.raw?.content || product.raw);
+  const marketing = objectOrEmpty(content.marketing || product.raw?.marketing);
+  const brandMeta = productBrandMeta(product);
+  const libraryMeta = productLibraryMeta(product);
+  const positioning = objectOrEmpty(product.raw?.positioning);
+  const features = marketing.features || marketing.featureBenefits;
+  const hasFeatureCopy = Array.isArray(features)
+    ? features.length > 0
+    : Boolean(
+        text(features || marketing.sellingPoints)
+        || (Array.isArray(positioning.sellingPoints) && positioning.sellingPoints.length > 0)
+        || (Array.isArray(libraryMeta.sellingPoints) && libraryMeta.sellingPoints.length > 0)
+      );
+  const hasSummary = Boolean(text(
+    marketing.subhead
+    || marketing.summary
+    || marketing.description
+    || product.raw?.publicSummary
+    || brandMeta.tagline
+    || product.spec
+  ));
+  const missing = [
+    !text(product.name) ? '产品名称' : '',
+    !text(product.model) ? '型号' : '',
+    !(categoryBinding.categoryLevel1Id && categoryBinding.categoryLevel2Id) ? '产品库分类' : '',
+    !hasSummary ? '官网摘要' : '',
+    !hasFeatureCopy ? '官网卖点' : '',
+    !productImageSrc(product) ? '产品主图' : '',
+  ].filter(Boolean);
+  return { ready: missing.length === 0, missing };
+}
+
 function productCategoryBinding(product: NormalizedProduct): {
   primaryCategoryId: string;
   categoryLevel1Id: string;
@@ -1078,6 +1500,13 @@ function optionalNonNegativeNumber(value: unknown): number | undefined {
   if (!raw) return undefined;
   const n = Number(raw);
   return Number.isFinite(n) && n >= 0 ? n : undefined;
+}
+
+function nullableNonNegativeNumber(value: unknown): number | null {
+  const raw = text(value);
+  if (!raw) return null;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : null;
 }
 
 function splitBadges(value: string): string[] {
@@ -1146,6 +1575,18 @@ function productUpdatePayload(
   const previousLibraryMeta = objectOrEmpty(previousMeta.productLibrary);
   const listPrice = optionalNonNegativeNumber(draft.listPrice);
   const costPrice = optionalNonNegativeNumber(draft.costPrice);
+  const websitePrice = optionalNonNegativeNumber(draft.websitePrice);
+  const websitePriceMin = optionalNonNegativeNumber(draft.websitePriceMin);
+  const websitePriceMax = optionalNonNegativeNumber(draft.websitePriceMax);
+  const promoPrice = optionalNonNegativeNumber(draft.promoPrice);
+  const lengthMm = nullableNonNegativeNumber(draft.lengthMm);
+  const widthMm = nullableNonNegativeNumber(draft.widthMm);
+  const heightMm = nullableNonNegativeNumber(draft.heightMm);
+  const netWeightKg = nullableNonNegativeNumber(draft.netWeightKg);
+  const packageLengthMm = nullableNonNegativeNumber(draft.packageLengthMm);
+  const packageWidthMm = nullableNonNegativeNumber(draft.packageWidthMm);
+  const packageHeightMm = nullableNonNegativeNumber(draft.packageHeightMm);
+  const grossWeightKg = nullableNonNegativeNumber(draft.grossWeightKg);
   const technicalSpecs = parseKeyValueLines(draft.technicalSpecs);
   const sellingPoints = splitLines(draft.sellingPoints);
   const applicationScenarios = splitLines(draft.applicationScenarios);
@@ -1156,7 +1597,30 @@ function productUpdatePayload(
     category,
     ...(listPrice !== undefined ? { listPrice } : {}),
     ...(costPrice !== undefined ? { costPrice } : {}),
+    lengthMm,
+    widthMm,
+    heightMm,
+    netWeightKg,
+    packageLengthMm,
+    packageWidthMm,
+    packageHeightMm,
+    grossWeightKg,
     currency: text(draft.currency) || 'CNY',
+    websitePricing: {
+      brandCode: brand,
+      siteCode: brand,
+      locale: PRODUCT_DETAIL_LOCALE,
+      priceDisplayMode: text(draft.websitePriceDisplayMode) || 'not_shown',
+      ...(websitePrice !== undefined ? { websitePrice } : {}),
+      ...(websitePriceMin !== undefined ? { websitePriceMin } : {}),
+      ...(websitePriceMax !== undefined ? { websitePriceMax } : {}),
+      ...(promoPrice !== undefined ? { promoPrice } : {}),
+      currency: text(draft.currency) || 'CNY',
+      priceUnit: text(draft.priceUnit),
+      priceLabel: text(draft.priceLabel),
+      priceNote: text(draft.priceNote),
+      taxIncluded: draft.taxIncluded,
+    },
     lifecycleStage: text(draft.lifecycleStage) || 'intro',
     primaryCategoryId,
     categoryLevel1Id,
@@ -1544,6 +2008,14 @@ function createProductPayload(
   const websitePriceMin = optionalNonNegativeNumber(draft.websitePriceMin);
   const websitePriceMax = optionalNonNegativeNumber(draft.websitePriceMax);
   const promoPrice = optionalNonNegativeNumber(draft.promoPrice);
+  const lengthMm = nullableNonNegativeNumber(draft.lengthMm);
+  const widthMm = nullableNonNegativeNumber(draft.widthMm);
+  const heightMm = nullableNonNegativeNumber(draft.heightMm);
+  const netWeightKg = nullableNonNegativeNumber(draft.netWeightKg);
+  const packageLengthMm = nullableNonNegativeNumber(draft.packageLengthMm);
+  const packageWidthMm = nullableNonNegativeNumber(draft.packageWidthMm);
+  const packageHeightMm = nullableNonNegativeNumber(draft.packageHeightMm);
+  const grossWeightKg = nullableNonNegativeNumber(draft.grossWeightKg);
   const technicalSpecs = parseKeyValueLines(draft.technicalSpecs);
   const sellingPoints = splitLines(draft.sellingPoints);
   const applicationScenarios = splitLines(draft.applicationScenarios);
@@ -1571,6 +2043,14 @@ function createProductPayload(
     } : {}),
     ...(listPrice !== undefined ? { listPrice } : {}),
     ...(costPrice !== undefined ? { costPrice } : {}),
+    lengthMm,
+    widthMm,
+    heightMm,
+    netWeightKg,
+    packageLengthMm,
+    packageWidthMm,
+    packageHeightMm,
+    grossWeightKg,
     currency: text(draft.currency) || 'CNY',
     websitePricing: {
       brandCode: brand,
@@ -1819,6 +2299,7 @@ function ProductsContent() {
   const [pageSize, setPageSize] = useState(20);
   const [catalogPage, setCatalogPage] = useState(1);
   const [productPermissions, setProductPermissions] = useState<BrandProductPermissions>(EMPTY_BRAND_PRODUCT_PERMISSIONS);
+  const [permissionsReady, setPermissionsReady] = useState(false);
   const [actionNotice, setActionNotice] = useState('');
   const { data: brandSiteData } = useSWR('/api/v2/brand-sites', () => brandSites.list(), { revalidateOnFocus: false });
   const createBrandOptions = useMemo(() => brandOptionsFromSites(brandSiteData), [brandSiteData]);
@@ -1878,6 +2359,9 @@ function ProductsContent() {
       })
       .catch(() => {
         if (!cancelled) setProductPermissions(EMPTY_BRAND_PRODUCT_PERMISSIONS);
+      })
+      .finally(() => {
+        if (!cancelled) setPermissionsReady(true);
       });
     return () => {
       cancelled = true;
@@ -1885,7 +2369,7 @@ function ProductsContent() {
   }, []);
 
   function setModule(nextModule: ProductModule) {
-    router.push(nextModule === 'catalog' ? '/products?module=catalog' : `/products?module=${nextModule}`);
+    router.push(nextModule === 'dashboard' ? '/products' : `/products?module=${nextModule}`);
   }
 
   const liveProductList = useMemo(() => {
@@ -2023,6 +2507,10 @@ function ProductsContent() {
   }, [assignmentsByProductKey, visibleCatalogProducts]);
 
   const catalogTotalPages = Math.max(Math.ceil(visibleCatalogProducts.length / pageSize), 1);
+  const productDataConsoleProducts = useMemo(
+    () => sortProductsByStatusThenOrder(liveProductList),
+    [liveProductList]
+  );
 
   const pagedCatalogProducts = useMemo(() => {
     const safePage = Math.min(Math.max(catalogPage, 1), catalogTotalPages);
@@ -2116,6 +2604,902 @@ function ProductsContent() {
           border-top: 1px solid var(--border);
           background: var(--surface-2);
         }
+        .product-edit-backdrop {
+          background:
+            radial-gradient(circle at 20% 12%, rgba(255,255,255,.28), transparent 32%),
+            rgba(15, 23, 42, .54) !important;
+        }
+        .product-edit-modal {
+          border-radius: 14px !important;
+          border-color: rgba(15, 23, 42, .14) !important;
+          background: #f8fafc !important;
+          box-shadow: 0 28px 72px rgba(15, 23, 42, .24), 0 2px 8px rgba(15, 23, 42, .08) !important;
+        }
+        .product-edit-modal-head {
+          padding: 18px 22px !important;
+          background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+          border-bottom-color: rgba(15, 23, 42, .10) !important;
+        }
+        .product-edit-modal-head h2 {
+          margin: 3px 0 4px;
+          color: var(--t-primary);
+          font-size: 20px;
+          line-height: 1.25;
+          font-weight: 900;
+          letter-spacing: 0;
+        }
+        .product-edit-modal-head span {
+          color: var(--t-secondary);
+          font-size: 13px;
+          line-height: 1.45;
+        }
+        .product-edit-modal-body {
+          padding: 18px 22px 22px !important;
+          gap: 16px !important;
+          background: #f8fafc;
+        }
+        .product-edit-modal-actions {
+          padding: 14px 22px !important;
+          border-top-color: rgba(15, 23, 42, .10) !important;
+          background: rgba(255,255,255,.94) !important;
+          backdrop-filter: blur(12px);
+        }
+        .product-edit-section {
+          gap: 14px !important;
+          padding: 16px;
+          border: 1px solid rgba(15, 23, 42, .10);
+          border-radius: 10px;
+          background: #ffffff;
+          box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+          scroll-margin-top: 12px;
+        }
+        .product-edit-section-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 12px;
+          min-width: 0;
+          padding-bottom: 10px;
+          border-bottom: 1px solid rgba(15, 23, 42, .07);
+        }
+        .product-edit-section-head h3 {
+          margin: 0;
+          color: var(--t-primary);
+          font-size: 15px;
+          line-height: 1.35;
+          font-weight: 900;
+          letter-spacing: 0;
+        }
+        .product-edit-section-head .badge {
+          flex: 0 0 auto;
+        }
+        .product-edit-field-grid {
+          gap: 14px !important;
+        }
+        .product-edit-field-grid label {
+          min-width: 0;
+        }
+        .product-edit-field-grid .t-label {
+          color: var(--t-secondary);
+          font-size: 11px;
+          font-weight: 800;
+        }
+        .product-edit-modal .input {
+          min-height: 38px;
+          border-color: rgba(15, 23, 42, .16);
+          border-radius: 7px;
+          background: #fff;
+          box-shadow: 0 1px 1px rgba(15, 23, 42, .03);
+        }
+        .product-edit-modal textarea.input {
+          min-height: 108px;
+          line-height: 1.55;
+        }
+        .product-edit-modal .input:focus {
+          border-color: rgba(200, 32, 44, .45);
+          box-shadow: 0 0 0 3px rgba(200, 32, 44, .10);
+        }
+        .product-edit-modal .input:disabled,
+        .product-edit-modal .input[readonly] {
+          background: #f3f5f7;
+          color: var(--t-secondary);
+          box-shadow: none;
+        }
+        .product-edit-modal .inset {
+          border-color: rgba(15, 23, 42, .09);
+          border-radius: 8px;
+          background: #f6f8fa;
+        }
+        .product-edit-media-panel {
+          padding: 12px;
+          border: 1px solid rgba(15, 23, 42, .09);
+          border-radius: 10px;
+          background: #f8fafc;
+        }
+        .product-edit-media-thumb {
+          border: 1px solid rgba(15, 23, 42, .12);
+          border-radius: 9px;
+          background:
+            linear-gradient(45deg, rgba(15,23,42,.04) 25%, transparent 25%),
+            linear-gradient(-45deg, rgba(15,23,42,.04) 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, rgba(15,23,42,.04) 75%),
+            linear-gradient(-45deg, transparent 75%, rgba(15,23,42,.04) 75%),
+            #fff;
+          background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+          background-size: 16px 16px;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+        }
+        .product-edit-check-item {
+          padding: 12px;
+          border: 1px solid rgba(15, 23, 42, .09);
+          border-radius: 8px;
+          background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,.76);
+        }
+        .product-edit-progress {
+          display: grid;
+          grid-template-columns: minmax(220px, 270px) minmax(0, 1fr);
+          gap: 14px;
+          align-items: stretch;
+          padding: 14px;
+          border: 1px solid rgba(15, 23, 42, .10);
+          border-radius: 10px;
+          background: linear-gradient(135deg, #ffffff 0%, #f7f9fb 54%, #fff7f8 100%);
+          box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+        }
+        .product-edit-progress__summary {
+          display: grid;
+          align-content: space-between;
+          gap: 10px;
+          min-width: 0;
+          padding: 12px;
+          border-radius: 8px;
+          background: #ffffff;
+          border: 1px solid rgba(15, 23, 42, .08);
+          box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+        }
+        .product-edit-progress__summary p,
+        .product-edit-progress__summary strong,
+        .product-edit-progress__summary span {
+          margin: 0;
+        }
+        .product-edit-progress__summary strong {
+          display: block;
+          color: var(--t-primary);
+          font-size: 28px;
+          line-height: 1.1;
+          letter-spacing: 0;
+        }
+        .product-edit-progress__summary > div:first-child > span {
+          color: var(--t-secondary);
+          font-size: 12px;
+        }
+        .product-edit-progress__bar {
+          height: 6px;
+          overflow: hidden;
+          border-radius: 999px;
+          background: rgba(15, 23, 42, .08);
+        }
+        .product-edit-progress__bar span {
+          display: block;
+          height: 100%;
+          border-radius: inherit;
+          background: var(--brand-500, var(--brand));
+        }
+        .product-edit-progress__items {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 156px), 1fr));
+          gap: 8px;
+          min-width: 0;
+        }
+        .product-edit-progress__item {
+          display: flex;
+          gap: 8px;
+          align-items: flex-start;
+          min-width: 0;
+          padding: 10px 11px;
+          border: 1px solid rgba(15, 23, 42, .08);
+          border-radius: 8px;
+          background: rgba(255,255,255,.86);
+          color: var(--t-secondary);
+          cursor: pointer;
+          text-align: left;
+          appearance: none;
+          transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease, background-color 150ms ease;
+        }
+        .product-edit-progress__item:hover {
+          border-color: rgba(200, 32, 44, .28);
+          box-shadow: 0 4px 12px rgba(15, 23, 42, .08);
+          transform: translateY(-1px);
+        }
+        .product-edit-progress__item:focus-visible {
+          outline: 3px solid rgba(200, 32, 44, .16);
+          outline-offset: 2px;
+        }
+        .product-edit-progress__item:active {
+          transform: translateY(0);
+          box-shadow: 0 1px 3px rgba(15, 23, 42, .08);
+        }
+        .product-edit-progress__item.is-ready {
+          border-color: rgba(34, 197, 94, .22);
+          background: rgba(240, 253, 244, .72);
+        }
+        .product-edit-progress__item.is-todo,
+        .product-edit-progress__item.is-blocked {
+          border-color: rgba(245, 158, 11, .24);
+          background: rgba(255, 251, 235, .72);
+        }
+        .product-edit-progress__item svg {
+          flex: 0 0 auto;
+          margin-top: 2px;
+        }
+        .product-edit-progress__item.is-ready svg {
+          color: var(--success);
+        }
+        .product-edit-progress__item.is-todo svg,
+        .product-edit-progress__item.is-blocked svg {
+          color: var(--warning);
+        }
+        .product-edit-progress__item div {
+          display: grid;
+          gap: 3px;
+          min-width: 0;
+        }
+        .product-edit-progress__item strong {
+          color: var(--t-primary);
+          font-size: 12px;
+          line-height: 1.35;
+        }
+        .product-edit-progress__item span {
+          color: var(--t-tertiary);
+          font-size: 11px;
+          line-height: 1.35;
+          overflow-wrap: anywhere;
+        }
+        .product-readiness-checklist {
+          display: grid;
+          gap: 12px;
+          padding: 14px;
+          border: 1px solid rgba(15, 23, 42, .10);
+          border-radius: 10px;
+          background: #ffffff;
+          box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+        }
+        .product-readiness-checklist.is-compact {
+          padding: 12px;
+          background: #f8fafc;
+        }
+        .product-readiness-checklist__head {
+          display: flex;
+          justify-content: space-between;
+          gap: 12px;
+          align-items: flex-start;
+          min-width: 0;
+        }
+        .product-readiness-checklist__head div {
+          display: grid;
+          gap: 3px;
+          min-width: 0;
+        }
+        .product-readiness-checklist__head p,
+        .product-readiness-checklist__head strong,
+        .product-readiness-checklist__head span {
+          margin: 0;
+        }
+        .product-readiness-checklist__head strong {
+          color: var(--t-primary);
+          font-size: 16px;
+          line-height: 1.35;
+          font-weight: 900;
+        }
+        .product-readiness-checklist__head div > span {
+          color: var(--t-secondary);
+          font-size: 12px;
+        }
+        .product-readiness-checklist__grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+          gap: 8px;
+        }
+        .product-readiness-checklist__item {
+          display: flex;
+          gap: 9px;
+          align-items: flex-start;
+          min-width: 0;
+          min-height: 62px;
+          padding: 10px 11px;
+          border: 1px solid rgba(15, 23, 42, .08);
+          border-radius: 8px;
+          background: #fff;
+          color: var(--t-secondary);
+          cursor: pointer;
+          text-align: left;
+          appearance: none;
+          transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+        }
+        .product-readiness-checklist__item:hover {
+          border-color: rgba(15, 23, 42, .18);
+          box-shadow: 0 4px 12px rgba(15, 23, 42, .07);
+          transform: translateY(-1px);
+        }
+        .product-readiness-checklist__item:focus-visible {
+          outline: 3px solid rgba(200, 32, 44, .16);
+          outline-offset: 2px;
+        }
+        .product-readiness-checklist__item.is-success {
+          border-color: rgba(34, 197, 94, .22);
+          background: rgba(240, 253, 244, .72);
+        }
+        .product-readiness-checklist__item.is-warning {
+          border-color: rgba(245, 158, 11, .28);
+          background: rgba(255, 251, 235, .78);
+        }
+        .product-readiness-checklist__item.is-info {
+          border-color: rgba(59, 130, 246, .18);
+          background: rgba(239, 246, 255, .72);
+        }
+        .product-readiness-checklist__item svg {
+          flex: 0 0 auto;
+          margin-top: 2px;
+        }
+        .product-readiness-checklist__item.is-success svg {
+          color: var(--success);
+        }
+        .product-readiness-checklist__item.is-warning svg {
+          color: var(--warning);
+        }
+        .product-readiness-checklist__item.is-info svg {
+          color: var(--brand-500, var(--brand));
+        }
+        .product-readiness-checklist__item div {
+          display: grid;
+          gap: 4px;
+          min-width: 0;
+        }
+        .product-readiness-checklist__item span {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          min-width: 0;
+        }
+        .product-readiness-checklist__item strong {
+          color: var(--t-primary);
+          font-size: 12px;
+          line-height: 1.35;
+          font-weight: 900;
+        }
+        .product-readiness-checklist__item em {
+          flex: 0 0 auto;
+          padding: 2px 5px;
+          border-radius: 999px;
+          border: 1px solid rgba(15, 23, 42, .10);
+          background: rgba(255,255,255,.72);
+          color: var(--t-secondary);
+          font-size: 10px;
+          line-height: 1;
+          font-style: normal;
+          font-weight: 900;
+        }
+        .product-readiness-checklist__item small {
+          color: var(--t-tertiary);
+          font-size: 11px;
+          line-height: 1.35;
+          overflow-wrap: anywhere;
+        }
+        .product-data-console {
+          display: grid;
+          gap: 16px;
+        }
+        .product-data-console-hero {
+          display: grid;
+          grid-template-columns: minmax(0, 1.2fr) minmax(280px, .55fr);
+          gap: 18px;
+          padding: 22px;
+          border: 1px solid rgba(15, 23, 42, .12);
+          border-radius: var(--r-lg);
+          background: linear-gradient(135deg, #101828 0%, #1f2937 54%, #3a0f16 100%);
+          box-shadow: var(--sh-md);
+          color: #fff;
+        }
+        .product-data-console-hero h2 {
+          margin: 4px 0 0;
+          color: #fff;
+          font-size: 26px;
+          line-height: 1.2;
+          font-weight: 900;
+        }
+        .product-data-console-hero span {
+          display: block;
+          margin-top: 8px;
+          color: rgba(255,255,255,.72);
+          font-size: 13px;
+          line-height: 1.5;
+        }
+        .product-data-console-hero .t-label {
+          color: rgba(255,255,255,.68);
+        }
+        .product-data-console-hero__verdict {
+          display: grid;
+          gap: 8px;
+          align-content: center;
+          padding: 14px;
+          border: 1px solid rgba(255,255,255,.16);
+          border-radius: var(--r-md);
+          background: rgba(255,255,255,.08);
+        }
+        .product-data-console-hero__verdict strong {
+          color: #fff;
+          font-size: 20px;
+          line-height: 1.25;
+          font-weight: 900;
+        }
+        .product-data-console-hero__verdict small {
+          color: rgba(255,255,255,.70);
+          font-size: 12px;
+          line-height: 1.45;
+        }
+        .product-data-console-metrics {
+          display: grid;
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          gap: 0;
+          overflow: hidden;
+          border: 1px solid var(--border);
+          border-radius: var(--r-lg);
+          background: var(--surface-1);
+          box-shadow: var(--sh-xs);
+        }
+        .product-data-console-metric {
+          display: grid;
+          gap: 5px;
+          min-width: 0;
+          padding: 16px;
+          border-right: 1px solid var(--border);
+          background: transparent;
+        }
+        .product-data-console-metric:last-child {
+          border-right: 0;
+        }
+        .product-data-console-metric span,
+        .product-data-console-metric small {
+          color: var(--t-secondary);
+          font-size: 12px;
+          line-height: 1.35;
+        }
+        .product-data-console-metric strong {
+          color: var(--t-primary);
+          font-size: 28px;
+          line-height: 1.05;
+          font-weight: 900;
+          font-variant-numeric: tabular-nums;
+        }
+        .product-data-console-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1.3fr) minmax(360px, .75fr);
+          gap: 14px;
+          align-items: start;
+        }
+        .product-data-console-panel {
+          display: grid;
+          gap: 12px;
+          min-width: 0;
+          padding: 16px;
+          border: 1px solid var(--border);
+          border-radius: var(--r-lg);
+          background: var(--surface-1);
+          box-shadow: var(--sh-xs);
+        }
+        .product-data-console-panel__head {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12px;
+        }
+        .product-data-console-panel__head h3 {
+          margin: 3px 0 0;
+          color: var(--t-primary);
+          font-size: 16px;
+          line-height: 1.3;
+          font-weight: 900;
+        }
+        .product-data-console-list {
+          display: grid;
+          gap: 8px;
+        }
+        .product-data-console-bars {
+          display: grid;
+          gap: 10px;
+        }
+        .product-data-console-bar {
+          display: grid;
+          gap: 6px;
+        }
+        .product-data-console-bar__meta {
+          display: flex;
+          justify-content: space-between;
+          gap: 10px;
+          color: var(--t-secondary);
+          font-size: 12px;
+          font-weight: 800;
+        }
+        .product-data-console-bar__track {
+          height: 9px;
+          overflow: hidden;
+          border-radius: 999px;
+          background: var(--surface-2);
+          border: 1px solid var(--border);
+        }
+        .product-data-console-bar__track span {
+          display: block;
+          height: 100%;
+          border-radius: inherit;
+          background: var(--brand);
+        }
+        .product-data-console-bar.is-warning .product-data-console-bar__track span {
+          background: var(--warning);
+        }
+        .product-data-console-bar.is-danger .product-data-console-bar__track span {
+          background: var(--danger);
+        }
+        .product-data-console-funnel {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 8px;
+        }
+        .product-data-console-funnel div {
+          display: grid;
+          gap: 4px;
+          padding: 12px;
+          border: 1px solid var(--border);
+          border-radius: var(--r-md);
+          background: var(--surface-2);
+        }
+        .product-data-console-funnel span {
+          color: var(--t-secondary);
+          font-size: 12px;
+          line-height: 1.35;
+        }
+        .product-data-console-funnel strong {
+          color: var(--t-primary);
+          font-size: 22px;
+          line-height: 1.1;
+          font-weight: 900;
+          font-variant-numeric: tabular-nums;
+        }
+        .product-data-console-row {
+          display: grid;
+          grid-template-columns: 48px minmax(0, 1.4fr) minmax(190px, .7fr) auto;
+          gap: 12px;
+          align-items: center;
+          min-width: 0;
+          padding: 10px;
+          border: 1px solid var(--border);
+          border-radius: var(--r-md);
+          background: var(--surface-2);
+        }
+        .product-data-console-row__image {
+          width: 48px;
+          aspect-ratio: 1 / 1;
+          display: grid;
+          place-items: center;
+          overflow: hidden;
+          border: 1px solid var(--border);
+          border-radius: var(--r-sm);
+          background: var(--surface-1);
+          color: var(--t-tertiary);
+        }
+        .product-data-console-row__image img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .product-data-console-row__main,
+        .product-data-console-row__status {
+          display: grid;
+          gap: 4px;
+          min-width: 0;
+        }
+        .product-data-console-row__main strong {
+          color: var(--t-primary);
+          font-size: 14px;
+          line-height: 1.35;
+          font-weight: 900;
+        }
+        .product-data-console-row__main span,
+        .product-data-console-row__main small,
+        .product-data-console-row__status span,
+        .product-data-console-row__status small {
+          color: var(--t-secondary);
+          font-size: 12px;
+          line-height: 1.35;
+          overflow-wrap: anywhere;
+        }
+        .product-data-console-row__tags {
+          display: flex;
+          gap: 5px;
+          flex-wrap: wrap;
+        }
+        .product-data-console-health {
+          display: grid;
+          gap: 8px;
+        }
+        .product-data-console-health div {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          min-height: 40px;
+          padding: 9px 11px;
+          border: 1px solid var(--border);
+          border-radius: var(--r-sm);
+          background: var(--surface-2);
+        }
+        .product-data-console-health span {
+          color: var(--t-secondary);
+          font-size: 12px;
+        }
+        .product-data-console-health strong {
+          color: var(--t-primary);
+          font-size: 18px;
+          font-weight: 900;
+          font-variant-numeric: tabular-nums;
+        }
+        .product-catalog-filterline {
+          display: grid;
+          grid-template-columns: minmax(280px, 1fr) 160px 170px 190px auto;
+          gap: 8px;
+          align-items: center;
+          width: 100%;
+        }
+        .product-catalog-filterline > select {
+          width: 100%;
+          min-width: 0;
+        }
+        .product-catalog-search {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          min-width: 0;
+        }
+        .product-catalog-shell {
+          overflow: hidden;
+          max-width: 100%;
+          border: 1px solid rgba(15, 23, 42, .10);
+          border-radius: 10px;
+          background: #ffffff;
+          box-shadow: 0 1px 2px rgba(15, 23, 42, .04), 0 10px 30px rgba(15, 23, 42, .04);
+        }
+        .product-catalog-commandbar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          padding: 16px 18px;
+          border-bottom: 1px solid rgba(15, 23, 42, .09);
+          background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+        }
+        .product-catalog-commandbar__main {
+          display: grid;
+          gap: 4px;
+          min-width: 0;
+        }
+        .product-catalog-commandbar__main p {
+          margin: 0;
+          color: var(--brand);
+          font-size: 12px;
+          font-weight: 900;
+          line-height: 1.2;
+        }
+        .product-catalog-commandbar__main h2 {
+          margin: 0;
+          color: var(--t-primary);
+          font-size: 20px;
+          line-height: 1.25;
+          font-weight: 900;
+          letter-spacing: 0;
+        }
+        .product-catalog-commandbar__main span {
+          color: var(--t-secondary);
+          font-size: 12px;
+          line-height: 1.45;
+          overflow-wrap: anywhere;
+        }
+        .product-catalog-commandbar__meta {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+        .product-catalog-workqueue {
+          display: grid;
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+          gap: 0;
+          padding: 0 18px;
+          border-bottom: 1px solid rgba(15, 23, 42, .09);
+          background: #ffffff;
+        }
+        .product-catalog-workqueue button {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) auto;
+          gap: 2px 8px;
+          align-items: center;
+          min-width: 0;
+          min-height: 58px;
+          padding: 10px 12px 9px;
+          border: 0;
+          border-right: 1px solid rgba(15, 23, 42, .08);
+          border-bottom: 2px solid transparent;
+          border-radius: 0;
+          background: transparent;
+          color: var(--t-secondary);
+          text-align: left;
+          cursor: pointer;
+          transition: background .16s ease, border-color .16s ease;
+        }
+        .product-catalog-workqueue button:first-child {
+          border-left: 1px solid rgba(15, 23, 42, .08);
+        }
+        .product-catalog-workqueue button:hover,
+        .product-catalog-workqueue button:focus-visible {
+          border-bottom-color: rgba(200,32,44,.35);
+          background: #fbfcfd;
+          outline: none;
+        }
+        .product-catalog-workqueue button.is-active {
+          border-bottom-color: var(--brand);
+          background: rgba(200,32,44,.045);
+        }
+        .product-catalog-workqueue span {
+          color: var(--t-primary);
+          font-size: 12px;
+          font-weight: 900;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .product-catalog-workqueue strong {
+          color: var(--t-primary);
+          font-size: 18px;
+          line-height: 1;
+          font-weight: 900;
+          font-variant-numeric: tabular-nums;
+        }
+        .product-catalog-workqueue small {
+          grid-column: 1 / -1;
+          color: var(--t-tertiary);
+          font-size: 11px;
+          line-height: 1.25;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .product-catalog-feedback {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          min-height: 42px;
+          padding: 9px 18px;
+          border-bottom: 1px solid rgba(15, 23, 42, .09);
+          background: #f8fafc;
+        }
+        .product-catalog-feedback strong {
+          color: var(--t-primary);
+          font-size: 12px;
+          line-height: 1.35;
+        }
+        .product-catalog-feedback span {
+          color: var(--t-secondary);
+          font-size: 12px;
+          line-height: 1.35;
+        }
+        .product-catalog-table {
+          border-collapse: separate;
+          border-spacing: 0;
+        }
+        .product-catalog-table th {
+          height: 34px;
+          padding-top: 7px !important;
+          padding-bottom: 7px !important;
+          font-size: 11px;
+          line-height: 1.2;
+          white-space: nowrap;
+          background: #f8fafc;
+        }
+        .product-catalog-table td {
+          padding-top: 9px !important;
+          padding-bottom: 9px !important;
+          vertical-align: middle;
+          line-height: 1.35;
+        }
+        .product-catalog-table h3 {
+          font-size: 14px !important;
+          line-height: 1.25 !important;
+          -webkit-line-clamp: 1 !important;
+        }
+        .product-catalog-table .badge,
+        .product-catalog-table .pill-brand {
+          min-height: 22px;
+          padding-top: 2px;
+          padding-bottom: 2px;
+          line-height: 1.2;
+        }
+        .product-catalog-table .mono-cell {
+          font-size: 12px;
+        }
+        .product-catalog-image-preview {
+          width: 34px !important;
+          height: 32px !important;
+          border-radius: 6px !important;
+        }
+        .product-catalog-website-cell {
+          gap: 3px !important;
+          min-width: 210px !important;
+          max-width: 310px;
+        }
+        .product-catalog-website-cell__status {
+          gap: 4px !important;
+        }
+        .product-catalog-website-cell__path,
+        .product-catalog-website-cell__slug,
+        .product-catalog-website-cell__next {
+          display: block;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          line-height: 1.25;
+        }
+        .product-catalog-table .product-catalog-website-cell__slug,
+        .product-catalog-table .product-catalog-website-cell__next {
+          display: none;
+        }
+        .product-catalog-row-actions {
+          gap: 6px !important;
+          justify-content: flex-end;
+          flex-wrap: nowrap !important;
+        }
+        .product-catalog-row-actions .btn {
+          min-height: 32px;
+          height: 32px;
+          padding: 0 10px;
+          font-size: 12px;
+          white-space: nowrap;
+        }
+        @media (max-width: 760px) {
+          .product-data-console-hero,
+          .product-data-console-panel__head {
+            grid-template-columns: 1fr;
+          }
+          .product-data-console-metrics,
+          .product-data-console-layout,
+          .product-data-console-funnel,
+          .product-data-console-row,
+          .product-catalog-filterline,
+          .product-catalog-commandbar,
+          .product-catalog-workqueue {
+            grid-template-columns: 1fr;
+          }
+          .product-catalog-commandbar {
+            display: grid;
+          }
+          .product-catalog-commandbar__meta {
+            justify-content: flex-start;
+          }
+          .product-data-console-metric {
+            border-right: 0;
+            border-bottom: 1px solid var(--border);
+          }
+          .product-edit-progress {
+            grid-template-columns: 1fr;
+          }
+          .product-edit-media-panel {
+            grid-template-columns: 1fr !important;
+          }
+          .product-edit-media-thumb {
+            width: min(180px, 100%) !important;
+          }
+        }
       `}</style>
       <div
         className="page-container products-page"
@@ -2126,56 +3510,19 @@ function ProductsContent() {
           width: '100%',
         }}
       >
-        <WorkbenchSectionHeader
-          eyebrow="营销工作台"
-          title="产品库管理"
-          description="产品库、产品资料和目录底座共用同一套筛选、产品库状态与内容管理入口。"
-          actions={
-            <div
-              style={{
-                display: 'flex',
-                gap: 3,
-                padding: 3,
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--r-xl)',
-                background: 'var(--surface-1)',
-                boxShadow: 'var(--sh-xs)',
-                flexWrap: 'wrap',
-                maxWidth: '100%',
-              }}
-            >
-              <ModeButton active={activeModule === 'catalog'} onClick={() => setModule('catalog')}>
-                <Package size={14} />
-                单品
-              </ModeButton>
-              <ModeButton active={activeModule === 'materials'} onClick={() => setModule('materials')}>
-                <FileText size={14} />
-                产品资料
-              </ModeButton>
-              <ModeButton active={activeModule === 'base'} onClick={() => setModule('base')}>
-                <Boxes size={14} />
-                目录底座
-              </ModeButton>
-              <ModeButton active={activeModule === 'categories'} onClick={() => router.push('/master-data/categories')}>
-                <FolderOpen size={14} />
-                分类管理
-              </ModeButton>
-            </div>
-          }
-        />
+        {activeModule !== 'dashboard' && activeModule !== 'catalog' ? (
+          <WorkbenchSectionHeader
+            eyebrow="营销工作台"
+            title={activeModule === 'materials' ? '产品资料管理' : '产品目录底座'}
+            description="产品库 CRUD、产品资料和目录底座继续作为独立管理入口保留。"
+          />
+        ) : null}
 
-        {activeModule !== 'categories' && (
+        {activeModule === 'catalog' && (
           <>
-            <section className="g4" style={{ gap: 12 }}>
-              <Metric label="产品编码" value={String(stats.total)} hint="产品库单品" />
-              <Metric label="现货产品" value={String(stats.stock)} hint="可直接纳入报价" />
-              <Metric label="新品" value={String(stats.newest)} hint="建议优先推荐" />
-              <Metric label="平均毛利" value={pct(stats.avgMargin)} hint="按指导价估算" />
-            </section>
-
             <WorkbenchFilterToolbar>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', width: '100%' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: '1 1 260px', minWidth: 240 }}>
+              <div className="product-catalog-filterline">
+                <div className="product-catalog-search">
                   <Search size={16} style={{ color: 'var(--t-tertiary)', flexShrink: 0 }} />
                   <input
                     className="input"
@@ -2185,65 +3532,58 @@ function ProductsContent() {
                     style={{ width: '100%', minWidth: 0 }}
                   />
                 </div>
-                {activeModule === 'catalog' && (
-                  <>
-                    <select
-                      className="input"
-                      value={brandFilter}
-                      onChange={(event) => setBrandFilter(event.target.value)}
-                      aria-label="产品库品牌筛选"
-                      style={{ width: 160 }}
+                <select
+                  className="input"
+                  value={brandFilter}
+                  onChange={(event) => setBrandFilter(event.target.value)}
+                  aria-label="产品库品牌筛选"
+                >
+                  {brandOptions.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="input"
+                  value={statusFilter}
+                  onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+                  aria-label="产品库状态筛选"
+                >
+                  {STATUS_OPTIONS.map((item) => (
+                    <option key={item.value} value={item.value}>
+                      {statusFilterCounts ? `${item.label} (${statusFilterCounts[item.value] ?? 0})` : item.label}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  className="input"
+                  value={category}
+                  onChange={(event) => setCategory(event.target.value as CatalogCategoryFilter)}
+                  aria-label="产品库分类筛选"
+                >
+                  <option value="all">全部产品库分类</option>
+                  {catalogCategoryOptions.map((item, index) => (
+                    <option key={`${item.value || item.label}-${index}`} value={item.value}>
+                      {item.label}
+                    </option>
+                  ))}
+                </select>
+                {batchFilter ? (
+                  <span className="badge badge-info" style={{ display: 'inline-flex', gap: 6, alignItems: 'center', maxWidth: 260 }}>
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>试导入批次：{batchFilter}</span>
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm"
+                      onClick={() => setBatchFilter('')}
+                      aria-label="清除试导入批次筛选"
+                      title="清除试导入批次筛选"
+                      style={{ width: 24, minWidth: 24, height: 24, padding: 0 }}
                     >
-                      {brandOptions.map((item) => (
-                        <option key={item.value} value={item.value}>
-                          {item.label}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      className="input"
-                      value={statusFilter}
-                      onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
-                      aria-label="产品库状态筛选"
-                      style={{ width: 170 }}
-                    >
-                      {STATUS_OPTIONS.map((item) => (
-                        <option key={item.value} value={item.value}>
-                          {statusFilterCounts ? `${item.label} (${statusFilterCounts[item.value] ?? 0})` : item.label}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      className="input"
-                      value={category}
-                      onChange={(event) => setCategory(event.target.value as CatalogCategoryFilter)}
-                      aria-label="产品库分类筛选"
-                      style={{ width: 180 }}
-                    >
-                      <option value="all">全部产品库分类</option>
-                      {catalogCategoryOptions.map((item, index) => (
-                        <option key={`${item.value || item.label}-${index}`} value={item.value}>
-                          {item.label}
-                        </option>
-                      ))}
-                    </select>
-                    {batchFilter ? (
-                      <span className="badge badge-info" style={{ display: 'inline-flex', gap: 6, alignItems: 'center', maxWidth: 260 }}>
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>试导入批次：{batchFilter}</span>
-                        <button
-                          type="button"
-                          className="btn btn-ghost btn-sm"
-                          onClick={() => setBatchFilter('')}
-                          aria-label="清除试导入批次筛选"
-                          title="清除试导入批次筛选"
-                          style={{ width: 24, minWidth: 24, height: 24, padding: 0 }}
-                        >
-                          <X size={13} />
-                        </button>
-                      </span>
-                    ) : null}
-                  </>
-                )}
+                      <X size={13} />
+                    </button>
+                  </span>
+                ) : null}
                 <span
                   className={error ? 'badge badge-warning' : 'badge badge-success'}
                   title={error ? String(error.message || error) : undefined}
@@ -2256,9 +3596,18 @@ function ProductsContent() {
           </>
         )}
 
-        {activeModule === 'catalog' ? (
+        {activeModule === 'dashboard' ? (
+          <ProductDataConsole
+            products={productDataConsoleProducts}
+            assignmentByProductKey={assignmentsByProductKey}
+            isLoading={isLoading}
+            error={error}
+            onOpenCatalog={() => setModule('catalog')}
+          />
+        ) : activeModule === 'catalog' ? (
           <ProductCatalogShell
             products={pagedCatalogProducts}
+            allProducts={visibleCatalogProducts}
             total={visibleCatalogProducts.length}
             currentPage={Math.min(catalogPage, catalogTotalPages)}
             totalPages={catalogTotalPages}
@@ -2266,6 +3615,7 @@ function ProductsContent() {
             pageSizeOptions={PRODUCT_PAGE_SIZE_OPTIONS}
             isLoading={isLoading}
             error={error}
+            permissionsReady={permissionsReady}
             canCreateProduct={productPermissions.canCreateProduct}
             canUpdateProduct={productPermissions.canUpdateProduct}
             canPublishProduct={productPermissions.canPublishProduct}
@@ -2403,8 +3753,386 @@ function CategoryCountPill({ label, value, tone = 'neutral' }: { label: string; 
   );
 }
 
+type ProductDataConsoleIssue = 'missingData' | 'missingImage' | 'missingDirectory' | 'pendingPublish' | 'websiteRisk';
+type ProductCatalogWorkFilter = 'all' | 'admission' | 'directory' | 'publish' | 'review' | 'healthy';
+const PRODUCT_CATALOG_WORK_FILTER_LABELS: Record<ProductCatalogWorkFilter, string> = {
+  all: '全部产品',
+  admission: '发布准入未达',
+  directory: '官网目录未承接',
+  publish: '待发布',
+  review: '公开复核',
+  healthy: '发布健康',
+};
+type ProductDataConsoleItem = {
+  product: NormalizedProduct;
+  assignments: WebsiteShelfAssignment[];
+  readiness: ReturnType<typeof productReadinessSummary>;
+  issues: ProductDataConsoleIssue[];
+  primaryAction: string;
+  nextStep: string;
+};
+
+function productDataConsoleItems(
+  products: NormalizedProduct[],
+  assignmentByProductKey: Map<string, WebsiteShelfAssignment[]>,
+): ProductDataConsoleItem[] {
+  return products.map((product) => {
+    const assignments = assignmentsForProduct(assignmentByProductKey, product);
+    const activeAssignments = activeWebsiteAssignments(assignments);
+    const publishedAssignments = activeAssignments.filter((assignment) => assignment.status === 'published');
+    const readiness = productReadinessSummary(product);
+    const publishReadiness = productPublishRequiredReadiness(product);
+    const imageSrc = productImageSrc(product);
+    const issues: ProductDataConsoleIssue[] = [];
+    if (!publishReadiness.ready) issues.push('missingData');
+    if (!activeAssignments.length) issues.push('missingDirectory');
+    if (activeAssignments.length && !publishedAssignments.length) issues.push('pendingPublish');
+    if (activeAssignments.length > publishedAssignments.length && publishedAssignments.length > 0) issues.push('websiteRisk');
+
+    const primaryAction = issues.includes('missingData') || issues.includes('missingImage')
+      ? '补齐资料'
+      : issues.includes('missingDirectory')
+        ? '配置官网目录'
+        : issues.includes('pendingPublish')
+          ? '发布到官网'
+          : issues.includes('websiteRisk')
+            ? '检查官网'
+            : '查看详情';
+    const nextStep = issues.includes('missingData')
+      ? `发布必填项待补：${publishReadiness.missing.slice(0, 3).join('、')}${publishReadiness.missing.length > 3 ? '等' : ''}`
+      : issues.includes('missingImage')
+        ? '缺少主图，官网卡片展示风险'
+        : issues.includes('missingDirectory')
+          ? '未挂载官网目录，无法进入发布'
+          : issues.includes('pendingPublish')
+            ? '目录已配置，等待发布'
+            : issues.includes('websiteRisk')
+              ? '部分站点发布或回读需要复核'
+              : '资料与官网发布状态正常';
+
+    return { product, assignments, readiness, issues, primaryAction, nextStep };
+  });
+}
+
+function ProductDataConsoleMetric({
+  label,
+  value,
+  hint,
+  suffix = '',
+  tone = 'neutral',
+}: {
+  label: string;
+  value: number;
+  hint: string;
+  suffix?: string;
+  tone?: 'neutral' | 'warning' | 'success' | 'danger';
+}) {
+  const color = tone === 'success'
+    ? 'var(--success)'
+    : tone === 'danger'
+      ? 'var(--danger)'
+      : tone === 'warning'
+        ? 'var(--warning)'
+        : 'var(--t-primary)';
+  return (
+    <div className="product-data-console-metric">
+      <span>{label}</span>
+      <strong style={{ color }}>{value}{suffix}</strong>
+      <small>{hint}</small>
+    </div>
+  );
+}
+
+function ProductDataConsoleBar({
+  label,
+  value,
+  total,
+  tone,
+}: {
+  label: string;
+  value: number;
+  total: number;
+  tone: 'warning' | 'danger';
+}) {
+  const percent = total ? Math.min(100, Math.round((value / total) * 100)) : 0;
+  return (
+    <div className={`product-data-console-bar is-${tone}`}>
+      <div className="product-data-console-bar__meta">
+        <span>{label}</span>
+        <strong>{value} 个 · {percent}%</strong>
+      </div>
+      <div className="product-data-console-bar__track" aria-hidden="true">
+        <span style={{ width: `${percent}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function ProductCatalogWorkQueue({
+  active,
+  counts,
+  onChange,
+}: {
+  active: ProductCatalogWorkFilter;
+  counts: Record<ProductCatalogWorkFilter, number>;
+  onChange: (value: ProductCatalogWorkFilter) => void;
+}) {
+  const items: Array<{ key: ProductCatalogWorkFilter; label: string; hint: string }> = [
+    { key: 'all', label: '全部产品', hint: '当前筛选结果' },
+    { key: 'admission', label: '准入未达', hint: '先补必填项' },
+    { key: 'directory', label: '目录未承接', hint: '配置官网目录' },
+    { key: 'publish', label: '待发布', hint: '执行官网发布' },
+    { key: 'review', label: '公开复核', hint: '核对前台回读' },
+    { key: 'healthy', label: '发布健康', hint: '无需处理' },
+  ];
+  return (
+    <section className="product-catalog-workqueue" aria-label="产品目录运营任务筛选">
+      {items.map((item) => {
+        const selected = active === item.key;
+        return (
+          <button
+            key={item.key}
+            type="button"
+            className={selected ? 'is-active' : undefined}
+            onClick={() => onChange(item.key)}
+          >
+            <span>{item.label}</span>
+            <strong>{counts[item.key] || 0}</strong>
+            <small>{item.hint}</small>
+          </button>
+        );
+      })}
+    </section>
+  );
+}
+
+function ProductDataConsole({
+  products,
+  assignmentByProductKey,
+  isLoading,
+  error,
+  onOpenCatalog,
+}: {
+  products: NormalizedProduct[];
+  assignmentByProductKey: Map<string, WebsiteShelfAssignment[]>;
+  isLoading: boolean;
+  error: unknown;
+  onOpenCatalog: () => void;
+}) {
+  const rows = useMemo(() => productDataConsoleItems(products, assignmentByProductKey), [assignmentByProductKey, products]);
+  const total = rows.length;
+  const missingData = rows.filter((item) => item.issues.includes('missingData') || item.issues.includes('missingImage')).length;
+  const missingDirectory = rows.filter((item) => item.issues.includes('missingDirectory')).length;
+  const pendingPublish = rows.filter((item) => item.issues.includes('pendingPublish')).length;
+  const websiteRisk = rows.filter((item) => item.issues.includes('websiteRisk')).length;
+  const ready = rows.filter((item) => !item.issues.length).length;
+  const dataReady = Math.max(total - missingData, 0);
+  const directoryReady = Math.max(total - missingDirectory, 0);
+  const publishedOrSafe = Math.max(total - pendingPublish - websiteRisk, 0);
+  const dataReadyRate = total ? Math.round((dataReady / total) * 100) : 0;
+  const directoryReadyRate = total ? Math.round((directoryReady / total) * 100) : 0;
+  const publishReadyRate = total ? Math.round((publishedOrSafe / total) * 100) : 0;
+  const healthRate = total ? Math.round((ready / total) * 100) : 0;
+  const riskTotal = missingData + missingDirectory + pendingPublish + websiteRisk;
+  const verdict = riskTotal
+    ? `当前 ${riskTotal} 项问题影响产品发布质量`
+    : '当前产品数据链路健康';
+  const verdictDetail = missingData
+    ? '第一风险是产品事实未达发布准入，不应进入官网发布。'
+    : missingDirectory
+      ? '产品事实已进入发布链路，当前阻塞点是官网目录承接。'
+      : pendingPublish
+        ? '产品事实与目录已准备，当前重点是发布执行。'
+        : websiteRisk
+          ? '已发布产品存在公开展示复核项，需要核对前台回读。'
+          : '产品事实、目录挂载、发布状态和公开回读均处于稳定状态。';
+  const riskRows = rows
+    .filter((item) => item.issues.length)
+    .sort((left, right) => right.issues.length - left.issues.length)
+    .slice(0, 5);
+
+  if (error) {
+    return (
+      <WorkbenchTableState
+        type="error"
+        title="产品数据中台暂时不可用"
+        description={String((error as Error)?.message || error)}
+      />
+    );
+  }
+
+  if (isLoading && !products.length) {
+    return (
+      <WorkbenchTableState
+        type="loading"
+        title="正在同步产品数据中台"
+        description="正在读取产品事实、资料完整度和官网挂载状态。"
+      />
+    );
+  }
+
+  return (
+    <section className="product-data-console">
+      <div className="product-data-console-hero">
+        <div>
+          <p className="t-label">产品数据中台 · 领导汇报视图</p>
+          <h2>{verdict}</h2>
+          <span>{verdictDetail} 数据口径覆盖产品事实、资料完整度、官网目录、发布状态和公开回读。</span>
+        </div>
+        <div className="product-data-console-hero__verdict">
+          <strong>{healthRate}% 产品发布健康率</strong>
+          <small>稳定展示产品 {ready} / {total || 0} 个；风险产品 {Math.max(total - ready, 0)} 个。</small>
+          <button type="button" className="btn btn-brand btn-sm" onClick={onOpenCatalog}>
+            <Package size={14} />
+            进入产品目录管理
+          </button>
+        </div>
+      </div>
+
+      <div className="product-data-console-metrics">
+        <ProductDataConsoleMetric label="产品总数" value={total} hint="当前产品事实库" />
+        <ProductDataConsoleMetric label="发布准入率" value={dataReadyRate} suffix="%" hint={`${missingData} 个产品必填项待补`} tone={missingData ? 'warning' : 'success'} />
+        <ProductDataConsoleMetric label="目录挂载率" value={directoryReadyRate} suffix="%" hint={`${missingDirectory} 个未挂载目录`} tone={missingDirectory ? 'danger' : 'success'} />
+        <ProductDataConsoleMetric label="发布链路率" value={publishReadyRate} suffix="%" hint={`${pendingPublish + websiteRisk} 个待发布/复核`} tone={pendingPublish || websiteRisk ? 'warning' : 'success'} />
+        <ProductDataConsoleMetric label="风险产品数" value={Math.max(total - ready, 0)} hint="影响官网稳定展示" tone={total - ready ? 'danger' : 'success'} />
+      </div>
+
+      <div className="product-data-console-layout">
+        <section className="product-data-console-panel">
+          <div className="product-data-console-panel__head">
+            <div>
+              <p className="t-label">问题分布</p>
+              <h3>发布准入漏斗</h3>
+            </div>
+            <StatusPill tone={riskTotal ? 'warning' : 'success'}>
+              {riskTotal ? `${riskTotal} 项问题` : '全部健康'}
+            </StatusPill>
+          </div>
+          <div className="product-data-console-bars">
+            <ProductDataConsoleBar label="1. 产品事实未达发布准入" value={missingData} total={total} tone="danger" />
+            <ProductDataConsoleBar label="2. 官网目录未承接" value={missingDirectory} total={total} tone="warning" />
+            <ProductDataConsoleBar label="3. 目录已承接待发布" value={pendingPublish} total={total} tone="warning" />
+            <ProductDataConsoleBar label="4. 公开展示需复核" value={websiteRisk} total={total} tone="warning" />
+          </div>
+          <div className="product-data-console-funnel">
+            <div>
+              <span>产品事实</span>
+              <strong>{total}</strong>
+            </div>
+            <div>
+              <span>发布准入</span>
+              <strong>{dataReady}</strong>
+            </div>
+            <div>
+              <span>目录承接</span>
+              <strong>{directoryReady}</strong>
+            </div>
+            <div>
+              <span>发布无风险</span>
+              <strong>{publishedOrSafe}</strong>
+            </div>
+          </div>
+        </section>
+
+        <aside className="product-data-console-panel">
+          <div className="product-data-console-panel__head">
+            <div>
+              <p className="t-label">管理结论</p>
+              <h3>本轮优先级</h3>
+            </div>
+          </div>
+          <div className="product-data-console-health">
+            <div>
+              <span>第一优先级</span>
+              <strong>{missingData ? '发布准入' : missingDirectory ? '目录承接' : pendingPublish ? '发布执行' : websiteRisk ? '公开复核' : '保持健康'}</strong>
+            </div>
+            <div>
+              <span>影响范围</span>
+              <strong>{Math.max(total - ready, 0)} 个产品</strong>
+            </div>
+            <div>
+              <span>准入口径</span>
+              <strong>{healthRate}% 健康</strong>
+            </div>
+          </div>
+          <div className="inset" style={{ padding: 12, color: 'var(--t-secondary)', fontSize: 12, lineHeight: 1.5 }}>
+            发布治理口径：产品事实必填项完整后，才进入官网目录承接；目录承接后执行发布；已发布内容以公开回读作为最终校验。
+          </div>
+        </aside>
+      </div>
+
+      <section className="product-data-console-panel">
+        <div className="product-data-console-panel__head">
+          <div>
+            <p className="t-label">重点风险产品</p>
+            <h3>影响发布质量的产品清单</h3>
+          </div>
+          <StatusPill tone={riskRows.length ? 'warning' : 'success'}>
+            {riskRows.length ? `展示前 ${riskRows.length} 个` : '暂无风险'}
+          </StatusPill>
+        </div>
+        <div className="product-data-console-list">
+          {riskRows.map((item) => (
+            <ProductDataConsoleRow key={item.product.id} item={item} onOpenCatalog={onOpenCatalog} />
+          ))}
+          {!rows.length ? (
+            <div className="inset" style={{ padding: 14, color: 'var(--t-secondary)', fontSize: 13 }}>
+              当前还没有产品数据。可以先进入产品目录管理创建或导入产品。
+            </div>
+          ) : !riskRows.length ? (
+            <div className="inset" style={{ padding: 14, color: 'var(--success)', fontSize: 13 }}>
+              当前没有影响发布质量的重点风险产品。
+            </div>
+          ) : null}
+        </div>
+      </section>
+    </section>
+  );
+}
+
+function ProductDataConsoleRow({
+  item,
+  onOpenCatalog,
+}: {
+  item: ProductDataConsoleItem;
+  onOpenCatalog: () => void;
+}) {
+  const imageSrc = productImageSrc(item.product);
+  const activeAssignments = activeWebsiteAssignments(item.assignments);
+  return (
+    <article className="product-data-console-row">
+      <div className="product-data-console-row__image">
+        {imageSrc ? <img src={imageSrc} alt={item.product.name || item.product.model || '产品主图'} /> : <Image size={18} />}
+      </div>
+      <div className="product-data-console-row__main">
+        <div>
+          <strong>{item.product.name || item.product.model || '未命名产品'}</strong>
+          <span>{item.product.model || '待补型号'} · {item.product.sku || '待补 SKU'}</span>
+        </div>
+        <small>{item.product.categoryPath || item.product.category || '未绑定产品库分类'}</small>
+        <div className="product-data-console-row__tags">
+          {item.issues.includes('missingData') ? <span className="badge badge-warning">发布准入未达</span> : null}
+          {item.issues.includes('missingImage') ? <span className="badge badge-warning">缺主图</span> : null}
+          {item.issues.includes('missingDirectory') ? <span className="badge badge-danger">未配置目录</span> : null}
+          {item.issues.includes('pendingPublish') ? <span className="badge badge-info">待发布</span> : null}
+          {item.issues.includes('websiteRisk') ? <span className="badge badge-warning">官网需复核</span> : null}
+          {!item.issues.length ? <span className="badge badge-success">发布健康</span> : null}
+        </div>
+      </div>
+      <div className="product-data-console-row__status">
+        <span>{activeAssignments.length ? `${activeAssignments.length} 个官网挂载` : '未挂载官网'}</span>
+        <small>{item.nextStep}</small>
+      </div>
+      <button type="button" className="btn btn-outline btn-sm" onClick={onOpenCatalog}>
+        {item.primaryAction}
+      </button>
+    </article>
+  );
+}
+
 function ProductCatalogShell({
   products: items,
+  allProducts,
   total,
   currentPage,
   totalPages,
@@ -2412,6 +4140,7 @@ function ProductCatalogShell({
   pageSizeOptions,
   isLoading,
   error,
+  permissionsReady,
   canCreateProduct,
   canUpdateProduct,
   canPublishProduct,
@@ -2428,6 +4157,7 @@ function ProductCatalogShell({
   onReset,
 }: {
   products: NormalizedProduct[];
+  allProducts: NormalizedProduct[];
   total: number;
   currentPage: number;
   totalPages: number;
@@ -2435,6 +4165,7 @@ function ProductCatalogShell({
   pageSizeOptions: number[];
   isLoading: boolean;
   error: unknown;
+  permissionsReady: boolean;
   canCreateProduct: boolean;
   canUpdateProduct: boolean;
   canPublishProduct: boolean;
@@ -2456,6 +4187,7 @@ function ProductCatalogShell({
   const [creating, setCreating] = useState(false);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [bulkStatus, setBulkStatus] = useState<'active' | 'inactive' | ''>('');
+  const [workFilter, setWorkFilter] = useState<ProductCatalogWorkFilter>('all');
   const { confirmFloating, floatingDialog } = useFloatingDialog();
   const createBrandCode = normalizeBrand(createDraft.brand);
   const { data: createCategoryData, error: createCategoryError, isLoading: createCategoryLoading } = useSWR(
@@ -2468,11 +4200,40 @@ function ProductCatalogShell({
   );
   const createCategoryTree = createCategoryData?.tree || [];
 
-  const visibleProductIds = useMemo(() => items.map((product) => product.id).filter(Boolean), [items]);
+  const showSelectionColumn = canPublishProduct;
+  const showProductActionColumn = canUpdateProduct || canPublishProduct || canDeleteProduct;
+  const productCatalogColSpan = 9 + (showSelectionColumn ? 1 : 0) + (showProductActionColumn ? 1 : 0);
+  const catalogWorkItems = useMemo(
+    () => productDataConsoleItems(allProducts, assignmentByProductKey),
+    [allProducts, assignmentByProductKey]
+  );
+  const workCounts = useMemo(() => ({
+    all: catalogWorkItems.length,
+    admission: catalogWorkItems.filter((item) => item.issues.includes('missingData')).length,
+    directory: catalogWorkItems.filter((item) => item.issues.includes('missingDirectory')).length,
+    publish: catalogWorkItems.filter((item) => item.issues.includes('pendingPublish')).length,
+    review: catalogWorkItems.filter((item) => item.issues.includes('websiteRisk')).length,
+    healthy: catalogWorkItems.filter((item) => !item.issues.length).length,
+  }), [catalogWorkItems]);
+  const visibleItems = useMemo(() => {
+    if (workFilter === 'all') return items;
+    const matchedIds = new Set(catalogWorkItems
+      .filter((item) => {
+        if (workFilter === 'admission') return item.issues.includes('missingData');
+        if (workFilter === 'directory') return item.issues.includes('missingDirectory');
+        if (workFilter === 'publish') return item.issues.includes('pendingPublish');
+        if (workFilter === 'review') return item.issues.includes('websiteRisk');
+        if (workFilter === 'healthy') return !item.issues.length;
+        return true;
+      })
+      .map((item) => item.product.id));
+    return items.filter((product) => matchedIds.has(product.id));
+  }, [catalogWorkItems, items, workFilter]);
+  const visibleProductIds = useMemo(() => visibleItems.map((product) => product.id).filter(Boolean), [visibleItems]);
   const selectedItems = useMemo(() => {
     const selected = new Set(selectedProductIds);
-    return items.filter((product) => selected.has(product.id));
-  }, [items, selectedProductIds]);
+    return visibleItems.filter((product) => selected.has(product.id));
+  }, [selectedProductIds, visibleItems]);
   const allVisibleSelected = visibleProductIds.length > 0 && visibleProductIds.every((id) => selectedProductIds.includes(id));
   const someVisibleSelected = visibleProductIds.some((id) => selectedProductIds.includes(id));
 
@@ -2563,47 +4324,44 @@ function ProductCatalogShell({
   }
 
   return (
-    <section className="card-elevated" style={{ padding: 0, overflow: 'hidden', maxWidth: '100%' }}>
-      <div
-        style={{
-          padding: 18,
-          borderBottom: '1px solid var(--border)',
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          gap: 12,
-          flexWrap: 'wrap',
-        }}
-      >
-        <div style={{ flex: '1 1 260px', minWidth: 0 }}>
-          <p className="t-label">产品目录管理</p>
-          <h2 className="t-headline" style={{ marginTop: 4 }}>
-            真实产品主数据
-          </h2>
-          <p style={{ marginTop: 6, color: 'var(--t-secondary)', fontSize: 13, overflowWrap: 'anywhere' }}>
-            编辑、状态切换与归档会同步到同一份产品主数据。
-          </p>
+    <section className="product-catalog-shell">
+      <div className="product-catalog-commandbar">
+        <div className="product-catalog-commandbar__main">
+          <p>产品目录运营台</p>
+          <h2>真实产品主数据</h2>
+          <span>产品事实必填项完整 → 官网目录承接 → 发布执行 → 公开回读复核</span>
         </div>
-        {canCreateProduct ? (
-          <button
-            type="button"
-            className="btn btn-brand btn-sm"
-            onClick={() => {
-              setCreateError('');
-              setCreateDraft(emptyCreateDraft());
-              setShowCreate(true);
-            }}
-            style={{ flexShrink: 0 }}
-          >
-            <Plus size={14} />
-            新增产品
-          </button>
-        ) : (
-          <span className="badge badge-grey" style={{ flexShrink: 0 }}>
-            只读查看
-          </span>
-        )}
+        <div className="product-catalog-commandbar__meta">
+          {!permissionsReady ? (
+            <span className="badge badge-grey">正在确认权限</span>
+          ) : canCreateProduct ? (
+            <button
+              type="button"
+              className="btn btn-brand btn-sm"
+              onClick={() => {
+                setCreateError('');
+                setCreateDraft(emptyCreateDraft());
+                setShowCreate(true);
+              }}
+            >
+              <Plus size={14} />
+              新增产品
+            </button>
+          ) : (
+            <span className="badge badge-grey">只读查看</span>
+          )}
+        </div>
       </div>
+
+      <ProductCatalogWorkQueue
+        active={workFilter}
+        counts={workCounts}
+        onChange={(next) => {
+          setWorkFilter(next);
+          setSelectedProductIds([]);
+          onNotice(next === 'all' ? '已切换到全部产品。' : `已切换到${PRODUCT_CATALOG_WORK_FILTER_LABELS[next]}任务视图。`);
+        }}
+      />
 
       {pilotSummary ? (
         <div
@@ -2648,43 +4406,35 @@ function ProductCatalogShell({
         />
       )}
 
-      <div
-        style={{
-          padding: '12px 18px',
-          borderBottom: '1px solid var(--border)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-          flexWrap: 'wrap',
-        }}
-      >
-        <span style={{ color: 'var(--t-secondary)', fontSize: 12, minWidth: 0 }}>
-          {isLoading ? '正在加载真实产品...' : `显示 ${items.length} / ${total} 个产品库产品`}
+      <div className="product-catalog-feedback" role="status">
+        <span>
+          {isLoading ? '正在加载真实产品...' : `当前视图显示 ${visibleItems.length} / ${items.length} 个，本次筛选共 ${total} 个产品`}
         </span>
         {actionNotice && (
-          <span
-            className="badge badge-info"
-            role="status"
-            style={{ maxWidth: '100%', overflowWrap: 'anywhere', whiteSpace: 'normal' }}
-          >
+          <strong>
             {actionNotice}
-          </span>
+          </strong>
         )}
       </div>
 
-      {error ? (
+      {!permissionsReady ? (
+        <WorkbenchTableState
+          type="loading"
+          title="正在确认操作权限"
+          description="正在读取当前账号的产品库操作权限，确认后再展示可用操作。"
+        />
+      ) : error ? (
         <EmptyCatalogState
           type="error"
           title="产品暂不可用"
           description={String((error as Error)?.message || error)}
           onReset={onReset}
         />
-      ) : !isLoading && !items.length ? (
+      ) : !isLoading && !visibleItems.length ? (
         <EmptyCatalogState
-          title="当前筛选下没有真实产品"
-          description="可以清空筛选重新查看，或在后续写入表单补齐后创建新产品。"
-          onReset={onReset}
+          title={workFilter === 'all' ? '当前筛选下没有真实产品' : `当前没有${PRODUCT_CATALOG_WORK_FILTER_LABELS[workFilter]}任务`}
+          description={workFilter === 'all' ? '可以清空筛选重新查看，或在后续写入表单补齐后创建新产品。' : '这个任务视图下没有待处理产品，可以切回全部产品查看。'}
+          onReset={workFilter === 'all' ? onReset : () => setWorkFilter('all')}
         />
       ) : (
         <WorkbenchTableShell>
@@ -2734,35 +4484,37 @@ function ProductCatalogShell({
             </div>
           ) : null}
           <div style={{ overflowX: 'auto' }}>
-            <table className="table product-catalog-table" style={{ minWidth: 1480 }}>
+            <table className="table product-catalog-table" style={{ minWidth: showProductActionColumn ? 1560 : 1440 }}>
               <thead>
                 <tr>
-                  <th style={{ width: 44 }}>
-                    <input
-                      type="checkbox"
-                      checked={allVisibleSelected}
-                      disabled={!canPublishProduct || !visibleProductIds.length || Boolean(bulkStatus)}
-                      ref={(node) => {
-                        if (node) node.indeterminate = someVisibleSelected && !allVisibleSelected;
-                      }}
-                      onChange={(event) => toggleVisibleSelection(event.target.checked)}
-                      aria-label="选择当前页全部产品库产品"
-                    />
-                  </th>
+                  {showSelectionColumn ? (
+                    <th style={{ width: 44 }}>
+                      <input
+                        type="checkbox"
+                        checked={allVisibleSelected}
+                        disabled={!visibleProductIds.length || Boolean(bulkStatus)}
+                        ref={(node) => {
+                          if (node) node.indeterminate = someVisibleSelected && !allVisibleSelected;
+                        }}
+                        onChange={(event) => toggleVisibleSelection(event.target.checked)}
+                        aria-label="选择当前页全部产品库产品"
+                      />
+                    </th>
+                  ) : null}
                   <th>产品库分类</th>
                   <th>产品</th>
-                  <th>型号与 SKU</th>
+                  <th>型号 / SKU</th>
                   <th>系列</th>
                   <th>资料完整度</th>
                   <th>品牌</th>
                   <th>图片</th>
                   <th>产品库状态</th>
-                  <th>官网上架状态</th>
-                  <th style={{ textAlign: 'right' }}>操作</th>
+                  <th>官网展示健康</th>
+                  {showProductActionColumn ? <th style={{ textAlign: 'right' }}>操作</th> : null}
                 </tr>
               </thead>
               <tbody>
-                {items.map((product) => {
+                {visibleItems.map((product) => {
                   const assignments = assignmentsForProduct(assignmentByProductKey, product);
                   return (
                     <ProductCatalogRow
@@ -2773,6 +4525,7 @@ function ProductCatalogShell({
                       canDeleteProduct={canDeleteProduct}
                       assignments={assignments}
                       brandOptions={brandOptions}
+                      showSelectionColumn={showSelectionColumn}
                       selected={selectedProductIds.includes(product.id)}
                       selectionDisabled={!canPublishProduct || Boolean(bulkStatus)}
                       onSelectionChange={(checked) => {
@@ -2785,6 +4538,7 @@ function ProductCatalogShell({
                       }}
                       onNotice={onNotice}
                       onChanged={onChanged}
+                      feedbackColSpan={productCatalogColSpan}
                     />
                   );
                 })}
@@ -2819,6 +4573,14 @@ type ProductLibraryCompletenessDraft = Pick<
   | 'launchDate'
   | 'discontinueDate'
   | 'salesUnit'
+  | 'lengthMm'
+  | 'widthMm'
+  | 'heightMm'
+  | 'netWeightKg'
+  | 'packageLengthMm'
+  | 'packageWidthMm'
+  | 'packageHeightMm'
+  | 'grossWeightKg'
   | 'packageSpec'
   | 'configurationNotes'
   | 'installationRequirement'
@@ -2882,6 +4644,48 @@ function ProductLibraryCompletenessFields({
           <span className="t-label">销售单位</span>
           <input className="input" value={draft.salesUnit} disabled={disabled} onChange={(event) => onPatch({ salesUnit: event.target.value })} placeholder="台 / 套 / 件" />
         </label>
+      </div>
+      <div className="product-edit-subsection" style={{ display: 'grid', gap: 10 }}>
+        <div className="product-edit-section-head" style={{ padding: 0, border: 0 }}>
+          <h4 style={{ margin: 0, fontSize: 14 }}>基础尺寸与重量</h4>
+          <span className="badge badge-grey">产品主表字段 · 尺寸 mm / 重量 kg</span>
+        </div>
+        <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))', gap: 12 }}>
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span className="t-label">产品长 mm</span>
+            <input className="input" type="number" min={0} step="0.01" value={draft.lengthMm} disabled={disabled} onChange={(event) => onPatch({ lengthMm: event.target.value })} placeholder="如：720" />
+          </label>
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span className="t-label">产品宽 mm</span>
+            <input className="input" type="number" min={0} step="0.01" value={draft.widthMm} disabled={disabled} onChange={(event) => onPatch({ widthMm: event.target.value })} placeholder="如：450" />
+          </label>
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span className="t-label">产品高 mm</span>
+            <input className="input" type="number" min={0} step="0.01" value={draft.heightMm} disabled={disabled} onChange={(event) => onPatch({ heightMm: event.target.value })} placeholder="如：260" />
+          </label>
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span className="t-label">净重 kg</span>
+            <input className="input" type="number" min={0} step="0.001" value={draft.netWeightKg} disabled={disabled} onChange={(event) => onPatch({ netWeightKg: event.target.value })} placeholder="如：18.5" />
+          </label>
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span className="t-label">包装长 mm</span>
+            <input className="input" type="number" min={0} step="0.01" value={draft.packageLengthMm} disabled={disabled} onChange={(event) => onPatch({ packageLengthMm: event.target.value })} placeholder="如：820" />
+          </label>
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span className="t-label">包装宽 mm</span>
+            <input className="input" type="number" min={0} step="0.01" value={draft.packageWidthMm} disabled={disabled} onChange={(event) => onPatch({ packageWidthMm: event.target.value })} placeholder="如：520" />
+          </label>
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span className="t-label">包装高 mm</span>
+            <input className="input" type="number" min={0} step="0.01" value={draft.packageHeightMm} disabled={disabled} onChange={(event) => onPatch({ packageHeightMm: event.target.value })} placeholder="如：360" />
+          </label>
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span className="t-label">毛重 kg</span>
+            <input className="input" type="number" min={0} step="0.001" value={draft.grossWeightKg} disabled={disabled} onChange={(event) => onPatch({ grossWeightKg: event.target.value })} placeholder="如：21" />
+          </label>
+        </div>
+      </div>
+      <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
         <label style={{ display: 'grid', gap: 6 }}>
           <span className="t-label">包装/配置说明</span>
           <input className="input" value={draft.packageSpec} disabled={disabled} onChange={(event) => onPatch({ packageSpec: event.target.value })} placeholder="如：整机+附件包" />
@@ -3349,11 +5153,13 @@ function ProductCatalogRow({
   canDeleteProduct,
   assignments,
   brandOptions,
+  showSelectionColumn,
   selected,
   selectionDisabled,
   onSelectionChange,
   onNotice,
   onChanged,
+  feedbackColSpan,
 }: {
   product: NormalizedProduct;
   canUpdateProduct: boolean;
@@ -3361,11 +5167,13 @@ function ProductCatalogRow({
   canDeleteProduct: boolean;
   assignments: WebsiteShelfAssignment[];
   brandOptions: Array<{ value: ProductBrand; label: string }>;
+  showSelectionColumn: boolean;
   selected: boolean;
   selectionDisabled: boolean;
   onSelectionChange: (checked: boolean) => void;
   onNotice: (text: string) => void;
   onChanged: () => Promise<unknown>;
+  feedbackColSpan: number;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<EditProductDraft>(() => editDraftFromProduct(product));
@@ -3375,6 +5183,7 @@ function ProductCatalogRow({
     success: '',
     error: '',
   });
+  const editBodyRef = useRef<HTMLDivElement | null>(null);
   const { alertFloating, confirmFloating, floatingDialog } = useFloatingDialog();
   const { data: categoryData, error: categoryError, isLoading: categoryLoading } = useSWR(
     editing ? ['/api/v2/brand-product-categories', PRODUCT_BASE_CATEGORY_BRAND, 'product-edit'] : null,
@@ -3438,6 +5247,14 @@ function ProductCatalogRow({
     }));
   }
 
+  function scrollToEditSection(targetId: string) {
+    const container = editBodyRef.current;
+    const target = targetId ? document.getElementById(targetId) : null;
+    if (!container || !target) return;
+    const offset = target.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 12;
+    container.scrollTo({ top: Math.max(offset, 0), behavior: 'smooth' });
+  }
+
   async function selectEditMainImage(file: File | null) {
     if (!file) return;
     if (!/^image\/(png|jpe?g)$/i.test(file.type) && !/\.(png|jpe?g)$/i.test(file.name)) {
@@ -3451,7 +5268,7 @@ function ProductCatalogRow({
   async function saveEdit(event: FormEvent) {
     event.preventDefault();
     if (!canUpdateProduct) return;
-    setRowState((state) => ({ ...state, saving: true, error: '', success: '' }));
+    setRowState((state) => ({ ...state, saving: true, savingAction: 'save', error: '', success: '' }));
     try {
       const mainImageRef = await uploadProductMainImageRef(draft.mainImage, product.sku || product.id);
       const manualPdfRefs = await uploadProductManualPdfRefs(draft.manualPdfs, product.sku || product.id);
@@ -3475,20 +5292,20 @@ function ProductCatalogRow({
       draft.manualPdfs.forEach((manual) => {
         if (manual.file && manual.previewUrl.startsWith('blob:')) URL.revokeObjectURL(manual.previewUrl);
       });
-      setEditing(false);
-      setRowState({ dirty: false, saving: false, success: '已保存，刷新品牌页可见同步变化。', error: '' });
-      onNotice(`已保存 ${product.sku || draft.name}。`);
+      const saveFeedback = formatSaveChecklistFeedback(editChecklistItems, hasPublishedWebsite);
+      setRowState({ dirty: false, saving: false, success: saveFeedback, error: '' });
+      onNotice(saveFeedback);
       await onChanged();
     } catch (e) {
       const message = (e as Error)?.message || '保存产品失败。';
-      setRowState((state) => ({ ...state, saving: false, error: message, success: '' }));
+      setRowState((state) => ({ ...state, saving: false, savingAction: undefined, error: message, success: '' }));
       onNotice(message);
     }
   }
 
   async function changeStatus(nextStatus: 'active' | 'inactive') {
     if (!canPublishProduct) return;
-    setRowState((state) => ({ ...state, saving: true, error: '', success: '' }));
+    setRowState((state) => ({ ...state, saving: true, savingAction: 'status', error: '', success: '' }));
     try {
       await products.update(product.id, productStatusPayload(product, nextStatus));
       setRowState({ dirty: false, saving: false, success: `状态已切换为${statusLabel(nextStatus)}。`, error: '' });
@@ -3496,7 +5313,7 @@ function ProductCatalogRow({
       await onChanged();
     } catch (e) {
       const message = (e as Error)?.message || '状态切换失败。';
-      setRowState((state) => ({ ...state, saving: false, error: message, success: '' }));
+      setRowState((state) => ({ ...state, saving: false, savingAction: undefined, error: message, success: '' }));
       onNotice(message);
     }
   }
@@ -3510,7 +5327,7 @@ function ProductCatalogRow({
       tone: 'danger',
     });
     if (!confirmed) return;
-    setRowState((state) => ({ ...state, saving: true, error: '', success: '' }));
+    setRowState((state) => ({ ...state, saving: true, savingAction: 'archive', error: '', success: '' }));
     try {
       await products.archive(product.id, tenantIdForProduct(product) || undefined);
       setRowState({ dirty: false, saving: false, success: '已归档，默认列表不再显示。', error: '' });
@@ -3518,7 +5335,7 @@ function ProductCatalogRow({
       await onChanged();
     } catch (e) {
       const message = (e as Error)?.message || '归档产品失败。';
-      setRowState((state) => ({ ...state, saving: false, error: message, success: '' }));
+      setRowState((state) => ({ ...state, saving: false, savingAction: undefined, error: message, success: '' }));
       onNotice(message);
     }
   }
@@ -3530,8 +5347,61 @@ function ProductCatalogRow({
   const readiness = productReadinessSummary(product);
   const reviewNotes = Array.isArray(libraryMeta.reviewNotes) ? libraryMeta.reviewNotes.map(text).filter(Boolean) : [];
   const websiteCategory = text(brandMeta.websiteCategory || brandMeta.websiteMenuCategory || brandMeta.cat);
-  const shelfMeta = websiteShelfSummary(assignments);
   const imageSrc = productImageSrc(product);
+  const rowBusyText = rowState.savingAction === 'save'
+    ? '正在保存内容...'
+    : rowState.savingAction === 'status'
+      ? '正在切换状态...'
+      : rowState.savingAction === 'archive'
+        ? '正在归档...'
+        : '';
+  const activeAssignmentsInEdit = activeWebsiteAssignments(assignments);
+  const hasPublishedWebsite = activeAssignmentsInEdit.some((assignment) => assignment.status === 'published');
+  const selectedProductCategoryPath = [selectedLevel1, selectedLevel2, selectedLevel3]
+    .filter(Boolean)
+    .map((item) => item?.name || item?.code)
+    .join(' / ');
+  const editChecklistItems = buildProductEditChecklist({
+    productId: product.id,
+    draft,
+    selectedProductCategoryPath,
+    imageSrc,
+    activeAssignments: activeAssignmentsInEdit,
+    hasPublishedWebsite,
+  });
+  const editProgressItems: ProductEditProgressItem[] = [
+    {
+      label: '产品主数据',
+      status: draft.name && draft.model && draft.categoryLevel1Id && draft.categoryLevel2Id ? 'ready' : 'blocked',
+      detail: draft.categoryLevel2Id ? (selectedProductCategoryPath || '分类已绑定') : '需补齐名称、型号和二级分类',
+      targetId: `product-edit-section-master-${product.id}`,
+    },
+    {
+      label: '官网展示文案',
+      status: draft.series && draft.publicSummary && (draft.featureBenefits || draft.sellingPoints) ? 'ready' : 'todo',
+      detail: draft.publicSummary ? '摘要与卖点已维护' : '需补官网摘要、卖点和系列',
+      targetId: `product-edit-section-website-content-${product.id}`,
+    },
+    {
+      label: '素材详情',
+      status: (draft.mainImage || imageSrc) && (draft.officialDetailHtml || draft.manualPdfs.length) ? 'ready' : 'todo',
+      detail: draft.mainImage || imageSrc ? '主图已准备，继续核对详情/PDF' : '至少需要主图和详情资料',
+      targetId: `product-edit-section-assets-${product.id}`,
+    },
+    {
+      label: '官网目录',
+      status: activeAssignmentsInEdit.length ? 'ready' : 'blocked',
+      detail: activeAssignmentsInEdit.length ? `已配置 ${activeAssignmentsInEdit.length} 个官网挂载` : '需要选择官网与展示目录',
+      targetId: `product-edit-section-website-mapping-${product.id}`,
+    },
+    {
+      label: '发布检查',
+      status: hasPublishedWebsite ? 'ready' : 'todo',
+      detail: hasPublishedWebsite ? '已有官网发布记录，可回读校验' : '保存后再发布到官网',
+      targetId: `product-edit-section-check-${product.id}`,
+    },
+  ];
+  const saveFeedbackPreview = formatSaveChecklistFeedback(editChecklistItems, hasPublishedWebsite);
   const editDialog = canUpdateProduct && editing && typeof document !== 'undefined'
     ? createPortal(
       <div
@@ -3588,11 +5458,14 @@ function ProductCatalogRow({
             </button>
           </header>
 
-          <div className="product-edit-modal-body" style={{ overflow: 'auto', padding: 18, display: 'grid', gap: 14 }}>
-            <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+          <div ref={editBodyRef} className="product-edit-modal-body" style={{ overflow: 'auto', padding: 18, display: 'grid', gap: 14 }}>
+            <ProductEditProgressStrip items={editProgressItems} onNavigate={scrollToEditSection} />
+            <ProductReadinessChecklistPanel items={editChecklistItems} onNavigate={scrollToEditSection} />
+
+            <section id={`product-edit-section-master-${product.id}`} className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
               <div className="product-edit-section-head">
-                <h3>基础信息</h3>
-                <span className="badge badge-grey">{displayBrand(product.brand)}</span>
+                <h3>1. 产品主数据</h3>
+                <span className="badge badge-grey">产品库必填 · {displayBrand(product.brand)}</span>
               </div>
               <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
                 <label style={{ display: 'grid', gap: 6 }}>
@@ -3623,10 +5496,10 @@ function ProductCatalogRow({
               </div>
             </section>
 
-            <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+            <section id={`product-edit-section-category-${product.id}`} className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
               <div className="product-edit-section-head">
                 <h3>产品分类绑定</h3>
-                <span className="badge badge-grey">来自当前品牌分类树</span>
+                <span className="badge badge-grey">来自产品库分类树，会驱动官网默认映射</span>
               </div>
               {categoryLoading ? (
                 <div className="inset" style={{ padding: 12, color: 'var(--t-secondary)', fontSize: 13 }}>正在加载产品分类...</div>
@@ -3676,17 +5549,22 @@ function ProductCatalogRow({
                   </label>
                 </div>
               )}
+              <p style={{ margin: 0, color: 'var(--t-tertiary)', fontSize: 12 }}>
+                当前分类路径：{selectedProductCategoryPath || product.categoryPath || '未完成绑定'}。运营只需要选产品库真实分类，官网目录可自动映射，也可在下方人工覆盖。
+              </p>
             </section>
 
-            <ProductLibraryCompletenessFields
-              draft={draft}
-              disabled={rowState.saving}
-              onPatch={patchDraft}
-            />
+            <div id={`product-edit-section-library-${product.id}`}>
+              <ProductLibraryCompletenessFields
+                draft={draft}
+                disabled={rowState.saving}
+                onPatch={patchDraft}
+              />
+            </div>
 
             <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
               <div className="product-edit-section-head">
-                <h3>价格信息</h3>
+                <h3>产品库内部价格</h3>
                 {rowState.dirty && <span className="badge badge-warning">有未保存修改</span>}
               </div>
               <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
@@ -3708,12 +5586,20 @@ function ProductCatalogRow({
               </p>
             </section>
 
-            <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+            <section id={`product-edit-section-website-content-${product.id}`} className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
               <div className="product-edit-section-head">
-                <h3>产品库公共内容</h3>
-                {rowState.dirty && <span className="badge badge-warning">有未保存修改</span>}
+                <h3>2. 官网展示内容</h3>
+                <span className="badge badge-grey">保存产品库公共内容，供官网读取</span>
+              </div>
+              <div className="inset" style={{ padding: 12, display: 'grid', gap: 4, color: 'var(--t-secondary)', fontSize: 12, lineHeight: 1.5 }}>
+                <strong style={{ color: 'var(--t-primary)' }}>运营填报重点：先确认官网标题/摘要/卖点，再确认价格展示方式，最后检查官网目录挂载。</strong>
+                <span>这些内容属于产品事实发布口径；保存产品后，官网挂载仍需要在下一块配置中保存/发布。</span>
               </div>
               <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">公开路径 slug</span>
+                  <input className="input" value={draft.publicSlug} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" onChange={(event) => patchDraft({ publicSlug: event.target.value })} placeholder="留空则按 SKU 生成" />
+                </label>
                 <label style={{ display: 'grid', gap: 6 }}>
                   <span className="t-label">系列</span>
                   <input className="input" value={draft.series} onChange={(event) => patchDraft({ series: event.target.value })} />
@@ -3734,6 +5620,54 @@ function ProductCatalogRow({
                   <span className="t-label">标签</span>
                   <input className="input" value={draft.badges} onChange={(event) => patchDraft({ badges: event.target.value })} placeholder="新品, 高端" />
                 </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">官网排序</span>
+                  <input className="input" type="number" min={0} value={draft.displayOrder} onChange={(event) => patchDraft({ displayOrder: event.target.value })} />
+                </label>
+              </div>
+              <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">官网价格展示方式</span>
+                  <select className="input" value={draft.websitePriceDisplayMode} onChange={(event) => patchDraft({ websitePriceDisplayMode: event.target.value })}>
+                    <option value="not_shown">不展示价格</option>
+                    <option value="show_price">显示官网参考价</option>
+                    <option value="price_range">显示价格区间</option>
+                    <option value="inquiry">面议</option>
+                    <option value="contact_dealer">联系经销商</option>
+                  </select>
+                </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">官网参考价</span>
+                  <input className="input" type="number" min={0} step="0.01" value={draft.websitePrice} disabled={draft.websitePriceDisplayMode !== 'show_price'} onChange={(event) => patchDraft({ websitePrice: event.target.value })} placeholder="选择显示官网参考价时填写" />
+                </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">官网最低价</span>
+                  <input className="input" type="number" min={0} step="0.01" value={draft.websitePriceMin} disabled={draft.websitePriceDisplayMode !== 'price_range'} onChange={(event) => patchDraft({ websitePriceMin: event.target.value })} placeholder="价格区间最低价" />
+                </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">官网最高价</span>
+                  <input className="input" type="number" min={0} step="0.01" value={draft.websitePriceMax} disabled={draft.websitePriceDisplayMode !== 'price_range'} onChange={(event) => patchDraft({ websitePriceMax: event.target.value })} placeholder="价格区间最高价" />
+                </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">活动价</span>
+                  <input className="input" type="number" min={0} step="0.01" value={draft.promoPrice} onChange={(event) => patchDraft({ promoPrice: event.target.value })} placeholder="可选" />
+                </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">价格单位</span>
+                  <input className="input" value={draft.priceUnit} onChange={(event) => patchDraft({ priceUnit: event.target.value })} placeholder="台 / 套 / 件" />
+                </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">价格标签</span>
+                  <input className="input" value={draft.priceLabel} onChange={(event) => patchDraft({ priceLabel: event.target.value })} placeholder="官网参考价 / 起售价" />
+                </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">价格说明</span>
+                  <input className="input" value={draft.priceNote} onChange={(event) => patchDraft({ priceNote: event.target.value })} placeholder="例如：最终成交价以经销商报价为准" />
+                </label>
+                <label style={{ display: 'flex', gap: 8, alignItems: 'center', paddingTop: 22 }}>
+                  <input type="checkbox" checked={draft.taxIncluded} onChange={(event) => patchDraft({ taxIncluded: event.target.checked })} />
+                  <span className="t-label">价格含税</span>
+                </label>
               </div>
               <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 12 }}>
                 <label style={{ display: 'grid', gap: 6 }}>
@@ -3751,13 +5685,29 @@ function ProductCatalogRow({
               </div>
             </section>
 
-            <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+            <section id={`product-edit-section-website-mapping-${product.id}`} className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
               <div className="product-edit-section-head">
-                <h3>图片 / 素材</h3>
+                <h3>官网目录与发布</h3>
+                <span className="badge badge-grey">默认自动映射，也支持人工覆盖</span>
+              </div>
+              <ProductSitePublishingPanel
+                product={product}
+                assignments={assignments}
+                brandOptions={brandOptions}
+                disabled={rowState.saving}
+                canPublish={canPublishProduct}
+                onNotice={onNotice}
+                onChanged={onChanged}
+              />
+            </section>
+
+            <section id={`product-edit-section-assets-${product.id}`} className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+              <div className="product-edit-section-head">
+                <h3>3. 图片 / 素材</h3>
                 <span className={draft.mainImage || imageSrc ? 'badge badge-success' : 'badge badge-warning'}>{draft.mainImage ? '已选择新主图' : imageSrc ? '已有主图' : '未上传图片'}</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '160px minmax(0, 1fr)', gap: 14, alignItems: 'start' }}>
-                <div style={{ width: 146, aspectRatio: '1 / 1', border: '1px solid var(--border)', borderRadius: 'var(--r-sm)', background: 'var(--surface-2)', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+              <div className="product-edit-media-panel" style={{ display: 'grid', gridTemplateColumns: '160px minmax(0, 1fr)', gap: 14, alignItems: 'start' }}>
+                <div className="product-edit-media-thumb" style={{ width: 146, aspectRatio: '1 / 1', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
                   {draft.mainImage ? (
                     <img src={draft.mainImage.previewUrl} alt="新产品主图预览" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   ) : imageSrc ? (
@@ -3766,7 +5716,7 @@ function ProductCatalogRow({
                     <Image size={28} style={{ color: 'var(--t-tertiary)' }} />
                   )}
                 </div>
-                <div style={{ display: 'grid', gap: 10, alignContent: 'start' }}>
+                <div style={{ display: 'grid', gap: 10, alignContent: 'start', minWidth: 0 }}>
                   <p style={{ margin: 0, color: 'var(--t-secondary)', fontSize: 12 }}>编辑产品库主图，保存后同步到产品库素材引用。</p>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <label className="btn btn-outline btn-sm">
@@ -3789,9 +5739,9 @@ function ProductCatalogRow({
               </div>
             </section>
 
-            <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+            <section id={`product-edit-section-assets-detail-${product.id}`} className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
               <div className="product-edit-section-head">
-                <h3>产品公共详情</h3>
+                <h3>产品公共详情 / 长图</h3>
                 <span className="badge badge-grey">750px 长图</span>
               </div>
               {contentLoading ? (
@@ -3809,7 +5759,7 @@ function ProductCatalogRow({
                 />
               )}
             </section>
-            <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+            <section id={`product-edit-section-manuals-${product.id}`} className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
               <div className="product-edit-section-head">
                 <h3>产品说明 PDF</h3>
                 <span className="badge badge-grey">不限数量</span>
@@ -3821,20 +5771,35 @@ function ProductCatalogRow({
               />
             </section>
 
-            <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+            <section id={`product-edit-section-check-${product.id}`} className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
               <div className="product-edit-section-head">
-                <h3>多官网挂载配置</h3>
-                <span className="badge badge-grey">目录/系列从官网配置选择</span>
+                <h3>4. 发布检查</h3>
+                <span className={hasPublishedWebsite ? 'badge badge-success' : 'badge badge-warning'}>
+                  {hasPublishedWebsite ? '已有官网发布' : '待发布'}
+                </span>
               </div>
-              <ProductSitePublishingPanel
-                product={product}
-                assignments={assignments}
-                brandOptions={brandOptions}
-                disabled={rowState.saving}
-                canPublish={canPublishProduct}
-                onNotice={onNotice}
-                onChanged={onChanged}
+              <ProductReadinessChecklistPanel
+                items={editChecklistItems}
+                title="发布前资料清单"
+                compact
+                saveMode={Boolean(rowState.success)}
+                onNavigate={scrollToEditSection}
               />
+              <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
+                {editProgressItems.map((item) => (
+                  <MappingCheckItem
+                    key={item.label}
+                    label={item.label}
+                    value={item.status === 'ready' ? '已就绪' : item.status === 'blocked' ? '需先处理' : '建议补齐'}
+                    tone={item.status === 'ready' ? 'success' : item.status === 'blocked' ? 'warning' : 'info'}
+                    note={item.detail}
+                  />
+                ))}
+              </div>
+              <div className="inset" style={{ padding: 12, color: rowState.success ? 'var(--success)' : 'var(--t-secondary)', fontSize: 13, lineHeight: 1.5 }}>
+                {rowState.success || saveFeedbackPreview}
+              </div>
+              {rowState.error ? <div className="inset" role="alert" style={{ padding: 12, color: 'var(--danger)', fontSize: 13 }}>{rowState.error}</div> : null}
             </section>
           </div>
 
@@ -3874,15 +5839,17 @@ function ProductCatalogRow({
       {editDialog}
       {floatingDialog}
       <tr className={selected ? 'is-selected' : undefined}>
-        <td>
-          <input
-            type="checkbox"
-            checked={selected}
-            disabled={selectionDisabled}
-            onChange={(event) => onSelectionChange(event.target.checked)}
-            aria-label={`选择 ${product.name || product.sku || '产品库产品'}`}
-          />
-        </td>
+        {showSelectionColumn ? (
+          <td>
+            <input
+              type="checkbox"
+              checked={selected}
+              disabled={selectionDisabled}
+              onChange={(event) => onSelectionChange(event.target.checked)}
+              aria-label={`选择 ${product.name || product.sku || '产品库产品'}`}
+            />
+          </td>
+        ) : null}
         <td>
           <div style={{ minWidth: 0, fontWeight: 800 }}>
             {product.categoryPath ||
@@ -3899,7 +5866,7 @@ function ProductCatalogRow({
           ) : null}
           <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', minWidth: 0 }}>
             {rowState.dirty && <span className="badge badge-warning">有未保存修改</span>}
-            {rowState.saving && <span className="badge badge-info">保存中...</span>}
+            {rowBusyText && <span className="badge badge-info">{rowBusyText}</span>}
           </div>
           <h3
             style={{
@@ -3958,7 +5925,7 @@ function ProductCatalogRow({
           </StatusPill>
         </td>
         <td>
-          <StatusPill tone={shelfMeta.tone}>{shelfMeta.label}</StatusPill>
+          <WebsiteShelfSummaryCell assignments={assignments} productBrand={product.brand} />
         </td>
         {canUpdateProduct || canPublishProduct || canDeleteProduct ? (
           <td style={{ textAlign: 'right' }}>
@@ -3971,7 +5938,7 @@ function ProductCatalogRow({
                   disabled={rowState.saving}
                 >
                   <Edit3 size={14} />
-                  编辑
+                  {rowState.savingAction === 'save' ? '保存中' : '编辑'}
                 </button>
               )}
               {canPublishProduct && product.status !== 'archived' && (
@@ -3981,7 +5948,7 @@ function ProductCatalogRow({
                   onClick={() => changeStatus(statusTarget)}
                   disabled={rowState.saving}
                 >
-                  {statusTarget === 'active' ? '启用' : '停用'}
+                  {rowState.savingAction === 'status' ? '处理中' : statusTarget === 'active' ? '启用' : '停用'}
                 </button>
               )}
               {canDeleteProduct && (
@@ -3992,21 +5959,17 @@ function ProductCatalogRow({
                   disabled={rowState.saving || product.status === 'archived'}
                 >
                   <Archive size={14} />
-                  归档
+                  {rowState.savingAction === 'archive' ? '归档中' : '归档'}
                 </button>
               )}
             </div>
           </td>
-        ) : (
-          <td style={{ textAlign: 'right', color: 'var(--t-tertiary)', fontSize: 12 }}>
-            无写入权限
-          </td>
-        )}
+        ) : null}
       </tr>
 
       {(rowState.success || rowState.error) && (
         <tr>
-          <td colSpan={11}>
+          <td colSpan={feedbackColSpan}>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {rowState.success && (
                 <span className="badge badge-success" role="status" style={{ whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
@@ -4155,6 +6118,78 @@ function siteCategorySelectOptions(rows: SiteProductCategoryRow[]): SiteProductC
   return out;
 }
 
+function publicProjectionPath(product: Record<string, any> | null): string {
+  if (!product) return '';
+  return text(product.websiteCategoryPath || objectOrEmpty(product.siteMeta).websiteCategoryPath || product.websiteCategory);
+}
+
+function ProductPublicProjectionReadback({
+  product,
+  siteCode,
+  productTenantId,
+  publicSlug,
+  expectedCategoryPath,
+  status,
+  refreshVersion,
+  variant = 'line',
+}: {
+  product: NormalizedProduct;
+  siteCode: string;
+  productTenantId: string;
+  publicSlug?: string | null;
+  expectedCategoryPath: string;
+  status?: AssignmentStatus | null;
+  refreshVersion: number;
+  variant?: 'line' | 'panel';
+}) {
+  const normalizedSiteCode = normalizeBrand(siteCode);
+  const { data, isLoading, error } = useSWR(
+    normalizedSiteCode && product.id
+      ? ['/api/v2/sites/products/public-projection', normalizedSiteCode, product.id, productTenantId, refreshVersion]
+      : null,
+    async () => publicSiteProducts.list(normalizedSiteCode, {
+      locale: 'zh-CN',
+      productId: product.id,
+      sku: text(product.sku) || undefined,
+    }),
+    { revalidateOnFocus: false },
+  );
+  const publicProduct = publicSiteProductItems(data)[0] || null;
+  const publicCategoryPath = publicProjectionPath(publicProduct);
+  const matches = Boolean(publicProduct && expectedCategoryPath && publicCategoryPath === expectedCategoryPath);
+  const isPublished = status === 'published';
+  const statusText = isLoading
+    ? '校验中...'
+    : error
+      ? '读取失败'
+      : publicProduct
+        ? (publicCategoryPath || '未返回目录')
+        : isPublished
+          ? '已发布但公开接口未找到'
+          : '未发布或公开接口未找到';
+  const tone = error || (isPublished && (!publicProduct || !matches)) ? 'var(--warning)' : publicProduct ? 'var(--success)' : 'var(--t-tertiary)';
+  const matchText = publicProduct ? (matches ? '一致' : '与后台保存不一致') : '';
+
+  if (variant === 'panel') {
+    return (
+      <div className="inset" style={{ padding: 10, display: 'grid', gap: 4, color: 'var(--t-secondary)', fontSize: 12 }}>
+        <strong style={{ color: 'var(--t-primary)', fontSize: 12 }}>公开官网回读</strong>
+        <span>后台准备保存目录：{expectedCategoryPath || '未选择'}</span>
+        <span>公开接口当前目录：{statusText}</span>
+        {publicProduct ? <span>公开 URL slug：{text(publicProduct.slug || publicSlug) || '未返回'}</span> : null}
+        <span style={{ color: tone }}>{publicProduct ? (matches ? '公开接口与后台目录一致' : '公开接口与后台目录不一致，保存/发布后请刷新校验') : statusText}</span>
+      </div>
+    );
+  }
+
+  return (
+    <span>
+      公开官网接口：{statusText}
+      {matchText ? <span style={{ color: tone, marginLeft: 6 }}>{matchText}</span> : null}
+    </span>
+  );
+}
+
 function OverrideHint({ value, fallback }: { value: string; fallback: string }) {
   const overridden = text(value) && text(value) !== text(fallback);
   return <span className={overridden ? 'badge badge-info' : 'badge badge-grey'}>{overridden ? '官网覆盖' : '产品库默认'}</span>;
@@ -4186,6 +6221,7 @@ function ProductSitePublishingPanel({
   const [creating, setCreating] = useState(false);
   const [draft, setDraft] = useState<ProductSitePublishingDraft>(() => productSitePublishingDraftFromAssignment(product, undefined, firstAvailableSite));
   const [saving, setSaving] = useState(false);
+  const [publicReadbackVersion, setPublicReadbackVersion] = useState(0);
   const activeSiteCode = normalizeBrand(draft.siteCode || editing?.siteCode || firstAvailableSite);
   const defaults = productSitePublishingDefaults(product, activeSiteCode);
   const { data: categoryData, isLoading: categoryLoading, error: categoryError } = useSWR(
@@ -4272,6 +6308,7 @@ function ProductSitePublishingPanel({
       setEditing(null);
       setCreating(false);
       await onChanged();
+      setPublicReadbackVersion((version) => version + 1);
     } catch (error) {
       onNotice((error as Error)?.message || '保存官网展示配置失败。');
     } finally {
@@ -4288,6 +6325,7 @@ function ProductSitePublishingPanel({
       else await siteProductAssignments.hide(siteCode, assignment.id);
       onNotice(next === 'published' ? '已发布到官网。' : '已从官网隐藏。');
       await onChanged();
+      setPublicReadbackVersion((version) => version + 1);
     } catch (error) {
       onNotice((error as Error)?.message || '官网上下架操作失败。');
     } finally {
@@ -4308,6 +6346,7 @@ function ProductSitePublishingPanel({
         setCreating(false);
       }
       await onChanged();
+      setPublicReadbackVersion((version) => version + 1);
     } catch (error) {
       onNotice((error as Error)?.message || '移除官网挂载配置失败。');
     } finally {
@@ -4348,6 +6387,15 @@ function ProductSitePublishingPanel({
                 <span>目录：{assignmentCategoryPath || '未选择'}</span>
                 <span>slug：{text(assignment.publicSlug) || productSitePublishingDefaults(product, assignment.siteCode).publicSlug}</span>
                 <span>排序：{nonNegativeInt(assignment.displayOrder)} {assignment.isFeatured ? ' / 推荐' : ''}</span>
+                <ProductPublicProjectionReadback
+                  product={product}
+                  siteCode={assignment.siteCode || productBrandSite}
+                  productTenantId={assignment.productTenantId || productTenantId}
+                  publicSlug={assignment.publicSlug}
+                  expectedCategoryPath={assignmentCategoryPath}
+                  status={assignment.status}
+                  refreshVersion={publicReadbackVersion}
+                />
                 <span style={{ color: assignment.status === 'published' ? 'var(--success)' : 'var(--t-tertiary)' }}>{visibleReason}</span>
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -4382,12 +6430,31 @@ function ProductSitePublishingPanel({
                 {websiteCategoryOverridden || seriesOverridden ? '人工覆盖' : suggestionLoading ? '匹配中' : suggestedWebsiteCategory ? '跟随产品库' : '需要手动选择'}
               </span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 8, color: 'var(--t-secondary)', fontSize: 12 }}>
-              <span>产品库分类：{text(publishingSuggestion?.productCategory?.pathLabel) || text(product.categoryPath || product.category) || '未维护'}；二级分类会决定默认官网映射</span>
-              <span>系统建议官网目录：{suggestionLoading ? '匹配中...' : suggestedWebsiteCategoryPath || '未找到映射，请手动选择'}</span>
-              <span>当前保存官网目录：{currentWebsiteCategoryPath || '未选择'}{websiteCategoryOverridden ? '（人工覆盖）' : suggestedWebsiteCategoryId && draft.siteProductCategoryId ? '（跟随默认）' : ''}</span>
-              <span>官网系列：{text(draft.series) || suggestedSeries || '沿用产品库系列'}{seriesOverridden ? '（人工覆盖）' : suggestedSeries ? '（跟随产品库）' : ''}</span>
-              <span>展示判断：{draft.siteProductCategoryId ? '目录有效；保存为草稿后需发布才展示' : '未选择官网目录，保存会被阻止'}</span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: 8 }}>
+              <MappingCheckItem
+                label="产品库分类"
+                value={text(publishingSuggestion?.productCategory?.pathLabel) || text(product.categoryPath || product.category)}
+                tone={text(publishingSuggestion?.productCategory?.pathLabel || product.categoryPath || product.category) ? 'success' : 'warning'}
+                note="默认映射会参考一级与末级分类"
+              />
+              <MappingCheckItem
+                label="系统建议"
+                value={suggestionLoading ? '匹配中...' : suggestedWebsiteCategoryPath || '未找到映射'}
+                tone={suggestedWebsiteCategoryPath ? 'success' : suggestionLoading ? 'info' : 'warning'}
+                note={suggestedWebsiteCategoryPath ? '可一键恢复自动映射' : '需要手动选择官网目录'}
+              />
+              <MappingCheckItem
+                label="当前保存"
+                value={currentWebsiteCategoryPath || '未选择'}
+                tone={draft.siteProductCategoryId ? (websiteCategoryOverridden ? 'info' : 'success') : 'warning'}
+                note={websiteCategoryOverridden ? '人工覆盖' : suggestedWebsiteCategoryId && draft.siteProductCategoryId ? '跟随默认' : '保存会要求选择目录'}
+              />
+              <MappingCheckItem
+                label="展示判断"
+                value={draft.siteProductCategoryId ? '目录有效' : '未选择官网目录'}
+                tone={draft.siteProductCategoryId ? 'success' : 'warning'}
+                note={editing?.status === 'published' ? '已发布后官网可见' : '保存为草稿后仍需发布'}
+              />
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
               <button
@@ -4402,6 +6469,16 @@ function ProductSitePublishingPanel({
               <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>默认跟随产品库分类；下方选择其他官网目录后按人工映射保存。</span>
             </div>
           </div>
+          <ProductPublicProjectionReadback
+            product={product}
+            siteCode={activeSiteCode}
+            productTenantId={productTenantId}
+            publicSlug={draft.publicSlug || editing?.publicSlug || defaults.publicSlug}
+            expectedCategoryPath={currentWebsiteCategoryPath}
+            status={editing?.status || null}
+            refreshVersion={publicReadbackVersion}
+            variant="panel"
+          />
           <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
             <label style={{ display: 'grid', gap: 6 }}>
               <span className="t-label">官网</span>
@@ -4782,6 +6859,7 @@ function ProductCatalogImagePreview({ src, alt }: { src: string; alt: string }) 
   if (!src || failed) {
     return (
       <div
+        className="product-catalog-image-preview"
         title={src ? '图片加载失败' : '暂无产品图片'}
         style={{
           width: 44,
@@ -4803,6 +6881,7 @@ function ProductCatalogImagePreview({ src, alt }: { src: string; alt: string }) 
     <>
       <button
         type="button"
+        className="product-catalog-image-preview"
         onClick={() => setPreviewOpen(true)}
         title="点击查看大图"
         style={{

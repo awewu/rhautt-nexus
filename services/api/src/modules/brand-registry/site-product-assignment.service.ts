@@ -707,6 +707,8 @@ export class SiteProductAssignmentService {
     const siteCode = normalizeSiteCode(siteCodeInput);
     const tenantId = resolvePublicSiteTenant(siteCode);
     if (!tenantId || !UUID_RE.test(tenantId)) throw new NotFoundException('网站未配置公开租户');
+    const productIdFilter = text(filters.productId).toLowerCase();
+    const publicSlugFilter = text(filters.slug).toLowerCase();
     const assignments = await withRlsTransaction(this.ds, async (em) => {
       const site = await this.findSite(em, tenantId, siteCode);
       return em.getRepository(SiteProductAssignmentEntity).find({
@@ -715,7 +717,12 @@ export class SiteProductAssignmentService {
         take: 500,
       });
     }, { tenantId });
-    const items = await this.hydrate(siteCode, assignments, locale);
+    const narrowedAssignments = assignments.filter((assignment) => {
+      if (productIdFilter && assignment.productId.toLowerCase() !== productIdFilter) return false;
+      if (publicSlugFilter && text(assignment.publicSlug).toLowerCase() !== publicSlugFilter) return false;
+      return true;
+    });
+    const items = await this.hydrate(siteCode, narrowedAssignments, locale);
     const filtered = items.filter((item) => this.matches(item, filters));
     return { success: true, data: { items: filtered, total: filtered.length, locale: String(locale || 'zh-CN') } };
   }
@@ -930,6 +937,9 @@ export class SiteProductAssignmentService {
     if (filters.brand && item.brand !== String(filters.brand)) return false;
     if (filters.category && item.category !== String(filters.category)) return false;
     if (filters.websiteCategory && item.websiteCategory !== String(filters.websiteCategory)) return false;
+    if (filters.websiteCategoryPath && item.websiteCategoryPath !== String(filters.websiteCategoryPath)) return false;
+    if (filters.slug && String(item.slug || '').toLowerCase() !== String(filters.slug).trim().toLowerCase()) return false;
+    if (filters.sku && String(item.sku || '').toLowerCase() !== String(filters.sku).trim().toLowerCase()) return false;
     if (filters.featured === 'true' && item.isFeatured !== true) return false;
     const keyword = String(filters.keyword || '').trim().toLowerCase();
     if (!keyword) return true;

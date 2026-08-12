@@ -27,6 +27,14 @@ export class ProductEntity {
   @Column({ name: 'product_key', type: 'varchar', nullable: true }) @Index() productKey: string | null;
   @Column({ name: 'list_price', type: 'decimal', default: 0 }) listPrice: number;
   @Column({ name: 'cost_price', type: 'decimal', default: 0 }) costPrice: number;
+  @Column({ name: 'length_mm', type: 'decimal', nullable: true }) lengthMm: number | null;
+  @Column({ name: 'width_mm', type: 'decimal', nullable: true }) widthMm: number | null;
+  @Column({ name: 'height_mm', type: 'decimal', nullable: true }) heightMm: number | null;
+  @Column({ name: 'net_weight_kg', type: 'decimal', nullable: true }) netWeightKg: number | null;
+  @Column({ name: 'package_length_mm', type: 'decimal', nullable: true }) packageLengthMm: number | null;
+  @Column({ name: 'package_width_mm', type: 'decimal', nullable: true }) packageWidthMm: number | null;
+  @Column({ name: 'package_height_mm', type: 'decimal', nullable: true }) packageHeightMm: number | null;
+  @Column({ name: 'gross_weight_kg', type: 'decimal', nullable: true }) grossWeightKg: number | null;
   @Column({ type: 'varchar', default: 'CNY' }) currency: string;
   @Column({ default: 'active' }) @Index() status: string;
   @Column({ name: 'record_status', default: 'active' }) recordStatus: string;

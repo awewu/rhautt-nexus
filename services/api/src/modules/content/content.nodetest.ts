@@ -5,6 +5,7 @@ import { makeFakeDataSource, InMemoryRepository } from '../common/testing/fake-d
 import { ProductEntity } from '../product-catalog/product-catalog.entity';
 import { ProductSellingPointEntity } from '../product-catalog/product-mgmt.entity';
 import { FileArtifactEntity } from '../file-artifact/file-artifact.entity';
+import { GrowthContentAssetEntity } from '../growth/growth.entities';
 import { ContentAssetEntity, ContentPublishTaskEntity } from './content.entity';
 import { ContentService } from './content.service';
 
@@ -16,8 +17,12 @@ function fixture(rows: any[] = []) {
   const taskRepo = new InMemoryRepository();
   const productRepo = new InMemoryRepository();
   productRepo.seed(
-    { id: 'p1', tenantId: 't1', name: 'Rheem test product', sku: 'SKU-1', dataReadinessStatus: 'fact_verified', published: true },
-    { id: 'p2', tenantId: 't1', name: 'Draft product', sku: 'SKU-2', dataReadinessStatus: 'imported_draft', published: true },
+    { id: 'pl1', tenantId: 'product-library', name: 'Rheem library product', sku: 'SKU-L1', brandCode: 'rheem', status: 'active', recordStatus: 'active', dataReadinessStatus: 'fact_verified', published: true, deletedAt: null },
+    { id: 'p1', tenantId: 't1', name: 'Rheem test product', sku: 'SKU-1', brandCode: 'rheem', status: 'active', recordStatus: 'active', dataReadinessStatus: 'fact_verified', published: true, deletedAt: null },
+    { id: 'p0', tenantId: 't1', name: 'Tenant seed product', sku: 'SKU-0', brandCode: 'rheem', status: 'active', recordStatus: 'active', dataReadinessStatus: 'fact_verified', published: true, deletedAt: null },
+    { id: 'p2', tenantId: 't1', name: 'Draft product', sku: 'SKU-2', brandCode: 'rheem', status: 'active', recordStatus: 'active', dataReadinessStatus: 'imported_draft', published: true, deletedAt: null },
+    { id: 'p3', tenantId: 't1', name: 'Disabled product', sku: 'SKU-3', brandCode: 'rheem', status: 'inactive', recordStatus: 'active', dataReadinessStatus: 'fact_verified', published: true, deletedAt: null },
+    { id: 'p4', tenantId: 't1', name: 'Unpublished product', sku: 'SKU-4', brandCode: 'rheem', status: 'active', recordStatus: 'active', dataReadinessStatus: 'fact_verified', published: false, deletedAt: null },
   );
   const sellingPointRepo = new InMemoryRepository();
   sellingPointRepo.seed(
@@ -26,12 +31,19 @@ function fixture(rows: any[] = []) {
   );
   const fileRepo = new InMemoryRepository();
   fileRepo.seed({ id: 'f1', tenantId: 't1', status: 'active', originalName: 'manual-fact.pdf', entityType: 'content_fact_source', mimeType: 'application/pdf', createdAt: new Date('2026-08-11') });
+  const contentAssetRepo = new InMemoryRepository();
+  contentAssetRepo.seed(
+    { id: 'ca1', tenantId: 't1', status: 'active', archivedAt: null, title: 'Verified lifestyle image', assetType: '封面图', brandSlug: 'rheem', channel: 'wechat', summary: 'usable content asset', tags: ['节能'], fileArtifactId: 'f1', fileUrl: '', thumbnailUrl: '', fileFormat: 'jpg', usageScene: '文案配图', updatedAt: new Date('2026-08-12') },
+    { id: 'ca3', tenantId: 't1', status: 'active', archivedAt: null, title: 'Reusable generic image', assetType: '正文配图', brandSlug: null, channel: 'seo', summary: 'generic content asset', tags: ['通用'], fileArtifactId: 'f3', fileUrl: '', thumbnailUrl: '', fileFormat: 'png', usageScene: '通用配图', updatedAt: new Date('2026-08-12') },
+    { id: 'ca2', tenantId: 't1', status: 'active', archivedAt: new Date('2026-08-12'), title: 'Archived image', assetType: '封面图', brandSlug: 'rheem', channel: 'wechat', summary: 'archived', tags: [], fileArtifactId: 'f2', fileUrl: '', thumbnailUrl: '', fileFormat: 'jpg', usageScene: '文案配图', updatedAt: new Date('2026-08-11') },
+  );
   const { ds } = makeFakeDataSource([
     [ContentAssetEntity, repo],
     [ContentPublishTaskEntity, taskRepo],
     [ProductEntity, productRepo],
     [ProductSellingPointEntity, sellingPointRepo],
     [FileArtifactEntity, fileRepo],
+    [GrowthContentAssetEntity, contentAssetRepo],
   ]);
   return { svc: new ContentService(ds), repo, taskRepo };
 }
@@ -129,6 +141,30 @@ test('listFactSources exposes uploaded artifacts as human-readable evidence', as
   assert.equal(artifact.verified, true);
 });
 
+test('productionContext exposes only enabled products and content asset library items', async () => {
+  const { svc } = fixture();
+  const result: any = await svc.productionContext(actor, { brandCode: 'rheem', channel: 'wechat', productTenantId: 'product-library', limit: 10 });
+  assert.deepEqual(result.products.map((item: any) => item.id), ['pl1']);
+  assert.equal(result.products.some((item: any) => ['p0', 'p1', 'p2', 'p3', 'p4'].includes(item.id)), false);
+  assert.deepEqual(result.materials.map((item: any) => item.id), ['ca1', 'ca3']);
+  assert.equal(result.materials.some((item: any) => item.id === 'f1' || item.label === 'manual-fact.pdf'), false);
+  assert.equal(result.factSources.some((item: any) => item.type === 'manual' && item.id === 'f1' && item.label === 'Verified lifestyle image'), true);
+});
+
+test('productionContext can browse enabled products before a brand is selected', async () => {
+  const { svc } = fixture();
+  const result: any = await svc.productionContext(actor, { channel: 'xiaohongshu', productTenantId: 'product-library', limit: 10 });
+  assert.deepEqual(result.products.map((item: any) => item.id), ['pl1']);
+  assert.equal(result.materials.some((item: any) => item.id === 'ca3'), true);
+});
+
+test('productionContext does not filter content assets by selected brand', async () => {
+  const { svc } = fixture();
+  const result: any = await svc.productionContext(actor, { brandCode: 'everhot', productTenantId: 'product-library', limit: 10 });
+  assert.equal(result.products.length, 0);
+  assert.deepEqual(result.materials.map((item: any) => item.id), ['ca1', 'ca3']);
+});
+
 test('createPublishTask still blocks after binding pending fact refs', async () => {
   const { svc, repo } = fixture([{ id: 'c9', tenantId: 't1', status: 'approved', factRefs: [] }]);
   await svc.bindFactRefs(actor, 'c9', [{ type: 'product', id: 'p2' }]);
@@ -140,4 +176,17 @@ test('legacy publish endpoint no longer marks approved content as published', as
   const { svc, repo } = fixture([{ id: 'c10', tenantId: 't1', status: 'approved', factRefs: [{ type: 'fact', id: 'f1', verified: true }] }]);
   await assert.rejects(() => svc.publish(actor, 'c10'), /创建发布任务/);
   assert.equal((repo.rows.find((x: any) => x.id === 'c10') as any).status, 'approved');
+});
+
+test('list returns production next actions for the content factory', async () => {
+  const { svc } = fixture([
+    { id: 'c11', tenantId: 't1', title: '缺事实源稿', status: 'draft', factRefs: [], sourceType: 'geo_gap', updatedAt: new Date('2026-08-10') },
+    { id: 'c12', tenantId: 't1', title: '可发布稿', status: 'approved', factRefs: [{ type: 'manual', id: 'f1', verified: true }], updatedAt: new Date('2026-08-10') },
+  ]);
+  const result: any = await svc.list(actor);
+  const blocked = result.contents.find((item: any) => item.id === 'c11');
+  const publishable = result.contents.find((item: any) => item.id === 'c12');
+  assert.equal(blocked.nextAction.key, 'bindFacts');
+  assert.equal(blocked.source.label, 'GEO 缺口');
+  assert.equal(publishable.nextAction.key, 'createPublishTask');
 });

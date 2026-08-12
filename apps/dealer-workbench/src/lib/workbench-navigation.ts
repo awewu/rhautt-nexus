@@ -188,6 +188,7 @@ export const WORKBENCH_NAV: WorkbenchNavItem[] = [
     group: 2,
     permission: 'product.catalog.view',
     children: [
+      { key: 'product-data-console', label: '产品数据中台', href: '/products', icon: Gauge },
       { key: 'product-list', label: '产品目录', href: '/products?module=catalog', icon: Package },
       { key: 'product-mgmt', label: '产品管理(生命周期/上市/定价)', href: '/product-mgmt', icon: Boxes },
       { key: 'product-materials', label: '产品资料', href: '/products?module=materials', icon: FileText },

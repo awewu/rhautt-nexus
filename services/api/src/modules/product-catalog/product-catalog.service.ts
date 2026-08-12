@@ -447,6 +447,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
   private projectProductRead(
     product: ProductEntity,
     categories = new Map<string, BrandProductCategoryEntity>(),
+    websitePricing?: ProductWebsitePricingEntity | null,
   ): Record<string, unknown> {
     const binding = this.categoryBindingFromMeta(product);
     const primaryCategory = binding.primaryCategoryId ? categories.get(binding.primaryCategoryId) : null;
@@ -469,6 +470,22 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       categoryBindings,
       categoryAncestry: categoryProjection(ancestry),
       categoryPath: pathFromCategories || binding.categoryPath || this.legacyCategoryPath(product),
+      websitePricing: websitePricing ? {
+        id: websitePricing.id,
+        brandCode: websitePricing.brandCode,
+        siteCode: websitePricing.siteCode,
+        locale: websitePricing.locale,
+        priceDisplayMode: websitePricing.priceDisplayMode,
+        websitePrice: websitePricing.websitePrice,
+        websitePriceMin: websitePricing.websitePriceMin,
+        websitePriceMax: websitePricing.websitePriceMax,
+        promoPrice: websitePricing.promoPrice,
+        currency: websitePricing.currency,
+        priceUnit: websitePricing.priceUnit,
+        priceLabel: websitePricing.priceLabel,
+        priceNote: websitePricing.priceNote,
+        taxIncluded: websitePricing.taxIncluded,
+      } : null,
     };
   }
 
@@ -794,7 +811,11 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
         .take(pageSize);
       const [rows, total] = await qb.getManyAndCount();
       const categoryMap = await this.categoryMapForProducts(rows);
-      const items = rows.map((product) => this.projectProductRead(product, categoryMap));
+      const pricingRows = rows.length ? await repo.manager.getRepository(ProductWebsitePricingEntity).find({
+        where: { tenantId, productId: In(rows.map((row) => row.id)), deletedAt: null } as any,
+      }) : [];
+      const pricingByProductId = new Map(pricingRows.map((row) => [row.productId, row]));
+      const items = rows.map((product) => this.projectProductRead(product, categoryMap, pricingByProductId.get(product.id) || null));
       const facetRows = await repo.find({ where: { tenantId } as any, take: 2000 });
       const toFacet = (values: Array<string | null | undefined>) => {
         const counts = new Map<string, number>();
@@ -838,10 +859,22 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
   }
 
   async get(id: string, tenantId: string) {
-    const product = await this.scoped(tenantId, (repo) => repo.findOne({ where: { id, tenantId } }));
-    if (!product) throw new NotFoundException('产品不存在');
-    const categoryMap = await this.categoryMapForProducts([product]);
-    return { success: true, data: this.projectProductRead(product, categoryMap) };
+    return this.scoped(tenantId, async (repo) => {
+      const product = await repo.findOne({ where: { id, tenantId } });
+      if (!product) throw new NotFoundException('产品不存在');
+      const categoryMap = await this.categoryMapForProducts([product]);
+      const websitePricing = await repo.manager.getRepository(ProductWebsitePricingEntity).findOne({
+        where: {
+          tenantId,
+          productId: product.id,
+          brandCode: String(product.brand || '').trim().toLowerCase(),
+          siteCode: String(product.brand || '').trim().toLowerCase(),
+          locale: DEFAULT_LOCALE,
+          deletedAt: null,
+        } as any,
+      });
+      return { success: true, data: this.projectProductRead(product, categoryMap, websitePricing) };
+    });
   }
 
   private async categoryFilterIds(categoryId: string, includeDescendants: boolean): Promise<string[]> {
@@ -1087,6 +1120,14 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
         productKey: existingByModel?.productKey || `common:${normalizedModel}`,
         listPrice: Object.prototype.hasOwnProperty.call(dto, 'listPrice') ? Number(dto.listPrice || 0) : existingByModel?.listPrice || 0,
         costPrice: Object.prototype.hasOwnProperty.call(dto, 'costPrice') ? Number(dto.costPrice || 0) : existingByModel?.costPrice || 0,
+        lengthMm: Object.prototype.hasOwnProperty.call(dto, 'lengthMm') ? this.optionalNonNegativeNumber(dto.lengthMm) : existingByModel?.lengthMm ?? null,
+        widthMm: Object.prototype.hasOwnProperty.call(dto, 'widthMm') ? this.optionalNonNegativeNumber(dto.widthMm) : existingByModel?.widthMm ?? null,
+        heightMm: Object.prototype.hasOwnProperty.call(dto, 'heightMm') ? this.optionalNonNegativeNumber(dto.heightMm) : existingByModel?.heightMm ?? null,
+        netWeightKg: Object.prototype.hasOwnProperty.call(dto, 'netWeightKg') ? this.optionalNonNegativeNumber(dto.netWeightKg) : existingByModel?.netWeightKg ?? null,
+        packageLengthMm: Object.prototype.hasOwnProperty.call(dto, 'packageLengthMm') ? this.optionalNonNegativeNumber(dto.packageLengthMm) : existingByModel?.packageLengthMm ?? null,
+        packageWidthMm: Object.prototype.hasOwnProperty.call(dto, 'packageWidthMm') ? this.optionalNonNegativeNumber(dto.packageWidthMm) : existingByModel?.packageWidthMm ?? null,
+        packageHeightMm: Object.prototype.hasOwnProperty.call(dto, 'packageHeightMm') ? this.optionalNonNegativeNumber(dto.packageHeightMm) : existingByModel?.packageHeightMm ?? null,
+        grossWeightKg: Object.prototype.hasOwnProperty.call(dto, 'grossWeightKg') ? this.optionalNonNegativeNumber(dto.grossWeightKg) : existingByModel?.grossWeightKg ?? null,
         currency: String(dto.currency || existingByModel?.currency || 'CNY'),
         status: String(dto.status || existingByModel?.status || 'active'),
         recordStatus: String(dto.recordStatus || existingByModel?.recordStatus || 'active'),
@@ -1222,14 +1263,18 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     validateProductUpsertInput(dto);
     const mutable = [
       'name', 'category', 'spec', 'positioning', 'assetRefs', 'productKey',
-      'listPrice', 'costPrice', 'currency', 'status', 'lifecycleStage', 'dataReadinessStatus', 'meta',
+      'listPrice', 'costPrice',
+      'lengthMm', 'widthMm', 'heightMm', 'netWeightKg',
+      'packageLengthMm', 'packageWidthMm', 'packageHeightMm', 'grossWeightKg',
+      'currency', 'status', 'lifecycleStage', 'dataReadinessStatus', 'meta',
     ] as const;
     const patch = Object.fromEntries(mutable
       .filter((key) => Object.prototype.hasOwnProperty.call(dto, key) && dto[key] !== undefined)
       .map((key) => [key, dto[key]])) as Partial<ProductEntity>;
     const categoryBindingPatch = this.categoryBindingInput(dto);
+    const websitePricingInput = this.websitePricingFromDto(dto);
     if (!Object.keys(patch).length && categoryBindingPatch) patch.meta = {};
-    if (!Object.keys(patch).length) throw new BadRequestException('没有可更新字段');
+    if (!Object.keys(patch).length && !websitePricingInput) throw new BadRequestException('没有可更新字段');
     if ('positioning' in patch) patch.positioning = sanitizePositioning(patch.positioning);
     if ('assetRefs' in patch) patch.assetRefs = sanitizeAssetRefs(patch.assetRefs);
 
@@ -1253,9 +1298,24 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
         before.id,
       );
       const saved = await repo.save(candidate!);
+      const websitePricing = await this.upsertWebsitePricing(
+        manager,
+        tenantId,
+        saved.id,
+        brand,
+        websitePricingInput,
+        actor,
+      );
+      const categoryMap = await this.categoryMapForProducts([saved]);
       await this.recordProductMutation(manager, actor, 'product.update', before, saved);
-      return { success: true, data: saved };
+      return { success: true, data: this.projectProductRead(saved, categoryMap, websitePricing) };
     }, { tenantId, actorId: actor.userId, role: actor.role });
+  }
+
+  private optionalNonNegativeNumber(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') return null;
+    const n = Number(value);
+    return Number.isFinite(n) && n >= 0 ? n : null;
   }
 
   async archive(id: string, tenantId: string, actor: ProductMutationActor) {

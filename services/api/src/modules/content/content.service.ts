@@ -8,7 +8,7 @@ import { ContentAssetEntity, ContentPublishTaskEntity } from './content.entity';
 import { ProductEntity } from '../product-catalog/product-catalog.entity';
 import { ProductSellingPointEntity } from '../product-catalog/product-mgmt.entity';
 import { FileArtifactEntity } from '../file-artifact/file-artifact.entity';
-import { GrowthContentAssetEntity, GrowthMarketingMaterialEntity } from '../growth/growth.entities';
+import { GrowthContentAssetEntity } from '../growth/growth.entities';
 
 type ContentFactRef = { type: string; id: string; label?: string; verified?: boolean };
 type CreatePublishTaskDto = {
@@ -35,8 +35,40 @@ function productFactReady(product: ProductEntity) {
     || product.dataReadinessStatus === 'ready';
 }
 
+function productEnabled(product: ProductEntity) {
+  return product.status === 'active'
+    && product.recordStatus === 'active'
+    && product.published === true
+    && !product.deletedAt;
+}
+
 function artifactContentUrl(id?: string | null) {
   return id ? `/api/v2/file-artifact/${encodeURIComponent(id)}/content` : null;
+}
+
+function hasVerifiedFacts(content: ContentAssetEntity) {
+  return (content.factRefs || []).some((ref) => ref.id && ref.verified);
+}
+
+function daysSince(value?: Date | string | null) {
+  if (!value) return null;
+  const time = new Date(value).getTime();
+  if (!Number.isFinite(time)) return null;
+  return Math.max(0, Math.floor((Date.now() - time) / 86400000));
+}
+
+function sourceTypeLabel(sourceType?: string | null) {
+  const labels: Record<string, string> = {
+    geo_gap: 'GEO 缺口',
+    geo_experiment: 'GEO 实验',
+    product_fact: '产品事实发布',
+    dealer_question: '经销商问题',
+    sentiment: '舆情问题',
+    campaign: '活动 Campaign',
+    copywriter: '文案 Copilot',
+    manual: '人工 Brief',
+  };
+  return labels[text(sourceType)] || (sourceType ? sourceType : '人工 Brief');
 }
 
 @Injectable()
@@ -154,19 +186,20 @@ export class ContentService {
     }, this.scope(actor));
   }
 
-  async productionContext(actor: JwtPayload, q: { query?: string; brandCode?: string; channel?: string; limit?: string | number } = {}) {
+  async productionContext(actor: JwtPayload, q: { query?: string; brandCode?: string; channel?: string; limit?: string | number; productTenantId?: string } = {}) {
     return withRlsTransaction(this.ds, async (em) => {
       const needle = text(q.query).toLowerCase();
       const brandCode = text(q.brandCode).toLowerCase();
-      const channel = text(q.channel).toLowerCase();
+      const productTenantId = text(q.productTenantId) || actor.tenantId;
       const limit = Math.min(Math.max(Number(q.limit) || 18, 1), 50);
       const matches = (...values: unknown[]) => !needle || values.some((value) => text(value).toLowerCase().includes(needle));
 
       const products = (await em.getRepository(ProductEntity).find({
-        where: [{ tenantId: actor.tenantId }, { tenantId: 'rhautt_shared' }],
+        where: { tenantId: productTenantId },
         order: { updatedAt: 'DESC' as const },
         take: limit * 2,
       } as any))
+        .filter(productEnabled)
         .filter((item) => !brandCode || text(item.brandCode || item.brand).toLowerCase() === brandCode)
         .filter((item) => matches(item.name, item.sku, item.model, item.category, item.brandCode))
         .slice(0, limit)
@@ -198,33 +231,13 @@ export class ContentService {
           factRef: { type: 'selling-point', id: item.id, label: item.claim },
         }));
 
-      const uploaded = (await em.getRepository(FileArtifactEntity).find({
-        where: { tenantId: actor.tenantId, status: 'active' },
-        order: { createdAt: 'DESC' as const },
-        take: limit * 2,
-      } as any))
-        .filter((item) => matches(item.originalName, item.entityType, item.mimeType))
-        .slice(0, limit)
-        .map((item) => ({
-          id: item.id,
-          label: item.originalName || '上传素材',
-          type: item.entityType,
-          meta: [item.mimeType, item.createdAt ? new Date(item.createdAt).toLocaleDateString('zh-CN') : ''].map(text).filter(Boolean).join(' · '),
-          fileArtifactId: item.id,
-          thumbnailUrl: String(item.mimeType || '').startsWith('image/') ? artifactContentUrl(item.id) : null,
-          fileUrl: artifactContentUrl(item.id),
-          verified: true,
-          factRef: { type: 'manual', id: item.id, label: item.originalName || item.id },
-        }));
-
       const contentAssets = (await em.getRepository(GrowthContentAssetEntity).find({
         where: { tenantId: actor.tenantId, status: 'active' },
         order: { updatedAt: 'DESC' as const },
         take: limit * 2,
       } as any))
-        .filter((item) => !brandCode || text(item.brandSlug).toLowerCase() === brandCode)
-        .filter((item) => !channel || !item.channel || text(item.channel).toLowerCase() === channel)
-        .filter((item) => matches(item.title, item.summary, item.assetType, item.usageScene))
+        .filter((item) => !item.archivedAt)
+        .filter((item) => matches(item.title, item.summary, item.assetType, item.usageScene, item.channel, ...(Array.isArray(item.tags) ? item.tags : [])))
         .slice(0, limit)
         .map((item) => ({
           id: item.id,
@@ -238,28 +251,7 @@ export class ContentService {
           factRef: item.fileArtifactId ? { type: 'manual', id: item.fileArtifactId, label: item.title } : null,
         }));
 
-      const marketingMaterials = (await em.getRepository(GrowthMarketingMaterialEntity).find({
-        where: { tenantId: actor.tenantId, status: 'active' },
-        order: { updatedAt: 'DESC' as const },
-        take: limit * 2,
-      } as any))
-        .filter((item) => !brandCode || text(item.brandSlug).toLowerCase() === brandCode)
-        .filter((item) => !channel || !item.channel || text(item.channel).toLowerCase() === channel)
-        .filter((item) => matches(item.title, item.summary, item.materialType, item.targetAudience))
-        .slice(0, limit)
-        .map((item) => ({
-          id: item.id,
-          label: item.title,
-          type: item.materialType,
-          meta: [item.materialType, item.targetAudience, item.fileFormat].map(text).filter(Boolean).join(' · '),
-          fileArtifactId: item.fileArtifactId,
-          thumbnailUrl: item.thumbnailUrl || artifactContentUrl(item.fileArtifactId),
-          fileUrl: item.fileUrl || artifactContentUrl(item.fileArtifactId),
-          verified: !(item.complianceFlags || []).length,
-          factRef: item.fileArtifactId ? { type: 'manual', id: item.fileArtifactId, label: item.title } : null,
-        }));
-
-      const materials = [...uploaded, ...contentAssets, ...marketingMaterials]
+      const materials = contentAssets
         .filter((item, index, list) => list.findIndex((other) => `${other.fileArtifactId || other.id}` === `${item.fileArtifactId || item.id}`) === index)
         .slice(0, limit);
 
@@ -471,7 +463,10 @@ export class ContentService {
       const where: Record<string, unknown> = { tenantId: actor.tenantId };
       if (q.status) where.status = q.status;
       if (q.channel) where.channel = q.channel;
-      return { contents: await em.getRepository(ContentAssetEntity).find({ where, order: { updatedAt: 'DESC' }, take: 100 }) };
+      const contents = await em.getRepository(ContentAssetEntity).find({ where, order: { updatedAt: 'DESC' }, take: 100 });
+      const tasks = await em.getRepository(ContentPublishTaskEntity).find({ where: { tenantId: actor.tenantId }, order: { updatedAt: 'DESC' as const }, take: 200 } as any);
+      const taskMap = this.tasksByContent(tasks);
+      return { contents: contents.map((item) => this.enrichContentRow(item, taskMap.get(item.id) || [])) };
     }, this.scope(actor));
   }
 
@@ -481,4 +476,65 @@ export class ContentService {
       inReview: await em.getRepository(ContentAssetEntity).count({ where: { tenantId: actor.tenantId, status: 'in_review' } }),
     }), this.scope(actor));
   }
+
+  private tasksByContent(tasks: ContentPublishTaskEntity[]) {
+    const map = new Map<string, ContentPublishTaskEntity[]>();
+    for (const task of tasks) {
+      const list = map.get(task.contentId) || [];
+      list.push(task);
+      map.set(task.contentId, list);
+    }
+    for (const list of map.values()) list.sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime());
+    return map;
+  }
+
+  private enrichContentRow(content: ContentAssetEntity, publishTasks: ContentPublishTaskEntity[] = []) {
+    const latestTask = publishTasks[0] || null;
+    const openPublishTask = publishTasks.find((task) => task.status !== 'published' && task.status !== 'cancelled') || null;
+    const gate = this.factGate(content.factRefs || []);
+    const source = {
+      type: content.sourceType || 'manual',
+      label: content.sourceLabel || sourceTypeLabel(content.sourceType),
+      sourceRef: content.sourceRef || null,
+    };
+    const retrospectiveDone = content.status === 'published'
+      && Boolean(latestTask?.evidenceUrl || latestTask?.evidenceNote)
+      && (content.sourceType !== 'geo_experiment' || Boolean(latestTask?.evidenceUrl));
+
+    return {
+      ...content,
+      source,
+      factGate: {
+        status: gate.passed ? 'passed' : hasVerifiedFacts(content) ? 'partial' : 'blocked',
+        reason: gate.reason || '事实源已校验',
+        verifiedCount: (content.factRefs || []).filter((ref) => ref.id && ref.verified).length,
+        totalCount: (content.factRefs || []).filter((ref) => ref.id).length,
+      },
+      latestPublishTask: latestTask,
+      openPublishTask,
+      nextAction: this.nextActionFor(content, gate, openPublishTask),
+      aging: {
+        daysInCurrentStatus: daysSince(content.updatedAt),
+        overdue: content.status !== 'published' && Number(daysSince(content.updatedAt) || 0) >= 3,
+      },
+      retrospective: {
+        done: retrospectiveDone,
+        evidenceUrl: latestTask?.evidenceUrl || null,
+        evidenceNote: latestTask?.evidenceNote || null,
+        needsGeoRetest: content.status === 'published' && content.sourceType === 'geo_experiment' && !retrospectiveDone,
+      },
+    };
+  }
+
+  private nextActionFor(content: ContentAssetEntity, gate: { passed: boolean; reason?: string }, openTask?: ContentPublishTaskEntity | null) {
+    if (!gate.passed && content.status !== 'published') return { key: 'bindFacts', label: '补事实源', tone: 'danger' };
+    if (content.status === 'draft') return { key: 'submitReview', label: '提交审核', tone: 'info' };
+    if (content.status === 'rejected') return { key: 'editRework', label: '修改后重提', tone: 'warning' };
+    if (content.status === 'in_review') return { key: 'waitReview', label: '等待审核', tone: 'neutral' };
+    if (content.status === 'approved' && openTask) return { key: 'fillEvidence', label: '回填发布凭证', tone: 'warning' };
+    if (content.status === 'approved') return { key: 'createPublishTask', label: '创建发布任务', tone: 'success' };
+    if (content.status === 'published') return { key: 'retrospective', label: '查看复盘', tone: 'brand' };
+    return { key: 'inspect', label: '查看内容', tone: 'neutral' };
+  }
+
 }

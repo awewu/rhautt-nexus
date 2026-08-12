@@ -19,6 +19,7 @@ import {
   Search,
   Sparkles,
   Tag,
+  Upload,
   X,
 } from 'lucide-react';
 import { WorkbenchPaginationFooter } from './WorkbenchCore';
@@ -60,6 +61,7 @@ type SortBy = 'title' | 'materialType' | 'brandSlug' | 'fileFormat' | 'versionLa
 type SortOrder = 'ASC' | 'DESC';
 
 const DEFAULT_CATEGORIES = ['品牌物料', '产品物料', '活动物料', '销售话术', '案例素材', '培训合规'];
+const FILE_FORMAT_OPTIONS = ['PDF', 'PNG', 'JPG', 'JPEG', 'WEBP', 'SVG', 'PPTX', 'DOCX', 'XLSX', 'MP4', 'ZIP', '其他'];
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 const SORTABLE_COLUMNS: { key: SortBy; label: string }[] = [
@@ -173,6 +175,7 @@ export default function GrowthMaterialsTable() {
   const [form, setForm] = useState<MaterialForm>(EMPTY_FORM);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [editingId, setEditingId] = useState('');
+  const [formOpen, setFormOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -290,12 +293,30 @@ export default function GrowthMaterialsTable() {
     setSelectedFile(null);
   }
 
+  function openCreateForm() {
+    resetForm();
+    setMessage('');
+    setError('');
+    setFormOpen(true);
+  }
+
+  function closeForm() {
+    resetForm();
+    setFormOpen(false);
+  }
+
+  function requestCloseForm() {
+    if (busy) return;
+    closeForm();
+  }
+
   function edit(item: MarketingMaterial) {
     setEditingId(item.id);
     setForm(toForm(item));
     setSelectedFile(null);
     setMessage('');
     setError('');
+    setFormOpen(true);
   }
 
   async function save() {
@@ -334,6 +355,7 @@ export default function GrowthMaterialsTable() {
         setMessage('物料已新增');
       }
       resetForm();
+      setFormOpen(false);
       await load();
     } catch (e) {
       setError((e as Error).message || '保存失败');
@@ -531,8 +553,11 @@ export default function GrowthMaterialsTable() {
             维护物料名称、分类、品牌、适用场景、格式、版本和标签。支持分页、排序、批量操作与文件预览。
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button className="btn btn-brand btn-sm" onClick={() => setAiOpen((v) => !v)} disabled={busy}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <button className="btn btn-brand btn-sm" onClick={openCreateForm} disabled={busy}>
+            <Plus size={13} />新增物料
+          </button>
+          <button className="btn btn-outline btn-sm" onClick={() => setAiOpen((v) => !v)} disabled={busy}>
             <Sparkles size={13} />AI 生成图
           </button>
           <button className="btn btn-outline btn-sm" onClick={load} disabled={busy}>
@@ -540,6 +565,13 @@ export default function GrowthMaterialsTable() {
           </button>
         </div>
       </div>
+
+      {(message || error) && (
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          {message && <span className="badge badge-success">{message}</span>}
+          {error && <span className="badge badge-warning">{error}</span>}
+        </div>
+      )}
 
       {/* 多模态生成：AI 文生图 */}
       {aiOpen ? (
@@ -579,60 +611,6 @@ export default function GrowthMaterialsTable() {
           ) : null}
         </div>
       ) : null}
-
-      {/* 新增/编辑表单 */}
-      <div className="inset" style={{ display: 'grid', gap: 12 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
-          <label style={{ display: 'grid', gap: 6 }}>
-            <span className="t-label">物料名称</span>
-            <input className="input" value={form.title} onChange={(event) => patchForm({ title: event.target.value })} placeholder="例如 夏季活动海报" />
-          </label>
-          <label style={{ display: 'grid', gap: 6 }}>
-            <span className="t-label">分类</span>
-            <input className="input" list="growth-material-categories" value={form.materialType} onChange={(event) => patchForm({ materialType: event.target.value })} placeholder="输入或选择分类" />
-            <datalist id="growth-material-categories">
-              {categories.map((item) => <option key={item} value={item} />)}
-            </datalist>
-          </label>
-          <label style={{ display: 'grid', gap: 6 }}>
-            <span className="t-label">品牌</span>
-            <input className="input" value={form.brandSlug} onChange={(event) => patchForm({ brandSlug: event.target.value })} placeholder="Rheem / Ruud / Everhot" />
-          </label>
-          <label style={{ display: 'grid', gap: 6 }}>
-            <span className="t-label">适用场景</span>
-            <input className="input" value={form.channel} onChange={(event) => patchForm({ channel: event.target.value })} placeholder="官网 / 门店 / 朋友圈 / 培训" />
-          </label>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10 }}>
-          <input className="input" value={form.fileFormat} onChange={(event) => patchForm({ fileFormat: event.target.value })} placeholder="格式：PDF / PNG / PPTX" />
-          <input className="input" value={form.versionLabel} onChange={(event) => patchForm({ versionLabel: event.target.value })} placeholder="版本：v1" />
-          <input className="input" value={form.tags} onChange={(event) => patchForm({ tags: event.target.value })} placeholder="标签，用逗号分隔" />
-          <label className="input" style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', overflow: 'hidden' }}>
-            <input
-              type="file"
-              onChange={(event) => {
-                const file = event.target.files?.[0] || null;
-                setSelectedFile(file);
-                if (file) patchForm({ fileFormat: extensionLabel(file) });
-              }}
-              style={{ display: 'none' }}
-            />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: selectedFile || form.fileArtifactId ? 'var(--t-primary)' : 'var(--t-tertiary)' }}>
-              {selectedFile?.name || (form.fileArtifactId ? '已上传文件，可重新选择' : '选择上传文件')}
-            </span>
-          </label>
-        </div>
-        <textarea className="input" rows={2} value={form.summary} onChange={(event) => patchForm({ summary: event.target.value })} placeholder="备注说明" style={{ resize: 'vertical' }} />
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <button className="btn btn-brand btn-sm" onClick={save} disabled={busy}>
-            {editingId ? <Edit3 size={14} /> : <Plus size={14} />}
-            {editingId ? '保存修改' : '新增物料'}
-          </button>
-          {editingId && <button className="btn btn-outline btn-sm" onClick={resetForm} disabled={busy}>取消编辑</button>}
-          {message && <span className="badge badge-success">{message}</span>}
-          {error && <span className="badge badge-warning">{error}</span>}
-        </div>
-      </div>
 
       {/* 筛选与搜索 */}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -801,6 +779,157 @@ export default function GrowthMaterialsTable() {
         onPrevious={busy || page <= 1 ? undefined : () => setPage(Math.max(page - 1, 1))}
         onNext={busy || page >= totalPages ? undefined : () => setPage(page + 1)}
       />
+
+      {/* 新增/编辑表单弹层 */}
+      {formOpen && (
+        <div
+          onClick={requestCloseForm}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.42)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', zIndex: 50, padding: '8vh 24px 24px' }}
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            className="card-elevated"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="growth-material-form-title"
+            style={{
+              width: 'min(100%, 920px)',
+              maxHeight: '84vh',
+              background: 'var(--surface-1)',
+              boxShadow: 'var(--sh-modal)',
+              display: 'grid',
+              gridTemplateRows: 'auto 1fr auto',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--r-lg)',
+              overflow: 'hidden',
+            }}
+          >
+            <div style={{ padding: '20px 24px 18px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, background: 'var(--surface-1)' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <span style={{ width: 4, height: 16, borderRadius: 999, background: 'var(--brand)', display: 'inline-block' }} />
+                  <p className="t-label">{editingId ? '编辑物料' : '新增物料'}</p>
+                </div>
+                <h3 id="growth-material-form-title" className="t-headline" style={{ marginTop: 0 }}>
+                  {editingId ? '修改营销物料信息' : '录入营销物料'}
+                </h3>
+                <p style={{ fontSize: 12, color: 'var(--t-tertiary)', marginTop: 4 }}>
+                  维护物料分类、品牌归属、适用场景、版本与文件附件。
+                </p>
+              </div>
+              <button className="btn btn-ghost btn-sm icon-only" onClick={requestCloseForm} aria-label="关闭表单" disabled={busy}>
+                <X size={18} />
+              </button>
+            </div>
+
+            <div style={{ overflow: 'auto', padding: 24, display: 'grid', gap: 18, alignContent: 'start', background: 'var(--surface-2)' }}>
+              <section style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', padding: 18, display: 'grid', gap: 14 }}>
+                <div>
+                  <h4 style={{ margin: 0, color: 'var(--t-strong)', fontSize: 14 }}>基础信息</h4>
+                  <p style={{ margin: '4px 0 0', color: 'var(--t-tertiary)', fontSize: 12 }}>用于列表检索、分类筛选和后台归档。</p>
+                </div>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">物料名称 <span style={{ color: 'var(--brand)' }}>*</span></span>
+                  <input className="input" value={form.title} onChange={(event) => patchForm({ title: event.target.value })} placeholder="例如：夏季活动海报" />
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+                  <label style={{ display: 'grid', gap: 6 }}>
+                    <span className="t-label">分类 <span style={{ color: 'var(--brand)' }}>*</span></span>
+                    <select className="input" value={form.materialType} onChange={(event) => patchForm({ materialType: event.target.value })}>
+                      {categories.map((item) => <option key={item} value={item} />)}
+                    </select>
+                  </label>
+                  <label style={{ display: 'grid', gap: 6 }}>
+                    <span className="t-label">品牌</span>
+                    <input className="input" value={form.brandSlug} onChange={(event) => patchForm({ brandSlug: event.target.value })} placeholder="Rheem / Ruud / Everhot" />
+                  </label>
+                </div>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">适用场景</span>
+                  <input className="input" value={form.channel} onChange={(event) => patchForm({ channel: event.target.value })} placeholder="官网 / 门店 / 朋友圈 / 培训" />
+                </label>
+              </section>
+
+              <section style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', padding: 18, display: 'grid', gap: 14 }}>
+                <div>
+                  <h4 style={{ margin: 0, color: 'var(--t-strong)', fontSize: 14 }}>文件与版本</h4>
+                  <p style={{ margin: '4px 0 0', color: 'var(--t-tertiary)', fontSize: 12 }}>支持上传 PDF、图片、PPT 等营销物料文件。</p>
+                </div>
+                <label
+                  style={{
+                    minHeight: 92,
+                    border: '1px dashed var(--border-2)',
+                    borderRadius: 'var(--r-lg)',
+                    background: 'color-mix(in srgb, var(--brand-50) 22%, var(--surface-1) 78%)',
+                    display: 'grid',
+                    gridTemplateColumns: '44px minmax(0, 1fr) auto',
+                    gap: 12,
+                    alignItems: 'center',
+                    padding: 16,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <input
+                    type="file"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0] || null;
+                      setSelectedFile(file);
+                      if (file) patchForm({ fileFormat: extensionLabel(file) });
+                    }}
+                    style={{ display: 'none' }}
+                  />
+                  <span style={{ width: 44, height: 44, borderRadius: 'var(--r-lg)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-1)', border: '1px solid var(--border)', color: 'var(--brand)' }}>
+                    <Upload size={20} />
+                  </span>
+                  <span style={{ minWidth: 0 }}>
+                    <strong style={{ display: 'block', color: 'var(--t-primary)', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {selectedFile?.name || (form.fileArtifactId ? '已上传文件，可重新选择' : '点击选择上传文件')}
+                    </strong>
+                    <span style={{ display: 'block', color: 'var(--t-tertiary)', fontSize: 12, marginTop: 4 }}>
+                      文件会作为该物料的下载与预览附件保存。
+                    </span>
+                  </span>
+                  <span className="btn btn-outline btn-sm" aria-hidden="true">选择文件</span>
+                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
+                  <label style={{ display: 'grid', gap: 6 }}>
+                    <span className="t-label">格式</span>
+                    <select className="input" value={FILE_FORMAT_OPTIONS.includes(form.fileFormat) ? form.fileFormat : '其他'} onChange={(event) => patchForm({ fileFormat: event.target.value })}>
+                      {FILE_FORMAT_OPTIONS.map((item) => <option key={item} value={item}>{item}</option>)}
+                    </select>
+                  </label>
+                  <label style={{ display: 'grid', gap: 6 }}>
+                    <span className="t-label">版本</span>
+                    <input className="input" value={form.versionLabel} onChange={(event) => patchForm({ versionLabel: event.target.value })} placeholder="v1" />
+                  </label>
+                  <label style={{ display: 'grid', gap: 6 }}>
+                    <span className="t-label">标签</span>
+                    <input className="input" value={form.tags} onChange={(event) => patchForm({ tags: event.target.value })} placeholder="逗号分隔" />
+                  </label>
+                </div>
+              </section>
+
+              <section style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', padding: 18, display: 'grid', gap: 10 }}>
+                <div>
+                  <h4 style={{ margin: 0, color: 'var(--t-strong)', fontSize: 14 }}>备注说明</h4>
+                  <p style={{ margin: '4px 0 0', color: 'var(--t-tertiary)', fontSize: 12 }}>记录使用说明、适配渠道或版本变更信息。</p>
+                </div>
+                <textarea className="input" rows={4} value={form.summary} onChange={(event) => patchForm({ summary: event.target.value })} placeholder="备注说明" style={{ resize: 'vertical' }} />
+              </section>
+
+              {error && <span className="badge badge-warning" style={{ justifySelf: 'start' }}>{error}</span>}
+            </div>
+
+            <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', background: 'var(--surface-1)', display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'flex-end' }}>
+              <button className="btn btn-outline btn-sm" onClick={requestCloseForm} disabled={busy}>取消</button>
+              <button className="btn btn-brand btn-sm" onClick={save} disabled={busy}>
+                {busy ? <Loader2 size={14} className="animate-spin" /> : editingId ? <Edit3 size={14} /> : <Plus size={14} />}
+                {editingId ? '保存修改' : '新增物料'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 文件预览弹层 */}
       {previewItem && (
