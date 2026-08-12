@@ -44,16 +44,16 @@
     var meta = product && product.siteMeta && typeof product.siteMeta === 'object' ? product.siteMeta : {};
     var productBinding = meta.productCategoryBinding && typeof meta.productCategoryBinding === 'object' ? meta.productCategoryBinding : {};
     return [
-      product && product.categoryPath,
-      productBinding.pathLabel,
       product && product.websiteCategoryPath,
       meta.websiteCategoryPath,
       meta.siteProductCategory && meta.siteProductCategory.path,
-      product && product.cat,
-      product && product.category,
       product && product.websiteCategory,
       meta.websiteCategory,
       meta.siteProductCategory && meta.siteProductCategory.name,
+      product && product.categoryPath,
+      productBinding.pathLabel,
+      product && product.cat,
+      product && product.category,
       product && product.series,
       product && product.name
     ].filter(Boolean).join(' / ');
@@ -62,12 +62,14 @@
     var meta = product && product.siteMeta && typeof product.siteMeta === 'object' ? product.siteMeta : {};
     var productBinding = meta.productCategoryBinding && typeof meta.productCategoryBinding === 'object' ? meta.productCategoryBinding : {};
     return String(
-      (product && product.categoryPath)
-      || productBinding.pathLabel
-      || (product && product.websiteCategoryPath)
+      (product && product.websiteCategoryPath)
       || meta.websiteCategoryPath
       || (meta.siteProductCategory && meta.siteProductCategory.path)
       || (product && product.websiteCategory)
+      || meta.websiteCategory
+      || (meta.siteProductCategory && meta.siteProductCategory.name)
+      || (product && product.categoryPath)
+      || productBinding.pathLabel
       || (product && product.category)
       || ''
     );
@@ -77,15 +79,13 @@
     return parts[parts.length-1] || '';
   }
   function resolveAudience(product){
-    var legacy = String(product && product.cat || '').toLowerCase();
-    if(legacy === 'residential' || legacy === 'commercial') return legacy;
     var text = categoryText(product);
     if(text.indexOf('\u5546\u7528')>-1 || /commercial/i.test(text)) return 'commercial';
+    var legacy = String(product && product.cat || '').toLowerCase();
+    if(legacy === 'residential' || legacy === 'commercial') return legacy;
     return 'residential';
   }
   function resolveSystem(product){
-    var legacy = String(product && product.sys || '').toLowerCase();
-    if(legacy === 'water-heating' || legacy === 'heating-cooling') return legacy;
     var text = categoryText(product);
     if(
       text.indexOf('\u91c7\u6696')>-1
@@ -97,6 +97,8 @@
       || text.indexOf('\u9664\u6e7f')>-1
       || /heating|cooling|air/i.test(text)
     ) return 'heating-cooling';
+    var legacy = String(product && product.sys || '').toLowerCase();
+    if(legacy === 'water-heating' || legacy === 'heating-cooling') return legacy;
     return 'water-heating';
   }
   function normalizeRuntimeProduct(product){

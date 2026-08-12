@@ -55,4 +55,6 @@ test('product detail categories prefer database category paths over legacy cat s
   assert.match(catalog, /function categoryPathValue/);
   assert.match(catalog, /productCategoryBinding/);
   assert.match(catalog, /categoryLeaf\(p\)/);
+  assert.match(catalog, /product && product\.websiteCategoryPath[\s\S]*product && product\.categoryPath/);
+  assert.match(catalog, /var text = categoryText\(product\);[\s\S]*var legacy = String\(product && product\.sys/);
 });
