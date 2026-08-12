@@ -29,6 +29,7 @@ import { SentimentRadarPanel } from '../../../components/SentimentRadarPanel';
 import { CopyAssetsPanel } from '../../../components/CopyAssetsPanel';
 import { CampaignRoiPanel } from '../../../components/CampaignRoiPanel';
 import WechatPublishingWorkspace from '../../../components/WechatPublishingWorkspace';
+import ContentReviewWorkspace from '../../../components/ContentReviewWorkspace';
 
 type GrowthSection = 'geo' | 'copywriter' | 'sentiment' | 'automation' | 'materials';
 type WechatSection = 'wechat-accounts' | 'wechat-review' | 'wechat-drafts';
@@ -122,7 +123,7 @@ export default async function GrowthWorkspacePage({
   const { section } = await params;
   const wechatSection = wechatSectionFromParams(section);
   if (wechatSection === 'wechat-accounts') return <WechatPublishingWorkspace mode="accounts" />;
-  if (wechatSection === 'wechat-review') return <WechatPublishingWorkspace mode="review" />;
+  if (wechatSection === 'wechat-review') return <ContentReviewWorkspace />;
   if (wechatSection === 'wechat-drafts') return <WechatPublishingWorkspace mode="drafts" />;
 
   const activeKey = sectionFromParams(section);

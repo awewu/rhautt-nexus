@@ -498,7 +498,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     if (!primary) {
       throw new BadRequestException('Selected product category does not exist.');
     }
-    if (primary.brandCode !== brand) {
+    if (primary.brandCode !== brand && primary.brandCode !== 'common') {
       throw new BadRequestException('Selected product categories must belong to the product brand.');
     }
     if (primary.status !== 'active') {
@@ -651,6 +651,20 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     const marketing: ProductMarketing = content?.marketing ?? EMPTY_MARKETING;
     const seo: ProductSeo = content?.seo ?? EMPTY_SEO;
     const categoryBinding = this.categoryBindingFromMeta(product);
+    const marketingSpecs = Array.isArray((marketing as any).specs) ? (marketing as any).specs : [];
+    const marketingFeatures = Array.isArray((marketing as any).features) ? (marketing as any).features : [];
+    const marketingHighlights = Array.isArray((marketing as any).highlights) ? (marketing as any).highlights : [];
+    const marketingBadges = Array.isArray((marketing as any).badges) ? (marketing as any).badges : [];
+    const marketingCerts = Array.isArray((marketing as any).certs) ? (marketing as any).certs : [];
+    const marketingFaq = Array.isArray((marketing as any).faq) ? (marketing as any).faq : [];
+    const marketingFeatureBenefits = Array.isArray((marketing as any).featureBenefits) ? (marketing as any).featureBenefits : [];
+    const productLibraryMeta = product.meta && typeof product.meta === 'object' && !Array.isArray(product.meta)
+      ? ((product.meta as any).productLibrary ?? {})
+      : {};
+    const productLibraryCompliance = productLibraryMeta && typeof productLibraryMeta === 'object' && !Array.isArray(productLibraryMeta)
+      ? ((productLibraryMeta as any).compliance ?? {})
+      : {};
+    const libraryCerts = Array.isArray((productLibraryCompliance as any).certificates) ? (productLibraryCompliance as any).certificates : [];
     const base: Record<string, unknown> = {
       slug: this.publicSlug(product),
       sku: product.sku,
@@ -666,22 +680,26 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       categoryPath: categoryBinding.categoryPath || this.legacyCategoryPath(product),
       cat: meta.cat || product.category,
       sys: meta.sys || '',
-      series: meta.series || '',
-      tagline: meta.tagline || '',
+      series: (marketing as any).series || meta.series || '',
+      tagline: marketing.subhead || marketing.headline || meta.tagline || '',
       tags: Array.isArray(meta.tags) ? meta.tags : [],
-      badges: Array.isArray(meta.badges) ? meta.badges : Array.isArray(meta.tags) ? meta.tags : [],
-      en: meta.en || '',
+      badges: marketingBadges.length ? marketingBadges : Array.isArray(meta.badges) ? meta.badges : Array.isArray(meta.tags) ? meta.tags : [],
+      en: (marketing as any).officialEnglishName || meta.en || '',
       icon: imageRefs.icon?.url || meta.icon || '🔥',
       image: mainImage?.url || '',
       mainImage,
       gallery,
       manualPdfs,
       specImage: meta.specImage || '',
-      specs: Array.isArray(meta.specs) ? meta.specs : [],
-      features: Array.isArray(meta.features) ? meta.features : [],
-      highlights: Array.isArray(meta.highlights) ? meta.highlights : [],
-      certs: Array.isArray(meta.certs) ? meta.certs : undefined,
-      faqs: Array.isArray(meta.faqs) ? meta.faqs : undefined,
+      specs: marketingSpecs.length ? marketingSpecs : Array.isArray(meta.specs) ? meta.specs : [],
+      features: marketingFeatures.length
+        ? marketingFeatures
+        : marketingFeatureBenefits.length
+          ? marketingFeatureBenefits.map((item: any) => ({ title: item.feature, desc: item.benefit }))
+          : Array.isArray(meta.features) ? meta.features : [],
+      highlights: marketingHighlights.length ? marketingHighlights : Array.isArray(meta.highlights) ? meta.highlights : [],
+      certs: marketingCerts.length ? marketingCerts : Array.isArray(meta.certs) && meta.certs.length ? meta.certs : libraryCerts.length ? libraryCerts : undefined,
+      faqs: marketingFaq.length ? marketingFaq.map((item: any) => ({ q: item.q, a: item.a })) : Array.isArray(meta.faqs) ? meta.faqs : undefined,
       locale,
       positioning,
       marketing,
@@ -1082,7 +1100,8 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       if (Object.prototype.hasOwnProperty.call(dto, 'positioning')) patch.positioning = sanitizePositioning(dto.positioning);
       if (Object.prototype.hasOwnProperty.call(dto, 'assetRefs')) patch.assetRefs = sanitizeAssetRefs(dto.assetRefs);
       if (categoryBindingPatch || this.metaHasCategoryBindingInput(dto.meta, tenantBrand)) {
-        patch.meta = await this.validateCategoryBinding(manager, repo.create({ ...(existingByModel ?? {}), ...patch } as any));
+        const candidate = repo.create({ ...(existingByModel ?? {}), ...patch } as any) as unknown as ProductEntity;
+        patch.meta = await this.validateCategoryBinding(manager, candidate);
       }
       await this.assertBrandSlugUnique(repo, tenantId, tenantBrand, (patch.meta as any)?.[tenantBrand]?.slug || existingByModel?.sku || skuCode, existingByModel?.id);
 
@@ -1203,7 +1222,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     validateProductUpsertInput(dto);
     const mutable = [
       'name', 'category', 'spec', 'positioning', 'assetRefs', 'productKey',
-      'listPrice', 'costPrice', 'currency', 'status', 'meta',
+      'listPrice', 'costPrice', 'currency', 'status', 'lifecycleStage', 'dataReadinessStatus', 'meta',
     ] as const;
     const patch = Object.fromEntries(mutable
       .filter((key) => Object.prototype.hasOwnProperty.call(dto, key) && dto[key] !== undefined)

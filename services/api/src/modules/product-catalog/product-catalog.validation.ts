@@ -171,6 +171,7 @@ export function validateProductUpsertInput(dto: unknown): Record<string, unknown
   assertOptionalString(body.workingName, 'workingName');
   assertOptionalString(body.recordStatus, 'recordStatus');
   assertOptionalString(body.dataReadinessStatus, 'dataReadinessStatus');
+  assertOptionalString(body.lifecycleStage, 'lifecycleStage');
   assertOptionalString(body.sourceSystem, 'sourceSystem');
   assertOptionalString(body.sourceRecordKey, 'sourceRecordKey');
   assertOptionalString(body.category, 'category');

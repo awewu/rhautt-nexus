@@ -12,7 +12,7 @@ function configureRuntimeEnvironment(env = process.env) {
   env.TS_NODE_PROJECT = tsProjectPath;
   env.API_COMPILED_ENTRY = compiledEntry;
 
-  const result = dotenv.config({ path: envPath, processEnv: env, quiet: true });
+  const result = dotenv.config({ path: envPath, processEnv: env, override: true, quiet: true });
   if (result.error && result.error.code !== 'ENOENT') throw result.error;
 
   return { repoRoot, envPath, tsProjectPath, compiledEntry };

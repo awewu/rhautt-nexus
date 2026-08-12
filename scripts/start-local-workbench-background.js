@@ -17,7 +17,11 @@ const child = spawn(process.execPath, ['../../node_modules/next/dist/bin/next', 
   env: {
     ...process.env,
     NODE_ENV: 'development',
-    NEXT_PUBLIC_API_URL: 'http://localhost:5500',
+    // Keep browser requests same-origin in local development.
+    // next.config.js rewrites /api/* to API_URL/http://localhost:5500 on the server side.
+    // Setting NEXT_PUBLIC_API_URL here makes the browser call :5500 directly and can turn
+    // normal PATCH/POST saves into opaque "Failed to fetch" network errors.
+    API_URL: process.env.API_URL || 'http://localhost:5500',
     HOME: tmpDir,
     USERPROFILE: tmpDir,
     TMP: tmpDir,

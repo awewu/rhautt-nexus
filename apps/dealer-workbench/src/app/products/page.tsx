@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { Archive, Bold, Boxes, CheckCircle2, Edit3, ExternalLink, EyeOff, FileText, FolderOpen, Heading2, Image, Italic, Link, List, ListOrdered, Package, Plus, Search, Table2, X, XCircle } from 'lucide-react';
+import { Archive, Bold, Boxes, CheckCircle2, Edit3, ExternalLink, EyeOff, FileText, FolderOpen, Heading2, Image, Italic, Link, List, ListOrdered, Package, Plus, RefreshCw, Search, Table2, X, XCircle } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
 import {
@@ -13,7 +13,7 @@ import {
   WorkbenchTableShell,
   WorkbenchTableState,
 } from '../../components/WorkbenchCore';
-import { auth, brandProductCategories, brandSites, fileArtifacts, products, siteProductAssignments } from '../../lib/api';
+import { auth, brandProductCategories, brandSites, fileArtifacts, products, siteProductAssignments, siteProductCategories } from '../../lib/api';
 import { getBrandProductPermissions, type BrandProductPermissions } from '../../lib/brand-product-adapter';
 import { CATEGORIES, PRODUCTS, SYSTEM_PACKS, type CatKey, type Product } from '../../lib/products-data';
 
@@ -27,9 +27,24 @@ type AssignmentStatus = 'draft' | 'published' | 'hidden';
 type WebsiteShelfTransition = 'publishing' | 'hiding';
 type WebsiteShelfAssignment = {
   id: string;
+  siteCode?: string;
+  siteId?: string;
+  brand?: string;
   productTenantId: string;
   productId: string;
   status: AssignmentStatus;
+  publicSlug?: string;
+  siteProductCategoryId?: string | null;
+  websiteCategory?: string | null;
+  menuGroup?: string | null;
+  displayOrder?: number;
+  isFeatured?: boolean;
+  siteTitle?: string | null;
+  siteSummary?: string | null;
+  siteMeta?: Record<string, unknown> | null;
+  publishedAt?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
   deletedAt?: string | null;
 };
 type FloatingDialogOptions = {
@@ -187,7 +202,24 @@ type CreateProductDraft = {
   categoryLevel1Id: string;
   categoryLevel2Id: string;
   categoryLevel3Id: string;
+  productType: string;
+  lifecycleStage: string;
+  manufacturer: string;
+  countryOfOrigin: string;
+  marketCode: string;
+  launchDate: string;
+  discontinueDate: string;
+  salesUnit: string;
+  packageSpec: string;
+  configurationNotes: string;
+  installationRequirement: string;
+  warrantyPolicy: string;
+  technicalSpecs: string;
+  sellingPoints: string;
+  applicationScenarios: string;
+  complianceCertificates: string;
   listPrice: string;
+  costPrice: string;
   currency: string;
   websitePriceDisplayMode: string;
   websitePrice: string;
@@ -201,6 +233,10 @@ type CreateProductDraft = {
   publicSlug: string;
   series: string;
   tagline: string;
+  publicSummary: string;
+  featureBenefits: string;
+  highlightMetrics: string;
+  faqs: string;
   websiteCategory: string;
   displayOrder: string;
   badges: string;
@@ -232,9 +268,32 @@ type EditProductDraft = {
   categoryLevel1Id: string;
   categoryLevel2Id: string;
   categoryLevel3Id: string;
+  productType: string;
+  lifecycleStage: string;
+  manufacturer: string;
+  countryOfOrigin: string;
+  marketCode: string;
+  launchDate: string;
+  discontinueDate: string;
+  salesUnit: string;
+  packageSpec: string;
+  configurationNotes: string;
+  installationRequirement: string;
+  warrantyPolicy: string;
+  technicalSpecs: string;
+  sellingPoints: string;
+  applicationScenarios: string;
+  complianceCertificates: string;
+  listPrice: string;
+  costPrice: string;
+  currency: string;
   publicSlug: string;
   series: string;
   tagline: string;
+  publicSummary: string;
+  featureBenefits: string;
+  highlightMetrics: string;
+  faqs: string;
   websiteCategory: string;
   displayOrder: string;
   badges: string;
@@ -299,6 +358,75 @@ type ProductCategoryUsage = {
   boundProductCount: number;
   childCategoryCount?: number;
 };
+type SiteProductCategoryRow = {
+  id?: string;
+  parentId?: string | null;
+  level?: number;
+  code?: string;
+  name?: string;
+  slug?: string | null;
+  websiteCategory: string;
+  menuGroup?: string | null;
+  menuGroups: string[];
+  mappedBaseCategoryId?: string | null;
+  sortOrder?: number;
+  isVisible?: boolean;
+  isFeatured?: boolean;
+  status?: string;
+  description?: string | null;
+  assignmentIds: string[];
+  productCount: number;
+  publishedCount: number;
+  hiddenCount: number;
+  draftCount: number;
+  featuredCount: number;
+  displayOrder: number;
+};
+type SiteProductCategoryResponse = {
+  siteCode: string;
+  total: number;
+  productCount: number;
+  items: SiteProductCategoryRow[];
+};
+type SitePublishingSuggestion = {
+  siteCode: string;
+  productId: string;
+  productTenantId: string;
+  productCategory: {
+    primaryCategoryId?: string | null;
+    categoryLevel1Id?: string | null;
+    categoryLevel2Id?: string | null;
+    categoryLevel3Id?: string | null;
+    matchedBaseCategoryId?: string | null;
+    pathLabel?: string;
+  };
+  suggestedWebsiteCategory?: {
+    id: string;
+    name: string;
+    path: string;
+    level: number;
+    mappedBaseCategoryId?: string | null;
+    matchReason: 'mapped_base_category_id' | 'first_and_leaf_name' | 'name_fallback' | 'none';
+  } | null;
+  suggestedSeries?: {
+    value?: string;
+    source?: string;
+  };
+};
+type SiteProductCategoryTreeNode = SiteProductCategoryRow & {
+  id: string;
+  name: string;
+  path: string;
+  level: number;
+  children: SiteProductCategoryTreeNode[];
+};
+type SiteProductCategorySelectOption = {
+  value: string;
+  label: string;
+  name: string;
+  path: string;
+  code?: string;
+};
 
 const CATEGORY_KEYS = new Set<string>(CATEGORIES.map((category) => category.key));
 const DEFAULT_BRAND_OPTIONS: Array<{ value: BrandFilter; label: string }> = [
@@ -313,6 +441,7 @@ const DEFAULT_CREATE_BRAND_OPTIONS: Array<{ value: ProductBrand; label: string }
   { value: 'everhot', label: '恒热 Everhot' },
 ];
 const DEFAULT_PRODUCT_BRANDS: ProductBrand[] = ['rheem', 'ruud', 'everhot'];
+const PRODUCT_BASE_CATEGORY_BRAND = 'common';
 const BRAND_PRODUCT_TENANTS: Record<string, string | undefined> = {
   rheem: process.env.NEXT_PUBLIC_RHEEM_TENANT_ID || '4aee0000-0000-4000-8000-000000000001',
   ruud: process.env.NEXT_PUBLIC_RUUD_TENANT_ID || '7aad0000-0000-4000-8000-000000000001',
@@ -349,7 +478,22 @@ function normalizeModule(value: unknown): ProductModule {
 }
 
 function normalizeCategory(value: unknown): CatKey {
-  return typeof value === 'string' && CATEGORY_KEYS.has(value) ? (value as CatKey) : 'heat_pump';
+  const raw = text(value);
+  return raw ? (raw as CatKey) : 'heat_pump';
+}
+
+function productCategoryNodeValue(node: ProductCategoryNode | null | undefined): string {
+  return text(node?.code || node?.slug || node?.nameCn || node?.name || node?.id);
+}
+
+function productCategoryDisplayLabel(value: unknown, tree: ProductCategoryNode[] = []): string {
+  const raw = text(value);
+  if (!raw) return '';
+  const flat = flattenCategoryTree(tree);
+  const matched = flat.find((node) => [node.id, node.code, node.slug, node.nameCn, node.name, node.nameEn].some((item) => text(item) === raw));
+  if (matched) return categoryOptionLabel(matched);
+  const builtin = CATEGORIES.find((category) => category.key === raw);
+  return builtin?.label || raw;
 }
 
 function normalizeBrand(value: unknown): string {
@@ -359,6 +503,7 @@ function normalizeBrand(value: unknown): string {
 }
 
 function displayBrand(value: string): string {
+  if (value === 'common') return '公共产品库';
   if (value === 'rheem') return '瑞美 Rheem';
   if (value === 'ruud') return '瑞德 Ruud';
   if (value === 'everhot') return '恒热 Everhot';
@@ -426,6 +571,69 @@ function officialDetailFromContent(result: unknown): string {
   const item = productDetailContentItems(result).find((row) => row?.locale === PRODUCT_DETAIL_LOCALE)
     || productDetailContentItems(result)[0];
   return text(item?.officialDetailHtml);
+}
+
+function productContentItem(result: unknown): Record<string, any> {
+  return productDetailContentItems(result).find((row) => row?.locale === PRODUCT_DETAIL_LOCALE)
+    || productDetailContentItems(result)[0]
+    || {};
+}
+
+function featureBenefitLines(value: unknown): string {
+  const items = Array.isArray(value) ? value : [];
+  return items
+    .map((item) => {
+      const row = objectOrEmpty(item);
+      const title = text(row.title || row.feature);
+      const desc = text(row.desc || row.description || row.benefit);
+      return desc ? `${title}: ${desc}` : title;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
+function highlightMetricLines(value: unknown): string {
+  const items = Array.isArray(value) ? value : [];
+  return items
+    .map((item) => {
+      if (typeof item === 'string') return text(item);
+      const row = objectOrEmpty(item);
+      const label = text(row.label || row.k || row.key);
+      const metric = text(row.value || row.v);
+      return metric ? `${label}: ${metric}` : label;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
+function faqLines(value: unknown): string {
+  const items = Array.isArray(value) ? value : [];
+  return items
+    .map((item) => {
+      const row = objectOrEmpty(item);
+      const question = text(row.q || row.question);
+      const answer = text(row.a || row.answer);
+      return question && answer ? `${question}: ${answer}` : question;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
+function contentDraftPatchFromResult(result: unknown): Partial<EditProductDraft> {
+  const item = productContentItem(result);
+  const marketing = objectOrEmpty(item.marketing);
+  const patch: Partial<EditProductDraft> = {};
+  if ('officialDetailHtml' in item) patch.officialDetailHtml = text(item.officialDetailHtml);
+  if ('series' in marketing) patch.series = text(marketing.series);
+  if ('headline' in marketing) patch.tagline = text(marketing.headline);
+  if ('subhead' in marketing) patch.publicSummary = text(marketing.subhead);
+  if ('officialEnglishName' in marketing) patch.officialEnglishName = text(marketing.officialEnglishName);
+  if ('badges' in marketing) patch.badges = Array.isArray(marketing.badges) ? marketing.badges.map(text).filter(Boolean).join(', ') : '';
+  if ('certs' in marketing) patch.complianceCertificates = Array.isArray(marketing.certs) ? marketing.certs.map(text).filter(Boolean).join('\n') : '';
+  if ('features' in marketing || 'featureBenefits' in marketing) patch.featureBenefits = featureBenefitLines(marketing.features || marketing.featureBenefits);
+  if ('highlights' in marketing) patch.highlightMetrics = highlightMetricLines(marketing.highlights);
+  if ('faq' in marketing) patch.faqs = faqLines(marketing.faq);
+  return patch;
 }
 
 function escapeProductDetailHtml(value: string) {
@@ -530,6 +738,25 @@ function assignmentMatchesProduct(assignment: WebsiteShelfAssignment | undefined
   );
 }
 
+function assignmentsForProduct(
+  map: Map<string, WebsiteShelfAssignment[]>,
+  product: NormalizedProduct,
+): WebsiteShelfAssignment[] {
+  const byTenant = map.get(assignmentKey(product.id, tenantIdForProduct(product))) || [];
+  const byProduct = map.get(product.id) || [];
+  const seen = new Set<string>();
+  return [...byTenant, ...byProduct].filter((assignment) => {
+    const key = assignment.id || `${assignment.siteCode || ''}:${assignment.productTenantId || ''}:${assignment.productId || ''}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return !assignment.deletedAt;
+  });
+}
+
+function activeWebsiteAssignments(assignments: WebsiteShelfAssignment[]): WebsiteShelfAssignment[] {
+  return assignments.filter((assignment) => !assignment.deletedAt && assignment.status !== 'hidden');
+}
+
 function websiteShelfMeta(assignment?: WebsiteShelfAssignment, transition?: WebsiteShelfTransition) {
   if (transition === 'publishing') return { label: '官网上架中', tone: 'info' as const };
   if (transition === 'hiding') return { label: '官网下架中', tone: 'warning' as const };
@@ -537,6 +764,23 @@ function websiteShelfMeta(assignment?: WebsiteShelfAssignment, transition?: Webs
   if (assignment.deletedAt || assignment.status === 'hidden') return { label: '官网已下架', tone: 'warning' as const };
   if (assignment.status === 'published') return { label: '官网已上架', tone: 'success' as const };
   return { label: '官网未上架', tone: 'neutral' as const };
+}
+
+function websiteShelfSummary(assignments: WebsiteShelfAssignment[]) {
+  const active = activeWebsiteAssignments(assignments);
+  if (!active.length) return { label: '官网未配置', tone: 'neutral' as const };
+  const published = active.filter((assignment) => assignment.status === 'published').length;
+  if (active.length === 1) return websiteShelfMeta(active[0]);
+  if (published === active.length) return { label: `已上架 ${active.length} 个官网`, tone: 'success' as const };
+  if (published > 0) return { label: `已配置 ${active.length} 个官网`, tone: 'info' as const };
+  return { label: `待发布 ${active.length} 个官网`, tone: 'neutral' as const };
+}
+
+function websitePublishingStatusMeta(assignment: WebsiteShelfAssignment) {
+  if (assignment.deletedAt) return { label: '已移除', tone: 'neutral' as const };
+  if (assignment.status === 'published') return { label: '已发布，官网可见', tone: 'success' as const };
+  if (assignment.status === 'hidden') return { label: '已隐藏，官网不可见', tone: 'warning' as const };
+  return { label: '草稿，未发布到官网', tone: 'neutral' as const };
 }
 
 function catalogCategoryFilterOptions(tree: ProductCategoryNode[]) {
@@ -659,7 +903,24 @@ function emptyCreateDraft(): CreateProductDraft {
     categoryLevel1Id: '',
     categoryLevel2Id: '',
     categoryLevel3Id: '',
+    productType: '',
+    lifecycleStage: 'intro',
+    manufacturer: '',
+    countryOfOrigin: '中国',
+    marketCode: 'CN',
+    launchDate: '',
+    discontinueDate: '',
+    salesUnit: '台',
+    packageSpec: '',
+    configurationNotes: '',
+    installationRequirement: '',
+    warrantyPolicy: '',
+    technicalSpecs: '',
+    sellingPoints: '',
+    applicationScenarios: '',
+    complianceCertificates: '',
     listPrice: '',
+    costPrice: '',
     currency: 'CNY',
     websitePriceDisplayMode: 'not_shown',
     websitePrice: '',
@@ -673,6 +934,10 @@ function emptyCreateDraft(): CreateProductDraft {
     publicSlug: '',
     series: '',
     tagline: '',
+    publicSummary: '',
+    featureBenefits: '',
+    highlightMetrics: '',
+    faqs: '',
     websiteCategory: '',
     displayOrder: '0',
     badges: '',
@@ -686,6 +951,14 @@ function emptyCreateDraft(): CreateProductDraft {
 function editDraftFromProduct(product: NormalizedProduct): EditProductDraft {
   const brandMeta = productBrandMeta(product);
   const categoryBinding = productCategoryBinding(product);
+  const spec = objectOrEmpty(product.raw?.spec);
+  const libraryMeta = productLibraryMeta(product);
+  const skuMeta = objectOrEmpty(libraryMeta.sku);
+  const lifecycle = objectOrEmpty(libraryMeta.lifecycle);
+  const compliance = objectOrEmpty(libraryMeta.compliance);
+  const positioning = objectOrEmpty(product.raw?.positioning);
+  const librarySellingPoints = Array.isArray(libraryMeta.sellingPoints) ? libraryMeta.sellingPoints : [];
+  const libraryScenarios = Array.isArray(libraryMeta.applicationScenarios) ? libraryMeta.applicationScenarios : Array.isArray(libraryMeta.scenarios) ? libraryMeta.scenarios : [];
   return {
     name: text(product.name),
     model: text(product.model),
@@ -694,9 +967,38 @@ function editDraftFromProduct(product: NormalizedProduct): EditProductDraft {
     categoryLevel1Id: categoryBinding.categoryLevel1Id,
     categoryLevel2Id: categoryBinding.categoryLevel2Id,
     categoryLevel3Id: categoryBinding.categoryLevel3Id,
+    productType: text(spec.productType || libraryMeta.productType),
+    lifecycleStage: text(product.raw?.lifecycleStage || lifecycle.stage) || 'intro',
+    manufacturer: text(spec.manufacturer || libraryMeta.manufacturer),
+    countryOfOrigin: text(spec.countryOfOrigin || libraryMeta.countryOfOrigin) || '中国',
+    marketCode: text(spec.marketCode || libraryMeta.marketCode) || 'CN',
+    launchDate: text(lifecycle.launchDate),
+    discontinueDate: text(lifecycle.discontinueDate),
+    salesUnit: text(skuMeta.salesUnit) || '台',
+    packageSpec: text(skuMeta.packageSpec),
+    configurationNotes: text(skuMeta.configurationNotes),
+    installationRequirement: text(libraryMeta.installationRequirement),
+    warrantyPolicy: text(libraryMeta.warrantyPolicy),
+    technicalSpecs: keyValueLines(spec.technicalSpecs || brandMeta.specs),
+    sellingPoints: Array.isArray(positioning.sellingPoints) && positioning.sellingPoints.length
+      ? positioning.sellingPoints.map(text).filter(Boolean).join('\n')
+      : librarySellingPoints.map(text).filter(Boolean).join('\n'),
+    applicationScenarios: Array.isArray(positioning.scenarios) && positioning.scenarios.length
+      ? positioning.scenarios.map(text).filter(Boolean).join('\n')
+      : Array.isArray(positioning.applicationScenarios) && positioning.applicationScenarios.length
+        ? positioning.applicationScenarios.map(text).filter(Boolean).join('\n')
+        : libraryScenarios.map(text).filter(Boolean).join('\n'),
+    complianceCertificates: Array.isArray(compliance.certificates) ? compliance.certificates.map(text).filter(Boolean).join('\n') : '',
+    listPrice: text((product.raw as any)?.listPrice ?? product.marketPrice),
+    costPrice: text((product.raw as any)?.costPrice ?? product.dealerPrice),
+    currency: text((product.raw as any)?.currency) || 'CNY',
     publicSlug: text(brandMeta.slug) || slug(text(product.sku)),
     series: text(brandMeta.series),
     tagline: text(brandMeta.tagline),
+    publicSummary: '',
+    featureBenefits: '',
+    highlightMetrics: '',
+    faqs: '',
     websiteCategory: text(brandMeta.websiteCategory || brandMeta.websiteMenuCategory || brandMeta.cat),
     displayOrder: String(nonNegativeInt(brandMeta.displayOrder ?? brandMeta.sortOrder)),
     badges: Array.isArray(brandMeta.badges) ? brandMeta.badges.map(text).filter(Boolean).join(', ') : '',
@@ -749,6 +1051,7 @@ function productReadinessSummary(product: NormalizedProduct) {
 }
 
 function productCategoryBinding(product: NormalizedProduct): {
+  primaryCategoryId: string;
   categoryLevel1Id: string;
   categoryLevel2Id: string;
   categoryLevel3Id: string;
@@ -758,6 +1061,7 @@ function productCategoryBinding(product: NormalizedProduct): {
   const brandMeta = productBrandMeta(product);
   const categoryMeta = objectOrEmpty(meta.categoryBinding);
   return {
+    primaryCategoryId: text(raw.primaryCategoryId || brandMeta.primaryCategoryId || meta.primaryCategoryId || categoryMeta.primaryCategoryId),
     categoryLevel1Id: text(raw.categoryLevel1Id || brandMeta.categoryLevel1Id || meta.categoryLevel1Id || categoryMeta.categoryLevel1Id),
     categoryLevel2Id: text(raw.categoryLevel2Id || brandMeta.categoryLevel2Id || meta.categoryLevel2Id || categoryMeta.categoryLevel2Id),
     categoryLevel3Id: text(raw.categoryLevel3Id || brandMeta.categoryLevel3Id || meta.categoryLevel3Id || categoryMeta.categoryLevel3Id),
@@ -783,6 +1087,35 @@ function splitBadges(value: string): string[] {
     .filter(Boolean);
 }
 
+function splitLines(value: string): string[] {
+  return value
+    .split(/\r?\n|[;；]/g)
+    .map(text)
+    .filter(Boolean);
+}
+
+function parseKeyValueLines(value: string): Array<{ k: string; v: string }> {
+  return splitLines(value).map((line) => {
+    const parts = line.split(/[:：=]/);
+    const k = text(parts.shift());
+    const v = text(parts.join(':'));
+    return k && v ? { k, v } : { k: line, v: '' };
+  });
+}
+
+function keyValueLines(value: unknown): string {
+  if (!Array.isArray(value)) return '';
+  return value
+    .map((item) => {
+      const row = objectOrEmpty(item);
+      const k = text(row.k || row.label || row.name || row.key);
+      const v = text(row.v || row.value || row.desc || row.description);
+      return v ? `${k}: ${v}` : k;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
 function productUpdatePayload(
   product: NormalizedProduct,
   draft: EditProductDraft,
@@ -795,6 +1128,7 @@ function productUpdatePayload(
   const categoryLevel1Id = text(draft.categoryLevel1Id);
   const categoryLevel2Id = text(draft.categoryLevel2Id);
   const categoryLevel3Id = text(draft.categoryLevel3Id);
+  const primaryCategoryId = categoryLevel3Id || categoryLevel2Id || categoryLevel1Id;
   if (!name) throw new Error('请填写产品名称。');
   if (!model) throw new Error('请填写产品型号。');
   if (!category) throw new Error('请选择分类。');
@@ -809,10 +1143,22 @@ function productUpdatePayload(
   const websiteCategory = text(draft.websiteCategory);
   const displayOrder = nonNegativeInt(draft.displayOrder);
   const tenantId = tenantIdForProduct(product);
+  const previousLibraryMeta = objectOrEmpty(previousMeta.productLibrary);
+  const listPrice = optionalNonNegativeNumber(draft.listPrice);
+  const costPrice = optionalNonNegativeNumber(draft.costPrice);
+  const technicalSpecs = parseKeyValueLines(draft.technicalSpecs);
+  const sellingPoints = splitLines(draft.sellingPoints);
+  const applicationScenarios = splitLines(draft.applicationScenarios);
+  const complianceCertificates = splitLines(draft.complianceCertificates);
   return {
     ...(tenantId ? { tenantId } : {}),
     name,
     category,
+    ...(listPrice !== undefined ? { listPrice } : {}),
+    ...(costPrice !== undefined ? { costPrice } : {}),
+    currency: text(draft.currency) || 'CNY',
+    lifecycleStage: text(draft.lifecycleStage) || 'intro',
+    primaryCategoryId,
     categoryLevel1Id,
     categoryLevel2Id,
     categoryLevel3Id: categoryLevel3Id || null,
@@ -822,9 +1168,46 @@ function productUpdatePayload(
       officialModel: model,
       model,
       system,
+      productType: text(draft.productType),
+      manufacturer: text(draft.manufacturer),
+      countryOfOrigin: text(draft.countryOfOrigin),
+      marketCode: text(draft.marketCode) || 'CN',
+      technicalSpecs,
+    },
+    positioning: {
+      ...(objectOrEmpty(product.raw?.positioning) as any),
+      sellingPoints,
+      scenarios: applicationScenarios,
     },
     meta: {
       ...previousMeta,
+      productLibrary: {
+        ...previousLibraryMeta,
+        productType: text(draft.productType),
+        manufacturer: text(draft.manufacturer),
+        countryOfOrigin: text(draft.countryOfOrigin),
+        marketCode: text(draft.marketCode) || 'CN',
+        lifecycle: {
+          ...objectOrEmpty(previousLibraryMeta.lifecycle),
+          stage: text(draft.lifecycleStage) || 'intro',
+          launchDate: text(draft.launchDate),
+          discontinueDate: text(draft.discontinueDate),
+        },
+        sku: {
+          ...objectOrEmpty(previousLibraryMeta.sku),
+          salesUnit: text(draft.salesUnit),
+          packageSpec: text(draft.packageSpec),
+          configurationNotes: text(draft.configurationNotes),
+        },
+        sellingPoints,
+        applicationScenarios,
+        installationRequirement: text(draft.installationRequirement),
+        warrantyPolicy: text(draft.warrantyPolicy),
+        compliance: {
+          ...objectOrEmpty(previousLibraryMeta.compliance),
+          certificates: complianceCertificates,
+        },
+      },
       [brand]: {
         ...previousBrandMeta,
         slug: publicSlug,
@@ -836,6 +1219,7 @@ function productUpdatePayload(
         sys: system,
         displayOrder,
         sortOrder: displayOrder,
+        primaryCategoryId,
         categoryLevel1Id,
         categoryLevel2Id,
         categoryLevel3Id: categoryLevel3Id || null,
@@ -863,6 +1247,62 @@ function productImageSrc(product: NormalizedProduct): string {
 function artifactContentUrl(artifactId: unknown): string {
   const id = text(artifactId);
   return id ? `/api/v2/file-artifact/${encodeURIComponent(id)}/content` : '';
+}
+
+const PRODUCT_DETAIL_ARTIFACT_SRC_ATTR = 'data-product-artifact-src';
+const PRODUCT_DETAIL_ARTIFACT_STATUS_ATTR = 'data-product-artifact-status';
+const FILE_ARTIFACT_CONTENT_SRC_RE = /(?:https?:\/\/[^"'<>\s]+)?(\/api\/v2\/file-artifact\/([0-9a-fA-F-]{36})\/content)(?:[?#][^"'<>\s]*)?/i;
+const PUBLIC_PRODUCT_IMAGE_SRC_RE = /(?:https?:\/\/[^"'<>\s]+)?\/api\/v2\/brand\/[^"'<>\s]+\/products\/[^"'<>\s]+\/images\/([0-9a-fA-F-]{36})(?:[?#][^"'<>\s]*)?/i;
+
+function productDetailImageArtifactId(src: unknown): string {
+  const raw = text(src);
+  return text(raw.match(FILE_ARTIFACT_CONTENT_SRC_RE)?.[2] || raw.match(PUBLIC_PRODUCT_IMAGE_SRC_RE)?.[1]);
+}
+
+function productDetailPersistentImageSrc(src: unknown): string {
+  const raw = text(src);
+  const artifactPath = raw.match(FILE_ARTIFACT_CONTENT_SRC_RE)?.[1];
+  return artifactPath || raw;
+}
+
+function productDetailImageDataUrl(artifact: any): string {
+  const mimeType = text(artifact?.mimeType) || 'image/png';
+  const dataBase64 = text(artifact?.dataBase64);
+  return dataBase64 && mimeType.toLowerCase().startsWith('image/')
+    ? `data:${mimeType};base64,${dataBase64}`
+    : '';
+}
+
+async function hydrateOfficialDetailEditorImages(editor: HTMLDivElement) {
+  const images = Array.from(editor.querySelectorAll<HTMLImageElement>('img'));
+  await Promise.all(images.map(async (image) => {
+    const originalSrc = image.getAttribute(PRODUCT_DETAIL_ARTIFACT_SRC_ATTR) || image.getAttribute('src') || '';
+    const artifactId = productDetailImageArtifactId(originalSrc);
+    if (!artifactId || image.getAttribute('src')?.startsWith('data:')) return;
+    image.setAttribute(PRODUCT_DETAIL_ARTIFACT_SRC_ATTR, productDetailPersistentImageSrc(originalSrc));
+    image.setAttribute(PRODUCT_DETAIL_ARTIFACT_STATUS_ATTR, 'loading');
+    try {
+      const artifact = await fileArtifacts.getBase64(artifactId);
+      const dataUrl = productDetailImageDataUrl(artifact);
+      if (!dataUrl) throw new Error('image preview data is empty');
+      image.setAttribute('src', dataUrl);
+      image.setAttribute(PRODUCT_DETAIL_ARTIFACT_STATUS_ATTR, 'ready');
+    } catch {
+      image.setAttribute(PRODUCT_DETAIL_ARTIFACT_STATUS_ATTR, 'failed');
+    }
+  }));
+}
+
+function serializeOfficialDetailEditorHtml(editor: HTMLDivElement | null): string {
+  if (!editor) return '';
+  const clone = editor.cloneNode(true) as HTMLDivElement;
+  clone.querySelectorAll<HTMLImageElement>('img').forEach((image) => {
+    const persistentSrc = image.getAttribute(PRODUCT_DETAIL_ARTIFACT_SRC_ATTR);
+    if (persistentSrc) image.setAttribute('src', productDetailPersistentImageSrc(persistentSrc));
+    image.removeAttribute(PRODUCT_DETAIL_ARTIFACT_SRC_ATTR);
+    image.removeAttribute(PRODUCT_DETAIL_ARTIFACT_STATUS_ATTR);
+  });
+  return sanitizeOfficialProductDetailHtml(clone.innerHTML || '');
 }
 
 function productAssetUrl(ref: Record<string, any>): string {
@@ -999,13 +1439,61 @@ async function uploadProductManualPdfRefs(manualPdfs: ProductManualPdfDraft[], s
   ).then((refs) => refs.filter(Boolean));
 }
 
-async function saveOfficialProductDetailContent(productId: string, tenantId: string, officialDetailHtml: string) {
-  const html = sanitizeOfficialProductDetailHtml(officialDetailHtml);
+function productPublicContentPayload(product: NormalizedProduct | null, draft: Pick<CreateProductDraft, 'name' | 'currency' | 'series' | 'tagline' | 'publicSummary' | 'officialEnglishName' | 'badges' | 'technicalSpecs' | 'sellingPoints' | 'featureBenefits' | 'highlightMetrics' | 'faqs' | 'complianceCertificates' | 'officialDetailHtml'>) {
+  const specs = parseKeyValueLines(draft.technicalSpecs);
+  const featureBenefits = parseKeyValueLines(draft.featureBenefits || draft.sellingPoints).map((item) => ({
+    title: item.k,
+    desc: item.v,
+  }));
+  const highlights = parseKeyValueLines(draft.highlightMetrics).map((item) => ({
+    label: item.k,
+    value: item.v,
+  }));
+  const faq = parseKeyValueLines(draft.faqs).map((item) => ({
+    q: item.k,
+    a: item.v,
+  })).filter((item) => item.q && item.a);
+  return {
+    name: text(draft.name),
+    locale: PRODUCT_DETAIL_LOCALE,
+    status: 'published',
+    displayCurrency: text(draft.currency) || 'CNY',
+    officialDetailHtml: sanitizeOfficialProductDetailHtml(draft.officialDetailHtml),
+    marketing: {
+      headline: text(draft.tagline),
+      subhead: text(draft.publicSummary),
+      series: text(draft.series),
+      officialEnglishName: text(draft.officialEnglishName),
+      badges: splitBadges(draft.badges),
+      certs: splitLines(draft.complianceCertificates),
+      specs,
+      features: featureBenefits,
+      featureBenefits: featureBenefits.map((item) => ({ feature: item.title, benefit: item.desc })),
+      highlights,
+      faq,
+    },
+    seo: {
+      metaTitle: text(product?.name || draft.name),
+      metaDescription: text(draft.publicSummary || draft.tagline),
+      canonical: '',
+      ogImage: '',
+      keywords: splitBadges(draft.badges),
+    },
+  };
+}
+
+function productPublicContentSignature(value: unknown): string {
+  const item = productContentItem(value);
+  return JSON.stringify({
+    officialDetailHtml: text(item.officialDetailHtml),
+    marketing: objectOrEmpty(item.marketing),
+  });
+}
+
+async function saveProductPublicContent(productId: string, tenantId: string, product: NormalizedProduct | null, draft: Pick<CreateProductDraft, 'name' | 'currency' | 'series' | 'tagline' | 'publicSummary' | 'officialEnglishName' | 'badges' | 'technicalSpecs' | 'sellingPoints' | 'featureBenefits' | 'highlightMetrics' | 'faqs' | 'complianceCertificates' | 'officialDetailHtml'>) {
   await products.upsertContent(productId, {
     ...(tenantId ? { tenantId } : {}),
-    locale: PRODUCT_DETAIL_LOCALE,
-    status: 'draft',
-    officialDetailHtml: html,
+    ...productPublicContentPayload(product, draft),
   });
 }
 
@@ -1038,6 +1526,7 @@ function createProductPayload(
   const categoryLevel1Id = text(categorySelection.level1?.id);
   const categoryLevel2Id = text(categorySelection.level2?.id);
   const categoryLevel3Id = text(categorySelection.level3?.id);
+  const primaryCategoryId = text(categorySelection.leaf?.id);
   const publicSlug = slug(draft.publicSlug || model);
   const websiteCategory = text(draft.websiteCategory) || category;
   const displayOrder = nonNegativeInt(draft.displayOrder);
@@ -1050,10 +1539,15 @@ function createProductPayload(
   const system = category;
   const sku = materialCode;
   const listPrice = optionalNonNegativeNumber(draft.listPrice);
+  const costPrice = optionalNonNegativeNumber(draft.costPrice);
   const websitePrice = optionalNonNegativeNumber(draft.websitePrice);
   const websitePriceMin = optionalNonNegativeNumber(draft.websitePriceMin);
   const websitePriceMax = optionalNonNegativeNumber(draft.websitePriceMax);
   const promoPrice = optionalNonNegativeNumber(draft.promoPrice);
+  const technicalSpecs = parseKeyValueLines(draft.technicalSpecs);
+  const sellingPoints = splitLines(draft.sellingPoints);
+  const applicationScenarios = splitLines(draft.applicationScenarios);
+  const complianceCertificates = splitLines(draft.complianceCertificates);
   return {
     ...(tenantId ? { tenantId } : {}),
     sku,
@@ -1065,13 +1559,18 @@ function createProductPayload(
     brandCodes: selectedBrands,
     model,
     category,
+    primaryCategoryId,
+    productType: text(draft.productType),
+    lifecycleStage: text(draft.lifecycleStage) || 'intro',
     ...(includeCategoryBinding ? {
+      primaryCategoryId,
       categoryLevel1Id,
       categoryLevel2Id,
       categoryLevel3Id: categoryLevel3Id || null,
       categoryPath: categorySelection.path,
     } : {}),
     ...(listPrice !== undefined ? { listPrice } : {}),
+    ...(costPrice !== undefined ? { costPrice } : {}),
     currency: text(draft.currency) || 'CNY',
     websitePricing: {
       brandCode: brand,
@@ -1093,8 +1592,40 @@ function createProductPayload(
       officialModel: model,
       model,
       system,
+      productType: text(draft.productType),
+      manufacturer: text(draft.manufacturer),
+      countryOfOrigin: text(draft.countryOfOrigin),
+      marketCode: text(draft.marketCode) || 'CN',
+      technicalSpecs,
+    },
+    positioning: {
+      sellingPoints,
+      scenarios: applicationScenarios,
     },
     meta: {
+      productLibrary: {
+        productType: text(draft.productType),
+        manufacturer: text(draft.manufacturer),
+        countryOfOrigin: text(draft.countryOfOrigin),
+        marketCode: text(draft.marketCode) || 'CN',
+        lifecycle: {
+          stage: text(draft.lifecycleStage) || 'intro',
+          launchDate: text(draft.launchDate),
+          discontinueDate: text(draft.discontinueDate),
+        },
+        sku: {
+          salesUnit: text(draft.salesUnit),
+          packageSpec: text(draft.packageSpec),
+          configurationNotes: text(draft.configurationNotes),
+        },
+        sellingPoints,
+        applicationScenarios,
+        installationRequirement: text(draft.installationRequirement),
+        warrantyPolicy: text(draft.warrantyPolicy),
+        compliance: {
+          certificates: complianceCertificates,
+        },
+      },
       [brand]: {
         slug: publicSlug || slug(sku),
         name,
@@ -1106,6 +1637,7 @@ function createProductPayload(
         displayOrder,
         sortOrder: displayOrder,
         ...(includeCategoryBinding ? {
+          primaryCategoryId,
           categoryLevel1Id,
           categoryLevel2Id,
           categoryLevel3Id: categoryLevel3Id || null,
@@ -1232,9 +1764,11 @@ function normalizeProduct(item: any): NormalizedProduct {
     materialCategory: text(spec.materialCategory) || text(brandMeta.materialCategory),
     productLine: text(spec.productLine) || text(brandMeta.productLine),
     categoryPath: text(item.categoryPath) || text(brandMeta.categoryPath),
-    applicationScenarios: Array.isArray(positioning.applicationScenarios)
-      ? positioning.applicationScenarios.map(text).filter(Boolean)
-      : [],
+    applicationScenarios: Array.isArray(positioning.scenarios)
+      ? positioning.scenarios.map(text).filter(Boolean)
+      : Array.isArray(positioning.applicationScenarios)
+        ? positioning.applicationScenarios.map(text).filter(Boolean)
+        : [],
     status: text(item.status) || 'active',
     marketPrice: safeMarketPrice,
     dealerPrice: safeDealerPrice,
@@ -1364,21 +1898,12 @@ function ProductsContent() {
   }, [liveProductList]);
 
   const catalogAssignmentBrands = useMemo(() => {
-    const brands = new Set<string>();
-    liveProductList.forEach((product) => {
-      const brand = normalizeBrand(product.brand);
-      if (brand) brands.add(brand);
-    });
-    if (!brands.size) {
-      (supportedProductBrands.length ? supportedProductBrands : DEFAULT_PRODUCT_BRANDS).forEach((brand) => brands.add(brand));
-    }
-    return Array.from(brands).sort();
-  }, [liveProductList, supportedProductBrands]);
+    return supportedProductBrands.length ? supportedProductBrands : DEFAULT_PRODUCT_BRANDS;
+  }, [supportedProductBrands]);
 
   const categoryFilterBrands = useMemo(() => {
-    if (brandFilter !== 'all') return [brandFilter];
-    return supportedProductBrands.length ? supportedProductBrands : DEFAULT_PRODUCT_BRANDS;
-  }, [brandFilter, supportedProductBrands]);
+    return [PRODUCT_BASE_CATEGORY_BRAND];
+  }, []);
 
   const { data: catalogCategoryData } = useSWR(
     categoryFilterBrands.length ? ['/api/v2/brand-product-categories/catalog-filter', categoryFilterBrands] : null,
@@ -1428,7 +1953,7 @@ function ProductsContent() {
         catalogAssignmentBrands.map((brand) =>
           siteProductAssignments
             .list(brand, { page: '1', pageSize: '500' })
-            .then((result) => assignmentItems(result))
+            .then((result) => assignmentItems(result).map((assignment) => ({ ...assignment, siteCode: assignment.siteCode || brand })))
             .catch(() => [])
         )
       );
@@ -1437,12 +1962,17 @@ function ProductsContent() {
     { revalidateOnFocus: false }
   );
 
-  const assignmentByProductKey = useMemo(() => {
-    const map = new Map<string, WebsiteShelfAssignment>();
+  const assignmentsByProductKey = useMemo(() => {
+    const map = new Map<string, WebsiteShelfAssignment[]>();
+    const add = (key: string, assignment: WebsiteShelfAssignment) => {
+      const items = map.get(key) || [];
+      if (!items.some((item) => item.id === assignment.id)) items.push(assignment);
+      map.set(key, items);
+    };
     for (const assignment of shelfAssignmentData || []) {
       if (!assignment.productId) continue;
-      map.set(assignmentKey(assignment.productId, assignment.productTenantId), assignment);
-      if (!map.has(assignment.productId)) map.set(assignment.productId, assignment);
+      add(assignmentKey(assignment.productId, assignment.productTenantId), assignment);
+      add(assignment.productId, assignment);
     }
     return map;
   }, [shelfAssignmentData]);
@@ -1482,8 +2012,7 @@ function ProductsContent() {
     if (!pilotProducts.length) return null;
     const categories = new Set(pilotProducts.map((product) => text(productLibraryMeta(product).sourceCategory) || product.category).filter(Boolean));
     const websitePublished = pilotProducts.filter((product) => {
-      const assignment = assignmentByProductKey.get(assignmentKey(product.id, tenantIdForProduct(product))) || assignmentByProductKey.get(product.id);
-      return assignment?.status === 'published' && !assignment.deletedAt;
+      return assignmentsForProduct(assignmentsByProductKey, product).some((assignment) => assignment.status === 'published' && !assignment.deletedAt);
     }).length;
     return {
       products: pilotProducts.length,
@@ -1491,7 +2020,7 @@ function ProductsContent() {
       websitePublished,
       needsCompletion: pilotProducts.filter((product) => productLibraryMeta(product).dataReadinessStatus === 'needs_completion').length,
     };
-  }, [assignmentByProductKey, visibleCatalogProducts]);
+  }, [assignmentsByProductKey, visibleCatalogProducts]);
 
   const catalogTotalPages = Math.max(Math.ceil(visibleCatalogProducts.length / pageSize), 1);
 
@@ -1627,9 +2156,9 @@ function ProductsContent() {
                 <Boxes size={14} />
                 目录底座
               </ModeButton>
-              <ModeButton active={activeModule === 'categories'} onClick={() => setModule('categories')}>
+              <ModeButton active={activeModule === 'categories'} onClick={() => router.push('/master-data/categories')}>
                 <FolderOpen size={14} />
-                产品分类
+                分类管理
               </ModeButton>
             </div>
           }
@@ -1692,8 +2221,8 @@ function ProductsContent() {
                       style={{ width: 180 }}
                     >
                       <option value="all">全部产品库分类</option>
-                      {catalogCategoryOptions.map((item) => (
-                        <option key={item.value} value={item.value}>
+                      {catalogCategoryOptions.map((item, index) => (
+                        <option key={`${item.value || item.label}-${index}`} value={item.value}>
                           {item.label}
                         </option>
                       ))}
@@ -1742,7 +2271,7 @@ function ProductsContent() {
             canPublishProduct={productPermissions.canPublishProduct}
             canDeleteProduct={productPermissions.canDeleteProduct}
             brandOptions={createBrandOptions}
-            assignmentByProductKey={assignmentByProductKey}
+            assignmentByProductKey={assignmentsByProductKey}
             pilotSummary={pilotSummary}
             actionNotice={actionNotice}
             onNotice={setActionNotice}
@@ -1911,7 +2440,7 @@ function ProductCatalogShell({
   canPublishProduct: boolean;
   canDeleteProduct: boolean;
   brandOptions: Array<{ value: ProductBrand; label: string }>;
-  assignmentByProductKey: Map<string, WebsiteShelfAssignment>;
+  assignmentByProductKey: Map<string, WebsiteShelfAssignment[]>;
   pilotSummary: ProductPilotSummary | null;
   actionNotice: string;
   onNotice: (text: string) => void;
@@ -1930,9 +2459,9 @@ function ProductCatalogShell({
   const { confirmFloating, floatingDialog } = useFloatingDialog();
   const createBrandCode = normalizeBrand(createDraft.brand);
   const { data: createCategoryData, error: createCategoryError, isLoading: createCategoryLoading } = useSWR(
-    showCreate && createBrandCode ? ['/api/v2/brand-product-categories', createBrandCode, 'product-create'] : null,
+    showCreate && createBrandCode ? ['/api/v2/brand-product-categories', PRODUCT_BASE_CATEGORY_BRAND, 'product-create'] : null,
     async () => {
-      const result = await brandProductCategories.list({ brandCode: createBrandCode });
+      const result = await brandProductCategories.list({ brandCode: PRODUCT_BASE_CATEGORY_BRAND });
       return { tree: normalizeProductCategoryTree(result) };
     },
     { revalidateOnFocus: false },
@@ -2014,8 +2543,8 @@ function ProductCatalogShell({
         }
         createdRows.push({ brand, payload, created });
         const createdId = text((created as any)?.id);
-        if (createdId && text(createDraft.officialDetailHtml)) {
-          await saveOfficialProductDetailContent(createdId, text((payload as any).tenantId), createDraft.officialDetailHtml);
+        if (createdId) {
+          await saveProductPublicContent(createdId, text((payload as any).tenantId), null, createDraft);
         }
       }
       createDraft.manualPdfs.forEach((manual) => URL.revokeObjectURL(manual.previewUrl));
@@ -2234,9 +2763,7 @@ function ProductCatalogShell({
               </thead>
               <tbody>
                 {items.map((product) => {
-                  const assignment =
-                    assignmentByProductKey.get(assignmentKey(product.id, tenantIdForProduct(product))) ||
-                    assignmentByProductKey.get(product.id);
+                  const assignments = assignmentsForProduct(assignmentByProductKey, product);
                   return (
                     <ProductCatalogRow
                       key={product.id}
@@ -2244,7 +2771,8 @@ function ProductCatalogShell({
                       canUpdateProduct={canUpdateProduct}
                       canPublishProduct={canPublishProduct}
                       canDeleteProduct={canDeleteProduct}
-                      assignment={assignment}
+                      assignments={assignments}
+                      brandOptions={brandOptions}
                       selected={selectedProductIds.includes(product.id)}
                       selectionDisabled={!canPublishProduct || Boolean(bulkStatus)}
                       onSelectionChange={(checked) => {
@@ -2277,6 +2805,118 @@ function ProductCatalogShell({
         </WorkbenchTableShell>
       )}
       {floatingDialog}
+    </section>
+  );
+}
+
+type ProductLibraryCompletenessDraft = Pick<
+  CreateProductDraft,
+  | 'productType'
+  | 'lifecycleStage'
+  | 'manufacturer'
+  | 'countryOfOrigin'
+  | 'marketCode'
+  | 'launchDate'
+  | 'discontinueDate'
+  | 'salesUnit'
+  | 'packageSpec'
+  | 'configurationNotes'
+  | 'installationRequirement'
+  | 'warrantyPolicy'
+  | 'technicalSpecs'
+  | 'sellingPoints'
+  | 'applicationScenarios'
+  | 'complianceCertificates'
+>;
+
+function ProductLibraryCompletenessFields({
+  draft,
+  disabled = false,
+  onPatch,
+}: {
+  draft: ProductLibraryCompletenessDraft;
+  disabled?: boolean;
+  onPatch: (next: Partial<ProductLibraryCompletenessDraft>) => void;
+}) {
+  return (
+    <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+      <div className="product-edit-section-head">
+        <h3>产品资料完整度</h3>
+        <span className="badge badge-grey">产品库字段，不代表官网发布</span>
+      </div>
+      <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">产品类型</span>
+          <input className="input" value={draft.productType} disabled={disabled} onChange={(event) => onPatch({ productType: event.target.value })} placeholder="如：燃气热水器 / 热泵 / 采暖炉" />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">生命周期</span>
+          <select className="input" value={draft.lifecycleStage} disabled={disabled} onChange={(event) => onPatch({ lifecycleStage: event.target.value })}>
+            <option value="intro">导入 / 上新</option>
+            <option value="growth">成长</option>
+            <option value="mature">成熟</option>
+            <option value="withdrawn">停售</option>
+          </select>
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">制造商</span>
+          <input className="input" value={draft.manufacturer} disabled={disabled} onChange={(event) => onPatch({ manufacturer: event.target.value })} placeholder="如：Rheem / Everhot" />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">产地</span>
+          <input className="input" value={draft.countryOfOrigin} disabled={disabled} onChange={(event) => onPatch({ countryOfOrigin: event.target.value })} placeholder="中国" />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">适用市场</span>
+          <input className="input" value={draft.marketCode} disabled={disabled} onChange={(event) => onPatch({ marketCode: event.target.value })} placeholder="CN" />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">上市日期</span>
+          <input className="input" type="date" value={draft.launchDate} disabled={disabled} onChange={(event) => onPatch({ launchDate: event.target.value })} />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">停售日期</span>
+          <input className="input" type="date" value={draft.discontinueDate} disabled={disabled} onChange={(event) => onPatch({ discontinueDate: event.target.value })} />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">销售单位</span>
+          <input className="input" value={draft.salesUnit} disabled={disabled} onChange={(event) => onPatch({ salesUnit: event.target.value })} placeholder="台 / 套 / 件" />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">包装/配置说明</span>
+          <input className="input" value={draft.packageSpec} disabled={disabled} onChange={(event) => onPatch({ packageSpec: event.target.value })} placeholder="如：整机+附件包" />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">SKU 配置差异</span>
+          <input className="input" value={draft.configurationNotes} disabled={disabled} onChange={(event) => onPatch({ configurationNotes: event.target.value })} placeholder="如：不同容量/包装/销售配置" />
+        </label>
+      </div>
+      <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 12 }}>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">技术参数</span>
+          <textarea className="input" rows={5} value={draft.technicalSpecs} disabled={disabled} onChange={(event) => onPatch({ technicalSpecs: event.target.value })} placeholder={'一行一个，例如：\n容量: 16L\n能效等级: 一级\n燃气种类: 天然气'} />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">产品卖点</span>
+          <textarea className="input" rows={5} value={draft.sellingPoints} disabled={disabled} onChange={(event) => onPatch({ sellingPoints: event.target.value })} placeholder={'一行一个，例如：\n恒温控制\n低噪运行\n安全防护'} />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">应用场景</span>
+          <textarea className="input" rows={5} value={draft.applicationScenarios} disabled={disabled} onChange={(event) => onPatch({ applicationScenarios: event.target.value })} placeholder={'一行一个，例如：\n住宅热水\n公寓\n别墅'} />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">安装条件</span>
+          <textarea className="input" rows={5} value={draft.installationRequirement} disabled={disabled} onChange={(event) => onPatch({ installationRequirement: event.target.value })} placeholder="如：排烟、燃气压力、水压、电源、安装空间要求" />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">保修政策</span>
+          <textarea className="input" rows={5} value={draft.warrantyPolicy} disabled={disabled} onChange={(event) => onPatch({ warrantyPolicy: event.target.value })} placeholder="如：整机保修年限、核心部件保修、适用条件" />
+        </label>
+        <label style={{ display: 'grid', gap: 6 }}>
+          <span className="t-label">合规/证书</span>
+          <textarea className="input" rows={5} value={draft.complianceCertificates} disabled={disabled} onChange={(event) => onPatch({ complianceCertificates: event.target.value })} placeholder={'一行一个，例如：\nCCC 证书\n能效备案\n检测报告'} />
+        </label>
+      </div>
     </section>
   );
 }
@@ -2499,6 +3139,12 @@ function CreateProductForm({
             )}
           </section>
 
+          <ProductLibraryCompletenessFields
+            draft={draft}
+            disabled={submitting}
+            onPatch={patch}
+          />
+
           <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
             <div className="product-edit-section-head">
               <h3>价格信息</h3>
@@ -2508,6 +3154,10 @@ function CreateProductForm({
               <label style={{ display: 'grid', gap: 6 }}>
                 <span className="t-label">产品库目录价</span>
                 <input className="input" type="number" min={0} step="0.01" value={draft.listPrice} onChange={(event) => patch({ listPrice: event.target.value })} placeholder="不填则为 0" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">经销商基准价</span>
+                <input className="input" type="number" min={0} step="0.01" value={draft.costPrice} onChange={(event) => patch({ costPrice: event.target.value })} placeholder="内部供货/结算参考价，不对官网展示" />
               </label>
               <label style={{ display: 'grid', gap: 6 }}>
                 <span className="t-label">币种</span>
@@ -2697,7 +3347,8 @@ function ProductCatalogRow({
   canUpdateProduct,
   canPublishProduct,
   canDeleteProduct,
-  assignment,
+  assignments,
+  brandOptions,
   selected,
   selectionDisabled,
   onSelectionChange,
@@ -2708,7 +3359,8 @@ function ProductCatalogRow({
   canUpdateProduct: boolean;
   canPublishProduct: boolean;
   canDeleteProduct: boolean;
-  assignment?: WebsiteShelfAssignment;
+  assignments: WebsiteShelfAssignment[];
+  brandOptions: Array<{ value: ProductBrand; label: string }>;
   selected: boolean;
   selectionDisabled: boolean;
   onSelectionChange: (checked: boolean) => void;
@@ -2724,11 +3376,10 @@ function ProductCatalogRow({
     error: '',
   });
   const { alertFloating, confirmFloating, floatingDialog } = useFloatingDialog();
-  const brandCode = normalizeBrand(product.brand);
   const { data: categoryData, error: categoryError, isLoading: categoryLoading } = useSWR(
-    editing && brandCode ? ['/api/v2/brand-product-categories', brandCode, 'product-edit'] : null,
+    editing ? ['/api/v2/brand-product-categories', PRODUCT_BASE_CATEGORY_BRAND, 'product-edit'] : null,
     async () => {
-      const result = await brandProductCategories.list({ brandCode });
+      const result = await brandProductCategories.list({ brandCode: PRODUCT_BASE_CATEGORY_BRAND });
       return { tree: normalizeProductCategoryTree(result) };
     },
     { revalidateOnFocus: false },
@@ -2748,6 +3399,7 @@ function ProductCatalogRow({
   const level1Options = activeCategoryOptions(productCategoryTree, selectedLevel1);
   const level2Options = activeCategoryOptions(level2Children, selectedLevel2);
   const level3Options = activeCategoryOptions(level3Children, selectedLevel3);
+  const systemDisplayValue = productCategoryDisplayLabel(draft.system || draft.category, productCategoryTree);
   const inactiveCategoryBindings = [selectedLevel1, selectedLevel2, selectedLevel3].filter(
     (item): item is ProductCategoryNode => Boolean(item && item.status === 'inactive'),
   );
@@ -2771,8 +3423,7 @@ function ProductCatalogRow({
 
   useEffect(() => {
     if (!editing || !contentData) return;
-    const officialDetailHtml = officialDetailFromContent(contentData);
-    setDraft((current) => ({ ...current, officialDetailHtml }));
+    setDraft((current) => ({ ...current, ...contentDraftPatchFromResult(contentData) }));
     setRowState((state) => ({ ...state, dirty: false, success: '', error: '' }));
   }, [contentData, editing]);
 
@@ -2813,9 +3464,12 @@ function ProductCatalogRow({
       });
       const nextAssetRefs = [mainImageRef, ...retainedRefs, ...manualPdfRefs].filter(Boolean);
       await products.update(product.id, { ...payload, assetRefs: nextAssetRefs });
-      const existingOfficialDetailHtml = officialDetailFromContent(contentData);
-      if (text(draft.officialDetailHtml) || existingOfficialDetailHtml) {
-        await saveOfficialProductDetailContent(product.id, tenantIdForProduct(product), draft.officialDetailHtml);
+      const previousPublicContent = productPublicContentSignature(contentData);
+      const nextPublicContent = productPublicContentSignature({
+        data: { items: [{ officialDetailHtml: sanitizeOfficialProductDetailHtml(draft.officialDetailHtml), marketing: productPublicContentPayload(product, draft).marketing }] },
+      });
+      if (nextPublicContent !== previousPublicContent) {
+        await saveProductPublicContent(product.id, tenantIdForProduct(product), product, draft);
       }
       if (draft.mainImage) URL.revokeObjectURL(draft.mainImage.previewUrl);
       draft.manualPdfs.forEach((manual) => {
@@ -2876,7 +3530,7 @@ function ProductCatalogRow({
   const readiness = productReadinessSummary(product);
   const reviewNotes = Array.isArray(libraryMeta.reviewNotes) ? libraryMeta.reviewNotes.map(text).filter(Boolean) : [];
   const websiteCategory = text(brandMeta.websiteCategory || brandMeta.websiteMenuCategory || brandMeta.cat);
-  const shelfMeta = websiteShelfMeta(assignment);
+  const shelfMeta = websiteShelfSummary(assignments);
   const imageSrc = productImageSrc(product);
   const editDialog = canUpdateProduct && editing && typeof document !== 'undefined'
     ? createPortal(
@@ -2956,7 +3610,7 @@ function ProductCatalogRow({
                 <label style={{ display: 'grid', gap: 6 }}>
                   <span className="t-label">分类</span>
                   <select className="input" value={draft.category} required onChange={(event) => patchDraft({ category: event.target.value })}>
-                    {customCategory && <option value={draft.category}>{draft.category}</option>}
+                    {customCategory && <option value={draft.category}>{productCategoryDisplayLabel(draft.category, productCategoryTree)}</option>}
                     {CATEGORIES.map((category) => (
                       <option key={category.key} value={category.key}>{category.label}</option>
                     ))}
@@ -2964,7 +3618,7 @@ function ProductCatalogRow({
                 </label>
                 <label style={{ display: 'grid', gap: 6 }}>
                   <span className="t-label">系统</span>
-                  <input className="input" value={draft.system} required onChange={(event) => patchDraft({ system: event.target.value })} />
+                  <input className="input" value={systemDisplayValue} required disabled readOnly title={draft.system} />
                 </label>
               </div>
             </section>
@@ -2993,14 +3647,29 @@ function ProductCatalogRow({
                   </label>
                   <label style={{ display: 'grid', gap: 6 }}>
                     <span className="t-label">二级分类</span>
-                    <select className="input" value={draft.categoryLevel2Id} required disabled={!draft.categoryLevel1Id} onChange={(event) => patchDraft({ categoryLevel2Id: event.target.value, categoryLevel3Id: '' })}>
+                    <select className="input" value={draft.categoryLevel2Id} required disabled={!draft.categoryLevel1Id} onChange={(event) => {
+                      const selectedCategory = level2Options.find((item) => item.id === event.target.value) || null;
+                      const selectedValue = productCategoryNodeValue(selectedCategory);
+                      patchDraft({
+                        categoryLevel2Id: event.target.value,
+                        categoryLevel3Id: '',
+                        ...(selectedValue ? { category: selectedValue, system: selectedValue } : {}),
+                      });
+                    }}>
                       <option value="">请选择二级分类</option>
                       {level2Options.map((item) => <option key={item.id} value={item.id}>{categoryOptionLabel(item)}</option>)}
                     </select>
                   </label>
                   <label style={{ display: 'grid', gap: 6 }}>
                     <span className="t-label">三级分类（可选）</span>
-                    <select className="input" value={draft.categoryLevel3Id} disabled={!draft.categoryLevel2Id} onChange={(event) => patchDraft({ categoryLevel3Id: event.target.value })}>
+                    <select className="input" value={draft.categoryLevel3Id} disabled={!draft.categoryLevel2Id} onChange={(event) => {
+                      const selectedCategory = level3Options.find((item) => item.id === event.target.value) || selectedLevel2;
+                      const selectedValue = productCategoryNodeValue(selectedCategory);
+                      patchDraft({
+                        categoryLevel3Id: event.target.value,
+                        ...(selectedValue ? { category: selectedValue, system: selectedValue } : {}),
+                      });
+                    }}>
                       <option value="">不选择三级分类</option>
                       {level3Options.map((item) => <option key={item.id} value={item.id}>{categoryOptionLabel(item)}</option>)}
                     </select>
@@ -3009,16 +3678,42 @@ function ProductCatalogRow({
               )}
             </section>
 
+            <ProductLibraryCompletenessFields
+              draft={draft}
+              disabled={rowState.saving}
+              onPatch={patchDraft}
+            />
+
             <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
               <div className="product-edit-section-head">
-                <h3>官网展示</h3>
+                <h3>价格信息</h3>
                 {rowState.dirty && <span className="badge badge-warning">有未保存修改</span>}
               </div>
               <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
                 <label style={{ display: 'grid', gap: 6 }}>
-                  <span className="t-label">公开路径</span>
-                  <input className="input" value={draft.publicSlug} required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" onChange={(event) => patchDraft({ publicSlug: event.target.value })} />
+                  <span className="t-label">产品库目录价</span>
+                  <input className="input" type="number" min={0} step="0.01" value={draft.listPrice} disabled={rowState.saving} onChange={(event) => patchDraft({ listPrice: event.target.value })} placeholder="不填则为 0" />
                 </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">经销商基准价</span>
+                  <input className="input" type="number" min={0} step="0.01" value={draft.costPrice} disabled={rowState.saving} onChange={(event) => patchDraft({ costPrice: event.target.value })} placeholder="内部供货/结算参考价，不对官网展示" />
+                </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">币种</span>
+                  <input className="input" value={draft.currency} disabled={rowState.saving} onChange={(event) => patchDraft({ currency: event.target.value || 'CNY' })} placeholder="CNY" />
+                </label>
+              </div>
+              <p style={{ margin: 0, color: 'var(--t-tertiary)', fontSize: 12 }}>
+                经销商基准价属于产品库内部价，不会进入官网展示；具体到某个经销商的协议价后续应走价格表/报价模块。
+              </p>
+            </section>
+
+            <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+              <div className="product-edit-section-head">
+                <h3>产品库公共内容</h3>
+                {rowState.dirty && <span className="badge badge-warning">有未保存修改</span>}
+              </div>
+              <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
                 <label style={{ display: 'grid', gap: 6 }}>
                   <span className="t-label">系列</span>
                   <input className="input" value={draft.series} onChange={(event) => patchDraft({ series: event.target.value })} />
@@ -3028,16 +3723,30 @@ function ProductCatalogRow({
                   <input className="input" value={draft.officialEnglishName} onChange={(event) => patchDraft({ officialEnglishName: event.target.value })} />
                 </label>
                 <label style={{ display: 'grid', gap: 6 }}>
-                  <span className="t-label">排序</span>
-                  <input className="input" type="number" min="0" max="999999" value={draft.displayOrder} onChange={(event) => patchDraft({ displayOrder: event.target.value })} />
-                </label>
-                <label style={{ display: 'grid', gap: 6 }}>
                   <span className="t-label">标语</span>
                   <input className="input" value={draft.tagline} onChange={(event) => patchDraft({ tagline: event.target.value })} />
                 </label>
                 <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">官网摘要</span>
+                  <input className="input" value={draft.publicSummary} onChange={(event) => patchDraft({ publicSummary: event.target.value })} />
+                </label>
+                <label style={{ display: 'grid', gap: 6 }}>
                   <span className="t-label">标签</span>
                   <input className="input" value={draft.badges} onChange={(event) => patchDraft({ badges: event.target.value })} placeholder="新品, 高端" />
+                </label>
+              </div>
+              <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 12 }}>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">官网功能说明</span>
+                  <textarea className="input" rows={4} value={draft.featureBenefits} onChange={(event) => patchDraft({ featureBenefits: event.target.value })} placeholder={'一行一个，例如：\n恒温控制: 出水温度更稳定\n低噪运行: 夜间使用更安静'} />
+                </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">官网核心亮点</span>
+                  <textarea className="input" rows={4} value={draft.highlightMetrics} onChange={(event) => patchDraft({ highlightMetrics: event.target.value })} placeholder={'一行一个，例如：\n热效率: 95%\n适用面积: 80-180m2'} />
+                </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">官网常见问题</span>
+                  <textarea className="input" rows={4} value={draft.faqs} onChange={(event) => patchDraft({ faqs: event.target.value })} placeholder={'一行一个，例如：\n如何安装？: 由授权服务商安装\n质保多久？: 以官网政策为准'} />
                 </label>
               </div>
             </section>
@@ -3082,7 +3791,7 @@ function ProductCatalogRow({
 
             <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
               <div className="product-edit-section-head">
-                <h3>官网产品详情</h3>
+                <h3>产品公共详情</h3>
                 <span className="badge badge-grey">750px 长图</span>
               </div>
               {contentLoading ? (
@@ -3109,6 +3818,22 @@ function ProductCatalogRow({
                 manualPdfs={draft.manualPdfs}
                 disabled={rowState.saving}
                 onChange={(manualPdfs) => patchDraft({ manualPdfs })}
+              />
+            </section>
+
+            <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+              <div className="product-edit-section-head">
+                <h3>多官网挂载配置</h3>
+                <span className="badge badge-grey">目录/系列从官网配置选择</span>
+              </div>
+              <ProductSitePublishingPanel
+                product={product}
+                assignments={assignments}
+                brandOptions={brandOptions}
+                disabled={rowState.saving}
+                canPublish={canPublishProduct}
+                onNotice={onNotice}
+                onChanged={onChanged}
               />
             </section>
           </div>
@@ -3303,6 +4028,448 @@ function ProductCatalogRow({
   );
 }
 
+type ProductSitePublishingDraft = {
+  siteCode: string;
+  publicSlug: string;
+  siteProductCategoryId: string;
+  websiteCategory: string;
+  websiteCategoryPath: string;
+  displayOrder: string;
+  isFeatured: boolean;
+  siteTitle: string;
+  siteSummary: string;
+  tags: string;
+  series: string;
+};
+
+function productSitePublishingDefaults(product: NormalizedProduct, siteCode = normalizeBrand(product.brand)): ProductSitePublishingDraft {
+  const siteMeta = objectOrEmpty(objectOrEmpty(product.raw?.meta)[siteCode]);
+  const brandMeta = Object.keys(siteMeta).length ? siteMeta : productBrandMeta(product);
+  const libraryMeta = productLibraryMeta(product);
+  const firstSellingPoint = Array.isArray(libraryMeta.sellingPoints) ? text(libraryMeta.sellingPoints[0]) : '';
+  const baseSlug = text(brandMeta.slug) || text(product.sku) || text(product.model) || text(product.id);
+  const badges = Array.isArray(brandMeta.badges) ? brandMeta.badges.map(text).filter(Boolean) : [];
+  return {
+    siteCode,
+    publicSlug: slug(baseSlug),
+    siteProductCategoryId: '',
+    websiteCategory: '',
+    websiteCategoryPath: '',
+    displayOrder: String(nonNegativeInt(brandMeta.displayOrder ?? brandMeta.sortOrder ?? 0)),
+    isFeatured: Boolean(brandMeta.isFeatured),
+    siteTitle: text(brandMeta.name || product.name),
+    siteSummary: text(brandMeta.tagline || firstSellingPoint),
+    tags: badges.join(', '),
+    series: text(brandMeta.series || libraryMeta.series),
+  };
+}
+
+function productSitePublishingDraftFromAssignment(product: NormalizedProduct, assignment?: WebsiteShelfAssignment, siteCode?: string): ProductSitePublishingDraft {
+  const defaults = productSitePublishingDefaults(product, siteCode || assignment?.siteCode || normalizeBrand(product.brand));
+  const meta = objectOrEmpty(assignment?.siteMeta);
+  const metaCategory = objectOrEmpty(meta.siteProductCategory);
+  return {
+    ...defaults,
+    siteCode: assignment?.siteCode || defaults.siteCode,
+    publicSlug: text(assignment?.publicSlug) || defaults.publicSlug,
+    siteProductCategoryId: text(assignment?.siteProductCategoryId || metaCategory.id),
+    websiteCategory: text(assignment?.websiteCategory) || defaults.websiteCategory,
+    websiteCategoryPath: text(meta.websiteCategoryPath || metaCategory.path || assignment?.websiteCategory),
+    displayOrder: String(nonNegativeInt(assignment?.displayOrder ?? defaults.displayOrder)),
+    isFeatured: Boolean(assignment?.isFeatured),
+    siteTitle: text(assignment?.siteTitle) || defaults.siteTitle,
+    siteSummary: text(assignment?.siteSummary) || defaults.siteSummary,
+    tags: Array.isArray(meta.tags) ? meta.tags.map(text).filter(Boolean).join(', ') : defaults.tags,
+    series: text(meta.series) || defaults.series,
+  };
+}
+
+function productSitePublishingPayload(product: NormalizedProduct, draft: ProductSitePublishingDraft, options: { includeProductRef?: boolean; suggestion?: SitePublishingSuggestion | null } = {}): Record<string, unknown> {
+  const publicSlug = slug(draft.publicSlug);
+  const siteProductCategoryId = text(draft.siteProductCategoryId);
+  const suggestedCategoryId = text(options.suggestion?.suggestedWebsiteCategory?.id);
+  const suggestedCategory = text(options.suggestion?.suggestedWebsiteCategory?.name);
+  const suggestedCategoryPath = text(options.suggestion?.suggestedWebsiteCategory?.path || options.suggestion?.suggestedWebsiteCategory?.name);
+  const suggestedSeries = text(options.suggestion?.suggestedSeries?.value);
+  if (!publicSlug) throw new Error('请填写官网 URL slug。');
+  if (!siteProductCategoryId) throw new Error('请选择官网目录。');
+  return {
+    ...(options.includeProductRef === false ? {} : {
+      productId: product.id,
+      productTenantId: tenantIdForProduct(product) || PRODUCT_LIBRARY_TENANT_ID,
+    }),
+    publicSlug,
+    siteProductCategoryId,
+    websiteCategory: text(draft.websiteCategory),
+    displayOrder: nonNegativeInt(draft.displayOrder),
+    isFeatured: Boolean(draft.isFeatured),
+    siteTitle: text(draft.siteTitle) || null,
+    siteSummary: text(draft.siteSummary) || null,
+    siteMeta: {
+      series: text(draft.series),
+      tags: splitBadges(draft.tags),
+      defaultWebsiteCategory: suggestedCategory || null,
+      defaultWebsiteCategoryPath: suggestedCategoryPath || null,
+      defaultSiteProductCategoryId: suggestedCategoryId || null,
+      websiteCategoryPath: text(draft.websiteCategoryPath) || text(draft.websiteCategory),
+      websiteCategorySource: suggestedCategoryId && siteProductCategoryId !== suggestedCategoryId ? 'manual' : (options.suggestion?.suggestedWebsiteCategory?.matchReason || 'manual'),
+      productCategoryBinding: options.suggestion?.productCategory || productCategoryBinding(product),
+      defaultSeries: suggestedSeries || null,
+      seriesSource: suggestedSeries && text(draft.series) !== suggestedSeries ? 'manual' : (options.suggestion?.suggestedSeries?.source || 'manual'),
+    },
+  };
+}
+
+function siteCategorySelectOptions(rows: SiteProductCategoryRow[]): SiteProductCategorySelectOption[] {
+  const byId = new Map(rows.filter((row) => text(row.id)).map((row) => [text(row.id), row]));
+  const isSelectable = (row: SiteProductCategoryRow, seen = new Set<string>()): boolean => {
+    const id = text(row.id);
+    if (id && seen.has(id)) return false;
+    if (id) seen.add(id);
+    if (row.status === 'inactive' || row.isVisible === false) return false;
+    const parentId = text(row.parentId);
+    if (!parentId) return true;
+    const parent = byId.get(parentId);
+    return Boolean(parent && isSelectable(parent, seen));
+  };
+  const tree = buildSiteProductCategoryTree(rows.filter((row) => isSelectable(row)));
+  const out: SiteProductCategorySelectOption[] = [];
+  const visit = (items: SiteProductCategoryTreeNode[], parentPath = '') => {
+    items.forEach((item) => {
+      const value = text(item.id);
+      const name = text(item.name || item.websiteCategory);
+      const path = [parentPath, name].filter(Boolean).join(' / ');
+      if (value) {
+        out.push({
+          value,
+          name,
+          path,
+          code: text(item.code),
+          label: `${'　'.repeat(Math.max(0, (item.level || 1) - 1))}${path}`,
+        });
+      }
+      if (item.children?.length) visit(item.children, path);
+    });
+  };
+  visit(tree);
+  return out;
+}
+
+function OverrideHint({ value, fallback }: { value: string; fallback: string }) {
+  const overridden = text(value) && text(value) !== text(fallback);
+  return <span className={overridden ? 'badge badge-info' : 'badge badge-grey'}>{overridden ? '官网覆盖' : '产品库默认'}</span>;
+}
+
+function ProductSitePublishingPanel({
+  product,
+  assignments,
+  brandOptions,
+  disabled,
+  canPublish,
+  onNotice,
+  onChanged,
+}: {
+  product: NormalizedProduct;
+  assignments: WebsiteShelfAssignment[];
+  brandOptions: Array<{ value: ProductBrand; label: string }>;
+  disabled: boolean;
+  canPublish: boolean;
+  onNotice: (text: string) => void;
+  onChanged: () => Promise<unknown>;
+}) {
+  const liveAssignments = assignments.filter((assignment) => !assignment.deletedAt);
+  const configuredSites = new Set(liveAssignments.map((assignment) => normalizeBrand(assignment.siteCode)));
+  const productBrandSite = normalizeBrand(product.brand);
+  const preferredSite = brandOptions.find((option) => normalizeBrand(option.value) === productBrandSite && !configuredSites.has(productBrandSite));
+  const firstAvailableSite = (preferredSite || brandOptions.find((option) => !configuredSites.has(normalizeBrand(option.value))) || brandOptions[0])?.value || productBrandSite;
+  const [editing, setEditing] = useState<WebsiteShelfAssignment | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [draft, setDraft] = useState<ProductSitePublishingDraft>(() => productSitePublishingDraftFromAssignment(product, undefined, firstAvailableSite));
+  const [saving, setSaving] = useState(false);
+  const activeSiteCode = normalizeBrand(draft.siteCode || editing?.siteCode || firstAvailableSite);
+  const defaults = productSitePublishingDefaults(product, activeSiteCode);
+  const { data: categoryData, isLoading: categoryLoading, error: categoryError } = useSWR(
+    activeSiteCode ? ['/api/v2/brand-sites/product-categories/select', activeSiteCode] : null,
+    async () => siteProductCategories.list(activeSiteCode, { selectable: true }) as Promise<SiteProductCategoryResponse>,
+    { revalidateOnFocus: false },
+  );
+  const categoryOptions = useMemo(() => siteCategorySelectOptions(categoryData?.items || []), [categoryData]);
+  const categoryOptionById = useMemo(() => new Map(categoryOptions.map((option) => [option.value, option])), [categoryOptions]);
+  const showEditor = Boolean(creating || editing);
+  const productTenantId = tenantIdForProduct(product) || PRODUCT_LIBRARY_TENANT_ID;
+  const { data: publishingSuggestion, isLoading: suggestionLoading } = useSWR(
+    showEditor && activeSiteCode && product.id ? ['/api/v2/brand-sites/product-categories/suggestion', activeSiteCode, product.id, productTenantId] : null,
+    async () => siteProductCategories.suggestion(activeSiteCode, { productId: product.id, productTenantId }) as Promise<SitePublishingSuggestion>,
+    { revalidateOnFocus: false },
+  );
+  const selectedWebsiteCategory = categoryOptionById.get(text(draft.siteProductCategoryId));
+  const suggestedWebsiteCategory = text(publishingSuggestion?.suggestedWebsiteCategory?.name);
+  const suggestedWebsiteCategoryId = text(publishingSuggestion?.suggestedWebsiteCategory?.id);
+  const suggestedWebsiteCategoryPath = text(publishingSuggestion?.suggestedWebsiteCategory?.path || publishingSuggestion?.suggestedWebsiteCategory?.name);
+  const suggestedSeries = text(publishingSuggestion?.suggestedSeries?.value);
+  const currentWebsiteCategoryPath = text(selectedWebsiteCategory?.path || draft.websiteCategoryPath || draft.websiteCategory);
+  const websiteCategoryOverridden = Boolean(suggestedWebsiteCategoryId && text(draft.siteProductCategoryId) && text(draft.siteProductCategoryId) !== suggestedWebsiteCategoryId);
+  const websiteCategoryMappingMode = websiteCategoryOverridden || !suggestedWebsiteCategoryId ? 'manual' : 'auto';
+  const seriesOverridden = Boolean(suggestedSeries && text(draft.series) && text(draft.series) !== suggestedSeries);
+
+  useEffect(() => {
+    if (!showEditor || !publishingSuggestion) return;
+    const nextCategoryId = text(publishingSuggestion.suggestedWebsiteCategory?.id);
+    const nextCategory = text(publishingSuggestion.suggestedWebsiteCategory?.name);
+    const nextCategoryPath = text(publishingSuggestion.suggestedWebsiteCategory?.path || nextCategory);
+    const nextSeries = text(publishingSuggestion.suggestedSeries?.value);
+    setDraft((current) => ({
+      ...current,
+      siteProductCategoryId: text(current.siteProductCategoryId) ? current.siteProductCategoryId : nextCategoryId || current.siteProductCategoryId,
+      websiteCategory: text(current.websiteCategory) ? current.websiteCategory : nextCategory || current.websiteCategory,
+      websiteCategoryPath: text(current.websiteCategoryPath) ? current.websiteCategoryPath : nextCategoryPath || current.websiteCategoryPath,
+      series: text(current.series) ? current.series : nextSeries || current.series,
+    }));
+  }, [showEditor, publishingSuggestion]);
+
+  function applyWebsiteCategory(categoryId: string) {
+    const option = categoryOptionById.get(categoryId);
+    setDraft((current) => ({
+      ...current,
+      siteProductCategoryId: categoryId,
+      websiteCategory: option?.name || '',
+      websiteCategoryPath: option?.path || '',
+    }));
+  }
+
+  function applyAutoWebsiteCategory() {
+    if (!suggestedWebsiteCategoryId) return;
+    setDraft((current) => ({
+      ...current,
+      siteProductCategoryId: suggestedWebsiteCategoryId,
+      websiteCategory: suggestedWebsiteCategory,
+      websiteCategoryPath: suggestedWebsiteCategoryPath,
+    }));
+  }
+
+  function startCreate() {
+    const siteCode = (preferredSite || brandOptions.find((option) => !configuredSites.has(normalizeBrand(option.value))) || brandOptions[0])?.value || productBrandSite;
+    setEditing(null);
+    setCreating(true);
+    setDraft(productSitePublishingDraftFromAssignment(product, undefined, siteCode));
+  }
+
+  function startEdit(assignment: WebsiteShelfAssignment) {
+    setCreating(false);
+    setEditing(assignment);
+    setDraft(productSitePublishingDraftFromAssignment(product, assignment, assignment.siteCode));
+  }
+
+  async function saveAssignment() {
+    if (!activeSiteCode || saving || disabled) return;
+    setSaving(true);
+    try {
+      const payload = productSitePublishingPayload(product, draft, { includeProductRef: !editing?.id, suggestion: publishingSuggestion });
+      if (editing?.id) await siteProductAssignments.update(activeSiteCode, editing.id, payload);
+      else await siteProductAssignments.create(activeSiteCode, payload);
+      onNotice(editing?.id ? '官网展示配置已更新。' : '官网展示配置已新增。');
+      onNotice(editing?.id ? '官网展示配置已更新；如果状态还是草稿，请点击“发布”后官网才会展示。' : '官网展示配置已保存为草稿；请点击卡片上的“发布”后官网才会展示。');
+      setEditing(null);
+      setCreating(false);
+      await onChanged();
+    } catch (error) {
+      onNotice((error as Error)?.message || '保存官网展示配置失败。');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function changeAssignmentStatus(assignment: WebsiteShelfAssignment, next: 'published' | 'hidden') {
+    const siteCode = normalizeBrand(assignment.siteCode);
+    if (!siteCode || !assignment.id || saving || disabled) return;
+    setSaving(true);
+    try {
+      if (next === 'published') await siteProductAssignments.publish(siteCode, assignment.id);
+      else await siteProductAssignments.hide(siteCode, assignment.id);
+      onNotice(next === 'published' ? '已发布到官网。' : '已从官网隐藏。');
+      await onChanged();
+    } catch (error) {
+      onNotice((error as Error)?.message || '官网上下架操作失败。');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeAssignment(assignment: WebsiteShelfAssignment) {
+    const siteCode = normalizeBrand(assignment.siteCode);
+    if (!siteCode || !assignment.id || saving || disabled) return;
+    if (typeof window !== 'undefined' && !window.confirm(`确认移除 ${displayBrand(siteCode)} 的官网挂载配置？`)) return;
+    setSaving(true);
+    try {
+      await siteProductAssignments.archive(siteCode, assignment.id);
+      onNotice('官网挂载配置已移除。');
+      if (editing?.id === assignment.id) {
+        setEditing(null);
+        setCreating(false);
+      }
+      await onChanged();
+    } catch (error) {
+      onNotice((error as Error)?.message || '移除官网挂载配置失败。');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div style={{ display: 'grid', gap: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <p style={{ margin: 0, color: 'var(--t-secondary)', fontSize: 12 }}>
+          一个产品可以挂载到多个官网；每个官网独立维护目录、slug、排序、推荐和展示文案。
+        </p>
+        <button type="button" className="btn btn-outline btn-sm" onClick={startCreate} disabled={disabled || saving || brandOptions.every((option) => configuredSites.has(normalizeBrand(option.value)))}>
+          <Plus size={13} />
+          添加官网
+        </button>
+      </div>
+
+      {liveAssignments.length ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: 10 }}>
+          {liveAssignments.map((assignment) => {
+            const assignmentMeta = objectOrEmpty(assignment.siteMeta);
+            const categoryMeta = objectOrEmpty(assignmentMeta.siteProductCategory);
+            const assignmentCategoryPath = text(assignmentMeta.websiteCategoryPath || categoryMeta.path || assignment.websiteCategory);
+            const visibleReason = assignment.status === 'published'
+              ? '保存后已发布，官网会展示。'
+              : assignment.status === 'hidden'
+                ? '当前已隐藏，官网不会展示；点击发布后才展示。'
+                : '当前为草稿，官网不会展示；点击发布后才展示。';
+            return (
+            <div key={assignment.id} className="inset" style={{ padding: 12, display: 'grid', gap: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+                <strong>{displayBrand(normalizeBrand(assignment.siteCode))}</strong>
+                <StatusPill tone={websitePublishingStatusMeta(assignment).tone}>{websitePublishingStatusMeta(assignment).label}</StatusPill>
+              </div>
+              <div style={{ display: 'grid', gap: 4, color: 'var(--t-secondary)', fontSize: 12 }}>
+                <span>目录：{assignmentCategoryPath || '未选择'}</span>
+                <span>slug：{text(assignment.publicSlug) || productSitePublishingDefaults(product, assignment.siteCode).publicSlug}</span>
+                <span>排序：{nonNegativeInt(assignment.displayOrder)} {assignment.isFeatured ? ' / 推荐' : ''}</span>
+                <span style={{ color: assignment.status === 'published' ? 'var(--success)' : 'var(--t-tertiary)' }}>{visibleReason}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button type="button" className="btn btn-outline btn-sm" onClick={() => startEdit(assignment)} disabled={disabled || saving}>配置</button>
+                {canPublish && assignment.status !== 'published' ? (
+                  <button type="button" className="btn btn-brand btn-sm" onClick={() => changeAssignmentStatus(assignment, 'published')} disabled={disabled || saving}>发布</button>
+                ) : null}
+                {canPublish && assignment.status === 'published' ? (
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => changeAssignmentStatus(assignment, 'hidden')} disabled={disabled || saving}>隐藏</button>
+                ) : null}
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => removeAssignment(assignment)} disabled={disabled || saving}>移除</button>
+              </div>
+            </div>
+          );})}
+        </div>
+      ) : (
+        <div className="inset" style={{ padding: 12, color: 'var(--t-secondary)', fontSize: 13 }}>
+          当前产品还没有官网挂载配置。先点“添加官网”，选择官网目录后保存为草稿，再决定是否发布。
+        </div>
+      )}
+
+      {showEditor ? (
+        <div className="inset" style={{ padding: 14, display: 'grid', gap: 12, borderColor: 'var(--brand-300)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+            <strong>{editing ? '编辑官网展示配置' : '新增官网展示配置'}</strong>
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setEditing(null); setCreating(false); }} disabled={saving}>收起</button>
+          </div>
+          <div className="inset" style={{ padding: 12, display: 'grid', gap: 8, background: 'var(--surface-subtle, #f8fafc)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <strong style={{ fontSize: 13 }}>产品库 → 官网展示映射</strong>
+              <span className={websiteCategoryOverridden || seriesOverridden ? 'badge badge-info' : 'badge badge-grey'}>
+                {websiteCategoryOverridden || seriesOverridden ? '人工覆盖' : suggestionLoading ? '匹配中' : suggestedWebsiteCategory ? '跟随产品库' : '需要手动选择'}
+              </span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 8, color: 'var(--t-secondary)', fontSize: 12 }}>
+              <span>产品库分类：{text(publishingSuggestion?.productCategory?.pathLabel) || text(product.categoryPath || product.category) || '未维护'}；二级分类会决定默认官网映射</span>
+              <span>系统建议官网目录：{suggestionLoading ? '匹配中...' : suggestedWebsiteCategoryPath || '未找到映射，请手动选择'}</span>
+              <span>当前保存官网目录：{currentWebsiteCategoryPath || '未选择'}{websiteCategoryOverridden ? '（人工覆盖）' : suggestedWebsiteCategoryId && draft.siteProductCategoryId ? '（跟随默认）' : ''}</span>
+              <span>官网系列：{text(draft.series) || suggestedSeries || '沿用产品库系列'}{seriesOverridden ? '（人工覆盖）' : suggestedSeries ? '（跟随产品库）' : ''}</span>
+              <span>展示判断：{draft.siteProductCategoryId ? '目录有效；保存为草稿后需发布才展示' : '未选择官网目录，保存会被阻止'}</span>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              <button
+                type="button"
+                className={websiteCategoryMappingMode === 'auto' ? 'btn btn-brand btn-sm' : 'btn btn-outline btn-sm'}
+                disabled={saving || disabled || suggestionLoading || !suggestedWebsiteCategoryId}
+                onClick={applyAutoWebsiteCategory}
+              >
+                自动映射
+              </button>
+              <span className={websiteCategoryMappingMode === 'manual' ? 'badge badge-info' : 'badge badge-grey'}>手动选择可覆盖</span>
+              <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>默认跟随产品库分类；下方选择其他官网目录后按人工映射保存。</span>
+            </div>
+          </div>
+          <div className="product-edit-field-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span className="t-label">官网</span>
+              <select className="input" value={draft.siteCode} disabled={Boolean(editing) || saving || disabled} onChange={(event) => setDraft(productSitePublishingDraftFromAssignment(product, undefined, event.target.value))}>
+                {brandOptions.map((option) => (
+                  <option key={option.value} value={option.value} disabled={!editing && configuredSites.has(normalizeBrand(option.value))}>{option.label}</option>
+                ))}
+              </select>
+            </label>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span className="t-label">官网目录 <span className={websiteCategoryMappingMode === 'manual' ? 'badge badge-info' : 'badge badge-grey'}>{websiteCategoryMappingMode === 'manual' ? '手动映射' : '自动映射'}</span></span>
+              <select className="input" value={draft.siteProductCategoryId} disabled={saving || disabled || categoryLoading} onChange={(event) => applyWebsiteCategory(event.target.value)}>
+                <option value="">{categoryLoading ? '目录加载中...' : '请选择官网目录'}</option>
+                {categoryOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              </select>
+              <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>默认用系统建议目录；需要特殊陈列时在这里手动选择官网目录。</span>
+              {categoryError ? <span style={{ color: 'var(--warning)', fontSize: 12 }}>官网目录加载失败，请先检查目录管理。</span> : null}
+              {!categoryError && !categoryLoading && !categoryOptions.length ? <span style={{ color: 'var(--warning)', fontSize: 12 }}>当前官网还没有后台目录树，请先到官网目录管理维护。</span> : null}
+            </label>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span className="t-label">官网系列</span>
+              <input className="input" value={draft.series} disabled={saving || disabled} placeholder={suggestedSeries || '未维护官网系列'} onChange={(event) => setDraft((current) => ({ ...current, series: event.target.value }))} />
+              <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>{suggestedSeries ? '默认跟随产品库系列；改写后按人工覆盖保存。' : '产品库尚未维护系列，可先留空。'}</span>
+            </label>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span className="t-label">URL slug <OverrideHint value={draft.publicSlug} fallback={defaults.publicSlug} /></span>
+              <input className="input" value={draft.publicSlug} pattern="[a-z0-9]+(?:-[a-z0-9]+)*" disabled={saving || disabled} onChange={(event) => setDraft((current) => ({ ...current, publicSlug: event.target.value }))} />
+            </label>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span className="t-label">官网标题 <OverrideHint value={draft.siteTitle} fallback={defaults.siteTitle} /></span>
+              <input className="input" value={draft.siteTitle} disabled={saving || disabled} onChange={(event) => setDraft((current) => ({ ...current, siteTitle: event.target.value }))} />
+            </label>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span className="t-label">排序</span>
+              <input className="input" type="number" min="0" max="999999" value={draft.displayOrder} disabled={saving || disabled} onChange={(event) => setDraft((current) => ({ ...current, displayOrder: event.target.value }))} />
+            </label>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span className="t-label">推荐</span>
+              <span className="toggle-row" style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 38 }}>
+                <input type="checkbox" checked={draft.isFeatured} disabled={saving || disabled} onChange={(event) => setDraft((current) => ({ ...current, isFeatured: event.target.checked }))} />
+                <span>在该官网推荐展示</span>
+              </span>
+            </label>
+            <label style={{ display: 'grid', gap: 6 }}>
+              <span className="t-label">官网标签 <OverrideHint value={draft.tags} fallback={defaults.tags} /></span>
+              <input className="input" value={draft.tags} disabled={saving || disabled} placeholder="新品, 推荐" onChange={(event) => setDraft((current) => ({ ...current, tags: event.target.value }))} />
+            </label>
+          </div>
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span className="t-label">官网摘要/卖点 <OverrideHint value={draft.siteSummary} fallback={defaults.siteSummary} /></span>
+            <textarea className="input" rows={3} value={draft.siteSummary} disabled={saving || disabled} onChange={(event) => setDraft((current) => ({ ...current, siteSummary: event.target.value }))} />
+          </label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+            <button type="button" className="btn btn-ghost btn-sm" disabled={saving || disabled} onClick={() => setDraft((current) => ({
+              ...productSitePublishingDraftFromAssignment(product, editing || undefined, activeSiteCode),
+              siteProductCategoryId: suggestedWebsiteCategoryId || current.siteProductCategoryId,
+              websiteCategory: suggestedWebsiteCategory || current.websiteCategory,
+              websiteCategoryPath: suggestedWebsiteCategoryPath || current.websiteCategoryPath,
+              series: suggestedSeries || current.series,
+            }))}>恢复默认映射</button>
+            <button type="button" className="btn btn-brand btn-sm" disabled={saving || disabled} onClick={saveAssignment}>{saving ? '保存中...' : '保存官网配置'}</button>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function OfficialProductDetailEditor({
   value,
   onChange,
@@ -3322,13 +4489,16 @@ function OfficialProductDetailEditor({
 
   useEffect(() => {
     const editor = editorRef.current;
-    if (!editor || lastValueRef.current === value) return;
-    editor.innerHTML = value || '';
-    lastValueRef.current = value;
+    if (!editor) return;
+    if (lastValueRef.current !== value) {
+      editor.innerHTML = value || '';
+      lastValueRef.current = value;
+    }
+    void hydrateOfficialDetailEditorImages(editor);
   }, [value]);
 
   function commit() {
-    const next = sanitizeOfficialProductDetailHtml(editorRef.current?.innerHTML || '');
+    const next = serializeOfficialDetailEditorHtml(editorRef.current);
     lastValueRef.current = next;
     onChange(next);
   }
@@ -3375,17 +4545,19 @@ function OfficialProductDetailEditor({
     setUploading(true);
     try {
       for (const file of selected) {
+        const dataBase64 = await readBrowserFileBase64(file);
         const artifact = await fileArtifacts.uploadBase64({
           entityType: 'product-official-detail-image',
           entityId: entityId || 'product-detail',
           filename: file.name,
           mimeType: file.type || 'image/jpeg',
-          dataBase64: await readBrowserFileBase64(file),
+          dataBase64,
         });
         const artifactId = text((artifact as any)?.id || (artifact as any)?.artifactId);
-        const url = text((artifact as any)?.contentUrl) || (artifactId ? `/api/v2/file-artifact/${encodeURIComponent(artifactId)}/content` : '');
+        const url = text((artifact as any)?.contentUrl) || artifactContentUrl(artifactId);
         if (!url) throw new Error('图片上传未返回可访问地址。');
-        insertHtml(`<img src="${escapeProductDetailHtml(url)}" alt="${escapeProductDetailHtml(file.name)}" loading="lazy">`);
+        const dataUrl = `data:${file.type || 'image/jpeg'};base64,${dataBase64}`;
+        insertHtml(`<img src="${escapeProductDetailHtml(dataUrl)}" ${PRODUCT_DETAIL_ARTIFACT_SRC_ATTR}="${escapeProductDetailHtml(productDetailPersistentImageSrc(url))}" alt="${escapeProductDetailHtml(file.name)}" loading="lazy">`);
       }
     } catch (e) {
       await alertFloating({ title: '详情图片上传失败', message: (e as Error)?.message || '详情图片上传失败。' });
@@ -4380,7 +5552,7 @@ function CategoryNodeCard({ node, parentName }: { node: ProductCategoryNode; par
           {node.status === 'inactive' ? '停用' : '启用'}
         </StatusPill>
         <StatusPill tone={node.showOnWebsite ? 'info' : 'neutral'}>
-          {node.showOnWebsite ? '官网显示' : '官网隐藏'}
+          {node.showOnWebsite ? '允许官网映射' : '不参与官网映射'}
         </StatusPill>
       </div>
       <p style={{ marginTop: 5, color: 'var(--t-tertiary)', fontSize: 11, overflowWrap: 'anywhere' }}>
@@ -4412,7 +5584,7 @@ function CategoryLevelPlaceholder({ label }: { label: string }) {
   );
 }
 
-function ProductCategoryManagerCrudView({
+export function ProductCategoryManagerCrudView({
   canCreate,
   canUpdate,
   canDelete,
@@ -4422,7 +5594,8 @@ function ProductCategoryManagerCrudView({
   canDelete: boolean;
 }) {
   const canWrite = canCreate || canUpdate || canDelete;
-  const [brandCode, setBrandCode] = useState<ProductBrand>('rheem');
+  const [brandCode] = useState<ProductBrand>('common');
+  const [siteCode, setSiteCode] = useState<ProductBrand>('everhot');
   const [selectedId, setSelectedId] = useState('');
   const [mode, setMode] = useState<'edit' | 'create'>('edit');
   const [createParentId, setCreateParentId] = useState<string | null>(null);
@@ -4432,16 +5605,29 @@ function ProductCategoryManagerCrudView({
   const [notice, setNotice] = useState('');
   const [actionError, setActionError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [activeCategoryTab, setActiveCategoryTab] = useState<'base' | 'website'>('base');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
   const [childrenByParent, setChildrenByParent] = useState<Record<string, ProductCategoryNode[]>>({});
   const [loadingChildren, setLoadingChildren] = useState<Record<string, boolean>>({});
   const { confirmFloating, floatingDialog } = useFloatingDialog();
+  const activeSiteCode = siteCode;
+  const activeBrandLabel = displayBrand(siteCode);
   const { data, error, isLoading, mutate } = useSWR(
     ['/api/v2/brand-product-categories', brandCode, 'all', 'crud'],
     async () => {
       const result = await brandProductCategories.list({ brandCode, metrics: 'false' });
       return { tree: normalizeProductCategoryTree(result) };
     },
+    { revalidateOnFocus: false },
+  );
+  const {
+    data: websiteCategoryData,
+    error: websiteCategoryError,
+    isLoading: websiteCategoryLoading,
+    mutate: mutateWebsiteCategories,
+  } = useSWR<SiteProductCategoryResponse>(
+    activeCategoryTab === 'website' ? ['/api/v2/brand-sites', activeSiteCode, 'product-categories'] : null,
+    async () => siteProductCategories.list(activeSiteCode) as Promise<SiteProductCategoryResponse>,
     { revalidateOnFocus: false },
   );
   const tree = data?.tree || [];
@@ -4687,10 +5873,11 @@ function ProductCategoryManagerCrudView({
       <section className="card-elevated" style={{ padding: 18, borderRadius: 'var(--r-lg)' }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div style={{ flex: '1 1 320px', minWidth: 0 }}>
-            <p className="t-label">产品分类管理</p>
-            <h2 className="t-headline" style={{ marginTop: 4 }}>品牌产品目录分类</h2>
+            <p className="t-label">基础资料 / 产品分类</p>
+            <h2 className="t-headline" style={{ marginTop: 4 }}>公共产品分类与官网目录管理</h2>
             <p style={{ marginTop: 6, color: 'var(--t-secondary)', fontSize: 13, overflowWrap: 'anywhere' }}>
-              按品牌维护官网产品目录层级。一级、二级、三级都可配置，产品后续按这套目录归类展示。
+              这里维护的是公共产品库的事实分类，用于产品录入、导入、筛选和经销商 API 输出；不是官网栏目。
+              官网目录用于给产品库提供官网栏目选项；产品归属、URL、推荐、官网文案和图片都在产品库维护。
             </p>
           </div>
           <span className={error ? 'badge badge-warning' : isLoading ? 'badge badge-grey' : 'badge badge-success'}>
@@ -4698,12 +5885,30 @@ function ProductCategoryManagerCrudView({
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
-          <span style={{ color: 'var(--t-secondary)', fontSize: 12, fontWeight: 600, marginRight: 2 }}>品牌</span>
-          {DEFAULT_CREATE_BRAND_OPTIONS.map((item) => (
-            <CategoryChip key={item.value} active={brandCode === item.value} onClick={() => setBrandCode(item.value)}>
-              {item.label}
-            </CategoryChip>
-          ))}
+          <span style={{ color: 'var(--t-secondary)', fontSize: 12, fontWeight: 600, marginRight: 2 }}>当前基座</span>
+          <span className="badge badge-info">公共产品库</span>
+          <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>所有品牌产品录入、导入、筛选共用这一套分类。</span>
+        </div>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
+            gap: 10,
+            marginTop: 14,
+          }}
+        >
+          <div className="inset" style={{ padding: 12 }}>
+            <strong style={{ display: 'block', fontSize: 13 }}>先建分类，再录产品</strong>
+            <p style={{ margin: '4px 0 0', color: 'var(--t-secondary)', fontSize: 12 }}>产品录入页会直接读取这里的分类树，运营人员不用手工重复输入分类名称。</p>
+          </div>
+          <div className="inset" style={{ padding: 12 }}>
+            <strong style={{ display: 'block', fontSize: 13 }}>停用不破坏历史数据</strong>
+            <p style={{ margin: '4px 0 0', color: 'var(--t-secondary)', fontSize: 12 }}>分类停用后，历史产品仍保留绑定；新产品录入时不再推荐使用。</p>
+          </div>
+          <div className="inset" style={{ padding: 12 }}>
+            <strong style={{ display: 'block', fontSize: 13 }}>官网目录只搭骨架</strong>
+            <p style={{ margin: '4px 0 0', color: 'var(--t-secondary)', fontSize: 12 }}>这里只维护官网目录树；产品选择哪个官网目录，回到产品库或上架配置中完成。</p>
+          </div>
         </div>
       </section>
 
@@ -4720,14 +5925,40 @@ function ProductCategoryManagerCrudView({
         }}
       >
         <div>
-          <p className="t-label">当前目录</p>
-          <strong style={{ display: 'block', marginTop: 3 }}>{displayBrand(brandCode)}</strong>
+          <p className="t-label">当前产品基座分类</p>
+          <strong style={{ display: 'block', marginTop: 3 }}>公共产品库</strong>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <CategoryCountPill label="已加载" value={loadedCount} />
           <CategoryCountPill label="根节点" value={tree.length} />
           <CategoryCountPill label="启用" value={activeCount} tone="success" />
         </div>
+      </section>
+
+      <section className="card-elevated" style={{ padding: 14, borderRadius: 'var(--r-lg)' }}>
+        <div role="tablist" aria-label="产品分类管理范围" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeCategoryTab === 'base'}
+            className={activeCategoryTab === 'base' ? 'btn btn-brand btn-sm' : 'btn btn-outline btn-sm'}
+            onClick={() => setActiveCategoryTab('base')}
+          >
+            产品基座分类
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeCategoryTab === 'website'}
+            className={activeCategoryTab === 'website' ? 'btn btn-brand btn-sm' : 'btn btn-outline btn-sm'}
+            onClick={() => setActiveCategoryTab('website')}
+          >
+            官网目录管理
+          </button>
+        </div>
+        <p style={{ margin: '10px 0 0', color: 'var(--t-secondary)', fontSize: 12, overflowWrap: 'anywhere' }}>
+          产品基座分类是全产品库统一事实分类；官网目录管理只维护每个官网的栏目树，作为产品库发布配置的可选目录。
+        </p>
       </section>
 
       {notice ? <span className="badge badge-success" style={{ justifySelf: 'start' }}>{notice}</span> : null}
@@ -4786,11 +6017,12 @@ function ProductCategoryManagerCrudView({
           </div>
         ) : null}
 
+        {activeCategoryTab === 'base' ? (
         <div className="card-elevated" style={{ overflow: 'hidden', borderRadius: 'var(--r-lg)', width: '100%', justifySelf: 'stretch' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: 18, borderBottom: '1px solid var(--border)' }}>
             <div>
               <p className="t-label">{displayBrand(brandCode)}</p>
-              <h3 className="t-headline" style={{ marginTop: 4 }}>产品目录树</h3>
+              <h3 className="t-headline" style={{ marginTop: 4 }}>产品基座分类树</h3>
             </div>
             {canCreate && (
               <button type="button" className="btn btn-brand btn-sm" onClick={() => startCreate(null)} disabled={saving || isLoading}>
@@ -4800,9 +6032,9 @@ function ProductCategoryManagerCrudView({
             )}
           </div>
           {isLoading ? (
-            <WorkbenchTableState type="loading" title="正在加载产品目录" description="正在读取当前品牌的一、二、三级分类。" />
+            <WorkbenchTableState type="loading" title="正在加载产品基座分类" description="正在读取公共产品库的一、二、三级分类。" />
           ) : error ? (
-            <WorkbenchTableState type="error" title="产品目录暂时不可用" description={String((error as Error)?.message || error)} />
+            <WorkbenchTableState type="error" title="产品基座分类暂时不可用" description={String((error as Error)?.message || error)} />
           ) : tree.length ? (
             <CategoryCrudTreePanel
               rows={flat}
@@ -4819,7 +6051,7 @@ function ProductCategoryManagerCrudView({
           ) : (
             <WorkbenchTableState
               type="empty"
-              title="当前品牌还没有产品目录"
+              title="公共产品库还没有产品基座分类"
               description="先创建一级分类，再在一级下维护二级系统，三级分类可按需补充。"
               action={canCreate ? (
                 <button type="button" className="btn btn-brand btn-sm" onClick={() => startCreate(null)} disabled={!canWrite || saving}>
@@ -4830,9 +6062,398 @@ function ProductCategoryManagerCrudView({
             />
           )}
         </div>
+        ) : (
+        <SiteProductCategoryCrudPanel
+          siteCode={activeSiteCode}
+          brandLabel={activeBrandLabel}
+          onSiteCodeChange={setSiteCode}
+          data={websiteCategoryData}
+          loading={websiteCategoryLoading}
+          error={websiteCategoryError}
+          canWrite={canWrite}
+          onChanged={mutateWebsiteCategories}
+        />
+        )}
 
       </section>
       {floatingDialog}
+    </div>
+  );
+}
+
+function SiteProductCategoryCrudPanel({
+  siteCode,
+  brandLabel,
+  onSiteCodeChange,
+  data,
+  loading,
+  error,
+  canWrite,
+  onChanged,
+}: {
+  siteCode: ProductBrand;
+  brandLabel: string;
+  onSiteCodeChange: (siteCode: ProductBrand) => void;
+  data?: SiteProductCategoryResponse;
+  loading: boolean;
+  error: unknown;
+  canWrite: boolean;
+  onChanged: () => Promise<SiteProductCategoryResponse | undefined>;
+}) {
+  const [editing, setEditing] = useState<SiteProductCategoryRow | null>(null);
+  const [mode, setMode] = useState<'create' | 'edit'>('edit');
+  const [createParentId, setCreateParentId] = useState<string | null>(null);
+  const [draft, setDraft] = useState({
+    name: '',
+    parentId: '',
+    sortOrder: '0',
+    isVisible: true,
+    status: 'active',
+    description: '',
+  });
+  const [expandedPaths, setExpandedPaths] = useState<Set<string>>(() => new Set());
+  const [expandedInitializedSite, setExpandedInitializedSite] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState('');
+  const [actionError, setActionError] = useState('');
+  const rows = data?.items || [];
+  const websiteTree = useMemo(() => buildSiteProductCategoryTree(rows), [rows]);
+  const flatWebsiteRows = useMemo(
+    () => flattenSiteProductCategoryTree(websiteTree, expandedPaths),
+    [expandedPaths, websiteTree],
+  );
+  const allWebsiteRows = useMemo(() => flattenAllSiteProductCategoryRows(websiteTree), [websiteTree]);
+  const blockedParentIds = useMemo(() => {
+    if (!editing?.id) return new Set<string>();
+    const blocked = new Set<string>([editing.id]);
+    const visit = (items: SiteProductCategoryTreeNode[]) => {
+      items.forEach((item) => {
+        if (blocked.has(item.parentId || '')) {
+          blocked.add(item.id);
+        }
+        if (item.children.length) visit(item.children);
+      });
+    };
+    visit(websiteTree);
+    return blocked;
+  }, [editing?.id, websiteTree]);
+  const parentOptions = useMemo(() => allWebsiteRows.filter((item) => !blockedParentIds.has(item.id)), [allWebsiteRows, blockedParentIds]);
+  const editingTitle = mode === 'create'
+    ? (createParentId ? '新增下级目录' : '新增一级目录')
+    : editing?.websiteCategory || '选择一个官网目录';
+
+  useEffect(() => {
+    setEditing(null);
+    setMode('edit');
+    setCreateParentId(null);
+    setDraft({
+      name: '',
+      parentId: '',
+      sortOrder: '0',
+      isVisible: true,
+      status: 'active',
+      description: '',
+    });
+    setExpandedPaths(new Set());
+    setExpandedInitializedSite('');
+    setNotice('');
+    setActionError('');
+  }, [siteCode]);
+
+  useEffect(() => {
+    if (expandedInitializedSite === siteCode || !websiteTree.length) return;
+    setExpandedPaths(new Set(websiteTree.map((item) => item.path)));
+    setExpandedInitializedSite(siteCode);
+  }, [expandedInitializedSite, siteCode, websiteTree]);
+
+  function toggleWebsiteNode(node: SiteProductCategoryTreeNode) {
+    if (!node.children.length) return;
+    setExpandedPaths((current) => {
+      const next = new Set(current);
+      if (next.has(node.path)) next.delete(node.path);
+      else next.add(node.path);
+      return next;
+    });
+  }
+
+  function startEdit(row: SiteProductCategoryRow) {
+    setEditing(row);
+    setMode('edit');
+    setCreateParentId(null);
+    setDraft({
+      name: row.name || row.websiteCategory,
+      parentId: row.parentId || '',
+      sortOrder: String(row.sortOrder ?? row.displayOrder ?? 0),
+      isVisible: row.isVisible !== false,
+      status: row.status === 'inactive' ? 'inactive' : 'active',
+      description: row.description || '',
+    });
+    setNotice('');
+    setActionError('');
+  }
+
+  function startCreate(parent?: SiteProductCategoryTreeNode | null) {
+    setEditing(null);
+    setMode('create');
+    setCreateParentId(parent?.id || null);
+    setDraft({
+      name: '',
+      parentId: parent?.id || '',
+      sortOrder: String(parent?.children?.length || rows.length),
+      isVisible: true,
+      status: 'active',
+      description: '',
+    });
+    setNotice('');
+    setActionError('');
+  }
+
+  async function importEverhot() {
+    setSaving(true);
+    setNotice('');
+    setActionError('');
+    try {
+      const result = await siteProductCategories.importEverhot(siteCode) as any;
+      await onChanged();
+      setNotice(`已导入/更新 ${Number(result?.importedCount || 0)} 个恒热官网目录来源产品，跳过 ${Number(result?.skippedCount || 0)} 个。`);
+    } catch (e) {
+      setActionError(errorMessage(e));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function saveCategory(event: FormEvent) {
+    event.preventDefault();
+    setSaving(true);
+    setNotice('');
+    setActionError('');
+    try {
+      const payload: Record<string, unknown> = {
+        name: draft.name,
+        parentId: draft.parentId || null,
+        sortOrder: nonNegativeInt(draft.sortOrder),
+        isVisible: draft.isVisible,
+        status: draft.status,
+        description: draft.description || null,
+      };
+      const result = mode === 'create'
+        ? await siteProductCategories.create(siteCode, payload) as any
+        : editing?.id
+          ? await siteProductCategories.updateById(siteCode, editing.id, payload) as any
+          : await siteProductCategories.update(siteCode, { fromCategory: editing?.websiteCategory, toCategory: draft.name }) as any;
+      await onChanged();
+      setNotice(mode === 'create' ? '官网目录已创建。' : '官网目录已保存。');
+      setEditing(null);
+      setMode('edit');
+      setCreateParentId(null);
+    } catch (e) {
+      setActionError(errorMessage(e));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function clearCategory() {
+    if (!editing) return;
+    const childCount = Number((editing as any).children?.length || 0);
+    if (childCount > 0) {
+      setActionError(`不能删除“${editing.websiteCategory}”：请先处理 ${childCount} 个下级目录。`);
+      return;
+    }
+    if (Number(editing.productCount || 0) > 0) {
+      setActionError(`不能在目录页删除“${editing.websiteCategory}”：已有 ${Number(editing.productCount || 0)} 个产品引用该目录，请先到产品库调整产品官网目录。`);
+      return;
+    }
+    const confirmed = window.confirm(`确认删除目录“${editing.websiteCategory}”？`);
+    if (!confirmed) return;
+    setSaving(true);
+    setNotice('');
+    setActionError('');
+    try {
+      const result = editing.id
+        ? await siteProductCategories.removeById(siteCode, editing.id) as any
+        : await siteProductCategories.clear(siteCode, editing.websiteCategory) as any;
+      await onChanged();
+      void result;
+      setNotice('官网目录已删除。');
+      setEditing(null);
+    } catch (e) {
+      setActionError(errorMessage(e));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="card-elevated" style={{ padding: 18, borderRadius: 'var(--r-lg)', width: '100%', justifySelf: 'stretch' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ minWidth: 0, flex: '1 1 320px' }}>
+          <p className="t-label">官网目录管理 / {brandLabel}</p>
+          <h3 className="t-headline" style={{ marginTop: 4 }}>官网产品目录树</h3>
+          <p style={{ marginTop: 8, color: 'var(--t-secondary)', fontSize: 13, overflowWrap: 'anywhere' }}>
+            这里只维护官网前台产品目录骨架。产品归属、URL、编码、推荐、官网售价、官网文案和图片，请回到产品库维护。
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <button type="button" className="btn btn-outline btn-sm" onClick={() => startCreate(null)} disabled={!canWrite || saving}>
+            <Plus size={14} />
+            新增一级目录
+          </button>
+          <button type="button" className="btn btn-brand btn-sm" onClick={importEverhot} disabled={!canWrite || saving || siteCode !== 'everhot'} title={siteCode === 'everhot' ? '从恒热旧官网产品数据生成初始化目录' : '当前只接入了恒热旧官网目录导入'}>
+            <RefreshCw size={14} />
+            {siteCode === 'everhot' ? '导入恒热旧官网目录' : '旧官网导入待接入'}
+          </button>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
+        <span style={{ color: 'var(--t-secondary)', fontSize: 12, fontWeight: 700 }}>官网</span>
+        {DEFAULT_CREATE_BRAND_OPTIONS.map((item) => (
+          <CategoryChip key={item.value} active={siteCode === item.value} onClick={() => onSiteCodeChange(item.value)}>
+            {item.label.replace(' ', '官网 ')}
+          </CategoryChip>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
+        <CategoryCountPill label="目录数" value={rows.length} />
+        <CategoryCountPill label="一级目录" value={websiteTree.length} />
+        <CategoryCountPill label="启用" value={rows.filter((row) => row.status !== 'inactive').length} tone="success" />
+      </div>
+
+      {notice ? <span className="badge badge-success" style={{ display: 'inline-flex', marginTop: 12 }}>{notice}</span> : null}
+      {actionError ? <span className="badge badge-warning" style={{ display: 'inline-flex', marginTop: 12, overflowWrap: 'anywhere' }}>{actionError}</span> : null}
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(min(100%, 520px), 1.12fr) minmax(min(100%, 360px), 0.88fr)',
+          gap: 14,
+          alignItems: 'start',
+          marginTop: 14,
+        }}
+      >
+        <div className="inset" style={{ padding: 12, borderRadius: 'var(--r-lg)', background: '#FFFFFF' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <div>
+              <p className="t-label">分类树</p>
+              <strong style={{ display: 'block', marginTop: 3 }}>{brandLabel} 产品目录</strong>
+            </div>
+            <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>点击“编辑”在右侧维护</span>
+          </div>
+          {loading ? (
+            <WorkbenchTableState type="loading" title="正在加载官网目录" description="正在读取数据库中的站点产品目录树。" />
+          ) : error ? (
+            <WorkbenchTableState type="error" title="官网目录暂时不可用" description={errorMessage(error)} />
+          ) : rows.length ? (
+            <SiteProductCategoryTreePanel
+              rows={flatWebsiteRows}
+              expandedPaths={expandedPaths}
+              selectedId={editing?.id || ''}
+              saving={saving}
+              canWrite={canWrite}
+              onToggle={toggleWebsiteNode}
+              onEdit={startEdit}
+              onAddChild={startCreate}
+            />
+          ) : (
+            <WorkbenchTableState
+              type="empty"
+              title="还没有官网目录"
+              description={siteCode === 'everhot'
+                ? '可以先导入恒热旧官网目录，也可以手工新增一级目录。'
+                : '当前官网还没有产品目录。可以先手工新增一级目录，后续产品库会读取这里的目录选项。'}
+              action={canWrite ? (
+                <button type="button" className="btn btn-brand btn-sm" onClick={() => startCreate(null)} disabled={saving}>
+                  <Plus size={14} />
+                  新增一级目录
+                </button>
+              ) : undefined}
+            />
+          )}
+        </div>
+
+        <aside className="card-elevated" style={{ padding: 14, borderRadius: 'var(--r-lg)', position: 'sticky', top: 12 }}>
+          {editing || mode === 'create' ? (
+            <form onSubmit={saveCategory} style={{ display: 'grid', gap: 12 }}>
+              <div>
+                <p className="t-label">{mode === 'create' ? '新增官网目录' : '编辑官网目录'}</p>
+                <h4 className="t-headline" style={{ marginTop: 4, fontSize: 16 }}>{editingTitle}</h4>
+                <p style={{ margin: '6px 0 0', color: 'var(--t-secondary)', fontSize: 12 }}>
+                  这里只改目录名称、上下级、排序和启停。产品挂到哪个目录，请在产品库维护。
+                </p>
+              </div>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">目录名称 *</span>
+                <input className="input" value={draft.name} required disabled={saving || !canWrite} onChange={(event) => setDraft((current) => ({ ...current, name: event.target.value }))} placeholder="如：家用热水" />
+              </label>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">上级目录</span>
+                <select className="input" value={draft.parentId} disabled={saving || !canWrite} onChange={(event) => setDraft((current) => ({ ...current, parentId: event.target.value }))}>
+                  <option value="">无，作为一级目录</option>
+                  {parentOptions.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {'　'.repeat(Math.max(0, category.level - 1))}{category.name || category.websiteCategory}
+                    </option>
+                  ))}
+                </select>
+                <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>选择“无”就是一级目录；选择某个目录后会成为它的下级目录。</span>
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))', gap: 10 }}>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">排序</span>
+                  <input className="input" type="number" min={0} value={draft.sortOrder} disabled={saving || !canWrite} onChange={(event) => setDraft((current) => ({ ...current, sortOrder: event.target.value }))} />
+                </label>
+                <label style={{ display: 'grid', gap: 6 }}>
+                  <span className="t-label">状态</span>
+                  <select className="input" value={draft.status} disabled={saving || !canWrite} onChange={(event) => setDraft((current) => ({ ...current, status: event.target.value }))}>
+                    <option value="active">启用</option>
+                    <option value="inactive">停用</option>
+                  </select>
+                </label>
+              </div>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 44 }}>
+                  <input type="checkbox" checked={draft.isVisible} disabled={saving || !canWrite} onChange={(event) => setDraft((current) => ({ ...current, isVisible: event.target.checked }))} />
+                  <span style={{ fontSize: 13 }}>官网显示</span>
+                </label>
+              </div>
+              <label style={{ display: 'grid', gap: 6 }}>
+                <span className="t-label">运营说明</span>
+                <textarea className="input" rows={3} value={draft.description} disabled={saving || !canWrite} onChange={(event) => setDraft((current) => ({ ...current, description: event.target.value }))} placeholder="给运营人员看的备注，可说明这个栏目放什么产品。" />
+              </label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                <button type="button" className="btn btn-danger btn-sm" onClick={clearCategory} disabled={saving || !canWrite || mode === 'create'}>
+                  <Archive size={14} />
+                  删除目录
+                </button>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => { setEditing(null); setMode('edit'); setCreateParentId(null); }} disabled={saving}>取消</button>
+                  <button type="submit" className="btn btn-brand btn-sm" disabled={saving || !canWrite}>
+                    <CheckCircle2 size={14} />
+                    {saving ? '保存中...' : '保存'}
+                  </button>
+                </div>
+              </div>
+            </form>
+          ) : (
+            <div style={{ display: 'grid', gap: 12 }}>
+              <div>
+                <p className="t-label">操作区</p>
+                <h4 className="t-headline" style={{ marginTop: 4, fontSize: 16 }}>先选择左侧分类</h4>
+                <p style={{ margin: '6px 0 0', color: 'var(--t-secondary)', fontSize: 13 }}>
+                  点击左侧“编辑”即可维护目录名称、上级目录、排序、启停和运营备注。产品归属、推荐和 URL 请到产品库维护。
+                </p>
+              </div>
+              <button type="button" className="btn btn-brand btn-sm" onClick={() => startCreate(null)} disabled={!canWrite || saving}>
+                <Plus size={14} />
+                新增一级目录
+              </button>
+            </div>
+          )}
+        </aside>
+      </div>
     </div>
   );
 }
@@ -4851,6 +6472,240 @@ function flattenLazyCategoryRows(
   };
   visit(roots);
   return out;
+}
+
+function emptySiteCategoryRow(category: string): SiteProductCategoryRow {
+  return {
+    websiteCategory: category,
+    menuGroups: [],
+    assignmentIds: [],
+    productCount: 0,
+    publishedCount: 0,
+    hiddenCount: 0,
+    draftCount: 0,
+    featuredCount: 0,
+    displayOrder: 0,
+  };
+}
+
+function splitWebsiteCategoryPath(value: string): string[] {
+  return String(value || '')
+    .split('/')
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function buildSiteProductCategoryTree(rows: SiteProductCategoryRow[]): SiteProductCategoryTreeNode[] {
+  if (rows.some((row) => row.id)) {
+    const byId = new Map<string, SiteProductCategoryTreeNode>();
+    rows.forEach((row) => {
+      const id = text(row.id || row.websiteCategory);
+      if (!id) return;
+      byId.set(id, {
+        ...row,
+        id,
+        name: row.name || row.websiteCategory,
+        path: id,
+        level: Number(row.level || 1),
+        children: [],
+        sortOrder: Number(row.sortOrder ?? row.displayOrder ?? 0),
+        displayOrder: Number(row.displayOrder ?? row.sortOrder ?? 0),
+        menuGroups: row.menuGroups?.length ? row.menuGroups : row.menuGroup ? [row.menuGroup] : [],
+      });
+    });
+    const roots: SiteProductCategoryTreeNode[] = [];
+    byId.forEach((node) => {
+      if (node.parentId && byId.has(node.parentId)) byId.get(node.parentId)!.children.push(node);
+      else roots.push(node);
+    });
+    const sortNodes = (items: SiteProductCategoryTreeNode[]) => {
+      items.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0) || a.name.localeCompare(b.name, 'zh-Hans-CN'));
+      items.forEach((item) => sortNodes(item.children));
+    };
+    sortNodes(roots);
+    return roots;
+  }
+  const root: SiteProductCategoryTreeNode[] = [];
+  const byPath = new Map<string, SiteProductCategoryTreeNode>();
+  for (const row of rows) {
+    const parts = splitWebsiteCategoryPath(row.websiteCategory);
+    const normalizedParts = parts.length ? parts : [row.websiteCategory || '未设置官网分类'];
+    normalizedParts.forEach((part, index) => {
+      const pathValue = normalizedParts.slice(0, index + 1).join(' / ');
+      let node = byPath.get(pathValue);
+      if (!node) {
+        node = {
+          ...emptySiteCategoryRow(pathValue),
+          id: pathValue,
+          name: part,
+          path: pathValue,
+          level: index + 1,
+          children: [],
+        };
+        byPath.set(pathValue, node);
+        if (index === 0) root.push(node);
+        else byPath.get(normalizedParts.slice(0, index).join(' / '))?.children.push(node);
+      }
+      node.productCount += row.productCount;
+      node.publishedCount += row.publishedCount;
+      node.hiddenCount += row.hiddenCount;
+      node.draftCount += row.draftCount;
+      node.featuredCount += row.featuredCount;
+      node.displayOrder = Math.min(node.displayOrder || row.displayOrder || 0, row.displayOrder || 0);
+      row.menuGroups.forEach((group) => {
+        if (group && !node.menuGroups.includes(group)) node.menuGroups.push(group);
+      });
+      if (index === normalizedParts.length - 1) {
+        node.websiteCategory = row.websiteCategory;
+        node.assignmentIds = row.assignmentIds;
+        node.displayOrder = row.displayOrder;
+      }
+    });
+  }
+  const sortNodes = (items: SiteProductCategoryTreeNode[]) => {
+    items.sort((a, b) => a.displayOrder - b.displayOrder || a.name.localeCompare(b.name, 'zh-Hans-CN'));
+    items.forEach((item) => sortNodes(item.children));
+  };
+  sortNodes(root);
+  return root;
+}
+
+function flattenSiteProductCategoryTree(
+  roots: SiteProductCategoryTreeNode[],
+  expandedPaths: Set<string>,
+): SiteProductCategoryTreeNode[] {
+  const out: SiteProductCategoryTreeNode[] = [];
+  const visit = (items: SiteProductCategoryTreeNode[]) => {
+    items.forEach((item) => {
+      out.push(item);
+      if (expandedPaths.has(item.path)) visit(item.children);
+    });
+  };
+  visit(roots);
+  return out;
+}
+
+function flattenAllSiteProductCategoryRows(roots: SiteProductCategoryTreeNode[]): SiteProductCategoryTreeNode[] {
+  const out: SiteProductCategoryTreeNode[] = [];
+  const visit = (items: SiteProductCategoryTreeNode[]) => {
+    items.forEach((item) => {
+      out.push(item);
+      if (item.children.length) visit(item.children);
+    });
+  };
+  visit(roots);
+  return out;
+}
+
+function SiteProductCategoryTreePanel({
+  rows,
+  expandedPaths,
+  selectedId,
+  saving,
+  canWrite,
+  onToggle,
+  onEdit,
+  onAddChild,
+}: {
+  rows: SiteProductCategoryTreeNode[];
+  expandedPaths: Set<string>;
+  selectedId: string;
+  saving: boolean;
+  canWrite: boolean;
+  onToggle: (node: SiteProductCategoryTreeNode) => void;
+  onEdit: (row: SiteProductCategoryRow) => void;
+  onAddChild: (row: SiteProductCategoryTreeNode) => void;
+}) {
+  return (
+    <div style={{ marginTop: 14, padding: 10, border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', background: '#FFFFFF' }}>
+      <div
+        role="tree"
+        aria-label="官网产品目录树"
+        style={{ display: 'grid', gap: 2, minHeight: 120 }}
+      >
+        {rows.map((node, index) => {
+          const expandable = node.children.length > 0;
+          const expanded = expandedPaths.has(node.path);
+          const editable = Boolean(node.id || node.websiteCategory);
+          return (
+            <div
+              key={`${node.id || node.path}-${index}`}
+              role="treeitem"
+              aria-expanded={expandable ? expanded : undefined}
+              aria-selected={selectedId === node.id}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'minmax(240px, 1fr) auto',
+                alignItems: 'center',
+                gap: 10,
+                minHeight: 44,
+                padding: '6px 8px',
+                paddingLeft: 8 + Math.max(0, node.level - 1) * 24,
+                borderRadius: 8,
+                background: selectedId === node.id ? 'var(--brand-50)' : editable ? 'transparent' : 'var(--surface-2)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                <button
+                  type="button"
+                  onClick={() => onToggle(node)}
+                  disabled={!expandable}
+                  aria-label={expanded ? '收起官网分类' : '展开官网分类'}
+                  style={{
+                    width: 24,
+                    height: 24,
+                    border: 0,
+                    padding: 0,
+                    background: 'transparent',
+                    color: expandable ? 'var(--t-secondary)' : 'var(--t-tertiary)',
+                    cursor: expandable ? 'pointer' : 'default',
+                    fontSize: 12,
+                    lineHeight: '24px',
+                    flex: '0 0 24px',
+                  }}
+                >
+                  {expandable ? (expanded ? '▾' : '▸') : ''}
+                </button>
+                <div style={{ minWidth: 0 }}>
+                  <strong style={{ display: 'block', fontSize: 13, overflowWrap: 'anywhere', fontWeight: node.level === 1 ? 800 : 650 }}>{node.name}</strong>
+                  <span style={{ display: 'block', marginTop: 2, color: 'var(--t-tertiary)', fontSize: 12 }}>
+                    {node.level} 级目录 · 排序 {node.sortOrder ?? node.displayOrder ?? 0} · {node.status === 'inactive' ? '停用' : '启用'}{node.isVisible === false ? ' · 官网隐藏' : ''}
+                  </span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
+                <StatusPill tone={node.status === 'inactive' ? 'warning' : 'success'}>
+                  {node.status === 'inactive' ? '停用' : '启用'}
+                </StatusPill>
+                <StatusPill tone={node.isVisible === false ? 'neutral' : 'info'}>
+                  {node.isVisible === false ? '官网隐藏' : '官网显示'}
+                </StatusPill>
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm"
+                  onClick={() => onAddChild(node)}
+                  disabled={saving || !canWrite || !node.id}
+                >
+                  <Plus size={14} />
+                  新增
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm"
+                  onClick={() => onEdit(node)}
+                  disabled={saving || !canWrite || !editable}
+                  title="编辑该官网分类"
+                >
+                  <Edit3 size={14} />
+                  编辑
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 function CategoryCrudTreePanel({
@@ -4880,7 +6735,7 @@ function CategoryCrudTreePanel({
     <div style={{ padding: 10 }}>
       <div
         role="tree"
-        aria-label="产品目录树"
+        aria-label="产品基座分类树"
         style={{
           display: 'grid',
           alignContent: 'start',
@@ -4958,7 +6813,7 @@ function CategoryCrudTreePanel({
                     {node.status === 'inactive' ? '停用' : '启用'}
                   </StatusPill>
                   <StatusPill tone={node.showOnWebsite ? 'info' : 'neutral'}>
-                    {node.showOnWebsite ? '官网显示' : '官网隐藏'}
+                    {node.showOnWebsite ? '允许官网映射' : '不参与官网映射'}
                   </StatusPill>
                   <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>{node.code}</span>
                 </button>
@@ -5090,7 +6945,7 @@ function CategoryCrudTreeTable({
                   </StatusPill>
                   <div style={{ marginTop: 6 }}>
                     <StatusPill tone={node.showOnWebsite ? 'info' : 'neutral'}>
-                      {node.showOnWebsite ? '官网显示' : '官网隐藏'}
+                      {node.showOnWebsite ? '允许官网映射' : '不参与官网映射'}
                     </StatusPill>
                   </div>
                 </td>
@@ -5314,7 +7169,7 @@ function CategoryCrudEditor({
           ) : null}
           {mode === 'edit' && selected ? (
             <StatusPill tone={draft.showOnWebsite ? 'info' : 'neutral'}>
-              {draft.showOnWebsite ? '官网显示' : '官网隐藏'}
+              {draft.showOnWebsite ? '允许官网映射' : '不参与官网映射'}
             </StatusPill>
           ) : null}
           <button type="button" className="btn btn-ghost btn-sm" onClick={onClose} disabled={saving} aria-label="关闭">
@@ -5357,9 +7212,9 @@ function CategoryCrudEditor({
           }}
         >
           <span>
-            <span className="t-label" style={{ display: 'block' }}>显示到官网</span>
+            <span className="t-label" style={{ display: 'block' }}>允许官网映射</span>
             <span style={{ display: 'block', marginTop: 3, color: 'var(--t-secondary)', fontSize: 12 }}>
-              关闭后，该分类及其下级不会进入官网公开目录。
+              关闭后，该基座分类不会作为官网分类映射来源；不会影响已录入产品，也不会触发产品自动发布。
             </span>
           </span>
           <input

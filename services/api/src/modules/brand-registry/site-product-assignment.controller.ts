@@ -6,6 +6,9 @@ import { PublicRateLimitGuard } from '../common/public-rate-limit.guard';
 import { Roles } from '../common/roles.decorator';
 import {
   SiteProductAssignmentBatchInput,
+  SiteProductCategoryUpdateInput,
+  SiteProductShelfCategoryInput,
+  SiteProductPublishingSuggestionInput,
   SiteProductAssignmentInput,
   SiteProductAssignmentService,
 } from './site-product-assignment.service';
@@ -75,6 +78,84 @@ export class SiteProductAssignmentController {
   }
 }
 
+@Controller('brand-sites/:siteCode/product-categories')
+export class SiteProductCategoryController {
+  constructor(private readonly service: SiteProductAssignmentService) {}
+
+  @Get()
+  @Permissions('brand.library.read')
+  list(@Req() req: AuthRequest, @Param('siteCode') siteCode: string, @Query('selectable') selectable?: string) {
+    return this.service.listWebsiteCategories(req.user, siteCode, selectable === 'true');
+  }
+
+  @Post('import-everhot')
+  @Roles('platform_admin', 'hq_admin', 'brand_admin')
+  @Permissions('brand.library.update')
+  importEverhot(@Req() req: AuthRequest, @Param('siteCode') siteCode: string) {
+    return this.service.importEverhotWebsiteCategories(req.user, siteCode);
+  }
+
+  @Get('suggestion')
+  @Permissions('brand.library.read')
+  suggestion(
+    @Req() req: AuthRequest,
+    @Param('siteCode') siteCode: string,
+    @Query() query: SiteProductPublishingSuggestionInput,
+  ) {
+    return this.service.publishingSuggestion(req.user, siteCode, query);
+  }
+
+  @Post()
+  @Roles('platform_admin', 'hq_admin', 'brand_admin')
+  @Permissions('brand.library.create')
+  createShelfCategory(@Req() req: AuthRequest, @Param('siteCode') siteCode: string, @Body() body: SiteProductShelfCategoryInput) {
+    return this.service.createShelfCategory(req.user, siteCode, body);
+  }
+
+  @Patch(':id')
+  @Roles('platform_admin', 'hq_admin', 'brand_admin')
+  @Permissions('brand.library.update')
+  updateShelfCategory(
+    @Req() req: AuthRequest,
+    @Param('siteCode') siteCode: string,
+    @Param('id') id: string,
+    @Body() body: SiteProductShelfCategoryInput,
+  ) {
+    return this.service.updateShelfCategory(req.user, siteCode, id, body);
+  }
+
+  @Delete(':id')
+  @Roles('platform_admin', 'hq_admin', 'brand_admin')
+  @Permissions('brand.library.delete')
+  deleteShelfCategory(
+    @Req() req: AuthRequest,
+    @Param('siteCode') siteCode: string,
+    @Param('id') id: string,
+    @Query('moveTo') moveTo?: string,
+  ) {
+    return this.service.deleteShelfCategory(req.user, siteCode, id, moveTo);
+  }
+
+  @Patch()
+  @Roles('platform_admin', 'hq_admin', 'brand_admin')
+  @Permissions('brand.library.update')
+  update(@Req() req: AuthRequest, @Param('siteCode') siteCode: string, @Body() body: SiteProductCategoryUpdateInput) {
+    return this.service.updateWebsiteCategory(req.user, siteCode, body);
+  }
+
+  @Delete()
+  @Roles('platform_admin', 'hq_admin', 'brand_admin')
+  @Permissions('brand.library.update')
+  clear(
+    @Req() req: AuthRequest,
+    @Param('siteCode') siteCode: string,
+    @Query('category') category: string,
+    @Query('moveTo') moveTo?: string,
+  ) {
+    return this.service.clearWebsiteCategory(req.user, siteCode, category, moveTo);
+  }
+}
+
 @Public()
 @UseGuards(PublicRateLimitGuard)
 @Controller('sites')
@@ -88,6 +169,11 @@ export class SiteProductPublicController {
     @Query() filters?: Record<string, unknown>,
   ) {
     return this.service.publicList(siteCode, locale, filters);
+  }
+
+  @Get(':siteCode/product-categories')
+  categories(@Param('siteCode') siteCode: string) {
+    return this.service.publicWebsiteCategories(siteCode);
   }
 
   @Get(':siteCode/products/:publicSlug')

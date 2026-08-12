@@ -24,7 +24,8 @@ test('static website shell reads public basic settings and category visibility f
   const settings = read('site-basic-settings.js');
 
   assert.match(nav, /site-basic-settings\.js/);
-  assert.match(nav, /\/api\/v2\/brand\/.*\/categories/);
+  assert.match(nav, /\/api\/v2\/sites\/.*\/product-categories/);
+  assert.match(nav, /installRuntimeMenu/);
   assert.match(nav, /data-website-category/);
   assert.match(settings, /EVERHOT_API_BASE/);
   assert.match(settings, /\/api\/v2\/sites\/.*\/basic-settings/);
@@ -46,4 +47,12 @@ test('product media keeps A-server assets local and sends backend artifacts to B
   assert.match(catalog, /\^\\\/\(\?:api\\\/v2\|uploads\)\\\//);
   assert.match(catalog, /RUNTIME_API_BASE \+ path/);
   assert.match(catalog, /return path;/);
+});
+
+test('product detail categories prefer database category paths over legacy cat sys guesses', () => {
+  const catalog = read('catalog.js');
+
+  assert.match(catalog, /function categoryPathValue/);
+  assert.match(catalog, /productCategoryBinding/);
+  assert.match(catalog, /categoryLeaf\(p\)/);
 });

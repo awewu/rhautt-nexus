@@ -166,6 +166,19 @@ export const WORKBENCH_NAV: WorkbenchNavItem[] = [
     children: [{ key: 'portal-home', label: '经销商门户', href: '/portal', icon: Store }],
   },
   {
+    key: 'master-data',
+    label: '基础资料',
+    shortLabel: '基础资料',
+    desc: '产品分类 · 品牌字典 · 产品属性字典',
+    href: '/master-data/categories',
+    icon: Settings2,
+    group: 2,
+    permission: 'product.catalog.view',
+    children: [
+      { key: 'master-product-categories', label: '产品分类', href: '/master-data/categories', icon: FolderOpen },
+    ],
+  },
+  {
     key: 'product',
     label: '产品',
     shortLabel: '产品',
@@ -179,7 +192,6 @@ export const WORKBENCH_NAV: WorkbenchNavItem[] = [
       { key: 'product-mgmt', label: '产品管理(生命周期/上市/定价)', href: '/product-mgmt', icon: Boxes },
       { key: 'product-materials', label: '产品资料', href: '/products?module=materials', icon: FileText },
       { key: 'product-base', label: '产品目录底座', href: '/products?module=base', icon: Boxes },
-      { key: 'product-categories', label: '产品分类', href: '/products?module=categories', icon: FolderOpen },
     ],
   },
   // 客户赋能(独立产品线)界面：我的工作台 /dealer · 售前闭环 /presale 已从营销中台导航移除，
@@ -224,6 +236,7 @@ export function navItemForPath(path: string | null): WorkbenchNavItem {
   if (path?.startsWith('/growth/automation')) return byKey('automation');
   if (path?.startsWith('/growth/materials')) return byKey('materials');
   if (path?.startsWith('/portal')) return byKey('dealer-portal');
+  if (path?.startsWith('/master-data')) return byKey('master-data');
   if (path?.startsWith('/positioning')) return byKey('brand-sites');
   if (path?.startsWith('/product-mgmt')) return byKey('product');
   if (path?.startsWith('/accounts')) return byKey('accounts');

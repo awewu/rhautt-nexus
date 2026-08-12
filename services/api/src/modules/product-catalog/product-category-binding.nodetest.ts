@@ -64,6 +64,28 @@ test('product update accepts root and intermediate category bindings', async () 
   assert.equal((mid.data.meta as any).everhot.categoryPath, 'Residential / Water Heating');
 });
 
+test('product update accepts common base category binding for brand products', async () => {
+  const { service } = serviceFixture({
+    categories: [
+      category('common-l1', 'common', 1, null, 'Residential'),
+      category('common-l2', 'common', 2, 'common-l1', 'Heating'),
+    ],
+    products: [product('p1', 'everhot')],
+  });
+
+  const updated = await service.update('p1', TENANT_ID, {
+    primaryCategoryId: 'common-l2',
+    categoryLevel1Id: 'common-l1',
+    categoryLevel2Id: 'common-l2',
+  }, ACTOR);
+  const meta = (updated.data.meta as any).everhot;
+
+  assert.equal(meta.primaryCategoryId, 'common-l2');
+  assert.equal(meta.categoryLevel1Id, 'common-l1');
+  assert.equal(meta.categoryLevel2Id, 'common-l2');
+  assert.equal(meta.categoryPath, 'Residential / Heating');
+});
+
 test('product update rejects category bindings from another brand', async () => {
   const { service } = serviceFixture({
     categories: [

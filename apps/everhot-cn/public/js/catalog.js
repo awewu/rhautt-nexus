@@ -11,7 +11,6 @@
   var RUNTIME_SITE_CODE = window.EVERHOT_SITE_CODE || 'everhot';
   var RUNTIME_API_BASE = window.EVERHOT_API_BASE || '';
   var RUNTIME_PRODUCTS_API = '/api/v2/sites/' + RUNTIME_SITE_CODE + '/products?locale=zh-CN';
-  var LEGACY_PRODUCTS_API = '/api/v2/brand/' + RUNTIME_SITE_CODE + '/products?locale=zh-CN';
 
   function installCatalog(){
     window.EVERHOT_PRODUCTS = Array.isArray(window.EVERHOT_PRODUCTS) ? window.EVERHOT_PRODUCTS : [];
@@ -34,13 +33,71 @@
       return res.json();
     });
   }
-  function fetchWithLegacy(apiBase, primary, legacy, valid){
+  function fetchPublished(apiBase, primary, valid){
     function accept(json){
       if(!valid(json)) throw new Error('Invalid product response');
       return json;
     }
-    return fetchJson(apiBase + primary).then(accept)
-      .catch(function(){ return fetchJson(apiBase + legacy).then(accept); });
+    return fetchJson(apiBase + primary).then(accept);
+  }
+  function categoryText(product){
+    var meta = product && product.siteMeta && typeof product.siteMeta === 'object' ? product.siteMeta : {};
+    var productBinding = meta.productCategoryBinding && typeof meta.productCategoryBinding === 'object' ? meta.productCategoryBinding : {};
+    return [
+      product && product.categoryPath,
+      productBinding.pathLabel,
+      product && product.websiteCategoryPath,
+      meta.websiteCategoryPath,
+      meta.siteProductCategory && meta.siteProductCategory.path,
+      product && product.cat,
+      product && product.category,
+      product && product.websiteCategory,
+      meta.websiteCategory,
+      meta.siteProductCategory && meta.siteProductCategory.name,
+      product && product.series,
+      product && product.name
+    ].filter(Boolean).join(' / ');
+  }
+  function categoryPathValue(product){
+    var meta = product && product.siteMeta && typeof product.siteMeta === 'object' ? product.siteMeta : {};
+    var productBinding = meta.productCategoryBinding && typeof meta.productCategoryBinding === 'object' ? meta.productCategoryBinding : {};
+    return String(
+      (product && product.categoryPath)
+      || productBinding.pathLabel
+      || (product && product.websiteCategoryPath)
+      || meta.websiteCategoryPath
+      || (meta.siteProductCategory && meta.siteProductCategory.path)
+      || (product && product.websiteCategory)
+      || (product && product.category)
+      || ''
+    );
+  }
+  function categoryLeaf(product){
+    var parts = categoryPathValue(product).split('/').map(function(part){return part.trim();}).filter(Boolean);
+    return parts[parts.length-1] || '';
+  }
+  function resolveAudience(product){
+    var legacy = String(product && product.cat || '').toLowerCase();
+    if(legacy === 'residential' || legacy === 'commercial') return legacy;
+    var text = categoryText(product);
+    if(text.indexOf('\u5546\u7528')>-1 || /commercial/i.test(text)) return 'commercial';
+    return 'residential';
+  }
+  function resolveSystem(product){
+    var legacy = String(product && product.sys || '').toLowerCase();
+    if(legacy === 'water-heating' || legacy === 'heating-cooling') return legacy;
+    var text = categoryText(product);
+    if(
+      text.indexOf('\u91c7\u6696')>-1
+      || text.indexOf('\u5236\u51b7')>-1
+      || text.indexOf('\u5730\u6696')>-1
+      || text.indexOf('\u7a7a\u8c03')>-1
+      || text.indexOf('\u70ed\u6cf5')>-1
+      || text.indexOf('\u65b0\u98ce')>-1
+      || text.indexOf('\u9664\u6e7f')>-1
+      || /heating|cooling|air/i.test(text)
+    ) return 'heating-cooling';
+    return 'water-heating';
   }
   function normalizeRuntimeProduct(product){
     var copy = {};
@@ -48,6 +105,8 @@
     copy.slug = String(product && (product.slug || product.sku) || '');
     copy.tagline = product && (product.tagline || product.summary) || '';
     copy.image = product && (product.image || (product.mainImage && product.mainImage.url)) || '';
+    copy.cat = resolveAudience(copy);
+    copy.sys = resolveSystem(copy);
     return copy;
   }
   function isRuntimeProductForSite(product){
@@ -57,10 +116,10 @@
   function loadRuntimeProducts(){
     if(window.EVERHOT_PRODUCTS_READY) return window.EVERHOT_PRODUCTS_READY;
     if(!shouldUseRuntimeProducts()){ installCatalog(); setRuntimeStatus('static'); return Promise.resolve(false); }
-    if(!window.fetch){ installCatalog(); setRuntimeStatus('fallback'); return Promise.resolve(false); }
+    if(!window.fetch){ window.EVERHOT_PRODUCTS = []; installCatalog(); setRuntimeStatus('api-error'); return Promise.resolve(false); }
     setRuntimeStatus('loading');
     var apiBase = RUNTIME_API_BASE;
-    window.EVERHOT_PRODUCTS_READY = fetchWithLegacy(apiBase, RUNTIME_PRODUCTS_API, LEGACY_PRODUCTS_API, function(json){
+    window.EVERHOT_PRODUCTS_READY = fetchPublished(apiBase, RUNTIME_PRODUCTS_API, function(json){
       return !!(json && json.data && Array.isArray(json.data.items));
     })
       .then(function(json){
@@ -71,11 +130,12 @@
           setRuntimeStatus(window.EVERHOT_PRODUCTS.length ? 'runtime' : 'empty');
           return true;
         }
+        window.EVERHOT_PRODUCTS = [];
         installCatalog();
-        setRuntimeStatus('fallback');
+        setRuntimeStatus('empty');
         return false;
       })
-      .catch(function(){ installCatalog(); setRuntimeStatus('fallback'); return false; });
+      .catch(function(){ window.EVERHOT_PRODUCTS = []; installCatalog(); setRuntimeStatus('api-error'); return false; });
     return window.EVERHOT_PRODUCTS_READY;
   }
   function loadRuntimeProduct(slug){
@@ -84,10 +144,9 @@
     if(found) return Promise.resolve(found);
     var apiBase = RUNTIME_API_BASE;
     var suffix = encodeURIComponent(slug) + '?locale=zh-CN';
-    return fetchWithLegacy(
+    return fetchPublished(
       apiBase,
       '/api/v2/sites/' + RUNTIME_SITE_CODE + '/products/' + suffix,
-      '/api/v2/brand/' + RUNTIME_SITE_CODE + '/products/' + suffix,
       function(json){ return !!(json && json.data && typeof json.data === 'object'); }
     )
       .then(function(json){
@@ -291,9 +350,9 @@
       + '<p class="catalog-empty-tx">页面会直接使用 Everhot 同源公开 API，加载完成后显示最新上架产品。</p></div>';
   }
   function runtimeNotice(){
-    if(window.EVERHOT_PRODUCTS_STATUS !== 'fallback') return '';
+    if(window.EVERHOT_PRODUCTS_STATUS !== 'api-error') return '';
     return '<div class="catalog-empty"><p class="catalog-empty-tt">产品 API 暂时不可用</p>'
-      + '<p class="catalog-empty-tx">当前显示本页随站点携带的离线目录；稍后刷新可重新读取最新后台数据。</p></div>';
+      + '<p class="catalog-empty-tx">当前未取到官网公开发布数据，请检查后台租户、站点与发布记录。</p></div>';
   }
 
   function renderGrids(){
@@ -336,9 +395,17 @@
     }).join('');
   }
   function catName(p){
-    var c=p.cat==='residential'?'家用':'商用';
-    var s=p.sys==='water-heating'?'热水系统':'采暖制冷';
-    return {c:c,s:s,sysPath:BASE+'/products/'+p.cat+'/'+p.sys+'/'};
+    var audience = resolveAudience(p);
+    var system = resolveSystem(p);
+    var c=audience==='residential'?'家用':'商用';
+    var s=categoryLeaf(p) || (system==='water-heating'?'热水系统':'采暖制冷');
+    return {c:c,s:s,sysPath:BASE+'/products/'+audience+'/'+system+'/'};
+  }
+  function productHeroSeriesText(p){
+    var parts=[];
+    if(p&&p.en) parts.push(p.en);
+    if(p&&p.series) parts.push(p.series);
+    return parts.join(' · ');
   }
   function configuredRelated(p){
     var rel=p&&p.related;
@@ -370,7 +437,7 @@
   }
   function related(p){
     var sib=configuredRelated(p);
-    if(!sib.length && window.EVERHOT_PRODUCTS_STATUS === 'fallback'){
+    if(!sib.length && window.EVERHOT_PRODUCTS_STATUS === 'runtime'){
       sib=window.EVERHOT_CATALOG.by(p.cat,p.sys).filter(function(x){return x.slug!==p.slug;}).slice(0,3);
     }
     if(!sib.length) return '';
@@ -492,7 +559,7 @@
       +     '<div class="pd-crumb"><a href="'+BASE+'/">首页</a> / <a href="'+BASE+'/products/">产品中心</a> / <a href="'+cn.sysPath+'">'+e(cn.c+cn.s)+'</a></div>'
       +     badges(p)
       +     '<h1>'+e(p.name)+'</h1>'
-      +     '<p class="pd-series">'+e(p.en)+' · '+e(p.series||'')+'</p>'
+      +     '<p class="pd-series">'+e(productHeroSeriesText(p))+'</p>'
       +     '<p class="pd-tagline">'+e(p.tagline)+'</p>'
       +     '<div class="pd-hero-actions"><a class="btn btn-light btn-lg" href="'+BASE+'/find-a-pro/">预约经销商选型</a>'
       +       '<a class="btn btn-outline-light btn-lg" href="'+cn.sysPath+'">查看同类产品</a></div>'

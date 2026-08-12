@@ -26,7 +26,7 @@ const SECTIONS: SettingsSection[] = [
   'legal', 'privacy', 'seo', 'analytics',
 ];
 const SECTION_SET = new Set<string>(SECTIONS);
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export const EVERHOT_BASIC_SETTINGS_DEFAULTS: Record<SettingsSection, Record<string, unknown>> = {
   identity: {

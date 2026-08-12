@@ -11,6 +11,7 @@ import {
   SiteInquiryEntity,
   SiteNewsArticleEntity,
   SiteProductAssignmentEntity,
+  SiteProductCategoryEntity,
 } from './brand-site.entity';
 import { BrandSiteController } from './brand-site.controller';
 import { BrandSiteService } from './brand-site.service';
@@ -21,7 +22,7 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 import { ProductCatalogModule } from '../product-catalog/product-catalog.module';
 import { PublicRateLimitGuard } from '../common/public-rate-limit.guard';
 import {
-  SiteProductAssignmentController, SiteProductPublicController,
+  SiteProductAssignmentController, SiteProductCategoryController, SiteProductPublicController,
 } from './site-product-assignment.controller';
 import { SiteProductAssignmentService } from './site-product-assignment.service';
 import { SiteNewsController, SiteNewsPublicController } from './site-news.controller';
@@ -50,6 +51,7 @@ import { SiteDealerService } from './site-dealer.service';
       BrandSiteEntity,
       BrandSiteBasicSettingsEntity,
       SiteProductAssignmentEntity,
+      SiteProductCategoryEntity,
       SiteNewsArticleEntity,
       SiteDocumentCategoryEntity,
       SiteDocumentEntity,
@@ -59,7 +61,7 @@ import { SiteDealerService } from './site-dealer.service';
     ])]),
   ],
   controllers: [
-    BrandRegistryController, BrandSiteController, SiteProductAssignmentController, SiteProductPublicController,
+    BrandRegistryController, BrandSiteController, SiteProductAssignmentController, SiteProductCategoryController, SiteProductPublicController,
     SiteNewsController, SiteNewsPublicController, BrandSiteBasicSettingsController,
     BrandSiteBasicSettingsPublicController, SiteInquiryController, SiteInquiryPublicController,
     SiteDocumentController, SiteDocumentPublicController,
@@ -80,6 +82,7 @@ import { SiteDealerService } from './site-dealer.service';
       bootSmokeRepositoryProvider(BrandSiteEntity),
       bootSmokeRepositoryProvider(BrandSiteBasicSettingsEntity),
       bootSmokeRepositoryProvider(SiteProductAssignmentEntity),
+      bootSmokeRepositoryProvider(SiteProductCategoryEntity),
       bootSmokeRepositoryProvider(SiteNewsArticleEntity),
       bootSmokeRepositoryProvider(SiteDocumentCategoryEntity),
       bootSmokeRepositoryProvider(SiteDocumentEntity),

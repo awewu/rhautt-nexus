@@ -115,47 +115,146 @@
     return code ? ' data-website-category="'+e(code)+'"' : '';
   }
 
-  function collectPublicCategoryCodes(items){
-    var codes={};
-    function visit(item){
-      if(!item||!item.code)return;
-      codes[item.code]=true;
-      (item.children||[]).forEach(visit);
-    }
-    (items||[]).forEach(visit);
-    return codes;
+  function categoryTextValue(item, key){
+    return String(item && item[key] != null ? item[key] : '').trim();
   }
 
-  function applyWebsiteCategoryVisibility(mount, visibleCodes){
-    if(!mount||!visibleCodes)return;
-    mount.querySelectorAll('a[data-website-category]').forEach(function(anchor){
-      var code=anchor.getAttribute('data-website-category');
-      if(!visibleCodes[code]){
-        var row=anchor.closest('li');
-        (row||anchor).remove();
+  function categoryName(item){
+    return categoryTextValue(item,'name') || categoryTextValue(item,'websiteCategory') || categoryTextValue(item,'nameCn') || categoryTextValue(item,'code');
+  }
+
+  function categorySlug(item){
+    return (categoryTextValue(item,'slug') || categoryTextValue(item,'code')).replace(/^\/+|\/+$/g,'');
+  }
+
+  function sortCategories(items){
+    return (items || []).slice().sort(function(a,b){
+      return Number(a && (a.sortOrder || a.displayOrder) || 0) - Number(b && (b.sortOrder || b.displayOrder) || 0)
+        || categoryName(a).localeCompare(categoryName(b),'zh-Hans-CN');
+    });
+  }
+
+  function isAudienceRoot(item, audience){
+    var code=categoryTextValue(item,'code').toLowerCase();
+    var slugValue=categorySlug(item).toLowerCase();
+    var group=categoryTextValue(item,'menuGroup').toLowerCase();
+    var name=categoryName(item);
+    if(code===audience || slugValue===audience || group===audience)return true;
+    if(audience==='commercial' && name.indexOf('\u5546\u7528')>-1)return true;
+    if(audience==='residential' && name.indexOf('\u5bb6\u7528')>-1)return true;
+    return false;
+  }
+
+  function findAudienceRoot(tree, audience){
+    var queue=(tree||[]).slice();
+    while(queue.length){
+      var item=queue.shift();
+      if(isAudienceRoot(item,audience))return item;
+      (item.children||[]).forEach(function(child){queue.push(child);});
+    }
+    return null;
+  }
+
+  function categoryHref(audience, trail){
+    var parts=(trail||[]).map(categorySlug).filter(Boolean);
+    return 'products/'+audience+(parts.length?'/'+parts.join('/'):'')+'/';
+  }
+
+  function categoryColumnsFromRoot(audience, root){
+    var secondLevel=sortCategories(root && root.children);
+    return secondLevel.map(function(section){
+      var children=sortCategories(section.children);
+      var sectionTrail=[section];
+      return {
+        head: categoryName(section),
+        items: (children.length?children:[section]).map(function(item){
+          var trail=children.length?sectionTrail.concat([item]):[item];
+          return [categoryName(item),categoryHref(audience,trail)];
+        })
+      };
+    });
+  }
+
+  function nonProductColumns(menu, audience){
+    var prefix='products/'+audience+'/';
+    return (menu.cols||[]).filter(function(col){
+      if(col.featured || col.cards)return true;
+      return !(col.items||[]).some(function(item){return String(item && item[1] || '').indexOf(prefix)===0;});
+    });
+  }
+
+  function installRuntimeMenu(menuId, audience, root){
+    var menu=menus.filter(function(item){return item.id===menuId;})[0];
+    if(!menu || !root || !Array.isArray(root.children) || !root.children.length)return false;
+    menu.cols=categoryColumnsFromRoot(audience, root).concat(nonProductColumns(menu, audience));
+    return true;
+  }
+
+  function desktopColumnHtml(col){
+    var html='<div class="ev-mega-col'+(col.featured?' ev-mega-featured':'')+'"><p class="ev-mega-head">'+e(col.head)+'</p>';
+    if(col.cards){
+      html+='<div class="ev-mega-cards">';
+      col.cards.forEach(function(c){
+        html+='<a class="ev-mega-card" href="'+BASE+'/'+c[2]+'">'
+          +'<span class="ev-mega-card-ic" aria-hidden="true">'+ico(c[3])+'</span>'
+          +'<span class="ev-mega-card-tx"><strong>'+e(c[0])+'</strong><em>'+e(c[1])+'</em></span>'
+          +'<svg class="ev-mega-card-ar" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h9M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
+      });
+      html+='</div>';
+      if(col.cta){ html+='<a class="ev-mega-cta" href="'+BASE+'/'+col.cta[1]+'">'+e(col.cta[0])+' &#8594;</a>'; }
+      if(col.warranty){ html+='<a class="ev-mega-warranty" href="'+BASE+'/warranty/"><strong>淇濅慨涓庢敞鍐?/strong><span>浜у搧娉ㄥ唽 路 淇濅慨鏌ヨ</span></a>'; }
+    } else {
+      html+='<ul>';
+      (col.items||[]).forEach(function(it){ html+='<li><a href="'+BASE+'/'+it[1]+'"'+websiteCategoryAttr(it[1])+'>'+e(it[0])+'</a></li>'; });
+      html+='</ul>';
+    }
+    return html+'</div>';
+  }
+
+  function mobilePanelHtml(menu){
+    var html='';
+    (menu.cols||[]).forEach(function(col){
+      html+='<p class="ev-acc-head">'+e(col.head)+'</p><ul>';
+      if(col.cards){
+        col.cards.forEach(function(c){ html+='<li><a href="'+BASE+'/'+c[2]+'">'+e(c[0])+'</a></li>'; });
+        if(col.cta){ html+='<li><a href="'+BASE+'/'+col.cta[1]+'">'+e(col.cta[0])+'</a></li>'; }
+        if(col.warranty){ html+='<li><a href="'+BASE+'/warranty/">淇濅慨涓庢敞鍐?/a></li>'; }
+      } else {
+        (col.items||[]).forEach(function(it){ html+='<li><a href="'+BASE+'/'+it[1]+'"'+websiteCategoryAttr(it[1])+'>'+e(it[0])+'</a></li>'; });
+      }
+      html+='</ul>';
+    });
+    return html;
+  }
+
+  function renderRuntimeMenus(mount){
+    menus.forEach(function(menu, index){
+      var panel=mount.querySelector('#ev-mega-'+menu.id+' .ev-mega-inner');
+      if(panel) panel.innerHTML=(menu.cols||[]).map(desktopColumnHtml).join('');
+      var acc=mount.querySelectorAll('.ev-acc')[index];
+      var accPanel=acc && acc.querySelector('.ev-acc-panel');
+      if(accPanel){
+        accPanel.innerHTML=mobilePanelHtml(menu);
+        var btn=acc.querySelector('.ev-acc-btn');
+        if(btn && btn.getAttribute('aria-expanded')==='true') accPanel.style.maxHeight=accPanel.scrollHeight+'px';
       }
     });
-    mount.querySelectorAll('.ev-mega-col:not(.ev-mega-featured)').forEach(function(column){
-      var list=column.querySelector('ul');
-      if(list&&!list.querySelector('li'))column.hidden=true;
-    });
-    mount.querySelectorAll('.ev-acc-panel ul').forEach(function(list){
-      if(list.querySelector('li'))return;
-      var head=list.previousElementSibling;
-      if(head&&head.classList.contains('ev-acc-head'))head.remove();
-      list.remove();
-    });
+    upgradeIcons(mount);
   }
 
-  function syncWebsiteCategoryVisibility(mount){
+  function syncWebsiteCategoryNav(mount){
     if(!window.fetch)return;
-    var url=API_BASE+'/api/v2/brand/'+encodeURIComponent(SITE_CODE)+'/categories';
+    var url=API_BASE+'/api/v2/sites/'+encodeURIComponent(SITE_CODE)+'/product-categories';
     fetch(url,{cache:'no-store',headers:{Accept:'application/json'}})
       .then(function(response){return response.ok?response.json():null;})
       .then(function(payload){
         var data=payload&&payload.data;
         if(!data)return;
-        applyWebsiteCategoryVisibility(mount,collectPublicCategoryCodes(data.items||data.tree||[]));
+        var tree=data.tree||[];
+        var changed=false;
+        changed=installRuntimeMenu('homeowners','residential',findAudienceRoot(tree,'residential'))||changed;
+        changed=installRuntimeMenu('commercial','commercial',findAudienceRoot(tree,'commercial'))||changed;
+        if(changed)renderRuntimeMenus(mount);
       })
       .catch(function(){});
   }
@@ -288,7 +387,7 @@
     if(!mount) return;
     mount.innerHTML=buildNav();
     upgradeIcons(mount); upgradeIcons(document);
-    syncWebsiteCategoryVisibility(mount);
+    syncWebsiteCategoryNav(mount);
 
     // A11y: 把导航与页脚之间的正文包进 <main id="evMain">，作为 skip-link 目标与主地标
     try{
@@ -372,9 +471,11 @@
         if(panel) panel.style.maxHeight=open?'':panel.scrollHeight+'px';
       });
     });
-    // close drawer when a link is tapped
-    mount.querySelectorAll('.ev-drawer-nav a, .ev-drawer-foot a').forEach(function(a){
-      a.addEventListener('click',closeDrawer);
+    // close drawer when a link is tapped; delegation keeps runtime DB menu links covered.
+    [mount.querySelector('.ev-drawer-nav'), mount.querySelector('.ev-drawer-foot')].forEach(function(area){
+      if(area) area.addEventListener('click',function(ev){
+        if(ev.target && ev.target.closest && ev.target.closest('a')) closeDrawer();
+      });
     });
 
     // ===== Audience gateway overlay logic =====

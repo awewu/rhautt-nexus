@@ -3,18 +3,40 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
 import { ContentController } from './content.controller';
 import { ContentService } from './content.service';
-import { ContentAssetEntity } from './content.entity';
+import { ContentAssetEntity, ContentPublishTaskEntity } from './content.entity';
 import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smoke';
+import { ProductEntity } from '../product-catalog/product-catalog.entity';
+import { ProductSellingPointEntity } from '../product-catalog/product-mgmt.entity';
+import { FileArtifactEntity } from '../file-artifact/file-artifact.entity';
+import { GrowthContentAssetEntity, GrowthMarketingMaterialEntity } from '../growth/growth.entities';
+
+const CONTENT_REPOSITORIES = [
+  ContentAssetEntity,
+  ContentPublishTaskEntity,
+  ProductEntity,
+  ProductSellingPointEntity,
+  FileArtifactEntity,
+  GrowthContentAssetEntity,
+  GrowthMarketingMaterialEntity,
+];
 
 @Module({
   imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([ContentAssetEntity])]),
+    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature(CONTENT_REPOSITORIES)]),
     AuthModule,
   ],
   controllers: [ContentController],
   providers: [
     ContentService,
-    ...(TARGET_API_BOOT_SMOKE ? [bootSmokeRepositoryProvider(ContentAssetEntity)] : []),
+    ...(TARGET_API_BOOT_SMOKE ? [
+      bootSmokeRepositoryProvider(ContentAssetEntity),
+      bootSmokeRepositoryProvider(ContentPublishTaskEntity),
+      bootSmokeRepositoryProvider(ProductEntity),
+      bootSmokeRepositoryProvider(ProductSellingPointEntity),
+      bootSmokeRepositoryProvider(FileArtifactEntity),
+      bootSmokeRepositoryProvider(GrowthContentAssetEntity),
+      bootSmokeRepositoryProvider(GrowthMarketingMaterialEntity),
+    ] : []),
   ],
   exports: [ContentService],
 })

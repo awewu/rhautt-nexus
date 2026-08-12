@@ -151,6 +151,8 @@ export interface ProductPositioning {
   valueProposition: string;
   /** 解决的痛点 */
   painPoints: string[];
+  /** 产品卖点（自由文本） */
+  sellingPoints: string[];
   /** 适用场景（自由文本） */
   scenarios: string[];
   /** 应用场景大类（受控：家用/商用双轨，见 APPLICATION_SCENARIOS） */
@@ -164,6 +166,7 @@ export const EMPTY_POSITIONING: ProductPositioning = {
   markets: [],
   valueProposition: '',
   painPoints: [],
+  sellingPoints: [],
   scenarios: [],
   applicationScenarios: [],
 };
@@ -212,6 +215,7 @@ export function sanitizePositioning(input: unknown): ProductPositioning {
     markets: sanitizeCodes(p.markets, codeSet(MARKETS)),
     valueProposition: typeof p.valueProposition === 'string' ? p.valueProposition.trim() : '',
     painPoints: sanitizeStrings(p.painPoints),
+    sellingPoints: sanitizeStrings((p as any).sellingPoints),
     scenarios: sanitizeStrings(p.scenarios),
     applicationScenarios: sanitizeCodes(p.applicationScenarios, codeSet(APPLICATION_SCENARIOS)),
   };
@@ -315,8 +319,14 @@ export interface FaqItem {
 export interface ProductMarketing {
   headline: string;
   subhead: string;
+  series?: string;
+  officialEnglishName?: string;
+  badges?: string[];
+  certs?: string[];
+  specs?: Array<{ k: string; v: string }>;
+  features?: Array<{ title: string; desc: string }>;
   featureBenefits: FeatureBenefit[];
-  highlights: string[];
+  highlights: Array<string | { label: string; value: string }>;
   faq: FaqItem[];
 }
 
@@ -413,14 +423,32 @@ export function sanitizeMarketing(input: unknown): ProductMarketing {
   const m = (input && typeof input === 'object' ? input : {}) as Partial<ProductMarketing>;
   const str = (v: unknown): string => (typeof v === 'string' ? v.trim() : '');
   const fbs = Array.isArray(m.featureBenefits) ? m.featureBenefits : [];
+  const specs = Array.isArray(m.specs) ? m.specs : [];
+  const features = Array.isArray(m.features) ? m.features : [];
+  const highlights = Array.isArray(m.highlights) ? m.highlights : [];
   const faqs = Array.isArray(m.faq) ? m.faq : [];
   return {
     headline: str(m.headline),
     subhead: str(m.subhead),
+    series: str(m.series),
+    officialEnglishName: str(m.officialEnglishName),
+    badges: sanitizeStrings(m.badges),
+    certs: sanitizeStrings((m as any).certs),
+    specs: specs
+      .map((x) => ({ k: str((x as any)?.k ?? (x as any)?.key ?? (x as any)?.label), v: str((x as any)?.v ?? (x as any)?.value) }))
+      .filter((x) => x.k || x.v),
+    features: features
+      .map((x) => ({ title: str((x as any)?.title ?? (x as any)?.feature), desc: str((x as any)?.desc ?? (x as any)?.description ?? (x as any)?.benefit) }))
+      .filter((x) => x.title || x.desc),
     featureBenefits: fbs
       .map((x) => ({ feature: str((x as FeatureBenefit)?.feature), benefit: str((x as FeatureBenefit)?.benefit) }))
       .filter((x) => x.feature || x.benefit),
-    highlights: sanitizeStrings(m.highlights),
+    highlights: highlights
+      .map((x) => {
+        if (typeof x === 'string') return str(x);
+        return { label: str((x as any)?.label ?? (x as any)?.k ?? (x as any)?.key), value: str((x as any)?.value ?? (x as any)?.v) };
+      })
+      .filter((x) => typeof x === 'string' ? Boolean(x) : Boolean(x.label || x.value)),
     faq: faqs
       .map((x) => ({ q: str((x as FaqItem)?.q), a: str((x as FaqItem)?.a) }))
       .filter((x) => x.q && x.a),

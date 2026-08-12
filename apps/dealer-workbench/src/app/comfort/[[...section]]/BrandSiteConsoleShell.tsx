@@ -6914,6 +6914,15 @@ const BASIC_INFO_IMAGE_FIELDS = new Set([
   'seo.organizationLogo',
 ]);
 
+const HIDDEN_BASIC_INFO_FIELDS = new Set([
+  'identity.logoUrl',
+  'identity.whiteLogoUrl',
+  'identity.favicon16Url',
+  'identity.favicon32Url',
+  'identity.faviconIcoUrl',
+  'identity.appleTouchIconUrl',
+]);
+
 function isBasicInfoImageField(section: string, key: string) {
   return BASIC_INFO_IMAGE_FIELDS.has(`${section}.${key}`);
 }
@@ -7484,6 +7493,7 @@ function SiteBasicInfoPanel({ siteCode, canWrite }: { siteCode: string; canWrite
           </div>
           <div className="site-basic-grid">
             {group.fields.map((field) => {
+              if (HIDDEN_BASIC_INFO_FIELDS.has(`${group.section}.${field.key}`)) return null;
               if (
                 group.section === 'identity' &&
                 (field.key === 'siteUrl' || field.key === 'localeLabel')

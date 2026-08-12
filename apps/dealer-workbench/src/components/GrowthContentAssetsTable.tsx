@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Archive, Edit3, FileImage, Loader2, Plus, RefreshCw, Search, Upload } from 'lucide-react';
+import { Archive, Edit3, Eye, FileImage, Loader2, Plus, RefreshCw, Search, Upload, X } from 'lucide-react';
 import { fileArtifacts, growthContentAssets } from '../lib/api';
 
 type ContentAsset = {
@@ -58,6 +58,13 @@ function fileFormat(file: File) {
   return (file.name.split('.').pop() || file.type || 'file').toUpperCase();
 }
 
+function contentAssetPreviewUrl(item: ContentAsset) {
+  const url = String(item.thumbnailUrl || item.fileUrl || '').trim();
+  if (url) return url;
+  const artifactId = String(item.fileArtifactId || '').trim();
+  return artifactId ? `/api/v2/file-artifact/${encodeURIComponent(artifactId)}/content` : '';
+}
+
 function toPayload(form: typeof EMPTY_FORM) {
   return {
     ...form,
@@ -74,6 +81,7 @@ export default function GrowthContentAssetsTable() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewItem, setPreviewItem] = useState<ContentAsset | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -235,11 +243,44 @@ export default function GrowthContentAssetsTable() {
 
       <div className="table-shell">
         <table className="table">
-          <thead><tr><th>素材名称</th><th>类型</th><th>品牌</th><th>渠道</th><th>场景</th><th>格式</th><th>使用</th><th>更新</th><th>状态</th><th>操作</th></tr></thead>
+          <thead><tr><th>图片</th><th>素材名称</th><th>类型</th><th>品牌</th><th>渠道</th><th>场景</th><th>格式</th><th>使用</th><th>更新</th><th>状态</th><th>操作</th></tr></thead>
           <tbody>
             {items.map((item) => (
               <tr key={item.id}>
-                <td><strong>{item.title}</strong>{item.summary ? <div style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>{item.summary}</div> : null}</td>
+                <td>
+                  {contentAssetPreviewUrl(item) ? (
+                    <button
+                      type="button"
+                      onClick={() => setPreviewItem(item)}
+                      title="点击查看图片"
+                      style={{ width: 44, height: 44, border: '1px solid var(--line)', borderRadius: 4, padding: 0, background: '#f8fafc', display: 'grid', placeItems: 'center', overflow: 'hidden', cursor: 'pointer' }}
+                    >
+                      <img src={contentAssetPreviewUrl(item)} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    </button>
+                  ) : (
+                    <div
+                      title="暂无图片"
+                      style={{ width: 44, height: 44, border: '1px solid var(--line)', borderRadius: 4, background: '#f8fafc', display: 'grid', placeItems: 'center', color: 'var(--t-tertiary)' }}
+                    >
+                      <FileImage size={18} />
+                    </div>
+                  )}
+                </td>
+                <td>
+                  {contentAssetPreviewUrl(item) ? (
+                    <button
+                      type="button"
+                      onClick={() => setPreviewItem(item)}
+                      style={{ appearance: 'none', border: 0, background: 'transparent', padding: 0, color: 'inherit', cursor: 'pointer', textAlign: 'left' }}
+                      title="点击查看素材图片"
+                    >
+                      <strong style={{ textDecoration: 'underline', textUnderlineOffset: 3 }}>{item.title}</strong>
+                    </button>
+                  ) : (
+                    <strong>{item.title}</strong>
+                  )}
+                  {item.summary ? <div style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>{item.summary}</div> : null}
+                </td>
                 <td><span className="badge badge-info">{item.assetType}</span></td>
                 <td>{item.brandSlug || '-'}</td>
                 <td>{item.channel || '-'}</td>
@@ -249,16 +290,42 @@ export default function GrowthContentAssetsTable() {
                 <td>{formatDate(item.updatedAt)}</td>
                 <td>{item.archivedAt ? <span className="badge badge-grey">已归档</span> : <span className="badge badge-success">可用</span>}</td>
                 <td><div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}>
+                  {contentAssetPreviewUrl(item) && <button className="btn btn-outline btn-sm" onClick={() => setPreviewItem(item)} disabled={busy}><Eye size={13} />预览</button>}
                   <button className="btn btn-outline btn-sm" onClick={() => edit(item)} disabled={busy}><Edit3 size={13} />编辑</button>
                   {!item.archivedAt && <button className="btn btn-outline btn-sm" onClick={() => archive(item.id)} disabled={busy}><Archive size={13} />归档</button>}
                 </div></td>
               </tr>
             ))}
-            {!busy && !items.length ? <tr><td colSpan={10} style={{ textAlign: 'center', color: 'var(--t-secondary)', padding: 28 }}><FileImage size={18} style={{ color: 'var(--brand)', verticalAlign: 'middle', marginRight: 8 }} />暂无素材</td></tr> : null}
-            {busy ? <tr><td colSpan={10} style={{ textAlign: 'center', padding: 28 }}><Loader2 size={18} className="animate-spin" style={{ color: 'var(--brand)', verticalAlign: 'middle' }} /><span style={{ marginLeft: 8 }}>加载中</span></td></tr> : null}
+            {!busy && !items.length ? <tr><td colSpan={11} style={{ textAlign: 'center', color: 'var(--t-secondary)', padding: 28 }}><FileImage size={18} style={{ color: 'var(--brand)', verticalAlign: 'middle', marginRight: 8 }} />暂无素材</td></tr> : null}
+            {busy ? <tr><td colSpan={11} style={{ textAlign: 'center', padding: 28 }}><Loader2 size={18} className="animate-spin" style={{ color: 'var(--brand)', verticalAlign: 'middle' }} /><span style={{ marginLeft: 8 }}>加载中</span></td></tr> : null}
           </tbody>
         </table>
       </div>
+      {previewItem ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="素材图片预览"
+          onClick={() => setPreviewItem(null)}
+          style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(15, 23, 42, 0.68)', display: 'grid', placeItems: 'center', padding: 24 }}
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            style={{ width: 'min(920px, 96vw)', maxHeight: '88vh', background: '#fff', borderRadius: 8, boxShadow: '0 24px 60px rgba(15, 23, 42, 0.28)', display: 'grid', gridTemplateRows: 'auto minmax(0, 1fr)', overflow: 'hidden' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '12px 14px', borderBottom: '1px solid var(--line)' }}>
+              <div style={{ minWidth: 0 }}>
+                <strong style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{previewItem.title}</strong>
+                <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>{previewItem.fileFormat || previewItem.assetType || 'image'}</span>
+              </div>
+              <button className="btn btn-outline btn-sm" onClick={() => setPreviewItem(null)} aria-label="关闭预览"><X size={14} /></button>
+            </div>
+            <div style={{ minHeight: 260, maxHeight: 'calc(88vh - 58px)', display: 'grid', placeItems: 'center', background: '#f8fafc', padding: 16, overflow: 'auto' }}>
+              <img src={contentAssetPreviewUrl(previewItem)} alt={previewItem.title} style={{ maxWidth: '100%', maxHeight: 'calc(88vh - 96px)', objectFit: 'contain', borderRadius: 6 }} />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

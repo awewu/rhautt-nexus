@@ -1,11 +1,4 @@
 {
-  "home-hero": {
-    "src": "/assets/img/site-materials/home-hero.webp",
-    "filename": "home-card1.webp",
-    "mimeType": "image/webp",
-    "size": 44308,
-    "updatedAt": "2026-07-24T10:32:40.735Z"
-  },
   "brand-story": {
     "src": "/assets/img/site-materials/home-audience-residential-bg.webp",
     "filename": "home-audience-residential-bg.webp",
@@ -31,7 +24,7 @@
     {
       "id": "residential",
       "tagZh": "家用",
-      "tagEn": "RESIDENTIAL",
+      "tagEn": "RESIDENTIAL1",
       "title": "为家庭打造的舒适系统",
       "description": "热水 · 采暖为核心，兼顾制冷，全屋舒适一站解决",
       "primaryLabel": "热水 Water →",
@@ -44,7 +37,7 @@
     {
       "id": "commercial",
       "tagZh": "商用",
-      "tagEn": "COMMERCIAL",
+      "tagEn": "COMMERCIAL1",
       "title": "为建筑而生的工程系统",
       "description": "酒店 · 公寓 · 综合体，高并发连续供热水、稳定供暖，兼顾供冷",
       "primaryLabel": "热水 Water →",
@@ -57,7 +50,7 @@
     {
       "id": "professionals",
       "tagZh": "专业人士",
-      "tagEn": "PROFESSIONALS",
+      "tagEn": "PROFESSIONALS1",
       "title": "为经销商与工程师赋能",
       "description": "培训 · 技术资料 · BIM/CAD · 合作计划",
       "primaryLabel": "专业人士中心 →",
@@ -68,6 +61,13 @@
       "sortOrder": 2
     }
   ],
+  "home-hero": {
+    "src": "/assets/img/site-materials/home-hero.webp",
+    "filename": "home-card1.webp",
+    "mimeType": "image/webp",
+    "size": 44308,
+    "updatedAt": "2026-07-24T10:32:40.735Z"
+  },
   "home-hero-carousel": [
     {
       "id": "hero-1785467096246-0",
