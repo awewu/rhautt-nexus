@@ -83,6 +83,8 @@ jspm_packages/
 # Electron
 release/
 dist-electron/
+# scripts/release 是门禁基础设施源码，不是 Electron 打包产物 —— 不受上面 release/ 规则牵连
+!scripts/release/
 
 # Uploads
 uploads/
