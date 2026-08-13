@@ -14,3 +14,5 @@ package-lock.json
 # 生成页面/同步产物：由 scripts/geo 生成，格式化会造成同源校验漂移
 apps/*/public/tech/
 apps/*/public/packages/tokens/
+# 站点 public/ 为生成器/GEO 注入产物：prettier 改写会触发 everhot-static-gates 的无漂移门禁
+apps/*/public/
