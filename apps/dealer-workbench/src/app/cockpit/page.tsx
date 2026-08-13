@@ -155,7 +155,7 @@ export default function CockpitPage() {
                     borderRadius: 999,
                     whiteSpace: 'nowrap',
                     background: isGeo ? 'rgba(200,32,44,0.08)' : 'var(--surface-2, #F3F4F6)',
-                    color: isGeo ? '#C8202C' : 'var(--t-secondary, #6B7280)',
+                    color: isGeo ? 'var(--brand-500)' : 'var(--t-secondary, #6B7280)',
                     fontWeight: isGeo ? 700 : 500,
                   }}
                 >

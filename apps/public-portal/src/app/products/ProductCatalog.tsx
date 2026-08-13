@@ -151,7 +151,7 @@ export default function ProductCatalog({
                             fontSize: 10,
                             fontWeight: 700,
                             background: 'rgba(22,163,74,0.10)',
-                            color: '#16A34A',
+                            color: 'var(--rh-air)',
                           }}
                         >
                           节能产品

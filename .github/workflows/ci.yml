@@ -24,6 +24,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - name: UI token 棘轮门禁（裸色值债务只减不增）
+        run: npm run guard:ui-tokens
       - run: npm run lint --if-present
       - run: npm test --if-present
       - run: npm run test:production-readiness
