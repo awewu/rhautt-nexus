@@ -53,7 +53,6 @@ export default function ProductCatalog({ products, unavailable }: { products: Si
                 <article key={product.id} className="rh-card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ background: product.bg, height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                     {product.image ? (
-                      // eslint-disable-next-line @next/next/no-img-element
                       <img src={product.image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     ) : (
                       <div className="rh-bolt-frame" style={{ width: 56, height: 60, fontSize: 13 }}>{product.code}</div>

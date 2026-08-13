@@ -71,7 +71,7 @@ export class CdpService implements OnModuleInit {
     return withRlsTransaction(this.ds, async (em) => {
       const repo = em.getRepository(CdpProfileEntity);
       const phoneHash = dto.phone ? hashPII(normalizePhone(dto.phone)) : null;
-      let profile = phoneHash ? await repo.findOne({ where: { tenantId: actor.tenantId, phoneHash } }) : null;
+      const profile = phoneHash ? await repo.findOne({ where: { tenantId: actor.tenantId, phoneHash } }) : null;
       const patch: any = {
         tenantId: actor.tenantId,
         externalRef: dto.externalRef ?? profile?.externalRef ?? null,
