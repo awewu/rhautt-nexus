@@ -11,3 +11,6 @@ build/
 .next/
 pnpm-lock.yaml
 package-lock.json
+# 生成页面/同步产物：由 scripts/geo 生成，格式化会造成同源校验漂移
+apps/*/public/tech/
+apps/*/public/packages/tokens/

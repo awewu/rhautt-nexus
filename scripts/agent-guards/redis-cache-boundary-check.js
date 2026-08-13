@@ -352,8 +352,9 @@ if (!failures.length) {
   record(
     report,
     'rate-limit-present',
-    productionMiddleware.includes("app.use('/api', rateLimit") &&
-      productionMiddleware.includes("app.use(['/api/login'"),
+    // prettier 可能把 app.use 实参换行，用正则容忍空白
+    /app\.use\(\s*'\/api',\s*rateLimit/.test(productionMiddleware) &&
+      /app\.use\(\s*\[\s*'\/api\/login'/.test(productionMiddleware),
     'production middleware must keep API and auth rate limits'
   );
   record(
