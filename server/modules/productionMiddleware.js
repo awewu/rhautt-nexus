@@ -5,7 +5,9 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const { createRequestContext } = require('../middleware/requestContext');
-const { createProductionStaticSurfaceGuard } = require('../middleware/productionStaticSurfaceGuard');
+const {
+  createProductionStaticSurfaceGuard,
+} = require('../middleware/productionStaticSurfaceGuard');
 
 // 已完全迁移到 NestJS 的域（PostgreSQL 实体完整，路由全覆盖）
 const NESTJS_TARGET = process.env.NESTJS_URL || 'http://localhost:5500';
@@ -47,13 +49,17 @@ const LEGACY_V2_INPROCESS = process.env.LEGACY_V2_INPROCESS === 'true';
 
 function isNestJSMigrated(path) {
   if (!LEGACY_V2_INPROCESS) return path.startsWith('/api/v2/') || path === '/api/v2';
-  return NESTJS_MIGRATED_PREFIXES.some(p => path.startsWith(p));
+  return NESTJS_MIGRATED_PREFIXES.some((p) => path.startsWith(p));
 }
 
 function loadProxyFactory() {
   try {
     const proxyModule = require('http-proxy-middleware');
-    return proxyModule.createProxyMiddleware || proxyModule.default?.createProxyMiddleware || proxyModule.default;
+    return (
+      proxyModule.createProxyMiddleware ||
+      proxyModule.default?.createProxyMiddleware ||
+      proxyModule.default
+    );
   } catch (error) {
     return null;
   }
@@ -68,7 +74,7 @@ function createNestJsProxyMiddleware({ target = NESTJS_TARGET, logger = console 
         success: false,
         error: 'NestJS target proxy is unavailable in this runtime',
         path: req.path,
-        targetConfigured: Boolean(target)
+        targetConfigured: Boolean(target),
       });
     };
   }
@@ -78,8 +84,10 @@ function createNestJsProxyMiddleware({ target = NESTJS_TARGET, logger = console 
       target,
       changeOrigin: true,
       on: {
-        error: (_err, _req, _res, next) => { if (typeof next === 'function') next(); }
-      }
+        error: (_err, _req, _res, next) => {
+          if (typeof next === 'function') next();
+        },
+      },
     });
   } catch (error) {
     logger.log?.('WARN NestJS proxy middleware disabled:', error.message);
@@ -89,17 +97,14 @@ function createNestJsProxyMiddleware({ target = NESTJS_TARGET, logger = console 
         success: false,
         error: 'NestJS target proxy failed to initialize',
         path: req.path,
-        targetConfigured: Boolean(target)
+        targetConfigured: Boolean(target),
       });
     };
   }
 }
 
 function shouldBypassRateLimit(req, bypassToken) {
-  return Boolean(
-    bypassToken &&
-    req.get('X-Rhautt-Capacity-Token') === bypassToken
-  );
+  return Boolean(bypassToken && req.get('X-Rhautt-Capacity-Token') === bypassToken);
 }
 
 function createCorsOptions({ allowedOrigins, isProd }) {
@@ -112,7 +117,7 @@ function createCorsOptions({ allowedOrigins, isProd }) {
       if (!isProd && devLocalOrigin.test(origin)) return cb(null, true);
       return cb(new Error(`CORS blocked: ${origin}`));
     },
-    credentials: true
+    credentials: true,
   };
 }
 
@@ -120,54 +125,66 @@ function registerProductionMiddleware(app, options = {}) {
   const {
     engines,
     env = process.env,
-    publicDir = path.join(__dirname, '..', '..', 'archive', 'legacy-ui', 'public')
+    publicDir = path.join(__dirname, '..', '..', 'archive', 'legacy-ui', 'public'),
   } = options;
 
-  const allowedOrigins = (env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000')
+  const allowedOrigins = (
+    env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000'
+  )
     .split(',')
-    .map(origin => origin.trim());
+    .map((origin) => origin.trim());
   const isProd = env.NODE_ENV === 'production';
   const rateLimitWindowMs = Number(env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000);
   const globalRateLimitMax = Number(env.GLOBAL_RATE_LIMIT_MAX || 1000);
   const authRateLimitMax = Number(env.AUTH_RATE_LIMIT_MAX || 10);
   const rateLimitBypassToken = env.RATE_LIMIT_BYPASS_TOKEN || '';
 
-  app.use(helmet({
-    contentSecurityPolicy: false,
-    crossOriginEmbedderPolicy: false
-  }));
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    })
+  );
 
   app.use(cors(createCorsOptions({ allowedOrigins, isProd })));
 
-  app.use(createRequestContext({
-    serviceName: 'rhautt-nexus-production',
-    slowMs: Number(env.SLOW_REQUEST_MS || 1000),
-    criticalMs: Number(env.CRITICAL_REQUEST_MS || 5000)
-  }));
+  app.use(
+    createRequestContext({
+      serviceName: 'rhautt-nexus-production',
+      slowMs: Number(env.SLOW_REQUEST_MS || 1000),
+      criticalMs: Number(env.CRITICAL_REQUEST_MS || 5000),
+    })
+  );
 
-  app.use('/api', rateLimit({
-    windowMs: rateLimitWindowMs,
-    max: globalRateLimitMax,
-    standardHeaders: true,
-    legacyHeaders: false,
-    skip: req => shouldBypassRateLimit(req, rateLimitBypassToken),
-    message: { success: false, error: '请求过于频繁，请稍后再试' }
-  }));
+  app.use(
+    '/api',
+    rateLimit({
+      windowMs: rateLimitWindowMs,
+      max: globalRateLimitMax,
+      standardHeaders: true,
+      legacyHeaders: false,
+      skip: (req) => shouldBypassRateLimit(req, rateLimitBypassToken),
+      message: { success: false, error: '请求过于频繁，请稍后再试' },
+    })
+  );
 
-  app.use(['/api/login', '/api/auth/login', '/api/v2/auth/login', '/api/register', '/api/reset-password'], rateLimit({
-    windowMs: rateLimitWindowMs,
-    max: authRateLimitMax,
-    standardHeaders: true,
-    legacyHeaders: false,
-    skip: req => shouldBypassRateLimit(req, rateLimitBypassToken),
-    message: { success: false, error: '登录尝试过多，请15分钟后再试' }
-  }));
+  app.use(
+    ['/api/login', '/api/auth/login', '/api/v2/auth/login', '/api/register', '/api/reset-password'],
+    rateLimit({
+      windowMs: rateLimitWindowMs,
+      max: authRateLimitMax,
+      standardHeaders: true,
+      legacyHeaders: false,
+      skip: (req) => shouldBypassRateLimit(req, rateLimitBypassToken),
+      message: { success: false, error: '登录尝试过多，请15分钟后再试' },
+    })
+  );
 
   // NestJS 反向代理必须在 bodyParser 之前，否则 body stream 已被消耗。
   // The proxy package is loaded lazily so health/static compatibility routes can
   // still boot in CommonJS test runtimes when the installed proxy package is ESM.
   const nestjsProxy = createNestJsProxyMiddleware({
-    target: env.NESTJS_URL || NESTJS_TARGET
+    target: env.NESTJS_URL || NESTJS_TARGET,
   });
   app.use((req, res, next) => {
     if (isNestJSMigrated(req.path)) return nestjsProxy(req, res, next);
@@ -182,11 +199,7 @@ function registerProductionMiddleware(app, options = {}) {
       const start = Date.now();
 
       res.on('finish', () => {
-        engines.performanceMonitor.monitorAPI(
-          req.path,
-          Date.now() - start,
-          res.statusCode
-        );
+        engines.performanceMonitor.monitorAPI(req.path, Date.now() - start, res.statusCode);
       });
 
       next();
@@ -218,17 +231,19 @@ function registerProductionErrorHandlers(app, options = {}) {
     if (res.headersSent) return next(err);
     res.status(err.status || 500).json({
       success: false,
-      error: isProd ? '服务暂时不可用，请稍后再试' : (err.message || 'Internal error'),
+      error: isProd ? '服务暂时不可用，请稍后再试' : err.message || 'Internal error',
       errorId: errId,
-      ...(isProd ? {} : { stack: err.stack })
+      ...(isProd ? {} : { stack: err.stack }),
     });
   });
 }
 
 module.exports = {
+  isNestJSMigrated,
+  NESTJS_MIGRATED_PREFIXES,
   createNestJsProxyMiddleware,
   createCorsOptions,
   registerProductionErrorHandlers,
   registerProductionMiddleware,
-  shouldBypassRateLimit
+  shouldBypassRateLimit,
 };

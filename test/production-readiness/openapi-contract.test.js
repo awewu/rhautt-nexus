@@ -15,12 +15,15 @@ const protectedPrefixes = [
   '/api/v2/governance',
   '/api/v2/tenants',
   '/api/v2/dealers',
-  '/api/v2/stores'
+  '/api/v2/stores',
 ];
 const httpMethods = new Set(['get', 'post', 'put', 'patch', 'delete']);
 
 function sha256(filePath) {
-  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+  // 与 scripts/agent-guards/generated-client-check.js 保持同一换行规范：
+  // CRLF 归一化为 LF，避免 Windows checkout 下 hash 漂移
+  const normalized = fs.readFileSync(filePath, 'utf8').replace(/\r\n/g, '\n');
+  return crypto.createHash('sha256').update(normalized).digest('hex');
 }
 
 function loadSpec() {
@@ -57,27 +60,29 @@ describe('OpenAPI contract and generated client', () => {
     expect(spec.info.title).toBe('Rhautt Nexus / 瑞合数智枢纽 API');
     expect(spec.info.description).toContain('Rhautt Comfort / 瑞合瑞德暖通科技集团');
     expect(spec.info.description).toContain('瑞诺瓦');
-    expect(Object.keys(spec.paths)).toEqual(expect.arrayContaining([
-      '/api/v2/health/ready',
-      '/api/v2/health/observability',
-      '/api/v2/tenants',
-      '/api/v2/tenants/{id}',
-      '/api/v2/dealers',
-      '/api/v2/dealers/{id}',
-      '/api/v2/stores',
-      '/api/v2/stores/{id}',
-      '/api/v2/crm/leads',
-      '/api/v2/diagnosis/complete',
-      '/api/v2/diagnosis/public/complete',
-      '/api/v2/diagnosis/public/reports/{reportId}',
-      '/api/v2/analytics/overview',
-      '/api/v2/audit/events',
-      '/api/v2/lifecycle/handover',
-      '/api/v2/lifecycle/handover/{contractId}/handoff-package',
-      '/api/v2/lifecycle/customer-projects',
-      '/api/v2/lifecycle/customer-projects/{contractId}',
-      '/api/v2/react-candidate/status'
-    ]));
+    expect(Object.keys(spec.paths)).toEqual(
+      expect.arrayContaining([
+        '/api/v2/health/ready',
+        '/api/v2/health/observability',
+        '/api/v2/tenants',
+        '/api/v2/tenants/{id}',
+        '/api/v2/dealers',
+        '/api/v2/dealers/{id}',
+        '/api/v2/stores',
+        '/api/v2/stores/{id}',
+        '/api/v2/crm/leads',
+        '/api/v2/diagnosis/complete',
+        '/api/v2/diagnosis/public/complete',
+        '/api/v2/diagnosis/public/reports/{reportId}',
+        '/api/v2/analytics/overview',
+        '/api/v2/audit/events',
+        '/api/v2/lifecycle/handover',
+        '/api/v2/lifecycle/handover/{contractId}/handoff-package',
+        '/api/v2/lifecycle/customer-projects',
+        '/api/v2/lifecycle/customer-projects/{contractId}',
+        '/api/v2/react-candidate/status',
+      ])
+    );
   });
 
   test('tenant management contract freezes the NestJS tenant, dealer and store surface', () => {
@@ -89,7 +94,7 @@ describe('OpenAPI contract and generated client', () => {
       '/api/v2/dealers': ['get', 'post'],
       '/api/v2/dealers/{id}': ['get', 'put'],
       '/api/v2/stores': ['get', 'post'],
-      '/api/v2/stores/{id}': ['get', 'put']
+      '/api/v2/stores/{id}': ['get', 'put'],
     };
 
     for (const [routePath, methods] of Object.entries(expectedOperations)) {
@@ -99,9 +104,15 @@ describe('OpenAPI contract and generated client', () => {
       }
     }
 
-    expect(schemas.Tenant.required).toEqual(expect.arrayContaining(['id', 'code', 'name', 'type', 'status']));
-    expect(schemas.Dealer.required).toEqual(expect.arrayContaining(['id', 'tenantId', 'code', 'name', 'status']));
-    expect(schemas.Store.required).toEqual(expect.arrayContaining(['id', 'tenantId', 'dealerId', 'code', 'name', 'status']));
+    expect(schemas.Tenant.required).toEqual(
+      expect.arrayContaining(['id', 'code', 'name', 'type', 'status'])
+    );
+    expect(schemas.Dealer.required).toEqual(
+      expect.arrayContaining(['id', 'tenantId', 'code', 'name', 'status'])
+    );
+    expect(schemas.Store.required).toEqual(
+      expect.arrayContaining(['id', 'tenantId', 'dealerId', 'code', 'name', 'status'])
+    );
     expect(schemas.CreateTenantInput.required).toEqual(['code', 'name']);
     expect(schemas.CreateDealerInput.required).toEqual(['code', 'name']);
     expect(schemas.CreateStoreInput.required).toEqual(['dealerId', 'code', 'name']);
@@ -128,7 +139,7 @@ describe('OpenAPI contract and generated client', () => {
       ids.add(item.operation.operationId);
       expect(item.operation.tags.length).toBeGreaterThan(0);
       expect(Object.keys(item.operation.responses).length).toBeGreaterThan(0);
-      if (protectedPrefixes.some(prefix => item.routePath.startsWith(prefix))) {
+      if (protectedPrefixes.some((prefix) => item.routePath.startsWith(prefix))) {
         expect(item.operation.security).toEqual([{ bearerAuth: [] }]);
       }
     }
@@ -141,31 +152,69 @@ describe('OpenAPI contract and generated client', () => {
   test('high-value production APIs use concrete business schemas instead of generic envelopes', () => {
     const spec = loadSpec();
 
-    expect(successRef(spec, '/api/v2/analytics/overview', 'get')).toBe('#/components/responses/AnalyticsOverviewSuccess');
-    expect(successRef(spec, '/api/v2/diagnosis/complete', 'post', '201')).toBe('#/components/responses/DiagnosisCompletionSuccess');
-    expect(successRef(spec, '/api/v2/diagnosis/public/complete', 'post', '201')).toBe('#/components/responses/DiagnosisCompletionSuccess');
-    expect(successRef(spec, '/api/v2/diagnosis/public/reports/{reportId}', 'get')).toBe('#/components/responses/DiagnosisPublicReportSuccess');
-    expect(successRef(spec, '/api/v2/system-packs', 'get')).toBe('#/components/responses/SystemPackListSuccess');
-    expect(successRef(spec, '/api/v2/system-packs/{packId}', 'get')).toBe('#/components/responses/SystemPackSuccess');
-    expect(successRef(spec, '/api/v2/system-packs/compose', 'post')).toBe('#/components/responses/SystemPackCompositionSuccess');
-    expect(successRef(spec, '/api/v2/system-packs/recommend', 'post')).toBe('#/components/responses/SystemPackRecommendationSuccess');
-    expect(successRef(spec, '/api/v2/audit/events', 'get')).toBe('#/components/responses/AuditEventsSuccess');
-    expect(successRef(spec, '/api/v2/lifecycle/handover', 'get')).toBe('#/components/responses/LifecycleHandoverListSuccess');
-    expect(successRef(spec, '/api/v2/lifecycle/handover', 'post', '201')).toBe('#/components/responses/LifecycleHandoverSuccess');
-    expect(successRef(spec, '/api/v2/lifecycle/handover/{contractId}', 'get')).toBe('#/components/responses/LifecycleHandoverSuccess');
-    expect(successRef(spec, '/api/v2/lifecycle/customer-projects', 'get')).toBe('#/components/responses/LifecycleCustomerProjectListSuccess');
-    expect(successRef(spec, '/api/v2/lifecycle/customer-projects/{contractId}', 'get')).toBe('#/components/responses/LifecycleCustomerProjectSuccess');
-    expect(successRef(spec, '/api/v2/lifecycle/handover/{contractId}/handoff-package', 'get')).toBe('#/components/responses/LifecycleIotHandoffPackageSuccess');
-    expect(successRef(spec, '/api/v2/lifecycle/handover/{contractId}/state', 'patch')).toBe('#/components/responses/LifecycleHandoverSuccess');
-    expect(successRef(spec, '/api/v2/lifecycle/handover/{contractId}/acceptance', 'post')).toBe('#/components/responses/LifecycleHandoverSuccess');
-    expect(successRef(spec, '/api/v2/health/observability', 'get')).toBe('#/components/responses/HealthObservabilitySuccess');
-    expect(successRef(spec, '/api/v2/react-candidate/status', 'get')).toBe('#/components/responses/ReactCandidateStatusSuccess');
+    expect(successRef(spec, '/api/v2/analytics/overview', 'get')).toBe(
+      '#/components/responses/AnalyticsOverviewSuccess'
+    );
+    expect(successRef(spec, '/api/v2/diagnosis/complete', 'post', '201')).toBe(
+      '#/components/responses/DiagnosisCompletionSuccess'
+    );
+    expect(successRef(spec, '/api/v2/diagnosis/public/complete', 'post', '201')).toBe(
+      '#/components/responses/DiagnosisCompletionSuccess'
+    );
+    expect(successRef(spec, '/api/v2/diagnosis/public/reports/{reportId}', 'get')).toBe(
+      '#/components/responses/DiagnosisPublicReportSuccess'
+    );
+    expect(successRef(spec, '/api/v2/system-packs', 'get')).toBe(
+      '#/components/responses/SystemPackListSuccess'
+    );
+    expect(successRef(spec, '/api/v2/system-packs/{packId}', 'get')).toBe(
+      '#/components/responses/SystemPackSuccess'
+    );
+    expect(successRef(spec, '/api/v2/system-packs/compose', 'post')).toBe(
+      '#/components/responses/SystemPackCompositionSuccess'
+    );
+    expect(successRef(spec, '/api/v2/system-packs/recommend', 'post')).toBe(
+      '#/components/responses/SystemPackRecommendationSuccess'
+    );
+    expect(successRef(spec, '/api/v2/audit/events', 'get')).toBe(
+      '#/components/responses/AuditEventsSuccess'
+    );
+    expect(successRef(spec, '/api/v2/lifecycle/handover', 'get')).toBe(
+      '#/components/responses/LifecycleHandoverListSuccess'
+    );
+    expect(successRef(spec, '/api/v2/lifecycle/handover', 'post', '201')).toBe(
+      '#/components/responses/LifecycleHandoverSuccess'
+    );
+    expect(successRef(spec, '/api/v2/lifecycle/handover/{contractId}', 'get')).toBe(
+      '#/components/responses/LifecycleHandoverSuccess'
+    );
+    expect(successRef(spec, '/api/v2/lifecycle/customer-projects', 'get')).toBe(
+      '#/components/responses/LifecycleCustomerProjectListSuccess'
+    );
+    expect(successRef(spec, '/api/v2/lifecycle/customer-projects/{contractId}', 'get')).toBe(
+      '#/components/responses/LifecycleCustomerProjectSuccess'
+    );
+    expect(successRef(spec, '/api/v2/lifecycle/handover/{contractId}/handoff-package', 'get')).toBe(
+      '#/components/responses/LifecycleIotHandoffPackageSuccess'
+    );
+    expect(successRef(spec, '/api/v2/lifecycle/handover/{contractId}/state', 'patch')).toBe(
+      '#/components/responses/LifecycleHandoverSuccess'
+    );
+    expect(successRef(spec, '/api/v2/lifecycle/handover/{contractId}/acceptance', 'post')).toBe(
+      '#/components/responses/LifecycleHandoverSuccess'
+    );
+    expect(successRef(spec, '/api/v2/health/observability', 'get')).toBe(
+      '#/components/responses/HealthObservabilitySuccess'
+    );
+    expect(successRef(spec, '/api/v2/react-candidate/status', 'get')).toBe(
+      '#/components/responses/ReactCandidateStatusSuccess'
+    );
   });
 
   test('all OpenAPI component refs resolve to defined components', () => {
     const spec = loadSpec();
     const refs = collectRefs(spec);
-    const missing = refs.filter(ref => {
+    const missing = refs.filter((ref) => {
       if (!ref.startsWith('#/')) return false;
       const parts = ref.slice(2).split('/');
       let cursor = spec;
@@ -183,19 +232,29 @@ describe('OpenAPI contract and generated client', () => {
     const spec = loadSpec();
     const schemas = spec.components.schemas;
 
-    expect(schemas.SystemPackListEnvelope.properties.data.items.$ref).toBe('#/components/schemas/SystemPack');
+    expect(schemas.SystemPackListEnvelope.properties.data.items.$ref).toBe(
+      '#/components/schemas/SystemPack'
+    );
     expect(schemas.SystemPackEnvelope.properties.data.$ref).toBe('#/components/schemas/SystemPack');
-    expect(schemas.SystemPackCompositionEnvelope.properties.data.$ref).toBe('#/components/schemas/SystemPackComposition');
-    expect(schemas.SystemPackRecommendationEnvelope.properties.data.$ref).toBe('#/components/schemas/SystemPackRecommendation');
+    expect(schemas.SystemPackCompositionEnvelope.properties.data.$ref).toBe(
+      '#/components/schemas/SystemPackComposition'
+    );
+    expect(schemas.SystemPackRecommendationEnvelope.properties.data.$ref).toBe(
+      '#/components/schemas/SystemPackRecommendation'
+    );
 
-    expect(schemas.SystemPack.required).toEqual(expect.arrayContaining([
-      'standards',
-      'standardsCoverage',
-      'deliverables',
-      'iotCapabilities',
-      'quoteTags'
-    ]));
-    expect(schemas.SystemPack.properties.standardsCoverage.items.$ref).toBe('#/components/schemas/SystemPackStandardsCoverage');
+    expect(schemas.SystemPack.required).toEqual(
+      expect.arrayContaining([
+        'standards',
+        'standardsCoverage',
+        'deliverables',
+        'iotCapabilities',
+        'quoteTags',
+      ])
+    );
+    expect(schemas.SystemPack.properties.standardsCoverage.items.$ref).toBe(
+      '#/components/schemas/SystemPackStandardsCoverage'
+    );
 
     expect(schemas.SystemPackStandardsCoverageDomain.enum).toEqual([
       'thermal-comfort',
@@ -203,7 +262,7 @@ describe('OpenAPI contract and generated client', () => {
       'hot-water-safety',
       'potable-water',
       'energy',
-      'smart-interoperability'
+      'smart-interoperability',
     ]);
     expect(schemas.SystemPackStandardsCoverage.required).toEqual([
       'domain',
@@ -212,19 +271,27 @@ describe('OpenAPI contract and generated client', () => {
       'softwareChecks',
       'deliverableEvidence',
       'quoteImpact',
-      'lifecycleHandoffImpact'
+      'lifecycleHandoffImpact',
     ]);
-    expect(schemas.SystemPackComposition.required).toEqual(expect.arrayContaining([
-      'standardsCoverage',
-      'standardsEvidence',
-      'iot',
-      'quoteTags',
-      'implementationNotes'
-    ]));
-    expect(schemas.SystemPackStandardsEvidence.properties.coverage.$ref).toBe('#/components/schemas/SystemPackStandardsCoverageSummary');
-    expect(schemas.SystemPackStandardsCoverageSummary.properties.status.enum).toEqual(['complete', 'incomplete']);
-    expect(schemas.SystemPackStandardsCoverageSummary.properties.missingRequiredDomains.items.$ref)
-      .toBe('#/components/schemas/SystemPackStandardsCoverageDomain');
+    expect(schemas.SystemPackComposition.required).toEqual(
+      expect.arrayContaining([
+        'standardsCoverage',
+        'standardsEvidence',
+        'iot',
+        'quoteTags',
+        'implementationNotes',
+      ])
+    );
+    expect(schemas.SystemPackStandardsEvidence.properties.coverage.$ref).toBe(
+      '#/components/schemas/SystemPackStandardsCoverageSummary'
+    );
+    expect(schemas.SystemPackStandardsCoverageSummary.properties.status.enum).toEqual([
+      'complete',
+      'incomplete',
+    ]);
+    expect(
+      schemas.SystemPackStandardsCoverageSummary.properties.missingRequiredDomains.items.$ref
+    ).toBe('#/components/schemas/SystemPackStandardsCoverageDomain');
   });
 
   test('domain schemas preserve lifecycle-only IoT handoff', () => {
@@ -232,83 +299,115 @@ describe('OpenAPI contract and generated client', () => {
     const schemas = spec.components.schemas;
 
     expect(schemas.IotHandoff.properties.handoffBoundary.enum).toEqual(['lifecycle_handoff_only']);
-    expect(schemas.IotHandoffInput.properties.handoffBoundary.enum).toEqual(['lifecycle_handoff_only']);
-    expect(schemas.CapabilityRegistryItem.properties.controlBoundary.enum).toEqual(['lifecycle_handoff_only']);
+    expect(schemas.IotHandoffInput.properties.handoffBoundary.enum).toEqual([
+      'lifecycle_handoff_only',
+    ]);
+    expect(schemas.CapabilityRegistryItem.properties.controlBoundary.enum).toEqual([
+      'lifecycle_handoff_only',
+    ]);
 
-    expect(schemas.LifecycleHandover.required).toEqual(expect.arrayContaining([
-      'tenantId',
-      'customerId',
-      'contractId',
-      'projectState',
-      'lifecycleStage',
-      'handoverStatus',
-      'iot',
-      'installedAssets',
-      'servicePlan'
-    ]));
-    expect(schemas.LifecycleCustomerProject.required).toEqual(expect.arrayContaining([
-      'tenantId',
-      'customerId',
-      'contractId',
-      'projectState',
-      'customerVisibleState',
-      'progressPercent',
-      'references',
-      'solution',
-      'quotation',
-      'construction',
-      'acceptance',
-      'servicePlan',
-      'installedAssets',
-      'iot',
-      'milestones',
-      'nextAction',
-      'visibility',
-      'handoffBoundary'
-    ]));
-    expect(schemas.LifecycleCustomerProjectListEnvelope.properties.data.properties.items.items.$ref).toBe('#/components/schemas/LifecycleCustomerProject');
-    expect(schemas.LifecycleCustomerProject.properties.handoffBoundary.enum).toEqual(['lifecycle_handoff_only']);
-    expect(schemas.LifecycleCustomerIot.properties.handoffBoundary.enum).toEqual(['lifecycle_handoff_only']);
+    expect(schemas.LifecycleHandover.required).toEqual(
+      expect.arrayContaining([
+        'tenantId',
+        'customerId',
+        'contractId',
+        'projectState',
+        'lifecycleStage',
+        'handoverStatus',
+        'iot',
+        'installedAssets',
+        'servicePlan',
+      ])
+    );
+    expect(schemas.LifecycleCustomerProject.required).toEqual(
+      expect.arrayContaining([
+        'tenantId',
+        'customerId',
+        'contractId',
+        'projectState',
+        'customerVisibleState',
+        'progressPercent',
+        'references',
+        'solution',
+        'quotation',
+        'construction',
+        'acceptance',
+        'servicePlan',
+        'installedAssets',
+        'iot',
+        'milestones',
+        'nextAction',
+        'visibility',
+        'handoffBoundary',
+      ])
+    );
+    expect(
+      schemas.LifecycleCustomerProjectListEnvelope.properties.data.properties.items.items.$ref
+    ).toBe('#/components/schemas/LifecycleCustomerProject');
+    expect(schemas.LifecycleCustomerProject.properties.handoffBoundary.enum).toEqual([
+      'lifecycle_handoff_only',
+    ]);
+    expect(schemas.LifecycleCustomerIot.properties.handoffBoundary.enum).toEqual([
+      'lifecycle_handoff_only',
+    ]);
     expect(schemas.LifecycleCustomerVisibility.properties.scope.enum).toEqual(['customer-visible']);
-    expect(schemas.LifecycleCustomerVisibility.properties.hiddenFields.items.enum).toEqual(expect.arrayContaining([
-      'dealerMargin',
-      'costBaseline',
-      'internalApprovalNotes',
-      'crossTenantData',
-      'sensitiveTechnicianNotes'
-    ]));
-    expect(schemas.LifecycleCustomerSolution.properties.equipmentBrands.items.enum).toEqual(expect.arrayContaining(['Rheem', 'Ruud', 'Everhot']));
-    expect(schemas.LifecycleIotHandoffPackage.required).toEqual(expect.arrayContaining([
-      'packageType',
-      'packageVersion',
-      'generatedAt',
-      'tenantId',
-      'customerId',
-      'contractId',
-      'home',
-      'installedAssets',
-      'capabilityRegistry',
-      'servicePlan',
-      'warrantySummary',
-      'maintenanceSchedule',
-      'handoffBoundary',
-      'forbiddenControl',
-      'visibility'
-    ]));
-    expect(schemas.LifecycleIotHandoffPackage.properties.packageType.enum).toEqual(['rhautt-nexus-iot-lifecycle-handoff']);
-    expect(schemas.LifecycleIotHandoffPackage.properties.handoffBoundary.enum).toEqual(['lifecycle_handoff_only']);
-    expect(schemas.LifecycleIotHandoffPackage.properties.capabilityRegistry.items.$ref).toBe('#/components/schemas/CapabilityRegistryItem');
-    expect(schemas.LifecycleIotForbiddenControl.properties.realtimeControlCommands.const).toBe(false);
+    expect(schemas.LifecycleCustomerVisibility.properties.hiddenFields.items.enum).toEqual(
+      expect.arrayContaining([
+        'dealerMargin',
+        'costBaseline',
+        'internalApprovalNotes',
+        'crossTenantData',
+        'sensitiveTechnicianNotes',
+      ])
+    );
+    expect(schemas.LifecycleCustomerSolution.properties.equipmentBrands.items.enum).toEqual(
+      expect.arrayContaining(['Rheem', 'Ruud', 'Everhot'])
+    );
+    expect(schemas.LifecycleIotHandoffPackage.required).toEqual(
+      expect.arrayContaining([
+        'packageType',
+        'packageVersion',
+        'generatedAt',
+        'tenantId',
+        'customerId',
+        'contractId',
+        'home',
+        'installedAssets',
+        'capabilityRegistry',
+        'servicePlan',
+        'warrantySummary',
+        'maintenanceSchedule',
+        'handoffBoundary',
+        'forbiddenControl',
+        'visibility',
+      ])
+    );
+    expect(schemas.LifecycleIotHandoffPackage.properties.packageType.enum).toEqual([
+      'rhautt-nexus-iot-lifecycle-handoff',
+    ]);
+    expect(schemas.LifecycleIotHandoffPackage.properties.handoffBoundary.enum).toEqual([
+      'lifecycle_handoff_only',
+    ]);
+    expect(schemas.LifecycleIotHandoffPackage.properties.capabilityRegistry.items.$ref).toBe(
+      '#/components/schemas/CapabilityRegistryItem'
+    );
+    expect(schemas.LifecycleIotForbiddenControl.properties.realtimeControlCommands.const).toBe(
+      false
+    );
     expect(schemas.LifecycleIotForbiddenControl.properties.remoteSetpointWrite.const).toBe(false);
     expect(schemas.LifecycleIotForbiddenControl.properties.deviceActuation.const).toBe(false);
-    expect(schemas.LifecycleIotHandoffPackageVisibility.properties.scope.enum).toEqual(['iot-lifecycle-handoff']);
-    expect(schemas.LifecycleIotHandoffPackageVisibility.properties.hiddenFields.items.enum).toEqual(expect.arrayContaining([
-      'dealerMargin',
-      'costBaseline',
-      'internalApprovalNotes',
-      'realtimeControlCommands',
-      'remoteControlTokens'
-    ]));
+    expect(schemas.LifecycleIotHandoffPackageVisibility.properties.scope.enum).toEqual([
+      'iot-lifecycle-handoff',
+    ]);
+    expect(schemas.LifecycleIotHandoffPackageVisibility.properties.hiddenFields.items.enum).toEqual(
+      expect.arrayContaining([
+        'dealerMargin',
+        'costBaseline',
+        'internalApprovalNotes',
+        'realtimeControlCommands',
+        'remoteControlTokens',
+      ])
+    );
   });
 
   test('generated TypeScript client is synchronized with OpenAPI hash and operations', () => {
@@ -327,7 +426,7 @@ describe('OpenAPI contract and generated client', () => {
   test('generated client guard passes', () => {
     const output = execSync('node scripts/agent-guards/generated-client-check.js', {
       cwd: ROOT,
-      encoding: 'utf8'
+      encoding: 'utf8',
     });
 
     expect(output).toContain('Generated Client Check: failures = 0');

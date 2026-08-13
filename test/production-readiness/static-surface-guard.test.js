@@ -2,12 +2,17 @@ const express = require('express');
 const request = require('./helpers/in-process-request');
 const {
   createLegacySurfaceClassifier,
-  createProductionStaticSurfaceGuard
+  createProductionStaticSurfaceGuard,
 } = require('../../server/middleware/productionStaticSurfaceGuard');
 const createPageAliasesRouter = require('../../server/routes/page-aliases');
+const { testIfArtifacts } = require('./helpers/local-artifacts');
+
+// 分类清单在 archive/（.gitignore 且无生成步骤），缺失时分类器回退 unclassified，
+// 依赖具体 bucket 的断言跳过
+const testWithManifest = testIfArtifacts(['archive/legacy-ui/public/legacy-surface-manifest.json']);
 
 describe('production static surface guard', () => {
-  test('redirects former production HTML pages after archival', async () => {
+  testWithManifest('redirects former production HTML pages after archival', async () => {
     const app = express();
     app.use(createProductionStaticSurfaceGuard());
     app.get('/index-ready.html', (req, res) => res.status(200).send('portal'));
@@ -30,9 +35,11 @@ describe('production static surface guard', () => {
 
   test('returns classified JSON for blocked legacy HTML when html is not accepted', async () => {
     const app = express();
-    app.use(createProductionStaticSurfaceGuard({
-      classifySurface: () => ({ active: false, bucket: 'archive' })
-    }));
+    app.use(
+      createProductionStaticSurfaceGuard({
+        classifySurface: () => ({ active: false, bucket: 'archive' }),
+      })
+    );
     app.get('/analytics.html', (req, res) => res.status(200).send('legacy analytics'));
 
     const res = await request(app)
@@ -45,42 +52,35 @@ describe('production static surface guard', () => {
     expect(res.body.surfaceBucket).toBe('archive');
   });
 
-  test('classifies legacy surfaces from manifest by basename', () => {
+  testWithManifest('classifies legacy surfaces from manifest by basename', () => {
     const classifySurface = createLegacySurfaceClassifier();
 
     expect(classifySurface('/index-ready.html')).toEqual({ active: false, bucket: 'archive' });
     expect(classifySurface('/admin-dashboard.html')).toEqual({ active: false, bucket: 'archive' });
-    expect(classifySurface('/quotation-pro.html')).toEqual({ active: false, bucket: 'migration-candidate' });
+    expect(classifySurface('/quotation-pro.html')).toEqual({
+      active: false,
+      bucket: 'migration-candidate',
+    });
   });
 
   test('legacy aliases redirect to active production pages', async () => {
     const app = express();
     app.use(createPageAliasesRouter());
 
-    await request(app)
-      .get('/analytics')
-      .expect(302)
-      .expect('Location', '/index.html');
+    await request(app).get('/analytics').expect(302).expect('Location', '/index.html');
 
-    await request(app)
-      .get('/admin')
-      .expect(302)
-      .expect('Location', '/login.html');
+    await request(app).get('/admin').expect(302).expect('Location', '/login.html');
   });
 
   test('standalone module aliases redirect to retained portal surfaces', async () => {
     const app = express();
     app.use(createPageAliasesRouter());
 
-    await request(app)
-      .get('/rysnova')
-      .expect(302)
-      .expect('Location', '/index-ready.html');
+    await request(app).get('/rysnova').expect(302).expect('Location', '/index-ready.html');
 
     await request(app)
       .get('/rysnova-ai')
       .expect(302)
       .expect('Location', '/index-ready.html#contact');
-
   });
 });

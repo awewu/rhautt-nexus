@@ -1,0 +1,13 @@
+﻿# \u751f\u6210\u4ea7\u7269\uff1a\u683c\u5f0f\u5316\u4f1a\u7834\u574f OpenAPI hash \u4e0e\u751f\u6210\u5ba2\u6237\u7aef\u540c\u6b65\u95e8\u7981
+contracts/openapi/
+packages/generated-client/
+evidence/
+archive/
+_archive/
+backups/
+coverage/
+dist/
+build/
+.next/
+pnpm-lock.yaml
+package-lock.json

@@ -30,7 +30,17 @@ describe('Auth M2 · 影子运行对比脚本', () => {
 
   test('脚本覆盖所有 legacy auth 端点的镜像对比', () => {
     const src = fs.readFileSync(SCRIPT, 'utf8');
-    const required = ['/login', '/login-sms', '/send-sms', '/register', '/me', '/user', '/password', '/refresh-token', '/logout'];
+    const required = [
+      '/login',
+      '/login-sms',
+      '/send-sms',
+      '/register',
+      '/me',
+      '/user',
+      '/password',
+      '/refresh-token',
+      '/logout',
+    ];
     for (const p of required) {
       expect(src).toContain(p);
     }

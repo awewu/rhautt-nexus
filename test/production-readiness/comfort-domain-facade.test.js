@@ -1,7 +1,7 @@
 const {
   COMFORT_DOMAIN_FACADES,
   getComfortDomainFacade,
-  getComfortDomainInventory
+  getComfortDomainInventory,
 } = require('../../server/modules/comfort-domain/comfortDomainFacade');
 
 describe('comfort-home domain facade registry', () => {
@@ -14,10 +14,10 @@ describe('comfort-home domain facade registry', () => {
       'air-conditioning',
       'smart-control',
       'quote-costing',
-      'lifecycle-iot'
+      'lifecycle-iot',
     ];
 
-    expect(COMFORT_DOMAIN_FACADES.map(facade => facade.id)).toEqual(required);
+    expect(COMFORT_DOMAIN_FACADES.map((facade) => facade.id)).toEqual(required);
 
     for (const facade of COMFORT_DOMAIN_FACADES) {
       expect(facade.owner).toBeTruthy();
@@ -30,17 +30,21 @@ describe('comfort-home domain facade registry', () => {
   });
 
   test('keeps quote costing and lifecycle IoT as production contracts', () => {
-    expect(getComfortDomainFacade('quote-costing')).toEqual(expect.objectContaining({
-      status: 'production',
-      routes: expect.arrayContaining(['/api/quotation-v2/from-bom']),
-      outputs: expect.arrayContaining(['margin-guard', 'customer-total'])
-    }));
+    expect(getComfortDomainFacade('quote-costing')).toEqual(
+      expect.objectContaining({
+        status: 'production',
+        routes: expect.arrayContaining(['/api/quotation-v2/from-bom']),
+        outputs: expect.arrayContaining(['margin-guard', 'customer-total']),
+      })
+    );
 
-    expect(getComfortDomainFacade('lifecycle-iot')).toEqual(expect.objectContaining({
-      status: 'production',
-      routes: expect.arrayContaining(['/api/v2/lifecycle']),
-      iotBridge: expect.arrayContaining(['installed-device-id', 'maintenance-schedule'])
-    }));
+    expect(getComfortDomainFacade('lifecycle-iot')).toEqual(
+      expect.objectContaining({
+        status: 'production',
+        routes: expect.arrayContaining(['/api/v2/lifecycle']),
+        iotBridge: expect.arrayContaining(['installed-device-id', 'maintenance-schedule']),
+      })
+    );
   });
 
   test('inventory exposes production maturity summary for harnesses and admin review', () => {

@@ -11,7 +11,15 @@ describe('NestJS production auth service', () => {
   test('login uses PostgreSQL privileged lookup and returns tenant scoped token payload', () => {
     expect(service).toContain('auth_lookup_user_by_phone_hash');
     expect(service).toContain('withRlsTransaction');
-    for (const field of ['userId', 'tenantId', 'dealerId', 'storeId', 'customerId', 'role', 'permissions']) {
+    for (const field of [
+      'userId',
+      'tenantId',
+      'dealerId',
+      'storeId',
+      'customerId',
+      'role',
+      'permissions',
+    ]) {
       expect(service).toMatch(new RegExp(`${field}:`));
     }
   });
@@ -26,7 +34,9 @@ describe('NestJS production auth service', () => {
 
   test('protected auth endpoints keep explicit guards and stable success status codes', () => {
     expect(controller).toMatch(/@Post\('login'\)\s*@HttpCode\(200\)/);
-    expect(controller).toMatch(/@Post\('refresh-token'\)\s*@HttpCode\(200\)\s*@UseGuards\(AuthGuard\)/);
+    expect(controller).toMatch(
+      /@Post\('refresh-token'\)\s*@HttpCode\(200\)\s*@UseGuards\(AuthGuard\)/
+    );
     expect(controller).toMatch(/@Post\('logout'\)\s*@HttpCode\(200\)\s*@UseGuards\(AuthGuard\)/);
   });
 

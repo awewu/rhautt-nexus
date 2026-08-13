@@ -12,11 +12,14 @@ function createRequest(app, method, requestPath, headers, payload) {
   const socket = new Socket();
   const req = new IncomingMessage(socket);
   const url = new URL(requestPath, 'http://127.0.0.1');
-  const body = payload === undefined
-    ? null
-    : Buffer.from(typeof payload === 'string' || Buffer.isBuffer(payload)
-      ? payload
-      : JSON.stringify(payload));
+  const body =
+    payload === undefined
+      ? null
+      : Buffer.from(
+          typeof payload === 'string' || Buffer.isBuffer(payload)
+            ? payload
+            : JSON.stringify(payload)
+        );
 
   req.method = method.toUpperCase();
   req.url = `${url.pathname}${url.search}`;
@@ -36,9 +39,9 @@ function createRequest(app, method, requestPath, headers, payload) {
 
   const source = Readable.from(body ? [body] : []);
   req._read = source._read.bind(source);
-  source.on('data', chunk => req.push(chunk));
+  source.on('data', (chunk) => req.push(chunk));
   source.on('end', () => req.push(null));
-  source.on('error', error => req.emit('error', error));
+  source.on('error', (error) => req.emit('error', error));
 
   return req;
 }
@@ -68,9 +71,8 @@ function createResponse(resolve) {
   };
   res.writeHead = (statusCode, statusMessageOrHeaders, maybeHeaders) => {
     res.statusCode = statusCode;
-    const headerSource = typeof statusMessageOrHeaders === 'object'
-      ? statusMessageOrHeaders
-      : maybeHeaders;
+    const headerSource =
+      typeof statusMessageOrHeaders === 'object' ? statusMessageOrHeaders : maybeHeaders;
     if (headerSource) {
       for (const [key, value] of Object.entries(headerSource)) res.setHeader(key, value);
     }
@@ -78,7 +80,8 @@ function createResponse(resolve) {
     return res;
   };
   res.write = (chunk) => {
-    if (chunk !== undefined) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
+    if (chunk !== undefined)
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)));
     return true;
   };
   res.end = (chunk) => {
@@ -96,7 +99,7 @@ function createResponse(resolve) {
       statusCode: res.statusCode,
       headers: responseHeaders,
       text,
-      body: parseBody(text, responseHeaders)
+      body: parseBody(text, responseHeaders),
     };
     res.emit('finish');
     resolve(response);
@@ -141,7 +144,7 @@ class InProcessTest {
 
   expect(first, second) {
     if (typeof first === 'number') {
-      this.assertions.push(response => {
+      this.assertions.push((response) => {
         if (response.status !== first) {
           throw new Error(`expected status ${first}, got ${response.status}: ${response.text}`);
         }
@@ -150,7 +153,7 @@ class InProcessTest {
     }
 
     if (typeof first === 'string') {
-      this.assertions.push(response => {
+      this.assertions.push((response) => {
         const actual = response.headers[normalizeHeaderName(first)] || response.headers[first];
         if (actual !== second) {
           throw new Error(`expected header ${first}=${second}, got ${actual}`);
@@ -179,7 +182,7 @@ class InProcessTest {
       const res = createResponse(resolve);
       req.on('error', reject);
       res.on('error', reject);
-      this.app.handle(req, res, error => {
+      this.app.handle(req, res, (error) => {
         if (error) return reject(error);
         if (!res.finished) {
           res.statusCode = res.statusCode && res.statusCode !== 200 ? res.statusCode : 404;
@@ -195,11 +198,11 @@ class InProcessTest {
 
 function request(app) {
   return {
-    get: requestPath => new InProcessTest(app, 'GET', requestPath),
-    post: requestPath => new InProcessTest(app, 'POST', requestPath),
-    put: requestPath => new InProcessTest(app, 'PUT', requestPath),
-    patch: requestPath => new InProcessTest(app, 'PATCH', requestPath),
-    delete: requestPath => new InProcessTest(app, 'DELETE', requestPath)
+    get: (requestPath) => new InProcessTest(app, 'GET', requestPath),
+    post: (requestPath) => new InProcessTest(app, 'POST', requestPath),
+    put: (requestPath) => new InProcessTest(app, 'PUT', requestPath),
+    patch: (requestPath) => new InProcessTest(app, 'PATCH', requestPath),
+    delete: (requestPath) => new InProcessTest(app, 'DELETE', requestPath),
   };
 }
 

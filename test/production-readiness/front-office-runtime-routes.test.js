@@ -13,7 +13,7 @@ function makeApp(router) {
 function makeHarness() {
   const db = {
     users: [{ id: 'user-1', role: 'designer', name: '设计师' }],
-    templates: []
+    templates: [],
   };
   const engines = {
     quickLock: { startSession: jest.fn().mockReturnValue({ id: 'session-1' }) },
@@ -21,35 +21,37 @@ function makeHarness() {
     painMatching: { match: jest.fn().mockReturnValue({ systems: ['五恒系统'] }) },
     valueQuote: {
       generateValueQuote: jest.fn().mockReturnValue({ total: 100000 }),
-      exportPDF: jest.fn().mockReturnValue({ url: '/exports/quote.pdf' })
+      exportPDF: jest.fn().mockReturnValue({ url: '/exports/quote.pdf' }),
     },
     templateEngine: {
       getCategories: jest.fn().mockReturnValue(['villa']),
       getPopularTemplates: jest.fn().mockReturnValue([{ id: 'popular-1' }]),
       loadTemplate: jest.fn().mockResolvedValue({ id: 'tpl-1' }),
-      deleteTemplate: jest.fn().mockResolvedValue(true)
+      deleteTemplate: jest.fn().mockResolvedValue(true),
     },
     visuals: { generatePresentationPackage: jest.fn().mockReturnValue({ diagrams: 3 }) },
     conditionalField: {
       generateFieldStateConfig: jest.fn().mockReturnValue({ visibleFields: ['area'] }),
-      aiRecognizeHiddenPainPoints: jest.fn().mockReturnValue({ tags: ['hot-water-wait'] })
+      aiRecognizeHiddenPainPoints: jest.fn().mockReturnValue({ tags: ['hot-water-wait'] }),
     },
     aiValidation: { validateSolution: jest.fn().mockReturnValue({ valid: true }) },
     aiValidationEngineNew: {
       runValidationTest: jest.fn().mockResolvedValue({ passRate: 0.95 }),
       generateReport: jest.fn().mockResolvedValue({ id: 'report-1' }),
-      getStats: jest.fn().mockReturnValue({ tests: 3 })
+      getStats: jest.fn().mockReturnValue({ tests: 3 }),
     },
     feedbackCollector: {
-      collectFeedback: jest.fn().mockResolvedValue({ id: 'fb-1' })
-    }
+      collectFeedback: jest.fn().mockResolvedValue({ id: 'fb-1' }),
+    },
   };
   const authenticateToken = jest.fn((req, res, next) => {
     req.user = { id: 'user-1', role: 'designer' };
     next();
   });
   const checkRole = jest.fn(() => (req, res, next) => next());
-  const app = makeApp(createFrontOfficeRuntimeRouter({ db, engines, authenticateToken, checkRole }));
+  const app = makeApp(
+    createFrontOfficeRuntimeRouter({ db, engines, authenticateToken, checkRole })
+  );
   return { app, db, engines, authenticateToken };
 }
 
@@ -63,8 +65,14 @@ describe('front-office runtime route module', () => {
       .expect(200);
     expect(session.body.data.id).toBe('session-1');
 
-    await request(app).post('/api/quick-session/step1').send({ roomProfile: { area: 120 } }).expect(200);
-    await request(app).post('/api/quick-session/step2').send({ painPoints: { selected: ['hot'] } }).expect(200);
+    await request(app)
+      .post('/api/quick-session/step1')
+      .send({ roomProfile: { area: 120 } })
+      .expect(200);
+    await request(app)
+      .post('/api/quick-session/step2')
+      .send({ painPoints: { selected: ['hot'] } })
+      .expect(200);
 
     const step3 = await request(app)
       .post('/api/quick-session/step3')
@@ -96,35 +104,24 @@ describe('front-office runtime route module', () => {
     expect(created.body.data.id).toMatch(/^TPL-/);
     expect(db.templates).toHaveLength(1);
 
-    const list = await request(app)
-      .get('/api/templates')
-      .expect(200);
+    const list = await request(app).get('/api/templates').expect(200);
     expect(list.body.data).toHaveLength(1);
 
-    const categories = await request(app)
-      .get('/api/templates/categories')
-      .expect(200);
+    const categories = await request(app).get('/api/templates/categories').expect(200);
     expect(categories.body.data).toEqual(['villa']);
     expect(engines.templateEngine.loadTemplate).not.toHaveBeenCalledWith('categories');
 
-    const popular = await request(app)
-      .get('/api/templates/popular?limit=5')
-      .expect(200);
+    const popular = await request(app).get('/api/templates/popular?limit=5').expect(200);
     expect(popular.body.data).toEqual([{ id: 'popular-1' }]);
 
-    const loaded = await request(app)
-      .get('/api/templates/tpl-1')
-      .expect(200);
+    const loaded = await request(app).get('/api/templates/tpl-1').expect(200);
     expect(loaded.body.data.id).toBe('tpl-1');
   });
 
   test('preserves AI, validation, and feedback contracts', async () => {
     const { app } = makeHarness();
 
-    const fieldState = await request(app)
-      .post('/api/field-state')
-      .send({ area: 120 })
-      .expect(200);
+    const fieldState = await request(app).post('/api/field-state').send({ area: 120 }).expect(200);
     expect(fieldState.body.data.visibleFields).toContain('area');
 
     const hidden = await request(app)
