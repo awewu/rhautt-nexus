@@ -22,7 +22,9 @@ function exists(relativePath) {
 }
 
 function sha256(relativePath) {
-  return crypto.createHash('sha256').update(read(relativePath)).digest('hex');
+  // 与生成器保持一致：先归一化行尾再取哈希，避免 Windows(CRLF)/Linux(LF) 检出差异导致指纹漂移
+  const normalized = read(relativePath).replace(/\r\n/g, '\n');
+  return crypto.createHash('sha256').update(normalized).digest('hex');
 }
 
 function collectOperations(spec) {
