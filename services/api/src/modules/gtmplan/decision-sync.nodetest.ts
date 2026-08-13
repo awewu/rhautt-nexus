@@ -61,7 +61,10 @@ test('active 但无操作者署名 → 保持 proposed (finalDecision 必须人�
 });
 
 test('有 spend/收入时写 actualOutcome (结果回看素材)', () => {
-  const p = buildCampaignDecisionPayload(campaign({ spend: 120000, attributedRevenue: 480000 }), 'u-1');
+  const p = buildCampaignDecisionPayload(
+    campaign({ spend: 120000, attributedRevenue: 480000 }),
+    'u-1'
+  );
   assert.equal(p.actualOutcome, 'spend=120000; attributedRevenue=480000');
 });
 
@@ -89,7 +92,7 @@ test('201 成功 → ok, 且 URL/鉴权头正确', async () => {
       url = String(input);
       auth = init.headers.authorization;
       return new Response('{}', { status: 201 });
-    }) as typeof fetch,
+    }) as typeof fetch
   );
   assert.deepEqual(r, { ok: true, status: 201 });
   assert.equal(url, 'https://tandem.example/api/gateway/decisions');
@@ -98,8 +101,11 @@ test('201 成功 → ok, 且 URL/鉴权头正确', async () => {
 
 test('HTTP 400 / 网络异常 → fail-soft 返回错误对象, 不抛', async () => {
   const env = { TANDEM_AI_GATEWAY_URL: 'https://t.example', TANDEM_AI_GATEWAY_TOKEN: 'tok' };
-  const r400 = await syncDecisionToTandem(payload, env, (async () =>
-    new Response('bad', { status: 400 })) as typeof fetch);
+  const r400 = await syncDecisionToTandem(
+    payload,
+    env,
+    (async () => new Response('bad', { status: 400 })) as typeof fetch
+  );
   assert.equal(r400.ok, false);
   if (!r400.ok && !('skipped' in r400 && r400.skipped)) assert.equal((r400 as any).status, 400);
 

@@ -1,5 +1,14 @@
 import {
-  Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { DevicesCandidateService } from './devices-candidate.service';

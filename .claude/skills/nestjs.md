@@ -6,6 +6,7 @@ description: NestJS + TypeORM + PostgreSQL patterns for the 瑞诺瓦AI舒适家
 # NestJS Expert — 瑞诺瓦AI舒适家
 
 ## Project Stack
+
 - NestJS 11 + Fastify, TypeScript strict
 - TypeORM + PostgreSQL (rhautt_nexus DB)
 - `synchronize: true` in dev (auto-creates tables from entities)
@@ -14,6 +15,7 @@ description: NestJS + TypeORM + PostgreSQL patterns for the 瑞诺瓦AI舒适家
 - Tenant scope from `req.user.tenantId` (NEVER from headers)
 
 ## Entity Pattern
+
 ```ts
 @Entity('table_name')
 @Index(['tenantId', 'customerId'])
@@ -28,6 +30,7 @@ export class MyEntity {
 ```
 
 ## Service Pattern
+
 ```ts
 @Injectable()
 export class MyService {
@@ -40,6 +43,7 @@ export class MyService {
 ```
 
 ## Module Pattern
+
 ```ts
 @Module({
   imports: [TypeOrmModule.forFeature([MyEntity]), AuthModule],
@@ -51,17 +55,25 @@ export class MyModule {}
 ```
 
 ## Controller Pattern
+
 ```ts
 @UseGuards(AuthGuard)
 @Controller('my-resource')
 export class MyController {
-  @Get()    list(@Req() req: any) { return this.svc.list(req.user); }
-  @Post()   create(@Req() req: any, @Body() b: any) { return this.svc.create(req.user, b); }
-  @Get(':id') get(@Req() req: any, @Param('id') id: string) { return this.svc.get(req.user, id); }
+  @Get() list(@Req() req: any) {
+    return this.svc.list(req.user);
+  }
+  @Post() create(@Req() req: any, @Body() b: any) {
+    return this.svc.create(req.user, b);
+  }
+  @Get(':id') get(@Req() req: any, @Param('id') id: string) {
+    return this.svc.get(req.user, id);
+  }
 }
 ```
 
 ## Rules
+
 - ALWAYS wrap responses: `{ success: true, data: result }`
 - ALWAYS scope queries by `tenantId`
 - NEVER hardcode tenantId — read from `user.tenantId`

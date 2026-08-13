@@ -1,6 +1,10 @@
 import {
-  Column, CreateDateColumn, Entity, Index,
-  PrimaryGeneratedColumn, UpdateDateColumn
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 /**
@@ -31,7 +35,10 @@ export class GlobalProductEntity {
 
   // 精算必填参数（仅 verified 可驱动 design CALC-*；calibrated/unverified 只进 BOM）
   @Column({ name: 'data_trust_level', default: 'unverified' }) dataTrustLevel: DataTrustLevel;
-  @Column({ name: 'canonical_params', type: 'jsonb', default: {} }) canonicalParams: Record<string, unknown>;
+  @Column({ name: 'canonical_params', type: 'jsonb', default: {} }) canonicalParams: Record<
+    string,
+    unknown
+  >;
 
   // 只读副本同步水位（最终一致：副本延迟期内业务以此判断是否可下单）
   @Column({ name: 'source_version', default: 1 }) sourceVersion: number;

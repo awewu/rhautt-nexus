@@ -28,7 +28,11 @@ export function siteMediaOriginEnabled() {
 }
 
 export function shouldSyncPublicSiteImage(entityType: string, mimeType?: string | null) {
-  return String(mimeType || '').toLowerCase().startsWith('image/') && PUBLIC_SITE_IMAGE_TYPES.has(entityType);
+  return (
+    String(mimeType || '')
+      .toLowerCase()
+      .startsWith('image/') && PUBLIC_SITE_IMAGE_TYPES.has(entityType)
+  );
 }
 
 export function publicSiteImageUrl(fileKey: string) {
@@ -43,7 +47,11 @@ export function publicSiteImageUrl(fileKey: string) {
   return encodedKey ? `${origin}/media/${encodedKey}` : '';
 }
 
-export async function syncPublicSiteImage(input: { fileKey: string; mimeType: string; buffer: Buffer }) {
+export async function syncPublicSiteImage(input: {
+  fileKey: string;
+  mimeType: string;
+  buffer: Buffer;
+}) {
   if (!siteMediaOriginEnabled()) return '';
   const response = await postToMediaOrigin({
     kind: 'artifact-image',
@@ -52,7 +60,9 @@ export async function syncPublicSiteImage(input: { fileKey: string; mimeType: st
     dataBase64: input.buffer.toString('base64'),
   });
   const path = String(response?.data?.path || '');
-  const url = path ? new URL(path, `${siteMediaOriginUrl()}/`).toString() : publicSiteImageUrl(input.fileKey);
+  const url = path
+    ? new URL(path, `${siteMediaOriginUrl()}/`).toString()
+    : publicSiteImageUrl(input.fileKey);
   await assertPublicMediaAvailable(url);
   return url;
 }
@@ -66,12 +76,17 @@ export async function readPublicSiteImage(fileKey: string) {
   return Buffer.from(await response.arrayBuffer());
 }
 
-export async function syncSiteMaterialBundle(manifest: Record<string, unknown>, files: SiteMaterialFile[] = []) {
+export async function syncSiteMaterialBundle(
+  manifest: Record<string, unknown>,
+  files: SiteMaterialFile[] = []
+) {
   if (!siteMediaOriginEnabled()) return null;
   const response = await postToMediaOrigin({ kind: 'site-material-bundle', manifest, files });
   for (const file of files) {
     const relative = file.path.split('/').filter(Boolean).map(encodeURIComponent).join('/');
-    await assertPublicMediaAvailable(`${siteMediaOriginUrl()}/assets/img/site-materials/${relative}`);
+    await assertPublicMediaAvailable(
+      `${siteMediaOriginUrl()}/assets/img/site-materials/${relative}`
+    );
   }
   return response?.data || manifest;
 }
@@ -84,7 +99,8 @@ export async function readRemoteSiteMaterialManifest() {
     cache: 'no-store',
   });
   if (response.status === 404) return {};
-  if (!response.ok) throw new BadGatewayException(`Everhot media manifest returned HTTP ${response.status}`);
+  if (!response.ok)
+    throw new BadGatewayException(`Everhot media manifest returned HTTP ${response.status}`);
   return response.json() as Promise<Record<string, unknown>>;
 }
 
@@ -98,7 +114,9 @@ export async function readRemoteSiteMaterialAsset(asset: string) {
 }
 
 function siteMediaOriginUrl() {
-  return String(process.env.SITE_MEDIA_ORIGIN_URL || '').trim().replace(/\/+$/, '');
+  return String(process.env.SITE_MEDIA_ORIGIN_URL || '')
+    .trim()
+    .replace(/\/+$/, '');
 }
 
 function siteMediaSyncUrl() {
@@ -108,7 +126,8 @@ function siteMediaSyncUrl() {
 
 async function postToMediaOrigin(payload: Record<string, unknown>) {
   const token = String(process.env.SITE_MEDIA_SYNC_TOKEN || '');
-  if (!siteMediaOriginUrl() || !token) throw new BadGatewayException('A-server media sync is not configured');
+  if (!siteMediaOriginUrl() || !token)
+    throw new BadGatewayException('A-server media sync is not configured');
   const response = await fetchWithTimeout(siteMediaSyncUrl(), {
     method: 'POST',
     headers: {
@@ -117,9 +136,11 @@ async function postToMediaOrigin(payload: Record<string, unknown>) {
     },
     body: JSON.stringify(payload),
   });
-  const result = await response.json().catch(() => null) as any;
+  const result = (await response.json().catch(() => null)) as any;
   if (!response.ok || result?.success !== true) {
-    throw new BadGatewayException(result?.error || `A-server media sync returned HTTP ${response.status}`);
+    throw new BadGatewayException(
+      result?.error || `A-server media sync returned HTTP ${response.status}`
+    );
   }
   return result;
 }
@@ -127,7 +148,8 @@ async function postToMediaOrigin(payload: Record<string, unknown>) {
 async function assertPublicMediaAvailable(url: string) {
   if (!url) throw new BadGatewayException('A-server media sync did not return a public URL');
   const response = await fetchWithTimeout(url, { method: 'HEAD', cache: 'no-store' });
-  if (!response.ok) throw new BadGatewayException(`A-server image verification returned HTTP ${response.status}`);
+  if (!response.ok)
+    throw new BadGatewayException(`A-server image verification returned HTTP ${response.status}`);
 }
 
 async function fetchWithTimeout(url: string, init: RequestInit) {

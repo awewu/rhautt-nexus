@@ -30,7 +30,7 @@ class DigitalTwinEngine {
    */
   createScene(projectData) {
     const { projectId, houseType, area, layout, systems } = projectData;
-    
+
     const scene = {
       id: `scene_${projectId}`,
       projectId,
@@ -42,12 +42,12 @@ class DigitalTwinEngine {
       pipes: [],
       cameras: [],
       createdAt: new Date().toISOString(),
-      lastUpdate: new Date().toISOString()
+      lastUpdate: new Date().toISOString(),
     };
 
     // 生成设备3D模型
-    systems.forEach(system => {
-      system.devices.forEach(device => {
+    systems.forEach((system) => {
+      system.devices.forEach((device) => {
         const device3D = this.createDevice3D(device);
         scene.devices.set(device.id, device3D);
       });
@@ -59,13 +59,13 @@ class DigitalTwinEngine {
     this.scenes.set(projectId, scene);
 
     console.log(`[DigitalTwin] 创建3D场景: ${projectId}`);
-    
+
     return {
       success: true,
       sceneId: scene.id,
       deviceCount: scene.devices.size,
       pipeCount: scene.pipes.length,
-      viewUrl: `/api/twin/scenes/${projectId}/view`
+      viewUrl: `/api/twin/scenes/${projectId}/view`,
     };
   }
 
@@ -79,7 +79,7 @@ class DigitalTwinEngine {
     }
 
     const { deviceId, temperature, pressure, flow, status, power } = deviceData;
-    
+
     const device = scene.devices.get(deviceId);
     if (device) {
       // 更新设备状态
@@ -89,13 +89,13 @@ class DigitalTwinEngine {
         flow,
         status,
         power,
-        lastUpdate: new Date().toISOString()
+        lastUpdate: new Date().toISOString(),
       };
 
       // 更新3D模型状态
       device.model.status = status;
       device.model.temperature = temperature;
-      
+
       scene.lastUpdate = new Date().toISOString();
 
       // 触发数据更新事件
@@ -104,7 +104,7 @@ class DigitalTwinEngine {
 
     return {
       success: true,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -113,14 +113,14 @@ class DigitalTwinEngine {
    */
   connectCamera(projectId, cameraConfig) {
     const { cameraId, streamUrl, position } = cameraConfig;
-    
+
     const camera = {
       id: cameraId,
       projectId,
       streamUrl,
       position,
       status: 'connected',
-      connectedAt: new Date().toISOString()
+      connectedAt: new Date().toISOString(),
     };
 
     this.cameras.set(cameraId, camera);
@@ -136,7 +136,7 @@ class DigitalTwinEngine {
       success: true,
       cameraId,
       liveUrl: `/api/twin/cameras/${cameraId}/live`,
-      embedUrl: `/api/twin/cameras/${cameraId}/embed`
+      embedUrl: `/api/twin/cameras/${cameraId}/embed`,
     };
   }
 
@@ -153,7 +153,7 @@ class DigitalTwinEngine {
     const analysis = {
       timestamp: new Date().toISOString(),
       cameraId,
-      detections: []
+      detections: [],
     };
 
     // 检测人员
@@ -163,7 +163,10 @@ class DigitalTwinEngine {
         type: 'person',
         count: personCount,
         confidence: 0.85,
-        bbox: [[100, 100], [200, 300]]
+        bbox: [
+          [100, 100],
+          [200, 300],
+        ],
       });
     }
 
@@ -174,7 +177,7 @@ class DigitalTwinEngine {
         violation: 'no_helmet',
         severity: 'medium',
         confidence: 0.78,
-        message: '检测到人员未佩戴安全帽'
+        message: '检测到人员未佩戴安全帽',
       });
     }
 
@@ -182,7 +185,7 @@ class DigitalTwinEngine {
     analysis.progress = {
       stage: '管道安装',
       completion: 65,
-      estimatedFinish: '3天后'
+      estimatedFinish: '3天后',
     };
 
     return analysis;
@@ -215,7 +218,7 @@ class DigitalTwinEngine {
       deviceId,
       command,
       executedAt: new Date().toISOString(),
-      estimatedEffect: '2秒内生效'
+      estimatedEffect: '2秒内生效',
     };
   }
 
@@ -239,18 +242,18 @@ class DigitalTwinEngine {
       statistics: {
         deviceCount: scene.devices.size,
         onlineCount: this.countOnlineDevices(scene),
-        alarmCount: this.countAlarms(scene)
-      }
+        alarmCount: this.countAlarms(scene),
+      },
     };
 
     if (includeDevices) {
-      viewData.devices = Array.from(scene.devices.values()).map(d => ({
+      viewData.devices = Array.from(scene.devices.values()).map((d) => ({
         id: d.id,
         type: d.type,
         position: d.position,
         status: d.data.status,
         temperature: d.data.temperature,
-        lastUpdate: d.data.lastUpdate
+        lastUpdate: d.data.lastUpdate,
       }));
     }
 
@@ -259,10 +262,10 @@ class DigitalTwinEngine {
     }
 
     if (includeCameras) {
-      viewData.cameras = scene.cameras.map(c => ({
+      viewData.cameras = scene.cameras.map((c) => ({
         id: c.id,
         status: c.status,
-        liveUrl: c.streamUrl
+        liveUrl: c.streamUrl,
       }));
     }
 
@@ -274,7 +277,7 @@ class DigitalTwinEngine {
    */
   convertBIMToScene(bimData) {
     const { ifcData, projectInfo } = bimData;
-    
+
     console.log('[DigitalTwin] 转换BIM模型...');
 
     // 提取BIM信息
@@ -283,7 +286,7 @@ class DigitalTwinEngine {
       source: 'BIM',
       projectInfo,
       elements: this.parseBIMElements(ifcData),
-      convertedAt: new Date().toISOString()
+      convertedAt: new Date().toISOString(),
     };
 
     return {
@@ -291,7 +294,7 @@ class DigitalTwinEngine {
       sceneId: scene.id,
       elementCount: scene.elements.length,
       conversionQuality: 'high',
-      scene
+      scene,
     };
   }
 
@@ -300,20 +303,20 @@ class DigitalTwinEngine {
    */
   simulateEnergyConsumption(projectId, config) {
     const { duration = 24, interval = 1 } = config; // 小时
-    
+
     const simulation = {
       projectId,
       duration: `${duration}小时`,
       interval: `${interval}小时`,
-      results: []
+      results: [],
     };
 
     // 生成仿真数据
     for (let i = 0; i < duration; i += interval) {
       const hour = i;
-      const outdoorTemp = 20 + Math.sin((hour - 6) * Math.PI / 12) * 10; // 温度曲线
+      const outdoorTemp = 20 + Math.sin(((hour - 6) * Math.PI) / 12) * 10; // 温度曲线
       const load = hour >= 8 && hour <= 22 ? 80 : 30; // 负载曲线
-      
+
       simulation.results.push({
         hour,
         outdoorTemp: outdoorTemp.toFixed(1),
@@ -322,20 +325,23 @@ class DigitalTwinEngine {
         sourceMix: {
           heatpump: 60,
           gas: 30,
-          electric: 10
-        }
+          electric: 10,
+        },
       });
     }
 
     // 计算总计
-    const totalConsumption = simulation.results.reduce((sum, r) => sum + parseFloat(r.energyConsumption), 0);
+    const totalConsumption = simulation.results.reduce(
+      (sum, r) => sum + parseFloat(r.energyConsumption),
+      0
+    );
     const totalCost = simulation.results.reduce((sum, r) => sum + parseFloat(r.cost), 0);
 
     return {
       ...simulation,
       totalConsumption: totalConsumption.toFixed(2),
       totalCost: totalCost.toFixed(2),
-      averageHourlyCost: (totalCost / duration).toFixed(2)
+      averageHourlyCost: (totalCost / duration).toFixed(2),
     };
   }
 
@@ -345,7 +351,7 @@ class DigitalTwinEngine {
     return {
       rooms: layout.rooms || [],
       dimensions: layout.dimensions || { width: 10, depth: 8, height: 2.8 },
-      orientation: layout.orientation || 'south'
+      orientation: layout.orientation || 'south',
     };
   }
 
@@ -360,24 +366,24 @@ class DigitalTwinEngine {
       model: {
         url: `/models/${device.type}.glb`,
         status: 'idle',
-        animations: []
+        animations: [],
       },
       data: {
         status: 'offline',
         temperature: null,
         pressure: null,
         flow: null,
-        lastUpdate: null
-      }
+        lastUpdate: null,
+      },
     };
   }
 
   generatePipes3D(systems) {
     const pipes = [];
-    
-    systems.forEach(system => {
+
+    systems.forEach((system) => {
       if (system.pipes) {
-        system.pipes.forEach(pipe => {
+        system.pipes.forEach((pipe) => {
           pipes.push({
             id: pipe.id,
             type: pipe.type, // 'hot_water', 'cold_water', 'refrigerant'
@@ -387,7 +393,7 @@ class DigitalTwinEngine {
             path: this.calculatePipePath(pipe),
             insulation: pipe.insulation || false,
             flow: 0,
-            temperature: null
+            temperature: null,
           });
         });
       }
@@ -400,8 +406,12 @@ class DigitalTwinEngine {
     // 简化路径计算
     return [
       pipe.startPosition,
-      { x: (pipe.startPosition.x + pipe.endPosition.x) / 2, y: pipe.startPosition.y, z: pipe.startPosition.z },
-      pipe.endPosition
+      {
+        x: (pipe.startPosition.x + pipe.endPosition.x) / 2,
+        y: pipe.startPosition.y,
+        z: pipe.startPosition.z,
+      },
+      pipe.endPosition,
     ];
   }
 
@@ -412,7 +422,7 @@ class DigitalTwinEngine {
 
   countOnlineDevices(scene) {
     let count = 0;
-    scene.devices.forEach(device => {
+    scene.devices.forEach((device) => {
       if (device.data.status === 'running') count++;
     });
     return count;
@@ -420,7 +430,7 @@ class DigitalTwinEngine {
 
   countAlarms(scene) {
     let count = 0;
-    scene.devices.forEach(device => {
+    scene.devices.forEach((device) => {
       if (device.data.temperature > 80) count++;
     });
     return count;
@@ -432,13 +442,13 @@ class DigitalTwinEngine {
       { type: 'wall', count: 10 },
       { type: 'window', count: 6 },
       { type: 'door', count: 4 },
-      { type: 'equipment', count: 8 }
+      { type: 'equipment', count: 8 },
     ];
   }
 
   async load3DEngine() {
     console.log('[DigitalTwin] 加载3D引擎...');
-    return new Promise(resolve => setTimeout(resolve, 100));
+    return new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   startRealTimeSync() {
@@ -446,11 +456,12 @@ class DigitalTwinEngine {
       // 定期同步数据
       this.scenes.forEach((scene, projectId) => {
         // 检查设备超时
-        scene.devices.forEach(device => {
+        scene.devices.forEach((device) => {
           if (device.data.lastUpdate) {
             const lastUpdate = new Date(device.data.lastUpdate);
             const now = new Date();
-            if (now - lastUpdate > 60000) { // 1分钟无更新
+            if (now - lastUpdate > 60000) {
+              // 1分钟无更新
               device.data.status = 'offline';
             }
           }

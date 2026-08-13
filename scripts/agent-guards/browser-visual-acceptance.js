@@ -13,7 +13,8 @@ try {
 
 const ROOT = path.join(__dirname, '..', '..');
 const EXTERNAL_BASE_URL = process.env.VISUAL_BASE_URL;
-const VISUAL_BROWSER_WS_ENDPOINT = process.env.VISUAL_BROWSER_WS_ENDPOINT || process.env.VISUAL_CDP_ENDPOINT || '';
+const VISUAL_BROWSER_WS_ENDPOINT =
+  process.env.VISUAL_BROWSER_WS_ENDPOINT || process.env.VISUAL_CDP_ENDPOINT || '';
 const VISUAL_BROWSER_EXECUTABLE_PATH =
   process.env.VISUAL_BROWSER_EXECUTABLE_PATH || findSystemBrowser();
 const LOCAL_STATIC_HOST = 'http://rhautt-nexus.local';
@@ -22,24 +23,28 @@ const REMOTE_CDP_MODE = Boolean(VISUAL_BROWSER_WS_ENDPOINT);
 const BASE_URL = LOCAL_STATIC_MODE ? LOCAL_STATIC_HOST : EXTERNAL_BASE_URL;
 const REPORT_BASE_URL = LOCAL_STATIC_MODE ? 'local-static://archive/legacy-ui/public' : BASE_URL;
 const EXECUTION_MODE = REMOTE_CDP_MODE
-  ? (LOCAL_STATIC_MODE ? 'remote-cdp-local-static-fixture' : 'remote-cdp-external-url')
-  : (LOCAL_STATIC_MODE ? 'local-static-fixture' : 'external-url');
+  ? LOCAL_STATIC_MODE
+    ? 'remote-cdp-local-static-fixture'
+    : 'remote-cdp-external-url'
+  : LOCAL_STATIC_MODE
+    ? 'local-static-fixture'
+    : 'external-url';
 const REPORT_JSON = path.join(ROOT, 'audit', 'browser-visual-acceptance-report.json');
 const REPORT_MD = path.join(ROOT, 'audit', 'browser-visual-acceptance-report.md');
 const RELEASE_EVIDENCE_JSON = path.join(ROOT, 'evidence', 'release-evidence.json');
 
 const pages = [
   { path: '/index.html', title: /Rhautt Comfort/, text: '舒适家居行业的售前' },
-  { path: '/index-ready.html', title: /Rhautt Comfort|瑞合瑞德/, text: '瑞合瑞德' }
+  { path: '/index-ready.html', title: /Rhautt Comfort|瑞合瑞德/, text: '瑞合瑞德' },
 ];
 
 function finalLaunchVisualProofFromReport(report) {
   return Boolean(
     report?.summary?.pages === pages.length &&
-      report?.summary?.failed === 0 &&
-      report?.summary?.passed === pages.length &&
-      report?.executionMode !== 'local-static-fixture' &&
-      report?.baseUrl !== 'local-static://archive/legacy-ui/public'
+    report?.summary?.failed === 0 &&
+    report?.summary?.passed === pages.length &&
+    report?.executionMode !== 'local-static-fixture' &&
+    report?.baseUrl !== 'local-static://archive/legacy-ui/public'
   );
 }
 
@@ -57,7 +62,7 @@ const FORBIDDEN_RENDERED_PATTERNS = [
   /一键生成/,
   /魔法/,
   /舒适岛/,
-  /锁客/
+  /锁客/,
 ];
 
 const PNG_1X1 = Buffer.from(
@@ -162,26 +167,38 @@ const ORBIT_CONTROLS_STUB = `
 async function designerProbe(page) {
   return page.evaluate(() => {
     const canvases = [...document.querySelectorAll('canvas')];
-    const canvas = canvases.find(item => item.width > 50 && item.height > 50);
+    const canvas = canvases.find((item) => item.width > 50 && item.height > 50);
     if (!canvas) return { ok: false, reason: 'no canvas' };
     const ctx = canvas.getContext('2d');
     if (!ctx) return { ok: false, reason: 'no 2d context' };
-    const sample = ctx.getImageData(0, 0, Math.min(canvas.width, 120), Math.min(canvas.height, 120)).data;
+    const sample = ctx.getImageData(
+      0,
+      0,
+      Math.min(canvas.width, 120),
+      Math.min(canvas.height, 120)
+    ).data;
     let nonBlank = 0;
     for (let index = 0; index < sample.length; index += 4) {
-      if (sample[index] || sample[index + 1] || sample[index + 2] || sample[index + 3]) nonBlank += 1;
+      if (sample[index] || sample[index + 1] || sample[index + 2] || sample[index + 3])
+        nonBlank += 1;
     }
-    return { ok: nonBlank > 30, canvasCount: canvases.length, width: canvas.width, height: canvas.height, nonBlank };
+    return {
+      ok: nonBlank > 30,
+      canvasCount: canvases.length,
+      width: canvas.width,
+      height: canvas.height,
+      nonBlank,
+    };
   });
 }
 
 async function inspectPage(context, spec) {
   const page = await context.newPage();
   const consoleErrors = [];
-  page.on('console', msg => {
+  page.on('console', (msg) => {
     if (msg.type() === 'error') consoleErrors.push(msg.text());
   });
-  page.on('pageerror', error => consoleErrors.push(error.message));
+  page.on('pageerror', (error) => consoleErrors.push(error.message));
 
   const startedAt = Date.now();
   let status = 0;
@@ -191,15 +208,25 @@ async function inspectPage(context, spec) {
   let canvas = null;
 
   try {
-    const response = await page.goto(`${BASE_URL}${spec.path}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    const response = await page.goto(`${BASE_URL}${spec.path}`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 15000,
+    });
     status = response ? response.status() : 0;
     await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
     title = await page.title();
-    textMatched = await page.getByText(spec.text, { exact: false }).count().then(count => count > 0).catch(() => false);
-    const renderedText = await page.locator('body').innerText({ timeout: 3000 }).catch(() => '');
-    forbiddenText = FORBIDDEN_RENDERED_PATTERNS
-      .filter(pattern => pattern.test(renderedText))
-      .map(pattern => String(pattern));
+    textMatched = await page
+      .getByText(spec.text, { exact: false })
+      .count()
+      .then((count) => count > 0)
+      .catch(() => false);
+    const renderedText = await page
+      .locator('body')
+      .innerText({ timeout: 3000 })
+      .catch(() => '');
+    forbiddenText = FORBIDDEN_RENDERED_PATTERNS.filter((pattern) => pattern.test(renderedText)).map(
+      (pattern) => String(pattern)
+    );
     if (spec.canvasProbe === 'designer') canvas = await designerProbe(page);
   } catch (error) {
     consoleErrors.push(error.message);
@@ -207,7 +234,9 @@ async function inspectPage(context, spec) {
 
   await page.close();
 
-  const passed = status >= 200 && status < 400 &&
+  const passed =
+    status >= 200 &&
+    status < 400 &&
     spec.title.test(title) &&
     (textMatched || spec.optionalText) &&
     forbiddenText.length === 0 &&
@@ -225,7 +254,7 @@ async function inspectPage(context, spec) {
     consoleErrors,
     canvas,
     durationMs: Date.now() - startedAt,
-    passed
+    passed,
   };
 }
 
@@ -236,7 +265,7 @@ function sha256(relativePath) {
 }
 
 async function installLocalStaticFixture(context) {
-  await context.route('**/*', async route => {
+  await context.route('**/*', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
 
@@ -244,16 +273,24 @@ async function installLocalStaticFixture(context) {
       return route.fulfill({
         status: 200,
         contentType: 'application/json; charset=utf-8',
-        body: JSON.stringify(mockApiResponse(url, request.method()))
+        body: JSON.stringify(mockApiResponse(url, request.method())),
       });
     }
 
     if (url.hostname === 'cdn.jsdelivr.net') {
       if (url.pathname.includes('/konva@')) {
-        return route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: KONVA_STATIC_STUB });
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/javascript; charset=utf-8',
+          body: KONVA_STATIC_STUB,
+        });
       }
       if (url.pathname.includes('/OrbitControls.js')) {
-        return route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: ORBIT_CONTROLS_STUB });
+        return route.fulfill({
+          status: 200,
+          contentType: 'application/javascript; charset=utf-8',
+          body: ORBIT_CONTROLS_STUB,
+        });
       }
       if (url.pathname.includes('/three@')) {
         return fulfillFile(route, 'node_modules/three/build/three.min.js');
@@ -270,11 +307,21 @@ async function installLocalStaticFixture(context) {
       return fulfillFile(route, relativePath);
     }
 
-    if (staticPath === '/icon-192.png' || staticPath.endsWith('.png') || staticPath.endsWith('.jpg') || staticPath.endsWith('.jpeg') || staticPath.endsWith('.webp')) {
+    if (
+      staticPath === '/icon-192.png' ||
+      staticPath.endsWith('.png') ||
+      staticPath.endsWith('.jpg') ||
+      staticPath.endsWith('.jpeg') ||
+      staticPath.endsWith('.webp')
+    ) {
       return route.fulfill({ status: 200, contentType: 'image/png', body: PNG_1X1 });
     }
 
-    return route.fulfill({ status: 404, contentType: 'text/plain; charset=utf-8', body: `missing local fixture: ${url.pathname}` });
+    return route.fulfill({
+      status: 404,
+      contentType: 'text/plain; charset=utf-8',
+      body: `missing local fixture: ${url.pathname}`,
+    });
   });
 }
 
@@ -290,33 +337,39 @@ function fulfillFile(route, relativePath) {
   return route.fulfill({
     status: 200,
     contentType: contentTypeFor(fullPath),
-    body: fs.readFileSync(fullPath)
+    body: fs.readFileSync(fullPath),
   });
 }
 
 function contentTypeFor(filePath) {
   const ext = path.extname(filePath).toLowerCase();
-  return {
-    '.html': 'text/html; charset=utf-8',
-    '.css': 'text/css; charset=utf-8',
-    '.js': 'application/javascript; charset=utf-8',
-    '.json': 'application/json; charset=utf-8',
-    '.svg': 'image/svg+xml',
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.ico': 'image/x-icon',
-    '.webp': 'image/webp'
-  }[ext] || 'application/octet-stream';
+  return (
+    {
+      '.html': 'text/html; charset=utf-8',
+      '.css': 'text/css; charset=utf-8',
+      '.js': 'application/javascript; charset=utf-8',
+      '.json': 'application/json; charset=utf-8',
+      '.svg': 'image/svg+xml',
+      '.png': 'image/png',
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.ico': 'image/x-icon',
+      '.webp': 'image/webp',
+    }[ext] || 'application/octet-stream'
+  );
 }
 
 function mockApiResponse(url, method) {
   const pathname = url.pathname;
-  const ok = data => ({ success: true, data });
+  const ok = (data) => ({ success: true, data });
 
-  if (pathname === '/api/health') return { success: true, status: 'ok', service: 'rhautt-nexus-visual-fixture' };
+  if (pathname === '/api/health')
+    return { success: true, status: 'ok', service: 'rhautt-nexus-visual-fixture' };
   if (pathname === '/api/auth/login') {
-    return ok({ token: 'visual-fixture-token', user: { id: 'visual-user', name: '视觉验收账号', role: 'hq_admin', tenantId: 'rhautt-hq' } });
+    return ok({
+      token: 'visual-fixture-token',
+      user: { id: 'visual-user', name: '视觉验收账号', role: 'hq_admin', tenantId: 'rhautt-hq' },
+    });
   }
   if (pathname === '/api/dashboard/stats') {
     return ok({
@@ -324,7 +377,7 @@ function mockApiResponse(url, method) {
       contracts: { total: 36, completed: 18, inProgress: 12 },
       revenue: { total: 18600000, avgOrderValue: 516000 },
       funnel: { leads: 88, qualified: 52, proposal: 31, won: 18, winRate: '34.6%' },
-      products: { active: 26 }
+      products: { active: 26 },
     });
   }
   if (pathname === '/api/dashboard/sales-trend') {
@@ -333,11 +386,17 @@ function mockApiResponse(url, method) {
       { month: '2026-02', revenue: 1800000, contractCount: 4 },
       { month: '2026-03', revenue: 2600000, contractCount: 6 },
       { month: '2026-04', revenue: 3100000, contractCount: 7 },
-      { month: '2026-05', revenue: 3600000, contractCount: 8 }
+      { month: '2026-05', revenue: 3600000, contractCount: 8 },
     ]);
   }
   if (/^\/api\/contracts\/[^/]+\/report$/.test(pathname)) {
-    return ok({ contractId: pathname.split('/')[3], customer: '王女士', progress: 62, contractPrice: 328000, totalMaterialCost: 198000 });
+    return ok({
+      contractId: pathname.split('/')[3],
+      customer: '王女士',
+      progress: 62,
+      contractPrice: 328000,
+      totalMaterialCost: 198000,
+    });
   }
   if (/^\/api\/contracts\/[^/]+\/gantt$/.test(pathname)) {
     return ok({
@@ -345,26 +404,53 @@ function mockApiResponse(url, method) {
       completedPhases: 2,
       inProgressPhases: 1,
       phases: [
-        { phaseId: 'P1', phase: '深化设计', date: '2026-06-01', description: '图纸与设备清单确认', status: 'completed' },
-        { phaseId: 'P2', phase: '材料进场', date: '2026-06-05', description: '主材与辅材入库', status: 'completed' },
-        { phaseId: 'P3', phase: '隐蔽施工', date: '2026-06-08', description: '管路、风道、水路预埋', status: 'in_progress' },
-        { phaseId: 'P4', phase: '设备安装', date: '2026-06-18', description: '主机与末端设备安装', status: 'pending' }
-      ]
+        {
+          phaseId: 'P1',
+          phase: '深化设计',
+          date: '2026-06-01',
+          description: '图纸与设备清单确认',
+          status: 'completed',
+        },
+        {
+          phaseId: 'P2',
+          phase: '材料进场',
+          date: '2026-06-05',
+          description: '主材与辅材入库',
+          status: 'completed',
+        },
+        {
+          phaseId: 'P3',
+          phase: '隐蔽施工',
+          date: '2026-06-08',
+          description: '管路、风道、水路预埋',
+          status: 'in_progress',
+        },
+        {
+          phaseId: 'P4',
+          phase: '设备安装',
+          date: '2026-06-18',
+          description: '主机与末端设备安装',
+          status: 'pending',
+        },
+      ],
     });
   }
-  if (/^\/api\/contracts\/[^/]+\/phase\/[^/]+\/(start|complete)$/.test(pathname)) return ok({ status: 'updated' });
+  if (/^\/api\/contracts\/[^/]+\/phase\/[^/]+\/(start|complete)$/.test(pathname))
+    return ok({ status: 'updated' });
   if (/^\/api\/material\/[^/]+\/movement$/.test(pathname)) return ok({ status: 'recorded' });
   if (/^\/api\/material\/[^/]+$/.test(pathname)) {
     return ok({
       categories: [
         { category: '热水系统', items: [{ name: '中央热水主机', totalPrice: 68000 }] },
-        { category: '空气系统', items: [{ name: '全空气末端', totalPrice: 86000 }] }
+        { category: '空气系统', items: [{ name: '全空气末端', totalPrice: 86000 }] },
       ],
-      movements: []
+      movements: [],
     });
   }
-  if (/^\/api\/acceptance\/[^/]+$/.test(pathname)) return method === 'POST' ? ok({ id: 'ACC-VISUAL' }) : ok([]);
-  if (/^\/api\/settlement\/[^/]+$/.test(pathname)) return method === 'POST' ? ok({ id: 'SET-VISUAL' }) : ok([]);
+  if (/^\/api\/acceptance\/[^/]+$/.test(pathname))
+    return method === 'POST' ? ok({ id: 'ACC-VISUAL' }) : ok([]);
+  if (/^\/api\/settlement\/[^/]+$/.test(pathname))
+    return method === 'POST' ? ok({ id: 'SET-VISUAL' }) : ok([]);
   if (pathname === '/api/quote/with-promotion') {
     return ok({
       breakdown: {
@@ -375,10 +461,13 @@ function mockApiResponse(url, method) {
         promotionDiscount: { rate: 0.97, after: 255645 },
         finalPrice: 255645,
         savedAmount: 30355,
-        savedPercent: '10.6%'
+        savedPercent: '10.6%',
       },
-      items: [{ name: '中央热水系统', amount: 88000 }, { name: '全空气系统', amount: 168000 }],
-      validUntil: '2026-07-05T00:00:00.000Z'
+      items: [
+        { name: '中央热水系统', amount: 88000 },
+        { name: '全空气系统', amount: 168000 },
+      ],
+      validUntil: '2026-07-05T00:00:00.000Z',
     });
   }
   if (pathname === '/api/quotation-v2/from-bom') {
@@ -394,45 +483,106 @@ function mockApiResponse(url, method) {
         tax: 10800,
         customerTotal: 198000,
         monthlyPayment: 5500,
-        grossMarginRate: 0.22
+        grossMarginRate: 0.22,
       },
       costBreakdown: [],
       marginGuard: { status: 'pass', quoteFloor: 174000 },
-      assumptions: []
+      assumptions: [],
     });
   }
   if (pathname === '/api/products') {
     if (method === 'POST') return ok({ id: 'P-VISUAL' });
     return ok([
-      { id: 'P1', model: 'Rheem DHW-80', specs: '中央热水', system: 'hot_water', brand: 'Rheem', price: 68000, status: 'active' },
-      { id: 'P2', model: 'Ruud Air Pro', specs: '全空气系统', system: 'air', brand: 'Ruud', price: 128000, status: 'active' },
-      { id: 'P3', model: 'Everhot Villa', specs: '墅级热水', system: 'hot_water', brand: 'Everhot', price: 98000, status: 'offshelf' }
+      {
+        id: 'P1',
+        model: 'Rheem DHW-80',
+        specs: '中央热水',
+        system: 'hot_water',
+        brand: 'Rheem',
+        price: 68000,
+        status: 'active',
+      },
+      {
+        id: 'P2',
+        model: 'Ruud Air Pro',
+        specs: '全空气系统',
+        system: 'air',
+        brand: 'Ruud',
+        price: 128000,
+        status: 'active',
+      },
+      {
+        id: 'P3',
+        model: 'Everhot Villa',
+        specs: '墅级热水',
+        system: 'hot_water',
+        brand: 'Everhot',
+        price: 98000,
+        status: 'offshelf',
+      },
     ]);
   }
   if (/^\/api\/products\/[^/]+\/shelf$/.test(pathname)) return ok({ status: 'updated' });
   if (pathname === '/api/promotion') {
     if (method === 'POST') return ok({ id: 'PROMO-VISUAL' });
-    return ok([{ id: 'PR1', name: '总部联动政策', discount: 0.92, startDate: '2026-06-01', endDate: '2026-06-30', isActive: true }]);
+    return ok([
+      {
+        id: 'PR1',
+        name: '总部联动政策',
+        discount: 0.92,
+        startDate: '2026-06-01',
+        endDate: '2026-06-30',
+        isActive: true,
+      },
+    ]);
   }
   if (/^\/api\/promotion\/[^/]+$/.test(pathname)) return ok({ deleted: true });
   if (pathname === '/api/pricing') {
-    return ok({ baseDiscount: 0.96, categoryDiscounts: { hot_water: 0.95, air: 0.94, water: 0.96 }, lastUpdated: '2026-06-06' });
+    return ok({
+      baseDiscount: 0.96,
+      categoryDiscounts: { hot_water: 0.95, air: 0.94, water: 0.96 },
+      lastUpdated: '2026-06-06',
+    });
   }
   if (pathname === '/api/crm/customers') {
     return ok([
-      { id: 'C001', name: '王女士', phone: '13400000000', city: '成都', houseType: '三室两厅', area: 138, createdAt: '2026-05-20T00:00:00.000Z' },
-      { id: 'C002', name: '李先生', phone: '13500000000', city: '杭州', houseType: '大平层', area: 218, createdAt: '2026-05-24T00:00:00.000Z' }
+      {
+        id: 'C001',
+        name: '王女士',
+        phone: '13400000000',
+        city: '成都',
+        houseType: '三室两厅',
+        area: 138,
+        createdAt: '2026-05-20T00:00:00.000Z',
+      },
+      {
+        id: 'C002',
+        name: '李先生',
+        phone: '13500000000',
+        city: '杭州',
+        houseType: '大平层',
+        area: 218,
+        createdAt: '2026-05-24T00:00:00.000Z',
+      },
     ]);
   }
   if (/^\/api\/crm\/customers\/[^/]+\/360$/.test(pathname)) {
-    return ok({ profile: { id: 'C001', name: '王女士', city: '成都', houseType: '三室两厅', area: 138 }, quoteCount: 2, contractCount: 1, totalRevenue: 328000, stage: '施工安装', interactionCount: 9 });
+    return ok({
+      profile: { id: 'C001', name: '王女士', city: '成都', houseType: '三室两厅', area: 138 },
+      quoteCount: 2,
+      contractCount: 1,
+      totalRevenue: 328000,
+      stage: '施工安装',
+      interactionCount: 9,
+    });
   }
-  if (/^\/api\/crm\/customers\/[^/]+\/interactions$/.test(pathname)) return ok({ id: 'INT-VISUAL' });
+  if (/^\/api\/crm\/customers\/[^/]+\/interactions$/.test(pathname))
+    return ok({ id: 'INT-VISUAL' });
   if (pathname === '/api/crm/funnel') {
     return ok([
       { stage: '线索', count: 88, value: 12000000, conversionFromLead: '100%' },
       { stage: '方案', count: 31, value: 6400000, conversionFromLead: '35%' },
-      { stage: '赢单', count: 18, value: 4200000, conversionFromLead: '20%' }
+      { stage: '赢单', count: 18, value: 4200000, conversionFromLead: '20%' },
     ]);
   }
   if (pathname === '/api/crm/opportunities') return ok({ id: 'OPP-VISUAL' });
@@ -458,7 +608,7 @@ function renderMarkdown(report) {
       `Preflight failure: ${report.preflightFailure?.reason || 'unknown'}`,
       '',
       'The browser visual acceptance gate did not execute page checks. This report is not production visual proof.',
-      ''
+      '',
     ].join('\n');
   }
 
@@ -470,11 +620,13 @@ function renderMarkdown(report) {
     `Base URL: ${report.baseUrl}`,
     '',
     '| Page | Status | Title | Text | Canvas | Console Errors | Result |',
-    '|---|---:|---|---:|---:|---:|---:|'
+    '|---|---:|---|---:|---:|---:|---:|',
   ];
   for (const result of report.results) {
     const forbidden = result.forbiddenText?.length ? result.forbiddenText.length : 0;
-    lines.push(`| ${result.path} | ${result.status} | ${String(result.title).replace(/\|/g, '/')} | ${result.textMatched ? 'yes' : 'no'} | ${result.canvas ? (result.canvas.ok ? 'pass' : 'fail') : 'n/a'} | ${result.consoleErrors.length + forbidden} | ${result.passed ? 'pass' : 'fail'} |`);
+    lines.push(
+      `| ${result.path} | ${result.status} | ${String(result.title).replace(/\|/g, '/')} | ${result.textMatched ? 'yes' : 'no'} | ${result.canvas ? (result.canvas.ok ? 'pass' : 'fail') : 'n/a'} | ${result.consoleErrors.length + forbidden} | ${result.passed ? 'pass' : 'fail'} |`
+    );
   }
   return lines.join('\n');
 }
@@ -486,13 +638,14 @@ function compactError(error) {
   const machPort = combined.includes('MachPort') || combined.includes('bootstrap_check_in');
   const permissionDenied = combined.includes('Permission denied') || combined.includes('EPERM');
   return {
-    reason: machPort && permissionDenied
-      ? 'sandbox-browser-launch-permission-denied'
-      : 'browser-visual-preflight-failed',
+    reason:
+      machPort && permissionDenied
+        ? 'sandbox-browser-launch-permission-denied'
+        : 'browser-visual-preflight-failed',
     message: message.slice(0, 2000),
     machPort,
     permissionDenied,
-    stackHash: crypto.createHash('sha256').update(combined).digest('hex')
+    stackHash: crypto.createHash('sha256').update(combined).digest('hex'),
   };
 }
 
@@ -506,13 +659,13 @@ async function createBrowserSession() {
       close: async () => {
         await context.close().catch(() => {});
         await browser.close().catch(() => {});
-      }
+      },
     };
   }
 
   const browser = await chromium.launch({
     headless: true,
-    executablePath: VISUAL_BROWSER_EXECUTABLE_PATH || undefined
+    executablePath: VISUAL_BROWSER_EXECUTABLE_PATH || undefined,
   });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   return {
@@ -521,7 +674,7 @@ async function createBrowserSession() {
     close: async () => {
       await context.close().catch(() => {});
       await browser.close().catch(() => {});
-    }
+    },
   };
 }
 
@@ -533,7 +686,7 @@ function updateLocalReleaseEvidence(key, patch) {
   evidence.requiredEvidence = evidence.requiredEvidence || {};
   evidence.requiredEvidence[key] = {
     ...(evidence.requiredEvidence[key] || {}),
-    ...patch
+    ...patch,
   };
   evidence.updatedAt = new Date().toISOString();
   fs.mkdirSync(path.dirname(RELEASE_EVIDENCE_JSON), { recursive: true });
@@ -546,17 +699,17 @@ function findSystemBrowser() {
     'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
     'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
     'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
-    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'
+    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
   ];
-  return candidates.find(candidate => fs.existsSync(candidate)) || '';
+  return candidates.find((candidate) => fs.existsSync(candidate)) || '';
 }
 
 function writePreflightFailureReport(error) {
   const preflightFailure = compactError(error);
-  const sourceHashes = pages.map(spec => ({
+  const sourceHashes = pages.map((spec) => ({
     path: spec.path,
     sourcePath: `archive/legacy-ui/public${spec.path}`,
-    sourceSha256: sha256(`archive/legacy-ui/public${spec.path}`)
+    sourceSha256: sha256(`archive/legacy-ui/public${spec.path}`),
   }));
   const report = {
     generatedAt: new Date().toISOString(),
@@ -570,33 +723,36 @@ function writePreflightFailureReport(error) {
       pages: pages.length,
       passed: 0,
       failed: pages.length,
-      notExecuted: pages.length
+      notExecuted: pages.length,
     },
     sourceHashes,
-    results: []
+    results: [],
   };
 
   fs.writeFileSync(REPORT_JSON, JSON.stringify(report, null, 2));
   fs.writeFileSync(REPORT_MD, renderMarkdown(report));
   updateReleaseEvidence('browserVisual', {
-    command: 'VISUAL_BASE_URL=<staging-url-or-local-static> VISUAL_BROWSER_WS_ENDPOINT=<cdp-endpoint-optional> npm run guard:browser-visual',
+    command:
+      'VISUAL_BASE_URL=<staging-url-or-local-static> VISUAL_BROWSER_WS_ENDPOINT=<cdp-endpoint-optional> npm run guard:browser-visual',
     status: 'preflight-failed-browser-launch',
     path: 'audit/browser-visual-acceptance-report.json',
     summaryPath: 'audit/browser-visual-acceptance-report.md',
     baseUrl: REPORT_BASE_URL,
     pages: pages.length,
     pagesRequired: pages.length,
-    missingPages: pages.map(spec => spec.path),
+    missingPages: pages.map((spec) => spec.path),
     staleSourcePaths: [],
     finalLaunchVisualProof: false,
     preflightFailure,
-    currentBlocker: 'Browser visual acceptance could not launch Chromium in this environment. MachPort/Permission denied preflight failure is recorded; final visual proof still requires rerunning guard:browser-visual in a browser-capable environment.'
+    currentBlocker:
+      'Browser visual acceptance could not launch Chromium in this environment. MachPort/Permission denied preflight failure is recorded; final visual proof still requires rerunning guard:browser-visual in a browser-capable environment.',
   });
   updateReleaseEvidence('guardAll', {
     command: 'npm run guard:all',
     status: 'blocked-by-browser-visual',
     path: 'evidence/guards/',
-    currentBlocker: 'browserVisual preflight failed during guard:browser-visual because Chromium launch hit MachPort/Permission denied in this sandbox. guard:all:nonvisual can continue, but final guard:all requires fresh browser visual acceptance.'
+    currentBlocker:
+      'browserVisual preflight failed during guard:browser-visual because Chromium launch hit MachPort/Permission denied in this sandbox. guard:all:nonvisual can continue, but final guard:all requires fresh browser visual acceptance.',
   });
   return report;
 }
@@ -617,17 +773,18 @@ async function main() {
     executionMode: EXECUTION_MODE,
     summary: {
       pages: results.length,
-      passed: results.filter(result => result.passed).length,
-      failed: results.filter(result => !result.passed).length
+      passed: results.filter((result) => result.passed).length,
+      failed: results.filter((result) => !result.passed).length,
     },
-    results
+    results,
   };
   report.finalLaunchVisualProof = finalLaunchVisualProofFromReport(report);
 
   fs.writeFileSync(REPORT_JSON, JSON.stringify(report, null, 2));
   fs.writeFileSync(REPORT_MD, renderMarkdown(report));
   updateReleaseEvidence('browserVisual', {
-    command: 'VISUAL_BASE_URL=<staging-url-or-local-static> VISUAL_BROWSER_WS_ENDPOINT=<cdp-endpoint-optional> npm run guard:browser-visual',
+    command:
+      'VISUAL_BASE_URL=<staging-url-or-local-static> VISUAL_BROWSER_WS_ENDPOINT=<cdp-endpoint-optional> npm run guard:browser-visual',
     status: 'passed-current-run',
     path: 'audit/browser-visual-acceptance-report.json',
     summaryPath: 'audit/browser-visual-acceptance-report.md',
@@ -640,19 +797,22 @@ async function main() {
     staleSourcePaths: [],
     finalLaunchVisualProof: report.finalLaunchVisualProof,
     currentBlocker: null,
-    lastRunAt: report.generatedAt
+    lastRunAt: report.generatedAt,
   });
   updateReleaseEvidence('guardAll', {
     command: 'npm run guard:all',
     status: 'blocked-by-sandbox-browser-launch',
     path: 'evidence/guards/',
-    currentBlocker: 'browserVisual passed current-run and guard:all:nonvisual can verify the non-visual suite, but final guard:all still needs a fresh full run in an environment where Playwright Chromium is not blocked by MachPort permissions.'
+    currentBlocker:
+      'browserVisual passed current-run and guard:all:nonvisual can verify the non-visual suite, but final guard:all still needs a fresh full run in an environment where Playwright Chromium is not blocked by MachPort permissions.',
   });
-  console.log(`Browser visual acceptance: ${report.summary.passed}/${report.summary.pages} pages passed`);
+  console.log(
+    `Browser visual acceptance: ${report.summary.passed}/${report.summary.pages} pages passed`
+  );
   if (report.summary.failed) process.exit(1);
 }
 
-main().catch(error => {
+main().catch((error) => {
   const report = writePreflightFailureReport(error);
   console.error(error);
   console.error(`Browser visual acceptance preflight failed: ${report.preflightFailure.reason}`);

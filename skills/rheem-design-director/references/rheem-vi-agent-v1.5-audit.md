@@ -161,11 +161,11 @@ Local static preview:
 
 Playwright viewport checks:
 
-| Viewport | Width | Body scroll width | Old `#C41230` | Logo source | Result |
-| --- | ---: | ---: | --- | --- | --- |
-| Desktop | 1440 | 1440 | Not present | Remote official-source badge loaded | Pass |
-| Tablet | 768 | 768 | Not present | Remote official-source badge loaded | Pass |
-| Mobile | 390 | 390 | Not present | Remote logo did not complete during one run | Pass layout, logo reliability gate |
+| Viewport | Width | Body scroll width | Old `#C41230` | Logo source                                 | Result                             |
+| -------- | ----: | ----------------: | ------------- | ------------------------------------------- | ---------------------------------- |
+| Desktop  |  1440 |              1440 | Not present   | Remote official-source badge loaded         | Pass                               |
+| Tablet   |   768 |               768 | Not present   | Remote official-source badge loaded         | Pass                               |
+| Mobile   |   390 |               390 | Not present   | Remote logo did not complete during one run | Pass layout, logo reliability gate |
 
 Notes:
 

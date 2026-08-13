@@ -1,6 +1,10 @@
 import {
-  Column, CreateDateColumn, Entity, Index,
-  PrimaryGeneratedColumn, UpdateDateColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('delivery_projects')
@@ -17,7 +21,8 @@ export class DeliveryProjectEntity {
   @Column({ type: 'uuid', name: 'quotation_id', nullable: true }) quotationId: string | null;
 
   @Column({ default: 'scheduled' }) status: string;
-  @Column({ type: 'varchar', name: 'current_milestone_key', nullable: true }) currentMilestoneKey: string | null;
+  @Column({ type: 'varchar', name: 'current_milestone_key', nullable: true }) currentMilestoneKey:
+    string | null;
   @Column({ type: 'numeric', name: 'total_amount', default: 0 }) totalAmount: number;
   @Column({ type: 'jsonb', default: () => "'{}'::jsonb" }) meta: Record<string, unknown>;
 
@@ -37,8 +42,10 @@ export class DeliveryMilestoneEntity {
   @Column() seq: number;
   @Column({ default: 'pending' }) status: 'pending' | 'in-progress' | 'completed';
   @Column({ type: 'boolean', name: 'requires_evidence', default: false }) requiresEvidence: boolean;
-  @Column({ type: 'boolean', name: 'requires_acceptance', default: false }) requiresAcceptance: boolean;
-  @Column({ type: 'varchar', name: 'unlocks_payment_key', nullable: true }) unlocksPaymentKey: string | null;
+  @Column({ type: 'boolean', name: 'requires_acceptance', default: false })
+  requiresAcceptance: boolean;
+  @Column({ type: 'varchar', name: 'unlocks_payment_key', nullable: true }) unlocksPaymentKey:
+    string | null;
   @Column({ type: 'timestamptz', name: 'started_at', nullable: true }) startedAt: Date | null;
   @Column({ type: 'timestamptz', name: 'completed_at', nullable: true }) completedAt: Date | null;
 
@@ -141,7 +148,8 @@ export class LifecycleLinkEntity {
   @Column({ type: 'uuid', name: 'opportunity_id', nullable: true }) opportunityId: string | null;
   @Column({ type: 'uuid', name: 'quotation_id', nullable: true }) quotationId: string | null;
   @Column({ type: 'uuid', name: 'contract_id', nullable: true }) contractId: string | null;
-  @Column({ type: 'uuid', name: 'design_project_id', nullable: true }) designProjectId: string | null;
+  @Column({ type: 'uuid', name: 'design_project_id', nullable: true }) designProjectId:
+    string | null;
   @Column({ default: 'lead' }) stage: string;
   @Column({ type: 'jsonb', default: () => "'{}'::jsonb" }) transitions: Record<string, unknown>;
 

@@ -58,7 +58,7 @@ export class GtmDigestService {
 
   async buildDigest(
     actor: JwtPayload,
-    opts: { days?: number; period?: string; model?: AttributionModel } = {},
+    opts: { days?: number; period?: string; model?: AttributionModel } = {}
   ): Promise<GtmDigest> {
     const now = new Date();
     const days = Math.min(Math.max(opts.days ?? 30, 1), 180);
@@ -92,7 +92,8 @@ export class GtmDigestService {
       funnel.revenue += Number(row.revenue) || 0;
       funnel.referral += Number(row.referral) || 0;
     }
-    funnel.leadToRevenueRate = funnel.lead > 0 ? Number((funnel.revenue / funnel.lead).toFixed(4)) : null;
+    funnel.leadToRevenueRate =
+      funnel.lead > 0 ? Number((funnel.revenue / funnel.lead).toFixed(4)) : null;
 
     return {
       generatedAt: now.toISOString(),

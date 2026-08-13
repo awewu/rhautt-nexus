@@ -7,14 +7,16 @@ import { DepositService } from './deposit.service';
 import { Public } from '../common/public.decorator';
 import { PublicRateLimitGuard } from '../common/public-rate-limit.guard';
 
-interface AuthRequest { user: JwtPayload; }
+interface AuthRequest {
+  user: JwtPayload;
+}
 
 @Controller('diagnosis')
 export class DiagnosisController {
   constructor(
     private readonly svc: DiagnosisService,
     private readonly ai: DiagnosisAiService,
-    private readonly deposit: DepositService,
+    private readonly deposit: DepositService
   ) {}
 
   /**
@@ -25,7 +27,8 @@ export class DiagnosisController {
   @UseGuards(PublicRateLimitGuard)
   @Post('public/complete')
   publicComplete(@Req() req: any, @Body() body: unknown) {
-    const ip = (req?.headers?.['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() || req?.ip;
+    const ip =
+      (req?.headers?.['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() || req?.ip;
     return this.svc.completePublicDiagnosis(body, { ip, userAgent: req?.headers?.['user-agent'] });
   }
 

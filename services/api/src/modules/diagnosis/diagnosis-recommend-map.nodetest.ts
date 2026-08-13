@@ -3,8 +3,14 @@ import assert from 'node:assert/strict';
 import { buildRecommendCriteria, resolveDiagnosisBrandTenants } from './diagnosis-recommend-map';
 
 test('diagnosis product recommendation is limited to the opened brand tenants', () => {
-  assert.deepEqual(resolveDiagnosisBrandTenants().map((scope) => scope.brand), ['rheem', 'ruud', 'everhot']);
-  assert.deepEqual(resolveDiagnosisBrandTenants(['ruud', 'unknown']).map((scope) => scope.brand), ['ruud']);
+  assert.deepEqual(
+    resolveDiagnosisBrandTenants().map((scope) => scope.brand),
+    ['rheem', 'ruud', 'everhot']
+  );
+  assert.deepEqual(
+    resolveDiagnosisBrandTenants(['ruud', 'unknown']).map((scope) => scope.brand),
+    ['ruud']
+  );
 });
 
 test('diagnosis recommendation criteria prefers diagnosed systems and pain points', () => {
@@ -20,7 +26,7 @@ test('diagnosis recommendation criteria prefers diagnosed systems and pain point
         systems: ['heating', 'air'],
         painPoints: ['t_01'],
       },
-    },
+    }
   );
 
   assert.deepEqual(criteria.segments, ['villa']);

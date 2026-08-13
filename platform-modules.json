@@ -19,13 +19,51 @@
       "name_cn": "板块一 · Rhautt 品牌管理",
       "audience": "对内，挂集团/设备品牌",
       "apps": [
-        { "app": "apps/public-portal", "site": "集团官网", "domain": "rhautt.com", "delivery": "self-built", "contentArchitecture": "复刻 aosmith.com", "vi": "ruud.com 调性（红 #E4002B 主导 + 中性企业壳）" },
-        { "app": "apps/everhot-cn", "site": "Everhot 品牌站", "domain": "everhot.com.cn", "delivery": "self-built", "contentArchitecture": "复刻 rheem.com 三受众架构", "vi": "Everhot 暖红（hex 待定 #E4002B vs #C8102E）" },
-        { "app": "apps/lithnova-cn", "site": "Lithnova 储能品牌站", "domain": "lithnova.com.cn", "delivery": "self-built", "contentArchitecture": "复刻 rheem.com/everhot 三受众架构（新能源储能）", "vi": "储能绿（token 待定）", "note": "D2(2026-07-03) Lithnova 释放为独立储能设备品牌；R0 仅登记，站点见 R3" },
-        { "app": "apps/rheem-cn", "site": "Rheem", "domain": "rheem.com.cn", "delivery": "external-link", "note": "不自建，外链占位" },
-        { "app": "apps/ruud-cn", "site": "Ruud", "domain": "ruud.com.cn", "delivery": "external-link", "note": "不自建，外链占位" }
+        {
+          "app": "apps/public-portal",
+          "site": "集团官网",
+          "domain": "rhautt.com",
+          "delivery": "self-built",
+          "contentArchitecture": "复刻 aosmith.com",
+          "vi": "ruud.com 调性（红 #E4002B 主导 + 中性企业壳）"
+        },
+        {
+          "app": "apps/everhot-cn",
+          "site": "Everhot 品牌站",
+          "domain": "everhot.com.cn",
+          "delivery": "self-built",
+          "contentArchitecture": "复刻 rheem.com 三受众架构",
+          "vi": "Everhot 暖红（hex 待定 #E4002B vs #C8102E）"
+        },
+        {
+          "app": "apps/lithnova-cn",
+          "site": "Lithnova 储能品牌站",
+          "domain": "lithnova.com.cn",
+          "delivery": "self-built",
+          "contentArchitecture": "复刻 rheem.com/everhot 三受众架构（新能源储能）",
+          "vi": "储能绿（token 待定）",
+          "note": "D2(2026-07-03) Lithnova 释放为独立储能设备品牌；R0 仅登记，站点见 R3"
+        },
+        {
+          "app": "apps/rheem-cn",
+          "site": "Rheem",
+          "domain": "rheem.com.cn",
+          "delivery": "external-link",
+          "note": "不自建，外链占位"
+        },
+        {
+          "app": "apps/ruud-cn",
+          "site": "Ruud",
+          "domain": "ruud.com.cn",
+          "delivery": "external-link",
+          "note": "不自建，外链占位"
+        }
       ],
-      "management": { "app": "apps/brand-console", "status": "planned-light", "role": "独立管理入口：管理集团官网+Everhot 两套自建资产（产品库/DAM/VI token/上新/ICP/发布）+ 维护 Rheem/Ruud 外链配置" },
+      "management": {
+        "app": "apps/brand-console",
+        "status": "planned-light",
+        "role": "独立管理入口：管理集团官网+Everhot 两套自建资产（产品库/DAM/VI token/上新/ICP/发布）+ 维护 Rheem/Ruud 外链配置"
+      },
       "domains": ["brand", "product-catalog"],
       "capabilities": ["dam (物料库，存储走 file-artifact)"],
       "dataStore": "③ 品牌运营库：各品牌独立产品库 + 内容/物料 DAM"
@@ -80,7 +118,15 @@
     "name_cn": "底座 / 总部（非视觉骨架，不直接对外冠名）",
     "apps": ["apps/business-console"],
     "appsNote": "business-console = 总部跨租户汇总分析，属底座/总部，不算赋能件套",
-    "domains": ["auth", "tenant", "analytics", "governance", "notification", "workflow", "file-artifact"],
+    "domains": [
+      "auth",
+      "tenant",
+      "analytics",
+      "governance",
+      "notification",
+      "workflow",
+      "file-artifact"
+    ],
     "dataStores": ["① 底座主库 PostgreSQL", "④ 分析数仓 OLAP（只读脱敏，禁建在 OLTP 主库）"],
     "sharedNonVisual": ["packages/contracts", "packages/domain", "packages/generated-client"],
     "noSharedUi": true

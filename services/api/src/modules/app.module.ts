@@ -53,29 +53,31 @@ import { TARGET_API_BOOT_SMOKE, BootSmokeInfraModule } from './boot-smoke';
     }),
     // boot-smoke 下提供全局 DataSource 桩（@Global），供注入 DataSource 的服务实例化。
     ...(TARGET_API_BOOT_SMOKE ? [BootSmokeInfraModule] : []),
-    ...(TARGET_API_BOOT_SMOKE ? [] : [
-      TypeOrmModule.forRoot({
-        type: 'postgres',
-        url: process.env.POSTGRES_URI,
-        host: process.env.POSTGRES_HOST || 'localhost',
-        port: Number(process.env.POSTGRES_PORT || 5432),
-        username: process.env.POSTGRES_USER || 'rhautt',
-        password: process.env.POSTGRES_PASSWORD,
-        database: process.env.POSTGRES_DB || 'rhautt_GOT',
-        // 与 data-source.ts 及 curated 迁移保持一致：业务表位于 rhautt_nexus schema。
-        // 缺省会退回 public（旧/空表），导致 bim_projects 等实体查询 500。
-        schema: process.env.POSTGRES_SCHEMA || 'rhautt_nexus',
-        autoLoadEntities: true,
-        // Schema is owned by curated SQL migrations (scripts/db/apply-migrations.js),
-        // not TypeORM. Default OFF in EVERY environment (including dev) to prevent silent
-        // entity→schema drift against the curated rhautt_nexus schema — the root cause of
-        // past column drift. Opt-in only via POSTGRES_SYNCHRONIZE=true for throwaway local
-        // experiments. Never run migrations through TypeORM here.
-        synchronize: process.env.POSTGRES_SYNCHRONIZE === 'true',
-        migrationsRun: false,
-        logging: process.env.NODE_ENV === 'development',
-      })
-    ]),
+    ...(TARGET_API_BOOT_SMOKE
+      ? []
+      : [
+          TypeOrmModule.forRoot({
+            type: 'postgres',
+            url: process.env.POSTGRES_URI,
+            host: process.env.POSTGRES_HOST || 'localhost',
+            port: Number(process.env.POSTGRES_PORT || 5432),
+            username: process.env.POSTGRES_USER || 'rhautt',
+            password: process.env.POSTGRES_PASSWORD,
+            database: process.env.POSTGRES_DB || 'rhautt_GOT',
+            // 与 data-source.ts 及 curated 迁移保持一致：业务表位于 rhautt_nexus schema。
+            // 缺省会退回 public（旧/空表），导致 bim_projects 等实体查询 500。
+            schema: process.env.POSTGRES_SCHEMA || 'rhautt_nexus',
+            autoLoadEntities: true,
+            // Schema is owned by curated SQL migrations (scripts/db/apply-migrations.js),
+            // not TypeORM. Default OFF in EVERY environment (including dev) to prevent silent
+            // entity→schema drift against the curated rhautt_nexus schema — the root cause of
+            // past column drift. Opt-in only via POSTGRES_SYNCHRONIZE=true for throwaway local
+            // experiments. Never run migrations through TypeORM here.
+            synchronize: process.env.POSTGRES_SYNCHRONIZE === 'true',
+            migrationsRun: false,
+            logging: process.env.NODE_ENV === 'development',
+          }),
+        ]),
     AuditLogModule,
     AuthModule,
     TenantModule,

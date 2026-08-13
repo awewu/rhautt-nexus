@@ -6,14 +6,14 @@ These issues follow the local Markdown convention and are published under `docs/
 
 ## Issue List
 
-| Issue | Title | Type | Blocked by | Parallel wave |
-| --- | --- | --- | --- | --- |
-| 01 | Brand site environment addresses and quick preview | AFK | None | Wave 0 |
-| 02 | Public brand-site runtime product endpoint | AFK | None | Wave 0 |
-| 03 | Everhot 5011 runtime product loader with static fallback | AFK | 02 | Wave 1 |
-| 04 | Row-level website shelf state controls in product area | AFK | None | Wave 0 |
-| 05 | Simulated non-product website materials tab | AFK | None | Wave 0 |
-| 06 | Local 5011 end-to-end CRUD smoke and guard coverage | AFK | 01, 02, 03, 04, 05 | Wave 2 |
+| Issue | Title                                                    | Type | Blocked by         | Parallel wave |
+| ----- | -------------------------------------------------------- | ---- | ------------------ | ------------- |
+| 01    | Brand site environment addresses and quick preview       | AFK  | None               | Wave 0        |
+| 02    | Public brand-site runtime product endpoint               | AFK  | None               | Wave 0        |
+| 03    | Everhot 5011 runtime product loader with static fallback | AFK  | 02                 | Wave 1        |
+| 04    | Row-level website shelf state controls in product area   | AFK  | None               | Wave 0        |
+| 05    | Simulated non-product website materials tab              | AFK  | None               | Wave 0        |
+| 06    | Local 5011 end-to-end CRUD smoke and guard coverage      | AFK  | 01, 02, 03, 04, 05 | Wave 2        |
 
 ## Parallel Execution
 

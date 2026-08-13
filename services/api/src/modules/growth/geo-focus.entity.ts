@@ -14,11 +14,14 @@ export class GeoTargetEntity {
   @Column({ name: 'probe_type', type: 'varchar', default: 'category' }) probeType: string;
   @Column({ name: 'region', type: 'varchar', nullable: true }) region: string | null;
   @Column({ name: 'asset_gaps', type: 'jsonb', default: () => "'[]'::jsonb" }) assetGaps: string[];
-  @Column({ name: 'probe_strategy', type: 'jsonb', default: () => "'{}'::jsonb" }) probeStrategy: Record<string, unknown>;
-  @Column({ name: 'last_probed_at', type: 'timestamptz', nullable: true }) lastProbedAt: Date | null;
+  @Column({ name: 'probe_strategy', type: 'jsonb', default: () => "'{}'::jsonb" })
+  probeStrategy: Record<string, unknown>;
+  @Column({ name: 'last_probed_at', type: 'timestamptz', nullable: true })
+  lastProbedAt: Date | null;
   @Column() query: string;
   @Column({ name: 'priority_score', type: 'numeric', default: 0 }) priorityScore: number;
-  @Column({ name: 'variant_strategy', type: 'jsonb', default: () => "'{}'::jsonb" }) variantStrategy: Record<string, unknown>;
+  @Column({ name: 'variant_strategy', type: 'jsonb', default: () => "'{}'::jsonb" })
+  variantStrategy: Record<string, unknown>;
   @Column({ default: 'candidate' }) status: string;
   @Column({ name: 'created_at', type: 'timestamptz', default: () => 'now()' }) createdAt: Date;
   @Column({ name: 'updated_at', type: 'timestamptz', default: () => 'now()' }) updatedAt: Date;

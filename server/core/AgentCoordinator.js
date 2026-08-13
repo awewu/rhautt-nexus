@@ -7,7 +7,7 @@
  */
 /**
  * Agent协调器 - 管理多Agent并行工作
- * 
+ *
  * 功能：
  * 1. 协调多个Agent并行执行任务
  * 2. 任务队列管理
@@ -23,27 +23,27 @@ class AgentCoordinator {
     this.runningTasks = new Map();
     this.completedTasks = [];
     this.maxConcurrentTasks = 5;
-    
+
     // Agent类型定义
     this.agentTypes = {
       SELF_CHECK: {
         name: '自检Agent',
         priority: 'background',
-        interval: 3600000 // 1小时
+        interval: 3600000, // 1小时
       },
       DEVELOPMENT: {
         name: '开发Agent',
-        priority: 'foreground'
+        priority: 'foreground',
       },
       TESTING: {
         name: '测试Agent',
-        priority: 'background'
+        priority: 'background',
       },
       MONITORING: {
         name: '监控Agent',
         priority: 'background',
-        interval: 30000 // 30秒
-      }
+        interval: 30000, // 30秒
+      },
     };
   }
 
@@ -56,9 +56,9 @@ class AgentCoordinator {
       ...agentConfig,
       status: 'idle',
       currentTask: null,
-      lastActivity: null
+      lastActivity: null,
     });
-    
+
     console.log(`✅ Agent注册成功: ${agentConfig.name} (${agentId})`);
   }
 
@@ -71,17 +71,17 @@ class AgentCoordinator {
       console.error(`Agent不存在: ${agentId}`);
       return false;
     }
-    
+
     agent.status = 'active';
     agent.lastActivity = new Date();
-    
+
     // 如果是定时任务，启动定时器
     if (agent.interval) {
       agent.timer = setInterval(() => {
         this.executeAgentTask(agentId);
       }, agent.interval);
     }
-    
+
     console.log(`🚀 Agent启动: ${agent.name}`);
     return true;
   }
@@ -94,20 +94,20 @@ class AgentCoordinator {
     if (!agent) {
       return false;
     }
-    
+
     agent.status = 'idle';
-    
+
     // 清除定时器
     if (agent.timer) {
       clearInterval(agent.timer);
       agent.timer = null;
     }
-    
+
     // 停止当前任务
     if (agent.currentTask) {
       this.cancelTask(agent.currentTask.id);
     }
-    
+
     console.log(`⏹️ Agent停止: ${agent.name}`);
     return true;
   }
@@ -120,14 +120,14 @@ class AgentCoordinator {
       id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       status: 'pending',
       createdAt: new Date(),
-      ...task
+      ...task,
     };
-    
+
     this.taskQueue.push(taskWithId);
-    
+
     // 尝试立即执行
     this.processTaskQueue();
-    
+
     return taskWithId.id;
   }
 
@@ -139,13 +139,13 @@ class AgentCoordinator {
     if (this.runningTasks.size >= this.maxConcurrentTasks) {
       return;
     }
-    
+
     // 按优先级排序任务
     const sortedTasks = this.taskQueue.sort((a, b) => {
-      const priorityOrder = { 'critical': 0, 'high': 1, 'normal': 2, 'low': 3 };
+      const priorityOrder = { critical: 0, high: 1, normal: 2, low: 3 };
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     });
-    
+
     // 执行任务
     while (this.runningTasks.size < this.maxConcurrentTasks && sortedTasks.length > 0) {
       const task = sortedTasks.shift();
@@ -164,53 +164,52 @@ class AgentCoordinator {
       this.taskQueue.push(task);
       return;
     }
-    
+
     // 更新任务和Agent状态
     task.status = 'running';
     task.startedAt = new Date();
     this.runningTasks.set(task.id, task);
-    
+
     agent.status = 'busy';
     agent.currentTask = task;
     agent.lastActivity = new Date();
-    
+
     console.log(`🔄 执行任务: ${task.name} (Agent: ${agent.name})`);
-    
+
     try {
       // 执行任务
       const result = await task.execute(task.params);
-      
+
       // 任务完成
       task.status = 'completed';
       task.completedAt = new Date();
       task.result = result;
-      
+
       this.completedTasks.push(task);
       this.runningTasks.delete(task.id);
-      
+
       // 释放Agent
       agent.status = 'idle';
       agent.currentTask = null;
-      
+
       console.log(`✅ 任务完成: ${task.name}`);
-      
+
       // 处理队列中的下一个任务
       this.processTaskQueue();
-      
     } catch (error) {
       // 任务失败
       task.status = 'failed';
       task.completedAt = new Date();
       task.error = error.message;
-      
+
       this.runningTasks.delete(task.id);
-      
+
       // 释放Agent
       agent.status = 'idle';
       agent.currentTask = null;
-      
+
       console.error(`❌ 任务失败: ${task.name}`, error);
-      
+
       // 处理队列中的下一个任务
       this.processTaskQueue();
     }
@@ -224,12 +223,12 @@ class AgentCoordinator {
     if (!agent || agent.status !== 'active') {
       return;
     }
-    
+
     // 检查Agent是否正在执行任务
     if (agent.status === 'busy') {
       return;
     }
-    
+
     // 执行Agent的定时任务
     if (agent.onInterval) {
       try {
@@ -260,26 +259,26 @@ class AgentCoordinator {
     const task = this.runningTasks.get(taskId);
     if (!task) {
       // 检查队列中的任务
-      const queueIndex = this.taskQueue.findIndex(t => t.id === taskId);
+      const queueIndex = this.taskQueue.findIndex((t) => t.id === taskId);
       if (queueIndex !== -1) {
         this.taskQueue.splice(queueIndex, 1);
         return true;
       }
       return false;
     }
-    
+
     // 取消正在运行的任务
     task.status = 'cancelled';
     task.completedAt = new Date();
     this.runningTasks.delete(taskId);
-    
+
     // 释放Agent
     const agent = this.agents.get(task.agentId);
     if (agent && agent.currentTask && agent.currentTask.id === taskId) {
       agent.status = 'idle';
       agent.currentTask = null;
     }
-    
+
     console.log(`🚫 任务取消: ${task.name}`);
     return true;
   }
@@ -289,19 +288,19 @@ class AgentCoordinator {
    */
   getSystemStatus() {
     return {
-      agents: Array.from(this.agents.values()).map(agent => ({
+      agents: Array.from(this.agents.values()).map((agent) => ({
         id: agent.id,
         name: agent.name,
         status: agent.status,
         currentTask: agent.currentTask ? agent.currentTask.name : null,
-        lastActivity: agent.lastActivity
+        lastActivity: agent.lastActivity,
       })),
       queue: {
         pending: this.taskQueue.length,
         running: this.runningTasks.size,
-        completed: this.completedTasks.length
+        completed: this.completedTasks.length,
       },
-      maxConcurrentTasks: this.maxConcurrentTasks
+      maxConcurrentTasks: this.maxConcurrentTasks,
     };
   }
 
@@ -314,19 +313,19 @@ class AgentCoordinator {
     if (runningTask) {
       return runningTask;
     }
-    
+
     // 检查队列中的任务
-    const queuedTask = this.taskQueue.find(t => t.id === taskId);
+    const queuedTask = this.taskQueue.find((t) => t.id === taskId);
     if (queuedTask) {
       return queuedTask;
     }
-    
+
     // 检查已完成的任务
-    const completedTask = this.completedTasks.find(t => t.id === taskId);
+    const completedTask = this.completedTasks.find((t) => t.id === taskId);
     if (completedTask) {
       return completedTask;
     }
-    
+
     return null;
   }
 
@@ -336,7 +335,7 @@ class AgentCoordinator {
   setMaxConcurrentTasks(max) {
     this.maxConcurrentTasks = max;
     console.log(`📊 最大并发任务数设置为: ${max}`);
-    
+
     // 尝试处理队列
     this.processTaskQueue();
   }
@@ -346,10 +345,8 @@ class AgentCoordinator {
    */
   cleanupCompletedTasks(olderThanHours = 24) {
     const cutoffTime = new Date(Date.now() - olderThanHours * 60 * 60 * 1000);
-    this.completedTasks = this.completedTasks.filter(
-      task => task.completedAt > cutoffTime
-    );
-    
+    this.completedTasks = this.completedTasks.filter((task) => task.completedAt > cutoffTime);
+
     console.log(`🧹 清理了${this.completedTasks.length}个已完成任务`);
   }
 }

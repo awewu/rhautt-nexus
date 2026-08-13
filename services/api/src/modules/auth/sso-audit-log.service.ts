@@ -32,10 +32,7 @@ export type SsoFailureReason =
   | 'unexpected';
 
 export type SsoAuditEventType =
-  | 'sso.login.started'
-  | 'sso.login.failed'
-  | 'sso.callback.succeeded'
-  | 'sso.callback.failed';
+  'sso.login.started' | 'sso.login.failed' | 'sso.callback.succeeded' | 'sso.callback.failed';
 
 export interface SsoAuditEvent {
   eventType: SsoAuditEventType;

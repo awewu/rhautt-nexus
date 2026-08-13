@@ -1,6 +1,10 @@
 import {
-  Column, CreateDateColumn, Entity, Index,
-  PrimaryGeneratedColumn, UpdateDateColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('contracts')
@@ -17,11 +21,16 @@ export class ContractEntity {
   @Column({ name: 'contract_no' }) contractNo: string;
   @Column({ default: 'draft' }) status: string;
   @Column({ type: 'timestamptz', name: 'signed_at', nullable: true }) signedAt: Date | null;
-  @Column({ type: 'numeric', precision: 14, scale: 2, name: 'total_amount', nullable: true }) totalAmount: number | null;
+  @Column({ type: 'numeric', precision: 14, scale: 2, name: 'total_amount', nullable: true })
+  totalAmount: number | null;
 
   @Column({ type: 'uuid', name: 'dealer_id', nullable: true }) dealerId: string | null;
-  @Column({ type: 'jsonb', name: 'terms', default: () => "'{}'::jsonb" }) terms: Record<string, unknown>;
-  @Column({ type: 'varchar', name: 'esign_contract_id', nullable: true }) esignContractId: string | null;
+  @Column({ type: 'jsonb', name: 'terms', default: () => "'{}'::jsonb" }) terms: Record<
+    string,
+    unknown
+  >;
+  @Column({ type: 'varchar', name: 'esign_contract_id', nullable: true }) esignContractId:
+    string | null;
   @Column({ type: 'int', name: 'esign_status', nullable: true }) esignStatus: number | null;
   @Column({ type: 'text', name: 'esign_sign_url', nullable: true }) esignSignUrl: string | null;
   @Column({ type: 'varchar', name: 'signed_pdf_key', nullable: true }) signedPdfKey: string | null;

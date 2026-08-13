@@ -4,7 +4,12 @@ import GrowthPromptLibrary from '../../../components/GrowthPromptLibrary';
 
 export default function GrowthPromptsPage() {
   return (
-    <div style={{ background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)', minHeight: '100%' }}>
+    <div
+      style={{
+        background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)',
+        minHeight: '100%',
+      }}
+    >
       <div className="page-container" style={{ display: 'grid', gap: 20 }}>
         <PageHeader
           title="提示词库"

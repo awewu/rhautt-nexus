@@ -45,7 +45,15 @@ export type DecisionSyncResult =
   | { ok: false; skipped: true }
   | { ok: false; skipped?: false; status?: number; error: string };
 
-const DECIDED_STATUSES = new Set(['active', 'running', 'closed', 'done', 'completed', 'cancelled', 'killed']);
+const DECIDED_STATUSES = new Set([
+  'active',
+  'running',
+  'closed',
+  'done',
+  'completed',
+  'cancelled',
+  'killed',
+]);
 
 /** 纯函数: Campaign → Decision payload(可单测)。by 为人类操作者 userId, 服务身份传空串。 */
 export function buildCampaignDecisionPayload(c: CampaignLike, by: string): DecisionUpsertPayload {
@@ -57,8 +65,9 @@ export function buildCampaignDecisionPayload(c: CampaignLike, by: string): Decis
     status: decided ? 'decided' : 'proposed',
   };
   if (c.buType === 'bet' && c.buRef) payload.betId = c.buRef;
-  const evidenceRefs = [c.buRef && c.buType !== 'bet' ? `gtm:bu:${c.buType ?? 'unknown'}:${c.buRef}` : null]
-    .filter((x): x is string => Boolean(x));
+  const evidenceRefs = [
+    c.buRef && c.buType !== 'bet' ? `gtm:bu:${c.buType ?? 'unknown'}:${c.buRef}` : null,
+  ].filter((x): x is string => Boolean(x));
   if (evidenceRefs.length) payload.evidenceRefs = evidenceRefs;
   payload.expectedOutcome = `budget=${c.budget}`;
   if (c.spend > 0 || c.attributedRevenue > 0) {
@@ -75,7 +84,7 @@ export function buildCampaignDecisionPayload(c: CampaignLike, by: string): Decis
 export async function syncDecisionToTandem(
   payload: DecisionUpsertPayload,
   env: NodeJS.ProcessEnv = process.env,
-  fetcher: typeof fetch = fetch,
+  fetcher: typeof fetch = fetch
 ): Promise<DecisionSyncResult> {
   const url = env.TANDEM_AI_GATEWAY_URL?.trim();
   const token = env.TANDEM_AI_GATEWAY_TOKEN?.trim();
@@ -87,7 +96,8 @@ export async function syncDecisionToTandem(
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(10_000),
     });
-    if (!res.ok) return { ok: false, status: res.status, error: `decision sync HTTP ${res.status}` };
+    if (!res.ok)
+      return { ok: false, status: res.status, error: `decision sync HTTP ${res.status}` };
     return { ok: true, status: res.status };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : String(e) };

@@ -26,7 +26,7 @@ export class EventBusService {
 
   constructor(
     @InjectRepository(OutboxEventEntity) private readonly outbox: Repository<OutboxEventEntity>,
-    @InjectDataSource() private readonly ds: DataSource,
+    @InjectDataSource() private readonly ds: DataSource
   ) {}
 
   subscribe(eventType: string, handler: Handler) {
@@ -74,7 +74,7 @@ export class EventBusService {
       return withRlsTransaction(
         this.ds,
         (em) => this.drain(em.getRepository(OutboxEventEntity), limit),
-        { tenantId, actorId: 'system:event-bus' },
+        { tenantId, actorId: 'system:event-bus' }
       );
     }
     return this.drain(this.outbox, limit);
@@ -98,7 +98,8 @@ export class EventBusService {
 
   private async drain(repo: Repository<OutboxEventEntity>, limit: number) {
     const pending = await repo.find({ where: { status: 'pending' }, take: limit });
-    let delivered = 0, dead = 0;
+    let delivered = 0,
+      dead = 0;
     for (const event of pending) {
       const r = await this.deliverEvent(repo, event);
       if (r === 'delivered') delivered++;
@@ -114,21 +115,31 @@ export class EventBusService {
    *  - 否则运行订阅者，成功 delivered / 失败重试或死信。
    * 在调用方给定的租户 RLS 事务内执行（tenantId 为空则用裸连接处理 foundation 事件）。
    */
-  async deliverEventById(outboxId: string, tenantId?: string): Promise<'delivered' | 'skipped' | 'failed' | 'dead'> {
-    const run = (repo: Repository<OutboxEventEntity>) => (async () => {
-      const event = await repo.findOne({ where: { id: outboxId } });
-      if (!event) return 'skipped' as const;
-      if (event.status !== 'pending') return 'skipped' as const; // 幂等：已投递/死信不重复
-      return this.deliverEvent(repo, event);
-    })();
+  async deliverEventById(
+    outboxId: string,
+    tenantId?: string
+  ): Promise<'delivered' | 'skipped' | 'failed' | 'dead'> {
+    const run = (repo: Repository<OutboxEventEntity>) =>
+      (async () => {
+        const event = await repo.findOne({ where: { id: outboxId } });
+        if (!event) return 'skipped' as const;
+        if (event.status !== 'pending') return 'skipped' as const; // 幂等：已投递/死信不重复
+        return this.deliverEvent(repo, event);
+      })();
     if (tenantId) {
-      return withRlsTransaction(this.ds, (em) => run(em.getRepository(OutboxEventEntity)), { tenantId, actorId: 'system:event-bus' });
+      return withRlsTransaction(this.ds, (em) => run(em.getRepository(OutboxEventEntity)), {
+        tenantId,
+        actorId: 'system:event-bus',
+      });
     }
     return run(this.outbox);
   }
 
   /** 运行订阅者并落状态（delivered/failed/dead）。假定 event 为 pending。 */
-  private async deliverEvent(repo: Repository<OutboxEventEntity>, event: OutboxEventEntity): Promise<'delivered' | 'failed' | 'dead'> {
+  private async deliverEvent(
+    repo: Repository<OutboxEventEntity>,
+    event: OutboxEventEntity
+  ): Promise<'delivered' | 'failed' | 'dead'> {
     const handlers = this.subscribers.get(event.eventType) || [];
     try {
       for (const h of handlers) await h(event);
@@ -150,13 +161,19 @@ export class EventBusService {
    * 只读列出 pending 事件摘要（供 Redis Stream relay 中继用；不投递、不改状态）。
    * tenantId 为空 → foundation（tenant NULL）事件；否则该租户 RLS 事务内可见事件。
    */
-  async listPending(limit = 200, tenantId?: string): Promise<Array<{ id: string; tenantId: string | null; eventType: string }>> {
+  async listPending(
+    limit = 200,
+    tenantId?: string
+  ): Promise<Array<{ id: string; tenantId: string | null; eventType: string }>> {
     const read = async (repo: Repository<OutboxEventEntity>) => {
       const rows = await repo.find({ where: { status: 'pending' }, take: limit });
       return rows.map((e) => ({ id: e.id, tenantId: e.tenantId, eventType: e.eventType }));
     };
     if (tenantId) {
-      return withRlsTransaction(this.ds, (em) => read(em.getRepository(OutboxEventEntity)), { tenantId, actorId: 'system:event-bus' });
+      return withRlsTransaction(this.ds, (em) => read(em.getRepository(OutboxEventEntity)), {
+        tenantId,
+        actorId: 'system:event-bus',
+      });
     }
     return read(this.outbox);
   }

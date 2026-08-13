@@ -1,4 +1,10 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { IS_PUBLIC_KEY } from '../common/public.decorator';
@@ -21,7 +27,8 @@ function extractTokenFromCookie(req: any): string | null {
 // tenant/dealer/store ids that are not always UUIDs). Rejects empty strings,
 // whitespace and non-string payloads — closing the "no tenant-scope check" gap
 // flagged in the security audit (H2), mirroring server/middleware/authenticateV2.js.
-const ID_LIKE = /^(?:[0-9a-fA-F]{24}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|[a-zA-Z0-9][a-zA-Z0-9_-]{1,63})$/;
+const ID_LIKE =
+  /^(?:[0-9a-fA-F]{24}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}|[a-zA-Z0-9][a-zA-Z0-9_-]{1,63})$/;
 
 function isValidId(value: unknown): boolean {
   return typeof value === 'string' && ID_LIKE.test(value);
@@ -47,7 +54,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwt: JwtService,
     private readonly reflector: Reflector,
-    private readonly rbac: RbacService,
+    private readonly rbac: RbacService
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
@@ -77,7 +84,12 @@ export class AuthGuard implements CanActivate {
       role: payload.role,
       permissions: payload.permissions ?? [],
     });
-    req.user = { ...payload, role: access.role, roles: access.roles, permissions: access.permissions };
+    req.user = {
+      ...payload,
+      role: access.role,
+      roles: access.roles,
+      permissions: access.permissions,
+    };
     return true;
   }
 }

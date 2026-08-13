@@ -9,7 +9,11 @@ import {
   WarrantyEntity,
   LifecycleLinkEntity,
 } from './delivery.entity';
-import { DeliveryController, AftersalesController, LifecycleController } from './delivery.controller';
+import {
+  DeliveryController,
+  AftersalesController,
+  LifecycleController,
+} from './delivery.controller';
 import { DeliveryService } from './delivery.service';
 import { AuthModule } from '../auth/auth.module';
 import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smoke';
@@ -25,10 +29,7 @@ const entities = [
 ];
 
 @Module({
-  imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature(entities)]),
-    AuthModule,
-  ],
+  imports: [...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature(entities)]), AuthModule],
   controllers: [DeliveryController, AftersalesController, LifecycleController],
   providers: [
     DeliveryService,

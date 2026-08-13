@@ -26,7 +26,11 @@ function arg(name, fallback) {
 const PORT = Number(process.env.PORT || arg('--port', '4015'));
 const PUBLIC = path.join(__dirname, '..', 'public');
 const REPO_ROOT = path.join(__dirname, '..', '..', '..');
-const API_TARGET = (process.env.RUUD_API_TARGET || process.env.NEXUS_API_ORIGIN || 'http://localhost:5500').replace(/\/+$/, '');
+const API_TARGET = (
+  process.env.RUUD_API_TARGET ||
+  process.env.NEXUS_API_ORIGIN ||
+  'http://localhost:5500'
+).replace(/\/+$/, '');
 
 // 跨站地址（本地默认独立端口；生产用 SITE_*_URL 覆盖为真实域名）。
 const SITES = {
@@ -75,7 +79,9 @@ function serveFile(res, filePath) {
     if (!err && stat.isDirectory()) fp = path.join(filePath, 'index.html');
     fs.readFile(fp, (e, data) => {
       if (e) return send(res, 404, 'Not Found', { 'Content-Type': 'text/plain; charset=utf-8' });
-      send(res, 200, data, { 'Content-Type': TYPES[path.extname(fp)] || 'application/octet-stream' });
+      send(res, 200, data, {
+        'Content-Type': TYPES[path.extname(fp)] || 'application/octet-stream',
+      });
     });
   });
 }
@@ -87,15 +93,25 @@ function proxyApi(req, res) {
     return send(res, 502, 'Bad API target', { 'Content-Type': 'text/plain; charset=utf-8' });
   }
   const transport = target.protocol === 'https:' ? https : http;
-  const upstream = transport.request(target, {
-    method: req.method,
-    headers: { ...req.headers, host: target.host },
-  }, (upstreamRes) => {
-    res.writeHead(upstreamRes.statusCode || 502, { ...upstreamRes.headers, 'cache-control': 'no-store' });
-    upstreamRes.pipe(res);
-  });
+  const upstream = transport.request(
+    target,
+    {
+      method: req.method,
+      headers: { ...req.headers, host: target.host },
+    },
+    (upstreamRes) => {
+      res.writeHead(upstreamRes.statusCode || 502, {
+        ...upstreamRes.headers,
+        'cache-control': 'no-store',
+      });
+      upstreamRes.pipe(res);
+    }
+  );
   upstream.on('error', (err) => {
-    if (!res.headersSent) return send(res, 502, `API proxy error: ${err.message}`, { 'Content-Type': 'text/plain; charset=utf-8' });
+    if (!res.headersSent)
+      return send(res, 502, `API proxy error: ${err.message}`, {
+        'Content-Type': 'text/plain; charset=utf-8',
+      });
     res.destroy(err);
   });
   req.pipe(upstream);

@@ -13,6 +13,7 @@ Product identity guardrail: Rhautt Comfort / 瑞合瑞德暖通科技集团 is t
 Your job is to stop the product from drifting into demo-looking, AI-flavored pages. Treat UI/VI as product architecture: information hierarchy, component tokens, visual evidence, and workflow credibility.
 
 Evaluate against these rules:
+
 - Use Ruud official-page evidence, not memory. Required reference families are products, commercial products, commercial resource center, EcoNet, mobile apps, homeowners, warranty, integrated systems, and BIM/product-document pages.
 - Do not claim "Ruud full-site review complete" unless official source coverage is attached in `docs/UI-VI-ARCHITECTURE-RHAUTT-COMFORT.md` or `docs/RUUD-VI-RESEARCH.md`.
 - Translate Ruud into Rhautt, do not copy it: product-family navigation, real equipment imagery, product specifications, contractor/dealer conversion, warranty/service lifecycle, EcoNet-style control continuity, and CAD/BIM/document resources.
@@ -22,6 +23,7 @@ Evaluate against these rules:
 - Check page snapshots for index, pain diagnosis, staff portal, designer, business console, customer view, and customer share before accepting production UI.
 
 When invoked, run or recommend:
+
 - `npm run guard:ui-vi`
 - `VISUAL_BASE_URL=http://localhost:3100 npm run guard:browser-visual`
 - `npm run guard:trunk-migration`

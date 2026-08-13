@@ -11,9 +11,9 @@ class CacheLayer {
       hits: 0,
       misses: 0,
       sets: 0,
-      deletes: 0
+      deletes: 0,
     };
-    
+
     // 启动清理任务
     this.startCleanupTask();
   }
@@ -38,7 +38,7 @@ class CacheLayer {
    */
   get(key) {
     const expireTime = this.ttl.get(key);
-    
+
     // 检查是否过期
     if (expireTime && Date.now() > expireTime) {
       this.cache.delete(key);
@@ -52,7 +52,7 @@ class CacheLayer {
       this.stats.hits++;
       return value;
     }
-    
+
     this.stats.misses++;
     return null;
   }
@@ -81,13 +81,13 @@ class CacheLayer {
    */
   getStats() {
     const total = this.stats.hits + this.stats.misses;
-    const hitRate = total > 0 ? (this.stats.hits / total * 100).toFixed(2) : 0;
-    
+    const hitRate = total > 0 ? ((this.stats.hits / total) * 100).toFixed(2) : 0;
+
     return {
       ...this.stats,
       hitRate: `${hitRate}%`,
       size: this.cache.size,
-      memoryUsage: this.estimateMemoryUsage()
+      memoryUsage: this.estimateMemoryUsage(),
     };
   }
 
@@ -109,7 +109,7 @@ class CacheLayer {
   cleanup() {
     const now = Date.now();
     let cleaned = 0;
-    
+
     for (const [key, expireTime] of this.ttl) {
       if (now > expireTime) {
         this.cache.delete(key);
@@ -117,7 +117,7 @@ class CacheLayer {
         cleaned++;
       }
     }
-    
+
     return cleaned;
   }
 
@@ -126,19 +126,22 @@ class CacheLayer {
    */
   startCleanupTask() {
     // 每5分钟清理一次过期缓存
-    setInterval(() => {
-      const cleaned = this.cleanup();
-      if (cleaned > 0) {
-        console.log(`[CacheLayer] 清理 ${cleaned} 个过期缓存项`);
-      }
-    }, 5 * 60 * 1000);
+    setInterval(
+      () => {
+        const cleaned = this.cleanup();
+        if (cleaned > 0) {
+          console.log(`[CacheLayer] 清理 ${cleaned} 个过期缓存项`);
+        }
+      },
+      5 * 60 * 1000
+    );
   }
 
   /**
    * 批量获取缓存
    */
   mget(keys) {
-    return keys.map(key => this.get(key));
+    return keys.map((key) => this.get(key));
   }
 
   /**

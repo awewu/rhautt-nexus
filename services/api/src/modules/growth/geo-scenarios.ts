@@ -42,40 +42,105 @@ interface Template {
 /** 场景骨架模板库（品类无关，靠填充词适配任意品类）。 */
 export const SCENARIO_TEMPLATES: Template[] = [
   // ── 信息型（认知阶段）
-  { id: 'cause', intent: 'info', stage: 'pre', requires: [],
-    render: (s) => `${s.category}${s.painPoint}是什么原因？` },
-  { id: 'fit-house', intent: 'info', stage: 'pre', requires: ['houseType'],
-    render: (s) => `${s.houseType}适合装${s.category}吗？` },
-  { id: 'zone-effect', intent: 'info', stage: 'pre', requires: ['climateZone'],
-    render: (s) => `${s.climateZone}地区用${s.category}效果怎么样？` },
+  {
+    id: 'cause',
+    intent: 'info',
+    stage: 'pre',
+    requires: [],
+    render: (s) => `${s.category}${s.painPoint}是什么原因？`,
+  },
+  {
+    id: 'fit-house',
+    intent: 'info',
+    stage: 'pre',
+    requires: ['houseType'],
+    render: (s) => `${s.houseType}适合装${s.category}吗？`,
+  },
+  {
+    id: 'zone-effect',
+    intent: 'info',
+    stage: 'pre',
+    requires: ['climateZone'],
+    render: (s) => `${s.climateZone}地区用${s.category}效果怎么样？`,
+  },
 
   // ── 对比型（评估阶段，AI 最常被问）
-  { id: 'how-to-choose', intent: 'compare', stage: 'mid', requires: [],
-    render: (s) => `${s.category}怎么选才能解决${s.painPoint}？` },
-  { id: 'zone-type', intent: 'compare', stage: 'mid', requires: ['climateZone'],
-    render: (s) => `${s.climateZone}地区${s.category}选哪种类型好？` },
-  { id: 'house-type', intent: 'compare', stage: 'mid', requires: ['houseType'],
-    render: (s) => `${s.houseType}装${s.category}选什么类型合适？` },
-  { id: 'vs-alternative', intent: 'compare', stage: 'mid', requires: [],
-    render: (s) => `解决${s.painPoint}，${s.category}和其他方案哪个更合适？` },
+  {
+    id: 'how-to-choose',
+    intent: 'compare',
+    stage: 'mid',
+    requires: [],
+    render: (s) => `${s.category}怎么选才能解决${s.painPoint}？`,
+  },
+  {
+    id: 'zone-type',
+    intent: 'compare',
+    stage: 'mid',
+    requires: ['climateZone'],
+    render: (s) => `${s.climateZone}地区${s.category}选哪种类型好？`,
+  },
+  {
+    id: 'house-type',
+    intent: 'compare',
+    stage: 'mid',
+    requires: ['houseType'],
+    render: (s) => `${s.houseType}装${s.category}选什么类型合适？`,
+  },
+  {
+    id: 'vs-alternative',
+    intent: 'compare',
+    stage: 'mid',
+    requires: [],
+    render: (s) => `解决${s.painPoint}，${s.category}和其他方案哪个更合适？`,
+  },
 
   // ── 决策型（购买阶段，意向最强）
-  { id: 'cost', intent: 'decide', stage: 'post', requires: ['houseType'],
-    render: (s) => `${s.houseType}装${s.category}大概要多少钱？` },
-  { id: 'regret', intent: 'decide', stage: 'post', requires: [],
-    render: (s) => `${s.category}装了会后悔吗？有哪些坑？` },
-  { id: 'zone-house-pick', intent: 'decide', stage: 'post', requires: ['climateZone', 'houseType'],
-    render: (s) => `${s.climateZone}${s.houseType}装${s.category}怎么选不踩坑？` },
+  {
+    id: 'cost',
+    intent: 'decide',
+    stage: 'post',
+    requires: ['houseType'],
+    render: (s) => `${s.houseType}装${s.category}大概要多少钱？`,
+  },
+  {
+    id: 'regret',
+    intent: 'decide',
+    stage: 'post',
+    requires: [],
+    render: (s) => `${s.category}装了会后悔吗？有哪些坑？`,
+  },
+  {
+    id: 'zone-house-pick',
+    intent: 'decide',
+    stage: 'post',
+    requires: ['climateZone', 'houseType'],
+    render: (s) => `${s.climateZone}${s.houseType}装${s.category}怎么选不踩坑？`,
+  },
 
   // ── 角色专属（问法差异 → AI 答案差异）
-  { id: 'layout-reserve', intent: 'compare', stage: 'mid', requires: ['houseType'],
+  {
+    id: 'layout-reserve',
+    intent: 'compare',
+    stage: 'mid',
+    requires: ['houseType'],
     audiences: ['decorator', 'designer'],
-    render: (s) => `${s.houseType}的${s.category}点位和预留怎么做？` },
-  { id: 'install-issue', intent: 'compare', stage: 'mid', requires: [],
+    render: (s) => `${s.houseType}的${s.category}点位和预留怎么做？`,
+  },
+  {
+    id: 'install-issue',
+    intent: 'compare',
+    stage: 'mid',
+    requires: [],
     audiences: ['installer'],
-    render: (s) => `${s.category}安装时${s.painPoint}怎么处理？` },
-  { id: 'maintenance', intent: 'info', stage: 'followup', requires: [],
-    render: (s) => `${s.category}后期维护麻烦吗？${s.painPoint}会复发吗？` },
+    render: (s) => `${s.category}安装时${s.painPoint}怎么处理？`,
+  },
+  {
+    id: 'maintenance',
+    intent: 'info',
+    stage: 'followup',
+    requires: [],
+    render: (s) => `${s.category}后期维护麻烦吗？${s.painPoint}会复发吗？`,
+  },
 ];
 
 // ── 品类词表 × 场景模板 · 播种器 ──────────────────────────────────────────
@@ -106,16 +171,21 @@ export const DEFAULT_VOCABULARY: Record<string, CategoryVocabulary> = {
 /** 解析品类词表：调用方覆盖优先；未知品类且无覆盖 → null（拒绝编造）。 */
 export function resolveVocabulary(
   category: string,
-  override?: Partial<CategoryVocabulary>,
+  override?: Partial<CategoryVocabulary>
 ): CategoryVocabulary | null {
   const builtin = DEFAULT_VOCABULARY[String(category || '').trim()];
-  const painPoints = (override?.painPoints?.length ? override.painPoints : builtin?.painPoints) || [];
+  const painPoints =
+    (override?.painPoints?.length ? override.painPoints : builtin?.painPoints) || [];
   const cleaned = [...new Set(painPoints.map((p) => String(p || '').trim()).filter(Boolean))];
   if (!cleaned.length) return null;
   return {
     painPoints: cleaned,
-    houseTypes: override?.houseTypes?.length ? override.houseTypes : (builtin?.houseTypes ?? HOUSE_TYPES),
-    climateZones: override?.climateZones?.length ? override.climateZones : (builtin?.climateZones ?? CLIMATE_ZONES),
+    houseTypes: override?.houseTypes?.length
+      ? override.houseTypes
+      : (builtin?.houseTypes ?? HOUSE_TYPES),
+    climateZones: override?.climateZones?.length
+      ? override.climateZones
+      : (builtin?.climateZones ?? CLIMATE_ZONES),
   };
 }
 
@@ -198,8 +268,14 @@ export interface DerivedTopic {
 }
 
 /** 由场景派生 prompt 簇（缺字段的模板自动跳过），按商业价值排序。 */
-export function deriveTopics(seed: ScenarioSeed, opts: { winnability?: number } = {}): DerivedTopic[] {
-  const has = { houseType: !!(seed.houseType || '').trim(), climateZone: !!(seed.climateZone || '').trim() };
+export function deriveTopics(
+  seed: ScenarioSeed,
+  opts: { winnability?: number } = {}
+): DerivedTopic[] {
+  const has = {
+    houseType: !!(seed.houseType || '').trim(),
+    climateZone: !!(seed.climateZone || '').trim(),
+  };
   const out: DerivedTopic[] = [];
   for (const t of SCENARIO_TEMPLATES) {
     if (t.audiences && !t.audiences.includes(seed.audience)) continue;
@@ -213,8 +289,13 @@ export function deriveTopics(seed: ScenarioSeed, opts: { winnability?: number } 
       winnability: opts.winnability,
     });
     out.push({
-      templateId: t.id, question, stage: t.stage, intent: t.intent,
-      score: scored.score, priority: scored.priority, factors: scored.factors,
+      templateId: t.id,
+      question,
+      stage: t.stage,
+      intent: t.intent,
+      score: scored.score,
+      priority: scored.priority,
+      factors: scored.factors,
     });
   }
   // 商业价值高者在前（priority 小者在前）

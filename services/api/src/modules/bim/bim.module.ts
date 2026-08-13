@@ -9,10 +9,7 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 const entities = [BimProjectEntity, RysnovaBimArtifactEntity, BcfTopicEntity];
 
 @Module({
-  imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature(entities)]),
-    AuthModule,
-  ],
+  imports: [...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature(entities)]), AuthModule],
   controllers: [BimController],
   providers: [
     BimService,

@@ -1,4 +1,11 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 /** 经销商收款路径配置（每家不同；migration 025）。 */
 @Entity('dealer_collection_configs')
@@ -12,7 +19,8 @@ export class DealerCollectionConfigEntity {
   @Column({ name: 'qr_image_url', type: 'varchar', nullable: true }) qrImageUrl: string | null;
   @Column({ name: 'offline_note', type: 'varchar', nullable: true }) offlineNote: string | null;
   @Column({ name: 'merchant_ref', type: 'varchar', nullable: true }) merchantRef: string | null;
-  @Column({ name: 'default_deposit_amount', type: 'decimal', nullable: true }) defaultDepositAmount: number | null;
+  @Column({ name: 'default_deposit_amount', type: 'decimal', nullable: true })
+  defaultDepositAmount: number | null;
   @Column({ default: true }) active: boolean;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;

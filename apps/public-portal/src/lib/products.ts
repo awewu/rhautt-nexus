@@ -19,8 +19,16 @@ export type Product = {
 
 export const PRODUCTS: Product[] = [
   {
-    id: 'RHP-8C', name: 'RHP-8C', desc: '变频空气源热泵 8kW', brand: 'Rheem', cat: '采暖系统', code: 'HP',
-    bg: 'linear-gradient(135deg,rgba(228,0,43,0.12),rgba(118,35,47,0.06))', metric: 'COP 4.2', price: '¥28,800', eco: true,
+    id: 'RHP-8C',
+    name: 'RHP-8C',
+    desc: '变频空气源热泵 8kW',
+    brand: 'Rheem',
+    cat: '采暖系统',
+    code: 'HP',
+    bg: 'linear-gradient(135deg,rgba(228,0,43,0.12),rgba(118,35,47,0.06))',
+    metric: 'COP 4.2',
+    price: '¥28,800',
+    eco: true,
     specs: [
       { label: '额定制热量', value: '8 kW' },
       { label: 'COP（制热）', value: '4.2' },
@@ -33,8 +41,16 @@ export const PRODUCTS: Product[] = [
     scenarios: ['120㎡ 以下户型采暖', '地暖 + 生活热水两联供', '长江流域冬季采暖'],
   },
   {
-    id: 'RHP-16DC', name: 'RHP-16DC', desc: '变频空气源热泵 16kW', brand: 'Rheem', cat: '中央空调', code: 'HP',
-    bg: 'linear-gradient(135deg,rgba(228,0,43,0.12),rgba(118,35,47,0.06))', metric: 'COP 4.8', price: '¥52,000', eco: true,
+    id: 'RHP-16DC',
+    name: 'RHP-16DC',
+    desc: '变频空气源热泵 16kW',
+    brand: 'Rheem',
+    cat: '中央空调',
+    code: 'HP',
+    bg: 'linear-gradient(135deg,rgba(228,0,43,0.12),rgba(118,35,47,0.06))',
+    metric: 'COP 4.8',
+    price: '¥52,000',
+    eco: true,
     specs: [
       { label: '额定制热量', value: '16 kW' },
       { label: 'COP（制热）', value: '4.8' },
@@ -47,8 +63,16 @@ export const PRODUCTS: Product[] = [
     scenarios: ['200-350㎡ 大户型/别墅', '采暖 + 制冷两联供', '北方严寒地区'],
   },
   {
-    id: 'GSHP-20', name: 'GSHP-20', desc: '地源热泵 20kW', brand: 'Rheem', cat: '采暖系统', code: 'GS',
-    bg: 'linear-gradient(135deg,rgba(63,88,90,0.20),rgba(16,28,40,0.12))', metric: 'COP 5.5', price: '¥86,000', eco: true,
+    id: 'GSHP-20',
+    name: 'GSHP-20',
+    desc: '地源热泵 20kW',
+    brand: 'Rheem',
+    cat: '采暖系统',
+    code: 'GS',
+    bg: 'linear-gradient(135deg,rgba(63,88,90,0.20),rgba(16,28,40,0.12))',
+    metric: 'COP 5.5',
+    price: '¥86,000',
+    eco: true,
     specs: [
       { label: '额定制热量', value: '20 kW' },
       { label: 'COP（制热）', value: '5.5' },
@@ -61,8 +85,16 @@ export const PRODUCTS: Product[] = [
     scenarios: ['独栋别墅整宅系统', '对运行费用敏感的大面积建筑', '严寒地区全年候方案'],
   },
   {
-    id: 'WH-150', name: 'WH-150', desc: '中央热水机 150L', brand: 'Rheem', cat: '热水系统', code: 'WH',
-    bg: 'linear-gradient(135deg,rgba(228,0,43,0.10),rgba(16,28,40,0.06))', metric: '≤5s出热水', price: '¥18,500', eco: false,
+    id: 'WH-150',
+    name: 'WH-150',
+    desc: '中央热水机 150L',
+    brand: 'Rheem',
+    cat: '热水系统',
+    code: 'WH',
+    bg: 'linear-gradient(135deg,rgba(228,0,43,0.10),rgba(16,28,40,0.06))',
+    metric: '≤5s出热水',
+    price: '¥18,500',
+    eco: false,
     specs: [
       { label: '水箱容积', value: '150 L' },
       { label: '出热水速度', value: '≤5 秒' },
@@ -75,8 +107,16 @@ export const PRODUCTS: Product[] = [
     scenarios: ['两卫户型中央热水', '即开即热舒适需求', '水质较硬地区'],
   },
   {
-    id: 'WH-300', name: 'WH-300', desc: '中央热水机 300L', brand: 'Rheem', cat: '热水系统', code: 'WH',
-    bg: 'linear-gradient(135deg,rgba(228,0,43,0.10),rgba(16,28,40,0.06))', metric: '≤5s出热水', price: '¥31,200', eco: false,
+    id: 'WH-300',
+    name: 'WH-300',
+    desc: '中央热水机 300L',
+    brand: 'Rheem',
+    cat: '热水系统',
+    code: 'WH',
+    bg: 'linear-gradient(135deg,rgba(228,0,43,0.10),rgba(16,28,40,0.06))',
+    metric: '≤5s出热水',
+    price: '¥31,200',
+    eco: false,
     specs: [
       { label: '水箱容积', value: '300 L' },
       { label: '出热水速度', value: '≤5 秒' },
@@ -89,8 +129,16 @@ export const PRODUCTS: Product[] = [
     scenarios: ['三卫以上大户型', '多人口家庭', '浴缸 + 花洒同时用水'],
   },
   {
-    id: 'ERV-150', name: 'ERV-150', desc: '全热交换新风 150 风量', brand: 'Ruud', cat: '新风净化', code: 'NV',
-    bg: 'linear-gradient(135deg,rgba(63,88,90,0.18),rgba(228,0,43,0.06))', metric: 'CO₂≤800ppm', price: '¥12,800', eco: true,
+    id: 'ERV-150',
+    name: 'ERV-150',
+    desc: '全热交换新风 150 风量',
+    brand: 'Ruud',
+    cat: '新风净化',
+    code: 'NV',
+    bg: 'linear-gradient(135deg,rgba(63,88,90,0.18),rgba(228,0,43,0.06))',
+    metric: 'CO₂≤800ppm',
+    price: '¥12,800',
+    eco: true,
     specs: [
       { label: '额定风量', value: '150 m³/h' },
       { label: '热交换效率', value: '≥75%' },
@@ -103,8 +151,16 @@ export const PRODUCTS: Product[] = [
     scenarios: ['90㎡ 以下户型', '婴幼儿/敏感人群家庭', '临街噪音大不便开窗'],
   },
   {
-    id: 'ERV-300', name: 'ERV-300', desc: '全热交换新风 300 风量', brand: 'Ruud', cat: '新风净化', code: 'NV',
-    bg: 'linear-gradient(135deg,rgba(63,88,90,0.18),rgba(228,0,43,0.06))', metric: 'PM2.5≤5μg', price: '¥21,600', eco: true,
+    id: 'ERV-300',
+    name: 'ERV-300',
+    desc: '全热交换新风 300 风量',
+    brand: 'Ruud',
+    cat: '新风净化',
+    code: 'NV',
+    bg: 'linear-gradient(135deg,rgba(63,88,90,0.18),rgba(228,0,43,0.06))',
+    metric: 'PM2.5≤5μg',
+    price: '¥21,600',
+    eco: true,
     specs: [
       { label: '额定风量', value: '300 m³/h' },
       { label: '热交换效率', value: '≥75%' },
@@ -117,8 +173,16 @@ export const PRODUCTS: Product[] = [
     scenarios: ['150㎡ 左右户型', '雾霾高发地区', '新装修除醛需求'],
   },
   {
-    id: 'ERV-500', name: 'ERV-500', desc: '全热交换新风 500 风量', brand: 'Ruud', cat: '新风净化', code: 'NV',
-    bg: 'linear-gradient(135deg,rgba(63,88,90,0.18),rgba(228,0,43,0.06))', metric: '换气效率≥75%', price: '¥34,800', eco: true,
+    id: 'ERV-500',
+    name: 'ERV-500',
+    desc: '全热交换新风 500 风量',
+    brand: 'Ruud',
+    cat: '新风净化',
+    code: 'NV',
+    bg: 'linear-gradient(135deg,rgba(63,88,90,0.18),rgba(228,0,43,0.06))',
+    metric: '换气效率≥75%',
+    price: '¥34,800',
+    eco: true,
     specs: [
       { label: '额定风量', value: '500 m³/h' },
       { label: '热交换效率', value: '≥75%' },
@@ -131,8 +195,16 @@ export const PRODUCTS: Product[] = [
     scenarios: ['大平层/别墅全屋新风', '商用办公空间', '高密闭性被动式建筑'],
   },
   {
-    id: 'RF-600', name: 'RF-600', desc: 'RO 反渗透净水直饮机 600G', brand: 'EverHot', cat: '净水系统', code: 'RO',
-    bg: 'linear-gradient(135deg,rgba(228,0,43,0.08),rgba(16,28,40,0.06))', metric: 'TDS≤50ppm', price: '¥8,600', eco: false,
+    id: 'RF-600',
+    name: 'RF-600',
+    desc: 'RO 反渗透净水直饮机 600G',
+    brand: 'EverHot',
+    cat: '净水系统',
+    code: 'RO',
+    bg: 'linear-gradient(135deg,rgba(228,0,43,0.08),rgba(16,28,40,0.06))',
+    metric: 'TDS≤50ppm',
+    price: '¥8,600',
+    eco: false,
     specs: [
       { label: '额定产水量', value: '600G（约1.6L/min）' },
       { label: '出水 TDS', value: '≤50 ppm' },
@@ -145,8 +217,16 @@ export const PRODUCTS: Product[] = [
     scenarios: ['家庭直饮水', '母婴用水', 'TDS 偏高市政水质'],
   },
   {
-    id: 'WS-300', name: 'WS-300', desc: '中央软水机 3T', brand: 'EverHot', cat: '净水系统', code: 'SW',
-    bg: 'linear-gradient(135deg,rgba(228,0,43,0.08),rgba(16,28,40,0.06))', metric: '硬度≤50mg/L', price: '¥11,200', eco: false,
+    id: 'WS-300',
+    name: 'WS-300',
+    desc: '中央软水机 3T',
+    brand: 'EverHot',
+    cat: '净水系统',
+    code: 'SW',
+    bg: 'linear-gradient(135deg,rgba(228,0,43,0.08),rgba(16,28,40,0.06))',
+    metric: '硬度≤50mg/L',
+    price: '¥11,200',
+    eco: false,
     specs: [
       { label: '额定流量', value: '3 T/h' },
       { label: '出水硬度', value: '≤50 mg/L' },
@@ -159,8 +239,16 @@ export const PRODUCTS: Product[] = [
     scenarios: ['北方高硬度水质', '保护热水/采暖设备', '衣物洗护与肌肤敏感'],
   },
   {
-    id: 'EC-HUB', name: 'EC-HUB', desc: 'Econet 智控中枢', brand: 'Rhautt', cat: '智控', code: 'EC',
-    bg: 'linear-gradient(135deg,rgba(16,28,40,0.92),rgba(63,88,90,0.18))', metric: '响应<100ms', price: '¥6,800', eco: false,
+    id: 'EC-HUB',
+    name: 'EC-HUB',
+    desc: 'Econet 智控中枢',
+    brand: 'Rhautt',
+    cat: '智控',
+    code: 'EC',
+    bg: 'linear-gradient(135deg,rgba(16,28,40,0.92),rgba(63,88,90,0.18))',
+    metric: '响应<100ms',
+    price: '¥6,800',
+    eco: false,
     specs: [
       { label: '协议支持', value: 'Wi-Fi / Zigbee / RS485' },
       { label: '响应延迟', value: '<100 ms（本地）' },
@@ -173,8 +261,16 @@ export const PRODUCTS: Product[] = [
     scenarios: ['热水+采暖+新风联动', '全屋能耗管理', '别墅多设备集中控制'],
   },
   {
-    id: 'EC-TC', name: 'EC-TC', desc: 'Econet 智能温控器', brand: 'Rhautt', cat: '智控', code: 'TC',
-    bg: 'linear-gradient(135deg,rgba(16,28,40,0.92),rgba(63,88,90,0.18))', metric: '精度±0.3°C', price: '¥1,980', eco: false,
+    id: 'EC-TC',
+    name: 'EC-TC',
+    desc: 'Econet 智能温控器',
+    brand: 'Rhautt',
+    cat: '智控',
+    code: 'TC',
+    bg: 'linear-gradient(135deg,rgba(16,28,40,0.92),rgba(63,88,90,0.18))',
+    metric: '精度±0.3°C',
+    price: '¥1,980',
+    eco: false,
     specs: [
       { label: '控温精度', value: '±0.3°C' },
       { label: '显示', value: '3.5" IPS 触屏' },
@@ -189,9 +285,12 @@ export const PRODUCTS: Product[] = [
 ];
 
 export function getProduct(id: string): Product | undefined {
-  return PRODUCTS.find(p => p.id === id);
+  return PRODUCTS.find((p) => p.id === id);
 }
 
 export const BRAND_COLOR: Record<string, string> = {
-  Rheem: 'var(--rh-red)', Ruud: 'var(--rh-red)', EverHot: 'var(--rh-red)', Rhautt: 'var(--rh-red-dk)',
+  Rheem: 'var(--rh-red)',
+  Ruud: 'var(--rh-red)',
+  EverHot: 'var(--rh-red)',
+  Rhautt: 'var(--rh-red-dk)',
 };

@@ -41,14 +41,17 @@ function parseEnv(file) {
     const i = line.indexOf('=');
     if (i <= 0) continue;
     let v = line.slice(i + 1).trim();
-    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) v = v.slice(1, -1);
+    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'")))
+      v = v.slice(1, -1);
     out[line.slice(0, i).trim()] = v;
   }
   return out;
 }
 
 const injected = parseEnv(ENV_FILE);
-console.log(`注入 ${Object.keys(injected).length} 个环境变量（键名：${Object.keys(injected).join(', ')}）—— 值不回显`);
+console.log(
+  `注入 ${Object.keys(injected).length} 个环境变量（键名：${Object.keys(injected).join(', ')}）—— 值不回显`
+);
 console.log(`启动 Tandem：${TANDEM_DIR} @ :${PORT}`);
 
 const child = spawn('npm', ['run', 'dev', '--', '--port', PORT], {

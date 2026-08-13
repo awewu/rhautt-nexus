@@ -79,7 +79,12 @@ module.exports = {
       time: true,
       env: { NODE_ENV: 'development' },
       out_file: path.join(repoRoot, 'runtime-logs', 'startup', 'consumer-diagnosis-pm2.out.log'),
-      error_file: path.join(repoRoot, 'runtime-logs', 'startup', 'consumer-diagnosis-pm2.error.log'),
+      error_file: path.join(
+        repoRoot,
+        'runtime-logs',
+        'startup',
+        'consumer-diagnosis-pm2.error.log'
+      ),
       merge_logs: true,
     },
     {

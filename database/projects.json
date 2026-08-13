@@ -48,18 +48,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-03-06T08:01:59.211Z"
     },
     "design": {
@@ -304,14 +294,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-19T07:01:59.212Z"
     },
     "design": null,
@@ -370,16 +354,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-18T07:01:59.212Z"
     },
     "design": null,
@@ -432,18 +408,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-16T07:01:59.212Z"
     },
     "design": {
@@ -554,18 +520,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-15T07:01:59.212Z"
     },
     "design": {
@@ -677,14 +633,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-03-04T08:01:59.212Z"
     },
     "design": {
@@ -893,18 +843,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-18T07:01:59.212Z"
     },
     "design": null,
@@ -957,16 +897,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-11T07:01:59.212Z"
     },
     "design": {
@@ -1147,14 +1079,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-03-19T07:01:59.212Z"
     },
     "design": {
@@ -1357,14 +1283,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-15T07:01:59.212Z"
     },
     "design": null,
@@ -1435,16 +1355,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-11T07:01:59.212Z"
     },
     "design": {
@@ -1624,14 +1536,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-16T07:01:59.212Z"
     },
     "design": null,
@@ -1690,16 +1596,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-14T07:01:59.212Z"
     },
     "design": {
@@ -1885,14 +1783,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-17T07:01:59.212Z"
     },
     "design": null,
@@ -1957,14 +1849,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-15T07:01:59.212Z"
     },
     "design": {
@@ -2071,14 +1957,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-15T07:01:59.212Z"
     },
     "design": null,
@@ -2143,16 +2023,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-09T07:01:59.212Z"
     },
     "design": {
@@ -2332,14 +2204,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-12T07:01:59.212Z"
     },
     "design": {
@@ -2495,14 +2361,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-16T07:01:59.212Z"
     },
     "design": {
@@ -2615,14 +2475,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-15T07:01:59.212Z"
     },
     "design": null,
@@ -2687,18 +2541,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-12T07:01:59.212Z"
     },
     "design": {
@@ -2903,14 +2747,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-03-03T08:01:59.212Z"
     },
     "design": {
@@ -3107,16 +2945,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-17T07:01:59.212Z"
     },
     "design": null,
@@ -3169,18 +2999,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-12T07:01:59.212Z"
     },
     "design": {
@@ -3391,18 +3211,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-03-04T08:01:59.212Z"
     },
     "design": {
@@ -3659,18 +3469,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-11T07:01:59.212Z"
     },
     "design": {
@@ -3887,14 +3687,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-03-19T07:01:59.212Z"
     },
     "design": {
@@ -4085,16 +3879,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-09T07:01:59.212Z"
     },
     "design": {
@@ -4268,18 +4054,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-13T07:01:59.213Z"
     },
     "design": {
@@ -4402,16 +4178,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-10T07:01:59.213Z"
     },
     "design": {
@@ -4591,18 +4359,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-11T07:01:59.213Z"
     },
     "design": {
@@ -4807,16 +4565,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-03-17T07:01:59.213Z"
     },
     "design": {
@@ -5049,16 +4799,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-14T07:01:59.213Z"
     },
     "design": {
@@ -5250,18 +4992,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-17T07:01:59.213Z"
     },
     "design": {
@@ -5378,16 +5110,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-06T07:01:59.213Z"
     },
     "design": {
@@ -5561,18 +5285,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-18T07:01:59.213Z"
     },
     "design": null,
@@ -5625,14 +5339,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-10T07:01:59.213Z"
     },
     "design": {
@@ -5801,14 +5509,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-03-21T07:01:59.213Z"
     },
     "design": {
@@ -5999,16 +5701,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-10T07:01:59.214Z"
     },
     "design": {
@@ -6182,16 +5876,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-17T07:01:59.214Z"
     },
     "design": null,
@@ -6244,14 +5930,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-09T07:01:59.214Z"
     },
     "design": {
@@ -6419,16 +6099,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-10T07:01:59.214Z"
     },
     "design": {
@@ -6609,14 +6281,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-03-21T07:01:59.214Z"
     },
     "design": {
@@ -6813,14 +6479,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-15T07:01:59.214Z"
     },
     "design": {
@@ -6921,18 +6581,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-15T07:01:59.214Z"
     },
     "design": {
@@ -7142,16 +6792,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-11T07:01:59.214Z"
     },
     "design": {
@@ -7343,16 +6985,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-16T07:01:59.214Z"
     },
     "design": {
@@ -7452,14 +7086,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-06T07:01:59.214Z"
     },
     "design": {
@@ -7609,16 +7237,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-19T07:01:59.214Z"
     },
     "design": null,
@@ -7683,14 +7303,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-09T07:01:59.214Z"
     },
     "design": {
@@ -7858,14 +7472,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-13T07:01:59.214Z"
     },
     "design": {
@@ -8027,14 +7635,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-13T07:01:59.214Z"
     },
     "design": {
@@ -8191,14 +7793,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-03-18T07:01:59.214Z"
     },
     "design": {
@@ -8408,18 +8004,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-03-19T07:01:59.214Z"
     },
     "design": {
@@ -8658,16 +8244,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-17T07:01:59.214Z"
     },
     "design": {
@@ -8785,14 +8363,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-15T07:01:59.214Z"
     },
     "design": {
@@ -8905,18 +8477,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-15T07:01:59.214Z"
     },
     "design": null,
@@ -8975,14 +8537,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-13T07:01:59.214Z"
     },
     "design": {
@@ -9138,18 +8694,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-14T07:01:59.214Z"
     },
     "design": {
@@ -9266,14 +8812,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-06T07:01:59.214Z"
     },
     "design": {
@@ -9429,18 +8969,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-10T07:01:59.214Z"
     },
     "design": {
@@ -9656,16 +9186,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-17T07:01:59.214Z"
     },
     "design": null,
@@ -9730,14 +9252,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-17T07:01:59.214Z"
     },
     "design": {
@@ -9832,14 +9348,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-15T07:01:59.214Z"
     },
     "design": null,
@@ -9898,14 +9408,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-17T07:01:59.214Z"
     },
     "design": null,
@@ -9965,18 +9469,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-03-21T07:01:59.214Z"
     },
     "design": {
@@ -10216,16 +9710,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-03-06T08:01:59.214Z"
     },
     "design": {
@@ -10441,18 +9927,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-03-03T08:01:59.214Z"
     },
     "design": {
@@ -10691,14 +10167,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-08T07:01:59.214Z"
     },
     "design": {
@@ -10860,14 +10330,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-09T07:01:59.214Z"
     },
     "design": {
@@ -11017,14 +10481,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-09T07:01:59.214Z"
     },
     "design": {
@@ -11192,16 +10650,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-15T07:01:59.214Z"
     },
     "design": {
@@ -11319,16 +10769,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-12T07:01:59.214Z"
     },
     "design": {
@@ -11514,16 +10956,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-12T07:01:59.214Z"
     },
     "design": {
@@ -11697,16 +11131,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-10T07:01:59.214Z"
     },
     "design": {
@@ -11898,16 +11324,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-13T07:01:59.214Z"
     },
     "design": {
@@ -12099,16 +11517,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-15T07:01:59.214Z"
     },
     "design": {
@@ -12294,18 +11704,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-13T07:01:59.214Z"
     },
     "design": {
@@ -12516,16 +11916,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-03-21T07:01:59.214Z"
     },
     "design": {
@@ -12758,16 +12150,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-11T07:01:59.214Z"
     },
     "design": {
@@ -12947,16 +12331,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-09T07:01:59.214Z"
     },
     "design": {
@@ -13131,18 +12507,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-03-17T07:01:59.215Z"
     },
     "design": {
@@ -13393,18 +12759,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-13T07:01:59.215Z"
     },
     "design": {
@@ -13509,14 +12865,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-15T07:01:59.215Z"
     },
     "design": null,
@@ -13587,18 +12937,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-08T07:01:59.215Z"
     },
     "design": {
@@ -13796,16 +13136,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-13T07:01:59.215Z"
     },
     "design": {
@@ -13986,14 +13318,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-03-20T07:01:59.215Z"
     },
     "design": {
@@ -14190,16 +13516,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-15T07:01:59.215Z"
     },
     "design": null,
@@ -14252,18 +13570,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-19T07:01:59.215Z"
     },
     "design": null,
@@ -14316,16 +13624,8 @@
           "severity": 1
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-06T07:01:59.215Z"
     },
     "design": {
@@ -14506,18 +13806,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-03-02T08:01:59.215Z"
     },
     "design": {
@@ -14768,16 +14058,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-15T07:01:59.215Z"
     },
     "design": {
@@ -14952,16 +14234,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-03-19T07:01:59.215Z"
     },
     "design": {
@@ -15188,18 +14462,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-09T07:01:59.215Z"
     },
     "design": {
@@ -15403,14 +14667,8 @@
           "severity": 3
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-16T07:01:59.215Z"
     },
     "design": {
@@ -15517,16 +14775,8 @@
           "severity": 2
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-13T07:01:59.215Z"
     },
     "design": {
@@ -15718,18 +14968,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-12T07:01:59.215Z"
     },
     "design": {
@@ -15945,16 +15185,8 @@
           "severity": 4
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐"],
       "timestamp": "2026-04-13T07:01:59.215Z"
     },
     "design": {
@@ -16054,14 +15286,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐"],
       "timestamp": "2026-04-12T07:01:59.215Z"
     },
     "design": {
@@ -16211,18 +15437,8 @@
           "severity": 5
         }
       ],
-      "matchedSystems": [
-        "空调",
-        "地暖",
-        "新风",
-        "热水"
-      ],
-      "aiRecommendations": [
-        "空调系统推荐",
-        "地暖系统推荐",
-        "新风系统推荐",
-        "热水系统推荐"
-      ],
+      "matchedSystems": ["空调", "地暖", "新风", "热水"],
+      "aiRecommendations": ["空调系统推荐", "地暖系统推荐", "新风系统推荐", "热水系统推荐"],
       "timestamp": "2026-04-09T07:01:59.215Z"
     },
     "design": {

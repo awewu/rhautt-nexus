@@ -1,4 +1,14 @@
-import { Body, Controller, Get, NotFoundException, Param, Post, Query, StreamableFile, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+  StreamableFile,
+  UseGuards,
+} from '@nestjs/common';
 import { ProductCatalogService } from './product-catalog.service';
 import { Public } from '../common/public.decorator';
 import { PublicRateLimitGuard } from '../common/public-rate-limit.guard';
@@ -45,9 +55,14 @@ export class BrandPublicController {
   async productImage(
     @Param('slug') slug: string,
     @Param('sku') sku: string,
-    @Param('artifactId') artifactId: string,
+    @Param('artifactId') artifactId: string
   ) {
-    const found = await this.svc.getPublicProductImage(slug, sku, artifactId, this.brandTenant(slug));
+    const found = await this.svc.getPublicProductImage(
+      slug,
+      sku,
+      artifactId,
+      this.brandTenant(slug)
+    );
     if (!found) throw new NotFoundException('image not found');
     return new StreamableFile(found.stream, {
       type: found.row.mimeType || 'application/octet-stream',
@@ -59,9 +74,14 @@ export class BrandPublicController {
   async productDocument(
     @Param('slug') slug: string,
     @Param('sku') sku: string,
-    @Param('artifactId') artifactId: string,
+    @Param('artifactId') artifactId: string
   ) {
-    const found = await this.svc.getPublicProductDocument(slug, sku, artifactId, this.brandTenant(slug));
+    const found = await this.svc.getPublicProductDocument(
+      slug,
+      sku,
+      artifactId,
+      this.brandTenant(slug)
+    );
     if (!found) throw new NotFoundException('document not found');
     return new StreamableFile(found.stream, {
       type: found.row.mimeType || 'application/pdf',
@@ -70,7 +90,11 @@ export class BrandPublicController {
   }
 
   @Get(':slug/products/:sku')
-  product(@Param('slug') slug: string, @Param('sku') sku: string, @Query('locale') locale?: string) {
+  product(
+    @Param('slug') slug: string,
+    @Param('sku') sku: string,
+    @Query('locale') locale?: string
+  ) {
     return this.svc.getBrandProductLocalized(slug, sku, locale, this.brandTenant(slug));
   }
 

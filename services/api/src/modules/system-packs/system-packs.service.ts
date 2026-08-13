@@ -29,7 +29,7 @@ export class SystemPacksService {
 
   compose(body: { selectedPackIds?: string[]; context?: Record<string, unknown> } = {}) {
     const selected = body.selectedPackIds?.length
-      ? body.selectedPackIds.map((id) => this.getPack(id)).filter(Boolean) as SystemPack[]
+      ? (body.selectedPackIds.map((id) => this.getPack(id)).filter(Boolean) as SystemPack[])
       : this.recommend(body.context || {}).packs;
 
     const smartControl = this.getPack('rheem-smart-control');
@@ -114,16 +114,18 @@ export class SystemPacksService {
 
     for (const pack of packs) {
       for (const coverage of pack.standardsCoverage || []) {
-        const existing = byDomain.get(coverage.domain) || {
-          domain: coverage.domain,
-          requiredFor: [],
-          primaryStandards: [],
-          softwareChecks: [],
-          deliverableEvidence: [],
-          quoteImpact: [],
-          lifecycleHandoffImpact: [],
-          packIds: [],
-        } as SystemPackCoverage & { packIds: string[] };
+        const existing =
+          byDomain.get(coverage.domain) ||
+          ({
+            domain: coverage.domain,
+            requiredFor: [],
+            primaryStandards: [],
+            softwareChecks: [],
+            deliverableEvidence: [],
+            quoteImpact: [],
+            lifecycleHandoffImpact: [],
+            packIds: [],
+          } as SystemPackCoverage & { packIds: string[] });
 
         for (const key of [
           'requiredFor',
@@ -133,7 +135,9 @@ export class SystemPacksService {
           'quoteImpact',
           'lifecycleHandoffImpact',
         ] as const) {
-          (existing[key] as string[]) = [...new Set((existing[key] as string[]).concat(coverage[key] || []))];
+          (existing[key] as string[]) = [
+            ...new Set((existing[key] as string[]).concat(coverage[key] || [])),
+          ];
         }
         (existing as any).packIds = [...new Set((existing as any).packIds.concat(pack.id))];
         byDomain.set(coverage.domain, existing);
@@ -148,35 +152,62 @@ export class SystemPacksService {
     });
   }
 
-  private buildStandardsEvidence(standards: SystemPackStandard[], standardsCoverage: SystemPackCoverage[] = []) {
-    const byLevel = standards.reduce((acc, standard) => {
-      const level = standard.level || 'L2';
-      if (!acc[level]) acc[level] = [];
-      acc[level].push({
-        level,
-        code: standard.code,
-        edition: standard.edition,
-        name: standard.name,
-        scope: standard.scope,
-        softwareCheck: standard.softwareCheck || 'calculationRule',
-      });
-      return acc;
-    }, {} as Record<string, SystemPackStandard[]>);
+  private buildStandardsEvidence(
+    standards: SystemPackStandard[],
+    standardsCoverage: SystemPackCoverage[] = []
+  ) {
+    const byLevel = standards.reduce(
+      (acc, standard) => {
+        const level = standard.level || 'L2';
+        if (!acc[level]) acc[level] = [];
+        acc[level].push({
+          level,
+          code: standard.code,
+          edition: standard.edition,
+          name: standard.name,
+          scope: standard.scope,
+          softwareCheck: standard.softwareCheck || 'calculationRule',
+        });
+        return acc;
+      },
+      {} as Record<string, SystemPackStandard[]>
+    );
 
     const coveredDomains = standardsCoverage.map((item) => item.domain);
     const missingRequiredDomains = REQUIRED_STANDARDS_COVERAGE_DOMAINS.filter(
-      (domain) => !coveredDomains.includes(domain),
+      (domain) => !coveredDomains.includes(domain)
     );
 
     return {
       hierarchy: [
-        { level: 'L1', label: '中国强制/底线约束', enforcement: 'mandatoryBlocker', standards: byLevel.L1 || [] },
-        { level: 'L2', label: '国内设计/施工/验收细化', enforcement: 'calculationRule', standards: byLevel.L2 || [] },
-        { level: 'L3', label: '国际先进参考/产品差异化', enforcement: 'advisoryOptimization', standards: byLevel.L3 || [] },
+        {
+          level: 'L1',
+          label: '中国强制/底线约束',
+          enforcement: 'mandatoryBlocker',
+          standards: byLevel.L1 || [],
+        },
+        {
+          level: 'L2',
+          label: '国内设计/施工/验收细化',
+          enforcement: 'calculationRule',
+          standards: byLevel.L2 || [],
+        },
+        {
+          level: 'L3',
+          label: '国际先进参考/产品差异化',
+          enforcement: 'advisoryOptimization',
+          standards: byLevel.L3 || [],
+        },
       ],
-      mandatoryBlockers: standards.filter((s) => s.softwareCheck === 'mandatoryBlocker').map((s) => s.code),
-      calculationRules: standards.filter((s) => s.softwareCheck === 'calculationRule').map((s) => s.code),
-      advisoryOptimizations: standards.filter((s) => s.softwareCheck === 'advisoryOptimization').map((s) => s.code),
+      mandatoryBlockers: standards
+        .filter((s) => s.softwareCheck === 'mandatoryBlocker')
+        .map((s) => s.code),
+      calculationRules: standards
+        .filter((s) => s.softwareCheck === 'calculationRule')
+        .map((s) => s.code),
+      advisoryOptimizations: standards
+        .filter((s) => s.softwareCheck === 'advisoryOptimization')
+        .map((s) => s.code),
       coverage: {
         status: missingRequiredDomains.length ? 'incomplete' : 'complete',
         requiredDomains: REQUIRED_STANDARDS_COVERAGE_DOMAINS,

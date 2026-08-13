@@ -2,7 +2,7 @@
  * 智能报价引擎 v2.0 - QuotationEngine
  * 多维度架构：产品+材料+施工+管理+面积+环境
  * 对标行业最优：酷家乐/齐家网/土巴兔报价机制
- * 
+ *
  * 架构维度：
  * 1. 产品维度 - 设备型号、规格、品牌
  * 2. 材料维度 - 管材、辅料、配件
@@ -35,10 +35,10 @@ class QuotationEngine {
           living: { basePrice: 350, name: '客厅' },
           bedroom: { basePrice: 280, name: '卧室' },
           kitchen: { basePrice: 450, name: '厨房' },
-          bathroom: { basePrice: 500, name: '卫生间' }
-        }
+          bathroom: { basePrice: 500, name: '卫生间' },
+        },
       },
-      
+
       // 齐家网模式 - 按项目清单报价
       qijia: {
         name: '项目清单式',
@@ -47,10 +47,10 @@ class QuotationEngine {
           materials: { ratio: 0.45, name: '主材费' },
           labor: { ratio: 0.35, name: '人工费' },
           overhead: { ratio: 0.15, name: '管理费' },
-          profit: { ratio: 0.05, name: '利润' }
-        }
+          profit: { ratio: 0.05, name: '利润' },
+        },
       },
-      
+
       // 土巴兔模式 - 套餐+增项报价
       tubatu: {
         name: '套餐+增项',
@@ -58,16 +58,16 @@ class QuotationEngine {
         packages: {
           basic: { price: 899, perSqm: true, name: '基础套餐' },
           standard: { price: 1299, perSqm: true, name: '标准套餐' },
-          premium: { price: 1899, perSqm: true, name: '尊享套餐' }
-        }
+          premium: { price: 1899, perSqm: true, name: '尊享套餐' },
+        },
       },
-      
+
       // 瑞美专业模式 - 暖通全系统报价
       rheem: {
         name: '暖通全系统',
         description: '设备+材料+施工+售后全包',
-        dimensions: ['product', 'material', 'construction', 'management', 'warranty']
-      }
+        dimensions: ['product', 'material', 'construction', 'management', 'warranty'],
+      },
     };
   }
 
@@ -78,37 +78,37 @@ class QuotationEngine {
     return {
       // 一线城市
       tier1: {
-        laborCost: 1.5,      // 人工费系数
-        materialCost: 1.1,   // 材料费系数
-        managementCost: 1.3,   // 管理费系数
-        cities: ['北京', '上海', '广州', '深圳']
+        laborCost: 1.5, // 人工费系数
+        materialCost: 1.1, // 材料费系数
+        managementCost: 1.3, // 管理费系数
+        cities: ['北京', '上海', '广州', '深圳'],
       },
       // 二线城市
       tier2: {
         laborCost: 1.2,
         materialCost: 1.05,
         managementCost: 1.15,
-        cities: ['杭州', '南京', '成都', '武汉', '西安', '重庆']
+        cities: ['杭州', '南京', '成都', '武汉', '西安', '重庆'],
       },
       // 三四线城市
       tier3: {
         laborCost: 1.0,
         materialCost: 1.0,
         managementCost: 1.0,
-        cities: ['其他']
+        cities: ['其他'],
       },
       // 特殊环境
       environment: {
-        highAltitude: 1.15,    // 高海拔
-        coastal: 1.1,         // 沿海腐蚀
-        cold: 1.2,              // 极寒地区
+        highAltitude: 1.15, // 高海拔
+        coastal: 1.1, // 沿海腐蚀
+        cold: 1.2, // 极寒地区
         highFloor: {
           '1-10': 1.0,
           '11-20': 1.05,
           '21-30': 1.1,
-          '30+': 1.15           // 高空作业费
-        }
-      }
+          '30+': 1.15, // 高空作业费
+        },
+      },
     };
   }
 
@@ -123,29 +123,29 @@ class QuotationEngine {
         priceAnchoring: {
           showHighFirst: true,
           discountPresentation: '立减XXX元',
-          savingsCalculation: true
+          savingsCalculation: true,
         },
         // 套餐组合策略
         bundling: {
-          hvacFreshAir: 0.95,    // 空调+新风95折
-          hvacHeating: 0.90,      // 空调+地暖9折
-          allInOne: 0.85          // 全屋系统85折
+          hvacFreshAir: 0.95, // 空调+新风95折
+          hvacHeating: 0.9, // 空调+地暖9折
+          allInOne: 0.85, // 全屋系统85折
         },
         // 心理定价策略
         psychological: {
           endWith99: true,
-          showPerDay: true,      // 折算到每天多少钱
-          showPerSqm: true        // 每平米单价
-        }
+          showPerDay: true, // 折算到每天多少钱
+          showPerSqm: true, // 每平米单价
+        },
       },
-      
+
       // 动态定价策略
       dynamicPricing: {
-        peakSeason: 1.0,         // 旺季（3-5月）
-        offSeason: 0.90,         // 淡季折扣
-        lastMonth: 0.85,         // 月末冲量
-        groupBuy: 0.88            // 拼团价
-      }
+        peakSeason: 1.0, // 旺季（3-5月）
+        offSeason: 0.9, // 淡季折扣
+        lastMonth: 0.85, // 月末冲量
+        groupBuy: 0.88, // 拼团价
+      },
     };
   }
 
@@ -155,14 +155,14 @@ class QuotationEngine {
    */
   generateMultiDimensionalQuote(params) {
     const {
-      area,                    // 建筑面积
-      rooms = 3,              // 房间数
-      city = '北京',          // 城市（环境维度）
-      floor = 10,             // 楼层（环境维度）
-      systems = ['hvac'],     // 系统类型
-      packageTier = 'standard',   // 套餐档次
-      quality = 'mid',        // 品质等级
-      urgency = false         // 是否加急
+      area, // 建筑面积
+      rooms = 3, // 房间数
+      city = '北京', // 城市（环境维度）
+      floor = 10, // 楼层（环境维度）
+      systems = ['hvac'], // 系统类型
+      packageTier = 'standard', // 套餐档次
+      quality = 'mid', // 品质等级
+      urgency = false, // 是否加急
     } = params;
 
     console.log(`[QuotationEngine] 生成多维度报价: ${area}㎡ ${city}`);
@@ -172,7 +172,11 @@ class QuotationEngine {
 
     // 2. 计算各维度成本
     const dimensions = this.calculateDimensions({
-      area, rooms, systems, quality, regionFactor
+      area,
+      rooms,
+      systems,
+      quality,
+      regionFactor,
     });
 
     // 3. 应用智能定价策略
@@ -192,17 +196,18 @@ class QuotationEngine {
         totalAmount: optimized.total,
         discountedAmount: optimized.discounted,
         savings: optimized.savings,
-        perSqm: Math.round(optimized.discounted / area)
+        perSqm: Math.round(optimized.discounted / area),
       },
-      dimensions,              // 各维度明细
-      versions,                 // 多版本报价
-      details,                  // 详细清单
-      strategies: {             // 应用的策略
+      dimensions, // 各维度明细
+      versions, // 多版本报价
+      details, // 详细清单
+      strategies: {
+        // 应用的策略
         bundling: optimized.bundlingApplied,
         seasonal: optimized.seasonalApplied,
-        psychological: optimized.psychologicalPricing
+        psychological: optimized.psychologicalPricing,
       },
-      aiInsights: this.generateAIInsights(dimensions, params)  // AI建议
+      aiInsights: this.generateAIInsights(dimensions, params), // AI建议
     };
   }
 
@@ -211,35 +216,36 @@ class QuotationEngine {
    */
   calculateDimensions(params) {
     const { area, rooms, systems, quality, regionFactor } = params;
-    
+
     const dimensions = {
       // 1. 产品维度 - 设备费
       product: this.calculateProductCost(systems, area, quality, regionFactor),
-      
+
       // 2. 材料维度 - 材料费
       material: this.calculateMaterialCost(systems, area, quality, regionFactor),
-      
+
       // 3. 施工维度 - 人工安装费
       construction: this.calculateConstructionCost(systems, area, rooms, regionFactor),
-      
+
       // 4. 管理维度 - 项目管理+监理
       management: this.calculateManagementCost(area, regionFactor),
-      
+
       // 5. 售后维度 - 延保服务
       warranty: this.calculateWarrantyCost(systems, quality),
-      
+
       // 6. 其他费用
       other: {
-        design: Math.round(area * 5),           // 设计费 5元/㎡
-        transport: Math.round(area * 3),       // 运输费 3元/㎡
-        waste: Math.round(area * 2)              // 垃圾清运费 2元/㎡
-      }
+        design: Math.round(area * 5), // 设计费 5元/㎡
+        transport: Math.round(area * 3), // 运输费 3元/㎡
+        waste: Math.round(area * 2), // 垃圾清运费 2元/㎡
+      },
     };
 
     // 计算小计
-    dimensions.subtotal = Object.values(dimensions)
-      .filter(v => typeof v === 'object' && v.amount)
-      .reduce((sum, d) => sum + d.amount, 0) +
+    dimensions.subtotal =
+      Object.values(dimensions)
+        .filter((v) => typeof v === 'object' && v.amount)
+        .reduce((sum, d) => sum + d.amount, 0) +
       Object.values(dimensions.other).reduce((sum, v) => sum + v, 0);
 
     return dimensions;
@@ -268,7 +274,7 @@ class QuotationEngine {
         unit: '套',
         quantity: 1,
         unitPrice: freshAirCost,
-        amount: freshAirCost
+        amount: freshAirCost,
       });
       totalAmount += freshAirCost;
     }
@@ -282,7 +288,7 @@ class QuotationEngine {
         unit: '㎡',
         quantity: area,
         unitPrice: heatingCost / area,
-        amount: heatingCost
+        amount: heatingCost,
       });
       totalAmount += heatingCost;
     }
@@ -294,7 +300,7 @@ class QuotationEngine {
       name: '设备费',
       amount: totalAmount,
       items: equipment,
-      notes: ['含主机、内机、控制器', '瑞美原厂正品']
+      notes: ['含主机、内机、控制器', '瑞美原厂正品'],
     };
   }
 
@@ -303,25 +309,26 @@ class QuotationEngine {
    */
   calculateHVACCost(area, quality) {
     // 负荷估算
-    const coolingLoad = area * 130;  // 130W/㎡
-    
+    const coolingLoad = area * 130; // 130W/㎡
+
     // 外机选型
     const outdoorOptions = [
       { capacity: 8000, price: 12000, name: '6匹外机' },
       { capacity: 12000, price: 18000, name: '8匹外机' },
       { capacity: 16000, price: 24000, name: '10匹外机' },
       { capacity: 24000, price: 35000, name: '14匹外机' },
-      { capacity: 32000, price: 48000, name: '18匹外机' }
+      { capacity: 32000, price: 48000, name: '18匹外机' },
     ];
 
-    const outdoor = outdoorOptions.find(o => o.capacity >= coolingLoad * 1.1) || 
-                    outdoorOptions[outdoorOptions.length - 1];
+    const outdoor =
+      outdoorOptions.find((o) => o.capacity >= coolingLoad * 1.1) ||
+      outdoorOptions[outdoorOptions.length - 1];
 
     // 品质系数
     const qualityFactor = quality === 'high' ? 1.3 : quality === 'low' ? 0.8 : 1.0;
-    
+
     const equipment = [];
-    
+
     // 外机
     equipment.push({
       name: outdoor.name,
@@ -330,13 +337,13 @@ class QuotationEngine {
       unit: '台',
       quantity: 1,
       unitPrice: Math.round(outdoor.price * qualityFactor),
-      amount: Math.round(outdoor.price * qualityFactor)
+      amount: Math.round(outdoor.price * qualityFactor),
     });
 
     // 内机（估算4台）
     const indoorCount = Math.min(Math.max(3, Math.floor(area / 30)), 6);
     const indoorPrice = quality === 'high' ? 4500 : quality === 'low' ? 2800 : 3500;
-    
+
     for (let i = 0; i < indoorCount; i++) {
       equipment.push({
         name: `室内机${i + 1}`,
@@ -345,7 +352,7 @@ class QuotationEngine {
         unit: '台',
         quantity: 1,
         unitPrice: indoorPrice,
-        amount: indoorPrice
+        amount: indoorPrice,
       });
     }
 
@@ -370,7 +377,7 @@ class QuotationEngine {
       unit: '米',
       quantity: copperPipeLength,
       unitPrice: copperPrice,
-      amount: copperPipeLength * copperPrice
+      amount: copperPipeLength * copperPrice,
     });
 
     // 保温棉
@@ -382,7 +389,7 @@ class QuotationEngine {
       unit: '米',
       quantity: insulationLength,
       unitPrice: insulationPrice,
-      amount: insulationLength * insulationPrice
+      amount: insulationLength * insulationPrice,
     });
 
     // 冷凝水管
@@ -392,7 +399,7 @@ class QuotationEngine {
       unit: '米',
       quantity: Math.round(area * 1.5),
       unitPrice: 12,
-      amount: Math.round(area * 1.5) * 12
+      amount: Math.round(area * 1.5) * 12,
     });
 
     // 信号线
@@ -402,7 +409,7 @@ class QuotationEngine {
       unit: '米',
       quantity: Math.round(area * 2),
       unitPrice: 8,
-      amount: Math.round(area * 2) * 8
+      amount: Math.round(area * 2) * 8,
     });
 
     // 辅料包
@@ -412,7 +419,7 @@ class QuotationEngine {
       unit: '套',
       quantity: 1,
       unitPrice: Math.round(area * 20),
-      amount: Math.round(area * 20)
+      amount: Math.round(area * 20),
     });
 
     totalAmount = items.reduce((sum, i) => sum + i.amount, 0);
@@ -422,7 +429,7 @@ class QuotationEngine {
       name: '材料费',
       amount: totalAmount,
       items,
-      notes: ['国标优质材料', '环保认证']
+      notes: ['国标优质材料', '环保认证'],
     };
   }
 
@@ -433,14 +440,14 @@ class QuotationEngine {
     const items = [];
 
     // 基础安装费
-    const baseInstall = area * 80;  // 80元/㎡基础安装
+    const baseInstall = area * 80; // 80元/㎡基础安装
     items.push({
       name: '基础安装',
       spec: '设备吊装、管路连接',
       unit: '㎡',
       quantity: area,
       unitPrice: 80,
-      amount: baseInstall
+      amount: baseInstall,
     });
 
     // 系统调试
@@ -450,7 +457,7 @@ class QuotationEngine {
       unit: '项',
       quantity: 1,
       unitPrice: 1500,
-      amount: 1500
+      amount: 1500,
     });
 
     // 风口安装
@@ -461,7 +468,7 @@ class QuotationEngine {
       unit: '个',
       quantity: ventCount,
       unitPrice: 150,
-      amount: ventCount * 150
+      amount: ventCount * 150,
     });
 
     // 高空作业费
@@ -471,7 +478,7 @@ class QuotationEngine {
       unit: '项',
       quantity: 1,
       unitPrice: 800,
-      amount: 800
+      amount: 800,
     });
 
     const totalAmount = Math.round(
@@ -482,7 +489,7 @@ class QuotationEngine {
       name: '施工费',
       amount: totalAmount,
       items,
-      notes: ['持证上岗', '标准工艺', '5年质保']
+      notes: ['持证上岗', '标准工艺', '5年质保'],
     };
   }
 
@@ -499,7 +506,7 @@ class QuotationEngine {
       unit: '项',
       quantity: 1,
       unitPrice: Math.round(area * 15),
-      amount: Math.round(area * 15)
+      amount: Math.round(area * 15),
     });
 
     // 工程监理
@@ -509,7 +516,7 @@ class QuotationEngine {
       unit: '次',
       quantity: 3,
       unitPrice: 300,
-      amount: 900
+      amount: 900,
     });
 
     const totalAmount = Math.round(
@@ -520,7 +527,7 @@ class QuotationEngine {
       name: '管理费',
       amount: totalAmount,
       items,
-      notes: ['专业监理', '全程跟踪']
+      notes: ['专业监理', '全程跟踪'],
     };
   }
 
@@ -531,21 +538,23 @@ class QuotationEngine {
     // 延保服务
     const baseWarranty = quality === 'high' ? 5 : quality === 'low' ? 2 : 3; // 年
     const extendedWarranty = 2; // 延保2年
-    
+
     const warrantyCost = systems.length * 500; // 每系统500元/年延保
 
     return {
       name: '售后延保',
       amount: warrantyCost * extendedWarranty,
-      items: [{
-        name: '延长保修服务',
-        spec: `厂家${baseWarranty}年+延保${extendedWarranty}年`,
-        unit: '年',
-        quantity: extendedWarranty,
-        unitPrice: warrantyCost,
-        amount: warrantyCost * extendedWarranty
-      }],
-      notes: [`厂家质保${baseWarranty}年`, '24小时响应']
+      items: [
+        {
+          name: '延长保修服务',
+          spec: `厂家${baseWarranty}年+延保${extendedWarranty}年`,
+          unit: '年',
+          quantity: extendedWarranty,
+          unitPrice: warrantyCost,
+          amount: warrantyCost * extendedWarranty,
+        },
+      ],
+      notes: [`厂家质保${baseWarranty}年`, '24小时响应'],
     };
   }
 
@@ -554,24 +563,24 @@ class QuotationEngine {
    */
   getRegionFactor(city, floor) {
     let factor = { ...this.regionFactors.tier3 };
-    
+
     // 匹配城市等级
     if (this.regionFactors.tier1.cities.includes(city)) {
       factor = { ...this.regionFactors.tier1 };
     } else if (this.regionFactors.tier2.cities.includes(city)) {
       factor = { ...this.regionFactors.tier2 };
     }
-    
+
     // 楼层系数
     let floorFactor = 1.0;
     if (floor <= 10) floorFactor = this.regionFactors.environment.highFloor['1-10'];
     else if (floor <= 20) floorFactor = this.regionFactors.environment.highFloor['11-20'];
     else if (floor <= 30) floorFactor = this.regionFactors.environment.highFloor['21-30'];
     else floorFactor = this.regionFactors.environment.highFloor['30+'];
-    
+
     return {
       ...factor,
-      floorFactor
+      floorFactor,
     };
   }
 
@@ -590,25 +599,26 @@ class QuotationEngine {
       appliedStrategies.push({
         name: '全屋系统套餐',
         discount: '85折',
-        saving: Math.round(total * (1 - strategies.conversionOptimization.bundling.allInOne))
+        saving: Math.round(total * (1 - strategies.conversionOptimization.bundling.allInOne)),
       });
     } else if (params.systems.includes('hvac') && params.systems.includes('floorHeating')) {
       discountRate *= strategies.conversionOptimization.bundling.hvacHeating;
       appliedStrategies.push({
         name: '空调+地暖套餐',
         discount: '9折',
-        saving: Math.round(total * (1 - strategies.conversionOptimization.bundling.hvacHeating))
+        saving: Math.round(total * (1 - strategies.conversionOptimization.bundling.hvacHeating)),
       });
     }
 
     // 2. 淡季折扣
     const month = new Date().getMonth();
-    if (month >= 10 || month <= 2) { // 11月-3月淡季
+    if (month >= 10 || month <= 2) {
+      // 11月-3月淡季
       discountRate *= strategies.dynamicPricing.offSeason;
       appliedStrategies.push({
         name: '淡季优惠',
         discount: '9折',
-        saving: Math.round(total * (1 - strategies.dynamicPricing.offSeason))
+        saving: Math.round(total * (1 - strategies.dynamicPricing.offSeason)),
       });
     }
 
@@ -619,7 +629,7 @@ class QuotationEngine {
       appliedStrategies.push({
         name: '月末冲量',
         discount: '85折',
-        saving: Math.round(total * (1 - strategies.dynamicPricing.lastMonth))
+        saving: Math.round(total * (1 - strategies.dynamicPricing.lastMonth)),
       });
     }
 
@@ -631,10 +641,10 @@ class QuotationEngine {
       discounted,
       savings,
       discountRate,
-      bundlingApplied: appliedStrategies.filter(s => s.name.includes('套餐')).length > 0,
-      seasonalApplied: appliedStrategies.filter(s => s.name.includes('淡季')).length > 0,
+      bundlingApplied: appliedStrategies.filter((s) => s.name.includes('套餐')).length > 0,
+      seasonalApplied: appliedStrategies.filter((s) => s.name.includes('淡季')).length > 0,
       psychologicalPricing: strategies.conversionOptimization.psychological,
-      appliedStrategies
+      appliedStrategies,
     };
   }
 
@@ -647,9 +657,9 @@ class QuotationEngine {
         name: '经济版',
         subtitle: '基础配置，性价比之选',
         amount: Math.round(optimized.discounted * 0.85),
-        perSqm: Math.round(optimized.discounted * 0.85 / area),
+        perSqm: Math.round((optimized.discounted * 0.85) / area),
         features: ['国产品牌外机', '基础保温材料', '标准安装工艺'],
-        warranty: '3年质保'
+        warranty: '3年质保',
       },
       standard: {
         name: '标准版',
@@ -658,16 +668,16 @@ class QuotationEngine {
         perSqm: Math.round(optimized.discounted / area),
         features: ['瑞美标准外机', '优质保温材料', '标准安装工艺'],
         warranty: '5年质保',
-        recommended: true
+        recommended: true,
       },
       premium: {
         name: '尊享版',
         subtitle: '旗舰配置，极致体验',
         amount: Math.round(optimized.discounted * 1.25),
-        perSqm: Math.round(optimized.discounted * 1.25 / area),
+        perSqm: Math.round((optimized.discounted * 1.25) / area),
         features: ['瑞美旗舰外机', '进口保温材料', '金牌安装工艺', '智能控制系统'],
-        warranty: '8年质保'
-      }
+        warranty: '8年质保',
+      },
     };
   }
 
@@ -676,16 +686,16 @@ class QuotationEngine {
    */
   generateDetailedBOM(dimensions) {
     const bom = [];
-    
+
     // 收集所有项目
-    ['product', 'material', 'construction', 'management', 'warranty'].forEach(dimension => {
+    ['product', 'material', 'construction', 'management', 'warranty'].forEach((dimension) => {
       const dim = dimensions[dimension];
       if (dim && dim.items) {
-        dim.items.forEach(item => {
+        dim.items.forEach((item) => {
           bom.push({
             ...item,
             category: dim.name,
-            categoryCode: dimension
+            categoryCode: dimension,
           });
         });
       }
@@ -696,13 +706,13 @@ class QuotationEngine {
       const names = {
         design: '设计费',
         transport: '运输费',
-        waste: '垃圾清运费'
+        waste: '垃圾清运费',
       };
       bom.push({
         name: names[key] || key,
         category: '其他费用',
         categoryCode: 'other',
-        amount
+        amount,
       });
     });
 
@@ -718,13 +728,13 @@ class QuotationEngine {
     // 成本结构分析
     const total = dimensions.subtotal;
     const productRatio = dimensions.product.amount / total;
-    
+
     if (productRatio > 0.6) {
       insights.push({
         type: 'optimization',
         title: '设备成本偏高',
         suggestion: '建议选择性价比更高的机型，可节省约15%费用',
-        potentialSaving: Math.round(total * 0.15)
+        potentialSaving: Math.round(total * 0.15),
       });
     }
 
@@ -734,7 +744,7 @@ class QuotationEngine {
         type: 'suggestion',
         title: '小户型优化建议',
         suggestion: '80㎡以下建议选用风管机，比多联机节省30%初投资',
-        potentialSaving: Math.round(total * 0.30)
+        potentialSaving: Math.round(total * 0.3),
       });
     }
 
@@ -745,7 +755,7 @@ class QuotationEngine {
         type: 'timing',
         title: '旺季提醒',
         suggestion: '当前为安装旺季，建议提前2周预约，避免排队',
-        urgency: 'medium'
+        urgency: 'medium',
       });
     }
 
@@ -754,7 +764,7 @@ class QuotationEngine {
       type: 'comparison',
       title: '价格竞争力',
       suggestion: '本报价较市场均价低12%，具备竞争优势',
-      marketPosition: 'below_average'
+      marketPosition: 'below_average',
     });
 
     return insights;
@@ -767,10 +777,10 @@ class QuotationEngine {
     let basePrice = systems.includes('hvac') ? 350 : 0;
     basePrice += systems.includes('freshAir') ? 60 : 0;
     basePrice += systems.includes('floorHeating') ? 160 : 0;
-    
+
     const regionFactor = this.getRegionFactor(city, 10);
     const adjustedPrice = Math.round(basePrice * regionFactor.laborCost);
-    
+
     return {
       area,
       systems,
@@ -779,9 +789,9 @@ class QuotationEngine {
       total: Math.round(area * adjustedPrice),
       range: {
         min: Math.round(area * adjustedPrice * 0.8),
-        max: Math.round(area * adjustedPrice * 1.2)
+        max: Math.round(area * adjustedPrice * 1.2),
       },
-      note: '此为快速估算，实际报价以现场勘察为准'
+      note: '此为快速估算，实际报价以现场勘察为准',
     };
   }
 
@@ -790,12 +800,7 @@ class QuotationEngine {
    * 用于替代前端固定比例估算，集中管理区域人工、辅材、税费、风险和毛利护栏。
    */
   generateQuoteFromBOM(params = {}) {
-    const {
-      items = [],
-      project = {},
-      dealer = {},
-      options = {}
-    } = params;
+    const { items = [], project = {}, dealer = {}, options = {} } = params;
 
     const normalizedItems = this.normalizeBomItems(items);
     if (!normalizedItems.length) {
@@ -806,26 +811,34 @@ class QuotationEngine {
 
     const city = project.city || dealer.city || '其他';
     const floor = Number(project.floor || 10);
-    const area = Math.max(Number(project.area || this.estimateAreaFromBOM(normalizedItems) || 80), 1);
+    const area = Math.max(
+      Number(project.area || this.estimateAreaFromBOM(normalizedItems) || 80),
+      1
+    );
     const regionFactor = this.getRegionFactor(city, floor);
     const metrics = this.analyzeBomMetrics(normalizedItems);
 
     const materialSubtotal = Math.round(normalizedItems.reduce((sum, item) => sum + item.total, 0));
     const laborRate = this.calculateBomLaborRate(metrics, project);
     const auxiliaryRate = this.calculateBomAuxiliaryRate(metrics);
-    const managementRate = dealer.tier === 'strategic' ? 0.026 : dealer.tier === 'premium' ? 0.032 : 0.038;
+    const managementRate =
+      dealer.tier === 'strategic' ? 0.026 : dealer.tier === 'premium' ? 0.032 : 0.038;
     const riskRate = this.calculateBomRiskRate(metrics, project);
     const taxRate = Number.isFinite(Number(options.taxRate)) ? Number(options.taxRate) : 0.06;
     const targetMarginRate = Number.isFinite(Number(options.targetMarginRate))
       ? Number(options.targetMarginRate)
-      : 0.20;
+      : 0.2;
     const minMarginRate = Number.isFinite(Number(options.minMarginRate))
       ? Number(options.minMarginRate)
       : 0.14;
 
     const labor = Math.round(Math.max(1200, materialSubtotal * laborRate * regionFactor.laborCost));
-    const auxiliary = Math.round(Math.max(600, materialSubtotal * auxiliaryRate * regionFactor.materialCost));
-    const management = Math.round(Math.max(800, materialSubtotal * managementRate * regionFactor.managementCost));
+    const auxiliary = Math.round(
+      Math.max(600, materialSubtotal * auxiliaryRate * regionFactor.materialCost)
+    );
+    const management = Math.round(
+      Math.max(800, materialSubtotal * managementRate * regionFactor.managementCost)
+    );
     const riskReserve = Math.round((materialSubtotal + labor + auxiliary) * riskRate);
     const directCost = Math.round(materialSubtotal + labor + auxiliary + management + riskReserve);
     const quoteFloor = Math.round(directCost / Math.max(0.01, 1 - minMarginRate));
@@ -840,12 +853,13 @@ class QuotationEngine {
       directCost,
       quoteFloor,
       status: discountedBeforeTax >= quoteFloor ? 'pass' : 'floor_adjusted',
-      adjustment: Math.max(0, quoteFloor - discountedBeforeTax)
+      adjustment: Math.max(0, quoteFloor - discountedBeforeTax),
     };
 
     const approvedBeforeTax = Math.max(discountedBeforeTax, quoteFloor);
     const tax = Math.round(approvedBeforeTax * taxRate);
-    const customerTotal = options.taxIncluded === false ? approvedBeforeTax : approvedBeforeTax + tax;
+    const customerTotal =
+      options.taxIncluded === false ? approvedBeforeTax : approvedBeforeTax + tax;
     const months = Number(options.financingMonths || 36);
 
     return {
@@ -856,7 +870,7 @@ class QuotationEngine {
         name: project.name || '未命名项目',
         city,
         floor,
-        area
+        area,
       },
       summary: {
         materialSubtotal,
@@ -873,7 +887,7 @@ class QuotationEngine {
         customerTotal,
         monthlyPayment: months > 0 ? Math.round(customerTotal / months) : customerTotal,
         perSqm: Math.round(customerTotal / area),
-        grossMarginRate: Number(((approvedBeforeTax - directCost) / approvedBeforeTax).toFixed(4))
+        grossMarginRate: Number(((approvedBeforeTax - directCost) / approvedBeforeTax).toFixed(4)),
       },
       costBreakdown: [
         { code: 'materials', name: '设备/管路材料', amount: materialSubtotal },
@@ -881,7 +895,7 @@ class QuotationEngine {
         { code: 'auxiliary', name: '辅材与损耗', amount: auxiliary },
         { code: 'management', name: '项目管理与质检', amount: management },
         { code: 'risk', name: '施工风险预备', amount: riskReserve },
-        { code: 'tax', name: '税费', amount: tax }
+        { code: 'tax', name: '税费', amount: tax },
       ],
       marginGuard,
       metrics,
@@ -889,8 +903,8 @@ class QuotationEngine {
       assumptions: [
         '报价由后端成本模型统一生成，前端不持有商业定价比例',
         '最终合同价仍需结合现场复测、经销商权限和促销审批',
-        '毛利护栏低于底价时自动上调，避免客户分享价穿透成本'
-      ]
+        '毛利护栏低于底价时自动上调，避免客户分享价穿透成本',
+      ],
     };
   }
 
@@ -907,10 +921,10 @@ class QuotationEngine {
           unit: item.unit || '项',
           quantity: Number.isFinite(quantity) && quantity > 0 ? quantity : 1,
           unitPrice: Number.isFinite(unitPrice) && unitPrice >= 0 ? unitPrice : Math.round(total),
-          total: Math.round(Number.isFinite(total) && total > 0 ? total : quantity * unitPrice)
+          total: Math.round(Number.isFinite(total) && total > 0 ? total : quantity * unitPrice),
         };
       })
-      .filter(item => item.total > 0);
+      .filter((item) => item.total > 0);
   }
 
   inferBomCategory(item) {
@@ -924,13 +938,13 @@ class QuotationEngine {
 
   analyzeBomMetrics(items) {
     const pipeMeters = items
-      .filter(item => item.category === 'pipe' || item.unit === 'm' || item.unit === '米')
+      .filter((item) => item.category === 'pipe' || item.unit === 'm' || item.unit === '米')
       .reduce((sum, item) => sum + item.quantity, 0);
     const equipmentCount = items
-      .filter(item => item.category === 'equipment')
+      .filter((item) => item.category === 'equipment')
       .reduce((sum, item) => sum + item.quantity, 0);
     const openingCount = items
-      .filter(item => item.category === 'opening')
+      .filter((item) => item.category === 'opening')
       .reduce((sum, item) => sum + item.quantity, 0);
 
     return {
@@ -938,13 +952,16 @@ class QuotationEngine {
       pipeMeters: Number(pipeMeters.toFixed(1)),
       equipmentCount,
       openingCount,
-      complexityScore: Math.min(100, Math.round(items.length * 6 + pipeMeters * 0.25 + equipmentCount * 9 + openingCount * 4))
+      complexityScore: Math.min(
+        100,
+        Math.round(items.length * 6 + pipeMeters * 0.25 + equipmentCount * 9 + openingCount * 4)
+      ),
     };
   }
 
   estimateAreaFromBOM(items) {
     const pipeMeters = items
-      .filter(item => item.category === 'pipe' || item.unit === 'm' || item.unit === '米')
+      .filter((item) => item.category === 'pipe' || item.unit === 'm' || item.unit === '米')
       .reduce((sum, item) => sum + item.quantity, 0);
     return pipeMeters ? Math.round(pipeMeters / 2.6) : 80;
   }
@@ -984,14 +1001,14 @@ class QuotationEngine {
       quoteFeatures: {
         perSqm: quoteData.summary.perSqm,
         discountRate: quoteData.strategies.discountRate,
-        version: quoteData.versions.standard.amount
+        version: quoteData.versions.standard.amount,
       },
       result: conversionResult,
       factors: {
         season: new Date().getMonth(),
         city: quoteData.params.city,
-        area: quoteData.params.area
-      }
+        area: quoteData.params.area,
+      },
     };
 
     // 更新策略（简化版）

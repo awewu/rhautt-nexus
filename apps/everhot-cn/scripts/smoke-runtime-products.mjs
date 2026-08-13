@@ -66,11 +66,13 @@ async function runCatalog({ hostname, fetchImpl, staticProducts }) {
       readyState: 'complete',
       addEventListener() {},
       querySelector(selector) {
-        if (selector === '[data-product-detail]' || selector === '[data-product-compare]') return null;
+        if (selector === '[data-product-detail]' || selector === '[data-product-compare]')
+          return null;
         return null;
       },
       querySelectorAll(selector) {
-        if (selector === '[data-catalog]' || selector === '[data-catalog],[data-featured]') return [grid];
+        if (selector === '[data-catalog]' || selector === '[data-catalog],[data-featured]')
+          return [grid];
         if (selector === '[data-featured]') return [];
         return [];
       },
@@ -128,12 +130,20 @@ const publicEverhotPayload = {
 };
 
 assertPublicSafe(publicEverhotPayload.data.items[0]);
-assert.equal(publicEverhotPayload.data.items.some((item) => item.slug === unlistedEverhot.slug), false);
-assert.equal(publicEverhotPayload.data.items.some((item) => item.slug === hiddenEverhot.slug), false);
+assert.equal(
+  publicEverhotPayload.data.items.some((item) => item.slug === unlistedEverhot.slug),
+  false
+);
+assert.equal(
+  publicEverhotPayload.data.items.some((item) => item.slug === hiddenEverhot.slug),
+  false
+);
 
 const success = await runCatalog({
   hostname: 'localhost',
-  staticProducts: [product({ slug: 'static-pump', name: 'Static Heat Pump', tagline: 'Static fallback' })],
+  staticProducts: [
+    product({ slug: 'static-pump', name: 'Static Heat Pump', tagline: 'Static fallback' }),
+  ],
   fetchImpl: async (url) => {
     successCalls.push(url);
     assert.equal(url, '/api/v2/sites/everhot/products?locale=zh-CN');
@@ -145,7 +155,10 @@ const success = await runCatalog({
 });
 
 assert.equal(success.window.EVERHOT_PRODUCTS_STATUS, 'runtime');
-assert.deepEqual(success.window.EVERHOT_PRODUCTS.map((item) => item.slug), ['everhot-runtime-published']);
+assert.deepEqual(
+  success.window.EVERHOT_PRODUCTS.map((item) => item.slug),
+  ['everhot-runtime-published']
+);
 assertPublicSafe(success.window.EVERHOT_PRODUCTS[0]);
 assert.match(success.grid.innerHTML, /Everhot Runtime Published/);
 assert.doesNotMatch(success.grid.innerHTML, /Everhot Runtime Unlisted/);
@@ -158,7 +171,9 @@ assert.deepEqual(successCalls, ['/api/v2/sites/everhot/products?locale=zh-CN']);
 const legacyCalls = [];
 const legacy = await runCatalog({
   hostname: 'localhost',
-  staticProducts: [product({ slug: 'static-pump', name: 'Static Heat Pump', tagline: 'Static fallback' })],
+  staticProducts: [
+    product({ slug: 'static-pump', name: 'Static Heat Pump', tagline: 'Static fallback' }),
+  ],
   fetchImpl: async (url) => {
     legacyCalls.push(url);
     if (url === '/api/v2/sites/everhot/products?locale=zh-CN') {
@@ -171,7 +186,10 @@ const legacy = await runCatalog({
     assert.equal(url, '/api/v2/brand/everhot/products?locale=zh-CN');
     return {
       ok: true,
-      json: async () => ({ success: true, data: { items: [product({ slug: 'legacy-pump', name: 'Legacy Runtime Pump' })], total: 1 } }),
+      json: async () => ({
+        success: true,
+        data: { items: [product({ slug: 'legacy-pump', name: 'Legacy Runtime Pump' })], total: 1 },
+      }),
     };
   },
 });
@@ -187,7 +205,9 @@ assert.deepEqual(legacyCalls, [
 const fallbackCalls = [];
 const fallback = await runCatalog({
   hostname: 'localhost',
-  staticProducts: [product({ slug: 'static-pump', name: 'Static Heat Pump', tagline: 'Static fallback' })],
+  staticProducts: [
+    product({ slug: 'static-pump', name: 'Static Heat Pump', tagline: 'Static fallback' }),
+  ],
   fetchImpl: async (url) => {
     fallbackCalls.push(url);
     throw new Error('offline');
@@ -205,7 +225,9 @@ assert.deepEqual(fallbackCalls, [
 const staticCalls = [];
 const staticRuntime = await runCatalog({
   hostname: 'www.everhot.com.cn',
-  staticProducts: [product({ slug: 'static-pump', name: 'Static Heat Pump', tagline: 'Static fallback' })],
+  staticProducts: [
+    product({ slug: 'static-pump', name: 'Static Heat Pump', tagline: 'Static fallback' }),
+  ],
   fetchImpl: async (url) => {
     staticCalls.push(url);
     throw new Error('non-local runtime should not fetch products');

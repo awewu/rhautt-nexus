@@ -11,15 +11,23 @@ export class MetricsController {
   @Post('refresh')
   async refresh(@Req() r: any, @Body() b: { period?: string; model?: AttributionModel } = {}) {
     const rollup = await this.svc.refreshDailyRollup(r.user);
-    const attribution = b.period ? await this.svc.refreshAttribution(r.user, b.period, b.model || 'position') : null;
+    const attribution = b.period
+      ? await this.svc.refreshAttribution(r.user, b.period, b.model || 'position')
+      : null;
     return { rollup, attribution };
   }
 
   @Get('daily')
-  daily(@Req() r: any, @Query('from') from?: string, @Query('to') to?: string) { return this.svc.getDailyRollup(r.user, { from, to }); }
+  daily(@Req() r: any, @Query('from') from?: string, @Query('to') to?: string) {
+    return this.svc.getDailyRollup(r.user, { from, to });
+  }
 
   @Get('attribution')
-  attribution(@Req() r: any, @Query('period') period: string, @Query('model') model?: AttributionModel) {
+  attribution(
+    @Req() r: any,
+    @Query('period') period: string,
+    @Query('model') model?: AttributionModel
+  ) {
     return this.svc.getChannelAttribution(r.user, period, model || 'position');
   }
 }

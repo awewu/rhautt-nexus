@@ -35,7 +35,7 @@ export interface GeoActionValidation {
 }
 
 export interface GeoActionType<TInput = unknown, TResult = unknown> {
-  id: string;                       // 如 'geo.generate-content'
+  id: string; // 如 'geo.generate-content'
   /**
    * 锚定的本体对象类型。**必须取自 common/ontology 的已登记类型**（编译期约束）：
    * 动作的名词与事实图谱的节点名从此不可能分叉，拼错即编译失败。
@@ -44,7 +44,10 @@ export interface GeoActionType<TInput = unknown, TResult = unknown> {
   label: string;
   /** 动作固有风险区：green=可自动 / yellow=代行需核准 / red=永不自动 */
   zone: GeoActionZone;
-  validate: (input: TInput, ctx: GeoActionContext) => Promise<GeoActionValidation> | GeoActionValidation;
+  validate: (
+    input: TInput,
+    ctx: GeoActionContext
+  ) => Promise<GeoActionValidation> | GeoActionValidation;
   execute: (input: TInput, ctx: GeoActionContext) => Promise<TResult>;
 }
 
@@ -58,10 +61,18 @@ export interface GeoActionResult<TResult = unknown> {
 
 class GeoActionRegistry {
   private actions = new Map<string, GeoActionType>();
-  register<I, R>(a: GeoActionType<I, R>): void { this.actions.set(a.id, a as unknown as GeoActionType); }
-  get(id: string): GeoActionType | undefined { return this.actions.get(id); }
-  has(id: string): boolean { return this.actions.has(id); }
-  list(): GeoActionType[] { return Array.from(this.actions.values()); }
+  register<I, R>(a: GeoActionType<I, R>): void {
+    this.actions.set(a.id, a as unknown as GeoActionType);
+  }
+  get(id: string): GeoActionType | undefined {
+    return this.actions.get(id);
+  }
+  has(id: string): boolean {
+    return this.actions.has(id);
+  }
+  list(): GeoActionType[] {
+    return Array.from(this.actions.values());
+  }
 }
 
 // 单例挂 globalThis，防热重载重复注册
@@ -79,19 +90,36 @@ export async function executeGeoAction<TResult = unknown>(
   actionId: string,
   input: unknown,
   ctx: GeoActionContext,
-  audit: (event: string, meta: Record<string, unknown>) => Promise<void>,
+  audit: (event: string, meta: Record<string, unknown>) => Promise<void>
 ): Promise<GeoActionResult<TResult>> {
   const checkId = genId();
   const action = geoActionRegistry.get(actionId);
   if (!action) {
-    return { ok: false, blocked: { stage: 'validate', code: 'not_found', reasons: [`action ${actionId} 未注册`] }, zone: 'green', checkId };
+    return {
+      ok: false,
+      blocked: { stage: 'validate', code: 'not_found', reasons: [`action ${actionId} 未注册`] },
+      zone: 'green',
+      checkId,
+    };
   }
 
   // ① 前置校验（submission criteria）
   const v = await action.validate(input, ctx);
   if (!v.ok) {
-    await audit('geo.action_blocked', { actionId, stage: 'validate', code: v.code, reasons: v.errors, isProxy: ctx.isProxy, checkId });
-    return { ok: false, blocked: { stage: 'validate', code: v.code, reasons: v.errors }, zone: action.zone, checkId };
+    await audit('geo.action_blocked', {
+      actionId,
+      stage: 'validate',
+      code: v.code,
+      reasons: v.errors,
+      isProxy: ctx.isProxy,
+      checkId,
+    });
+    return {
+      ok: false,
+      blocked: { stage: 'validate', code: v.code, reasons: v.errors },
+      zone: action.zone,
+      checkId,
+    };
   }
 
   // ② 治理闸：红区永不自动；AI 代行黄区+ 未核准即拦（对齐宪章 §12）
@@ -101,12 +129,26 @@ export async function executeGeoAction<TResult = unknown>(
         ? '红区动作不可自动执行，须人工走流程'
         : 'AI 代行的黄区动作暂拦，须经人工核准（draft→approved）后放行',
     ];
-    await audit('geo.action_blocked', { actionId, stage: 'gate', zone: action.zone, isProxy: ctx.isProxy, reasons, checkId });
+    await audit('geo.action_blocked', {
+      actionId,
+      stage: 'gate',
+      zone: action.zone,
+      isProxy: ctx.isProxy,
+      reasons,
+      checkId,
+    });
     return { ok: false, blocked: { stage: 'gate', reasons }, zone: action.zone, checkId };
   }
 
   // ③ 主写 + 审计（成功）
   const result = await action.execute(input, ctx);
-  await audit('geo.action_executed', { actionId, objectType: action.objectType, zone: action.zone, isProxy: ctx.isProxy, approved: !!ctx.approved, checkId });
+  await audit('geo.action_executed', {
+    actionId,
+    objectType: action.objectType,
+    zone: action.zone,
+    isProxy: ctx.isProxy,
+    approved: !!ctx.approved,
+    checkId,
+  });
   return { ok: true, data: result as TResult, zone: action.zone, checkId };
 }

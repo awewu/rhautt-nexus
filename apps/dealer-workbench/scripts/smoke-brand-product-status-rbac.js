@@ -38,7 +38,10 @@ function productFor(brand) {
     name,
     category: brand === 'ruud' ? 'furnace' : 'heat_pump',
     status: 'active',
-    spec: { officialModel: sku.replace(/^[A-Z]+-/, ''), system: brand === 'ruud' ? 'heating' : 'heat_pump_water' },
+    spec: {
+      officialModel: sku.replace(/^[A-Z]+-/, ''),
+      system: brand === 'ruud' ? 'heating' : 'heat_pump_water',
+    },
     meta: {
       [brand]: {
         slug: `${brand}-original-slug`,
@@ -65,7 +68,10 @@ async function main() {
   const productListBrands = [];
 
   await page.route('**/api/v2/auth/me', (route) =>
-    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ role, permissions: [] }) })
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ role, permissions: [] }),
+    })
   );
   await page.route('**/api/v2/brand-sites**', (route) => {
     if (route.request().url().includes('/product-assignments')) return route.fallback();
@@ -73,9 +79,39 @@ async function main() {
       contentType: 'application/json',
       body: JSON.stringify({
         items: [
-          { id: 'site-rheem', code: 'rheem', nameCn: 'Rheem', nameEn: 'Rheem', appKey: 'rheem-cn', deliveryType: 'self_hosted', status: 'active', sortOrder: 10, deletedAt: null },
-          { id: 'site-ruud', code: 'ruud', nameCn: 'Ruud', nameEn: 'Ruud', appKey: 'ruud-cn', deliveryType: 'self_hosted', status: 'active', sortOrder: 20, deletedAt: null },
-          { id: 'site-everhot', code: 'everhot', nameCn: 'Everhot', nameEn: 'Everhot', appKey: 'everhot-cn', deliveryType: 'self_hosted', status: 'active', sortOrder: 30, deletedAt: null },
+          {
+            id: 'site-rheem',
+            code: 'rheem',
+            nameCn: 'Rheem',
+            nameEn: 'Rheem',
+            appKey: 'rheem-cn',
+            deliveryType: 'self_hosted',
+            status: 'active',
+            sortOrder: 10,
+            deletedAt: null,
+          },
+          {
+            id: 'site-ruud',
+            code: 'ruud',
+            nameCn: 'Ruud',
+            nameEn: 'Ruud',
+            appKey: 'ruud-cn',
+            deliveryType: 'self_hosted',
+            status: 'active',
+            sortOrder: 20,
+            deletedAt: null,
+          },
+          {
+            id: 'site-everhot',
+            code: 'everhot',
+            nameCn: 'Everhot',
+            nameEn: 'Everhot',
+            appKey: 'everhot-cn',
+            deliveryType: 'self_hosted',
+            status: 'active',
+            sortOrder: 30,
+            deletedAt: null,
+          },
         ],
         total: 3,
       }),
@@ -88,14 +124,26 @@ async function main() {
     const method = route.request().method();
     if (!['PATCH', 'DELETE'].includes(method)) return route.fallback();
     if (!['platform_admin', 'hq_admin', 'brand_admin'].includes(role)) {
-      await route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ message: 'Forbidden' }) });
+      await route.fulfill({
+        status: 403,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Forbidden' }),
+      });
       return;
     }
     if (method === 'PATCH') {
       const body = route.request().postDataJSON();
       mutations.push({ method, body });
-      everhotProduct = { ...everhotProduct, ...body, meta: body.meta || everhotProduct.meta, spec: body.spec || everhotProduct.spec };
-      await route.fulfill({ contentType: 'application/json', body: JSON.stringify(everhotProduct) });
+      everhotProduct = {
+        ...everhotProduct,
+        ...body,
+        meta: body.meta || everhotProduct.meta,
+        spec: body.spec || everhotProduct.spec,
+      };
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify(everhotProduct),
+      });
       return;
     }
     mutations.push({ method });
@@ -107,32 +155,55 @@ async function main() {
     const brand = url.searchParams.get('brand') || 'everhot';
     productListBrands.push(brand);
     const item = brand === 'everhot' ? everhotProduct : productFor(brand);
-    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: [item], total: 1 }) });
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [item], total: 1 }),
+    });
   });
   await page.route('**/api/v2/product-catalog/devices', async (route) => {
     if (route.request().method() !== 'POST') {
-      await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: [everhotProduct], total: 1 }) });
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [everhotProduct], total: 1 }),
+      });
       return;
     }
     if (!['platform_admin', 'hq_admin', 'brand_admin'].includes(role)) {
-      await route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ message: 'Forbidden' }) });
+      await route.fulfill({
+        status: 403,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Forbidden' }),
+      });
       return;
     }
-    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ id: 'created-product' }) });
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ id: 'created-product' }),
+    });
   });
   await page.route('**/api/v2/brand-sites/*/product-assignments', async (route) => {
     const method = route.request().method();
     if (method === 'GET') {
-      await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: [], total: 0 }) });
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [], total: 0 }),
+      });
       return;
     }
     if (!['platform_admin', 'hq_admin', 'brand_admin'].includes(role)) {
-      await route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ message: 'Forbidden' }) });
+      await route.fulfill({
+        status: 403,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Forbidden' }),
+      });
       return;
     }
     const body = route.request().postDataJSON();
     assignmentCreates.push(body);
-    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ id: `assignment-${assignmentCreates.length}`, ...body }) });
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ id: `assignment-${assignmentCreates.length}`, ...body }),
+    });
   });
 
   try {
@@ -147,10 +218,21 @@ async function main() {
     await page.getByLabel('展示排序').fill('42');
     await page.getByLabel('标签').fill('New, Premium');
     await page.getByLabel('官方英文名').fill('Everhot Commercial Heat Pump 200L');
-    await page.locator('form').filter({ hasText: '公开路径' }).locator('button[type="submit"]').click();
-    await page.waitForFunction(() => document.body.innerText.includes('official-everhot-200'), null, { timeout: 15000 });
+    await page
+      .locator('form')
+      .filter({ hasText: '公开路径' })
+      .locator('button[type="submit"]')
+      .click();
+    await page.waitForFunction(
+      () => document.body.innerText.includes('official-everhot-200'),
+      null,
+      { timeout: 15000 }
+    );
 
-    const metadataPatch = mutations.find((entry) => entry.method === 'PATCH' && entry.body?.meta?.everhot?.slug === 'official-everhot-200');
+    const metadataPatch = mutations.find(
+      (entry) =>
+        entry.method === 'PATCH' && entry.body?.meta?.everhot?.slug === 'official-everhot-200'
+    );
     if (!metadataPatch) throw new Error('metadata PATCH was not captured');
     const meta = metadataPatch.body.meta.everhot;
     if (
@@ -166,14 +248,18 @@ async function main() {
 
     await page.goto(`${baseUrl}/comfort/sites/everhot`, { waitUntil: 'networkidle' });
     await page.waitForFunction(
-      () => Array.from(document.querySelectorAll('input')).some((input) => input.value === 'official-everhot-200'),
+      () =>
+        Array.from(document.querySelectorAll('input')).some(
+          (input) => input.value === 'official-everhot-200'
+        ),
       null,
       { timeout: 15000 }
     );
 
     await page.goto(`${baseUrl}/comfort/sites/rhautt-group`, { waitUntil: 'networkidle' });
     const groupBrandOptions = page.locator('.child-brand-option');
-    if ((await groupBrandOptions.count()) !== 3) throw new Error('rhautt-group child brand binding did not expose three brands');
+    if ((await groupBrandOptions.count()) !== 3)
+      throw new Error('rhautt-group child brand binding did not expose three brands');
 
     await page.goto(`${baseUrl}/comfort/sites/rheem`, { waitUntil: 'networkidle' });
     if ((await page.locator('.child-brand-option').count()) !== 0) {
@@ -182,8 +268,13 @@ async function main() {
 
     role = 'brand_viewer';
     await page.goto(`${baseUrl}/comfort/sites/everhot`, { waitUntil: 'networkidle' });
-    await page.getByText(/只读|鍙/).first().waitFor({ timeout: 15000 });
-    const readOnlyMutationButtons = await page.locator('.product-status-actions button, button.btn-brand:has-text("保存")').count();
+    await page
+      .getByText(/只读|鍙/)
+      .first()
+      .waitFor({ timeout: 15000 });
+    const readOnlyMutationButtons = await page
+      .locator('.product-status-actions button, button.btn-brand:has-text("保存")')
+      .count();
     const unauthorizedStatus = await page.evaluate(async () => {
       const response = await fetch('/api/v2/product-catalog/devices/product-everhot-1', {
         method: 'PATCH',
@@ -195,11 +286,22 @@ async function main() {
 
     await browser.close();
     const requiredBrands = ['everhot'];
-    const missingPickerBrands = requiredBrands.filter((brand) => !productListBrands.includes(brand));
+    const missingPickerBrands = requiredBrands.filter(
+      (brand) => !productListBrands.includes(brand)
+    );
     if (missingPickerBrands.length || readOnlyMutationButtons !== 0 || unauthorizedStatus !== 403) {
-      throw new Error(JSON.stringify({ missingPickerBrands, readOnlyMutationButtons, unauthorizedStatus, assignmentCreates }));
+      throw new Error(
+        JSON.stringify({
+          missingPickerBrands,
+          readOnlyMutationButtons,
+          unauthorizedStatus,
+          assignmentCreates,
+        })
+      );
     }
-    console.log('brand product catalog metadata/site picker/RBAC smoke passed: metadata editor persisted, brand page reflected metadata, rhautt-group switched Rheem/Ruud/Everhot, brand site stayed single-brand, read-only UI and API denial held');
+    console.log(
+      'brand product catalog metadata/site picker/RBAC smoke passed: metadata editor persisted, brand page reflected metadata, rhautt-group switched Rheem/Ruud/Everhot, brand site stayed single-brand, read-only UI and API denial held'
+    );
   } catch (error) {
     await fs.promises.mkdir(path.dirname(failureScreenshot), { recursive: true });
     await page.screenshot({ path: failureScreenshot, fullPage: true }).catch(() => {});

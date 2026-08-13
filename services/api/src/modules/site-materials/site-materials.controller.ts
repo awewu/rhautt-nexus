@@ -31,7 +31,10 @@ export class SiteMaterialsController {
   @Put(':brandCode')
   @Roles('platform_admin', 'hq_admin', 'brand_admin')
   @Permissions('brand.library.update')
-  async update(@Param('brandCode') brandCode: string, @Body() body: { key?: string; items?: any[] }) {
+  async update(
+    @Param('brandCode') brandCode: string,
+    @Body() body: { key?: string; items?: any[] }
+  ) {
     return { data: await this.service.update(brandCode, body) };
   }
 }

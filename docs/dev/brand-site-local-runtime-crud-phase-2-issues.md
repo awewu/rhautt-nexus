@@ -16,13 +16,13 @@ These Phase 2 issues follow the local Markdown convention and are published unde
 
 ## Issue List
 
-| Issue | Title | Type | Blocked by | Recommended parallel wave |
-| --- | --- | --- | --- | --- |
-| 01 | Clean and reconcile existing brand-site product assignments | AFK | Phase 1 complete | Wave 0 |
-| 02 | Rheem local runtime website integration | AFK | 01, Phase 1 public runtime endpoint | Wave 1 |
-| 03 | Ruud local runtime website integration | AFK | 01, Phase 1 public runtime endpoint | Wave 1 |
-| 04 | Real `其他素材` API and UI integration | AFK | Phase 1 simulated `其他素材` tab | Wave 1 |
-| 05 | Production preview and publish hardening | HITL | 01, 02, 03, 04 | Wave 2 / Final |
+| Issue | Title                                                       | Type | Blocked by                          | Recommended parallel wave |
+| ----- | ----------------------------------------------------------- | ---- | ----------------------------------- | ------------------------- |
+| 01    | Clean and reconcile existing brand-site product assignments | AFK  | Phase 1 complete                    | Wave 0                    |
+| 02    | Rheem local runtime website integration                     | AFK  | 01, Phase 1 public runtime endpoint | Wave 1                    |
+| 03    | Ruud local runtime website integration                      | AFK  | 01, Phase 1 public runtime endpoint | Wave 1                    |
+| 04    | Real `其他素材` API and UI integration                      | AFK  | Phase 1 simulated `其他素材` tab    | Wave 1                    |
+| 05    | Production preview and publish hardening                    | HITL | 01, 02, 03, 04                      | Wave 2 / Final            |
 
 ## Parallel Execution
 

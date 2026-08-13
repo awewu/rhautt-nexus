@@ -22,8 +22,8 @@ const testConfig = {
     { name: '次卧2', area: 12, type: 'bedroom' },
     { name: '厨房', area: 10, type: 'kitchen' },
     { name: '卫生间1', area: 6, type: 'bathroom' },
-    { name: '卫生间2', area: 5, type: 'bathroom' }
-  ]
+    { name: '卫生间2', area: 5, type: 'bathroom' },
+  ],
 };
 
 class QuickIntegrationTest {
@@ -68,14 +68,18 @@ class QuickIntegrationTest {
   async testAPI(name, endpoint, payload, validator) {
     try {
       const response = await axios.post(`${BASE_URL}${endpoint}`, payload, {
-        timeout: API_TIMEOUT
+        timeout: API_TIMEOUT,
       });
 
       if (response.data.success) {
         const isValid = validator ? validator(response.data.data) : true;
         if (isValid) {
           this.passed++;
-          this.results.push({ name, status: '✅ PASS', time: response.headers['x-response-time'] || 'N/A' });
+          this.results.push({
+            name,
+            status: '✅ PASS',
+            time: response.headers['x-response-time'] || 'N/A',
+          });
           console.log(`✅ ${name} - 通过`);
           return true;
         } else {
@@ -134,7 +138,7 @@ class QuickIntegrationTest {
         orientation: 'south',
         insulation: 'good',
         occupancy: 4,
-        waterQuality: '中'
+        waterQuality: '中',
       },
       (data) => data.fiveConstants && data.systems && data.systems.radiation
     );
@@ -150,7 +154,7 @@ class QuickIntegrationTest {
         occupancy: 4,
         rooms: testConfig.rooms,
         climateZone: '夏热冬冷',
-        level: 'premium'
+        level: 'premium',
       },
       (data) => data.performance && data.design && data.design.ventilation
     );
@@ -169,7 +173,7 @@ class QuickIntegrationTest {
         indoorCoolingSystem: '辐射供冷',
         indoorHeatingSystem: '辐射供暖',
         targetTemperature: 24,
-        targetHumidity: 50
+        targetHumidity: 50,
       },
       (data) => data.type === 'DOAS专用室外空气系统' && data.differentiation && data.parameters
     );
@@ -182,7 +186,7 @@ class QuickIntegrationTest {
       {
         ...testConfig,
         acType: 'VRF',
-        hasFreshAir: true
+        hasFreshAir: true,
       },
       (data) => data.acSystem && data.loads
     );
@@ -196,7 +200,7 @@ class QuickIntegrationTest {
         ...testConfig,
         water: { residents: 4, bathrooms: 2 },
         heating: { hasUnderfloor: true },
-        ac: { acType: 'VRF' }
+        ac: { acType: 'VRF' },
       },
       (data) => data.waterSystem && data.heatingSystem && data.airConditioning
     );
@@ -227,7 +231,7 @@ class QuickIntegrationTest {
       passed: this.passed,
       failed: this.failed,
       passRate: ((this.passed / (this.passed + this.failed)) * 100).toFixed(1),
-      results: this.results
+      results: this.results,
     };
     fs.writeFileSync('./test-report.json', JSON.stringify(report, null, 2));
   }

@@ -31,7 +31,10 @@ const DRY = args.includes('--dry');
 // --check：不写盘，只校验磁盘上的页面与「当前内核事实」是否同源。
 // 用途：防止有人手改 HTML 数值、或内核改了页面没重生成 → 品牌对外发布过期/错误的技术数据。
 const CHECK = args.includes('--check');
-const wantSite = (() => { const i = args.indexOf('--site'); return i > -1 ? args[i + 1] : null; })();
+const wantSite = (() => {
+  const i = args.indexOf('--site');
+  return i > -1 ? args[i + 1] : null;
+})();
 
 // ── L1 技术事实：直接从内核读取（唯一真相源）────────────────────────────────
 const kernels = require(join(ROOT, 'packages/domain/hvac-kernels'));
@@ -66,34 +69,54 @@ function assertNoLiteralQuantity(where, text) {
   const hit = stripped.match(UNIT_AFTER_NUMBER);
   if (hit) {
     throw new Error(
-      `文案 ${where} 里出现裸写数值「${hit[0]}」。技术量必须用 {占位符} 由内核填充，`
-      + '不得在文案中手写——否则会与限值表自相矛盾并对外发布。'
-      + `可用占位符：${Object.keys(KERNEL_VARS).join(', ')}`,
+      `文案 ${where} 里出现裸写数值「${hit[0]}」。技术量必须用 {占位符} 由内核填充，` +
+        '不得在文案中手写——否则会与限值表自相矛盾并对外发布。' +
+        `可用占位符：${Object.keys(KERNEL_VARS).join(', ')}`
     );
   }
 }
 
 const ROOM_LABEL = {
-  bedroom: '卧室', livingroom: '起居室（客厅）', study: '书房',
-  office: '办公室', meeting: '会议室', ward: '病房', classroom: '教室',
+  bedroom: '卧室',
+  livingroom: '起居室（客厅）',
+  study: '书房',
+  office: '办公室',
+  meeting: '会议室',
+  ward: '病房',
+  classroom: '教室',
 };
 const WATER_LABEL = { hot_water: '生活热水管', heating: '采暖供回水管', main: '干管' };
 const AIR_LABEL = { main: '主风管', branch: '支风管', terminal: '末端送风口' };
 
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const esc = (s) =>
+  String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 
 // ── 页面装配：文案 ← JSON（运营可编辑）；数值 ← 内核（锁死）─────────────────
 // 表格 rows 只由内核构造，JSON 里没有、也无法提供 rows。
 const TABLE_BUILDERS = {
-  'indoor-noise-limits': () => Object.entries(NOISE_LIMITS).map(([key, v]) => [
-    ROOM_LABEL[key] || key, String(v.day), v.night === undefined ? '—' : String(v.night),
-  ]),
-  'water-velocity': () => Object.entries(WATER_VELOCITY).map(([key, v]) => [
-    WATER_LABEL[key] || key, String(v.min), String(v.ideal), String(v.max),
-  ]),
-  'duct-velocity': () => Object.entries(AIR_VELOCITY).map(([key, v]) => [
-    AIR_LABEL[key] || key, String(v.ideal), String(v.max),
-  ]),
+  'indoor-noise-limits': () =>
+    Object.entries(NOISE_LIMITS).map(([key, v]) => [
+      ROOM_LABEL[key] || key,
+      String(v.day),
+      v.night === undefined ? '—' : String(v.night),
+    ]),
+  'water-velocity': () =>
+    Object.entries(WATER_VELOCITY).map(([key, v]) => [
+      WATER_LABEL[key] || key,
+      String(v.min),
+      String(v.ideal),
+      String(v.max),
+    ]),
+  'duct-velocity': () =>
+    Object.entries(AIR_VELOCITY).map(([key, v]) => [
+      AIR_LABEL[key] || key,
+      String(v.ideal),
+      String(v.max),
+    ]),
 };
 
 /** 占位符变量表：全部取自内核，运营无法注入或篡改数值。 */
@@ -118,7 +141,8 @@ const KERNEL_VARS = {
 function pages() {
   return Object.entries(COPY.pages).map(([slug, c]) => {
     const build = TABLE_BUILDERS[slug];
-    if (!build) throw new Error(`文案定义了页面 ${slug}，但没有对应的内核数据构造器——数值不能由文案提供。`);
+    if (!build)
+      throw new Error(`文案定义了页面 ${slug}，但没有对应的内核数据构造器——数值不能由文案提供。`);
 
     // 数值锁第二道闸：逐个文案字段校验，禁止裸写技术量。
     assertNoLiteralQuantity(`${slug}.lead`, c.lead);
@@ -184,9 +208,17 @@ const TECH_CSS = `
 function render(site, page) {
   const crumb = `<nav class="crumb"><a href="/">${esc(S.crumbHome)}</a> / <a href="/tech/">${esc(S.crumbTech)}</a> / <span>${esc(page.title)}</span></nav>`;
   const rows = page.table.rows
-    .map((r) => `<tr>${r.map((c, i) => (i === 0 ? `<th scope="row">${esc(c)}</th>` : `<td>${esc(c)}</td>`)).join('')}</tr>`)
+    .map(
+      (r) =>
+        `<tr>${r.map((c, i) => (i === 0 ? `<th scope="row">${esc(c)}</th>` : `<td>${esc(c)}</td>`)).join('')}</tr>`
+    )
     .join('\n          ');
-  const faq = page.faq.map((f) => `<div class="card faq-card"><div class="accent-bar"></div><h3>${esc(f.q)}</h3><p>${esc(f.a)}</p></div>`).join('\n            ');
+  const faq = page.faq
+    .map(
+      (f) =>
+        `<div class="card faq-card"><div class="accent-bar"></div><h3>${esc(f.q)}</h3><p>${esc(f.a)}</p></div>`
+    )
+    .join('\n            ');
   const method = page.method.map((m) => `<li>${esc(m)}</li>`).join('\n            ');
   const { baseCss, header } = siteShell(site);
 
@@ -243,7 +275,12 @@ ${header}
 }
 
 function indexPage(site, list) {
-  const items = list.map((p) => `<li><a href="/tech/${p.slug}/">${esc(p.title)}</a><span>${esc(p.standard)}</span></li>`).join('\n            ');
+  const items = list
+    .map(
+      (p) =>
+        `<li><a href="/tech/${p.slug}/">${esc(p.title)}</a><span>${esc(p.standard)}</span></li>`
+    )
+    .join('\n            ');
   const { baseCss, header } = siteShell(site);
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -280,8 +317,10 @@ ${header}
 const registry = JSON.parse(readFileSync(join(ROOT, 'brand-registry.json'), 'utf8'));
 // 只对**静态品牌站**生成：Next 应用（如 public-portal）的页面由应用路由渲染，
 // 往其 public/ 塞静态 HTML 会绕过应用外壳与导航，属于制造第二套面。
-const isNextApp = (app) => ['next.config.js', 'next.config.mjs', 'next.config.ts']
-  .some((f) => existsSync(join(ROOT, app, f)));
+const isNextApp = (app) =>
+  ['next.config.js', 'next.config.mjs', 'next.config.ts'].some((f) =>
+    existsSync(join(ROOT, app, f))
+  );
 
 const SITES = (registry.brands || [])
   .filter((b) => b.type === 'brand-site')
@@ -295,27 +334,44 @@ const SITES = (registry.brands || [])
   }));
 
 /** 剥离 geo:build 注入块后比较——GEO 层由另一条管线负责，不属本生成器的同源范围。 */
-const stripGeo = (html) => html.replace(/[ \t]*<!-- GEO:START -->[\s\S]*?<!-- GEO:END -->\r?\n?/g, '');
+const stripGeo = (html) =>
+  html.replace(/[ \t]*<!-- GEO:START -->[\s\S]*?<!-- GEO:END -->\r?\n?/g, '');
 const norm = (html) => stripGeo(html).replace(/\r\n/g, '\n').trim();
 
 let written = 0;
 const drift = [];
 for (const site of SITES) {
   const pubDir = join(ROOT, site.app, 'public');
-  if (!existsSync(pubDir)) { console.log(`skip ${site.slug}: 无 public 目录`); continue; }
+  if (!existsSync(pubDir)) {
+    console.log(`skip ${site.slug}: 无 public 目录`);
+    continue;
+  }
   const list = pages();
   const targets = [
-    ...list.map((page) => ({ file: join(pubDir, 'tech', page.slug, 'index.html'), html: render(site, page), label: `${site.slug}/tech/${page.slug}` })),
-    { file: join(pubDir, 'tech', 'index.html'), html: indexPage(site, list), label: `${site.slug}/tech (索引)` },
+    ...list.map((page) => ({
+      file: join(pubDir, 'tech', page.slug, 'index.html'),
+      html: render(site, page),
+      label: `${site.slug}/tech/${page.slug}`,
+    })),
+    {
+      file: join(pubDir, 'tech', 'index.html'),
+      html: indexPage(site, list),
+      label: `${site.slug}/tech (索引)`,
+    },
   ];
   for (const t of targets) {
     if (CHECK) {
       if (!existsSync(t.file)) drift.push(`${t.label}: 页面缺失（未生成）`);
-      else if (norm(readFileSync(t.file, 'utf8')) !== norm(t.html)) drift.push(`${t.label}: 与内核事实不同源（页面被手改或内核已变更）`);
+      else if (norm(readFileSync(t.file, 'utf8')) !== norm(t.html))
+        drift.push(`${t.label}: 与内核事实不同源（页面被手改或内核已变更）`);
       written++;
       continue;
     }
-    if (DRY) { console.log(`[dry] ${t.file}`); written++; continue; }
+    if (DRY) {
+      console.log(`[dry] ${t.file}`);
+      written++;
+      continue;
+    }
     mkdirSync(dirname(t.file), { recursive: true });
     writeFileSync(t.file, t.html, 'utf8');
     written++;
@@ -331,5 +387,7 @@ if (CHECK) {
     process.exit(1);
   }
 } else {
-  console.log(`${DRY ? '[dry] ' : ''}共 ${written} 个文件。下一步：npm run geo:build && npm run guard:geo`);
+  console.log(
+    `${DRY ? '[dry] ' : ''}共 ${written} 个文件。下一步：npm run geo:build && npm run guard:geo`
+  );
 }

@@ -19,7 +19,13 @@ const crypto = require('crypto');
 const { Client } = require('pg');
 
 const ROOT = path.join(__dirname, '..', '..');
-const MIGRATION = path.join(ROOT, 'database', 'postgres', 'migrations', '001_rhautt_nexus_core_ledger.sql');
+const MIGRATION = path.join(
+  ROOT,
+  'database',
+  'postgres',
+  'migrations',
+  '001_rhautt_nexus_core_ledger.sql'
+);
 const REPORT_JSON = path.join(ROOT, 'evidence', 'database', 'local-rls-apply-proof.json');
 const REPORT_MD = path.join(ROOT, 'evidence', 'database', 'local-rls-apply-proof.md');
 
@@ -73,12 +79,14 @@ async function main() {
     await client.query(`DROP ROLE IF EXISTS ${APP_ROLE}`);
     await client.query(`CREATE ROLE ${APP_ROLE} NOLOGIN`);
     await client.query(`GRANT USAGE ON SCHEMA rhautt_nexus TO ${APP_ROLE}`);
-    await client.query(`GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA rhautt_nexus TO ${APP_ROLE}`);
+    await client.query(
+      `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA rhautt_nexus TO ${APP_ROLE}`
+    );
 
     // 3) Seed two tenants as owner.
     await client.query(
       `INSERT INTO rhautt_nexus.tenants (id, code, name, tenant_type) VALUES ($1,'proof-a','Proof A','dealer_group'), ($2,'proof-b','Proof B','dealer_group')`,
-      [TENANT_A, TENANT_B],
+      [TENANT_A, TENANT_B]
     );
 
     // 4) Enter app role + tenant A scope (the same set_config the app uses).
@@ -89,26 +97,34 @@ async function main() {
     // 5) Insert a tenant-A customer (allowed by WITH CHECK).
     await client.query(
       `INSERT INTO rhautt_nexus.customers (tenant_id, phone_hash, phone_encrypted, name, status) VALUES ($1,'proof-hash-a','enc-a','Proof Customer A','active')`,
-      [TENANT_A],
+      [TENANT_A]
     );
     record('tenant-scoped-insert', true, 'tenant A insert accepted under RLS WITH CHECK');
 
     // 6) Tenant A sees exactly its own row.
     const aCount = await client.query('SELECT count(*)::int AS n FROM rhautt_nexus.customers');
-    record('tenant-scoped-select', aCount.rows[0].n === 1, `tenant A visible customers = ${aCount.rows[0].n} (expected 1)`);
+    record(
+      'tenant-scoped-select',
+      aCount.rows[0].n === 1,
+      `tenant A visible customers = ${aCount.rows[0].n} (expected 1)`
+    );
 
     // 7) Cross-tenant write is rejected by WITH CHECK.
     await expectReject(
       client,
       'cross-tenant-write-rejected',
       `INSERT INTO rhautt_nexus.customers (tenant_id, phone_hash, phone_encrypted, name, status) VALUES ($1,'proof-hash-bad','enc-bad','Bad Cross Tenant','active')`,
-      [TENANT_B],
+      [TENANT_B]
     );
 
     // 8) Switch to tenant B → cannot see tenant A rows (USING isolation).
     await client.query('SELECT set_config($1,$2,true)', ['app.tenant_id', TENANT_B]);
     const bCount = await client.query('SELECT count(*)::int AS n FROM rhautt_nexus.customers');
-    record('cross-tenant-read-isolated', bCount.rows[0].n === 0, `tenant B visible customers = ${bCount.rows[0].n} (expected 0)`);
+    record(
+      'cross-tenant-read-isolated',
+      bCount.rows[0].n === 0,
+      `tenant B visible customers = ${bCount.rows[0].n} (expected 0)`
+    );
 
     // 9) FORCE RLS active on the critical tenant tables.
     await client.query('RESET ROLE');
@@ -119,12 +135,20 @@ async function main() {
         AND c.relname IN ('customers','quotations','project_lifecycle','audit_logs','outbox_events','workflow_instances','workflow_steps')
         AND c.relrowsecurity = true AND c.relforcerowsecurity = true
     `);
-    record('force-rls-critical-tables', force.rows[0].n === 7, `FORCE RLS critical tables = ${force.rows[0].n} (expected 7)`);
+    record(
+      'force-rls-critical-tables',
+      force.rows[0].n === 7,
+      `FORCE RLS critical tables = ${force.rows[0].n} (expected 7)`
+    );
 
     await client.query('ROLLBACK');
   } catch (err) {
     record('execution', false, err.message);
-    try { await client.query('ROLLBACK'); } catch { /* ignore */ }
+    try {
+      await client.query('ROLLBACK');
+    } catch {
+      /* ignore */
+    }
   } finally {
     if (connected) await client.end().catch(() => {});
   }
@@ -156,12 +180,17 @@ async function main() {
       '',
       '| Check | Result | Details |',
       '|---|---:|---|',
-      ...checks.map((c) => `| ${c.name} | ${c.passed ? 'pass' : 'fail'} | ${String(c.details).replace(/\|/g, '/')} |`),
+      ...checks.map(
+        (c) =>
+          `| ${c.name} | ${c.passed ? 'pass' : 'fail'} | ${String(c.details).replace(/\|/g, '/')} |`
+      ),
       '',
-    ].join('\n'),
+    ].join('\n')
   );
 
-  console.log(`Local RLS apply proof: ${report.status} (${checks.length - failed.length}/${checks.length} checks)`);
+  console.log(
+    `Local RLS apply proof: ${report.status} (${checks.length - failed.length}/${checks.length} checks)`
+  );
   for (const c of checks) console.log(`  ${c.passed ? 'PASS' : 'FAIL'} ${c.name} — ${c.details}`);
   if (failed.length) process.exit(1);
 }

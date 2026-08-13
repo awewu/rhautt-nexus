@@ -68,7 +68,10 @@ function parseRheemListing(html, listingUrl, segment) {
   for (const item of document.querySelectorAll('.l_proItmeBox .item, body > .item, .item')) {
     const anchor = item.querySelector('a[href]');
     const sourceUrl = absoluteUrl(anchor?.getAttribute('href'), listingUrl);
-    if (!sourceUrl || !new RegExp(`/product/${segment}/\\d+\\.html$`).test(new URL(sourceUrl).pathname)) {
+    if (
+      !sourceUrl ||
+      !new RegExp(`/product/${segment}/\\d+\\.html$`).test(new URL(sourceUrl).pathname)
+    ) {
       continue;
     }
     const sourceId = new URL(sourceUrl).pathname.match(/\/(\d+)\.html$/)?.[1];

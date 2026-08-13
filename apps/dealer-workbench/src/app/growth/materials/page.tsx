@@ -4,7 +4,12 @@ import GrowthMaterialsTable from '../../../components/GrowthMaterialsTable';
 
 export default function GrowthMaterialsPage() {
   return (
-    <div style={{ background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)', minHeight: '100%' }}>
+    <div
+      style={{
+        background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)',
+        minHeight: '100%',
+      }}
+    >
       <div className="page-container" style={{ display: 'grid', gap: 20 }}>
         <PageHeader
           title="营销物料库管理"

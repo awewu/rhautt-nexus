@@ -11,22 +11,43 @@ function createDevicesCandidateRoutes(options = {}) {
   router.use(requireTenantScope);
 
   router.get('/stats/categories', async (req, res, next) => {
-    try { res.json({ success: true, data: await svc.categoriesStats() }); } catch (e) { next(e); }
+    try {
+      res.json({ success: true, data: await svc.categoriesStats() });
+    } catch (e) {
+      next(e);
+    }
   });
   router.get('/search', async (req, res, next) => {
-    try { res.json({ success: true, data: await svc.search(req.scope, req.query.query) }); } catch (e) { next(e); }
+    try {
+      res.json({ success: true, data: await svc.search(req.scope, req.query.query) });
+    } catch (e) {
+      next(e);
+    }
   });
   router.post('/recommend', (req, res) => {
     res.json({ success: true, data: { devices: [], requirements: req.body || {} } });
   });
   router.post('/batch', (req, res) => {
-    res.json({ success: true, data: { operation: req.body?.operation, deviceIds: req.body?.deviceIds || [], status: 'accepted' } });
+    res.json({
+      success: true,
+      data: {
+        operation: req.body?.operation,
+        deviceIds: req.body?.deviceIds || [],
+        status: 'accepted',
+      },
+    });
   });
   router.post('/compatibility', (req, res) => {
-    res.json({ success: true, data: { compatible: true, deviceIds: req.body?.deviceIds || [], notes: [] } });
+    res.json({
+      success: true,
+      data: { compatible: true, deviceIds: req.body?.deviceIds || [], notes: [] },
+    });
   });
   router.get('/export', (req, res) => {
-    res.json({ success: true, data: { exportId: `DEV-EXP-${Date.now()}`, format: req.query.format || 'excel' } });
+    res.json({
+      success: true,
+      data: { exportId: `DEV-EXP-${Date.now()}`, format: req.query.format || 'excel' },
+    });
   });
   router.post('/import', (req, res) => {
     res.json({ success: true, data: { importId: `DEV-IMP-${Date.now()}`, status: 'queued' } });
@@ -38,11 +59,29 @@ function createDevicesCandidateRoutes(options = {}) {
     } catch (e) {
       // MongoDB 未连接时返回静态设备包列表（候选面合同验证用）
       if (e.message && e.message.includes('buffering timed out')) {
-        return res.json({ success: true, data: [
-          { id: 'rheem-dhw-300', system: 'central-hot-water', brand: 'Rheem', name: 'Rheem central hot water pack' },
-          { id: 'ruud-air-doas', system: 'whole-air', brand: 'Ruud', name: 'Ruud whole-air and DOAS pack' },
-          { id: 'rysnova-water-quality', system: 'water-quality', brand: '瑞诺瓦', name: '瑞诺瓦水质系统包' }
-        ]});
+        return res.json({
+          success: true,
+          data: [
+            {
+              id: 'rheem-dhw-300',
+              system: 'central-hot-water',
+              brand: 'Rheem',
+              name: 'Rheem central hot water pack',
+            },
+            {
+              id: 'ruud-air-doas',
+              system: 'whole-air',
+              brand: 'Ruud',
+              name: 'Ruud whole-air and DOAS pack',
+            },
+            {
+              id: 'rysnova-water-quality',
+              system: 'water-quality',
+              brand: '瑞诺瓦',
+              name: '瑞诺瓦水质系统包',
+            },
+          ],
+        });
       }
       next(e);
     }
@@ -54,7 +93,9 @@ function createDevicesCandidateRoutes(options = {}) {
     try {
       const d = await svc.get(req.scope, req.params.deviceId);
       res.json({ success: true, data: d || { id: req.params.deviceId } });
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   });
   router.put('/:deviceId', (req, res) => {
     res.json({ success: true, data: { id: req.params.deviceId, ...req.body } });

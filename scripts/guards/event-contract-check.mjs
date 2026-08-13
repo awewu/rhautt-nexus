@@ -23,8 +23,12 @@ const errors = [];
 const warnings = [];
 
 let doc;
-try { doc = JSON.parse(readFileSync(CONTRACT, 'utf8')); }
-catch (e) { console.error('❌ 无法解析事件契约:', e.message); process.exit(1); }
+try {
+  doc = JSON.parse(readFileSync(CONTRACT, 'utf8'));
+} catch (e) {
+  console.error('❌ 无法解析事件契约:', e.message);
+  process.exit(1);
+}
 
 // ── ① 结构校验 ────────────────────────────────────────────────────────────
 const registry = new Map();
@@ -32,17 +36,25 @@ const THREE_SEG = /^[a-z]+(\.[a-z_]+){2}$/;
 const TWO_SEG = /^[a-z]+\.[a-z_]+$/;
 for (const ev of doc.events ?? []) {
   const id = ev.eventType || '(缺 eventType)';
-  if (!ev.eventType) { errors.push('事件缺 eventType'); continue; }
+  if (!ev.eventType) {
+    errors.push('事件缺 eventType');
+    continue;
+  }
   if (registry.has(ev.eventType)) errors.push(`${id}: 重复声明`);
   registry.set(ev.eventType, ev);
 
-  const okName = ev.legacyNaming ? (TWO_SEG.test(ev.eventType) || THREE_SEG.test(ev.eventType)) : THREE_SEG.test(ev.eventType);
+  const okName = ev.legacyNaming
+    ? TWO_SEG.test(ev.eventType) || THREE_SEG.test(ev.eventType)
+    : THREE_SEG.test(ev.eventType);
   if (!okName) {
-    errors.push(ev.legacyNaming
-      ? `${id}: 命名非法（两段名豁免也需 <domain>.<aggregate> 形式）`
-      : `${id}: 命名不符 <domain>.<aggregate>.<action>（如为早期事件请标 legacyNaming:true）`);
+    errors.push(
+      ev.legacyNaming
+        ? `${id}: 命名非法（两段名豁免也需 <domain>.<aggregate> 形式）`
+        : `${id}: 命名不符 <domain>.<aggregate>.<action>（如为早期事件请标 legacyNaming:true）`
+    );
   }
-  if (!['implemented', 'planned'].includes(ev.status)) errors.push(`${id}: status 必须为 implemented|planned`);
+  if (!['implemented', 'planned'].includes(ev.status))
+    errors.push(`${id}: status 必须为 implemented|planned`);
   if (!ev.producer) errors.push(`${id}: 缺 producer`);
   if (!Array.isArray(ev.consumers) || ev.consumers.length === 0) errors.push(`${id}: 缺 consumers`);
   if (!ev.payload || typeof ev.payload !== 'object') errors.push(`${id}: 缺 payload schema`);
@@ -64,7 +76,8 @@ function walk(dir, out = []) {
 // 与 `bus.publish({...})`（独立事务）。
 // 刻意不匹配裸 `eventType:` —— 审计实体（如 WechatPublishAuditEvent / SsoAuditLog）也用同名字段，
 // 它们是审计记录而非跨域事件，纳入会误报。
-const EMIT_RE = /(?:publishInTx|(?:bus|eventBus)\.publish)\s*\([\s\S]{0,600}?eventType:\s*'([a-z][a-zA-Z0-9_.]*)'/g;
+const EMIT_RE =
+  /(?:publishInTx|(?:bus|eventBus)\.publish)\s*\([\s\S]{0,600}?eventType:\s*'([a-z][a-zA-Z0-9_.]*)'/g;
 const emitted = new Map(); // eventType -> [相对路径]
 for (const file of walk(SRC)) {
   const text = readFileSync(file, 'utf8');
@@ -102,4 +115,6 @@ if (errors.length) {
   process.exit(1);
 }
 for (const w of warnings) console.warn('  ⚠ ' + w);
-console.log(`✅ guard:event-contract 通过：登记 ${registry.size} 个事件（implemented ${impl} / planned ${planned}），源码 ${emitted.size} 个发射点全部登记且双向一致。`);
+console.log(
+  `✅ guard:event-contract 通过：登记 ${registry.size} 个事件（implemented ${impl} / planned ${planned}），源码 ${emitted.size} 个发射点全部登记且双向一致。`
+);

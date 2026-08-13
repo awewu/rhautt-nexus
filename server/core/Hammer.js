@@ -13,14 +13,14 @@
  * █   Version: 3.0.0 | Standard: ISO/IEC 25010 + NASA-STD-8719  █
  * █                                                               █
  * █████████████████████████████████████████████████████████████████
- * 
+ *
  * 参考标准:
  * - ISO/IEC 25010: 系统和软件质量模型
  * - NASA-STD-8719.13: 软件安全标准
  * - IEC 61508: 功能安全
  * - DO-178C: 航空软件标准
  * - ISO 26262: 汽车功能安全
- * 
+ *
  * 验证维度 (9-Layer Architecture):
  * ┌─────────────────────────────────────────────────────────────┐
  * │ L9: Security        安全性验证 (SAST/DAST/密钥/注入)          │
@@ -33,14 +33,14 @@
  * │ L2: Syntax          语法验证 (AST/类型/规范/复杂度)             │
  * │ L1: Structure       结构验证 (文件/目录/模块/完整性)            │
  * └─────────────────────────────────────────────────────────────┘
- * 
+ *
  * 质量门禁 (Quality Gates):
  * - Gate 0: Critical    零容忍 (安全漏洞/数据丢失/系统崩溃)
  * - Gate 1: High        必须修复 (核心功能失败/性能降级)
  * - Gate 2: Medium      建议修复 (次要功能/警告/优化)
  * - Gate 3: Low         信息提示 (代码规范/文档/注释)
  * - Gate 4: Pass        通过放行
- * 
+ *
  * @author Rysnova Engineering Team
  * @version 3.0.0
  * @license MIT
@@ -57,18 +57,18 @@ const EventEmitter = require('events');
 class Hammer extends EventEmitter {
   constructor(config = {}) {
     super();
-    
+
     // 系统元数据
     this.name = 'Hammer';
     this.version = '3.0.0';
     this.codename = 'Titanium';
     this.standard = 'ISO/IEC 25010 + NASA-STD-8719';
-    
+
     // 配置 (默认工业级严格模式)
     this.config = {
       // 基础路径
       basePath: config.basePath || process.cwd(),
-      
+
       // 超时配置 (毫秒)
       timeouts: {
         syntax: config.timeoutSyntax || 30000,
@@ -76,57 +76,57 @@ class Hammer extends EventEmitter {
         functional: config.timeoutFunctional || 120000,
         integration: config.timeoutIntegration || 30000,
         performance: config.timeoutPerformance || 60000,
-        ...config.timeouts
+        ...config.timeouts,
       },
-      
+
       // 执行模式
       mode: config.mode || 'strict', // strict | normal | fast
       parallel: config.parallel !== false, // 默认并行
       failFast: config.failFast || false, // 不快速失败，收集所有问题
-      
+
       // 质量阈值
       thresholds: {
-        coverage: config.thresholdCoverage || 0.85,      // 85%覆盖率
-        complexity: config.thresholdComplexity || 10,       // 圈复杂度<10
-        duplications: config.thresholdDuplications || 3,    // 重复<3%
+        coverage: config.thresholdCoverage || 0.85, // 85%覆盖率
+        complexity: config.thresholdComplexity || 10, // 圈复杂度<10
+        duplications: config.thresholdDuplications || 3, // 重复<3%
         maintainability: config.thresholdMaintainability || 70, // 可维护性>70
-        reliability: config.thresholdReliability || 90,     // 可靠性>90
-        ...config.thresholds
+        reliability: config.thresholdReliability || 90, // 可靠性>90
+        ...config.thresholds,
       },
-      
+
       // 报告配置
       reporting: {
         format: config.reportFormat || 'full', // full | summary | json | junit
         outputDir: config.reportOutput || './hammer-reports',
         artifacts: config.reportArtifacts !== false,
-        ...config.reporting
+        ...config.reporting,
       },
-      
+
       // 忽略模式
       ignore: {
         patterns: config.ignorePatterns || ['node_modules/**', '.git/**', 'dist/**', 'build/**'],
         files: config.ignoreFiles || [],
-        ...config.ignore
+        ...config.ignore,
       },
-      
+
       // 扩展配置
       extensions: config.extensions || {},
-      
-      ...config
+
+      ...config,
     };
-    
+
     // 验证套件注册表
     this.suites = new Map();
-    
+
     // 验证规则注册表
     this.rules = new Map();
-    
+
     // 执行结果
     this.results = null;
-    
+
     // 验证缓存
     this.cache = new Map();
-    
+
     // 初始化
     this.initialize();
   }
@@ -134,21 +134,21 @@ class Hammer extends EventEmitter {
   // ═════════════════════════════════════════════════════════════════
   // 初始化与配置
   // ═════════════════════════════════════════════════════════════════
-  
+
   initialize() {
     this.emit('init', { name: this.name, version: this.version });
-    
+
     // 注册9层验证套件
     this.registerCoreSuites();
-    
+
     // 注册质量门禁规则
     this.registerQualityGates();
-    
+
     // 确保报告目录
     if (this.config.reporting.artifacts) {
       this.ensureDirectory(this.config.reporting.outputDir);
     }
-    
+
     this.emit('ready');
   }
 
@@ -159,12 +159,37 @@ class Hammer extends EventEmitter {
       description: '文件系统、目录结构、模块完整性验证',
       weight: 15,
       validators: [
-        { id: 'S01', name: 'Core Engines Existence', fn: this.v_L1_S01_CoreEngines.bind(this), weight: 10 },
-        { id: 'S02', name: 'Directory Structure', fn: this.v_L1_S02_DirectoryStructure.bind(this), weight: 5 },
-        { id: 'S03', name: 'File Integrity', fn: this.v_L1_S03_FileIntegrity.bind(this), weight: 5 },
-        { id: 'S04', name: 'Module Boundaries', fn: this.v_L1_S04_ModuleBoundaries.bind(this), weight: 3 },
-        { id: 'S05', name: 'Naming Conventions', fn: this.v_L1_S05_NamingConventions.bind(this), weight: 2 }
-      ]
+        {
+          id: 'S01',
+          name: 'Core Engines Existence',
+          fn: this.v_L1_S01_CoreEngines.bind(this),
+          weight: 10,
+        },
+        {
+          id: 'S02',
+          name: 'Directory Structure',
+          fn: this.v_L1_S02_DirectoryStructure.bind(this),
+          weight: 5,
+        },
+        {
+          id: 'S03',
+          name: 'File Integrity',
+          fn: this.v_L1_S03_FileIntegrity.bind(this),
+          weight: 5,
+        },
+        {
+          id: 'S04',
+          name: 'Module Boundaries',
+          fn: this.v_L1_S04_ModuleBoundaries.bind(this),
+          weight: 3,
+        },
+        {
+          id: 'S05',
+          name: 'Naming Conventions',
+          fn: this.v_L1_S05_NamingConventions.bind(this),
+          weight: 2,
+        },
+      ],
     });
 
     // L2: Syntax - 语法验证
@@ -173,12 +198,32 @@ class Hammer extends EventEmitter {
       description: '代码解析、AST检查、类型系统、代码规范',
       weight: 20,
       validators: [
-        { id: 'Y01', name: 'JavaScript Parsing', fn: this.v_L2_Y01_JSParsing.bind(this), weight: 10 },
-        { id: 'Y02', name: 'Import Resolution', fn: this.v_L2_Y02_ImportResolution.bind(this), weight: 8 },
-        { id: 'Y03', name: 'Circular Dependencies', fn: this.v_L2_Y03_CircularDependencies.bind(this), weight: 6 },
+        {
+          id: 'Y01',
+          name: 'JavaScript Parsing',
+          fn: this.v_L2_Y01_JSParsing.bind(this),
+          weight: 10,
+        },
+        {
+          id: 'Y02',
+          name: 'Import Resolution',
+          fn: this.v_L2_Y02_ImportResolution.bind(this),
+          weight: 8,
+        },
+        {
+          id: 'Y03',
+          name: 'Circular Dependencies',
+          fn: this.v_L2_Y03_CircularDependencies.bind(this),
+          weight: 6,
+        },
         { id: 'Y04', name: 'Code Complexity', fn: this.v_L2_Y04_Complexity.bind(this), weight: 5 },
-        { id: 'Y05', name: 'Dead Code Detection', fn: this.v_L2_Y05_DeadCode.bind(this), weight: 3 }
-      ]
+        {
+          id: 'Y05',
+          name: 'Dead Code Detection',
+          fn: this.v_L2_Y05_DeadCode.bind(this),
+          weight: 3,
+        },
+      ],
     });
 
     // L3: Dependency - 依赖验证
@@ -188,11 +233,31 @@ class Hammer extends EventEmitter {
       weight: 15,
       validators: [
         { id: 'D01', name: 'Node Modules', fn: this.v_L3_D01_NodeModules.bind(this), weight: 10 },
-        { id: 'D02', name: 'Package.json Validity', fn: this.v_L3_D02_PackageJSON.bind(this), weight: 8 },
-        { id: 'D03', name: 'Version Conflicts', fn: this.v_L3_D03_VersionConflicts.bind(this), weight: 6 },
-        { id: 'D04', name: 'Unused Dependencies', fn: this.v_L3_D04_UnusedDeps.bind(this), weight: 4 },
-        { id: 'D05', name: 'Security Vulnerabilities', fn: this.v_L3_D05_SecurityAudit.bind(this), weight: 10 }
-      ]
+        {
+          id: 'D02',
+          name: 'Package.json Validity',
+          fn: this.v_L3_D02_PackageJSON.bind(this),
+          weight: 8,
+        },
+        {
+          id: 'D03',
+          name: 'Version Conflicts',
+          fn: this.v_L3_D03_VersionConflicts.bind(this),
+          weight: 6,
+        },
+        {
+          id: 'D04',
+          name: 'Unused Dependencies',
+          fn: this.v_L3_D04_UnusedDeps.bind(this),
+          weight: 4,
+        },
+        {
+          id: 'D05',
+          name: 'Security Vulnerabilities',
+          fn: this.v_L3_D05_SecurityAudit.bind(this),
+          weight: 10,
+        },
+      ],
     });
 
     // L4: Configuration - 配置验证
@@ -205,8 +270,8 @@ class Hammer extends EventEmitter {
         { id: 'C02', name: 'Docker Configuration', fn: this.v_L4_C02_Docker.bind(this), weight: 6 },
         { id: 'C03', name: 'CI/CD Pipeline', fn: this.v_L4_C03_CICD.bind(this), weight: 5 },
         { id: 'C04', name: 'Secret Management', fn: this.v_L4_C04_Secrets.bind(this), weight: 10 },
-        { id: 'C05', name: 'Feature Flags', fn: this.v_L4_C05_FeatureFlags.bind(this), weight: 3 }
-      ]
+        { id: 'C05', name: 'Feature Flags', fn: this.v_L4_C05_FeatureFlags.bind(this), weight: 3 },
+      ],
     });
 
     // L5: Runtime - 运行时验证
@@ -217,10 +282,25 @@ class Hammer extends EventEmitter {
       validators: [
         { id: 'R01', name: 'Server Boot', fn: this.v_L5_R01_ServerBoot.bind(this), weight: 10 },
         { id: 'R02', name: 'Port Binding', fn: this.v_L5_R02_PortBinding.bind(this), weight: 8 },
-        { id: 'R03', name: 'Process Health', fn: this.v_L5_R03_ProcessHealth.bind(this), weight: 6 },
-        { id: 'R04', name: 'Memory Leak Check', fn: this.v_L5_R04_MemoryLeak.bind(this), weight: 5 },
-        { id: 'R05', name: 'Graceful Shutdown', fn: this.v_L5_R05_GracefulShutdown.bind(this), weight: 4 }
-      ]
+        {
+          id: 'R03',
+          name: 'Process Health',
+          fn: this.v_L5_R03_ProcessHealth.bind(this),
+          weight: 6,
+        },
+        {
+          id: 'R04',
+          name: 'Memory Leak Check',
+          fn: this.v_L5_R04_MemoryLeak.bind(this),
+          weight: 5,
+        },
+        {
+          id: 'R05',
+          name: 'Graceful Shutdown',
+          fn: this.v_L5_R05_GracefulShutdown.bind(this),
+          weight: 4,
+        },
+      ],
     });
 
     // L6: Functional - 功能验证
@@ -230,12 +310,32 @@ class Hammer extends EventEmitter {
       weight: 22,
       validators: [
         { id: 'F01', name: 'API Routes', fn: this.v_L6_F01_APIRoutes.bind(this), weight: 10 },
-        { id: 'F02', name: 'Engine Instances', fn: this.v_L6_F02_EngineInstances.bind(this), weight: 8 },
+        {
+          id: 'F02',
+          name: 'Engine Instances',
+          fn: this.v_L6_F02_EngineInstances.bind(this),
+          weight: 8,
+        },
         { id: 'F03', name: 'Middleware Chain', fn: this.v_L6_F03_Middleware.bind(this), weight: 6 },
-        { id: 'F04', name: 'Error Handling', fn: this.v_L6_F04_ErrorHandling.bind(this), weight: 8 },
-        { id: 'F05', name: 'Data Validation', fn: this.v_L6_F05_DataValidation.bind(this), weight: 7 },
-        { id: 'F06', name: 'Business Logic', fn: this.v_L6_F06_BusinessLogic.bind(this), weight: 9 }
-      ]
+        {
+          id: 'F04',
+          name: 'Error Handling',
+          fn: this.v_L6_F04_ErrorHandling.bind(this),
+          weight: 8,
+        },
+        {
+          id: 'F05',
+          name: 'Data Validation',
+          fn: this.v_L6_F05_DataValidation.bind(this),
+          weight: 7,
+        },
+        {
+          id: 'F06',
+          name: 'Business Logic',
+          fn: this.v_L6_F06_BusinessLogic.bind(this),
+          weight: 9,
+        },
+      ],
     });
 
     // L7: Integration - 集成验证
@@ -244,12 +344,17 @@ class Hammer extends EventEmitter {
       description: '数据库、缓存、消息队列、外部服务',
       weight: 15,
       validators: [
-        { id: 'I01', name: 'Database Connection', fn: this.v_L7_I01_Database.bind(this), weight: 10 },
+        {
+          id: 'I01',
+          name: 'Database Connection',
+          fn: this.v_L7_I01_Database.bind(this),
+          weight: 10,
+        },
         { id: 'I02', name: 'Cache Service', fn: this.v_L7_I02_Cache.bind(this), weight: 6 },
         { id: 'I03', name: 'External APIs', fn: this.v_L7_I03_ExternalAPIs.bind(this), weight: 7 },
         { id: 'I04', name: 'Message Queue', fn: this.v_L7_I04_MessageQueue.bind(this), weight: 5 },
-        { id: 'I05', name: 'Service Mesh', fn: this.v_L7_I05_ServiceMesh.bind(this), weight: 4 }
-      ]
+        { id: 'I05', name: 'Service Mesh', fn: this.v_L7_I05_ServiceMesh.bind(this), weight: 4 },
+      ],
     });
 
     // L8: Performance - 性能验证
@@ -261,9 +366,14 @@ class Hammer extends EventEmitter {
         { id: 'P01', name: 'Boot Time', fn: this.v_L8_P01_BootTime.bind(this), weight: 6 },
         { id: 'P02', name: 'Response Time', fn: this.v_L8_P02_ResponseTime.bind(this), weight: 8 },
         { id: 'P03', name: 'Throughput', fn: this.v_L8_P03_Throughput.bind(this), weight: 5 },
-        { id: 'P04', name: 'Resource Usage', fn: this.v_L8_P04_ResourceUsage.bind(this), weight: 5 },
-        { id: 'P05', name: 'Load Test', fn: this.v_L8_P05_LoadTest.bind(this), weight: 4 }
-      ]
+        {
+          id: 'P04',
+          name: 'Resource Usage',
+          fn: this.v_L8_P04_ResourceUsage.bind(this),
+          weight: 5,
+        },
+        { id: 'P05', name: 'Load Test', fn: this.v_L8_P05_LoadTest.bind(this), weight: 4 },
+      ],
     });
 
     // L9: Security - 安全性验证
@@ -273,11 +383,26 @@ class Hammer extends EventEmitter {
       weight: 20,
       validators: [
         { id: 'X01', name: 'Hardcoded Secrets', fn: this.v_L9_X01_Secrets.bind(this), weight: 10 },
-        { id: 'X02', name: 'Input Validation', fn: this.v_L9_X02_InputValidation.bind(this), weight: 8 },
+        {
+          id: 'X02',
+          name: 'Input Validation',
+          fn: this.v_L9_X02_InputValidation.bind(this),
+          weight: 8,
+        },
         { id: 'X03', name: 'CORS Configuration', fn: this.v_L9_X03_CORS.bind(this), weight: 6 },
-        { id: 'X04', name: 'Dependency Vulnerabilities', fn: this.v_L9_X04_DependencyVulns.bind(this), weight: 10 },
-        { id: 'X05', name: 'Injection Prevention', fn: this.v_L9_X05_Injection.bind(this), weight: 8 }
-      ]
+        {
+          id: 'X04',
+          name: 'Dependency Vulnerabilities',
+          fn: this.v_L9_X04_DependencyVulns.bind(this),
+          weight: 10,
+        },
+        {
+          id: 'X05',
+          name: 'Injection Prevention',
+          fn: this.v_L9_X05_Injection.bind(this),
+          weight: 8,
+        },
+      ],
     });
   }
 
@@ -288,7 +413,7 @@ class Hammer extends EventEmitter {
       description: '安全漏洞 / 数据丢失 / 系统崩溃',
       failOn: ['CRITICAL'],
       action: 'BLOCK',
-      notify: ['security', 'cto']
+      notify: ['security', 'cto'],
     });
 
     // Gate 1: High - 必须修复
@@ -297,7 +422,7 @@ class Hammer extends EventEmitter {
       description: '核心功能失败 / 性能严重降级',
       failOn: ['CRITICAL', 'HIGH'],
       action: 'BLOCK',
-      notify: ['tech-lead', 'pm']
+      notify: ['tech-lead', 'pm'],
     });
 
     // Gate 2: Medium - 建议修复
@@ -306,7 +431,7 @@ class Hammer extends EventEmitter {
       description: '次要功能问题 / 性能警告',
       failOn: ['CRITICAL', 'HIGH', 'MEDIUM'],
       action: 'WARN',
-      notify: ['developer']
+      notify: ['developer'],
     });
 
     // Gate 3: Low - 信息提示
@@ -315,7 +440,7 @@ class Hammer extends EventEmitter {
       description: '代码规范 / 文档 / 优化建议',
       failOn: [],
       action: 'PASS',
-      notify: []
+      notify: [],
     });
 
     // Gate 4: Pass
@@ -324,7 +449,7 @@ class Hammer extends EventEmitter {
       description: '完全通过',
       failOn: [],
       action: 'PASS',
-      notify: []
+      notify: [],
     });
   }
 
@@ -338,7 +463,7 @@ class Hammer extends EventEmitter {
       enabled: true,
       executed: false,
       results: [],
-      ...suite
+      ...suite,
     });
     this.emit('suite:register', { id, name: suite.name });
   }
@@ -360,9 +485,9 @@ class Hammer extends EventEmitter {
 
   async strike(options = {}) {
     const startTime = Date.now();
-    
+
     this.emit('strike:start', { timestamp: new Date().toISOString() });
-    
+
     console.log(`\n${'█'.repeat(70)}`);
     console.log('█' + ' '.repeat(68) + '█');
     console.log('█' + '  🔨 HAMMER INDUSTRIAL VALIDATION SYSTEM v3.0.0'.padEnd(68) + '█');
@@ -373,8 +498,9 @@ class Hammer extends EventEmitter {
     console.log('█'.repeat(70) + '\n');
 
     // 确定要执行的套件
-    const suiteIds = options.suites || Array.from(this.suites.keys()).filter(k => this.suites.get(k).enabled);
-    
+    const suiteIds =
+      options.suites || Array.from(this.suites.keys()).filter((k) => this.suites.get(k).enabled);
+
     // 执行前检查
     const precheck = await this.precheck();
     if (!precheck.success) {
@@ -390,7 +516,7 @@ class Hammer extends EventEmitter {
 
     // 计算质量门禁
     const gate = this.evaluateQualityGate();
-    
+
     // 生成最终报告
     const endTime = Date.now();
     this.results = {
@@ -398,46 +524,46 @@ class Hammer extends EventEmitter {
         hammer: { name: this.name, version: this.version, codename: this.codename },
         timestamp: new Date().toISOString(),
         duration: endTime - startTime,
-        config: this.sanitizeConfig()
+        config: this.sanitizeConfig(),
       },
       summary: this.calculateSummary(),
       gate,
       suites: this.compileSuiteResults(),
-      metrics: this.calculateMetrics()
+      metrics: this.calculateMetrics(),
     };
 
     // 输出报告
     await this.outputReport();
 
     this.emit('strike:complete', this.results);
-    
+
     return this.results;
   }
 
   async precheck() {
     // 基础检查：Node.js版本、磁盘空间、权限
     const checks = [];
-    
+
     // Node版本
     const nodeVersion = process.version;
     const majorVersion = parseInt(nodeVersion.slice(1));
     if (majorVersion < 16) {
       checks.push({ name: 'Node.js Version', status: 'FAILED', message: '需要Node.js 16+' });
     }
-    
+
     // 基础路径可写
     try {
       fs.accessSync(this.config.basePath, fs.constants.W_OK);
     } catch {
       checks.push({ name: 'Directory Writable', status: 'FAILED', message: '基础路径不可写' });
     }
-    
-    const failed = checks.filter(c => c.status === 'FAILED');
-    
+
+    const failed = checks.filter((c) => c.status === 'FAILED');
+
     return {
       success: failed.length === 0,
       checks,
-      failed
+      failed,
     };
   }
 
@@ -448,7 +574,7 @@ class Hammer extends EventEmitter {
   }
 
   async executeParallel(suiteIds, options) {
-    const promises = suiteIds.map(id => this.executeSuite(id, options));
+    const promises = suiteIds.map((id) => this.executeSuite(id, options));
     await Promise.all(promises);
   }
 
@@ -457,43 +583,43 @@ class Hammer extends EventEmitter {
     if (!suite || !suite.enabled) return;
 
     const suiteStart = Date.now();
-    
+
     this.emit('suite:start', { id: suiteId, name: suite.name });
-    
+
     console.log(`\n${'─'.repeat(70)}`);
     console.log(`🔍 ${suite.id}: ${suite.name}`);
     console.log(`   ${suite.description}`);
     console.log(`${'─'.repeat(70)}`);
 
     const results = [];
-    
+
     for (const validator of suite.validators) {
       // 快速失败模式
-      if (this.config.failFast && results.some(r => r.severity === 'CRITICAL')) {
+      if (this.config.failFast && results.some((r) => r.severity === 'CRITICAL')) {
         results.push({
           id: validator.id,
           name: validator.name,
           status: 'SKIPPED',
-          reason: 'fail-fast mode'
+          reason: 'fail-fast mode',
         });
         continue;
       }
 
       const result = await this.executeValidator(validator, suite);
       results.push(result);
-      
+
       this.emit('validator:complete', { suite: suiteId, validator: validator.id, result });
     }
 
     suite.executed = true;
     suite.results = results;
     suite.duration = Date.now() - suiteStart;
-    
+
     // 输出套件摘要
-    const passed = results.filter(r => r.status === 'PASSED').length;
-    const failed = results.filter(r => r.status === 'FAILED').length;
-    const critical = results.filter(r => r.severity === 'CRITICAL').length;
-    
+    const passed = results.filter((r) => r.status === 'PASSED').length;
+    const failed = results.filter((r) => r.status === 'FAILED').length;
+    const critical = results.filter((r) => r.severity === 'CRITICAL').length;
+
     const statusIcon = critical > 0 ? '💀' : failed > 0 ? '❌' : '✅';
     console.log(`   ${statusIcon} ${passed}/${results.length} passed (${suite.duration}ms)`);
 
@@ -502,11 +628,11 @@ class Hammer extends EventEmitter {
 
   async executeValidator(validator, suite) {
     const startTime = Date.now();
-    
+
     try {
       const result = await validator.fn();
       const duration = Date.now() - startTime;
-      
+
       const output = {
         id: validator.id,
         name: validator.name,
@@ -516,14 +642,19 @@ class Hammer extends EventEmitter {
         details: result.details || {},
         message: result.message || null,
         fix: result.fix || null,
-        weight: validator.weight || 1
+        weight: validator.weight || 1,
       };
 
       // 控制台输出
       if (!result.success) {
-        const icon = output.severity === 'CRITICAL' ? '💀' : 
-                     output.severity === 'HIGH' ? '❌' : 
-                     output.severity === 'MEDIUM' ? '⚠️' : 'ℹ️';
+        const icon =
+          output.severity === 'CRITICAL'
+            ? '💀'
+            : output.severity === 'HIGH'
+              ? '❌'
+              : output.severity === 'MEDIUM'
+                ? '⚠️'
+                : 'ℹ️';
         console.log(`   ${icon} [${validator.id}] ${validator.name}`);
         console.log(`      ${result.message}`);
         if (result.fix) {
@@ -534,12 +665,11 @@ class Hammer extends EventEmitter {
       }
 
       return output;
-      
     } catch (error) {
       const duration = Date.now() - startTime;
       console.log(`   💥 [${validator.id}] ${validator.name} - EXCEPTION`);
       console.log(`      ${error.message}`);
-      
+
       return {
         id: validator.id,
         name: validator.name,
@@ -547,22 +677,21 @@ class Hammer extends EventEmitter {
         severity: 'CRITICAL',
         duration,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       };
     }
   }
 
   evaluateQualityGate() {
-    const allResults = Array.from(this.suites.values())
-      .flatMap(s => s.results || []);
-    
-    const criticalCount = allResults.filter(r => r.severity === 'CRITICAL').length;
-    const highCount = allResults.filter(r => r.severity === 'HIGH').length;
-    const mediumCount = allResults.filter(r => r.severity === 'MEDIUM').length;
-    
+    const allResults = Array.from(this.suites.values()).flatMap((s) => s.results || []);
+
+    const criticalCount = allResults.filter((r) => r.severity === 'CRITICAL').length;
+    const highCount = allResults.filter((r) => r.severity === 'HIGH').length;
+    const mediumCount = allResults.filter((r) => r.severity === 'MEDIUM').length;
+
     // 确定门禁等级
     let gateId = 'G4_PASS';
-    
+
     if (criticalCount > 0) {
       gateId = 'G0_CRITICAL';
     } else if (highCount > 0) {
@@ -574,67 +703,66 @@ class Hammer extends EventEmitter {
     }
 
     const gate = this.rules.get(gateId);
-    
+
     return {
       level: gateId,
       name: gate.name,
       description: gate.description,
       action: gate.action,
       passed: gate.action === 'PASS',
-      issues: { critical: criticalCount, high: highCount, medium: mediumCount }
+      issues: { critical: criticalCount, high: highCount, medium: mediumCount },
     };
   }
 
   calculateSummary() {
-    const allResults = Array.from(this.suites.values())
-      .flatMap(s => s.results || []);
-    
+    const allResults = Array.from(this.suites.values()).flatMap((s) => s.results || []);
+
     const totalWeight = allResults.reduce((sum, r) => sum + (r.weight || 1), 0);
     const passedWeight = allResults
-      .filter(r => r.status === 'PASSED')
+      .filter((r) => r.status === 'PASSED')
       .reduce((sum, r) => sum + (r.weight || 1), 0);
-    
+
     return {
       total: allResults.length,
-      passed: allResults.filter(r => r.status === 'PASSED').length,
-      failed: allResults.filter(r => r.status === 'FAILED').length,
-      skipped: allResults.filter(r => r.status === 'SKIPPED').length,
+      passed: allResults.filter((r) => r.status === 'PASSED').length,
+      failed: allResults.filter((r) => r.status === 'FAILED').length,
+      skipped: allResults.filter((r) => r.status === 'SKIPPED').length,
       qualityScore: totalWeight > 0 ? Math.round((passedWeight / totalWeight) * 100) : 100,
-      coverage: this.calculateCoverage()
+      coverage: this.calculateCoverage(),
     };
   }
 
   calculateCoverage() {
     // 简化覆盖率计算
     const suites = Array.from(this.suites.values());
-    const executed = suites.filter(s => s.executed).length;
+    const executed = suites.filter((s) => s.executed).length;
     return {
       suites: Math.round((executed / suites.length) * 100),
       totalSuites: suites.length,
-      executedSuites: executed
+      executedSuites: executed,
     };
   }
 
   calculateMetrics() {
     const suites = Array.from(this.suites.values());
-    
+
     return {
       linesOfCode: this.estimateLOC(),
       complexity: this.estimateComplexity(),
       testDensity: this.calculateTestDensity(),
-      documentationCoverage: this.estimateDocCoverage()
+      documentationCoverage: this.estimateDocCoverage(),
     };
   }
 
   compileSuiteResults() {
-    return Array.from(this.suites.values()).map(suite => ({
+    return Array.from(this.suites.values()).map((suite) => ({
       id: suite.id,
       name: suite.name,
       enabled: suite.enabled,
       executed: suite.executed,
       duration: suite.duration,
       weight: suite.weight,
-      validators: suite.results || []
+      validators: suite.results || [],
     }));
   }
 
@@ -644,16 +772,24 @@ class Hammer extends EventEmitter {
 
   async v_L1_S01_CoreEngines() {
     const requiredEngines = [
-      'DOASComplianceEngine.js', 'SystemCoordinationEngine.js',
-      'ReheatModuleEngine.js', 'WaterSystemEngine.js', 'FreshAirProEngine.js',
-      'FiveConstantEngine.js', 'PerformanceMonitorEngine.js', 'CacheEngine.js',
+      'DOASComplianceEngine.js',
+      'SystemCoordinationEngine.js',
+      'ReheatModuleEngine.js',
+      'WaterSystemEngine.js',
+      'FreshAirProEngine.js',
+      'FiveConstantEngine.js',
+      'PerformanceMonitorEngine.js',
+      'CacheEngine.js',
       'LocationService.js',
-      'QuoteEngine.js', 'ReportEngine.js', 'EconetEngine.js', 'AIMatchingEngine.js'
+      'QuoteEngine.js',
+      'ReportEngine.js',
+      'EconetEngine.js',
+      'AIMatchingEngine.js',
     ];
-    
+
     const enginesPath = path.join(this.config.basePath, 'server', 'core');
     const issues = [];
-    
+
     for (const engine of requiredEngines) {
       const filePath = path.join(enginesPath, engine);
       if (!fs.existsSync(filePath)) {
@@ -665,45 +801,52 @@ class Hammer extends EventEmitter {
         }
       }
     }
-    
+
     if (issues.length > 0) {
       return {
         success: false,
         severity: 'CRITICAL',
         message: `${issues.length} 个引擎文件异常`,
         details: issues,
-        fix: '运行 npm run generate:engines 或手动创建缺失文件'
+        fix: '运行 npm run generate:engines 或手动创建缺失文件',
       };
     }
-    
+
     return { success: true, details: { count: requiredEngines.length } };
   }
 
   async v_L1_S02_DirectoryStructure() {
     const requiredDirs = [
-      'server/core', 'server/api', 'public', 'database', 
-      'docs', 'middleware', 'scripts', 'test', 'config'
+      'server/core',
+      'server/api',
+      'public',
+      'database',
+      'docs',
+      'middleware',
+      'scripts',
+      'test',
+      'config',
     ];
-    
-    const missing = requiredDirs.filter(dir => 
-      !fs.existsSync(path.join(this.config.basePath, dir))
+
+    const missing = requiredDirs.filter(
+      (dir) => !fs.existsSync(path.join(this.config.basePath, dir))
     );
-    
+
     if (missing.length > 0) {
       return {
         success: false,
         severity: 'HIGH',
         message: `缺失目录: ${missing.join(', ')}`,
-        fix: `mkdir -p ${missing.join(' ')}`
+        fix: `mkdir -p ${missing.join(' ')}`,
       };
     }
-    
+
     return { success: true };
   }
 
   async v_L1_S03_FileIntegrity() {
     const criticalFiles = ['server-production.js', 'package.json', 'docker-compose.yml'];
-    
+
     for (const file of criticalFiles) {
       const filePath = path.join(this.config.basePath, file);
       if (!fs.existsSync(filePath)) {
@@ -711,21 +854,21 @@ class Hammer extends EventEmitter {
           success: false,
           severity: 'CRITICAL',
           message: `关键文件缺失: ${file}`,
-          fix: `创建 ${file}`
+          fix: `创建 ${file}`,
         };
       }
-      
+
       const content = fs.readFileSync(filePath, 'utf8');
       if (content.trim().length < 50) {
         return {
           success: false,
           severity: 'HIGH',
           message: `文件内容异常: ${file} (${content.length} bytes)`,
-          fix: `检查并修复 ${file}`
+          fix: `检查并修复 ${file}`,
         };
       }
     }
-    
+
     return { success: true };
   }
 
@@ -745,12 +888,12 @@ class Hammer extends EventEmitter {
 
   async v_L2_Y01_JSParsing() {
     const serverFile = path.join(this.config.basePath, 'server-production.js');
-    
+
     try {
       execSync(`node --check "${serverFile}"`, {
         cwd: this.config.basePath,
         timeout: this.config.timeouts.syntax,
-        stdio: 'pipe'
+        stdio: 'pipe',
       });
       return { success: true };
     } catch (error) {
@@ -758,7 +901,7 @@ class Hammer extends EventEmitter {
         success: false,
         severity: 'CRITICAL',
         message: `语法错误: ${error.message.substring(0, 200)}`,
-        fix: 'node --check server-production.js 检查具体错误'
+        fix: 'node --check server-production.js 检查具体错误',
       };
     }
   }
@@ -766,17 +909,17 @@ class Hammer extends EventEmitter {
   async v_L2_Y02_ImportResolution() {
     const serverFile = path.join(this.config.basePath, 'server-production.js');
     const content = fs.readFileSync(serverFile, 'utf8');
-    
+
     const requirePattern = /require\(['"]([^'"]+)['"]\)/g;
     const requires = [];
     let match;
-    
+
     while ((match = requirePattern.exec(content)) !== null) {
       requires.push(match[1]);
     }
-    
+
     const unresolved = [];
-    
+
     for (const req of requires) {
       if (req.startsWith('./') || req.startsWith('../')) {
         const resolved = path.resolve(path.dirname(serverFile), req);
@@ -785,16 +928,16 @@ class Hammer extends EventEmitter {
         }
       }
     }
-    
+
     if (unresolved.length > 0) {
       return {
         success: false,
         severity: 'HIGH',
         message: `未解析的模块: ${unresolved.join(', ')}`,
-        fix: '创建缺失的模块文件或修复导入路径'
+        fix: '创建缺失的模块文件或修复导入路径',
       };
     }
-    
+
     return { success: true, details: { imports: requires.length } };
   }
 
@@ -817,64 +960,64 @@ class Hammer extends EventEmitter {
 
   async v_L3_D01_NodeModules() {
     const nodeModulesPath = path.join(this.config.basePath, 'node_modules');
-    
+
     if (!fs.existsSync(nodeModulesPath)) {
       return {
         success: false,
         severity: 'CRITICAL',
         message: 'node_modules 不存在',
-        fix: 'npm install'
+        fix: 'npm install',
       };
     }
-    
+
     const criticalPackages = ['express', 'cors', 'body-parser'];
-    const missing = criticalPackages.filter(pkg => 
-      !fs.existsSync(path.join(nodeModulesPath, pkg))
+    const missing = criticalPackages.filter(
+      (pkg) => !fs.existsSync(path.join(nodeModulesPath, pkg))
     );
-    
+
     if (missing.length > 0) {
       return {
         success: false,
         severity: 'CRITICAL',
         message: `关键包未安装: ${missing.join(', ')}`,
-        fix: `npm install ${missing.join(' ')}`
+        fix: `npm install ${missing.join(' ')}`,
       };
     }
-    
+
     return { success: true };
   }
 
   async v_L3_D02_PackageJSON() {
     const packagePath = path.join(this.config.basePath, 'package.json');
-    
+
     if (!fs.existsSync(packagePath)) {
       return {
         success: false,
         severity: 'CRITICAL',
         message: 'package.json 不存在',
-        fix: 'npm init -y'
+        fix: 'npm init -y',
       };
     }
-    
+
     try {
       const pkg = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-      
+
       if (!pkg.name || !pkg.version) {
         return {
           success: false,
           severity: 'MEDIUM',
           message: 'package.json 缺少 name/version',
-          fix: '完善 package.json 基本信息'
+          fix: '完善 package.json 基本信息',
         };
       }
-      
+
       return { success: true, details: { name: pkg.name, version: pkg.version } };
     } catch (error) {
       return {
         success: false,
         severity: 'CRITICAL',
         message: 'package.json 格式错误',
-        fix: '验证并修复 JSON 格式'
+        fix: '验证并修复 JSON 格式',
       };
     }
   }
@@ -897,57 +1040,57 @@ class Hammer extends EventEmitter {
 
   async v_L4_C01_EnvFiles() {
     const envExample = path.join(this.config.basePath, '.env.example');
-    
+
     if (!fs.existsSync(envExample)) {
       return {
         success: false,
         severity: 'MEDIUM',
         message: '.env.example 不存在',
-        fix: '创建 .env.example 模板文件'
+        fix: '创建 .env.example 模板文件',
       };
     }
-    
+
     return { success: true };
   }
 
   async v_L4_C02_Docker() {
     const dockerfile = path.join(this.config.basePath, 'Dockerfile');
     const dockerCompose = path.join(this.config.basePath, 'docker-compose.yml');
-    
+
     const issues = [];
-    
+
     if (!fs.existsSync(dockerfile)) {
       issues.push('Dockerfile 不存在');
     }
     if (!fs.existsSync(dockerCompose)) {
       issues.push('docker-compose.yml 不存在');
     }
-    
+
     if (issues.length > 0) {
       return {
         success: false,
         severity: 'MEDIUM',
         message: issues.join('; '),
-        fix: '创建 Docker 配置文件'
+        fix: '创建 Docker 配置文件',
       };
     }
-    
+
     return { success: true };
   }
 
   async v_L4_C03_CICD() {
     const githubWorkflows = path.join(this.config.basePath, '.github', 'workflows');
-    
+
     if (!fs.existsSync(githubWorkflows)) {
       return {
         success: false,
         severity: 'LOW',
         message: 'GitHub Actions 工作流未配置',
         fix: 'mkdir -p .github/workflows && 创建 CI/CD 配置',
-        warning: true
+        warning: true,
       };
     }
-    
+
     return { success: true };
   }
 
@@ -965,7 +1108,7 @@ class Hammer extends EventEmitter {
 
   async v_L5_R01_ServerBoot() {
     const serverFile = path.join(this.config.basePath, 'server-production.js');
-    
+
     try {
       require(serverFile);
       return { success: true };
@@ -975,7 +1118,7 @@ class Hammer extends EventEmitter {
           success: false,
           severity: 'CRITICAL',
           message: `模块加载失败: ${error.message}`,
-          fix: 'npm install 安装缺失依赖'
+          fix: 'npm install 安装缺失依赖',
         };
       }
       return { success: true, details: { loadable: true, note: '启动时依赖正常' } };
@@ -985,27 +1128,27 @@ class Hammer extends EventEmitter {
   async v_L5_R02_PortBinding() {
     return new Promise((resolve) => {
       const server = http.createServer();
-      
+
       server.once('error', (err) => {
         if (err.code === 'EADDRINUSE') {
           resolve({
             success: false,
             severity: 'HIGH',
             message: '端口 3000 已被占用',
-            fix: 'lsof -ti:3000 | xargs kill -9 或更换端口'
+            fix: 'lsof -ti:3000 | xargs kill -9 或更换端口',
           });
         } else {
           resolve({ success: true, details: { port: 3000, status: 'unknown' } });
         }
       });
-      
+
       server.once('listening', () => {
         server.close();
         resolve({ success: true, details: { port: 3000, available: true } });
       });
-      
+
       server.listen(3000, '127.0.0.1');
-      
+
       setTimeout(() => {
         server.close();
         resolve({ success: true, details: { port: 3000, timeout: true } });
@@ -1032,76 +1175,76 @@ class Hammer extends EventEmitter {
   async v_L6_F01_APIRoutes() {
     const serverFile = path.join(this.config.basePath, 'server-production.js');
     const content = fs.readFileSync(serverFile, 'utf8');
-    
+
     const requiredRoutes = [
       '/api/agent/execute',
-      '/api/agent/status', 
+      '/api/agent/status',
       '/api/agent/health',
-      '/api/system/health'
+      '/api/system/health',
     ];
-    
-    const missing = requiredRoutes.filter(route => !content.includes(route));
-    
+
+    const missing = requiredRoutes.filter((route) => !content.includes(route));
+
     if (missing.length > 0) {
       return {
         success: false,
         severity: 'CRITICAL',
         message: `缺失 API 路由: ${missing.join(', ')}`,
-        fix: '在 server-production.js 中注册路由'
+        fix: '在 server-production.js 中注册路由',
       };
     }
-    
+
     return { success: true, details: { routes: requiredRoutes.length } };
   }
 
   async v_L6_F02_EngineInstances() {
     const serverFile = path.join(this.config.basePath, 'server-production.js');
     const content = fs.readFileSync(serverFile, 'utf8');
-    
+
     const engineChecks = [
       { name: 'DOASComplianceEngine', patterns: ['new DOASComplianceEngine'] },
-      { name: 'CacheEngine', patterns: ['new CacheEngine'] }
+      { name: 'CacheEngine', patterns: ['new CacheEngine'] },
     ];
-    
+
     const missing = [];
     for (const check of engineChecks) {
-      const found = check.patterns.some(pattern => content.includes(pattern));
+      const found = check.patterns.some((pattern) => content.includes(pattern));
       if (!found) missing.push(check.name);
     }
-    
+
     if (missing.length > 0) {
       return {
         success: false,
         severity: 'HIGH',
         message: `引擎未实例化: ${missing.join(', ')}`,
-        fix: '在引擎注册表中添加实例化代码'
+        fix: '在引擎注册表中添加实例化代码',
       };
     }
-    
+
     return { success: true };
   }
 
   async v_L6_F03_Middleware() {
     const serverFile = path.join(this.config.basePath, 'server-production.js');
     const content = fs.readFileSync(serverFile, 'utf8');
-    
+
     const checks = [
       { name: 'cors', pattern: /app\.use\(\s*cors\s*\(/ },
       { name: 'bodyParser.json', pattern: /bodyParser\.json\s*\(/ },
-      { name: 'bodyParser.urlencoded', pattern: /bodyParser\.urlencoded\s*\(/ }
+      { name: 'bodyParser.urlencoded', pattern: /bodyParser\.urlencoded\s*\(/ },
     ];
-    
-    const missing = checks.filter(c => !c.pattern.test(content)).map(c => c.name);
-    
+
+    const missing = checks.filter((c) => !c.pattern.test(content)).map((c) => c.name);
+
     if (missing.length > 0) {
       return {
         success: false,
         severity: 'MEDIUM',
         message: `中间件缺失: ${missing.join(', ')}`,
-        fix: '添加 Express 中间件配置'
+        fix: '添加 Express 中间件配置',
       };
     }
-    
+
     return { success: true };
   }
 
@@ -1123,16 +1266,16 @@ class Hammer extends EventEmitter {
 
   async v_L7_I01_Database() {
     const dbPath = path.join(this.config.basePath, 'database');
-    
+
     if (!fs.existsSync(dbPath)) {
       return {
         success: false,
         severity: 'MEDIUM',
         message: 'database 目录不存在',
-        fix: 'mkdir database && 配置数据库连接'
+        fix: 'mkdir database && 配置数据库连接',
       };
     }
-    
+
     return { success: true };
   }
 
@@ -1182,23 +1325,23 @@ class Hammer extends EventEmitter {
 
   async v_L9_X01_Secrets() {
     const envPath = path.join(this.config.basePath, '.env');
-    
+
     if (fs.existsSync(envPath)) {
       const content = fs.readFileSync(envPath, 'utf8');
-      
+
       const weakPatterns = ['password=123', 'secret=abc', 'key=123456', 'admin=admin'];
-      const found = weakPatterns.filter(p => content.includes(p));
-      
+      const found = weakPatterns.filter((p) => content.includes(p));
+
       if (found.length > 0) {
         return {
           success: false,
           severity: 'CRITICAL',
           message: `发现弱密钥: ${found.join(', ')}`,
-          fix: '使用强密钥并从环境变量安全加载'
+          fix: '使用强密钥并从环境变量安全加载',
         };
       }
     }
-    
+
     return { success: true };
   }
 
@@ -1209,16 +1352,16 @@ class Hammer extends EventEmitter {
   async v_L9_X03_CORS() {
     const serverFile = path.join(this.config.basePath, 'server-production.js');
     const content = fs.readFileSync(serverFile, 'utf8');
-    
+
     if (!content.includes('cors(')) {
       return {
         success: false,
         severity: 'MEDIUM',
         message: 'CORS 中间件未配置',
-        fix: 'app.use(cors())'
+        fix: 'app.use(cors())',
       };
     }
-    
+
     return { success: true };
   }
 
@@ -1236,10 +1379,10 @@ class Hammer extends EventEmitter {
 
   async outputReport() {
     const { format, outputDir } = this.config.reporting;
-    
+
     // 控制台输出
     this.printConsoleReport();
-    
+
     // JSON报告
     if (format === 'json' || format === 'full') {
       fs.writeFileSync(
@@ -1247,27 +1390,21 @@ class Hammer extends EventEmitter {
         JSON.stringify(this.results, null, 2)
       );
     }
-    
+
     // JUnit XML报告
     if (format === 'junit') {
-      fs.writeFileSync(
-        path.join(outputDir, 'hammer-junit.xml'),
-        this.generateJUnitReport()
-      );
+      fs.writeFileSync(path.join(outputDir, 'hammer-junit.xml'), this.generateJUnitReport());
     }
-    
+
     // Markdown报告
     if (format === 'full') {
-      fs.writeFileSync(
-        path.join(outputDir, 'hammer-report.md'),
-        this.generateMarkdownReport()
-      );
+      fs.writeFileSync(path.join(outputDir, 'hammer-report.md'), this.generateMarkdownReport());
     }
   }
 
   printConsoleReport() {
     const { summary, gate } = this.results;
-    
+
     console.log(`\n${'█'.repeat(70)}`);
     console.log('█' + ' '.repeat(68) + '█');
     console.log('█' + '  📊 HAMMER VALIDATION REPORT'.padEnd(68) + '█');
@@ -1288,14 +1425,14 @@ class Hammer extends EventEmitter {
     console.log();
 
     // 失败详情
-    const failures = this.results.suites
-      .flatMap(s => s.validators.filter(v => v.status === 'FAILED'));
-    
+    const failures = this.results.suites.flatMap((s) =>
+      s.validators.filter((v) => v.status === 'FAILED')
+    );
+
     if (failures.length > 0) {
       console.log('❗ Failures:');
       failures.forEach((f, i) => {
-        const icon = f.severity === 'CRITICAL' ? '💀' : 
-                     f.severity === 'HIGH' ? '❌' : '⚠️';
+        const icon = f.severity === 'CRITICAL' ? '💀' : f.severity === 'HIGH' ? '❌' : '⚠️';
         console.log(`\n   ${i + 1}. ${icon} [${f.id}] ${f.name}`);
         console.log(`      ${f.message}`);
         if (f.fix) console.log(`      💡 ${f.fix}`);
@@ -1310,62 +1447,61 @@ class Hammer extends EventEmitter {
     // 生成JUnit XML格式
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<testsuites>\n';
-    
-    this.results.suites.forEach(suite => {
-      const failures = suite.validators.filter(v => v.status === 'FAILED').length;
+
+    this.results.suites.forEach((suite) => {
+      const failures = suite.validators.filter((v) => v.status === 'FAILED').length;
       xml += `  <testsuite name="${suite.name}" tests="${suite.validators.length}" failures="${failures}">\n`;
-      
-      suite.validators.forEach(v => {
+
+      suite.validators.forEach((v) => {
         xml += `    <testcase name="${v.name}" classname="${suite.id}" time="${v.duration / 1000}">\n`;
         if (v.status === 'FAILED') {
           xml += `      <failure message="${v.message}">${v.fix || ''}</failure>\n`;
         }
         xml += '    </testcase>\n';
       });
-      
+
       xml += '  </testsuite>\n';
     });
-    
+
     xml += '</testsuites>';
     return xml;
   }
 
   generateMarkdownReport() {
     const { meta, summary, gate, suites } = this.results;
-    
+
     let md = `# 🔨 Hammer Validation Report\n\n`;
     md += `**Generated:** ${meta.timestamp}\n\n`;
     md += `**Version:** ${meta.hammer.version}\n\n`;
     md += `**Duration:** ${meta.duration}ms\n\n`;
-    
+
     md += `## 🚦 Quality Gate\n\n`;
     md += `- **Level:** ${gate.name}\n`;
     md += `- **Action:** ${gate.action}\n`;
     md += `- **Passed:** ${gate.passed ? '✅ Yes' : '❌ No'}\n\n`;
-    
+
     md += `## 📊 Summary\n\n`;
     md += `- **Quality Score:** ${summary.qualityScore}/100\n`;
     md += `- **Total:** ${summary.total}\n`;
     md += `- **Passed:** ${summary.passed}\n`;
     md += `- **Failed:** ${summary.failed}\n`;
     md += `- **Skipped:** ${summary.skipped}\n\n`;
-    
+
     md += `## 🔍 Detailed Results\n\n`;
-    
-    suites.forEach(suite => {
+
+    suites.forEach((suite) => {
       md += `### ${suite.name}\n\n`;
       md += `| ID | Name | Status | Duration |\n`;
       md += `|----|------|--------|----------|\n`;
-      
-      suite.validators.forEach(v => {
-        const status = v.status === 'PASSED' ? '✅' : 
-                        v.status === 'FAILED' ? '❌' : '⏭️';
+
+      suite.validators.forEach((v) => {
+        const status = v.status === 'PASSED' ? '✅' : v.status === 'FAILED' ? '❌' : '⏭️';
         md += `| ${v.id} | ${v.name} | ${status} ${v.status} | ${v.duration}ms |\n`;
       });
-      
+
       md += '\n';
     });
-    
+
     return md;
   }
 
@@ -1378,7 +1514,7 @@ class Hammer extends EventEmitter {
       meta: { hammer: { name: this.name, version: this.version } },
       precheck,
       error: 'Precheck failed',
-      status: 'ABORTED'
+      status: 'ABORTED',
     };
   }
 
@@ -1399,7 +1535,7 @@ class Hammer extends EventEmitter {
       const result = execSync('find . -name "*.js" -not -path "./node_modules/*" | xargs wc -l', {
         cwd: this.config.basePath,
         encoding: 'utf8',
-        stdio: 'pipe'
+        stdio: 'pipe',
       });
       const match = result.match(/(\d+)\s+total/);
       return match ? parseInt(match[1]) : 0;
@@ -1431,16 +1567,16 @@ class Hammer extends EventEmitter {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       suites: this.suites.size,
-      rules: this.rules.size
+      rules: this.rules.size,
     };
   }
 
   getSuites() {
-    return Array.from(this.suites.values()).map(s => ({
+    return Array.from(this.suites.values()).map((s) => ({
       id: s.id,
       name: s.name,
       enabled: s.enabled,
-      weight: s.weight
+      weight: s.weight,
     }));
   }
 

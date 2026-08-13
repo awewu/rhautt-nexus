@@ -45,42 +45,48 @@ function routeKey(groupId, route) {
 }
 
 function catalogRoutes() {
-  return PRODUCTION_ROUTE_CATALOG.flatMap(group => (group.routes || []).map(route => ({
-    key: routeKey(group.id, route),
-    groupId: group.id,
-    currentDomain: group.domain,
-    currentStatus: route.status || group.status,
-    owner: group.owner,
-    id: route.id,
-    prefix: route.prefix || '/',
-    modulePath: route.modulePath || null,
-    middleware: route.middleware || null,
-    optional: Boolean(route.optional)
-  })));
+  return PRODUCTION_ROUTE_CATALOG.flatMap((group) =>
+    (group.routes || []).map((route) => ({
+      key: routeKey(group.id, route),
+      groupId: group.id,
+      currentDomain: group.domain,
+      currentStatus: route.status || group.status,
+      owner: group.owner,
+      id: route.id,
+      prefix: route.prefix || '/',
+      modulePath: route.modulePath || null,
+      middleware: route.middleware || null,
+      optional: Boolean(route.optional),
+    }))
+  );
 }
 
 function contractRoutes(contract) {
-  return (contract.routeGroups || []).flatMap(group => (group.routes || []).map(route => ({
-    key: routeKey(group.groupId, route),
-    groupId: group.groupId,
-    currentDomain: group.currentDomain,
-    currentStatus: route.currentStatus || group.currentStatus,
-    ownerAgent: route.ownerAgent || group.ownerAgent,
-    migrationAction: route.migrationAction || group.defaultMigrationAction,
-    targetModules: route.targetModules || group.defaultTargetModules || [],
-    targetApiNamespaces: route.targetApiNamespaces || [],
-    id: route.id,
-    prefix: route.prefix || '/',
-    modulePath: route.modulePath || null,
-    middleware: route.middleware || null
-  })));
+  return (contract.routeGroups || []).flatMap((group) =>
+    (group.routes || []).map((route) => ({
+      key: routeKey(group.groupId, route),
+      groupId: group.groupId,
+      currentDomain: group.currentDomain,
+      currentStatus: route.currentStatus || group.currentStatus,
+      ownerAgent: route.ownerAgent || group.ownerAgent,
+      migrationAction: route.migrationAction || group.defaultMigrationAction,
+      targetModules: route.targetModules || group.defaultTargetModules || [],
+      targetApiNamespaces: route.targetApiNamespaces || [],
+      id: route.id,
+      prefix: route.prefix || '/',
+      modulePath: route.modulePath || null,
+      middleware: route.middleware || null,
+    }))
+  );
 }
 
 function moduleNames(constantName) {
   const source = read(MODULE_BOUNDARY_PATH);
-  const match = source.match(new RegExp(`export const ${constantName} = \\[([\\s\\S]*?)\\] as const;`));
+  const match = source.match(
+    new RegExp(`export const ${constantName} = \\[([\\s\\S]*?)\\] as const;`)
+  );
   if (!match) return [];
-  return [...match[1].matchAll(/'([^']+)'/g)].map(item => item[1]);
+  return [...match[1].matchAll(/'([^']+)'/g)].map((item) => item[1]);
 }
 
 function renderMarkdown(report) {
@@ -108,11 +114,13 @@ function renderMarkdown(report) {
     '## Group Coverage',
     '',
     '| Group | Catalog Routes | Mapped Routes | Action | Owner Agent |',
-    '|---|---:|---:|---|---|'
+    '|---|---:|---:|---|---|',
   ];
 
   for (const group of report.groupCoverage) {
-    lines.push(`| ${group.groupId} | ${group.catalogRoutes} | ${group.mappedRoutes} | ${group.defaultMigrationAction} | ${group.ownerAgent} |`);
+    lines.push(
+      `| ${group.groupId} | ${group.catalogRoutes} | ${group.mappedRoutes} | ${group.defaultMigrationAction} | ${group.ownerAgent} |`
+    );
   }
 
   lines.push(
@@ -123,7 +131,9 @@ function renderMarkdown(report) {
     '|---|---|---|---|---|'
   );
   for (const route of report.routes) {
-    lines.push(`| ${route.key} | ${route.currentStatus} ${route.modulePath || route.middleware || ''} | ${route.targetModules.join(', ')} | ${route.targetApiNamespaces.join(', ')} | ${route.migrationAction} |`);
+    lines.push(
+      `| ${route.key} | ${route.currentStatus} ${route.modulePath || route.middleware || ''} | ${route.targetModules.join(', ')} | ${route.targetApiNamespaces.join(', ')} | ${route.migrationAction} |`
+    );
   }
 
   if (report.failures.length) {
@@ -156,8 +166,8 @@ function main() {
   const contract = JSON.parse(contractSource);
   const catalog = catalogRoutes();
   const mapped = contractRoutes(contract);
-  const catalogByKey = new Map(catalog.map(route => [route.key, route]));
-  const mappedByKey = new Map(mapped.map(route => [route.key, route]));
+  const catalogByKey = new Map(catalog.map((route) => [route.key, route]));
+  const mappedByKey = new Map(mapped.map((route) => [route.key, route]));
   const activeModules = new Set(moduleNames('apiModuleBoundary'));
   const plannedInterfaces = new Set(moduleNames('plannedApiInterfaces'));
   const knownModules = new Set([...activeModules, ...plannedInterfaces]);
@@ -171,7 +181,10 @@ function main() {
   if (!String(contract.nonCompletionRule || '').includes('not NestJS/Fastify runtime boot proof')) {
     fail('route target map nonCompletionRule must state it is not runtime boot proof');
   }
-  if (!Array.isArray(contract.requiredEvidenceBeforeRetiringLegacyRoute) || contract.requiredEvidenceBeforeRetiringLegacyRoute.length < 7) {
+  if (
+    !Array.isArray(contract.requiredEvidenceBeforeRetiringLegacyRoute) ||
+    contract.requiredEvidenceBeforeRetiringLegacyRoute.length < 7
+  ) {
     fail('route target map must define required evidence before retiring legacy routes');
   }
   for (const token of [
@@ -179,9 +192,13 @@ function main() {
     'NestJS/Fastify boot smoke passes',
     'OpenAPI contract covers replacement namespace',
     'generated client covers replacement call',
-    'rollback note names the removed compatibility route'
+    'rollback note names the removed compatibility route',
   ]) {
-    if (!contract.requiredEvidenceBeforeRetiringLegacyRoute.some(item => String(item).includes(token))) {
+    if (
+      !contract.requiredEvidenceBeforeRetiringLegacyRoute.some((item) =>
+        String(item).includes(token)
+      )
+    ) {
       fail(`requiredEvidenceBeforeRetiringLegacyRoute missing ${token}`);
     }
   }
@@ -193,10 +210,14 @@ function main() {
       continue;
     }
     if (route.modulePath && match.modulePath !== route.modulePath) {
-      fail(`${route.key}: modulePath mismatch contract=${match.modulePath} catalog=${route.modulePath}`);
+      fail(
+        `${route.key}: modulePath mismatch contract=${match.modulePath} catalog=${route.modulePath}`
+      );
     }
     if (route.middleware && match.middleware !== route.middleware) {
-      fail(`${route.key}: middleware mismatch contract=${match.middleware} catalog=${route.middleware}`);
+      fail(
+        `${route.key}: middleware mismatch contract=${match.middleware} catalog=${route.middleware}`
+      );
     }
     if ((match.prefix || '/') !== route.prefix) {
       fail(`${route.key}: prefix mismatch contract=${match.prefix || '/'} catalog=${route.prefix}`);
@@ -210,8 +231,13 @@ function main() {
       fail(`${route.key}: missing targetApiNamespaces`);
     }
     for (const moduleName of match.targetModules || []) {
-      if (!knownModules.has(moduleName)) fail(`${route.key}: target module ${moduleName} is not active or planned in ${MODULE_BOUNDARY_PATH}`);
-      const hasMatchingNamespace = (match.targetApiNamespaces || []).some(namespace => namespaceMatchesModule(namespace, moduleName));
+      if (!knownModules.has(moduleName))
+        fail(
+          `${route.key}: target module ${moduleName} is not active or planned in ${MODULE_BOUNDARY_PATH}`
+        );
+      const hasMatchingNamespace = (match.targetApiNamespaces || []).some((namespace) =>
+        namespaceMatchesModule(namespace, moduleName)
+      );
       if (!hasMatchingNamespace) {
         fail(`${route.key}: target module ${moduleName} has no matching /api/v2 namespace`);
       }
@@ -219,16 +245,19 @@ function main() {
   }
 
   for (const route of mapped) {
-    if (!catalogByKey.has(route.key)) warnings.push(`mapped route not present in production catalog: ${route.key}`);
+    if (!catalogByKey.has(route.key))
+      warnings.push(`mapped route not present in production catalog: ${route.key}`);
   }
 
-  const groupCoverage = PRODUCTION_ROUTE_CATALOG.map(group => {
-    const mappedGroup = (contract.routeGroups || []).find(item => item.groupId === group.id);
+  const groupCoverage = PRODUCTION_ROUTE_CATALOG.map((group) => {
+    const mappedGroup = (contract.routeGroups || []).find((item) => item.groupId === group.id);
     const catalogRouteCount = group.routes.length;
-    const mappedRouteCount = mapped.filter(route => route.groupId === group.id).length;
+    const mappedRouteCount = mapped.filter((route) => route.groupId === group.id).length;
     if (!mappedGroup) fail(`missing route group mapping: ${group.id}`);
     if (mappedRouteCount !== catalogRouteCount) {
-      fail(`${group.id}: mapped route count ${mappedRouteCount} does not match catalog route count ${catalogRouteCount}`);
+      fail(
+        `${group.id}: mapped route count ${mappedRouteCount} does not match catalog route count ${catalogRouteCount}`
+      );
     }
     return {
       groupId: group.id,
@@ -236,13 +265,15 @@ function main() {
       catalogRoutes: catalogRouteCount,
       mappedRoutes: mappedRouteCount,
       defaultMigrationAction: mappedGroup?.defaultMigrationAction || null,
-      ownerAgent: mappedGroup?.ownerAgent || null
+      ownerAgent: mappedGroup?.ownerAgent || null,
     };
   });
 
-  const targetModulesReferenced = [...new Set(mapped.flatMap(route => route.targetModules))].sort();
+  const targetModulesReferenced = [
+    ...new Set(mapped.flatMap((route) => route.targetModules)),
+  ].sort();
   const routes = mapped
-    .filter(route => catalogByKey.has(route.key))
+    .filter((route) => catalogByKey.has(route.key))
     .sort((a, b) => a.key.localeCompare(b.key));
   const report = {
     platform: contract.platform,
@@ -253,7 +284,7 @@ function main() {
     runtimeBootProof: false,
     contract: {
       path: CONTRACT_PATH,
-      sha256: sha256(contractSource)
+      sha256: sha256(contractSource),
     },
     catalogSource: contract.catalogSource,
     targetModuleSource: contract.targetModuleSource,
@@ -261,29 +292,35 @@ function main() {
       catalogRoutes: catalog.length,
       mappedRoutes: routes.length,
       targetModulesReferenced: targetModulesReferenced.length,
-      warnings: warnings.length
+      warnings: warnings.length,
     },
     targetModulesReferenced,
     groupCoverage,
     routes,
     warnings,
     failures,
-    requiredEvidenceBeforeRetiringLegacyRoute: contract.requiredEvidenceBeforeRetiringLegacyRoute
+    requiredEvidenceBeforeRetiringLegacyRoute: contract.requiredEvidenceBeforeRetiringLegacyRoute,
   };
 
   fs.mkdirSync(fullPath(path.dirname(REPORT_JSON)), { recursive: true });
   fs.writeFileSync(fullPath(REPORT_JSON), `${JSON.stringify(report, null, 2)}\n`);
   fs.writeFileSync(fullPath(REPORT_MD), renderMarkdown(report));
 
-  console.log(JSON.stringify({
-    status: report.status,
-    outputPath: REPORT_JSON,
-    markdownPath: REPORT_MD,
-    catalogRoutes: report.summary.catalogRoutes,
-    mappedRoutes: report.summary.mappedRoutes,
-    targetModulesReferenced: report.summary.targetModulesReferenced,
-    failures
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        status: report.status,
+        outputPath: REPORT_JSON,
+        markdownPath: REPORT_MD,
+        catalogRoutes: report.summary.catalogRoutes,
+        mappedRoutes: report.summary.mappedRoutes,
+        targetModulesReferenced: report.summary.targetModulesReferenced,
+        failures,
+      },
+      null,
+      2
+    )
+  );
 
   if (failures.length) process.exit(1);
   for (const warning of warnings) console.warn(`- ${warning}`);

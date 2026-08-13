@@ -34,7 +34,12 @@ function esc(s) {
 }
 
 function cleanSlug(s) {
-  return String(s || '').trim().toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  return String(s || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
 function productSchema(product, url) {
@@ -70,9 +75,12 @@ function breadcrumb(product, url) {
 function page(product) {
   const slug = cleanSlug(product.slug || product.sku);
   const title = `${product.name} | 恒热 Everhot`;
-  const desc = product.summary || product.tagline || `${product.name} 产品详情、规格参数与选型支持。`;
+  const desc =
+    product.summary || product.tagline || `${product.name} 产品详情、规格参数与选型支持。`;
   const url = `${SITE}/products/detail/${slug}/`;
-  const image = product.image ? new URL(product.image, SITE).href : `${SITE}/assets/img/hero-poster-desktop.webp`;
+  const image = product.image
+    ? new URL(product.image, SITE).href
+    : `${SITE}/assets/img/hero-poster-desktop.webp`;
   return `<!DOCTYPE html><html lang="zh-CN"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="theme-color" content="#BF1924">

@@ -29,15 +29,21 @@ export class ObjectStorageEvidenceEntity {
   @Column({ name: 'file_key' }) fileKey: string;
   @Column({ name: 'original_name', type: 'varchar', nullable: true }) originalName: string | null;
 
-  @Column({ name: 'operation', type: 'varchar', length: 20 }) operation: 'upload' | 'download' | 'migrate' | 'verify';
+  @Column({ name: 'operation', type: 'varchar', length: 20 }) operation:
+    'upload' | 'download' | 'migrate' | 'verify';
   @Column({ name: 'size_bytes', type: 'bigint', default: 0 }) sizeBytes: number;
 
-  @Column({ name: 'source_hash', type: 'varchar', length: 64, nullable: true }) sourceHash: string | null;
-  @Column({ name: 'destination_hash', type: 'varchar', length: 64, nullable: true }) destinationHash: string | null;
-  @Column({ name: 'pulled_hash', type: 'varchar', length: 64, nullable: true }) pulledHash: string | null;
+  @Column({ name: 'source_hash', type: 'varchar', length: 64, nullable: true }) sourceHash:
+    string | null;
+  @Column({ name: 'destination_hash', type: 'varchar', length: 64, nullable: true })
+  destinationHash: string | null;
+  @Column({ name: 'pulled_hash', type: 'varchar', length: 64, nullable: true }) pulledHash:
+    string | null;
 
-  @Column({ name: 'storage_provider', type: 'varchar', length: 32, nullable: true }) storageProvider: string | null;
-  @Column({ name: 'storage_region', type: 'varchar', length: 32, nullable: true }) storageRegion: string | null;
+  @Column({ name: 'storage_provider', type: 'varchar', length: 32, nullable: true })
+  storageProvider: string | null;
+  @Column({ name: 'storage_region', type: 'varchar', length: 32, nullable: true }) storageRegion:
+    string | null;
   @Column({ name: 'storage_url', type: 'text', nullable: true }) storageUrl: string | null;
 
   @Column({ type: 'jsonb', default: {} }) meta: Record<string, unknown>;

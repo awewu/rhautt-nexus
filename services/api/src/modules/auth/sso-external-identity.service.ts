@@ -46,11 +46,11 @@ export class SsoExternalIdentityService {
     @InjectDataSource() private readonly ds: DataSource,
     @InjectRepository(UserEntity) private readonly users: Repository<UserEntity>,
     @InjectRepository(ExternalIdentityBindingEntity)
-    private readonly bindings: Repository<ExternalIdentityBindingEntity>,
+    private readonly bindings: Repository<ExternalIdentityBindingEntity>
   ) {}
 
   async resolveVerifiedIdentity(
-    input: VerifiedExternalIdentity,
+    input: VerifiedExternalIdentity
   ): Promise<SsoExternalIdentityResolution> {
     const identity = this.normalizeIdentity(input);
     const profile = this.profileSnapshot(input.profile);
@@ -119,12 +119,16 @@ export class SsoExternalIdentityService {
           const displayName = this.autoProvisionDisplayName(identity, profile);
           if (!this.isRoleLikeDisplayName(displayName) && displayName !== current.name) {
             current.name = displayName;
-            await repo.save({ id: current.id, tenantId: current.tenantId, name: displayName } as UserEntity);
+            await repo.save({
+              id: current.id,
+              tenantId: current.tenantId,
+              name: displayName,
+            } as UserEntity);
           }
         }
         return current;
       },
-      { tenantId },
+      { tenantId }
     );
 
     if (!user || user.status !== 'active') {
@@ -150,7 +154,7 @@ export class SsoExternalIdentityService {
     identity: { provider: string; issuer: string; subject: string },
     profile: Record<string, unknown>,
     now: Date,
-    pendingBinding?: ExternalIdentityBindingEntity,
+    pendingBinding?: ExternalIdentityBindingEntity
   ): Promise<SsoExternalIdentityResolution | null> {
     if (!this.autoProvisionEnabled()) return null;
     if (!this.autoProvisionProfileAllowed(profile)) return null;
@@ -165,7 +169,9 @@ export class SsoExternalIdentityService {
       this.ds,
       async (em) => {
         const repo = em.getRepository(UserEntity);
-        const existing = await repo.findOne({ where: { tenantId, phoneHash: hashPII(normalized) } });
+        const existing = await repo.findOne({
+          where: { tenantId, phoneHash: hashPII(normalized) },
+        });
         if (existing) {
           existing.status = 'active';
           existing.role = role;
@@ -190,10 +196,10 @@ export class SsoExternalIdentityService {
             loginAttempts: 0,
             lockUntil: null,
             lastLoginAt: now,
-          }),
+          })
         );
       },
-      { tenantId },
+      { tenantId }
     );
 
     const binding = await this.bindings.save(
@@ -206,7 +212,7 @@ export class SsoExternalIdentityService {
         firstLoginAt: now,
         lastLoginAt: now,
         lastSeenProfile: profile,
-      }),
+      })
     );
 
     return {
@@ -218,8 +224,12 @@ export class SsoExternalIdentityService {
   }
 
   private normalizeIdentity(input: VerifiedExternalIdentity) {
-    const provider = String(input.provider || '').trim().toLowerCase();
-    const issuer = String(input.issuer || '').trim().replace(/\/+$/, '');
+    const provider = String(input.provider || '')
+      .trim()
+      .toLowerCase();
+    const issuer = String(input.issuer || '')
+      .trim()
+      .replace(/\/+$/, '');
     const subject = String(input.subject || '').trim();
     if (!provider || !issuer || !subject) {
       throw new ForbiddenException('SSO external identity is incomplete');
@@ -229,22 +239,27 @@ export class SsoExternalIdentityService {
 
   private autoProvisionEnabled() {
     if (process.env.OIDC_AUTO_PROVISION_ENABLED === 'true') return true;
-    return process.env.NODE_ENV !== 'production' && process.env.OIDC_DEV_AUTO_PROVISION_PLATFORM_ADMIN === 'true';
+    return (
+      process.env.NODE_ENV !== 'production' &&
+      process.env.OIDC_DEV_AUTO_PROVISION_PLATFORM_ADMIN === 'true'
+    );
   }
 
   private async autoProvisionTenantId() {
     const configured = String(
-      process.env.OIDC_AUTO_PROVISION_TENANT_ID || process.env.OIDC_DEV_AUTO_PROVISION_TENANT_ID || '',
+      process.env.OIDC_AUTO_PROVISION_TENANT_ID ||
+        process.env.OIDC_DEV_AUTO_PROVISION_TENANT_ID ||
+        ''
     ).trim();
     if (configured) return configured;
     const code = String(
       process.env.OIDC_AUTO_PROVISION_TENANT_CODE ||
         process.env.OIDC_DEV_AUTO_PROVISION_TENANT_CODE ||
-        'DEFAULT',
+        'DEFAULT'
     ).trim();
     const rows = await this.ds.query(
       'SELECT id FROM rhautt_nexus.tenants WHERE code = $1 AND status = $2 LIMIT 1',
-      [code, 'active'],
+      [code, 'active']
     );
     return rows[0]?.id ? String(rows[0].id) : null;
   }
@@ -279,7 +294,9 @@ export class SsoExternalIdentityService {
 
   private roleMap(): Map<string, UserRole> {
     const configured = this.csv(process.env.OIDC_AUTO_PROVISION_ROLE_MAP);
-    const entries = configured.length ? configured : ['owner:platform_admin', 'admin:platform_admin', 'employee:hq_admin'];
+    const entries = configured.length
+      ? configured
+      : ['owner:platform_admin', 'admin:platform_admin', 'employee:hq_admin'];
     const allowed: ReadonlySet<string> = new Set([
       'platform_admin',
       'hq_admin',
@@ -302,7 +319,7 @@ export class SsoExternalIdentityService {
 
   private autoProvisionIdentifier(
     identity: { provider: string; issuer: string; subject: string },
-    profile: Record<string, unknown>,
+    profile: Record<string, unknown>
   ) {
     const preferred = ['email', 'preferred_username', 'phone_number']
       .map((key) => profile[key])
@@ -317,7 +334,7 @@ export class SsoExternalIdentityService {
 
   private autoProvisionDisplayName(
     identity: { provider: string; issuer: string; subject: string },
-    profile: Record<string, unknown>,
+    profile: Record<string, unknown>
   ) {
     const name = [profile.name, profile.nickname, profile.email, profile.preferred_username]
       .map((value) => (typeof value === 'string' ? value.trim() : ''))
@@ -366,7 +383,8 @@ export class SsoExternalIdentityService {
   }
 
   private claimArray(value: unknown): string[] {
-    if (Array.isArray(value)) return value.filter((entry): entry is string => typeof entry === 'string');
+    if (Array.isArray(value))
+      return value.filter((entry): entry is string => typeof entry === 'string');
     return typeof value === 'string' ? [value] : [];
   }
 

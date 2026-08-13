@@ -18,27 +18,42 @@ const shell = fs.readFileSync(shellPath, 'utf8');
 
 test('brand site console requests product catalog rows with normalized brand and brand tenant', () => {
   assert.match(adapter, /const query = buildBrandProductListQuery\(brandCode, options\);/);
-  assert.match(adapter, /const query: Record<string, string> = \{\s*brand: brandCode,\s*page: String\(page\),\s*pageSize: String\(pageSize\),/s);
+  assert.match(
+    adapter,
+    /const query: Record<string, string> = \{\s*brand: brandCode,\s*page: String\(page\),\s*pageSize: String\(pageSize\),/s
+  );
   assert.match(adapter, /const tenantId = BRAND_PRODUCT_TENANTS\[brandCode\] \|\| '';/);
   assert.match(adapter, /if \(categoryLevel1Id\) query\.categoryLevel1Id = categoryLevel1Id;/);
   assert.match(adapter, /if \(categoryLevel2Id\) query\.categoryLevel2Id = categoryLevel2Id;/);
   assert.match(adapter, /if \(categoryLevel3Id\) query\.categoryLevel3Id = categoryLevel3Id;/);
   assert.match(adapter, /const productResult = await products\.list\(query\);/);
-  assert.match(adapter, /\.filter\(\(item\) => normalizeBrandCode\(String\(\(item as any\)\.brand \|\| ''\)\) === brandCode\)/);
+  assert.match(
+    adapter,
+    /\.filter\(\(item\) => normalizeBrandCode\(String\(\(item as any\)\.brand \|\| ''\)\) === brandCode\)/
+  );
 });
 
 test('brand site console displays bound category paths and filters by category options', () => {
   assert.match(adapter, /categoryPath: string;/);
-  assert.match(adapter, /const categoryPath = text\(product\.categoryPath\) \|\| text\(brandMeta\.categoryPath\);/);
+  assert.match(
+    adapter,
+    /const categoryPath = text\(product\.categoryPath\) \|\| text\(brandMeta\.categoryPath\);/
+  );
   assert.match(shell, /if \(categoryPath\) return productCategoryPathLabel\(categoryPath\);/);
   assert.match(shell, /brandProductCategories\.list\(\{ brandCode: normalizedBrandCode \}\)/);
   assert.match(shell, /CategoryMultiSelect/);
   assert.match(shell, /productMatchesCategoryFilters/);
   assert.match(shell, /function productCategoryPathFilterOptions\(products: BrandProductRow\[\]\)/);
   assert.match(shell, /const path = String\(product\.categoryPath \|\| ''\)\.trim\(\);/);
-  assert.match(shell, /function productDisplayCategoryPath\(product: BrandProductRow\) \{\s*const path = String\(product\.categoryPath \|\| ''\)\.trim\(\);/);
+  assert.match(
+    shell,
+    /function productDisplayCategoryPath\(product: BrandProductRow\) \{\s*const path = String\(product\.categoryPath \|\| ''\)\.trim\(\);/
+  );
   assert.match(shell, /product\.category \? productCategoryLabel\(product\.category\) : '-'/);
-  assert.doesNotMatch(shell, /product\.categoryPath \|\| product\.materialCategory \|\| product\.websiteMenuCategory \|\| product\.category/);
+  assert.doesNotMatch(
+    shell,
+    /product\.categoryPath \|\| product\.materialCategory \|\| product\.websiteMenuCategory \|\| product\.category/
+  );
   assert.match(shell, /value\.startsWith\('path:'\)/);
   assert.match(shell, /CATEGORY_FILTER_LOAD_PAGE_SIZE/);
   assert.match(shell, /categoryFilter\.length > 0/);
@@ -48,13 +63,25 @@ test('brand site console displays bound category paths and filters by category o
   assert.match(shell, /candidate === key \|\| candidate\.startsWith\(`\$\{key\}\/`\)/);
   assert.doesNotMatch(shell, /key\.endsWith\(`\/\$\{candidate\}`\)/);
   assert.doesNotMatch(shell, /label\.endsWith\(` \/ \$\{candidate\}`\)/);
-  assert.match(shell, /footerTotalProducts = categoryFilter\.length \? visibleProducts\.length : totalProducts/);
+  assert.match(
+    shell,
+    /footerTotalProducts = categoryFilter\.length \? visibleProducts\.length : totalProducts/
+  );
 });
 
 test('brand site console exposes stable product status filter options', () => {
-  assert.match(shell, /const PRODUCT_STATUS_FILTER_OPTIONS = \['active', 'inactive', 'draft', 'archived'\];/);
-  assert.match(shell, /function productStatusFilterOptions\(facets: Array<\{ value: string; count: number \}> = \[\]\)/);
-  assert.match(shell, /const statusOptions = useMemo\(\(\) => productStatusFilterOptions\(data\?\.facets\.statuses\), \[data\?\.facets\.statuses\]\);/);
+  assert.match(
+    shell,
+    /const PRODUCT_STATUS_FILTER_OPTIONS = \['active', 'inactive', 'draft', 'archived'\];/
+  );
+  assert.match(
+    shell,
+    /function productStatusFilterOptions\(facets: Array<\{ value: string; count: number \}> = \[\]\)/
+  );
+  assert.match(
+    shell,
+    /const statusOptions = useMemo\(\(\) => productStatusFilterOptions\(data\?\.facets\.statuses\), \[data\?\.facets\.statuses\]\);/
+  );
   assert.match(shell, /value=\{statusFilter\}/);
   assert.match(shell, /setStatusFilter\(event\.target\.value\);/);
   assert.match(shell, /status: statusFilter,/);
@@ -73,25 +100,40 @@ test('brand console logo remains stable when product filters reload table rows',
 });
 
 test('website shelf publish recreates stale product assignments before publishing', () => {
-  assert.match(shell, /function shelfAssignmentMatchesProduct\(assignment: WebsiteShelfAssignment \| undefined, row: BrandProductRow\)/);
+  assert.match(
+    shell,
+    /function shelfAssignmentMatchesProduct\(assignment: WebsiteShelfAssignment \| undefined, row: BrandProductRow\)/
+  );
   assert.match(shell, /assignment\.productId === row\.id/);
   assert.match(shell, /assignment\.productTenantId === rowTenantId\(row\)/);
-  assert.match(shell, /if \(existing && !existing\.deletedAt && !shelfAssignmentMatchesProduct\(existing, row\)\) \{\s*await siteProductAssignments\.archive\(siteCode, existing\.id\);/s);
-  assert.match(shell, /let assignmentId = shelfAssignmentMatchesProduct\(existing, row\) \? existing\?\.id \|\| '' : '';/);
+  assert.match(
+    shell,
+    /if \(existing && !existing\.deletedAt && !shelfAssignmentMatchesProduct\(existing, row\)\) \{\s*await siteProductAssignments\.archive\(siteCode, existing\.id\);/s
+  );
+  assert.match(
+    shell,
+    /let assignmentId = shelfAssignmentMatchesProduct\(existing, row\) \? existing\?\.id \|\| '' : '';/
+  );
 });
 
 test('Everhot and Rheem brand console coverage is present in adapter tests', () => {
   const testPath = path.join(__dirname, '..', 'src', 'lib', 'brand-product-adapter.nodetest.ts');
   const source = fs.readFileSync(testPath, 'utf8');
   assert.match(source, /Everhot brand site console lists only Everhot product catalog records/);
-  assert.match(source, /Rheem brand site console does not require selecting a brand and excludes other brands/);
+  assert.match(
+    source,
+    /Rheem brand site console does not require selecting a brand and excludes other brands/
+  );
   assert.match(source, /queries\[0\]\?\.brand, 'everhot'/);
   assert.match(source, /queries\[0\]\?\.brand, 'rheem'/);
 });
 
 test('website shelf state stays separate from product master data in the concrete brand page', () => {
   assert.match(shell, /loadBrandProductConsoleData\(normalizedBrandCode, query\)/);
-  assert.match(shell, /siteProductAssignments\.list\(nextData\.site\.code \|\| normalizedBrandCode/);
+  assert.match(
+    shell,
+    /siteProductAssignments\.list\(nextData\.site\.code \|\| normalizedBrandCode/
+  );
   assert.match(shell, /assignmentByProductId\.get\(product\.id\)/);
   assert.match(shell, /shelfAssignment=\{assignmentByProductId\.get\(product\.id\)\}/);
 });

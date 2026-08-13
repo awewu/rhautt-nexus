@@ -23,9 +23,18 @@
         "声源数据缺失时不得默认通过——应判为“数据不足”，避免把未知当合格。"
       ],
       "faq": [
-        { "q": "卧室夜间允许噪声级是多少？", "aTemplate": "{bedroomNight} dB(A)（GB 50118-2010）。昼间为 {bedroomDay} dB(A)。" },
-        { "q": "病房的要求比卧室更严吗？", "aTemplate": "是。病房夜间 {wardNight} dB(A)，比卧室夜间 {bedroomNight} dB(A) 更严。" },
-        { "q": "书房和会议室为什么要求更严？", "aTemplate": "二者以脑力工作与语言清晰度为主要功能，国标对其昼夜均按 {studyDay} dB(A) 控制。" }
+        {
+          "q": "卧室夜间允许噪声级是多少？",
+          "aTemplate": "{bedroomNight} dB(A)（GB 50118-2010）。昼间为 {bedroomDay} dB(A)。"
+        },
+        {
+          "q": "病房的要求比卧室更严吗？",
+          "aTemplate": "是。病房夜间 {wardNight} dB(A)，比卧室夜间 {bedroomNight} dB(A) 更严。"
+        },
+        {
+          "q": "书房和会议室为什么要求更严？",
+          "aTemplate": "二者以脑力工作与语言清晰度为主要功能，国标对其昼夜均按 {studyDay} dB(A) 控制。"
+        }
       ]
     },
 
@@ -41,8 +50,14 @@
         "生活热水管流速上限更严，因其噪声更易被住户感知。"
       ],
       "faq": [
-        { "q": "生活热水管推荐流速是多少？", "aTemplate": "推荐 {hotWaterIdeal} m/s，允许区间 {hotWaterMin}–{hotWaterMax} m/s。" },
-        { "q": "采暖管道流速应该控制在多少？", "aTemplate": "推荐 {heatingIdeal} m/s，区间 {heatingMin}–{heatingMax} m/s。" }
+        {
+          "q": "生活热水管推荐流速是多少？",
+          "aTemplate": "推荐 {hotWaterIdeal} m/s，允许区间 {hotWaterMin}–{hotWaterMax} m/s。"
+        },
+        {
+          "q": "采暖管道流速应该控制在多少？",
+          "aTemplate": "推荐 {heatingIdeal} m/s，区间 {heatingMin}–{heatingMax} m/s。"
+        }
       ]
     },
 
@@ -58,7 +73,10 @@
         "风速合规不等于噪声达标，仍须按 GB 50118 做室内声压级校核。"
       ],
       "faq": [
-        { "q": "末端送风口风速不能超过多少？", "aTemplate": "上限 {terminalMax} m/s，推荐 {terminalIdeal} m/s。" },
+        {
+          "q": "末端送风口风速不能超过多少？",
+          "aTemplate": "上限 {terminalMax} m/s，推荐 {terminalIdeal} m/s。"
+        },
         { "q": "主风管风速推荐值？", "aTemplate": "推荐 {mainIdeal} m/s，上限 {mainMax} m/s。" }
       ]
     }

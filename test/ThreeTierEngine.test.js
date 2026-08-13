@@ -18,7 +18,7 @@ describe('ThreeTierEngine', () => {
         area: 120,
         city: '上海',
         budget: '标准型',
-        painPoints: ['冬天冷', '夏天热']
+        painPoints: ['冬天冷', '夏天热'],
       });
 
       expect(result.version).toBe('1.0.0');
@@ -27,7 +27,7 @@ describe('ThreeTierEngine', () => {
       expect(result.tiers).toHaveProperty('comfort');
       expect(result.tiers).toHaveProperty('premium');
 
-      ['basic', 'comfort', 'premium'].forEach(k => {
+      ['basic', 'comfort', 'premium'].forEach((k) => {
         expect(result.tiers[k]).toHaveProperty('tier', k);
         expect(result.tiers[k]).toHaveProperty('name');
         expect(result.tiers[k]).toHaveProperty('totalPrice');
@@ -46,8 +46,10 @@ describe('ThreeTierEngine', () => {
 
     test('价格应满足 basic < comfort < premium', () => {
       const result = engine.generate({
-        area: 120, city: '上海', budget: '标准型',
-        painPoints: ['冬天冷', '夏天热', '空气差']
+        area: 120,
+        city: '上海',
+        budget: '标准型',
+        painPoints: ['冬天冷', '夏天热', '空气差'],
       });
       expect(result.tiers.basic.totalPrice).toBeLessThan(result.tiers.comfort.totalPrice);
       expect(result.tiers.comfort.totalPrice).toBeLessThan(result.tiers.premium.totalPrice);
@@ -86,8 +88,8 @@ describe('ThreeTierEngine', () => {
   describe('packagePricing - 套餐定价', () => {
     test('一线城市(上海)系数 1.10', () => {
       const r = engine.generate({ area: 100, city: '上海' });
-      expect(r.packagePricing.basic.cityFactor).toBe(1.10);
-      expect(r.packagePricing.basic.perSqm).toBe(Math.round(899 * 1.10));  // 989
+      expect(r.packagePricing.basic.cityFactor).toBe(1.1);
+      expect(r.packagePricing.basic.perSqm).toBe(Math.round(899 * 1.1)); // 989
     });
 
     test('二线城市(杭州)系数 1.05', () => {

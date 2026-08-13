@@ -1,17 +1,17 @@
 const express = require('express');
 const path = require('path');
-const {
-  DEPLOYMENT_MODES,
-  MODULES,
-  getModuleById
-} = require('./product-module-registry');
+const { DEPLOYMENT_MODES, MODULES, getModuleById } = require('./product-module-registry');
 const STANDALONE_MODULE_KEYS = ['rysnova'];
 
 function resolveStandaloneModule(value) {
   const byKey = MODULES[value];
-  const byNamespace = Object.values(MODULES).find(module => module.namespace === value);
+  const byNamespace = Object.values(MODULES).find((module) => module.namespace === value);
   const module = byKey || byNamespace || getModuleById(value);
-  if (!module || module === MODULES.sharedPlatform || !STANDALONE_MODULE_KEYS.some(key => MODULES[key].id === module.id)) {
+  if (
+    !module ||
+    module === MODULES.sharedPlatform ||
+    !STANDALONE_MODULE_KEYS.some((key) => MODULES[key].id === module.id)
+  ) {
     throw new Error(`unsupported standalone product module: ${value}`);
   }
   return module;
@@ -52,14 +52,15 @@ function moduleMeta(module) {
     portalIntegration: module.portalIntegration,
     standaloneProductization: module.standaloneProductization,
     dataBoundary: module.dataBoundary,
-    iotBoundary: 'lifecycle_handoff_only'
+    iotBoundary: 'lifecycle_handoff_only',
   };
 }
 
 function createProductModuleStandaloneApp(moduleKeyOrId, options = {}) {
   const module = resolveStandaloneModule(moduleKeyOrId);
   const app = options.app || express();
-  const publicDir = options.publicDir || path.join(__dirname, '..', '..', '..', 'archive', 'legacy-ui', 'public');
+  const publicDir =
+    options.publicDir || path.join(__dirname, '..', '..', '..', 'archive', 'legacy-ui', 'public');
   const meta = moduleMeta(module);
   const entry = sendModuleEntry(publicDir, module);
 
@@ -74,7 +75,7 @@ function createProductModuleStandaloneApp(moduleKeyOrId, options = {}) {
       success: true,
       status: 'ok',
       standalone: true,
-      ...meta
+      ...meta,
     });
   });
 
@@ -87,7 +88,7 @@ function createProductModuleStandaloneApp(moduleKeyOrId, options = {}) {
       success: true,
       status: 'ok',
       standalone: true,
-      ...meta
+      ...meta,
     });
   });
 
@@ -108,7 +109,7 @@ function createProductModuleStandaloneApp(moduleKeyOrId, options = {}) {
       error: 'Product module route not found',
       moduleId: module.id,
       moduleNamespace: module.namespace,
-      path: req.path
+      path: req.path,
     });
   });
 
@@ -117,12 +118,12 @@ function createProductModuleStandaloneApp(moduleKeyOrId, options = {}) {
     module,
     publicDir,
     meta,
-    entryRoutes: ['/', '/index.html', module.embeddedEntry, ...module.standaloneAliases]
+    entryRoutes: ['/', '/index.html', module.embeddedEntry, ...module.standaloneAliases],
   };
 }
 
 module.exports = {
   createProductModuleStandaloneApp,
   moduleMeta,
-  resolveStandaloneModule
+  resolveStandaloneModule,
 };

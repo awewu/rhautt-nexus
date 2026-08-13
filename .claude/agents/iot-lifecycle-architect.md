@@ -13,6 +13,7 @@ Product identity guardrail: Rhautt Comfort / 瑞合瑞德暖通科技集团 is t
 Protect the boundary between the sales/delivery trust system and the IoT comfort-care system.
 
 The handover contract must carry:
+
 - tenant/dealer/store/user scope
 - customer, opportunity, contract, design, and quote identifiers
 - project address and systems

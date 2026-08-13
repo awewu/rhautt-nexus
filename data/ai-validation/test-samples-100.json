@@ -804,7 +804,13 @@
       "region": "central",
       "painPoints": ["p7", "p6", "p3", "p4", "p5", "p15", "p18"],
       "budget": "high",
-      "expectedSystem": ["vrf_inverter", "fresh_air", "air_purifier", "humidifier", "sterilization"],
+      "expectedSystem": [
+        "vrf_inverter",
+        "fresh_air",
+        "air_purifier",
+        "humidifier",
+        "sterilization"
+      ],
       "priority": 1
     },
     {

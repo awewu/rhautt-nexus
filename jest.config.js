@@ -15,7 +15,7 @@ module.exports = {
     '**/test/**/*.test.js',
     '**/test/**/*.test.ts',
     '**/__tests__/**/*.js',
-    '**/__tests__/**/*.ts'
+    '**/__tests__/**/*.ts',
   ],
 
   // 覆盖率收集目标 - ⭐ 2026-04-26 聚焦核心业务引擎(避免归档/实验/装饰稀释)
@@ -39,7 +39,7 @@ module.exports = {
     '!**/test/**',
     '!**/tests/**',
     '!**/coverage/**',
-    '!**/dist/**'
+    '!**/dist/**',
   ],
 
   // 覆盖率目标阈值 - 核心引擎要求85%
@@ -48,8 +48,8 @@ module.exports = {
       branches: 60,
       functions: 70,
       lines: 80,
-      statements: 80
-    }
+      statements: 80,
+    },
   },
 
   // 覆盖率报告输出目录
@@ -72,7 +72,7 @@ module.exports = {
     '/public/',
     '/logs/',
     '/backups/',
-    '/.windsurf/'
+    '/.windsurf/',
   ],
 
   // 测试报告器
@@ -113,5 +113,5 @@ module.exports = {
 
   // 多worker配置优化
   maxWorkers: 2,
-  workerIdleMemoryLimit: '512MB'
+  workerIdleMemoryLimit: '512MB',
 };

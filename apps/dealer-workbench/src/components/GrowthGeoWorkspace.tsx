@@ -1,7 +1,21 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertCircle, BarChart3, Bot, CheckCircle2, Database, Eye, Loader2, Play, RefreshCw, Search, Trash2, Wand2, X } from 'lucide-react';
+import {
+  AlertCircle,
+  BarChart3,
+  Bot,
+  CheckCircle2,
+  Database,
+  Eye,
+  Loader2,
+  Play,
+  RefreshCw,
+  Search,
+  Trash2,
+  Wand2,
+  X,
+} from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { brandSites, growthGeo } from '../lib/api';
 
@@ -231,7 +245,10 @@ function fmtDate(value?: string | null) {
 }
 
 function splitCsv(value: string) {
-  return value.split(',').map((item) => item.trim()).filter(Boolean);
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 function cleanAnswerText(value?: string | null) {
@@ -255,11 +272,20 @@ function qualityStatusColor(status: string) {
 }
 
 function normalizeQuestionKey(value?: string | null) {
-  return String(value || '').replace(/\s+/g, '').trim();
+  return String(value || '')
+    .replace(/\s+/g, '')
+    .trim();
 }
 
 function jobDisplayScore(job: ProbeJob) {
-  const statusScore = job.status === 'succeeded' ? 3 : job.status === 'running' ? 2 : job.status === 'pending' ? 1 : 0;
+  const statusScore =
+    job.status === 'succeeded'
+      ? 3
+      : job.status === 'running'
+        ? 2
+        : job.status === 'pending'
+          ? 1
+          : 0;
   const dataScore = (job.snapshotId ? 2 : 0) + (job.probeId ? 1 : 0);
   const timeScore = new Date(job.finishedAt || job.startedAt || job.createdAt || 0).getTime() || 0;
   return statusScore * 1_000_000_000_000_000 + dataScore * 1_000_000_000_000 + timeScore;
@@ -295,7 +321,9 @@ export function GrowthGeoWorkspace() {
   const [streamingJob, setStreamingJob] = useState<ProbeJob | null>(null);
   const [fallbackJobId, setFallbackJobId] = useState<string | null>(null);
   const [generatingKind, setGeneratingKind] = useState<'faq' | 'comparison' | 'topic' | null>(null);
-  const [generatedOptimization, setGeneratedOptimization] = useState<GeneratedOptimization | null>(null);
+  const [generatedOptimization, setGeneratedOptimization] = useState<GeneratedOptimization | null>(
+    null
+  );
   const streamTextRef = useRef('');
   const streamFlushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [brandOptions, setBrandOptions] = useState<BrandOption[]>(DEFAULT_BRAND_OPTIONS);
@@ -346,20 +374,40 @@ export function GrowthGeoWorkspace() {
       const [visibilityData, engineData, questions, work, batchData, siteData] = await Promise.all([
         growthGeo.visibility(),
         growthGeo.engines(),
-        growthGeo.questionSet({ brandSlug: activeBrandSlug, category, ...(stageFilter ? { stage: stageFilter } : {}) }),
-        growthGeo.probeWorklist({ brandSlug: activeBrandSlug, category, ...(stageFilter ? { stage: stageFilter } : {}) }),
+        growthGeo.questionSet({
+          brandSlug: activeBrandSlug,
+          category,
+          ...(stageFilter ? { stage: stageFilter } : {}),
+        }),
+        growthGeo.probeWorklist({
+          brandSlug: activeBrandSlug,
+          category,
+          ...(stageFilter ? { stage: stageFilter } : {}),
+        }),
         growthGeo.probeBatches({ brandSlug: activeBrandSlug, category }),
         brandSites.list().catch(() => null),
       ]);
       setReport(visibilityData);
       setEngines(engineData?.engines || visibilityData?.engines || []);
-      const sites = Array.isArray(siteData?.items) ? siteData.items : Array.isArray(siteData) ? siteData : [];
+      const sites = Array.isArray(siteData?.items)
+        ? siteData.items
+        : Array.isArray(siteData)
+          ? siteData
+          : [];
       const nextBrandOptions = sites
-        .filter((site: any) => ['rheem', 'ruud', 'everhot'].includes(String(site.code || '').toLowerCase()))
+        .filter((site: any) =>
+          ['rheem', 'ruud', 'everhot'].includes(String(site.code || '').toLowerCase())
+        )
         .map((site: any) => ({
           code: String(site.code).toLowerCase(),
-          label: `${site.nameCn || site.name_cn || site.nameEn || site.name_en || site.code} ${site.nameEn || site.name_en || ''}`.trim(),
-          url: site.productionUrl || site.production_url || site.developmentUrl || site.development_url || null,
+          label:
+            `${site.nameCn || site.name_cn || site.nameEn || site.name_en || site.code} ${site.nameEn || site.name_en || ''}`.trim(),
+          url:
+            site.productionUrl ||
+            site.production_url ||
+            site.developmentUrl ||
+            site.development_url ||
+            null,
         }));
       if (nextBrandOptions.length) setBrandOptions(nextBrandOptions);
       if (!GEO_BRAND_CODES.has(brandSlug)) setBrandSlug(DEFAULT_BRAND_OPTIONS[0].code);
@@ -373,7 +421,9 @@ export function GrowthGeoWorkspace() {
       } else {
         setSelectedBatch(null);
       }
-      const firstEngine = (engineData?.engines || []).find((item: Engine) => item.status === 'ready') || (engineData?.engines || [])[0];
+      const firstEngine =
+        (engineData?.engines || []).find((item: Engine) => item.status === 'ready') ||
+        (engineData?.engines || [])[0];
       if (firstEngine && !probeForm.engine) {
         setProbeForm((current) => ({ ...current, engine: firstEngine.engine }));
       }
@@ -389,8 +439,16 @@ export function GrowthGeoWorkspace() {
     try {
       const activeBrandSlug = normalizeGeoBrand(brandSlug);
       const [questions, work] = await Promise.all([
-        growthGeo.questionSet({ brandSlug: activeBrandSlug, category, ...(stageFilter ? { stage: stageFilter } : {}) }),
-        growthGeo.probeWorklist({ brandSlug: activeBrandSlug, category, ...(stageFilter ? { stage: stageFilter } : {}) }),
+        growthGeo.questionSet({
+          brandSlug: activeBrandSlug,
+          category,
+          ...(stageFilter ? { stage: stageFilter } : {}),
+        }),
+        growthGeo.probeWorklist({
+          brandSlug: activeBrandSlug,
+          category,
+          ...(stageFilter ? { stage: stageFilter } : {}),
+        }),
       ]);
       setQuestionSet(questions);
       setWorklist(work);
@@ -474,7 +532,9 @@ export function GrowthGeoWorkspace() {
     setError(null);
     try {
       await growthGeo.removeQuestion(id);
-      setQuestionForm((current) => current.id === id ? { id: '', stage: 'pre', question: '', priority: 100 } : current);
+      setQuestionForm((current) =>
+        current.id === id ? { id: '', stage: 'pre', question: '', priority: 100 } : current
+      );
       await loadAll();
     } catch (err) {
       setError(err instanceof Error ? err.message : '删除 GEO 问题失败');
@@ -499,7 +559,9 @@ export function GrowthGeoWorkspace() {
         questionIds: selectedQuestionIds,
         competitors: splitCsv(autoProbeForm.competitors),
       });
-      setNotice(`批量探测已创建，共 ${result?.batch?.totalProbes || selectedQuestionIds.length} 条问题。`);
+      setNotice(
+        `批量探测已创建，共 ${result?.batch?.totalProbes || selectedQuestionIds.length} 条问题。`
+      );
       await loadAll();
       pollBatch(result?.batch?.id);
     } catch (err) {
@@ -530,7 +592,10 @@ export function GrowthGeoWorkspace() {
       try {
         const detail = await growthGeo.probeBatch(id);
         setSelectedBatch(detail);
-        const batchData = await growthGeo.probeBatches({ brandSlug: normalizeGeoBrand(brandSlug), category });
+        const batchData = await growthGeo.probeBatches({
+          brandSlug: normalizeGeoBrand(brandSlug),
+          category,
+        });
         setBatches(batchData?.items || []);
         setBatchComparison(batchData?.comparison || null);
         if (!['pending', 'running'].includes(detail?.batch?.status) || count >= 40) return;
@@ -607,7 +672,7 @@ export function GrowthGeoWorkspace() {
         const apply = () => {
           streamFlushTimerRef.current = null;
           const text = cleanAnswerText(streamTextRef.current);
-          setStreamingJob((current) => current ? { ...current, answerPreview: text } : current);
+          setStreamingJob((current) => (current ? { ...current, answerPreview: text } : current));
         };
         if (force) {
           if (streamFlushTimerRef.current) {
@@ -622,50 +687,74 @@ export function GrowthGeoWorkspace() {
       let streamFinished = false;
       let fallbackQueued = false;
       try {
-      await growthGeo.streamProbeJob(request, (event) => {
-        if (event.type === 'started' && event.job) {
-          setStreamingJob((current) => ({ ...(current || event.job), ...event.job, answerPreview: current?.answerPreview || '' } as ProbeJob));
-        }
-        if (event.type === 'delta') {
-          const content = String(event.content || '');
-          streamTextRef.current += content;
-          flushStreamText();
-        }
-        if (event.type === 'done' && event.job) {
-          streamFinished = true;
-          if (event.snapshot?.answerText) streamTextRef.current = String(event.snapshot.answerText);
-          flushStreamText(true);
-          setStreamingJob((current) => ({
-            ...(current || event.job),
-            ...event.job,
-            status: 'succeeded',
-            answerPreview: cleanAnswerText(streamTextRef.current || event.snapshot?.answerText || current?.answerPreview || ''),
-          } as ProbeJob));
-        }
-        if ((event.type === 'failed' || event.type === 'blocked') && event.job) {
-          streamFinished = true;
-          setStreamingJob((current) => ({
-            ...(current || event.job),
-            ...event.job,
-            status: event.type === 'blocked' ? 'blocked' : 'failed',
-            errorMessage: String(event.errorMessage || event.job.errorMessage || '探测失败'),
-          } as ProbeJob));
-        }
-      });
+        await growthGeo.streamProbeJob(request, (event) => {
+          if (event.type === 'started' && event.job) {
+            setStreamingJob(
+              (current) =>
+                ({
+                  ...(current || event.job),
+                  ...event.job,
+                  answerPreview: current?.answerPreview || '',
+                }) as ProbeJob
+            );
+          }
+          if (event.type === 'delta') {
+            const content = String(event.content || '');
+            streamTextRef.current += content;
+            flushStreamText();
+          }
+          if (event.type === 'done' && event.job) {
+            streamFinished = true;
+            if (event.snapshot?.answerText)
+              streamTextRef.current = String(event.snapshot.answerText);
+            flushStreamText(true);
+            setStreamingJob(
+              (current) =>
+                ({
+                  ...(current || event.job),
+                  ...event.job,
+                  status: 'succeeded',
+                  answerPreview: cleanAnswerText(
+                    streamTextRef.current ||
+                      event.snapshot?.answerText ||
+                      current?.answerPreview ||
+                      ''
+                  ),
+                }) as ProbeJob
+            );
+          }
+          if ((event.type === 'failed' || event.type === 'blocked') && event.job) {
+            streamFinished = true;
+            setStreamingJob(
+              (current) =>
+                ({
+                  ...(current || event.job),
+                  ...event.job,
+                  status: event.type === 'blocked' ? 'blocked' : 'failed',
+                  errorMessage: String(event.errorMessage || event.job.errorMessage || '探测失败'),
+                }) as ProbeJob
+            );
+          }
+        });
       } catch (streamErr) {
-        if (!(streamErr instanceof TypeError) && !String(streamErr).includes('Failed to fetch')) throw streamErr;
+        if (!(streamErr instanceof TypeError) && !String(streamErr).includes('Failed to fetch'))
+          throw streamErr;
         const fallback = await growthGeo.runProbeJob(request);
         const fallbackJob = fallback.job as ProbeJob;
         fallbackQueued = true;
         streamFinished = true;
         setFallbackJobId(fallbackJob.id);
-        setStreamingJob((current) => ({
-          ...(current || fallbackJob),
-          ...fallbackJob,
-          status: 'running',
-          errorMessage: null,
-          answerPreview: current?.answerPreview || '流式连接失败，已切换为后台生成，请稍后查看结果。',
-        } as ProbeJob));
+        setStreamingJob(
+          (current) =>
+            ({
+              ...(current || fallbackJob),
+              ...fallbackJob,
+              status: 'running',
+              errorMessage: null,
+              answerPreview:
+                current?.answerPreview || '流式连接失败，已切换为后台生成，请稍后查看结果。',
+            }) as ProbeJob
+        );
         setNotice('流式连接失败，已切换为后台生成。');
         try {
           await loadAll();
@@ -678,12 +767,16 @@ export function GrowthGeoWorkspace() {
           const detail = await growthGeo.probeJob(fallbackJob.id);
           const nextJob = detail.job as ProbeJob;
           const answer = cleanAnswerText(detail.snapshot?.answerText || '');
-          setStreamingJob((current) => current ? ({
-            ...current,
-            ...nextJob,
-            answerPreview: answer || current.answerPreview || '',
-            errorMessage: nextJob.errorMessage || null,
-          } as ProbeJob) : current);
+          setStreamingJob((current) =>
+            current
+              ? ({
+                  ...current,
+                  ...nextJob,
+                  answerPreview: answer || current.answerPreview || '',
+                  errorMessage: nextJob.errorMessage || null,
+                } as ProbeJob)
+              : current
+          );
           if (nextJob.status === 'succeeded') {
             try {
               await loadAll();
@@ -703,7 +796,11 @@ export function GrowthGeoWorkspace() {
       }
       if (fallbackQueued) return;
       if (!streamFinished) {
-        setStreamingJob((current) => current ? { ...current, status: 'failed', errorMessage: '探测连接已结束，但未收到完成结果' } : current);
+        setStreamingJob((current) =>
+          current
+            ? { ...current, status: 'failed', errorMessage: '探测连接已结束，但未收到完成结果' }
+            : current
+        );
         return;
       }
       try {
@@ -716,7 +813,9 @@ export function GrowthGeoWorkspace() {
       setNotice(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : '自动探测失败';
-      setStreamingJob((current) => current ? { ...current, status: 'failed', errorMessage: message } : current);
+      setStreamingJob((current) =>
+        current ? { ...current, status: 'failed', errorMessage: message } : current
+      );
       setError(message);
     } finally {
       if (streamFlushTimerRef.current) {
@@ -750,7 +849,9 @@ export function GrowthGeoWorkspace() {
         question: job.question,
         engine: job.engine,
         brandSlug: activeBrandSlug,
-        competitors: job.competitors?.length ? job.competitors : splitCsv(autoProbeForm.competitors),
+        competitors: job.competitors?.length
+          ? job.competitors
+          : splitCsv(autoProbeForm.competitors),
       });
       setNotice('已按原问题重新创建探测任务，任务状态会自动刷新。');
       await loadAll();
@@ -764,7 +865,9 @@ export function GrowthGeoWorkspace() {
   }
 
   function updateReferenceSource(id: string, patch: Partial<ReferenceSource>) {
-    setReferenceSources((items) => items.map((item) => (item.id === id ? { ...item, ...patch } : item)));
+    setReferenceSources((items) =>
+      items.map((item) => (item.id === id ? { ...item, ...patch } : item))
+    );
   }
 
   function addReferenceSource() {
@@ -775,14 +878,16 @@ export function GrowthGeoWorkspace() {
   }
 
   function removeReferenceSource(id: string) {
-    setReferenceSources((items) => (items.length > 1 ? items.filter((item) => item.id !== id) : items));
+    setReferenceSources((items) =>
+      items.length > 1 ? items.filter((item) => item.id !== id) : items
+    );
   }
 
   async function generateOptimization(
     kind: 'faq' | 'comparison' | 'topic',
     targetJob = latestProbeJob,
     targetProbe: RecentProbe | ProbeDetail['probe'] | null | undefined = latestProbe,
-    answerPreview?: string | null,
+    answerPreview?: string | null
   ) {
     if (!targetJob) {
       setError('请先完成一次 GEO 探测');
@@ -790,15 +895,17 @@ export function GrowthGeoWorkspace() {
     }
     const detailForGaps: ProbeDetail = {
       job: targetJob,
-      probe: targetProbe ? {
-        id: targetProbe.id,
-        engine: targetProbe.engine,
-        question: targetProbe.question,
-        weCited: targetProbe.weCited,
-        citationRank: targetProbe.citationRank,
-        competitorsCited: targetProbe.competitorsCited,
-        probedAt: targetProbe.probedAt,
-      } : null,
+      probe: targetProbe
+        ? {
+            id: targetProbe.id,
+            engine: targetProbe.engine,
+            question: targetProbe.question,
+            weCited: targetProbe.weCited,
+            citationRank: targetProbe.citationRank,
+            competitorsCited: targetProbe.competitorsCited,
+            probedAt: targetProbe.probedAt,
+          }
+        : null,
       snapshot: {
         id: targetJob.snapshotId || targetJob.id,
         answerText: answerPreview || targetJob.answerPreview || '',
@@ -808,8 +915,14 @@ export function GrowthGeoWorkspace() {
       },
     };
     const gaps = buildContentGaps(detailForGaps, referenceSources);
-    const title = kind === 'faq' ? 'FAQ 草稿' : kind === 'comparison' ? '对比文章草稿' : '专题页建议';
-    const pendingText = kind === 'faq' ? '正在生成 FAQ 草稿...' : kind === 'comparison' ? '正在生成对比文章草稿...' : '正在生成专题页建议...';
+    const title =
+      kind === 'faq' ? 'FAQ 草稿' : kind === 'comparison' ? '对比文章草稿' : '专题页建议';
+    const pendingText =
+      kind === 'faq'
+        ? '正在生成 FAQ 草稿...'
+        : kind === 'comparison'
+          ? '正在生成对比文章草稿...'
+          : '正在生成专题页建议...';
     setGeneratingKind(kind);
     setGeneratedOptimization({ kind, jobId: targetJob.id, title, draft: pendingText });
     setError(null);
@@ -824,14 +937,17 @@ export function GrowthGeoWorkspace() {
         answerPreview: answerPreview || targetJob.answerPreview || undefined,
         brandSlug: normalizeGeoBrand(targetJob.brandSlug || brandSlug),
         category: targetJob.category || category,
-        competitors: targetProbe?.competitorsCited?.length ? targetProbe.competitorsCited : targetJob.competitors,
+        competitors: targetProbe?.competitorsCited?.length
+          ? targetProbe.competitorsCited
+          : targetJob.competitors,
         contentGaps: gaps,
-        sources: referenceSources.filter((item) => item.title.trim() || item.url.trim() || item.summary.trim()),
+        sources: referenceSources.filter(
+          (item) => item.title.trim() || item.url.trim() || item.summary.trim()
+        ),
       };
       let allowFallback = true;
       try {
-        await growthGeo.streamOptimizationContent(payload,
-        (event) => {
+        await growthGeo.streamOptimizationContent(payload, (event) => {
           if (event.type === 'delta' && typeof event.content === 'string') {
             draft += event.content;
             setGeneratedOptimization({ kind, jobId: targetJob.id, title, draft });
@@ -852,11 +968,13 @@ export function GrowthGeoWorkspace() {
             allowFallback = false;
             throw new Error(String(event.error || '生成优化内容失败'));
           }
-        },
-        );
+        });
       } catch (streamErr) {
         const streamMessage = streamErr instanceof Error ? streamErr.message : String(streamErr);
-        if (!allowFallback || (!streamMessage.includes('Failed to fetch') && !streamMessage.includes('流式'))) {
+        if (
+          !allowFallback ||
+          (!streamMessage.includes('Failed to fetch') && !streamMessage.includes('流式'))
+        ) {
           throw streamErr;
         }
         const fallback = await growthGeo.optimizationContent(payload);
@@ -904,31 +1022,44 @@ export function GrowthGeoWorkspace() {
       void openBatch(batch.id);
     }, 3000);
     return () => window.clearTimeout(timer);
-  }, [selectedBatch?.batch?.id, selectedBatch?.batch?.status, selectedBatch?.batch?.completedProbes]);
+  }, [
+    selectedBatch?.batch?.id,
+    selectedBatch?.batch?.status,
+    selectedBatch?.batch?.completedProbes,
+  ]);
 
   useEffect(() => {
     if (!streamingJob) return;
     const backendJob = report?.recentJobs?.find((job) => {
       if (fallbackJobId && job.id === fallbackJobId) return true;
       if (!streamingJob.id.startsWith('stream-') && job.id === streamingJob.id) return true;
-      return job.question === streamingJob.question
-        && job.engine === streamingJob.engine
-        && new Date(job.createdAt || 0).getTime() >= new Date(streamingJob.createdAt || 0).getTime();
+      return (
+        job.question === streamingJob.question &&
+        job.engine === streamingJob.engine &&
+        new Date(job.createdAt || 0).getTime() >= new Date(streamingJob.createdAt || 0).getTime()
+      );
     });
     if (!backendJob) return;
-    if (backendJob.status === 'succeeded' || backendJob.status === 'failed' || backendJob.status === 'blocked') {
+    if (
+      backendJob.status === 'succeeded' ||
+      backendJob.status === 'failed' ||
+      backendJob.status === 'blocked'
+    ) {
       setStreamingJob(null);
       setFallbackJobId(null);
       setNotice(null);
     }
   }, [fallbackJobId, report?.recentJobs, streamingJob]);
 
-  useEffect(() => () => {
-    if (streamFlushTimerRef.current) {
-      clearTimeout(streamFlushTimerRef.current);
-      streamFlushTimerRef.current = null;
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      if (streamFlushTimerRef.current) {
+        clearTimeout(streamFlushTimerRef.current);
+        streamFlushTimerRef.current = null;
+      }
+    },
+    []
+  );
 
   const recent = report?.recentProbes || [];
   const recentJobs = report?.recentJobs || [];
@@ -937,42 +1068,64 @@ export function GrowthGeoWorkspace() {
   const realProbeJobs = recentJobs.filter((job) => job.engine !== 'mock');
   const backendStreamingJob = streamingJob
     ? realProbeJobs.find((job) => {
-      if (fallbackJobId && job.id === fallbackJobId) return true;
-      if (!streamingJob.id.startsWith('stream-') && job.id === streamingJob.id) return true;
-      return job.question === streamingJob.question
-        && job.engine === streamingJob.engine
-        && new Date(job.createdAt || 0).getTime() >= new Date(streamingJob.createdAt || 0).getTime();
-    })
+        if (fallbackJobId && job.id === fallbackJobId) return true;
+        if (!streamingJob.id.startsWith('stream-') && job.id === streamingJob.id) return true;
+        return (
+          job.question === streamingJob.question &&
+          job.engine === streamingJob.engine &&
+          new Date(job.createdAt || 0).getTime() >= new Date(streamingJob.createdAt || 0).getTime()
+        );
+      })
     : null;
   const latestProbeJob = backendStreamingJob || streamingJob || realProbeJobs[0] || null;
-  const latestProbe = latestProbeJob
-    && !latestProbeJob.id.startsWith('stream-')
-    ? recent.find((item) => item.id === latestProbeJob.probeId || (item.question === latestProbeJob.question && item.engine === latestProbeJob.engine))
-    : null;
+  const latestProbe =
+    latestProbeJob && !latestProbeJob.id.startsWith('stream-')
+      ? recent.find(
+          (item) =>
+            item.id === latestProbeJob.probeId ||
+            (item.question === latestProbeJob.question && item.engine === latestProbeJob.engine)
+        )
+      : null;
   const failedProbeJobs = realProbeJobs.filter((job) => ['failed', 'blocked'].includes(job.status));
   const visibilityByEngine = new Map((report?.visibility || []).map((item) => [item.engine, item]));
-  const latestEngineVisibility = latestProbeJob ? visibilityByEngine.get(latestProbeJob.engine) : undefined;
-  const latestDetailForSuggestions: ProbeDetail | null = latestProbeJob ? {
-    job: latestProbeJob,
-    probe: latestProbe ? {
-      id: latestProbe.id,
-      engine: latestProbe.engine,
-      question: latestProbe.question,
-      weCited: latestProbe.weCited,
-      citationRank: latestProbe.citationRank,
-      competitorsCited: latestProbe.competitorsCited,
-      probedAt: latestProbe.probedAt,
-    } : null,
-    snapshot: latestProbeJob.answerPreview ? {
-      id: latestProbeJob.snapshotId || latestProbeJob.id,
-      answerText: latestProbeJob.answerPreview,
-      citations: referenceSources
-        .filter((item) => item.url.trim())
-        .map((item) => ({ title: item.title || item.url, url: item.url, owned: item.owned })),
-    } : null,
-  } : null;
-  const contentGaps = latestDetailForSuggestions ? buildContentGaps(latestDetailForSuggestions, referenceSources) : [];
-  const nextActions = latestDetailForSuggestions ? buildNextActions(latestDetailForSuggestions) : [];
+  const latestEngineVisibility = latestProbeJob
+    ? visibilityByEngine.get(latestProbeJob.engine)
+    : undefined;
+  const latestDetailForSuggestions: ProbeDetail | null = latestProbeJob
+    ? {
+        job: latestProbeJob,
+        probe: latestProbe
+          ? {
+              id: latestProbe.id,
+              engine: latestProbe.engine,
+              question: latestProbe.question,
+              weCited: latestProbe.weCited,
+              citationRank: latestProbe.citationRank,
+              competitorsCited: latestProbe.competitorsCited,
+              probedAt: latestProbe.probedAt,
+            }
+          : null,
+        snapshot: latestProbeJob.answerPreview
+          ? {
+              id: latestProbeJob.snapshotId || latestProbeJob.id,
+              answerText: latestProbeJob.answerPreview,
+              citations: referenceSources
+                .filter((item) => item.url.trim())
+                .map((item) => ({
+                  title: item.title || item.url,
+                  url: item.url,
+                  owned: item.owned,
+                })),
+            }
+          : null,
+      }
+    : null;
+  const contentGaps = latestDetailForSuggestions
+    ? buildContentGaps(latestDetailForSuggestions, referenceSources)
+    : [];
+  const nextActions = latestDetailForSuggestions
+    ? buildNextActions(latestDetailForSuggestions)
+    : [];
 
   return (
     <div style={{ display: 'grid', gap: 16 }}>
@@ -981,31 +1134,88 @@ export function GrowthGeoWorkspace() {
           <div>
             <p className="workbench-section-header__eyebrow">GEO 总览</p>
             <h2 className="workbench-section-header__title">AI 品牌可见度</h2>
-            <p className="workbench-section-header__description">统一查看品牌出现率、声量占比、AIVS、风险和 AI 引擎覆盖。</p>
+            <p className="workbench-section-header__description">
+              统一查看品牌出现率、声量占比、AIVS、风险和 AI 引擎覆盖。
+            </p>
           </div>
-          <button className="btn btn-outline btn-sm" type="button" onClick={loadAll} disabled={loading}>
+          <button
+            className="btn btn-outline btn-sm"
+            type="button"
+            onClick={loadAll}
+            disabled={loading}
+          >
             {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
             刷新
           </button>
         </div>
         {error ? (
-          <div className="inset" style={{ color: 'var(--danger)', display: 'flex', gap: 8, alignItems: 'center' }}>
+          <div
+            className="inset"
+            style={{ color: 'var(--danger)', display: 'flex', gap: 8, alignItems: 'center' }}
+          >
             <AlertCircle size={16} />
             {error}
           </div>
         ) : null}
-        {notice ? <div className="inset" style={{ color: 'var(--success)', fontSize: 13 }}>{notice}</div> : null}
+        {notice ? (
+          <div className="inset" style={{ color: 'var(--success)', fontSize: 13 }}>
+            {notice}
+          </div>
+        ) : null}
         <div className="g4" style={{ gap: 12 }}>
-          <MetricCard icon={Database} label="累计探测" value={String(metric.totalProbes)} hint="已完成的有效探测" />
-          <MetricCard icon={Search} label="我方出现率" value={pct(metric.citedRate)} hint="AI 回答中出现我方品牌" />
-          <MetricCard icon={Bot} label="平均 AIVS" value={String(metric.avgAivs)} hint="AI 可见度评分" />
-          <MetricCard icon={BarChart3} label="声量占比" value={pct(metric.shareOfVoice)} hint="我方与竞品声量比" />
-          <MetricCard icon={AlertCircle} label="高风险问题" value={String(selectedBatch?.board?.highRiskCount || selectedBatch?.batch?.highRiskCount || metric.hallucinationCount || 0)} hint="未出现、竞品独占或事实风险" />
-          <MetricCard icon={Database} label="覆盖入口" value={String(engines.length || 0)} hint="已纳入监测范围的 AI 引擎" />
+          <MetricCard
+            icon={Database}
+            label="累计探测"
+            value={String(metric.totalProbes)}
+            hint="已完成的有效探测"
+          />
+          <MetricCard
+            icon={Search}
+            label="我方出现率"
+            value={pct(metric.citedRate)}
+            hint="AI 回答中出现我方品牌"
+          />
+          <MetricCard
+            icon={Bot}
+            label="平均 AIVS"
+            value={String(metric.avgAivs)}
+            hint="AI 可见度评分"
+          />
+          <MetricCard
+            icon={BarChart3}
+            label="声量占比"
+            value={pct(metric.shareOfVoice)}
+            hint="我方与竞品声量比"
+          />
+          <MetricCard
+            icon={AlertCircle}
+            label="高风险问题"
+            value={String(
+              selectedBatch?.board?.highRiskCount ||
+                selectedBatch?.batch?.highRiskCount ||
+                metric.hallucinationCount ||
+                0
+            )}
+            hint="未出现、竞品独占或事实风险"
+          />
+          <MetricCard
+            icon={Database}
+            label="覆盖入口"
+            value={String(engines.length || 0)}
+            hint="已纳入监测范围的 AI 引擎"
+          />
         </div>
         <div className="table-shell">
           <table className="table">
-            <thead><tr><th>AI 引擎</th><th>探测数</th><th>被引用</th><th>引用率</th><th>平均 AIVS</th></tr></thead>
+            <thead>
+              <tr>
+                <th>AI 引擎</th>
+                <th>探测数</th>
+                <th>被引用</th>
+                <th>引用率</th>
+                <th>平均 AIVS</th>
+              </tr>
+            </thead>
             <tbody>
               {(report?.visibility || []).map((item) => (
                 <tr key={item.engine}>
@@ -1016,7 +1226,9 @@ export function GrowthGeoWorkspace() {
                   <td>{item.avgAivs}</td>
                 </tr>
               ))}
-              {!report?.visibility?.length ? <EmptyRow colSpan={5} text={loading ? '正在加载可见度数据' : '暂无可见度数据'} /> : null}
+              {!report?.visibility?.length ? (
+                <EmptyRow colSpan={5} text={loading ? '正在加载可见度数据' : '暂无可见度数据'} />
+              ) : null}
             </tbody>
           </table>
         </div>
@@ -1027,79 +1239,719 @@ export function GrowthGeoWorkspace() {
           <div>
             <p className="workbench-section-header__eyebrow">问题池</p>
             <h2 className="workbench-section-header__title">GEO 问题池与探测任务</h2>
-            <p className="workbench-section-header__description">统一维护监测问题、推荐问题、手动回答和 Hermes 批量探测。</p>
+            <p className="workbench-section-header__description">
+              统一维护监测问题、推荐问题、手动回答和 Hermes 批量探测。
+            </p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button className="btn btn-outline btn-sm" type="button" onClick={refreshQuestionFlow} disabled={saving || loading}><Play size={14} />预览标准题库</button>
-            <button className="btn btn-outline btn-sm" type="button" onClick={saveGeneratedQuestions} disabled={saving || !(questionSet?.generated || []).length}><CheckCircle2 size={14} />初始化标准题库</button>
-            <button className="btn btn-brand btn-sm" type="button" onClick={runBatchProbe} disabled={autoRunning || !(questionSet?.questions || []).length}>{autoRunning ? <Loader2 size={14} className="animate-spin" /> : <Bot size={14} />}Hermes 批量探测</button>
+            <button
+              className="btn btn-outline btn-sm"
+              type="button"
+              onClick={refreshQuestionFlow}
+              disabled={saving || loading}
+            >
+              <Play size={14} />
+              预览标准题库
+            </button>
+            <button
+              className="btn btn-outline btn-sm"
+              type="button"
+              onClick={saveGeneratedQuestions}
+              disabled={saving || !(questionSet?.generated || []).length}
+            >
+              <CheckCircle2 size={14} />
+              初始化标准题库
+            </button>
+            <button
+              className="btn btn-brand btn-sm"
+              type="button"
+              onClick={runBatchProbe}
+              disabled={autoRunning || !(questionSet?.questions || []).length}
+            >
+              {autoRunning ? <Loader2 size={14} className="animate-spin" /> : <Bot size={14} />}
+              Hermes 批量探测
+            </button>
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
-          <label style={{ display: 'grid', gap: 6 }}><span className="t-label">品牌官网</span><select className="input" value={brandSlug} onChange={(event) => setBrandSlug(normalizeGeoBrand(event.target.value))}>{brandOptions.map((item) => (<option key={item.code} value={item.code}>{item.label}</option>))}</select></label>
-          <label style={{ display: 'grid', gap: 6 }}><span className="t-label">品类</span><input className="input" value={category} onChange={(event) => setCategory(event.target.value)} /></label>
-          <label style={{ display: 'grid', gap: 6 }}><span className="t-label">阶段</span><select className="input" value={stageFilter} onChange={(event) => setStageFilter(event.target.value)}><option value="">全部阶段</option><option value="pre">购前</option><option value="mid">购中</option><option value="post">购后</option><option value="followup">追问</option></select></label>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: 12,
+          }}
+        >
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span className="t-label">品牌官网</span>
+            <select
+              className="input"
+              value={brandSlug}
+              onChange={(event) => setBrandSlug(normalizeGeoBrand(event.target.value))}
+            >
+              {brandOptions.map((item) => (
+                <option key={item.code} value={item.code}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span className="t-label">品类</span>
+            <input
+              className="input"
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+            />
+          </label>
+          <label style={{ display: 'grid', gap: 6 }}>
+            <span className="t-label">阶段</span>
+            <select
+              className="input"
+              value={stageFilter}
+              onChange={(event) => setStageFilter(event.target.value)}
+            >
+              <option value="">全部阶段</option>
+              <option value="pre">购前</option>
+              <option value="mid">购中</option>
+              <option value="post">购后</option>
+              <option value="followup">追问</option>
+            </select>
+          </label>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '140px minmax(0, 1fr) 110px 160px', gap: 10 }}>
-          <select className="input" value={questionForm.stage} onChange={(event) => setQuestionForm((current) => ({ ...current, stage: event.target.value as any }))}><option value="pre">购前</option><option value="mid">购中</option><option value="post">购后</option><option value="followup">追问</option></select>
-          <input className="input" placeholder="新增或编辑 GEO 问题" value={questionForm.question} onChange={(event) => setQuestionForm((current) => ({ ...current, question: event.target.value }))} />
-          <input className="input" type="number" value={questionForm.priority} onChange={(event) => setQuestionForm((current) => ({ ...current, priority: Number(event.target.value || 100) }))} />
-          <button className="btn btn-brand btn-sm" type="button" onClick={saveQuestion} disabled={saving}>{questionForm.id ? '保存编辑' : '新增问题'}</button>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '140px minmax(0, 1fr) 110px 160px',
+            gap: 10,
+          }}
+        >
+          <select
+            className="input"
+            value={questionForm.stage}
+            onChange={(event) =>
+              setQuestionForm((current) => ({ ...current, stage: event.target.value as any }))
+            }
+          >
+            <option value="pre">购前</option>
+            <option value="mid">购中</option>
+            <option value="post">购后</option>
+            <option value="followup">追问</option>
+          </select>
+          <input
+            className="input"
+            placeholder="新增或编辑 GEO 问题"
+            value={questionForm.question}
+            onChange={(event) =>
+              setQuestionForm((current) => ({ ...current, question: event.target.value }))
+            }
+          />
+          <input
+            className="input"
+            type="number"
+            value={questionForm.priority}
+            onChange={(event) =>
+              setQuestionForm((current) => ({
+                ...current,
+                priority: Number(event.target.value || 100),
+              }))
+            }
+          />
+          <button
+            className="btn btn-brand btn-sm"
+            type="button"
+            onClick={saveQuestion}
+            disabled={saving}
+          >
+            {questionForm.id ? '保存编辑' : '新增问题'}
+          </button>
         </div>
         <div className="table-shell growth-geo-questions-table-shell">
           <table className="table growth-geo-questions-table">
-            <thead><tr><th>阶段</th><th>探测问题</th><th>优先级</th><th>状态</th><th style={{ minWidth: 220, whiteSpace: 'nowrap' }}>操作</th></tr></thead>
+            <thead>
+              <tr>
+                <th>阶段</th>
+                <th>探测问题</th>
+                <th>优先级</th>
+                <th>状态</th>
+                <th style={{ minWidth: 220, whiteSpace: 'nowrap' }}>操作</th>
+              </tr>
+            </thead>
             <tbody>
               {(questionSet?.questions || []).slice(0, 20).map((item) => (
                 <tr key={item.id || item.stage + '-' + item.question}>
-                  <td><span className="badge">{stageLabels[item.stage] || item.stage}</span></td>
+                  <td>
+                    <span className="badge">{stageLabels[item.stage] || item.stage}</span>
+                  </td>
                   <td style={{ fontWeight: 700 }}>{item.question}</td>
                   <td>{item.priority}</td>
-                  <td><span className="badge">{item.enabled ? '启用' : '停用'}</span></td>
-                  <td style={{ minWidth: 220 }}><div style={{ display: 'flex', gap: 8, flexWrap: 'nowrap', alignItems: 'center', justifyContent: 'center' }}><button className="btn btn-outline btn-sm" type="button" onClick={() => setQuestionForm({ id: item.id, stage: item.stage, question: item.question, priority: item.priority })}>编辑</button><button className="btn btn-outline btn-sm" type="button" onClick={() => disableQuestion(item.id)} disabled={!item.enabled || saving}>停用</button><button className="btn btn-outline btn-sm" type="button" onClick={() => removeQuestion(item.id)} disabled={saving}><Trash2 size={14} />删除</button></div></td>
+                  <td>
+                    <span className="badge">{item.enabled ? '启用' : '停用'}</span>
+                  </td>
+                  <td style={{ minWidth: 220 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: 8,
+                        flexWrap: 'nowrap',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <button
+                        className="btn btn-outline btn-sm"
+                        type="button"
+                        onClick={() =>
+                          setQuestionForm({
+                            id: item.id,
+                            stage: item.stage,
+                            question: item.question,
+                            priority: item.priority,
+                          })
+                        }
+                      >
+                        编辑
+                      </button>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        type="button"
+                        onClick={() => disableQuestion(item.id)}
+                        disabled={!item.enabled || saving}
+                      >
+                        停用
+                      </button>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        type="button"
+                        onClick={() => removeQuestion(item.id)}
+                        disabled={saving}
+                      >
+                        <Trash2 size={14} />
+                        删除
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
-              {!questionSet?.questions?.length ? <EmptyRow colSpan={5} text={loading ? '正在加载问题池' : '暂无问题，请先新增或生成推荐问题'} /> : null}
+              {!questionSet?.questions?.length ? (
+                <EmptyRow
+                  colSpan={5}
+                  text={loading ? '正在加载问题池' : '暂无问题，请先新增或生成推荐问题'}
+                />
+              ) : null}
             </tbody>
           </table>
         </div>
         {(questionSet?.generated || []).length ? (
-          <details className="inset"><summary style={{ cursor: 'pointer', color: 'var(--t-secondary)', fontSize: 13, fontWeight: 700 }}>待保存推荐问题（{questionSet?.generated?.length || 0}）</summary><div className="table-shell" style={{ marginTop: 10 }}><table className="table"><thead><tr><th>阶段</th><th>推荐问题</th></tr></thead><tbody>{(questionSet?.generated || []).map((item, index) => (<tr key={item.stage + '-' + item.question + '-' + index}><td><span className="badge">{stageLabels[item.stage] || item.stage}</span></td><td style={{ fontWeight: 700 }}>{item.question}</td></tr>))}</tbody></table></div></details>
+          <details className="inset">
+            <summary
+              style={{
+                cursor: 'pointer',
+                color: 'var(--t-secondary)',
+                fontSize: 13,
+                fontWeight: 700,
+              }}
+            >
+              待保存推荐问题（{questionSet?.generated?.length || 0}）
+            </summary>
+            <div className="table-shell" style={{ marginTop: 10 }}>
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>阶段</th>
+                    <th>推荐问题</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(questionSet?.generated || []).map((item, index) => (
+                    <tr key={item.stage + '-' + item.question + '-' + index}>
+                      <td>
+                        <span className="badge">{stageLabels[item.stage] || item.stage}</span>
+                      </td>
+                      <td style={{ fontWeight: 700 }}>{item.question}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
         ) : null}
         <details className="inset">
-          <summary style={{ cursor: 'pointer', color: 'var(--t-secondary)', fontSize: 13, fontWeight: 700 }}>即时探测与手动补录</summary>
+          <summary
+            style={{
+              cursor: 'pointer',
+              color: 'var(--t-secondary)',
+              fontSize: 13,
+              fontWeight: 700,
+            }}
+          >
+            即时探测与手动补录
+          </summary>
           <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
-            <div className="workbench-section-header"><div><h3 className="workbench-section-header__title" style={{ fontSize: 16 }}>真实模型探测</h3><p className="workbench-section-header__description">输入目标问题，查看品牌露出、引用位次和竞品占位。</p></div><button className="btn btn-brand btn-sm" type="button" onClick={runAutoProbe} disabled={autoRunning}>{autoRunning ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}创建探测任务</button></div>
-            <input className="input" value={autoProbeForm.question} onChange={(event) => setAutoProbeForm((current) => ({ ...current, question: event.target.value }))} placeholder="输入要询问模型的 GEO 问题" />
-            <input className="input" value={autoProbeForm.competitors} onChange={(event) => setAutoProbeForm((current) => ({ ...current, competitors: event.target.value }))} placeholder="竞品名称，用逗号分隔" />
-            <LatestProbeCard job={latestProbeJob} probe={latestProbe} engines={engines} loading={loading} detailLoading={detailLoading} autoRunning={autoRunning} onDetail={openProbeDetail} onRerun={rerunProbe} onGenerate={(job, probe) => generateOptimization('comparison', job, probe, job.answerPreview)} generating={Boolean(generatingKind)} generatedOptimization={generatedOptimization} />
-            <div style={{ display: 'grid', gap: 10, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
+            <div className="workbench-section-header">
+              <div>
+                <h3 className="workbench-section-header__title" style={{ fontSize: 16 }}>
+                  真实模型探测
+                </h3>
+                <p className="workbench-section-header__description">
+                  输入目标问题，查看品牌露出、引用位次和竞品占位。
+                </p>
+              </div>
+              <button
+                className="btn btn-brand btn-sm"
+                type="button"
+                onClick={runAutoProbe}
+                disabled={autoRunning}
+              >
+                {autoRunning ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
+                创建探测任务
+              </button>
+            </div>
+            <input
+              className="input"
+              value={autoProbeForm.question}
+              onChange={(event) =>
+                setAutoProbeForm((current) => ({ ...current, question: event.target.value }))
+              }
+              placeholder="输入要询问模型的 GEO 问题"
+            />
+            <input
+              className="input"
+              value={autoProbeForm.competitors}
+              onChange={(event) =>
+                setAutoProbeForm((current) => ({ ...current, competitors: event.target.value }))
+              }
+              placeholder="竞品名称，用逗号分隔"
+            />
+            <LatestProbeCard
+              job={latestProbeJob}
+              probe={latestProbe}
+              engines={engines}
+              loading={loading}
+              detailLoading={detailLoading}
+              autoRunning={autoRunning}
+              onDetail={openProbeDetail}
+              onRerun={rerunProbe}
+              onGenerate={(job, probe) =>
+                generateOptimization('comparison', job, probe, job.answerPreview)
+              }
+              generating={Boolean(generatingKind)}
+              generatedOptimization={generatedOptimization}
+            />
+            <div
+              style={{
+                display: 'grid',
+                gap: 10,
+                borderTop: '1px solid var(--line)',
+                paddingTop: 12,
+              }}
+            >
               <strong style={{ color: 'var(--t-primary)' }}>手动补录 AI 回答</strong>
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 180px', gap: 12 }}><input className="input" placeholder="Example: Which home heat pump water heater brands are worth recommending?" value={probeForm.question} onChange={(event) => setProbeForm((current) => ({ ...current, question: event.target.value }))} /><select className="input" value={probeForm.engine} onChange={(event) => setProbeForm((current) => ({ ...current, engine: event.target.value }))}>{engines.map((item) => (<option key={item.engine} value={item.engine}>{item.label || item.engine}</option>))}</select></div>
-              <input className="input" placeholder="竞品名称，用逗号分隔" value={probeForm.competitors} onChange={(event) => setProbeForm((current) => ({ ...current, competitors: event.target.value }))} />
-              <textarea className="input" rows={4} placeholder="粘贴真实 AI 回答。没有回答时也可以先保存问题和引擎。" value={probeForm.answerSnapshot} onChange={(event) => setProbeForm((current) => ({ ...current, answerSnapshot: event.target.value }))} style={{ resize: 'vertical' }} />
-              <div><button className="btn btn-brand btn-sm" type="button" onClick={submitProbe} disabled={saving}>{saving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}保存探测</button></div>
+              <div
+                style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 180px', gap: 12 }}
+              >
+                <input
+                  className="input"
+                  placeholder="Example: Which home heat pump water heater brands are worth recommending?"
+                  value={probeForm.question}
+                  onChange={(event) =>
+                    setProbeForm((current) => ({ ...current, question: event.target.value }))
+                  }
+                />
+                <select
+                  className="input"
+                  value={probeForm.engine}
+                  onChange={(event) =>
+                    setProbeForm((current) => ({ ...current, engine: event.target.value }))
+                  }
+                >
+                  {engines.map((item) => (
+                    <option key={item.engine} value={item.engine}>
+                      {item.label || item.engine}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <input
+                className="input"
+                placeholder="竞品名称，用逗号分隔"
+                value={probeForm.competitors}
+                onChange={(event) =>
+                  setProbeForm((current) => ({ ...current, competitors: event.target.value }))
+                }
+              />
+              <textarea
+                className="input"
+                rows={4}
+                placeholder="粘贴真实 AI 回答。没有回答时也可以先保存问题和引擎。"
+                value={probeForm.answerSnapshot}
+                onChange={(event) =>
+                  setProbeForm((current) => ({ ...current, answerSnapshot: event.target.value }))
+                }
+                style={{ resize: 'vertical' }}
+              />
+              <div>
+                <button
+                  className="btn btn-brand btn-sm"
+                  type="button"
+                  onClick={submitProbe}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <CheckCircle2 size={14} />
+                  )}
+                  保存探测
+                </button>
+              </div>
             </div>
           </div>
         </details>
-        <p style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>当前可探测问题：{worklist?.total || 0} 条，真实运行引擎固定为 Hermes 中心 AI。</p>
+        <p style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+          当前可探测问题：{worklist?.total || 0} 条，真实运行引擎固定为 Hermes 中心 AI。
+        </p>
       </section>
 
       <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 14 }}>
-        <div className="workbench-section-header"><div><p className="workbench-section-header__eyebrow">结果诊断</p><h2 className="workbench-section-header__title">探测结果诊断</h2><p className="workbench-section-header__description">统一查看批量、即时和历史探测结果；内容补缺从详情进入。</p></div><button className="btn btn-outline btn-sm" type="button" onClick={loadAll} disabled={loading}>{loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}刷新</button></div>
-        {selectedBatch?.batch && ['pending', 'running'].includes(selectedBatch.batch.status) ? <div className="inset" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, color: 'var(--t-secondary)' }}><span>Hermes 批量探测进行中：{selectedBatch.batch.completedProbes || 0}/{selectedBatch.batch.totalProbes || 0}</span><Loader2 size={16} className="animate-spin" /></div> : null}
-        {batchComparison ? <div className="inset" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10 }}><MetricCard icon={BarChart3} label="出现率变化" value={(Number(batchComparison.citedRateDelta || 0) > 0 ? '+' : '') + (batchComparison.citedRateDelta || 0) + '%'} hint="最近两次批次对比" /><MetricCard icon={Bot} label="AIVS 变化" value={(Number(batchComparison.avgAivsDelta || 0) > 0 ? '+' : '') + (batchComparison.avgAivsDelta || 0)} hint="最近两次批次对比" /><MetricCard icon={AlertCircle} label="高风险变化" value={(Number(batchComparison.highRiskDelta || 0) > 0 ? '+' : '') + (batchComparison.highRiskDelta || 0)} hint="负数代表风险下降" /><MetricCard icon={Database} label="竞品命中变化" value={(Number(batchComparison.competitorHitDelta || 0) > 0 ? '+' : '') + (batchComparison.competitorHitDelta || 0)} hint="最近两次批次对比" /></div> : null}
-        <div className="table-shell growth-geo-results-table-shell"><table className="table growth-geo-results-table"><thead><tr><th>问题</th><th>阶段</th><th>AI 引擎</th><th>我方出现</th><th>AIVS</th><th>竞品命中</th><th>状态</th><th>风险</th><th>操作</th></tr></thead><tbody>{dedupedBatchJobs.map((job) => (<tr key={job.id}><td style={{ fontWeight: 700 }}>{job.question}</td><td><span className="badge">{job.stage ? stageLabels[job.stage] || job.stage : '-'}</span></td><td>{engineLabel(engines, job.engine)}</td><td>{job.probeId && job.riskReasons?.includes('we-cited') ? '是' : job.status === 'succeeded' ? '否' : '-'}</td><td>{job.aivs || 0}</td><td>{(job as any).probe?.competitorsCited?.length ? (job as any).probe.competitorsCited.join('、') : '-'}</td><td><span className="badge">{statusLabel(job.status)}</span></td><td><span className="badge">{riskLabel(job.riskLevel)}</span></td><td><div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button className="btn btn-outline btn-sm" type="button" onClick={() => openProbeDetail(job)} disabled={!job.snapshotId || detailLoading}>详情</button><button className="btn btn-outline btn-sm" type="button" onClick={() => rerunProbe(job)} disabled={autoRunning || ['pending', 'running'].includes(job.status)}>重探</button><button className="btn btn-outline btn-sm" type="button" onClick={() => generateOptimization('faq', job, (job as any).probe, job.answerPreview)} disabled={job.status !== 'succeeded' || Boolean(generatingKind)}>生成建议</button></div></td></tr>))}{!dedupedBatchJobs.length ? <EmptyRow colSpan={9} text={loading ? '正在加载探测结果' : '暂无探测结果'} /> : null}</tbody></table></div>
-        {batches.length ? <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{batches.slice(0, 6).map((batch) => (<button key={batch.id} className="btn btn-outline btn-sm" type="button" onClick={() => openBatch(batch.id)}>{fmtDate(batch.createdAt)} · {statusLabel(batch.status)} · {pct(batch.citedRate)}</button>))}</div> : null}
-        {realProbeJobs.length ? <details className="inset"><summary style={{ cursor: 'pointer', color: 'var(--t-secondary)', fontSize: 13, fontWeight: 700 }}>即时与历史探测记录（{realProbeJobs.length}）</summary><div className="table-shell" style={{ marginTop: 10 }}><table className="table"><thead><tr><th>问题</th><th>引擎</th><th>状态</th><th>摘要 / 错误</th><th>时间</th><th>操作</th></tr></thead><tbody>{realProbeJobs.slice(0, 21).map((job) => (<tr key={job.id}><td style={{ fontWeight: 700 }}>{job.question}</td><td>{engineLabel(engines, job.engine)}</td><td><span className="badge">{statusLabel(job.status)}</span></td><td>{job.answerPreview || job.errorMessage || '-'}</td><td>{fmtDate(job.finishedAt || job.createdAt)}</td><td><button className="btn btn-outline btn-sm" type="button" onClick={() => openProbeDetail(job)} disabled={detailLoading || !job.snapshotId}><Eye size={14} />详情</button></td></tr>))}</tbody></table></div></details> : null}
+        <div className="workbench-section-header">
+          <div>
+            <p className="workbench-section-header__eyebrow">结果诊断</p>
+            <h2 className="workbench-section-header__title">探测结果诊断</h2>
+            <p className="workbench-section-header__description">
+              统一查看批量、即时和历史探测结果；内容补缺从详情进入。
+            </p>
+          </div>
+          <button
+            className="btn btn-outline btn-sm"
+            type="button"
+            onClick={loadAll}
+            disabled={loading}
+          >
+            {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}刷新
+          </button>
+        </div>
+        {selectedBatch?.batch && ['pending', 'running'].includes(selectedBatch.batch.status) ? (
+          <div
+            className="inset"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 12,
+              color: 'var(--t-secondary)',
+            }}
+          >
+            <span>
+              Hermes 批量探测进行中：{selectedBatch.batch.completedProbes || 0}/
+              {selectedBatch.batch.totalProbes || 0}
+            </span>
+            <Loader2 size={16} className="animate-spin" />
+          </div>
+        ) : null}
+        {batchComparison ? (
+          <div
+            className="inset"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+              gap: 10,
+            }}
+          >
+            <MetricCard
+              icon={BarChart3}
+              label="出现率变化"
+              value={
+                (Number(batchComparison.citedRateDelta || 0) > 0 ? '+' : '') +
+                (batchComparison.citedRateDelta || 0) +
+                '%'
+              }
+              hint="最近两次批次对比"
+            />
+            <MetricCard
+              icon={Bot}
+              label="AIVS 变化"
+              value={
+                (Number(batchComparison.avgAivsDelta || 0) > 0 ? '+' : '') +
+                (batchComparison.avgAivsDelta || 0)
+              }
+              hint="最近两次批次对比"
+            />
+            <MetricCard
+              icon={AlertCircle}
+              label="高风险变化"
+              value={
+                (Number(batchComparison.highRiskDelta || 0) > 0 ? '+' : '') +
+                (batchComparison.highRiskDelta || 0)
+              }
+              hint="负数代表风险下降"
+            />
+            <MetricCard
+              icon={Database}
+              label="竞品命中变化"
+              value={
+                (Number(batchComparison.competitorHitDelta || 0) > 0 ? '+' : '') +
+                (batchComparison.competitorHitDelta || 0)
+              }
+              hint="最近两次批次对比"
+            />
+          </div>
+        ) : null}
+        <div className="table-shell growth-geo-results-table-shell">
+          <table className="table growth-geo-results-table">
+            <thead>
+              <tr>
+                <th>问题</th>
+                <th>阶段</th>
+                <th>AI 引擎</th>
+                <th>我方出现</th>
+                <th>AIVS</th>
+                <th>竞品命中</th>
+                <th>状态</th>
+                <th>风险</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dedupedBatchJobs.map((job) => (
+                <tr key={job.id}>
+                  <td style={{ fontWeight: 700 }}>{job.question}</td>
+                  <td>
+                    <span className="badge">
+                      {job.stage ? stageLabels[job.stage] || job.stage : '-'}
+                    </span>
+                  </td>
+                  <td>{engineLabel(engines, job.engine)}</td>
+                  <td>
+                    {job.probeId && job.riskReasons?.includes('we-cited')
+                      ? '是'
+                      : job.status === 'succeeded'
+                        ? '否'
+                        : '-'}
+                  </td>
+                  <td>{job.aivs || 0}</td>
+                  <td>
+                    {(job as any).probe?.competitorsCited?.length
+                      ? (job as any).probe.competitorsCited.join('、')
+                      : '-'}
+                  </td>
+                  <td>
+                    <span className="badge">{statusLabel(job.status)}</span>
+                  </td>
+                  <td>
+                    <span className="badge">{riskLabel(job.riskLevel)}</span>
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        type="button"
+                        onClick={() => openProbeDetail(job)}
+                        disabled={!job.snapshotId || detailLoading}
+                      >
+                        详情
+                      </button>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        type="button"
+                        onClick={() => rerunProbe(job)}
+                        disabled={autoRunning || ['pending', 'running'].includes(job.status)}
+                      >
+                        重探
+                      </button>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        type="button"
+                        onClick={() =>
+                          generateOptimization('faq', job, (job as any).probe, job.answerPreview)
+                        }
+                        disabled={job.status !== 'succeeded' || Boolean(generatingKind)}
+                      >
+                        生成建议
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {!dedupedBatchJobs.length ? (
+                <EmptyRow colSpan={9} text={loading ? '正在加载探测结果' : '暂无探测结果'} />
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+        {batches.length ? (
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {batches.slice(0, 6).map((batch) => (
+              <button
+                key={batch.id}
+                className="btn btn-outline btn-sm"
+                type="button"
+                onClick={() => openBatch(batch.id)}
+              >
+                {fmtDate(batch.createdAt)} · {statusLabel(batch.status)} · {pct(batch.citedRate)}
+              </button>
+            ))}
+          </div>
+        ) : null}
+        {realProbeJobs.length ? (
+          <details className="inset">
+            <summary
+              style={{
+                cursor: 'pointer',
+                color: 'var(--t-secondary)',
+                fontSize: 13,
+                fontWeight: 700,
+              }}
+            >
+              即时与历史探测记录（{realProbeJobs.length}）
+            </summary>
+            <div className="table-shell" style={{ marginTop: 10 }}>
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>问题</th>
+                    <th>引擎</th>
+                    <th>状态</th>
+                    <th>摘要 / 错误</th>
+                    <th>时间</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {realProbeJobs.slice(0, 21).map((job) => (
+                    <tr key={job.id}>
+                      <td style={{ fontWeight: 700 }}>{job.question}</td>
+                      <td>{engineLabel(engines, job.engine)}</td>
+                      <td>
+                        <span className="badge">{statusLabel(job.status)}</span>
+                      </td>
+                      <td>{job.answerPreview || job.errorMessage || '-'}</td>
+                      <td>{fmtDate(job.finishedAt || job.createdAt)}</td>
+                      <td>
+                        <button
+                          className="btn btn-outline btn-sm"
+                          type="button"
+                          onClick={() => openProbeDetail(job)}
+                          disabled={detailLoading || !job.snapshotId}
+                        >
+                          <Eye size={14} />
+                          详情
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        ) : null}
       </section>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 380px)', gap: 16 }}>
-        <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 12 }}><div className="workbench-section-header"><div><p className="workbench-section-header__eyebrow">优化任务</p><h2 className="workbench-section-header__title">优化建议</h2></div></div>{(report?.playbook || []).map((item) => (<div key={item.priority + '-' + item.kind + '-' + item.action} className="inset" style={{ display: 'grid', gap: 6 }}><div style={{ display: 'flex', gap: 8, alignItems: 'center' }}><span className="badge">{item.priority}</span><strong style={{ color: 'var(--t-primary)', fontSize: 13 }}>{item.engine || item.kind}</strong></div><p style={{ color: 'var(--t-secondary)', fontSize: 13 }}>{item.action}</p></div>))}{!report?.playbook?.length ? <p style={{ color: 'var(--t-tertiary)', fontSize: 13 }}>暂无优化任务。</p> : null}</section>
-        <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 12 }}><div className="workbench-section-header"><div><p className="workbench-section-header__eyebrow">站内可引用度</p><h2 className="workbench-section-header__title">Guard GEO 报告</h2></div></div><div className="inset"><div className="t-label">就绪站点</div><div style={{ marginTop: 6, fontSize: 28, fontWeight: 800, color: 'var(--brand)', fontVariantNumeric: 'tabular-nums' }}>{report?.onSite?.ready || 0}/{report?.onSite?.total || 0}</div><p style={{ marginTop: 6, color: 'var(--t-tertiary)', fontSize: 12 }}>查询时间：{report?.onSite?.generatedAt ? fmtDate(report.onSite.generatedAt) : '-'}{report?.onSite?.sourceTables?.length ? ' · ' + report.onSite.sourceTables.join(' / ') : ''}</p></div><div className="table-shell"><table className="table"><thead><tr><th>站点</th><th>已发布产品</th><th>状态</th></tr></thead><tbody>{(report?.onSite?.sites || []).slice(0, 6).map((site, index) => (<tr key={String(site.site || site.url || index)}><td style={{ fontWeight: 700 }}>{String(site.siteName || site.siteCode || site.url || site.name || '-')}</td><td>{String(site.publishedProducts || 0)}</td><td>{String(site.status || '-')}</td></tr>))}{!report?.onSite?.sites?.length ? <EmptyRow colSpan={3} text="暂无站内数据" /> : null}</tbody></table></div></section>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 380px)',
+          gap: 16,
+        }}
+      >
+        <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 12 }}>
+          <div className="workbench-section-header">
+            <div>
+              <p className="workbench-section-header__eyebrow">优化任务</p>
+              <h2 className="workbench-section-header__title">优化建议</h2>
+            </div>
+          </div>
+          {(report?.playbook || []).map((item) => (
+            <div
+              key={item.priority + '-' + item.kind + '-' + item.action}
+              className="inset"
+              style={{ display: 'grid', gap: 6 }}
+            >
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <span className="badge">{item.priority}</span>
+                <strong style={{ color: 'var(--t-primary)', fontSize: 13 }}>
+                  {item.engine || item.kind}
+                </strong>
+              </div>
+              <p style={{ color: 'var(--t-secondary)', fontSize: 13 }}>{item.action}</p>
+            </div>
+          ))}
+          {!report?.playbook?.length ? (
+            <p style={{ color: 'var(--t-tertiary)', fontSize: 13 }}>暂无优化任务。</p>
+          ) : null}
+        </section>
+        <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 12 }}>
+          <div className="workbench-section-header">
+            <div>
+              <p className="workbench-section-header__eyebrow">站内可引用度</p>
+              <h2 className="workbench-section-header__title">Guard GEO 报告</h2>
+            </div>
+          </div>
+          <div className="inset">
+            <div className="t-label">就绪站点</div>
+            <div
+              style={{
+                marginTop: 6,
+                fontSize: 28,
+                fontWeight: 800,
+                color: 'var(--brand)',
+                fontVariantNumeric: 'tabular-nums',
+              }}
+            >
+              {report?.onSite?.ready || 0}/{report?.onSite?.total || 0}
+            </div>
+            <p style={{ marginTop: 6, color: 'var(--t-tertiary)', fontSize: 12 }}>
+              查询时间：{report?.onSite?.generatedAt ? fmtDate(report.onSite.generatedAt) : '-'}
+              {report?.onSite?.sourceTables?.length
+                ? ' · ' + report.onSite.sourceTables.join(' / ')
+                : ''}
+            </p>
+          </div>
+          <div className="table-shell">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>站点</th>
+                  <th>已发布产品</th>
+                  <th>状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(report?.onSite?.sites || []).slice(0, 6).map((site, index) => (
+                  <tr key={String(site.site || site.url || index)}>
+                    <td style={{ fontWeight: 700 }}>
+                      {String(site.siteName || site.siteCode || site.url || site.name || '-')}
+                    </td>
+                    <td>{String(site.publishedProducts || 0)}</td>
+                    <td>{String(site.status || '-')}</td>
+                  </tr>
+                ))}
+                {!report?.onSite?.sites?.length ? (
+                  <EmptyRow colSpan={3} text="暂无站内数据" />
+                ) : null}
+              </tbody>
+            </table>
+          </div>
+        </section>
       </div>
 
-      {selectedDetail ? <ProbeDetailModal detail={selectedDetail} engines={engines} engineAivs={visibilityByEngine.get(selectedDetail.job.engine)?.avgAivs} onClose={() => setSelectedDetail(null)} onRerun={() => rerunProbe(selectedDetail.job)} onGenerate={(kind) => generateOptimization(kind, selectedDetail.job, selectedDetail.probe, selectedDetail.snapshot?.answerText)} generatingKind={generatingKind} generatedOptimization={generatedOptimization} /> : null}
+      {selectedDetail ? (
+        <ProbeDetailModal
+          detail={selectedDetail}
+          engines={engines}
+          engineAivs={visibilityByEngine.get(selectedDetail.job.engine)?.avgAivs}
+          onClose={() => setSelectedDetail(null)}
+          onRerun={() => rerunProbe(selectedDetail.job)}
+          onGenerate={(kind) =>
+            generateOptimization(
+              kind,
+              selectedDetail.job,
+              selectedDetail.probe,
+              selectedDetail.snapshot?.answerText
+            )
+          }
+          generatingKind={generatingKind}
+          generatedOptimization={generatedOptimization}
+        />
+      ) : null}
     </div>
   );
 }
@@ -1128,14 +1980,35 @@ function ProbeDetailModal({
   const copyQuality = detail.copyQuality;
   const suggestions = buildGeoSuggestions(detail);
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(15, 23, 42, 0.36)', display: 'grid', placeItems: 'center', padding: 24 }}>
-      <section className="card-elevated" style={{ width: 'min(960px, 96vw)', maxHeight: '88vh', overflow: 'auto', padding: 18, display: 'grid', gap: 14 }}>
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 50,
+        background: 'rgba(15, 23, 42, 0.36)',
+        display: 'grid',
+        placeItems: 'center',
+        padding: 24,
+      }}
+    >
+      <section
+        className="card-elevated"
+        style={{
+          width: 'min(960px, 96vw)',
+          maxHeight: '88vh',
+          overflow: 'auto',
+          padding: 18,
+          display: 'grid',
+          gap: 14,
+        }}
+      >
         <div className="workbench-section-header">
           <div>
             <p className="workbench-section-header__eyebrow">探测详情</p>
             <h2 className="workbench-section-header__title">{job.question}</h2>
             <p className="workbench-section-header__description">
-              {engineLabel(engines, job.engine)} · {job.status} · {fmtDate(job.finishedAt || job.createdAt)}
+              {engineLabel(engines, job.engine)} · {job.status} ·{' '}
+              {fmtDate(job.finishedAt || job.createdAt)}
             </p>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -1143,17 +2016,42 @@ function ProbeDetailModal({
               <RefreshCw size={14} />
               重新探测
             </button>
-            <button className="btn btn-outline btn-sm" type="button" onClick={onClose} aria-label="关闭">
+            <button
+              className="btn btn-outline btn-sm"
+              type="button"
+              onClick={onClose}
+              aria-label="关闭"
+            >
               <X size={14} />
             </button>
           </div>
         </div>
 
         <div className="g4" style={{ gap: 12 }}>
-          <MetricCard icon={Search} label="我方出现" value={probe?.weCited ? '是' : '否'} hint="品牌名或我方域名命中" />
-          <MetricCard icon={BarChart3} label="引用位次" value={probe?.citationRank ? String(probe.citationRank) : '-'} hint="答案句段中的首次位置" />
-          <MetricCard icon={Bot} label="AIVS" value={engineAivs !== undefined ? String(engineAivs) : '-'} hint="当前引擎平均分" />
-          <MetricCard icon={Database} label="文案质量" value={copyQuality ? String(copyQuality.score) : '-'} hint={copyQuality?.verdictLabel || engineLabel(engines, job.engine)} />
+          <MetricCard
+            icon={Search}
+            label="我方出现"
+            value={probe?.weCited ? '是' : '否'}
+            hint="品牌名或我方域名命中"
+          />
+          <MetricCard
+            icon={BarChart3}
+            label="引用位次"
+            value={probe?.citationRank ? String(probe.citationRank) : '-'}
+            hint="答案句段中的首次位置"
+          />
+          <MetricCard
+            icon={Bot}
+            label="AIVS"
+            value={engineAivs !== undefined ? String(engineAivs) : '-'}
+            hint="当前引擎平均分"
+          />
+          <MetricCard
+            icon={Database}
+            label="文案质量"
+            value={copyQuality ? String(copyQuality.score) : '-'}
+            hint={copyQuality?.verdictLabel || engineLabel(engines, job.engine)}
+          />
         </div>
 
         {job.errorMessage ? (
@@ -1165,23 +2063,59 @@ function ProbeDetailModal({
 
         {copyQuality ? (
           <div className="inset" style={{ display: 'grid', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'space-between',
+                gap: 12,
+              }}
+            >
               <div style={{ display: 'grid', gap: 4 }}>
                 <strong style={{ color: 'var(--t-primary)' }}>文案风格质量</strong>
                 <p style={{ color: 'var(--t-secondary)', fontSize: 13 }}>{copyQuality.summary}</p>
               </div>
-              <span className="badge" style={{ color: qualityColor(copyQuality.verdict), borderColor: qualityColor(copyQuality.verdict) }}>
+              <span
+                className="badge"
+                style={{
+                  color: qualityColor(copyQuality.verdict),
+                  borderColor: qualityColor(copyQuality.verdict),
+                }}
+              >
                 {copyQuality.verdictLabel}
               </span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: 10 }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+                gap: 10,
+              }}
+            >
               {copyQuality.dimensions.map((item) => (
-                <div key={item.key} className="inset" style={{ display: 'grid', gap: 6, padding: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
-                    <strong style={{ color: 'var(--t-primary)', fontSize: 13 }}>{item.label}</strong>
-                    <span style={{ color: qualityStatusColor(item.status), fontWeight: 800 }}>{item.score}</span>
+                <div
+                  key={item.key}
+                  className="inset"
+                  style={{ display: 'grid', gap: 6, padding: 12 }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      gap: 8,
+                      alignItems: 'center',
+                    }}
+                  >
+                    <strong style={{ color: 'var(--t-primary)', fontSize: 13 }}>
+                      {item.label}
+                    </strong>
+                    <span style={{ color: qualityStatusColor(item.status), fontWeight: 800 }}>
+                      {item.score}
+                    </span>
                   </div>
-                  <p style={{ color: 'var(--t-tertiary)', fontSize: 12, lineHeight: 1.5 }}>{item.summary}</p>
+                  <p style={{ color: 'var(--t-tertiary)', fontSize: 12, lineHeight: 1.5 }}>
+                    {item.summary}
+                  </p>
                 </div>
               ))}
             </div>
@@ -1189,7 +2123,9 @@ function ProbeDetailModal({
               <div style={{ display: 'grid', gap: 6 }}>
                 <strong style={{ color: 'var(--danger)', fontSize: 13 }}>主要风险</strong>
                 {copyQuality.risks.map((item) => (
-                  <p key={item} style={{ color: 'var(--t-secondary)', fontSize: 13 }}>{item}</p>
+                  <p key={item} style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
+                    {item}
+                  </p>
                 ))}
               </div>
             ) : null}
@@ -1197,7 +2133,9 @@ function ProbeDetailModal({
               <div style={{ display: 'grid', gap: 6 }}>
                 <strong style={{ color: 'var(--t-primary)', fontSize: 13 }}>修改建议</strong>
                 {copyQuality.suggestions.map((item) => (
-                  <p key={item} style={{ color: 'var(--t-secondary)', fontSize: 13 }}>{item}</p>
+                  <p key={item} style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
+                    {item}
+                  </p>
                 ))}
               </div>
             ) : null}
@@ -1206,16 +2144,27 @@ function ProbeDetailModal({
 
         <div className="inset" style={{ display: 'grid', gap: 8 }}>
           <strong style={{ color: 'var(--t-primary)' }}>完整 AI 回答</strong>
-          <p style={{ whiteSpace: 'pre-wrap', color: 'var(--t-secondary)', lineHeight: 1.7, fontSize: 13 }}>
+          <p
+            style={{
+              whiteSpace: 'pre-wrap',
+              color: 'var(--t-secondary)',
+              lineHeight: 1.7,
+              fontSize: 13,
+            }}
+          >
             {snapshot?.answerText || '暂无回答'}
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 12 }}>
+        <div
+          style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 12 }}
+        >
           <div className="inset" style={{ display: 'grid', gap: 8 }}>
             <strong style={{ color: 'var(--t-primary)' }}>竞品占位</strong>
             <p style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
-              {probe?.competitorsCited?.length ? probe.competitorsCited.join('、') : '本次回答未命中已配置竞品。'}
+              {probe?.competitorsCited?.length
+                ? probe.competitorsCited.join('、')
+                : '本次回答未命中已配置竞品。'}
             </p>
           </div>
           <div className="inset" style={{ display: 'grid', gap: 8 }}>
@@ -1223,7 +2172,10 @@ function ProbeDetailModal({
             {(snapshot?.citations || []).length ? (
               <div style={{ display: 'grid', gap: 6 }}>
                 {(snapshot?.citations || []).slice(0, 8).map((item, index) => (
-                  <span key={`${String(item.url || index)}`} style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
+                  <span
+                    key={`${String(item.url || index)}`}
+                    style={{ color: 'var(--t-secondary)', fontSize: 13 }}
+                  >
                     {String(item.title || item.domain || item.url || '-')}
                   </span>
                 ))}
@@ -1237,19 +2189,48 @@ function ProbeDetailModal({
         <div className="inset" style={{ display: 'grid', gap: 8 }}>
           <strong style={{ color: 'var(--t-primary)' }}>优化建议</strong>
           {suggestions.map((item) => (
-            <p key={item} style={{ color: 'var(--t-secondary)', fontSize: 13 }}>{item}</p>
+            <p key={item} style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
+              {item}
+            </p>
           ))}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
-            <button className="btn btn-outline btn-sm" type="button" onClick={() => onGenerate('faq')} disabled={Boolean(generatingKind)}>
-              {generatingKind === 'faq' ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />}
+            <button
+              className="btn btn-outline btn-sm"
+              type="button"
+              onClick={() => onGenerate('faq')}
+              disabled={Boolean(generatingKind)}
+            >
+              {generatingKind === 'faq' ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Wand2 size={14} />
+              )}
               生成 FAQ
             </button>
-            <button className="btn btn-outline btn-sm" type="button" onClick={() => onGenerate('comparison')} disabled={Boolean(generatingKind)}>
-              {generatingKind === 'comparison' ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />}
+            <button
+              className="btn btn-outline btn-sm"
+              type="button"
+              onClick={() => onGenerate('comparison')}
+              disabled={Boolean(generatingKind)}
+            >
+              {generatingKind === 'comparison' ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Wand2 size={14} />
+              )}
               生成对比文章
             </button>
-            <button className="btn btn-outline btn-sm" type="button" onClick={() => onGenerate('topic')} disabled={Boolean(generatingKind)}>
-              {generatingKind === 'topic' ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />}
+            <button
+              className="btn btn-outline btn-sm"
+              type="button"
+              onClick={() => onGenerate('topic')}
+              disabled={Boolean(generatingKind)}
+            >
+              {generatingKind === 'topic' ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Wand2 size={14} />
+              )}
               生成专题页建议
             </button>
           </div>
@@ -1258,7 +2239,14 @@ function ProbeDetailModal({
         {generatedOptimization ? (
           <div className="inset" style={{ display: 'grid', gap: 8 }}>
             <strong style={{ color: 'var(--t-primary)' }}>{generatedOptimization.title}</strong>
-            <p style={{ color: 'var(--t-secondary)', fontSize: 13, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+            <p
+              style={{
+                color: 'var(--t-secondary)',
+                fontSize: 13,
+                lineHeight: 1.7,
+                whiteSpace: 'pre-wrap',
+              }}
+            >
               {cleanAnswerText(generatedOptimization.draft)}
             </p>
             {generatedOptimization.assetId ? (
@@ -1275,24 +2263,34 @@ function buildGeoSuggestions(detail: ProbeDetail) {
   const probe = detail.probe;
   const items: string[] = [];
   if (!probe?.weCited) {
-    items.push('补齐权威内容：围绕该问题生成 FAQ、选购指南或产品对比页，并把品牌名、产品能力和服务承诺写进页面主内容。');
+    items.push(
+      '补齐权威内容：围绕该问题生成 FAQ、选购指南或产品对比页，并把品牌名、产品能力和服务承诺写进页面主内容。'
+    );
   } else if (probe.citationRank && probe.citationRank > 2) {
-    items.push('提升引用位次：把该问题对应的答案前置到官网专题页、FAQ 和结构化数据中，增强首段品牌露出。');
+    items.push(
+      '提升引用位次：把该问题对应的答案前置到官网专题页、FAQ 和结构化数据中，增强首段品牌露出。'
+    );
   } else {
     items.push('保持优势：本次回答已命中我方品牌，可继续沉淀为标准问答和官网 FAQ。');
   }
   if (probe?.competitorsCited?.length) {
-    items.push(`增加对比内容：本次竞品占位包含 ${probe.competitorsCited.join('、')}，建议生成“我方方案 vs 主流品牌”的对比素材。`);
+    items.push(
+      `增加对比内容：本次竞品占位包含 ${probe.competitorsCited.join('、')}，建议生成“我方方案 vs 主流品牌”的对比素材。`
+    );
   }
   if (!detail.snapshot?.citations?.length) {
-    items.push('补来源链路：建议整理官网资料、产品资料和案例链接，让后续回答更容易引用我方权威内容。');
+    items.push(
+      '补来源链路：建议整理官网资料、产品资料和案例链接，让后续回答更容易引用我方权威内容。'
+    );
   }
   return items;
 }
 
 function buildContentGaps(detail: ProbeDetail, sources: ReferenceSource[]) {
   const probe = detail.probe;
-  const ownedSources = sources.filter((item) => item.owned && (item.url.trim() || item.summary.trim()));
+  const ownedSources = sources.filter(
+    (item) => item.owned && (item.url.trim() || item.summary.trim())
+  );
   const gaps: Array<{ level: 'P0' | 'P1' | 'P2'; title: string; desc: string }> = [];
   if (!probe?.weCited) {
     gaps.push({
@@ -1328,15 +2326,21 @@ function buildContentGaps(detail: ProbeDetail, sources: ReferenceSource[]) {
       desc: '当前回答没有稳定引用链接，后续应把参考资料整理成可引用内容并同步到对外站点。',
     });
   }
-  return gaps.length ? gaps : [{
-    level: 'P2' as const,
-    title: '持续巩固内容',
-    desc: '本次结果较稳定，可把回答沉淀为 FAQ、选购指南和专题页内容，继续复测排名变化。',
-  }];
+  return gaps.length
+    ? gaps
+    : [
+        {
+          level: 'P2' as const,
+          title: '持续巩固内容',
+          desc: '本次结果较稳定，可把回答沉淀为 FAQ、选购指南和专题页内容，继续复测排名变化。',
+        },
+      ];
 }
 
 function buildNextActions(detail: ProbeDetail) {
-  const competitorText = detail.probe?.competitorsCited?.length ? detail.probe.competitorsCited.join('、') : '主流竞品';
+  const competitorText = detail.probe?.competitorsCited?.length
+    ? detail.probe.competitorsCited.join('、')
+    : '主流竞品';
   return [
     {
       kind: 'faq' as const,
@@ -1372,14 +2376,37 @@ function riskLabel(value?: ProbeJob['riskLevel'] | null) {
   return value || '-';
 }
 
-function MetricCard({ icon: Icon, label, value, hint }: { icon: LucideIcon; label: string; value: string; hint: string }) {
+function MetricCard({
+  icon: Icon,
+  label,
+  value,
+  hint,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string;
+  hint: string;
+}) {
   return (
     <article className="inset" style={{ padding: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+      <div
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
+      >
         <span className="t-label">{label}</span>
         <Icon size={16} style={{ color: 'var(--brand)' }} />
       </div>
-      <div style={{ marginTop: 8, fontSize: 28, lineHeight: 1, fontWeight: 800, color: 'var(--t-strong)', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+      <div
+        style={{
+          marginTop: 8,
+          fontSize: 28,
+          lineHeight: 1,
+          fontWeight: 800,
+          color: 'var(--t-strong)',
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {value}
+      </div>
       <p style={{ marginTop: 8, color: 'var(--t-tertiary)', fontSize: 12 }}>{hint}</p>
     </article>
   );
@@ -1425,7 +2452,14 @@ function LatestProbeCard({
   const running = job.status === 'running' || job.status === 'pending';
   return (
     <div className="inset" style={{ display: 'grid', gap: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 12,
+        }}
+      >
         <div style={{ display: 'grid', gap: 6, minWidth: 0 }}>
           <span className="t-label">最新探测</span>
           <strong style={{ color: 'var(--t-primary)', fontSize: 16 }}>{job.question}</strong>
@@ -1441,29 +2475,71 @@ function LatestProbeCard({
       <p style={{ color: 'var(--t-secondary)', fontSize: 13, lineHeight: 1.7 }}>
         {answerText || (running ? '正在生成回答...' : '暂无回答摘要')}
       </p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10 }}>
-        <FlowStep title="我方是否出现" desc={running ? '待分析' : (probe?.weCited ? '是' : '否')} />
-        <FlowStep title="引用位次" desc={running ? '待分析' : (probe?.citationRank ? `第 ${probe.citationRank} 位` : '-')} />
-        <FlowStep title="竞品占位" desc={running ? '待分析' : (probe?.competitorsCited?.length ? probe.competitorsCited.join('、') : '未命中竞品')} />
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gap: 10,
+        }}
+      >
+        <FlowStep title="我方是否出现" desc={running ? '待分析' : probe?.weCited ? '是' : '否'} />
+        <FlowStep
+          title="引用位次"
+          desc={running ? '待分析' : probe?.citationRank ? `第 ${probe.citationRank} 位` : '-'}
+        />
+        <FlowStep
+          title="竞品占位"
+          desc={
+            running
+              ? '待分析'
+              : probe?.competitorsCited?.length
+                ? probe.competitorsCited.join('、')
+                : '未命中竞品'
+          }
+        />
       </div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <button className="btn btn-outline btn-sm" type="button" onClick={() => onDetail(job)} disabled={detailLoading || running || job.id.startsWith('stream-')}>
+        <button
+          className="btn btn-outline btn-sm"
+          type="button"
+          onClick={() => onDetail(job)}
+          disabled={detailLoading || running || job.id.startsWith('stream-')}
+        >
           <Eye size={14} />
           查看详情
         </button>
-        <button className="btn btn-outline btn-sm" type="button" onClick={() => onRerun(job)} disabled={autoRunning || running}>
+        <button
+          className="btn btn-outline btn-sm"
+          type="button"
+          onClick={() => onRerun(job)}
+          disabled={autoRunning || running}
+        >
           <RefreshCw size={14} />
           重新探测
         </button>
-        <button className="btn btn-outline btn-sm" type="button" onClick={() => onGenerate(job, probe)} disabled={generating || running || job.id.startsWith('stream-')}>
+        <button
+          className="btn btn-outline btn-sm"
+          type="button"
+          onClick={() => onGenerate(job, probe)}
+          disabled={generating || running || job.id.startsWith('stream-')}
+        >
           {generating ? <Loader2 size={14} className="animate-spin" /> : <Wand2 size={14} />}
           生成优化建议
         </button>
       </div>
       {generatedOptimization?.jobId === job.id ? (
         <div className="inset" style={{ display: 'grid', gap: 8 }}>
-          <strong style={{ color: 'var(--t-primary)', fontSize: 13 }}>{generatedOptimization.title}</strong>
-          <p style={{ color: 'var(--t-secondary)', fontSize: 13, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+          <strong style={{ color: 'var(--t-primary)', fontSize: 13 }}>
+            {generatedOptimization.title}
+          </strong>
+          <p
+            style={{
+              color: 'var(--t-secondary)',
+              fontSize: 13,
+              lineHeight: 1.7,
+              whiteSpace: 'pre-wrap',
+            }}
+          >
             {cleanAnswerText(generatedOptimization.draft)}
           </p>
         </div>
@@ -1484,7 +2560,12 @@ function FlowStep({ title, desc }: { title: string; desc: string }) {
 function EmptyRow({ colSpan, text }: { colSpan: number; text: string }) {
   return (
     <tr>
-      <td colSpan={colSpan} style={{ textAlign: 'center', color: 'var(--t-tertiary)', padding: 22 }}>{text}</td>
+      <td
+        colSpan={colSpan}
+        style={{ textAlign: 'center', color: 'var(--t-tertiary)', padding: 22 }}
+      >
+        {text}
+      </td>
     </tr>
   );
 }

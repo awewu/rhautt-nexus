@@ -1,4 +1,8 @@
-import { EMPTY_POSITIONING, sanitizePositioning, type ProductPositioning } from './product-taxonomy';
+import {
+  EMPTY_POSITIONING,
+  sanitizePositioning,
+  type ProductPositioning,
+} from './product-taxonomy';
 
 export interface ProductRecommendationCandidate {
   sku?: string | null;
@@ -25,14 +29,27 @@ export interface ProductRecommendationScore {
   positioning: ProductPositioning;
 }
 
-export interface ProductRecommendationRank<T extends ProductRecommendationCandidate = ProductRecommendationCandidate> extends ProductRecommendationScore {
+export interface ProductRecommendationRank<
+  T extends ProductRecommendationCandidate = ProductRecommendationCandidate,
+> extends ProductRecommendationScore {
   p: T;
 }
 
 const SYSTEM_KEYWORDS: Record<string, string[]> = {
   hot_water: ['water-heating', 'hot water', 'water heater', '热水', '热水器', '恒温', '大水量'],
   heating: ['heating-boiler', 'boiler', '采暖', '壁挂炉', '冷凝炉', '锅炉'],
-  air: ['heat-pump', 'fan-coil', 'ventilation', 'dehumidification', 'air', '风盘', '空气', '新风', '除湿', '热泵'],
+  air: [
+    'heat-pump',
+    'fan-coil',
+    'ventilation',
+    'dehumidification',
+    'air',
+    '风盘',
+    '空气',
+    '新风',
+    '除湿',
+    '热泵',
+  ],
   fresh_air: ['ventilation', 'dehumidification', 'fresh air', '新风', '除湿', '空气'],
   water_treatment: ['water-treatment', 'filter', '净水', '软水', '过滤', '前置'],
   smart_control: ['control', 'hydronic-control', 'smart', '控制', '联动', '水控'],
@@ -93,7 +110,7 @@ export function resolveRecommendationSystems(criteria: ProductRecommendationCrit
 
 export function scoreProductRecommendation(
   product: ProductRecommendationCandidate,
-  criteria: ProductRecommendationCriteria,
+  criteria: ProductRecommendationCriteria
 ): ProductRecommendationScore {
   const positioning = sanitizePositioning(product.positioning ?? EMPTY_POSITIONING);
   const segments = criteriaSegments(criteria);
@@ -141,7 +158,10 @@ export function scoreProductRecommendation(
       positioning.valueProposition,
       ...positioning.painPoints,
       ...positioning.scenarios,
-    ].filter(Boolean).join(' ').toLowerCase();
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
 
     for (const system of systems) {
       const keywords = SYSTEM_KEYWORDS[system] || [system];
@@ -157,14 +177,15 @@ export function scoreProductRecommendation(
 
 export function rankProductRecommendationCandidates<T extends ProductRecommendationCandidate>(
   products: T[],
-  criteria: ProductRecommendationCriteria,
+  criteria: ProductRecommendationCriteria
 ): ProductRecommendationRank<T>[] {
   const systems = resolveRecommendationSystems(criteria);
   const segments = criteriaSegments(criteria);
   const painPoints = lowerList(criteria.painPoints);
-  const hasCriteria = systems.length > 0
-    || painPoints.length > 0
-    || [
+  const hasCriteria =
+    systems.length > 0 ||
+    painPoints.length > 0 ||
+    [
       criteria.segments,
       criteria.channels,
       criteria.personas,
@@ -177,11 +198,18 @@ export function rankProductRecommendationCandidates<T extends ProductRecommendat
     return { p, positioning: rec.positioning, score: rec.score, signals: rec.signals };
   });
 
-  if (!hasCriteria) return scored.sort((a, b) => String(a.p.name || '').localeCompare(String(b.p.name || '')));
+  if (!hasCriteria)
+    return scored.sort((a, b) => String(a.p.name || '').localeCompare(String(b.p.name || '')));
 
   return scored
     .filter((s) => s.score > 0)
-    .filter((s) => !segments.length || segments.some((segment) => s.positioning.targetSegments.includes(segment)))
-    .filter((s) => !systems.length || systems.some((system) => s.signals.includes(`system:${system}`)))
+    .filter(
+      (s) =>
+        !segments.length ||
+        segments.some((segment) => s.positioning.targetSegments.includes(segment))
+    )
+    .filter(
+      (s) => !systems.length || systems.some((system) => s.signals.includes(`system:${system}`))
+    )
     .sort((a, b) => b.score - a.score);
 }

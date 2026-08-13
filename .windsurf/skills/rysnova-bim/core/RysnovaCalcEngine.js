@@ -1,13 +1,13 @@
 /**
  * RysnovaCalcEngine - 暖通专业计算引擎
- * 
+ *
  * 集成行业顶尖计算能力:
  * - 负荷计算 (Radiance/Daysim光热耦合)
  * - 水力计算 (EPANET管网水力分析)
  * - 气流组织 (CFD风环境模拟)
  * - 噪声计算 (NC曲线/声压级预测)
  * - 能耗模拟 (EnergyPlus全年能耗)
- * 
+ *
  * @author Rysnova Team
  * @version 1.0.0
  */
@@ -16,18 +16,18 @@ class RysnovaCalcEngine {
   constructor() {
     this.name = 'RysnovaCalcEngine';
     this.version = '1.0.0';
-    
+
     // 计算精度配置
     this.PRECISION = {
-      loadCalculation: 0.01,      // 负荷计算 ±1%
-      hydraulic: 0.05,           // 水力计算 ±5%
-      cfd: 0.10,                 // CFD ±10%
-      energy: 0.05               // 能耗 ±5%
+      loadCalculation: 0.01, // 负荷计算 ±1%
+      hydraulic: 0.05, // 水力计算 ±5%
+      cfd: 0.1, // CFD ±10%
+      energy: 0.05, // 能耗 ±5%
     };
-    
+
     // 气象数据库
     this.climateDB = new Map();
-    
+
     // 材料热物性数据库
     this.materialDB = {
       // 常用建筑材料
@@ -44,30 +44,30 @@ class RysnovaCalcEngine {
    */
   async performCompleteCalculation(params) {
     console.log('[RysnovaCalc] 开始完整专业计算');
-    
+
     const results = {
       timestamp: new Date().toISOString(),
-      version: this.version
+      version: this.version,
     };
-    
+
     // 并行执行各专项计算
     const calculations = await Promise.all([
-      this.calculateLoad(params),        // 负荷计算
-      this.calculateHydraulic(params),   // 水力计算
-      this.calculateCFD(params),         // 气流组织
-      this.calculateNoise(params),       // 噪声计算
-      this.calculateEnergy(params)        // 能耗模拟
+      this.calculateLoad(params), // 负荷计算
+      this.calculateHydraulic(params), // 水力计算
+      this.calculateCFD(params), // 气流组织
+      this.calculateNoise(params), // 噪声计算
+      this.calculateEnergy(params), // 能耗模拟
     ]);
-    
+
     results.load = calculations[0];
     results.hydraulic = calculations[1];
     results.cfd = calculations[2];
     results.noise = calculations[3];
     results.energy = calculations[4];
-    
+
     // 综合评估
     results.evaluation = this.evaluateDesign(results);
-    
+
     return results;
   }
 
@@ -76,81 +76,74 @@ class RysnovaCalcEngine {
    * 严格遵循GB 50736-2012
    */
   async calculateLoad(params) {
-    const {
-      building,
-      rooms,
-      orientation,
-      climateZone,
-      occupancy,
-      schedule
-    } = params;
-    
+    const { building, rooms, orientation, climateZone, occupancy, schedule } = params;
+
     console.log('[RysnovaCalc] 负荷计算 - Radiance耦合');
-    
+
     // 1. 建筑几何分析
     const geometry = this.analyzeBuildingGeometry(building, rooms);
-    
+
     // 2. 围护结构热工计算
     const envelope = this.calculateEnvelopeLoad(geometry, building.materials);
-    
+
     // 3. 太阳辐射分析 (Radiance光线追踪)
     const solar = await this.calculateSolarRadiance({
       geometry,
       orientation,
       climateZone,
-      dateRange: this.getDesignDays(climateZone)
+      dateRange: this.getDesignDays(climateZone),
     });
-    
+
     // 4. 内部得热
     const internal = this.calculateInternalLoad({
       occupancy,
       lighting: building.lighting,
       equipment: building.equipment,
-      schedule
+      schedule,
     });
-    
+
     // 5. 新风负荷
     const ventilation = this.calculateVentilationLoad({
       airVolume: this.calculateFreshAirVolume(occupancy, rooms),
       climateZone,
-      efficiency: building.heatRecovery
+      efficiency: building.heatRecovery,
     });
-    
+
     // 6. 汇总
     const coolingLoad = envelope.cooling + solar.cooling + internal.cooling + ventilation.cooling;
     const heatingLoad = envelope.heating + solar.heating + internal.heating + ventilation.heating;
-    
+
     // 7. 湿负荷
     const moisture = this.calculateMoistureLoad({
       occupancy,
       ventilation,
-      climateZone
+      climateZone,
     });
-    
+
     return {
       cooling: {
         total: coolingLoad,
         sensible: this.calculateSensibleLoad(coolingLoad, moisture),
         latent: moisture.latent,
         peak: this.findPeakLoad(solar.hourly, internal.hourly),
-        byRoom: this.distributeByRoom(rooms, coolingLoad)
+        byRoom: this.distributeByRoom(rooms, coolingLoad),
       },
       heating: {
         total: heatingLoad,
         peak: this.findPeakHeating(envelope.hourly, climateZone),
-        byRoom: this.distributeByRoom(rooms, heatingLoad)
+        byRoom: this.distributeByRoom(rooms, heatingLoad),
       },
       ventilation: {
         volume: this.calculateFreshAirVolume(occupancy, rooms),
         load: ventilation,
-        heatRecovery: building.heatRecovery ? ventilation.recovered : 0
+        heatRecovery: building.heatRecovery ? ventilation.recovered : 0,
       },
       detail: {
         envelope,
         solar,
         internal,
-        hourly: this.generateHourlyProfile(solar, internal, envelope)
-      }
+        hourly: this.generateHourlyProfile(solar, internal, envelope),
+      },
     };
   }
 
@@ -164,15 +157,15 @@ class RysnovaCalcEngine {
       geometry,
       materials: this.getGlazingProperties(geometry.windows),
       sky: this.getClimateSky(climateZone),
-      orientation
+      orientation,
     });
-    
+
     // 执行光线追踪
     const rayTrace = await this.simulateRayTracing(radianceInput);
-    
+
     // 计算得热
     const gains = this.calculateSolarGains(rayTrace, geometry.windows);
-    
+
     return {
       total: gains.total,
       peak: gains.peak,
@@ -180,7 +173,7 @@ class RysnovaCalcEngine {
       heating: gains.total * 0.3, // 冬季辅助采暖
       hourly: gains.hourly,
       bySurface: gains.bySurface,
-      shading: this.evaluateShadingEffectiveness(geometry.shading)
+      shading: this.evaluateShadingEffectiveness(geometry.shading),
     };
   }
 
@@ -189,35 +182,35 @@ class RysnovaCalcEngine {
    */
   async calculateHydraulic(params) {
     const { pipeNetwork, pumps, valves, designFlow } = params;
-    
+
     console.log('[RysnovaCalc] 水力计算 - EPANET');
-    
+
     // 1. 构建管网模型
     const network = this.buildHydraulicNetwork({
       pipes: pipeNetwork,
       nodes: this.extractNodes(pipeNetwork),
       pumps,
-      valves
+      valves,
     });
-    
+
     // 2. EPANET模拟 (简化实现)
     const simulation = await this.simulateEPANET({
       network,
       demand: designFlow,
       pattern: this.getDemandPattern(params.buildingType),
-      duration: 24 // 24小时动态模拟
+      duration: 24, // 24小时动态模拟
     });
-    
+
     // 3. 结果分析
     return {
-      pressures: simulation.pressures,    // 各节点压力
-      flows: simulation.flows,           // 各管段流量
+      pressures: simulation.pressures, // 各节点压力
+      flows: simulation.flows, // 各管段流量
       velocities: this.calculateVelocities(simulation.flows, pipeNetwork),
-      headLoss: simulation.headLoss,      // 水头损失
+      headLoss: simulation.headLoss, // 水头损失
       npsh: this.calculateNPSH(pumps, simulation.pressures),
       cavitation: this.checkCavitationRisk(pumps, simulation),
       balance: this.analyzeHydraulicBalance(simulation),
-      optimization: this.suggestPipeOptimization(simulation)
+      optimization: this.suggestPipeOptimization(simulation),
     };
   }
 
@@ -226,54 +219,54 @@ class RysnovaCalcEngine {
    */
   async calculateCFD(params) {
     const { room, diffusers, airFlow, tempDiff } = params;
-    
+
     console.log('[RysnovaCalc] CFD气流组织模拟');
-    
+
     // 1. 网格划分
     const mesh = this.generateCFDMesh(room);
-    
+
     // 2. 边界条件
     const boundaryConditions = this.defineBoundaryConditions({
       diffusers,
       airFlow,
       tempDiff,
-      roomGeometry: room
+      roomGeometry: room,
     });
-    
+
     // 3. 求解 (简化CFD)
     const solution = await this.solveCFD({
       mesh,
       boundaryConditions,
       turbulence: 'k-epsilon',
-      convergence: 1e-4
+      convergence: 1e-4,
     });
-    
+
     // 4. 舒适性分析
     const comfort = this.analyzeComfort({
       velocityField: solution.velocity,
       temperatureField: solution.temperature,
       pmv: true,
-      ppd: true
+      ppd: true,
     });
-    
+
     return {
       airflow: {
         pattern: solution.streamlines,
         velocity: solution.velocity,
-        temperature: solution.temperature
+        temperature: solution.temperature,
       },
       comfort: {
         pmv: comfort.pmv,
         ppd: comfort.ppd,
-        adpi: comfort.adpi,  // 空气扩散性能指标
-        draught: comfort.draughtRisk
+        adpi: comfort.adpi, // 空气扩散性能指标
+        draught: comfort.draughtRisk,
       },
       effectiveness: {
         airChange: this.calculateAirChanges(airFlow, room.volume),
         ventilationEfficiency: this.calculateVentilationEfficiency(solution),
-        temperatureStratification: this.analyzeStratification(solution)
+        temperatureStratification: this.analyzeStratification(solution),
       },
-      recommendations: this.generateCFDRecommendations(comfort)
+      recommendations: this.generateCFDRecommendations(comfort),
     };
   }
 
@@ -282,45 +275,45 @@ class RysnovaCalcEngine {
    */
   async calculateNoise(params) {
     const { equipment, roomAcoustics, transmissionPaths } = params;
-    
+
     console.log('[RysnovaCalc] 噪声计算');
-    
+
     // 1. 声源声功率级
-    const sources = equipment.map(eq => ({
+    const sources = equipment.map((eq) => ({
       id: eq.id,
       location: eq.position,
       lw: this.getSoundPowerLevel(eq),
-      spectrum: this.getOctaveBands(eq)
+      spectrum: this.getOctaveBands(eq),
     }));
-    
+
     // 2. 传播计算
     const propagation = this.calculateSoundPropagation({
       sources,
       paths: transmissionPaths,
-      room: roomAcoustics
+      room: roomAcoustics,
     });
-    
+
     // 3. 接收点声压级
     const receivers = this.calculateReceiverLevels({
       sources,
       propagation,
-      roomAbsorption: roomAcoustics.absorption
+      roomAbsorption: roomAcoustics.absorption,
     });
-    
+
     // 4. NC曲线评价
     const nc = this.evaluateNCCurves(receivers);
-    
+
     return {
       sources,
       propagation,
       receivers,
       nc,
       compliance: {
-        gb50356: this.checkGB50356(nc),      // 剧场规范
-        gb50118: this.checkGB50118(nc),      // 民用建筑隔声
-        ashrae: this.checkASHRAE(nc)
+        gb50356: this.checkGB50356(nc), // 剧场规范
+        gb50118: this.checkGB50118(nc), // 民用建筑隔声
+        ashrae: this.checkASHRAE(nc),
       },
-      recommendations: this.generateNoiseRecommendations(nc)
+      recommendations: this.generateNoiseRecommendations(nc),
     };
   }
 
@@ -328,39 +321,34 @@ class RysnovaCalcEngine {
    * 全年能耗模拟 - EnergyPlus接口
    */
   async calculateEnergy(params) {
-    const {
-      building,
-      hvacSystems,
-      climateZone,
-      operationSchedule
-    } = params;
-    
+    const { building, hvacSystems, climateZone, operationSchedule } = params;
+
     console.log('[RysnovaCalc] 能耗模拟 - EnergyPlus');
-    
+
     // 1. 生成IDF输入文件
     const idf = this.generateIDF({
       building,
       systems: hvacSystems,
       climate: this.getEPW(climateZone),
-      schedule: operationSchedule
+      schedule: operationSchedule,
     });
-    
+
     // 2. 执行全年模拟
     const annual = await this.simulateEnergyPlus(idf, {
       period: 'annual',
-      timestep: 6,  // 10分钟
-      outputs: ['cooling', 'heating', 'fan', 'pump', 'total']
+      timestep: 6, // 10分钟
+      outputs: ['cooling', 'heating', 'fan', 'pump', 'total'],
     });
-    
+
     // 3. 能耗拆分
     const breakdown = this.analyzeEnergyBreakdown(annual);
-    
+
     // 4. 节能措施评估
     const savings = this.evaluateEnergyMeasures({
       baseline: annual,
-      measures: ['highEfficiencyChiller', 'heatRecovery', 'freeCooling']
+      measures: ['highEfficiencyChiller', 'heatRecovery', 'freeCooling'],
     });
-    
+
     return {
       annual: {
         total: annual.total,
@@ -369,22 +357,22 @@ class RysnovaCalcEngine {
         fan: annual.fan,
         pump: annual.pump,
         lighting: annual.lighting,
-        equipment: annual.equipment
+        equipment: annual.equipment,
       },
       breakdown: {
         byEndUse: breakdown.byEndUse,
         byMonth: breakdown.monthly,
-        peak: breakdown.peakDemand
+        peak: breakdown.peakDemand,
       },
       intensity: {
         perArea: annual.total / building.area,
-        perOccupant: annual.total / building.occupancy
+        perOccupant: annual.total / building.occupancy,
       },
       savings,
       carbon: {
         emissions: annual.total * this.getCarbonFactor(climateZone),
-        reductionPotential: savings.total
-      }
+        reductionPotential: savings.total,
+      },
     };
   }
 
@@ -397,20 +385,20 @@ class RysnovaCalcEngine {
       hydraulic: this.scoreHydraulicDesign(calculations.hydraulic),
       comfort: this.scoreComfort(calculations.cfd),
       noise: this.scoreNoise(calculations.noise),
-      energy: this.scoreEnergy(calculations.energy)
+      energy: this.scoreEnergy(calculations.energy),
     };
-    
+
     return {
       scores,
       overall: Object.values(scores).reduce((a, b) => a + b, 0) / 5,
       compliance: this.checkAllCompliance(calculations),
       optimization: this.identifyOptimization(calculations),
-      grade: this.calculateGrade(scores)
+      grade: this.calculateGrade(scores),
     };
   }
 
   // ============== 辅助方法 ==============
-  
+
   calculateGrade(scores) {
     const avg = Object.values(scores).reduce((a, b) => a + b, 0) / 5;
     if (avg >= 90) return 'A+ (卓越)';

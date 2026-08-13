@@ -13,14 +13,19 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
  */
 @Module({
   imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([DealerDirectoryEntity, RoutingDecisionEntity])]),
+    ...(TARGET_API_BOOT_SMOKE
+      ? []
+      : [TypeOrmModule.forFeature([DealerDirectoryEntity, RoutingDecisionEntity])]),
     AuthModule,
   ],
   controllers: [DispatchController],
   providers: [
     DispatchService,
     ...(TARGET_API_BOOT_SMOKE
-      ? [bootSmokeRepositoryProvider(DealerDirectoryEntity), bootSmokeRepositoryProvider(RoutingDecisionEntity)]
+      ? [
+          bootSmokeRepositoryProvider(DealerDirectoryEntity),
+          bootSmokeRepositoryProvider(RoutingDecisionEntity),
+        ]
       : []),
   ],
   exports: [DispatchService],

@@ -43,7 +43,9 @@ async function initializePostListenEngines({ engines, logger = console }) {
   logger.log('OK Econet pricing engine initialized');
 
   await engines.econetSystem.initialize();
-  logger.log(`OK Econet control system initialized (${engines.econetSystem.devices.size} device models)`);
+  logger.log(
+    `OK Econet control system initialized (${engines.econetSystem.devices.size} device models)`
+  );
 
   logger.log('DB persistence engine status:', engines.database.getStatus());
 }
@@ -60,7 +62,9 @@ function printStartupBanner({ port, host, httpsPort, useHttps, runtimeProfile, l
   if (useHttps) logger.log(`HTTPS: https://localhost:${httpsPort}`);
   logger.log(`Runtime profile: ${runtimeProfile || 'full'}`);
   logger.log('Core contracts: consultation, design, quote, BIM, lifecycle IoT, admin');
-  logger.log('Production gates: route ownership, active-page API contracts, React candidate isolation');
+  logger.log(
+    'Production gates: route ownership, active-page API contracts, React candidate isolation'
+  );
   logger.log('='.repeat(76));
   logger.log('');
 }
@@ -71,5 +75,5 @@ module.exports = {
   printStartupBanner,
   serviceStarted,
   startPostListenServices,
-  startPreListenServices
+  startPreListenServices,
 };

@@ -29,17 +29,17 @@
 
 ### 2.1 现有实体（按域）
 
-| 域 | 表 | 主键 | 唯一/串联键 | 备注 |
-|---|---|---|---|---|
-| crm | `customers` | uuid | **UNIQUE(tenant_id, phone_hash)** | 有 `address`（可空，未规范化、未入键） |
-| crm | `opportunities` | uuid | `customer_id`, `quotation_id` | 商机 |
-| quote | `quotations` | uuid | `quotation_no` UNIQUE；`source=designer-bom` | 携带设计 BOM |
-| delivery | `contracts` | uuid | `customer_id`, `quotation_id` | 合同 |
-| delivery | `delivery_projects` | uuid | `contract_id`, `customer_id`, `quotation_id` | 1 合同 1 施工项目 |
-| rysnova-bim | `bim_projects` | uuid | `customer_id`, `quotation_id` | 签单后深化载体（快照 BOM/项目） |
-| lifecycle | `lifecycle_links` | uuid | `customer_id` + 各阶段 id + `project_address` | **事实上的项目主线雏形** |
-| aftersales | `service_tickets` / `warranties` | uuid | `customer_id` | 售后 |
-| diagnosis | `diagnosis_sessions` | uuid | `customer_id` | 问诊 |
+| 域          | 表                               | 主键 | 唯一/串联键                                   | 备注                                   |
+| ----------- | -------------------------------- | ---- | --------------------------------------------- | -------------------------------------- |
+| crm         | `customers`                      | uuid | **UNIQUE(tenant_id, phone_hash)**             | 有 `address`（可空，未规范化、未入键） |
+| crm         | `opportunities`                  | uuid | `customer_id`, `quotation_id`                 | 商机                                   |
+| quote       | `quotations`                     | uuid | `quotation_no` UNIQUE；`source=designer-bom`  | 携带设计 BOM                           |
+| delivery    | `contracts`                      | uuid | `customer_id`, `quotation_id`                 | 合同                                   |
+| delivery    | `delivery_projects`              | uuid | `contract_id`, `customer_id`, `quotation_id`  | 1 合同 1 施工项目                      |
+| rysnova-bim | `bim_projects`                   | uuid | `customer_id`, `quotation_id`                 | 签单后深化载体（快照 BOM/项目）        |
+| lifecycle   | `lifecycle_links`                | uuid | `customer_id` + 各阶段 id + `project_address` | **事实上的项目主线雏形**               |
+| aftersales  | `service_tickets` / `warranties` | uuid | `customer_id`                                 | 售后                                   |
+| diagnosis   | `diagnosis_sessions`             | uuid | `customer_id`                                 | 问诊                                   |
 
 ### 2.2 核心差距（问题）
 
@@ -115,12 +115,14 @@ projects（= 扶正后的 lifecycle_links 主线）
 > 迁移文件命名沿用 `database/postgres/migrations/NNN_*.sql`，当前最新 `035`，本方案从 **`036`** 起。
 
 ### 阶段 P0 · 加列（向后兼容，可空）
+
 - `036_project_spine_columns.sql`：
   - `lifecycle_links` 加 `phone_hash`、`address_normalized`（可空）。
   - 各阶段表加 `project_id uuid NULL`（可空外键，先不加 NOT NULL）。
 - **零风险**：全部可空，旧代码不受影响。
 
 ### 阶段 P1 · 回填（backfill 脚本）
+
 - `scripts/db/backfill-project-spine.js`：
   1. 对每个 `lifecycle_links` 行：由 `customer_id` 取 `customers.phone_hash`；由 `project_address`（或 customer.address）计算 `address_normalized`；写回。
   2. **一客户多地址拆分**：若同一 `customer_id` 下检测到多个不同 `address_normalized`（历史被塌缩的项目），按地址拆成多条 Project 行（保留最早行为主，其余新建），并重挂对应阶段记录的 `project_id`。
@@ -128,16 +130,19 @@ projects（= 扶正后的 lifecycle_links 主线）
 - **先 `--dry-run` 出报告**（多少行、多少需拆分、多少无法匹配），人工复核再执行。
 
 ### 阶段 P2 · 加唯一约束 + 收紧
+
 - `037_project_spine_unique.sql`：
   - `UNIQUE(tenant_id, phone_hash, address_normalized)` on `lifecycle_links`。
   - 若 P1 回填干净，逐表把 `project_id` 改 `NOT NULL`（分表分批）。
 - **前置条件**：P1 dry-run 报告零冲突、零无法匹配。
 
 ### 阶段 P3 · 切写路径
+
 - 服务层按 §4.2 改为以 `project_id` 定位与串联（`advanceInTx` 定位键切换）。
 - 双读兼容期：先 `project_id` 命中，回退 `customer_id`（灰度），稳定后移除回退。
 
 ### 阶段 P4 · 清理
+
 - 移除写路径中的 `customer_id` 回退定位；文档/契约同步。
 
 ---
@@ -154,11 +159,11 @@ projects（= 扶正后的 lifecycle_links 主线）
 
 ## 7. 备选方案（评审对比）
 
-| 方案 | 做法 | 优点 | 缺点 |
-|---|---|---|---|
+| 方案                              | 做法                                                               | 优点                           | 缺点                                         |
+| --------------------------------- | ------------------------------------------------------------------ | ------------------------------ | -------------------------------------------- |
 | **A（推荐）扶正 lifecycle_links** | 现表加 `phone_hash+address_normalized+唯一约束`，作为 Project 主线 | 改动最小、复用现有富投影与 RLS | `lifecycle_links` 语义变重（既是桥又是主线） |
-| B 新建 `projects` 表 | 新建独立 Project 聚合，`lifecycle_links` 降为其投影 | 语义最清晰、职责单一 | 迁移量大、需重挂所有外键 |
-| C 仅在 `customers` 上做 | `customers` 唯一键改 `(tenant, phone_hash, address_normalized)` | 最简单 | **错误**：会把客户和项目混为一谈，违背 1:N |
+| B 新建 `projects` 表              | 新建独立 Project 聚合，`lifecycle_links` 降为其投影                | 语义最清晰、职责单一           | 迁移量大、需重挂所有外键                     |
+| C 仅在 `customers` 上做           | `customers` 唯一键改 `(tenant, phone_hash, address_normalized)`    | 最简单                         | **错误**：会把客户和项目混为一谈，违背 1:N   |
 
 > 方案 C 明确不采纳（违反 Customer 1:N Project）。A 与 B 二选一，建议 A 起步、保留演进到 B 的路径（符合"每模块留独立拆库路径"原则）。
 
@@ -231,21 +236,22 @@ projects（= 扶正后的 lifecycle_links 主线）
 
 **变更清单（8 条写路径 + 1 实体补漏）**：
 
-| 写路径 | 文件 | project_id 来源 |
-|---|---|---|
-| `createLead` | `crm.service.ts` | `advanceInTx` 先于 opportunity 创建，link.id → opportunity.projectId |
-| `createLeadInTx` | `crm.service.ts` | 同上（diagnosis 路径复用） |
-| `persist` | `quote.service.ts` | 按 customerId 查 lifecycle_links |
-| `createFromQuotation` | `contract.service.ts` | 按 quotationId 查 lifecycle_links |
-| `create` (线下合同) | `contract.service.ts` | 按 customerId 查 lifecycle_links |
-| `inheritFromQuotation` | `bim.service.ts` | 重排：先解析 link，再创建 contract + BIM project |
-| `createProjectForContract` | `construction.service.ts` | 按 contractId 查 lifecycle_links |
-| `createTicket` | `aftersales.service.ts` | 按 bimProjectId 查 lifecycle_links |
-| `createWarranty` | `aftersales.service.ts` | 按 bimProjectId 查 lifecycle_links |
-| `createSession` | `diagnosis.service.ts` | createLeadInTx 后按 customerId 查 link |
-| **实体补漏** | `aftersales.entity.ts` | ServiceTicketEntity / WarrantyEntity 补 projectId 列声明 |
+| 写路径                     | 文件                      | project_id 来源                                                      |
+| -------------------------- | ------------------------- | -------------------------------------------------------------------- |
+| `createLead`               | `crm.service.ts`          | `advanceInTx` 先于 opportunity 创建，link.id → opportunity.projectId |
+| `createLeadInTx`           | `crm.service.ts`          | 同上（diagnosis 路径复用）                                           |
+| `persist`                  | `quote.service.ts`        | 按 customerId 查 lifecycle_links                                     |
+| `createFromQuotation`      | `contract.service.ts`     | 按 quotationId 查 lifecycle_links                                    |
+| `create` (线下合同)        | `contract.service.ts`     | 按 customerId 查 lifecycle_links                                     |
+| `inheritFromQuotation`     | `bim.service.ts`          | 重排：先解析 link，再创建 contract + BIM project                     |
+| `createProjectForContract` | `construction.service.ts` | 按 contractId 查 lifecycle_links                                     |
+| `createTicket`             | `aftersales.service.ts`   | 按 bimProjectId 查 lifecycle_links                                   |
+| `createWarranty`           | `aftersales.service.ts`   | 按 bimProjectId 查 lifecycle_links                                   |
+| `createSession`            | `diagnosis.service.ts`    | createLeadInTx 后按 customerId 查 link                               |
+| **实体补漏**               | `aftersales.entity.ts`    | ServiceTicketEntity / WarrantyEntity 补 projectId 列声明             |
 
 **关键设计决策**：
+
 - CRM `createLead`/`createLeadInTx` **重排**：先 `advanceInTx`（创建 lifecycle_link），再创建 opportunity（取 link.id 作 projectId），再二次 `advanceInTx` 回填 opportunityId。
 - BIM `inheritFromQuotation` **重排**：先解析 lifecycle link，再创建 contract + BIM project（均注入 projectId），最后更新 link 回填 contractId/bimProjectId。
 - 售后 `createTicket`/`createWarranty`：按 `bimProjectId` 查 link（售后入口已携带 BIM 项目引用）。

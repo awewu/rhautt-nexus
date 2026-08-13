@@ -24,7 +24,10 @@ function service(config: Config = {}) {
 }
 
 function withFetch(
-  handler: (input: string, init?: RequestInit) => Promise<Partial<Response> & { json?: () => Promise<unknown> }>
+  handler: (
+    input: string,
+    init?: RequestInit
+  ) => Promise<Partial<Response> & { json?: () => Promise<unknown> }>
 ) {
   const original = globalThis.fetch;
   const calls: Array<{ input: string; init?: RequestInit }> = [];
@@ -57,7 +60,9 @@ test('OIDC login uses discovery from the configured issuer', async () => {
     json: async () => DISCOVERY,
   }));
   try {
-    const result = await service({ OIDC_ISSUER: 'https://issuer.example/' }).createLoginRedirect('/brand');
+    const result = await service({ OIDC_ISSUER: 'https://issuer.example/' }).createLoginRedirect(
+      '/brand'
+    );
 
     assert.equal(
       fetchMock.calls[0].input,

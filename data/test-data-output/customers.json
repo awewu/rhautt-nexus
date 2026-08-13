@@ -7,11 +7,7 @@
     "wechat": "wx_13564077399",
     "source": "ads",
     "status": "completed",
-    "tags": [
-      "别墅客户",
-      "低意向",
-      "价格敏感"
-    ],
+    "tags": ["别墅客户", "低意向", "价格敏感"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -54,11 +50,7 @@
     "wechat": "wx_14769123884",
     "source": "online",
     "status": "completed",
-    "tags": [
-      "别墅客户",
-      "低意向",
-      "价格敏感"
-    ],
+    "tags": ["别墅客户", "低意向", "价格敏感"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -101,11 +93,7 @@
     "wechat": "wx_16860732139",
     "source": "ads",
     "status": "contracted",
-    "tags": [
-      "别墅客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["别墅客户", "中意向", "价格敏感"],
     "profile": {
       "area": 120,
       "rooms": "3室2厅",
@@ -148,11 +136,7 @@
     "wechat": "wx_16792907903",
     "source": "online",
     "status": "completed",
-    "tags": [
-      "商用客户",
-      "低意向",
-      "预算充足"
-    ],
+    "tags": ["商用客户", "低意向", "预算充足"],
     "profile": {
       "area": 89,
       "rooms": "2室2厅",
@@ -195,11 +179,7 @@
     "wechat": "wx_16508062503",
     "source": "online",
     "status": "new",
-    "tags": [
-      "别墅客户",
-      "高意向",
-      "预算充足"
-    ],
+    "tags": ["别墅客户", "高意向", "预算充足"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -242,11 +222,7 @@
     "wechat": "wx_17223226688",
     "source": "online",
     "status": "new",
-    "tags": [
-      "别墅客户",
-      "高意向",
-      "预算充足"
-    ],
+    "tags": ["别墅客户", "高意向", "预算充足"],
     "profile": {
       "area": 120,
       "rooms": "3室2厅",
@@ -289,11 +265,7 @@
     "wechat": "wx_16168575312",
     "source": "ads",
     "status": "quoting",
-    "tags": [
-      "商用客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["商用客户", "高意向", "预算有限"],
     "profile": {
       "area": 120,
       "rooms": "3室2厅",
@@ -336,11 +308,7 @@
     "wechat": "wx_16302863485",
     "source": "partner",
     "status": "completed",
-    "tags": [
-      "公寓客户",
-      "低意向",
-      "价格敏感"
-    ],
+    "tags": ["公寓客户", "低意向", "价格敏感"],
     "profile": {
       "area": 200,
       "rooms": "办公空间",
@@ -383,11 +351,7 @@
     "wechat": "wx_18157922244",
     "source": "referral",
     "status": "diagnosed",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["公寓客户", "中意向", "价格敏感"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -430,11 +394,7 @@
     "wechat": "wx_13703081757",
     "source": "referral",
     "status": "quoting",
-    "tags": [
-      "公寓客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "高意向", "预算有限"],
     "profile": {
       "area": 200,
       "rooms": "办公空间",
@@ -477,11 +437,7 @@
     "wechat": "wx_13784902929",
     "source": "referral",
     "status": "contracted",
-    "tags": [
-      "别墅客户",
-      "中意向",
-      "预算有限"
-    ],
+    "tags": ["别墅客户", "中意向", "预算有限"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -524,11 +480,7 @@
     "wechat": "wx_19806386600",
     "source": "walkin",
     "status": "contracted",
-    "tags": [
-      "别墅客户",
-      "高意向",
-      "价格敏感"
-    ],
+    "tags": ["别墅客户", "高意向", "价格敏感"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -571,11 +523,7 @@
     "wechat": "wx_18429120276",
     "source": "online",
     "status": "quoting",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["公寓客户", "中意向", "价格敏感"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -618,11 +566,7 @@
     "wechat": "wx_17748149834",
     "source": "referral",
     "status": "negotiating",
-    "tags": [
-      "别墅客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["别墅客户", "高意向", "预算有限"],
     "profile": {
       "area": 450,
       "rooms": "7室5厅",
@@ -665,11 +609,7 @@
     "wechat": "wx_18459617553",
     "source": "online",
     "status": "new",
-    "tags": [
-      "公寓客户",
-      "低意向",
-      "价格敏感"
-    ],
+    "tags": ["公寓客户", "低意向", "价格敏感"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -712,11 +652,7 @@
     "wechat": "wx_14586762064",
     "source": "ads",
     "status": "diagnosed",
-    "tags": [
-      "商用客户",
-      "低意向",
-      "预算充足"
-    ],
+    "tags": ["商用客户", "低意向", "预算充足"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -759,11 +695,7 @@
     "wechat": "wx_14493695683",
     "source": "walkin",
     "status": "quoting",
-    "tags": [
-      "商用客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "中意向", "价格敏感"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -806,11 +738,7 @@
     "wechat": "wx_13336754934",
     "source": "online",
     "status": "quoting",
-    "tags": [
-      "商用客户",
-      "高意向",
-      "预算充足"
-    ],
+    "tags": ["商用客户", "高意向", "预算充足"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -853,11 +781,7 @@
     "wechat": "wx_17511366214",
     "source": "referral",
     "status": "contracted",
-    "tags": [
-      "公寓客户",
-      "低意向",
-      "价格敏感"
-    ],
+    "tags": ["公寓客户", "低意向", "价格敏感"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -900,11 +824,7 @@
     "wechat": "wx_19746452724",
     "source": "ads",
     "status": "new",
-    "tags": [
-      "商用客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["商用客户", "高意向", "预算有限"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -947,11 +867,7 @@
     "wechat": "wx_13323836133",
     "source": "online",
     "status": "contacted",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "中意向", "预算有限"],
     "profile": {
       "area": 200,
       "rooms": "办公空间",
@@ -994,11 +910,7 @@
     "wechat": "wx_18894248358",
     "source": "partner",
     "status": "new",
-    "tags": [
-      "公寓客户",
-      "低意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "低意向", "预算有限"],
     "profile": {
       "area": 120,
       "rooms": "3室2厅",
@@ -1041,11 +953,7 @@
     "wechat": "wx_18404290822",
     "source": "online",
     "status": "diagnosed",
-    "tags": [
-      "公寓客户",
-      "高意向",
-      "预算充足"
-    ],
+    "tags": ["公寓客户", "高意向", "预算充足"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -1088,11 +996,7 @@
     "wechat": "wx_19974072471",
     "source": "referral",
     "status": "contracted",
-    "tags": [
-      "别墅客户",
-      "中意向",
-      "预算有限"
-    ],
+    "tags": ["别墅客户", "中意向", "预算有限"],
     "profile": {
       "area": 120,
       "rooms": "3室2厅",
@@ -1135,11 +1039,7 @@
     "wechat": "wx_16344150438",
     "source": "referral",
     "status": "new",
-    "tags": [
-      "商用客户",
-      "低意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "低意向", "价格敏感"],
     "profile": {
       "area": 450,
       "rooms": "7室5厅",
@@ -1182,11 +1082,7 @@
     "wechat": "wx_19844468732",
     "source": "online",
     "status": "quoting",
-    "tags": [
-      "别墅客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["别墅客户", "高意向", "预算有限"],
     "profile": {
       "area": 200,
       "rooms": "办公空间",
@@ -1229,11 +1125,7 @@
     "wechat": "wx_13503913373",
     "source": "ads",
     "status": "diagnosed",
-    "tags": [
-      "商用客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["商用客户", "高意向", "预算有限"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -1276,11 +1168,7 @@
     "wechat": "wx_15257072280",
     "source": "ads",
     "status": "quoting",
-    "tags": [
-      "公寓客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "高意向", "预算有限"],
     "profile": {
       "area": 89,
       "rooms": "2室2厅",
@@ -1323,11 +1211,7 @@
     "wechat": "wx_13975009081",
     "source": "partner",
     "status": "negotiating",
-    "tags": [
-      "商用客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "中意向", "价格敏感"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -1370,11 +1254,7 @@
     "wechat": "wx_18292220078",
     "source": "ads",
     "status": "contacted",
-    "tags": [
-      "别墅客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["别墅客户", "中意向", "价格敏感"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -1417,11 +1297,7 @@
     "wechat": "wx_13786201924",
     "source": "referral",
     "status": "diagnosed",
-    "tags": [
-      "商用客户",
-      "中意向",
-      "预算充足"
-    ],
+    "tags": ["商用客户", "中意向", "预算充足"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -1464,11 +1340,7 @@
     "wechat": "wx_13161453563",
     "source": "ads",
     "status": "completed",
-    "tags": [
-      "商用客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "中意向", "价格敏感"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -1511,11 +1383,7 @@
     "wechat": "wx_18655105887",
     "source": "partner",
     "status": "contacted",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "预算充足"
-    ],
+    "tags": ["公寓客户", "中意向", "预算充足"],
     "profile": {
       "area": 200,
       "rooms": "办公空间",
@@ -1558,11 +1426,7 @@
     "wechat": "wx_15305860281",
     "source": "online",
     "status": "diagnosed",
-    "tags": [
-      "商用客户",
-      "中意向",
-      "预算充足"
-    ],
+    "tags": ["商用客户", "中意向", "预算充足"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -1605,11 +1469,7 @@
     "wechat": "wx_16439218110",
     "source": "ads",
     "status": "diagnosed",
-    "tags": [
-      "别墅客户",
-      "低意向",
-      "预算充足"
-    ],
+    "tags": ["别墅客户", "低意向", "预算充足"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -1652,11 +1512,7 @@
     "wechat": "wx_15934597342",
     "source": "ads",
     "status": "negotiating",
-    "tags": [
-      "商用客户",
-      "中意向",
-      "预算充足"
-    ],
+    "tags": ["商用客户", "中意向", "预算充足"],
     "profile": {
       "area": 200,
       "rooms": "办公空间",
@@ -1699,11 +1555,7 @@
     "wechat": "wx_19686941325",
     "source": "walkin",
     "status": "quoting",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "中意向", "预算有限"],
     "profile": {
       "area": 450,
       "rooms": "7室5厅",
@@ -1746,11 +1598,7 @@
     "wechat": "wx_15553238426",
     "source": "walkin",
     "status": "new",
-    "tags": [
-      "商用客户",
-      "低意向",
-      "预算有限"
-    ],
+    "tags": ["商用客户", "低意向", "预算有限"],
     "profile": {
       "area": 89,
       "rooms": "2室2厅",
@@ -1793,11 +1641,7 @@
     "wechat": "wx_18759036833",
     "source": "walkin",
     "status": "negotiating",
-    "tags": [
-      "公寓客户",
-      "高意向",
-      "价格敏感"
-    ],
+    "tags": ["公寓客户", "高意向", "价格敏感"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -1840,11 +1684,7 @@
     "wechat": "wx_17558538610",
     "source": "walkin",
     "status": "diagnosed",
-    "tags": [
-      "公寓客户",
-      "低意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "低意向", "预算有限"],
     "profile": {
       "area": 200,
       "rooms": "办公空间",
@@ -1887,11 +1727,7 @@
     "wechat": "wx_18412360297",
     "source": "partner",
     "status": "contacted",
-    "tags": [
-      "别墅客户",
-      "低意向",
-      "预算有限"
-    ],
+    "tags": ["别墅客户", "低意向", "预算有限"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -1934,11 +1770,7 @@
     "wechat": "wx_18543224602",
     "source": "partner",
     "status": "contacted",
-    "tags": [
-      "别墅客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["别墅客户", "高意向", "预算有限"],
     "profile": {
       "area": 120,
       "rooms": "3室2厅",
@@ -1981,11 +1813,7 @@
     "wechat": "wx_17851182188",
     "source": "partner",
     "status": "quoting",
-    "tags": [
-      "公寓客户",
-      "低意向",
-      "预算充足"
-    ],
+    "tags": ["公寓客户", "低意向", "预算充足"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -2028,11 +1856,7 @@
     "wechat": "wx_16661699011",
     "source": "partner",
     "status": "completed",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "中意向", "预算有限"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -2075,11 +1899,7 @@
     "wechat": "wx_13913906768",
     "source": "online",
     "status": "negotiating",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["公寓客户", "中意向", "价格敏感"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -2122,11 +1942,7 @@
     "wechat": "wx_16287813695",
     "source": "referral",
     "status": "contracted",
-    "tags": [
-      "别墅客户",
-      "中意向",
-      "预算充足"
-    ],
+    "tags": ["别墅客户", "中意向", "预算充足"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -2169,11 +1985,7 @@
     "wechat": "wx_18516372764",
     "source": "online",
     "status": "negotiating",
-    "tags": [
-      "公寓客户",
-      "低意向",
-      "预算充足"
-    ],
+    "tags": ["公寓客户", "低意向", "预算充足"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -2216,11 +2028,7 @@
     "wechat": "wx_15267988060",
     "source": "ads",
     "status": "new",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "中意向", "预算有限"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -2263,11 +2071,7 @@
     "wechat": "wx_19986977786",
     "source": "ads",
     "status": "completed",
-    "tags": [
-      "商用客户",
-      "高意向",
-      "预算充足"
-    ],
+    "tags": ["商用客户", "高意向", "预算充足"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -2310,11 +2114,7 @@
     "wechat": "wx_16124619448",
     "source": "referral",
     "status": "completed",
-    "tags": [
-      "商用客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["商用客户", "高意向", "预算有限"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -2357,11 +2157,7 @@
     "wechat": "wx_14152000515",
     "source": "walkin",
     "status": "contracted",
-    "tags": [
-      "商用客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["商用客户", "高意向", "预算有限"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -2404,11 +2200,7 @@
     "wechat": "wx_19757636367",
     "source": "walkin",
     "status": "contacted",
-    "tags": [
-      "商用客户",
-      "高意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "高意向", "价格敏感"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -2451,11 +2243,7 @@
     "wechat": "wx_16457023031",
     "source": "online",
     "status": "negotiating",
-    "tags": [
-      "别墅客户",
-      "低意向",
-      "预算充足"
-    ],
+    "tags": ["别墅客户", "低意向", "预算充足"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -2498,11 +2286,7 @@
     "wechat": "wx_19887356271",
     "source": "partner",
     "status": "new",
-    "tags": [
-      "商用客户",
-      "高意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "高意向", "价格敏感"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -2545,11 +2329,7 @@
     "wechat": "wx_17722493542",
     "source": "ads",
     "status": "diagnosed",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "中意向", "预算有限"],
     "profile": {
       "area": 450,
       "rooms": "7室5厅",
@@ -2592,11 +2372,7 @@
     "wechat": "wx_19358745018",
     "source": "walkin",
     "status": "new",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["公寓客户", "中意向", "价格敏感"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -2639,11 +2415,7 @@
     "wechat": "wx_14555972265",
     "source": "walkin",
     "status": "negotiating",
-    "tags": [
-      "商用客户",
-      "中意向",
-      "预算有限"
-    ],
+    "tags": ["商用客户", "中意向", "预算有限"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -2686,11 +2458,7 @@
     "wechat": "wx_17249613208",
     "source": "referral",
     "status": "negotiating",
-    "tags": [
-      "公寓客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "高意向", "预算有限"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -2733,11 +2501,7 @@
     "wechat": "wx_13753840625",
     "source": "online",
     "status": "quoting",
-    "tags": [
-      "商用客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "中意向", "价格敏感"],
     "profile": {
       "area": 89,
       "rooms": "2室2厅",
@@ -2780,11 +2544,7 @@
     "wechat": "wx_16593058441",
     "source": "online",
     "status": "contacted",
-    "tags": [
-      "别墅客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["别墅客户", "中意向", "价格敏感"],
     "profile": {
       "area": 450,
       "rooms": "7室5厅",
@@ -2827,11 +2587,7 @@
     "wechat": "wx_18100300792",
     "source": "online",
     "status": "new",
-    "tags": [
-      "公寓客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "高意向", "预算有限"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -2874,11 +2630,7 @@
     "wechat": "wx_17197599879",
     "source": "online",
     "status": "contracted",
-    "tags": [
-      "别墅客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["别墅客户", "高意向", "预算有限"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -2921,11 +2673,7 @@
     "wechat": "wx_15103208423",
     "source": "walkin",
     "status": "new",
-    "tags": [
-      "商用客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["商用客户", "高意向", "预算有限"],
     "profile": {
       "area": 200,
       "rooms": "办公空间",
@@ -2968,11 +2716,7 @@
     "wechat": "wx_15573077420",
     "source": "walkin",
     "status": "quoting",
-    "tags": [
-      "商用客户",
-      "低意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "低意向", "价格敏感"],
     "profile": {
       "area": 89,
       "rooms": "2室2厅",
@@ -3015,11 +2759,7 @@
     "wechat": "wx_15780720081",
     "source": "walkin",
     "status": "contracted",
-    "tags": [
-      "商用客户",
-      "高意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "高意向", "价格敏感"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -3062,11 +2802,7 @@
     "wechat": "wx_15382255690",
     "source": "ads",
     "status": "quoting",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "预算充足"
-    ],
+    "tags": ["公寓客户", "中意向", "预算充足"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -3109,11 +2845,7 @@
     "wechat": "wx_16249775262",
     "source": "partner",
     "status": "diagnosed",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "预算充足"
-    ],
+    "tags": ["公寓客户", "中意向", "预算充足"],
     "profile": {
       "area": 150,
       "rooms": "4室2厅",
@@ -3156,11 +2888,7 @@
     "wechat": "wx_15514019407",
     "source": "ads",
     "status": "completed",
-    "tags": [
-      "商用客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "中意向", "价格敏感"],
     "profile": {
       "area": 120,
       "rooms": "3室2厅",
@@ -3203,11 +2931,7 @@
     "wechat": "wx_15618882054",
     "source": "referral",
     "status": "negotiating",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "中意向", "预算有限"],
     "profile": {
       "area": 120,
       "rooms": "3室2厅",
@@ -3250,11 +2974,7 @@
     "wechat": "wx_13823905732",
     "source": "partner",
     "status": "diagnosed",
-    "tags": [
-      "公寓客户",
-      "低意向",
-      "预算充足"
-    ],
+    "tags": ["公寓客户", "低意向", "预算充足"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -3297,11 +3017,7 @@
     "wechat": "wx_18524909464",
     "source": "walkin",
     "status": "new",
-    "tags": [
-      "商用客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "中意向", "价格敏感"],
     "profile": {
       "area": 450,
       "rooms": "7室5厅",
@@ -3344,11 +3060,7 @@
     "wechat": "wx_17539937990",
     "source": "walkin",
     "status": "contracted",
-    "tags": [
-      "商用客户",
-      "中意向",
-      "预算有限"
-    ],
+    "tags": ["商用客户", "中意向", "预算有限"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -3391,11 +3103,7 @@
     "wechat": "wx_17414992096",
     "source": "online",
     "status": "negotiating",
-    "tags": [
-      "商用客户",
-      "高意向",
-      "预算充足"
-    ],
+    "tags": ["商用客户", "高意向", "预算充足"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -3438,11 +3146,7 @@
     "wechat": "wx_13108247606",
     "source": "walkin",
     "status": "contacted",
-    "tags": [
-      "别墅客户",
-      "低意向",
-      "价格敏感"
-    ],
+    "tags": ["别墅客户", "低意向", "价格敏感"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -3485,11 +3189,7 @@
     "wechat": "wx_17318334404",
     "source": "partner",
     "status": "contracted",
-    "tags": [
-      "商用客户",
-      "低意向",
-      "预算有限"
-    ],
+    "tags": ["商用客户", "低意向", "预算有限"],
     "profile": {
       "area": 89,
       "rooms": "2室2厅",
@@ -3532,11 +3232,7 @@
     "wechat": "wx_13161723351",
     "source": "walkin",
     "status": "new",
-    "tags": [
-      "公寓客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "高意向", "预算有限"],
     "profile": {
       "area": 120,
       "rooms": "3室2厅",
@@ -3579,11 +3275,7 @@
     "wechat": "wx_13248810423",
     "source": "walkin",
     "status": "completed",
-    "tags": [
-      "别墅客户",
-      "中意向",
-      "预算有限"
-    ],
+    "tags": ["别墅客户", "中意向", "预算有限"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -3626,11 +3318,7 @@
     "wechat": "wx_19682582744",
     "source": "ads",
     "status": "negotiating",
-    "tags": [
-      "商用客户",
-      "低意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "低意向", "价格敏感"],
     "profile": {
       "area": 450,
       "rooms": "7室5厅",
@@ -3673,11 +3361,7 @@
     "wechat": "wx_13400974719",
     "source": "walkin",
     "status": "negotiating",
-    "tags": [
-      "别墅客户",
-      "低意向",
-      "价格敏感"
-    ],
+    "tags": ["别墅客户", "低意向", "价格敏感"],
     "profile": {
       "area": 450,
       "rooms": "7室5厅",
@@ -3720,11 +3404,7 @@
     "wechat": "wx_17184655009",
     "source": "walkin",
     "status": "quoting",
-    "tags": [
-      "别墅客户",
-      "低意向",
-      "价格敏感"
-    ],
+    "tags": ["别墅客户", "低意向", "价格敏感"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -3767,11 +3447,7 @@
     "wechat": "wx_16214539733",
     "source": "ads",
     "status": "negotiating",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "预算充足"
-    ],
+    "tags": ["公寓客户", "中意向", "预算充足"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -3814,11 +3490,7 @@
     "wechat": "wx_18223595858",
     "source": "walkin",
     "status": "new",
-    "tags": [
-      "公寓客户",
-      "低意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "低意向", "预算有限"],
     "profile": {
       "area": 120,
       "rooms": "3室2厅",
@@ -3861,11 +3533,7 @@
     "wechat": "wx_16878800256",
     "source": "referral",
     "status": "contracted",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["公寓客户", "中意向", "价格敏感"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -3908,11 +3576,7 @@
     "wechat": "wx_18978075535",
     "source": "ads",
     "status": "contracted",
-    "tags": [
-      "公寓客户",
-      "高意向",
-      "价格敏感"
-    ],
+    "tags": ["公寓客户", "高意向", "价格敏感"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -3955,11 +3619,7 @@
     "wechat": "wx_15658067847",
     "source": "referral",
     "status": "new",
-    "tags": [
-      "公寓客户",
-      "低意向",
-      "预算充足"
-    ],
+    "tags": ["公寓客户", "低意向", "预算充足"],
     "profile": {
       "area": 89,
       "rooms": "2室2厅",
@@ -4002,11 +3662,7 @@
     "wechat": "wx_16432706331",
     "source": "online",
     "status": "negotiating",
-    "tags": [
-      "别墅客户",
-      "中意向",
-      "预算充足"
-    ],
+    "tags": ["别墅客户", "中意向", "预算充足"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -4049,11 +3705,7 @@
     "wechat": "wx_15743081352",
     "source": "partner",
     "status": "quoting",
-    "tags": [
-      "别墅客户",
-      "低意向",
-      "预算充足"
-    ],
+    "tags": ["别墅客户", "低意向", "预算充足"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -4096,11 +3748,7 @@
     "wechat": "wx_14574240810",
     "source": "walkin",
     "status": "contracted",
-    "tags": [
-      "别墅客户",
-      "中意向",
-      "预算充足"
-    ],
+    "tags": ["别墅客户", "中意向", "预算充足"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -4143,11 +3791,7 @@
     "wechat": "wx_18706537054",
     "source": "ads",
     "status": "completed",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "中意向", "预算有限"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -4190,11 +3834,7 @@
     "wechat": "wx_16921962877",
     "source": "online",
     "status": "diagnosed",
-    "tags": [
-      "公寓客户",
-      "中意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "中意向", "预算有限"],
     "profile": {
       "area": 450,
       "rooms": "7室5厅",
@@ -4237,11 +3877,7 @@
     "wechat": "wx_16463712862",
     "source": "referral",
     "status": "completed",
-    "tags": [
-      "别墅客户",
-      "低意向",
-      "预算充足"
-    ],
+    "tags": ["别墅客户", "低意向", "预算充足"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -4284,11 +3920,7 @@
     "wechat": "wx_14654899693",
     "source": "online",
     "status": "quoting",
-    "tags": [
-      "公寓客户",
-      "低意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "低意向", "预算有限"],
     "profile": {
       "area": 89,
       "rooms": "2室2厅",
@@ -4331,11 +3963,7 @@
     "wechat": "wx_13908452559",
     "source": "partner",
     "status": "completed",
-    "tags": [
-      "公寓客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "高意向", "预算有限"],
     "profile": {
       "area": 120,
       "rooms": "3室2厅",
@@ -4378,11 +4006,7 @@
     "wechat": "wx_15581822134",
     "source": "partner",
     "status": "new",
-    "tags": [
-      "别墅客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["别墅客户", "高意向", "预算有限"],
     "profile": {
       "area": 450,
       "rooms": "7室5厅",
@@ -4425,11 +4049,7 @@
     "wechat": "wx_15973656885",
     "source": "online",
     "status": "completed",
-    "tags": [
-      "商用客户",
-      "中意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "中意向", "价格敏感"],
     "profile": {
       "area": 450,
       "rooms": "7室5厅",
@@ -4472,11 +4092,7 @@
     "wechat": "wx_17393553598",
     "source": "partner",
     "status": "quoting",
-    "tags": [
-      "商用客户",
-      "低意向",
-      "预算充足"
-    ],
+    "tags": ["商用客户", "低意向", "预算充足"],
     "profile": {
       "area": 280,
       "rooms": "5室3厅",
@@ -4519,11 +4135,7 @@
     "wechat": "wx_17168136800",
     "source": "ads",
     "status": "quoting",
-    "tags": [
-      "商用客户",
-      "低意向",
-      "价格敏感"
-    ],
+    "tags": ["商用客户", "低意向", "价格敏感"],
     "profile": {
       "area": 350,
       "rooms": "6室4厅",
@@ -4566,11 +4178,7 @@
     "wechat": "wx_18116537761",
     "source": "walkin",
     "status": "quoting",
-    "tags": [
-      "公寓客户",
-      "低意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "低意向", "预算有限"],
     "profile": {
       "area": 89,
       "rooms": "2室2厅",
@@ -4613,11 +4221,7 @@
     "wechat": "wx_13522200096",
     "source": "referral",
     "status": "diagnosed",
-    "tags": [
-      "公寓客户",
-      "高意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "高意向", "预算有限"],
     "profile": {
       "area": 135,
       "rooms": "3室2厅",
@@ -4660,11 +4264,7 @@
     "wechat": "wx_19337664100",
     "source": "ads",
     "status": "negotiating",
-    "tags": [
-      "公寓客户",
-      "低意向",
-      "预算有限"
-    ],
+    "tags": ["公寓客户", "低意向", "预算有限"],
     "profile": {
       "area": 89,
       "rooms": "2室2厅",

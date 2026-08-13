@@ -21,13 +21,16 @@ const ACTOR = { userId: 'operator-1', role: 'brand_admin' };
 test('identity guarded upsert creates product and first SKU when brand model is new', async () => {
   const { service, products, skus, brandBindings } = serviceFixture();
 
-  const result = await service.upsertWithIdentityGuard({
-    tenantId: TENANT_ID,
-    brandCode: 'everhot',
-    model: 'RGS-A',
-    sku: 'MAT-001',
-    name: 'Everhot RGS-A',
-  }, ACTOR);
+  const result = await service.upsertWithIdentityGuard(
+    {
+      tenantId: TENANT_ID,
+      brandCode: 'everhot',
+      model: 'RGS-A',
+      sku: 'MAT-001',
+      name: 'Everhot RGS-A',
+    },
+    ACTOR
+  );
 
   assert.equal(result.success, true);
   assert.equal(result.meta.operation, 'created_product');
@@ -35,7 +38,10 @@ test('identity guarded upsert creates product and first SKU when brand model is 
   assert.equal(products.rows.length, 1);
   assert.equal(skus.rows.length, 1);
   assert.equal(products.rows[0].brandCode, 'everhot');
-  assert.deepEqual(brandBindings.rows.map((row) => row.brandCode), ['everhot']);
+  assert.deepEqual(
+    brandBindings.rows.map((row) => row.brandCode),
+    ['everhot']
+  );
   assert.equal(products.rows[0].model, 'RGS-A');
   assert.equal(products.rows[0].normalizedModel, 'rgs-a');
   assert.equal(skus.rows[0].productId, products.rows[0].id);
@@ -45,24 +51,27 @@ test('identity guarded upsert creates product and first SKU when brand model is 
 test('identity guarded upsert persists optional website pricing projection', async () => {
   const { service, products, websitePricing } = serviceFixture();
 
-  const result = await service.upsertWithIdentityGuard({
-    tenantId: TENANT_ID,
-    brandCode: 'everhot',
-    model: 'RGS-C',
-    sku: 'MAT-003',
-    name: 'Everhot RGS-C',
-    listPrice: 12000,
-    currency: 'CNY',
-    websitePricing: {
-      siteCode: 'everhot',
-      locale: 'zh-CN',
-      priceDisplayMode: 'show_price',
-      websitePrice: 11800,
-      priceUnit: '台',
-      priceLabel: '官网参考价',
-      taxIncluded: true,
+  const result = await service.upsertWithIdentityGuard(
+    {
+      tenantId: TENANT_ID,
+      brandCode: 'everhot',
+      model: 'RGS-C',
+      sku: 'MAT-003',
+      name: 'Everhot RGS-C',
+      listPrice: 12000,
+      currency: 'CNY',
+      websitePricing: {
+        siteCode: 'everhot',
+        locale: 'zh-CN',
+        priceDisplayMode: 'show_price',
+        websitePrice: 11800,
+        priceUnit: '台',
+        priceLabel: '官网参考价',
+        taxIncluded: true,
+      },
     },
-  }, ACTOR);
+    ACTOR
+  );
 
   assert.equal(result.meta.websitePricing?.priceDisplayMode, 'show_price');
   assert.equal(products.rows[0].listPrice, 12000);
@@ -82,13 +91,17 @@ test('identity guarded upsert returns duplicate prompt before updating existing 
   });
 
   await assert.rejects(
-    () => service.upsertWithIdentityGuard({
-      tenantId: TENANT_ID,
-      brandCode: 'everhot',
-      model: 'RGS-A',
-      sku: 'MAT-002',
-      name: 'Everhot RGS-A 新文案',
-    }, ACTOR),
+    () =>
+      service.upsertWithIdentityGuard(
+        {
+          tenantId: TENANT_ID,
+          brandCode: 'everhot',
+          model: 'RGS-A',
+          sku: 'MAT-002',
+          name: 'Everhot RGS-A 新文案',
+        },
+        ACTOR
+      ),
     (error: unknown) => {
       assert.ok(error instanceof ConflictException);
       const response = error.getResponse() as any;
@@ -98,24 +111,34 @@ test('identity guarded upsert returns duplicate prompt before updating existing 
       assert.equal(response.data.proposedSku.alreadyExists, false);
       assert.equal(response.data.resolution.confirmField, 'confirmExistingProduct');
       return true;
-    },
+    }
   );
 });
 
 test('identity guarded upsert updates product and appends SKU after explicit confirmation', async () => {
   const { service, products, skus } = serviceFixture({
-    products: [product('product-1', { sku: 'MAT-001', model: 'RGS-A', normalizedModel: 'rgs-a', name: 'Old name' })],
+    products: [
+      product('product-1', {
+        sku: 'MAT-001',
+        model: 'RGS-A',
+        normalizedModel: 'rgs-a',
+        name: 'Old name',
+      }),
+    ],
     skus: [sku('sku-1', 'product-1', 'MAT-001')],
   });
 
-  const result = await service.upsertWithIdentityGuard({
-    tenantId: TENANT_ID,
-    brandCode: 'everhot',
-    model: 'RGS-A',
-    sku: 'MAT-002',
-    name: 'New name',
-    confirmExistingProduct: true,
-  }, ACTOR);
+  const result = await service.upsertWithIdentityGuard(
+    {
+      tenantId: TENANT_ID,
+      brandCode: 'everhot',
+      model: 'RGS-A',
+      sku: 'MAT-002',
+      name: 'New name',
+      confirmExistingProduct: true,
+    },
+    ACTOR
+  );
 
   assert.equal(result.meta.operation, 'updated_existing_product');
   assert.equal(result.meta.skuOperation, 'created_sku');
@@ -130,14 +153,17 @@ test('identity guarded upsert updates product and appends SKU after explicit con
 test('identity guarded upsert stores one common product with multiple brand bindings', async () => {
   const { service, products, skus, brandBindings } = serviceFixture();
 
-  const result = await service.upsertWithIdentityGuard({
-    tenantId: TENANT_ID,
-    brandCode: 'everhot',
-    brandCodes: ['everhot', 'ruud'],
-    model: 'RGS-MULTI',
-    sku: 'MAT-MULTI-001',
-    name: 'Common RGS Multi',
-  }, ACTOR);
+  const result = await service.upsertWithIdentityGuard(
+    {
+      tenantId: TENANT_ID,
+      brandCode: 'everhot',
+      brandCodes: ['everhot', 'ruud'],
+      model: 'RGS-MULTI',
+      sku: 'MAT-MULTI-001',
+      name: 'Common RGS Multi',
+    },
+    ACTOR
+  );
 
   assert.equal(result.meta.operation, 'created_product');
   assert.equal(products.rows.length, 1);
@@ -156,13 +182,17 @@ test('identity guarded upsert rejects SKU already bound to another product', asy
   });
 
   await assert.rejects(
-    () => service.upsertWithIdentityGuard({
-      tenantId: TENANT_ID,
-      brandCode: 'everhot',
-      model: 'RGS-A',
-      sku: 'MAT-002',
-      confirmExistingProduct: true,
-    }, ACTOR),
+    () =>
+      service.upsertWithIdentityGuard(
+        {
+          tenantId: TENANT_ID,
+          brandCode: 'everhot',
+          model: 'RGS-A',
+          sku: 'MAT-002',
+          confirmExistingProduct: true,
+        },
+        ACTOR
+      ),
     (error: unknown) => {
       assert.ok(error instanceof ConflictException);
       const response = error.getResponse() as any;
@@ -171,7 +201,7 @@ test('identity guarded upsert rejects SKU already bound to another product', asy
       assert.equal(response.data.targetProduct.id, 'product-1');
       assert.equal(response.data.boundProduct.id, 'product-2');
       return true;
-    },
+    }
   );
 });
 
@@ -208,9 +238,15 @@ function serviceFixture({
     priceRepo as any,
     contentRepo as any,
     eventBus as any,
-    fileArtifacts as any,
+    fileArtifacts as any
   );
-  return { service, products: productRepo, skus: skuRepo, websitePricing: websitePricingRepo, brandBindings: brandBindingRepo };
+  return {
+    service,
+    products: productRepo,
+    skus: skuRepo,
+    websitePricing: websitePricingRepo,
+    brandBindings: brandBindingRepo,
+  };
 }
 
 function product(id: string, overrides: Partial<ProductEntity> = {}): ProductEntity {

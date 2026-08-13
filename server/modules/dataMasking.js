@@ -9,9 +9,10 @@ function maskSensitiveData(data, type) {
     case 'email': {
       const [user = '', domain = ''] = String(data).split('@');
       if (!domain) return data;
-      const maskedUser = user.length <= 3
-        ? user[0] + '***'
-        : user.substring(0, 2) + '***' + user.substring(user.length - 1);
+      const maskedUser =
+        user.length <= 3
+          ? user[0] + '***'
+          : user.substring(0, 2) + '***' + user.substring(user.length - 1);
       return `${maskedUser}@${domain}`;
     }
     case 'name':
@@ -33,5 +34,5 @@ function maskSensitiveInLog(logData) {
 
 module.exports = {
   maskSensitiveData,
-  maskSensitiveInLog
+  maskSensitiveInLog,
 };

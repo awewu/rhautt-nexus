@@ -238,7 +238,10 @@ export function validateDecisionInput(body: unknown): DecisionValidation {
   // 治理纪律: finalDecision 必须由人类决策者署名
   if (b.finalDecision !== undefined && b.finalDecision !== null) {
     if (typeof b.decidedBy !== 'string' || !b.decidedBy.trim()) {
-      return { ok: false, error: 'finalDecision 必须携带 decidedBy (人类决策者 id) — AI/服务不能写最终决定' };
+      return {
+        ok: false,
+        error: 'finalDecision 必须携带 decidedBy (人类决策者 id) — AI/服务不能写最终决定',
+      };
     }
     if (b.decidedBy.startsWith(SERVICE_ACCOUNT_PREFIX)) {
       return { ok: false, error: 'decidedBy 不能是服务账号 — 最终决定必须归属人类决策者' };
@@ -255,20 +258,40 @@ export function validateDecisionInput(body: unknown): DecisionValidation {
   }
   if (b.outcomeStatus === 'hit' || b.outcomeStatus === 'miss' || b.outcomeStatus === 'mixed') {
     if (typeof b.actualOutcome !== 'string' || !b.actualOutcome.trim()) {
-      return { ok: false, error: '结果回看 (outcomeStatus=hit/miss/mixed) 必须附 actualOutcome 说明' };
+      return {
+        ok: false,
+        error: '结果回看 (outcomeStatus=hit/miss/mixed) 必须附 actualOutcome 说明',
+      };
     }
     // 治理纪律 (v2): POST 上报回看结果与 PATCH 同一套规则 — 不能绕过人类署名
     if (b.status === 'proposed') {
-      return { ok: false, error: '不能回看未定案的决策 (status=proposed) — 先有人类 finalDecision 才有对错可标注' };
+      return {
+        ok: false,
+        error: '不能回看未定案的决策 (status=proposed) — 先有人类 finalDecision 才有对错可标注',
+      };
     }
     if (typeof b.outcomeReviewedBy !== 'string' || !b.outcomeReviewedBy.trim()) {
-      return { ok: false, error: '结果回看 (outcomeStatus=hit/miss/mixed) 必须携带 outcomeReviewedBy (人类回看者 id)' };
+      return {
+        ok: false,
+        error: '结果回看 (outcomeStatus=hit/miss/mixed) 必须携带 outcomeReviewedBy (人类回看者 id)',
+      };
     }
     if (b.outcomeReviewedBy.startsWith(SERVICE_ACCOUNT_PREFIX)) {
       return { ok: false, error: 'outcomeReviewedBy 不能是服务账号 — 对错标注必须归属人类' };
     }
   }
-  for (const key of ['betId', 'decidedAt', 'expectedOutcome', 'actualOutcome', 'supersedes', 'auditRef', 'tenantId', 'outcomeReviewedBy', 'outcomeReviewedAt', 'outcomeReviewNote'] as const) {
+  for (const key of [
+    'betId',
+    'decidedAt',
+    'expectedOutcome',
+    'actualOutcome',
+    'supersedes',
+    'auditRef',
+    'tenantId',
+    'outcomeReviewedBy',
+    'outcomeReviewedAt',
+    'outcomeReviewNote',
+  ] as const) {
     const v = b[key];
     if (v !== undefined && typeof v !== 'string') {
       return { ok: false, error: `${key} 必须是字符串` };
@@ -292,7 +315,10 @@ export function validateOutcomeReview(body: unknown): DecisionValidation {
     !b.actualOutcome.trim() ||
     b.actualOutcome.length > DECISION_LIMITS.maxOutcome
   ) {
-    return { ok: false, error: `结果回看必须附 actualOutcome 说明 (≤${DECISION_LIMITS.maxOutcome} 字符)` };
+    return {
+      ok: false,
+      error: `结果回看必须附 actualOutcome 说明 (≤${DECISION_LIMITS.maxOutcome} 字符)`,
+    };
   }
   if (typeof b.reviewedBy !== 'string' || !b.reviewedBy.trim()) {
     return { ok: false, error: '结果回看必须携带 reviewedBy (人类回看者 id)' };
@@ -300,7 +326,10 @@ export function validateOutcomeReview(body: unknown): DecisionValidation {
   if (b.reviewedBy.startsWith(SERVICE_ACCOUNT_PREFIX)) {
     return { ok: false, error: 'reviewedBy 不能是服务账号 — 对错标注必须归属人类' };
   }
-  if (b.reviewNote !== undefined && (typeof b.reviewNote !== 'string' || b.reviewNote.length > DECISION_LIMITS.maxOutcome)) {
+  if (
+    b.reviewNote !== undefined &&
+    (typeof b.reviewNote !== 'string' || b.reviewNote.length > DECISION_LIMITS.maxOutcome)
+  ) {
     return { ok: false, error: `reviewNote 必须是字符串 (≤${DECISION_LIMITS.maxOutcome} 字符)` };
   }
   return { ok: true };

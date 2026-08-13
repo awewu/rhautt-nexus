@@ -14,6 +14,7 @@ Rheem 是瑞美集团设备品牌，瑞合瑞德暖通科技集团中国独家�
 **品牌个性：** 可靠（Reliable）· 高效（Efficient）· 可持续（Sustainable）· 专业支持（Expert-backed）
 
 **核心主题：**
+
 - 稳供：设备年复一年可靠运行，峰值热水稳定保障
 - 高效：节能、降低电费、退税/补贴、低碳足迹
 - 可持续：低 GWP 制冷剂、Energy Star、热泵热水零现场排放
@@ -22,6 +23,7 @@ Rheem 是瑞美集团设备品牌，瑞合瑞德暖通科技集团中国独家�
 - 通达：本地备货、次日交付、24 小时紧急取货
 
 **官方站参考（重大决策前须实时刷新）：**
+
 - `https://www.rheem.com/products/water`
 - `https://www.rheem.com/products/residential/`
 - `https://www.rheem.com/products/commercial/`
@@ -32,20 +34,20 @@ Rheem 是瑞美集团设备品牌，瑞合瑞德暖通科技集团中国独家�
 
 ### Primitive（勿修改，定义于 `rheem-official-tokens.css`）
 
-| 变量 | 值 | 验证来源 |
-|---|---|---|
-| `--rheem-color-red` | `#E4002B` | rheem.com common.css ×143 |
-| `--rheem-color-red-deep` | `#C20025` | rmc-btn-primary:hover rgb(193.8,0,36.55) |
-| `--rheem-color-red-active` | `#B60022` | rmc-btn-primary:active |
-| `--rheem-color-blue` | `#1B365D` | --rmc-primary ×85 |
-| `--rheem-color-gray-10` | `#596067` | body text ×119 |
-| `--rheem-color-gray-8` | `#63666A` | muted text |
-| `--rheem-color-teal` | `#4F868E` | ×120 |
-| `--rheem-color-green` | `#789D4A` | ×110 |
-| `--rheem-color-orange` | `#EF6820` | ×110 |
-| `--rheem-color-surface` | `#F2F5F7` | ×74 |
-| `--rheem-color-border` | `#D6DADD` | --rmc-primary-border ×97 |
-| `--rheem-color-ink` | `#101828` | most-used dark ×223 |
+| 变量                       | 值        | 验证来源                                 |
+| -------------------------- | --------- | ---------------------------------------- |
+| `--rheem-color-red`        | `#E4002B` | rheem.com common.css ×143                |
+| `--rheem-color-red-deep`   | `#C20025` | rmc-btn-primary:hover rgb(193.8,0,36.55) |
+| `--rheem-color-red-active` | `#B60022` | rmc-btn-primary:active                   |
+| `--rheem-color-blue`       | `#1B365D` | --rmc-primary ×85                        |
+| `--rheem-color-gray-10`    | `#596067` | body text ×119                           |
+| `--rheem-color-gray-8`     | `#63666A` | muted text                               |
+| `--rheem-color-teal`       | `#4F868E` | ×120                                     |
+| `--rheem-color-green`      | `#789D4A` | ×110                                     |
+| `--rheem-color-orange`     | `#EF6820` | ×110                                     |
+| `--rheem-color-surface`    | `#F2F5F7` | ×74                                      |
+| `--rheem-color-border`     | `#D6DADD` | --rmc-primary-border ×97                 |
+| `--rheem-color-ink`        | `#101828` | most-used dark ×223                      |
 
 ### 语义（平台层，定义于 `rhautt-comfort-tokens.css`，`--rc-*` 命名空间）
 
@@ -57,21 +59,29 @@ Rheem 是瑞美集团设备品牌，瑞合瑞德暖通科技集团中国独家�
 
 ### ⚠️ 废弃值（不得使用）
 
-| 值 | 来源 | 替换为 |
-|---|---|---|
-| `#A00F28` | `rheem-vi.md`（未实测） | `var(--rheem-color-red-deep)` `#C20025` |
-| `#A50016` | `packages/tokens/rheem-cn.css` `--brand-primary-dk` | `var(--rheem-color-red-deep)` |
-| `#C41230` | 旧 Rheem red | `var(--rheem-color-red)` `#E4002B` |
+| 值        | 来源                                                | 替换为                                  |
+| --------- | --------------------------------------------------- | --------------------------------------- |
+| `#A00F28` | `rheem-vi.md`（未实测）                             | `var(--rheem-color-red-deep)` `#C20025` |
+| `#A50016` | `packages/tokens/rheem-cn.css` `--brand-primary-dk` | `var(--rheem-color-red-deep)`           |
+| `#C41230` | 旧 Rheem red                                        | `var(--rheem-color-red)` `#E4002B`      |
 
 ---
 
 ## 3. 字体
 
 ```css
-font-family: "Roboto", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+font-family:
+  'Roboto',
+  'PingFang SC',
+  'Microsoft YaHei',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  sans-serif;
 ```
 
 规则：
+
 - Dashboard H1：22–28px
 - Panel 标题：15–18px
 - 表格/正文：12–14px
@@ -83,12 +93,12 @@ font-family: "Roboto", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMac
 
 ## 4. 形状与阴影
 
-| 令牌 | 值 | 用途 |
-|---|---|---|
-| `--rheem-radius-sm` | `4px` | 小 UI 元素 |
-| `--rheem-radius-md` | `6px` | 输入框、通用组件 |
-| `--rheem-radius-lg` | `8px` | 按钮、卡片 |
-| `--rheem-shadow-panel` | `0 8px 24px rgba(16,24,40,.08)` | 浮层/面板 |
+| 令牌                   | 值                              | 用途             |
+| ---------------------- | ------------------------------- | ---------------- |
+| `--rheem-radius-sm`    | `4px`                           | 小 UI 元素       |
+| `--rheem-radius-md`    | `6px`                           | 输入框、通用组件 |
+| `--rheem-radius-lg`    | `8px`                           | 按钮、卡片       |
+| `--rheem-shadow-panel` | `0 8px 24px rgba(16,24,40,.08)` | 浮层/面板        |
 
 ---
 
@@ -105,26 +115,29 @@ font-family: "Roboto", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMac
 
 ## 6. 颜色语义角色
 
-| 颜色 | 用途 | 中文调性 | 好用词 | 避免 |
-|---|---|---|---|---|
+| 颜色         | 用途                                   | 中文调性         | 好用词               | 避免               |
+| ------------ | -------------------------------------- | ---------------- | -------------------- | ------------------ |
 | 红 `#E4002B` | 品牌标识、主 CTA、紧急商用路径、激活态 | 果断、可靠、推进 | 稳供、确认、联系专家 | 激情、爆款、网红红 |
-| 蓝 `#1B365D` | 工程规格、文档、专业导航 | 工程、标准、权威 | 规格、蓝本、定规 | 炫酷、科技蓝 |
-| 灰 `#63666A` | 工作面、表格、二级文本 | 中性、承压 | 参数、工况、状态 | 高级灰 |
-| 青 `#4F868E` | 水/系统连续性、支持生态 | 清洁、流动 | 水路、恒供、系统流 | 清新、治愈 |
-| 绿 `#789D4A` | 效率与可持续 | 节能、低碳 | 低碳、善度、减排 | 绿色生活方式泛化 |
-| 橙 `#EF6820` | 退税、警告、待确认 | 提醒、机会 | 补贴、提示、窗口期 | 焦虑、抢购 |
+| 蓝 `#1B365D` | 工程规格、文档、专业导航               | 工程、标准、权威 | 规格、蓝本、定规     | 炫酷、科技蓝       |
+| 灰 `#63666A` | 工作面、表格、二级文本                 | 中性、承压       | 参数、工况、状态     | 高级灰             |
+| 青 `#4F868E` | 水/系统连续性、支持生态                | 清洁、流动       | 水路、恒供、系统流   | 清新、治愈         |
+| 绿 `#789D4A` | 效率与可持续                           | 节能、低碳       | 低碳、善度、减排     | 绿色生活方式泛化   |
+| 橙 `#EF6820` | 退税、警告、待确认                     | 提醒、机会       | 补贴、提示、窗口期   | 焦虑、抢购         |
 
 ---
 
 ## 7. 产品分类边界（Rheem vs Ruud）
 
 **Rheem（水侧/水暖）：**
+
 - 燃气/电/太阳能/热泵热水器、壁挂炉、地暖、暖气片、家用冷热软水系统、水处理净化、商用热水、泳池加热
 
 **Ruud（气侧/空调）：**
+
 - 中央空调、VRF、分体机、空气源热泵（制冷/制热）、通风新风、空气净化/加湿/除湿、商用空调
 
 **五恒舒适系统：**
+
 - 水辐射/毛细管为主 → Rheem 主导品牌
 - 空调+通风为主 → Ruud 主导品牌
 - 混合方案 → 明确分类后再应用视觉标识
@@ -172,11 +185,13 @@ font-family: "Roboto", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMac
 调性锚点：稳 · 准 · 省 · 善 · 通
 
 **短语映射（常用）：**
+
 - "Tested. Trusted. Tough." → 经久验证，值得信赖，坚韧耐用。
 - "Peace of Mind Performance" → 安心运行，性能有据。
 - "One partner. Infinite solutions." → 一个伙伴，多元方案。
 
 **UI 文案规则：**
+
 - 标签首选 4–8 字锚点：稳供、定规、节能、善度、文档、校核、交付、质保
 - 诗意锚点须配具体副标题（如 `稳供` + `峰值热水需求覆盖 96%`）
 - 商用页强调：运行时间、应用适配、规格、交付、紧急支持
@@ -198,10 +213,10 @@ font-family: "Roboto", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMac
 
 以下文件内容已全部整合，头部已加废弃声明。阅读时以本文件为准。
 
-| 文件 | 原用途 | 废弃原因 |
-|---|---|---|
-| `skills/rheem-design-director/references/rheem-official-vi.md` | Rheem 官方 VI | 内容已整合 |
-| `skills/rheem-design-director/references/rheem-design-system-standard.md` | 设计系统标准 | 内容已整合；深红值 `#A00F28` 有误 |
-| `skills/rheem-design-director/references/vi-brand-system-skill.md` | VI 品牌体系技能 | 内容已整合 |
-| `skills/rheem-vi-ui-designer/references/rheem-vi.md` | 设计执行版规范 | 内容已整合；深红值 `#A00F28` 有误 |
-| `skills/rheem-design-director/references/rheem-chinese-localization.md` | 中文本地化 | 内容已整合 |
+| 文件                                                                      | 原用途          | 废弃原因                          |
+| ------------------------------------------------------------------------- | --------------- | --------------------------------- |
+| `skills/rheem-design-director/references/rheem-official-vi.md`            | Rheem 官方 VI   | 内容已整合                        |
+| `skills/rheem-design-director/references/rheem-design-system-standard.md` | 设计系统标准    | 内容已整合；深红值 `#A00F28` 有误 |
+| `skills/rheem-design-director/references/vi-brand-system-skill.md`        | VI 品牌体系技能 | 内容已整合                        |
+| `skills/rheem-vi-ui-designer/references/rheem-vi.md`                      | 设计执行版规范  | 内容已整合；深红值 `#A00F28` 有误 |
+| `skills/rheem-design-director/references/rheem-chinese-localization.md`   | 中文本地化      | 内容已整合                        |

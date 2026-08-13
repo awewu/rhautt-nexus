@@ -34,10 +34,7 @@
       "status": "active",
       "confidence": "on-track",
       "visibility": "public",
-      "tags": [
-        "增长",
-        "北极星"
-      ],
+      "tags": ["增长", "北极星"],
       "progressOverride": null,
       "createdAt": 1778148368824,
       "updatedAt": 1778148368824
@@ -52,9 +49,7 @@
       "status": "active",
       "confidence": "at-risk",
       "visibility": "public",
-      "tags": [
-        "增长"
-      ],
+      "tags": ["增长"],
       "progressOverride": null,
       "createdAt": 1778148368824,
       "updatedAt": 1778148368824
@@ -91,9 +86,7 @@
       "weight": 40,
       "confidence": "at-risk",
       "status": "active",
-      "tags": [
-        "ml"
-      ],
+      "tags": ["ml"],
       "createdAt": 1778148368824,
       "updatedAt": 1778148368824
     },

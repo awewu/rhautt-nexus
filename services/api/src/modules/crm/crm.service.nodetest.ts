@@ -9,36 +9,45 @@ import { CrmService } from './crm.service';
 type Row = Record<string, any>;
 
 function repository(seed: Row[] = [], idPrefix = 'row') {
-  const rows = seed.map(row => ({ ...row }));
+  const rows = seed.map((row) => ({ ...row }));
   let lastUpdate: Row | null = null;
-  const matches = (row: Row, where: Row) => Object.entries(where).every(([key, value]) => row[key] === value);
+  const matches = (row: Row, where: Row) =>
+    Object.entries(where).every(([key, value]) => row[key] === value);
   return {
     rows,
-    get lastUpdate() { return lastUpdate; },
-    create(value: Row) { return { id: value.id || `${idPrefix}-${rows.length + 1}`, ...value }; },
+    get lastUpdate() {
+      return lastUpdate;
+    },
+    create(value: Row) {
+      return { id: value.id || `${idPrefix}-${rows.length + 1}`, ...value };
+    },
     async save(value: Row) {
       const saved = { ...value };
-      const index = rows.findIndex(row => row.id === saved.id);
+      const index = rows.findIndex((row) => row.id === saved.id);
       if (index >= 0) rows[index] = saved;
       else rows.push(saved);
       return saved;
     },
-    async findOneBy(where: Row) { return rows.find(row => matches(row, where)) || null; },
+    async findOneBy(where: Row) {
+      return rows.find((row) => matches(row, where)) || null;
+    },
     async findOneByOrFail(where: Row) {
-      const found = rows.find(row => matches(row, where));
+      const found = rows.find((row) => matches(row, where));
       if (!found) throw new Error('not found');
       return { ...found };
     },
-    async findOne(options: { where: Row }) { return rows.find(row => matches(row, options.where)) || null; },
+    async findOne(options: { where: Row }) {
+      return rows.find((row) => matches(row, options.where)) || null;
+    },
     async find(options: { where: Row; order?: Row; take?: number }) {
-      return rows.filter(row => matches(row, options.where)).slice(0, options.take);
+      return rows.filter((row) => matches(row, options.where)).slice(0, options.take);
     },
     async update(criteria: Row, patch: Row) {
       lastUpdate = { ...patch };
-      const row = rows.find(candidate => matches(candidate, criteria));
+      const row = rows.find((candidate) => matches(candidate, criteria));
       if (row) Object.assign(row, patch);
       return { affected: row ? 1 : 0 };
-    }
+    },
   };
 }
 
@@ -51,7 +60,9 @@ function fixture() {
   const projects = repository([], 'project');
   const events: Row[] = [];
   const manager = {
-    async query() { return undefined; },
+    async query() {
+      return undefined;
+    },
     getRepository(entity: unknown) {
       if (entity === CustomerEntity) return customers;
       if (entity === OpportunityEntity) return opportunities;
@@ -59,17 +70,32 @@ function fixture() {
       if (entity === AuditLogEntity) return audits;
       if (entity === LifecycleLinkEntity) return projects;
       throw new Error('unexpected repository');
-    }
+    },
   };
-  const dataSource = { async transaction(work: (em: any) => Promise<unknown>) { return work(manager); } };
+  const dataSource = {
+    async transaction(work: (em: any) => Promise<unknown>) {
+      return work(manager);
+    },
+  };
   const eventBus = {
-    async publishInTx(_em: unknown, event: Row) { events.push(event); return event; },
-    async kickDispatch() { return undefined; }
+    async publishInTx(_em: unknown, event: Row) {
+      events.push(event);
+      return event;
+    },
+    async kickDispatch() {
+      return undefined;
+    },
   };
   const service = new CrmService(dataSource as any, eventBus as any);
   const user = {
-    userId: 'seller-a', tenantId: 'tenant-a', dealerId: 'dealer-a', storeId: 'store-a',
-    customerId: null, role: 'sales', permissions: [], modules: []
+    userId: 'seller-a',
+    tenantId: 'tenant-a',
+    dealerId: 'dealer-a',
+    storeId: 'store-a',
+    customerId: null,
+    role: 'sales',
+    permissions: [],
+    modules: [],
   } as any;
   return { service, user, customers, opportunities, interactions, audits, events };
 }
@@ -77,8 +103,13 @@ function fixture() {
 test('lead creation takes ownership from JWT, encrypts PII, and writes audit plus outbox', async () => {
   const f = fixture();
   const result = await f.service.createLead(f.user, {
-    phone: '138 0013 8000', name: 'Lead A', source: 'store', city: 'Shanghai',
-    tenantId: 'tenant-b', dealerId: 'dealer-b', phoneEncrypted: 'plaintext-injection'
+    phone: '138 0013 8000',
+    name: 'Lead A',
+    source: 'store',
+    city: 'Shanghai',
+    tenantId: 'tenant-b',
+    dealerId: 'dealer-b',
+    phoneEncrypted: 'plaintext-injection',
   } as any);
 
   const customer = f.customers.rows[0];
@@ -110,8 +141,13 @@ test('duplicate lead is idempotent and does not emit a second audit or outbox ev
 test('opportunity updates whitelist fields and emit an audit and outbox event', async () => {
   const f = fixture();
   f.opportunities.rows.push({
-    id: 'opp-a', tenantId: 'tenant-a', dealerId: 'dealer-a', storeId: 'store-a',
-    customerId: 'customer-a', stage: 'lead', probability: 0.1
+    id: 'opp-a',
+    tenantId: 'tenant-a',
+    dealerId: 'dealer-a',
+    storeId: 'store-a',
+    customerId: 'customer-a',
+    stage: 'lead',
+    probability: 0.1,
   });
 
   const stage = await f.service.updateOpportunityStage(f.user, 'opp-a', 'qualified');
@@ -120,7 +156,10 @@ test('opportunity updates whitelist fields and emit an audit and outbox event', 
   assert.equal(f.events.at(-1)?.eventType, 'opportunity.stage.updated');
 
   await f.service.updateOpportunity(f.user, 'opp-a', {
-    probability: 0.6, tenantId: 'tenant-b', customerId: 'customer-b', id: 'opp-b'
+    probability: 0.6,
+    tenantId: 'tenant-b',
+    customerId: 'customer-b',
+    id: 'opp-b',
   } as any);
   assert.deepEqual(f.opportunities.lastUpdate, { probability: 0.6 });
   assert.equal(f.audits.rows.at(-1)?.action, 'opportunity.update');
@@ -129,16 +168,34 @@ test('opportunity updates whitelist fields and emit an audit and outbox event', 
 
 test('interaction validates customer and optional opportunity ownership, then audits the mutation', async () => {
   const f = fixture();
-  f.customers.rows.push({ id: 'customer-a', tenantId: 'tenant-a', dealerId: 'dealer-a', storeId: 'store-a' });
+  f.customers.rows.push({
+    id: 'customer-a',
+    tenantId: 'tenant-a',
+    dealerId: 'dealer-a',
+    storeId: 'store-a',
+  });
   f.opportunities.rows.push({
-    id: 'opp-other', tenantId: 'tenant-a', dealerId: 'dealer-a', storeId: 'store-a', customerId: 'customer-other'
+    id: 'opp-other',
+    tenantId: 'tenant-a',
+    dealerId: 'dealer-a',
+    storeId: 'store-a',
+    customerId: 'customer-other',
   });
 
   await assert.rejects(
-    () => f.service.addInteraction(f.user, { customerId: 'customer-a', opportunityId: 'opp-other', content: 'invalid' }),
+    () =>
+      f.service.addInteraction(f.user, {
+        customerId: 'customer-a',
+        opportunityId: 'opp-other',
+        content: 'invalid',
+      }),
     /商机不存在/
   );
-  const saved = await f.service.addInteraction(f.user, { customerId: 'customer-a', type: 'call', content: 'follow up' });
+  const saved = await f.service.addInteraction(f.user, {
+    customerId: 'customer-a',
+    type: 'call',
+    content: 'follow up',
+  });
   assert.equal(saved.tenantId, 'tenant-a');
   assert.equal(f.audits.rows.at(-1)?.action, 'interaction.create');
   assert.equal(f.events.at(-1)?.eventType, 'interaction.created');
@@ -147,11 +204,21 @@ test('interaction validates customer and optional opportunity ownership, then au
 test('by-id mutations return not found for missing or cross-store opportunities', async () => {
   const f = fixture();
   f.opportunities.rows.push({
-    id: 'opp-store-b', tenantId: 'tenant-a', dealerId: 'dealer-a', storeId: 'store-b', customerId: 'customer-b'
+    id: 'opp-store-b',
+    tenantId: 'tenant-a',
+    dealerId: 'dealer-a',
+    storeId: 'store-b',
+    customerId: 'customer-b',
   });
 
-  await assert.rejects(() => f.service.updateOpportunityStage(f.user, 'missing', 'qualified'), /商机不存在/);
-  await assert.rejects(() => f.service.updateOpportunity(f.user, 'opp-store-b', { probability: 0.5 }), /商机不存在/);
+  await assert.rejects(
+    () => f.service.updateOpportunityStage(f.user, 'missing', 'qualified'),
+    /商机不存在/
+  );
+  await assert.rejects(
+    () => f.service.updateOpportunity(f.user, 'opp-store-b', { probability: 0.5 }),
+    /商机不存在/
+  );
   await assert.rejects(() => f.service.sign(f.user, 'opp-store-b', 'quote-1'), /商机不存在/);
   assert.equal(f.audits.rows.length, 0);
   assert.equal(f.events.length, 0);
@@ -160,8 +227,13 @@ test('by-id mutations return not found for missing or cross-store opportunities'
 test('sign writes audit and outbox in the opportunity transaction', async () => {
   const f = fixture();
   f.opportunities.rows.push({
-    id: 'opp-a', tenantId: 'tenant-a', dealerId: 'dealer-a', storeId: 'store-a',
-    customerId: 'customer-a', ownerUserId: 'seller-a', stage: 'quote'
+    id: 'opp-a',
+    tenantId: 'tenant-a',
+    dealerId: 'dealer-a',
+    storeId: 'store-a',
+    customerId: 'customer-a',
+    ownerUserId: 'seller-a',
+    stage: 'quote',
   });
 
   const result = await f.service.sign(f.user, 'opp-a', 'quote-1');

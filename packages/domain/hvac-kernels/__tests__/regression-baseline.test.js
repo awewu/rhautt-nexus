@@ -34,7 +34,8 @@ describe('HVAC kernels 回归基准集 (W1)', () => {
   describe('noise.evaluateRoomNoise (GB 50118-2010)', () => {
     test('卧室夜间达标场景 — 32.3 dB(A) ≤ 37', () => {
       const r = k.noise.evaluateRoomNoise({
-        roomType: 'bedroom', period: 'night',
+        roomType: 'bedroom',
+        period: 'night',
         room: { floorArea: 15, height: 2.8, absorption: 0.18 },
         sources: [{ soundPowerLevel: 40, distance: 2.5, pathAttenuation: 6 }],
         backgroundLp: 30,
@@ -47,7 +48,8 @@ describe('HVAC kernels 回归基准集 (W1)', () => {
 
     test('卧室夜间超标场景 — 58.4 dB(A) > 37', () => {
       const r = k.noise.evaluateRoomNoise({
-        roomType: 'bedroom', period: 'night',
+        roomType: 'bedroom',
+        period: 'night',
         room: { floorArea: 12 },
         sources: [{ soundPowerLevel: 62, distance: 1.5 }],
       });
@@ -63,8 +65,18 @@ describe('HVAC kernels 回归基准集 (W1)', () => {
 
     test('多房间汇总取最差项', () => {
       const agg = k.noise.evaluateRooms([
-        { roomType: 'bedroom', period: 'night', room: { floorArea: 15 }, sources: [{ soundPowerLevel: 40, distance: 2.5, pathAttenuation: 6 }] },
-        { roomType: 'bedroom', period: 'night', room: { floorArea: 12 }, sources: [{ soundPowerLevel: 62, distance: 1.5 }] },
+        {
+          roomType: 'bedroom',
+          period: 'night',
+          room: { floorArea: 15 },
+          sources: [{ soundPowerLevel: 40, distance: 2.5, pathAttenuation: 6 }],
+        },
+        {
+          roomType: 'bedroom',
+          period: 'night',
+          room: { floorArea: 12 },
+          sources: [{ soundPowerLevel: 62, distance: 1.5 }],
+        },
       ]);
       expect(agg.pass).toBe(false);
       expect(agg.failedCount).toBe(1);
@@ -84,7 +96,14 @@ describe('HVAC kernels 回归基准集 (W1)', () => {
     });
 
     test('generateDesign 产出结构稳定', () => {
-      const d = eng.generateDesign({ houseType: '三居', area: 120, residents: 3, bathrooms: 2, waterQuality: '中', city: '上海' });
+      const d = eng.generateDesign({
+        houseType: '三居',
+        area: 120,
+        residents: 3,
+        bathrooms: 2,
+        waterQuality: '中',
+        city: '上海',
+      });
       expect(Object.keys(d)).toEqual(expect.arrayContaining(['waterDemand', 'systems', 'summary']));
     });
 

@@ -19,11 +19,11 @@ const path = require('path');
 const EXPORT_ROOT = path.join(__dirname, '../../exports/delivery');
 
 const DOC_TYPES = [
-  { key: 'construction-drawing',    title: '施工图纸包',     icon: '📐' },
-  { key: 'equipment-material-list', title: '设备材料清单',   icon: '📦' },
-  { key: 'construction-spec',       title: '施工工艺规范',   icon: '🔧' },
-  { key: 'acceptance-standard',     title: '验收标准',       icon: '✅' },
-  { key: 'warranty-manual',         title: '质保与售后手册', icon: '🛡️' }
+  { key: 'construction-drawing', title: '施工图纸包', icon: '📐' },
+  { key: 'equipment-material-list', title: '设备材料清单', icon: '📦' },
+  { key: 'construction-spec', title: '施工工艺规范', icon: '🔧' },
+  { key: 'acceptance-standard', title: '验收标准', icon: '✅' },
+  { key: 'warranty-manual', title: '质保与售后手册', icon: '🛡️' },
 ];
 
 class TechnicalDeliveryGenerator {
@@ -47,7 +47,7 @@ class TechnicalDeliveryGenerator {
     const outDir = path.join(this.exportRoot, order.orderNo);
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
-    const documents = DOC_TYPES.map(d => {
+    const documents = DOC_TYPES.map((d) => {
       const html = this._renderDoc(d.key, order);
       const filePath = path.join(outDir, `${d.key}.html`);
       fs.writeFileSync(filePath, html, 'utf8');
@@ -58,7 +58,7 @@ class TechnicalDeliveryGenerator {
         filePath,
         url: `/exports/delivery/${order.orderNo}/${d.key}.html`,
         format: 'html',
-        sizeKB: Math.round(Buffer.byteLength(html, 'utf8') / 1024)
+        sizeKB: Math.round(Buffer.byteLength(html, 'utf8') / 1024),
       };
     });
 
@@ -70,7 +70,7 @@ class TechnicalDeliveryGenerator {
       tier: order.tier,
       area: order.area,
       city: order.city,
-      documents
+      documents,
     };
     fs.writeFileSync(path.join(outDir, 'manifest.json'), JSON.stringify(manifest, null, 2), 'utf8');
 
@@ -91,12 +91,18 @@ class TechnicalDeliveryGenerator {
    */
   _renderDoc(key, order) {
     switch (key) {
-      case 'construction-drawing':    return this._tmplConstructionDrawing(order);
-      case 'equipment-material-list': return this._tmplEquipmentList(order);
-      case 'construction-spec':       return this._tmplConstructionSpec(order);
-      case 'acceptance-standard':     return this._tmplAcceptanceStandard(order);
-      case 'warranty-manual':         return this._tmplWarrantyManual(order);
-      default: return this._wrap('未知文档类型', '<p>unknown doc</p>', order);
+      case 'construction-drawing':
+        return this._tmplConstructionDrawing(order);
+      case 'equipment-material-list':
+        return this._tmplEquipmentList(order);
+      case 'construction-spec':
+        return this._tmplConstructionSpec(order);
+      case 'acceptance-standard':
+        return this._tmplAcceptanceStandard(order);
+      case 'warranty-manual':
+        return this._tmplWarrantyManual(order);
+      default:
+        return this._wrap('未知文档类型', '<p>unknown doc</p>', order);
     }
   }
 
@@ -137,7 +143,7 @@ class TechnicalDeliveryGenerator {
     <span>订单号：${escapeHtml(order.orderNo)}</span>
     <span>客户：${escapeHtml(c.name || '待填')}</span>
     <span>地址：${escapeHtml(c.address || '待填')}</span>
-    <span>签单日：${escapeHtml(order.signedAt || new Date().toISOString().slice(0,10))}</span>
+    <span>签单日：${escapeHtml(order.signedAt || new Date().toISOString().slice(0, 10))}</span>
     <span>档次：${escapeHtml(tierName(order.tier))}</span>
     <span>面积：${order.area || '-'}㎡</span>
   </div>
@@ -164,10 +170,10 @@ ${bodyHtml}
   <thead><tr><th>图号</th><th>图纸名称</th><th>内容摘要</th><th>备注</th></tr></thead>
   <tbody>
     <tr><td>NT-01</td><td>平面布置总图</td><td>户型分区、设备位置、主要管线走向</td><td>必备</td></tr>
-    <tr><td>NT-02</td><td>水系统图</td><td>热水/冷热水/软水/净水管路走向</td><td>${systems.some(s=>/水/.test(s.name))?'涉及':'—'}</td></tr>
-    <tr><td>NT-03</td><td>采暖系统图</td><td>地暖盘管/散热器分区、混水中心位置</td><td>${systems.some(s=>/暖|heating/i.test(s.name||s.type))?'涉及':'—'}</td></tr>
-    <tr><td>NT-04</td><td>空调系统图</td><td>室内外机位置、冷媒管走向、冷凝水</td><td>${systems.some(s=>/空调|ac/i.test(s.name||s.type))?'涉及':'—'}</td></tr>
-    <tr><td>NT-05</td><td>新风系统图</td><td>送回风口、主管布置、CO2/PM传感器位</td><td>${systems.some(s=>/新风|fresh/i.test(s.name||s.type))?'涉及':'—'}</td></tr>
+    <tr><td>NT-02</td><td>水系统图</td><td>热水/冷热水/软水/净水管路走向</td><td>${systems.some((s) => /水/.test(s.name)) ? '涉及' : '—'}</td></tr>
+    <tr><td>NT-03</td><td>采暖系统图</td><td>地暖盘管/散热器分区、混水中心位置</td><td>${systems.some((s) => /暖|heating/i.test(s.name || s.type)) ? '涉及' : '—'}</td></tr>
+    <tr><td>NT-04</td><td>空调系统图</td><td>室内外机位置、冷媒管走向、冷凝水</td><td>${systems.some((s) => /空调|ac/i.test(s.name || s.type)) ? '涉及' : '—'}</td></tr>
+    <tr><td>NT-05</td><td>新风系统图</td><td>送回风口、主管布置、CO2/PM传感器位</td><td>${systems.some((s) => /新风|fresh/i.test(s.name || s.type)) ? '涉及' : '—'}</td></tr>
     <tr><td>NT-06</td><td>电气配电图</td><td>各系统配电、空气开关、线径、接地</td><td>必备</td></tr>
     <tr><td>NT-07</td><td>弱电/智能控制图</td><td>面板、传感器、网关、联动逻辑</td><td>按档次</td></tr>
     <tr><td>NT-08</td><td>节点详图</td><td>吊顶穿墙/下沉地面/墙面开孔大样</td><td>必备</td></tr>
@@ -195,20 +201,28 @@ ${bodyHtml}
   // ───────── ② 设备材料清单 ─────────
   _tmplEquipmentList(order) {
     const systems = order.systems || [];
-    const rows = systems.map((s, i) => {
-      const cfg = s.config || {};
-      const parts = [];
-      Object.entries(cfg).forEach(([k, v]) => {
-        if (typeof v === 'object' && v) {
-          const name = v.model || v.type || '';
-          parts.push(`<tr><td>${i+1}.${parts.length+1}</td><td>${escapeHtml(s.name)}/${escapeHtml(k)}</td><td>${escapeHtml(name)}</td><td>1</td><td>套</td><td>${escapeHtml(v.capacity||v.power||v.airflow||'-')}</td></tr>`);
-        }
-      });
-      if (parts.length === 0) {
-        parts.push(`<tr><td>${i+1}</td><td>${escapeHtml(s.name)}</td><td>-</td><td>1</td><td>套</td><td>-</td></tr>`);
-      }
-      return parts.join('');
-    }).join('') || '<tr><td colspan="6" style="text-align:center;color:#9ca3af;">订单未含系统清单</td></tr>';
+    const rows =
+      systems
+        .map((s, i) => {
+          const cfg = s.config || {};
+          const parts = [];
+          Object.entries(cfg).forEach(([k, v]) => {
+            if (typeof v === 'object' && v) {
+              const name = v.model || v.type || '';
+              parts.push(
+                `<tr><td>${i + 1}.${parts.length + 1}</td><td>${escapeHtml(s.name)}/${escapeHtml(k)}</td><td>${escapeHtml(name)}</td><td>1</td><td>套</td><td>${escapeHtml(v.capacity || v.power || v.airflow || '-')}</td></tr>`
+              );
+            }
+          });
+          if (parts.length === 0) {
+            parts.push(
+              `<tr><td>${i + 1}</td><td>${escapeHtml(s.name)}</td><td>-</td><td>1</td><td>套</td><td>-</td></tr>`
+            );
+          }
+          return parts.join('');
+        })
+        .join('') ||
+      '<tr><td colspan="6" style="text-align:center;color:#9ca3af;">订单未含系统清单</td></tr>';
 
     const body = `
 <h2>一、设备清单</h2>
@@ -221,14 +235,14 @@ ${bodyHtml}
 <table>
   <thead><tr><th>类别</th><th>材料名称</th><th>品牌参考</th><th>规格</th><th>预估用量</th></tr></thead>
   <tbody>
-    <tr><td>保温</td><td>橡塑保温棉</td><td>阿乐斯 B1级</td><td>厚 20mm</td><td>${Math.round((order.area||100)*0.6)} m²</td></tr>
-    <tr><td>水管</td><td>PE-RT地暖盘管</td><td>德国瑞好/伟星</td><td>DN16-20</td><td>${Math.round((order.area||100)*6)} m</td></tr>
-    <tr><td>水管</td><td>PPR热水管</td><td>日丰/金德</td><td>DN20-25</td><td>${Math.round((order.area||100)*0.8)} m</td></tr>
-    <tr><td>冷媒</td><td>紫铜管（R410A）</td><td>金龙/海亮</td><td>Φ6.35/9.52</td><td>${Math.round((order.area||100)*0.5)} m</td></tr>
-    <tr><td>风管</td><td>PE镀铝复合风管</td><td>爱美信/绿岛风</td><td>Φ150</td><td>${Math.round((order.area||100)*0.4)} m</td></tr>
-    <tr><td>支吊架</td><td>U型/吊杆+减震垫</td><td>通用</td><td>M8-M10</td><td>${Math.ceil((order.area||100)/10)} 套</td></tr>
-    <tr><td>电气</td><td>BV/ZR-BV铜芯线</td><td>上上/远东</td><td>2.5/4/6 mm²</td><td>${Math.round((order.area||100)*5)} m</td></tr>
-    <tr><td>调试</td><td>分集水器/温控面板</td><td>Rheem/Ruud</td><td>按系统分区</td><td>${Math.ceil((order.area||100)/30)} 套</td></tr>
+    <tr><td>保温</td><td>橡塑保温棉</td><td>阿乐斯 B1级</td><td>厚 20mm</td><td>${Math.round((order.area || 100) * 0.6)} m²</td></tr>
+    <tr><td>水管</td><td>PE-RT地暖盘管</td><td>德国瑞好/伟星</td><td>DN16-20</td><td>${Math.round((order.area || 100) * 6)} m</td></tr>
+    <tr><td>水管</td><td>PPR热水管</td><td>日丰/金德</td><td>DN20-25</td><td>${Math.round((order.area || 100) * 0.8)} m</td></tr>
+    <tr><td>冷媒</td><td>紫铜管（R410A）</td><td>金龙/海亮</td><td>Φ6.35/9.52</td><td>${Math.round((order.area || 100) * 0.5)} m</td></tr>
+    <tr><td>风管</td><td>PE镀铝复合风管</td><td>爱美信/绿岛风</td><td>Φ150</td><td>${Math.round((order.area || 100) * 0.4)} m</td></tr>
+    <tr><td>支吊架</td><td>U型/吊杆+减震垫</td><td>通用</td><td>M8-M10</td><td>${Math.ceil((order.area || 100) / 10)} 套</td></tr>
+    <tr><td>电气</td><td>BV/ZR-BV铜芯线</td><td>上上/远东</td><td>2.5/4/6 mm²</td><td>${Math.round((order.area || 100) * 5)} m</td></tr>
+    <tr><td>调试</td><td>分集水器/温控面板</td><td>Rheem/Ruud</td><td>按系统分区</td><td>${Math.ceil((order.area || 100) / 30)} 套</td></tr>
   </tbody>
 </table>
 
@@ -401,11 +415,14 @@ ${bodyHtml}
 // ───── 工具函数 ─────
 function escapeHtml(s) {
   return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 function tierName(t) {
-  return { basic: '基础', comfort: '舒适', premium: '旗舰' }[t] || (t || '-');
+  return { basic: '基础', comfort: '舒适', premium: '旗舰' }[t] || t || '-';
 }
 
 module.exports = TechnicalDeliveryGenerator;

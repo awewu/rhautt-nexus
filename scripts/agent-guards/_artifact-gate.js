@@ -31,7 +31,9 @@ function requireArtifactOrSkip(relativePaths, options = {}) {
 
   const guard = options.guard ? `${options.guard}: ` : '';
   const reason = options.reason ? `（${options.reason}）` : '';
-  console.log(`SKIPPED: ${guard}缺少产物 ${missing.join(', ')}${reason} —— 产物恢复/生成后本门禁自动恢复严格校验。`);
+  console.log(
+    `SKIPPED: ${guard}缺少产物 ${missing.join(', ')}${reason} —— 产物恢复/生成后本门禁自动恢复严格校验。`
+  );
   process.exit(0);
 }
 

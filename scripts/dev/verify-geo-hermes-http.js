@@ -15,7 +15,7 @@ async function main() {
   await client.connect();
   const { rows } = await client.query(
     'select id, tenant_id, dealer_id, store_id, role, permissions from rhautt_nexus.users where status = $1 order by created_at asc limit 1',
-    ['active'],
+    ['active']
   );
   await client.end();
   if (!rows.length) throw new Error('no active user');
@@ -33,7 +33,7 @@ async function main() {
       permissions: user.permissions || [],
     },
     secret,
-    { expiresIn: '1h' },
+    { expiresIn: '1h' }
   );
 
   const headers = {
@@ -93,30 +93,44 @@ async function main() {
   const job = detail.data.job;
   const snapshot = detail.data.snapshot;
 
-  console.log(JSON.stringify({
-    ok: job.status === 'succeeded',
-    httpApi: 'http://localhost:5500',
-    stream: {
-      deltaCount,
-      preview: streamedText.slice(0, 160),
-    },
-    job: {
-      id: job.id,
-      engine: job.engine,
-      status: job.status,
-      errorMessage: job.errorMessage,
-      probeId: job.probeId,
-      snapshotId: job.snapshotId,
-    },
-    snapshotPreview: snapshot ? snapshot.answerText.slice(0, 160) : null,
-    visibility: (visibility.data.visibility || []).filter((row) => row.engine === 'hermes-center-ai'),
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        ok: job.status === 'succeeded',
+        httpApi: 'http://localhost:5500',
+        stream: {
+          deltaCount,
+          preview: streamedText.slice(0, 160),
+        },
+        job: {
+          id: job.id,
+          engine: job.engine,
+          status: job.status,
+          errorMessage: job.errorMessage,
+          probeId: job.probeId,
+          snapshotId: job.snapshotId,
+        },
+        snapshotPreview: snapshot ? snapshot.answerText.slice(0, 160) : null,
+        visibility: (visibility.data.visibility || []).filter(
+          (row) => row.engine === 'hermes-center-ai'
+        ),
+      },
+      null,
+      2
+    )
+  );
 }
 
 main().catch((error) => {
-  console.error(JSON.stringify({
-    ok: false,
-    error: error instanceof Error ? error.message : String(error),
-  }, null, 2));
+  console.error(
+    JSON.stringify(
+      {
+        ok: false,
+        error: error instanceof Error ? error.message : String(error),
+      },
+      null,
+      2
+    )
+  );
   process.exit(1);
 });

@@ -12,23 +12,23 @@ Configure these variables only in server runtime environments such as
 `.env.nestjs`, `.env.production`, Docker/Compose secrets, PM2 environment
 files, or the production secret manager:
 
-| Variable | Purpose |
-| --- | --- |
-| `OIDC_ISSUER` | OIDC issuer. Current value: `https://ai.rhautt.com`. |
-| `OIDC_CLIENT_ID` | Nexus client ID issued by the IdP. |
-| `OIDC_CLIENT_SECRET` | Confidential client secret. Must never be committed or exposed to browser code. |
-| `OIDC_REDIRECT_URI` | Callback endpoint registered at the IdP. |
-| `OIDC_SCOPES` | Requested scopes. Current value: `openid profile email roles org`. |
-| `OIDC_POST_LOGIN_REDIRECT` | Nexus landing path after successful login. Current value: `/cockpit`. |
+| Variable                   | Purpose                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| `OIDC_ISSUER`              | OIDC issuer. Current value: `https://ai.rhautt.com`.                            |
+| `OIDC_CLIENT_ID`           | Nexus client ID issued by the IdP.                                              |
+| `OIDC_CLIENT_SECRET`       | Confidential client secret. Must never be committed or exposed to browser code. |
+| `OIDC_REDIRECT_URI`        | Callback endpoint registered at the IdP.                                        |
+| `OIDC_SCOPES`              | Requested scopes. Current value: `openid profile email roles org`.              |
+| `OIDC_POST_LOGIN_REDIRECT` | Nexus landing path after successful login. Current value: `/cockpit`.           |
 
 Optional variables:
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `OIDC_USERINFO_ENABLED` | `true` | Allows the callback implementation to call the discovered userinfo endpoint when claims are incomplete. |
-| `OIDC_ALLOWED_REDIRECT_HOSTS` | empty | Comma-separated host allowlist for same-site redirect handling when a deployment needs explicit host checks. |
-| `OIDC_ROLES_CLAIM` | `roles` | Upstream roles claim name used only as a hint. Nexus RBAC remains authoritative. |
-| `OIDC_ORG_CLAIM` | `org` | Upstream org claim name used only as a hint. Nexus tenant/store/dealer context remains authoritative. |
+| Variable                      | Default | Purpose                                                                                                      |
+| ----------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
+| `OIDC_USERINFO_ENABLED`       | `true`  | Allows the callback implementation to call the discovered userinfo endpoint when claims are incomplete.      |
+| `OIDC_ALLOWED_REDIRECT_HOSTS` | empty   | Comma-separated host allowlist for same-site redirect handling when a deployment needs explicit host checks. |
+| `OIDC_ROLES_CLAIM`            | `roles` | Upstream roles claim name used only as a hint. Nexus RBAC remains authoritative.                             |
+| `OIDC_ORG_CLAIM`              | `org`   | Upstream org claim name used only as a hint. Nexus tenant/store/dealer context remains authoritative.        |
 
 ## Local Reference
 

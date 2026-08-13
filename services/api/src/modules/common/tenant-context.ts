@@ -25,7 +25,9 @@ export function getTenantScope(): TenantScope | undefined {
 export function requireTenantScope(): TenantScope {
   const scope = storage.getStore();
   if (!scope?.tenantId) {
-    throw new Error('No tenant scope in context — a tenant-scoped operation ran outside an authenticated request.');
+    throw new Error(
+      'No tenant scope in context — a tenant-scoped operation ran outside an authenticated request.'
+    );
   }
   return scope;
 }

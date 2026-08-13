@@ -13,66 +13,44 @@ const CONFIG = {
   serverPort: 5000,
   apiBaseUrl: 'http://localhost:5000/api',
   timeout: 5000,
-  retries: 3
+  retries: 3,
 };
 
 // 验收检查清单
 const CHECKLIST = {
   // P0 核心功能检查项
   P0: {
-    '账号权限管理': [
+    账号权限管理: [
       '用户注册功能正常',
       '账号密码登录正常',
       '短信验证码登录正常',
       '角色权限控制正常',
-      'JWT认证机制正常'
+      'JWT认证机制正常',
     ],
-    '双模式设计流程': [
+    双模式设计流程: [
       '快速估算模式可用',
       '精细化设计模式可用',
       'AI方案推荐正常',
       '3D展示功能正常',
-      '设计流程完整'
+      '设计流程完整',
     ],
-    '六大系统支持': [
+    六大系统支持: [
       '五恒系统支持',
       '净水系统支持',
       '采暖系统支持',
       '热水系统支持',
       '新风系统支持',
-      '除湿系统支持'
+      '除湿系统支持',
     ],
-    '设备库管理': [
-      '瑞美产品预设完整',
-      '第三方产品审核',
-      '设备搜索筛选正常',
-      '设备详情展示'
-    ],
-    '智能报价系统': [
-      '多促销配置',
-      '实时价格计算',
-      '材料清单生成',
-      '报价单导出'
-    ]
+    设备库管理: ['瑞美产品预设完整', '第三方产品审核', '设备搜索筛选正常', '设备详情展示'],
+    智能报价系统: ['多促销配置', '实时价格计算', '材料清单生成', '报价单导出'],
   },
   // P1 扩展功能检查项
   P1: {
-    '方案管理': [
-      '版本控制正常',
-      '云端存储同步',
-      '项目分享协作',
-      '批量操作功能'
-    ],
-    '多终端支持': [
-      'Web端功能完整',
-      'Pad端适配',
-      '移动端查看'
-    ],
-    '智能控制': [
-      '控制系统集成',
-      'API接口预留'
-    ]
-  }
+    方案管理: ['版本控制正常', '云端存储同步', '项目分享协作', '批量操作功能'],
+    多终端支持: ['Web端功能完整', 'Pad端适配', '移动端查看'],
+    智能控制: ['控制系统集成', 'API接口预留'],
+  },
 };
 
 // 测试套件
@@ -90,14 +68,14 @@ class AcceptanceTestSuite {
       test,
       status,
       message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     this.results.push(result);
-    
+
     if (status === 'PASS') this.passed++;
     else if (status === 'FAIL') this.failed++;
     else if (status === 'SKIP') this.skipped++;
-    
+
     const icon = status === 'PASS' ? '✅' : status === 'FAIL' ? '❌' : '⚠️';
     console.log(`${icon} ${test}${message ? ': ' + message : ''}`);
   }
@@ -123,12 +101,11 @@ class AcceptanceTestSuite {
   async testAuthentication() {
     // 测试登录API
     try {
-      const loginResponse = await this.httpRequest(
-        `${CONFIG.apiBaseUrl}/auth/login`,
-        'POST',
-        { phone: '13800000000', password: '123456' }
-      );
-      
+      const loginResponse = await this.httpRequest(`${CONFIG.apiBaseUrl}/auth/login`, 'POST', {
+        phone: '13800000000',
+        password: '123456',
+      });
+
       if (loginResponse.success && loginResponse.data.token) {
         this.log('用户登录测试', 'PASS', '认证流程正常');
       } else {
@@ -175,7 +152,7 @@ class AcceptanceTestSuite {
         'POST',
         { area: 120, rooms: 3, city: 'beijing', budget: 'medium' }
       );
-      
+
       if (response.success && response.data.recommendations) {
         this.log('AI设计API', 'PASS', '方案生成正常');
       } else {
@@ -203,11 +180,11 @@ class AcceptanceTestSuite {
       'src/pages/Dashboard.jsx',
       'src/pages/auth/Login.jsx',
       'src/pages/design/QuickDesign.jsx',
-      'src/pages/design/DetailedDesign.jsx'
+      'src/pages/design/DetailedDesign.jsx',
     ];
 
     let missingCount = 0;
-    requiredFiles.forEach(file => {
+    requiredFiles.forEach((file) => {
       const fullPath = path.join(__dirname, '..', file);
       if (fs.existsSync(fullPath)) {
         this.log(`文件检查: ${file}`, 'PASS');
@@ -231,12 +208,12 @@ class AcceptanceTestSuite {
       'zod',
       'react',
       'react-dom',
-      'react-router-dom'
+      'react-router-dom',
     ];
 
     const nodeModulesPath = path.join(__dirname, '..', 'node_modules');
-    
-    requiredDeps.forEach(dep => {
+
+    requiredDeps.forEach((dep) => {
       const depPath = path.join(nodeModulesPath, dep);
       if (fs.existsSync(depPath)) {
         this.log(`依赖检查: ${dep}`, 'PASS');
@@ -256,9 +233,9 @@ class AcceptanceTestSuite {
         path: urlObj.pathname + urlObj.search,
         method: method,
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
-        timeout: CONFIG.timeout
+        timeout: CONFIG.timeout,
       };
 
       const req = http.request(options, (res) => {
@@ -296,11 +273,11 @@ class AcceptanceTestSuite {
         passed: this.passed,
         failed: this.failed,
         skipped: this.skipped,
-        passRate: ((this.passed / this.results.length) * 100).toFixed(2) + '%'
+        passRate: ((this.passed / this.results.length) * 100).toFixed(2) + '%',
       },
       results: this.results,
       checklist: CHECKLIST,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     // 保存报告
@@ -317,7 +294,7 @@ class AcceptanceTestSuite {
     console.log(`跳过: ${report.summary.skipped} ⚠️`);
     console.log(`通过率: ${report.summary.passRate}`);
     console.log('='.repeat(60));
-    
+
     if (report.summary.failed === 0) {
       console.log('🎉 验收通过！系统符合所有立项要求。');
     } else {
@@ -343,7 +320,7 @@ class AcceptanceTestSuite {
     // 3. API连接测试
     console.log('\n【阶段3】API功能测试');
     const apiConnected = await this.testAPIConnection();
-    
+
     if (apiConnected) {
       await this.testAuthentication();
       await this.testProjectAPI();
@@ -360,12 +337,15 @@ class AcceptanceTestSuite {
 // 如果直接运行此文件
 if (require.main === module) {
   const suite = new AcceptanceTestSuite();
-  suite.runAllTests().then(report => {
-    process.exit(report.summary.failed > 0 ? 1 : 0);
-  }).catch(err => {
-    console.error('测试执行失败:', err);
-    process.exit(1);
-  });
+  suite
+    .runAllTests()
+    .then((report) => {
+      process.exit(report.summary.failed > 0 ? 1 : 0);
+    })
+    .catch((err) => {
+      console.error('测试执行失败:', err);
+      process.exit(1);
+    });
 }
 
 module.exports = AcceptanceTestSuite;

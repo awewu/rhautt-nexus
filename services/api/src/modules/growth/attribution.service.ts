@@ -20,16 +20,16 @@ export interface CampaignAggregate {
 
 export interface CampaignEconomics extends CampaignAggregate {
   spend: number;
-  ctr: number;          // 点击率 clicks/impressions
-  leadRate: number;     // 留资率 leads/clicks
-  closeRate: number;    // 成交率 signed/leads
-  cpl: number;          // 单条留资成本 spend/leads
-  cac: number;          // 获客成本 spend/signed
+  ctr: number; // 点击率 clicks/impressions
+  leadRate: number; // 留资率 leads/clicks
+  closeRate: number; // 成交率 signed/leads
+  cpl: number; // 单条留资成本 spend/leads
+  cac: number; // 获客成本 spend/signed
 }
 
 export interface Touchpoint {
   campaignId: string;
-  ts: number;           // epoch ms
+  ts: number; // epoch ms
 }
 
 @Injectable()
@@ -60,12 +60,17 @@ export class AttributionService {
    * 多触点归因：把 1 个成交（信用 = 1）按模型分配到旅程中的各触点战役。
    * 返回 { campaignId: 信用占比 }，各占比之和 = 1（旅程非空时）。
    */
-  multiTouchCredit(journey: Touchpoint[], model: AttributionModel = 'linear'): Record<string, number> {
+  multiTouchCredit(
+    journey: Touchpoint[],
+    model: AttributionModel = 'linear'
+  ): Record<string, number> {
     const path = [...(journey || [])].sort((a, b) => a.ts - b.ts);
     const credit: Record<string, number> = {};
     if (path.length === 0) return credit;
 
-    const add = (id: string, w: number) => { credit[id] = this.round((credit[id] || 0) + w); };
+    const add = (id: string, w: number) => {
+      credit[id] = this.round((credit[id] || 0) + w);
+    };
 
     if (model === 'first-touch') {
       add(path[0].campaignId, 1);

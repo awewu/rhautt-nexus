@@ -17,7 +17,7 @@ import type { SellableModuleId } from './subscription.entity';
 export class EntitlementGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly entitlement: EntitlementService,
+    private readonly entitlement: EntitlementService
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {

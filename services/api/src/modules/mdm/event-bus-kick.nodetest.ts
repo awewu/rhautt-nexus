@@ -18,10 +18,13 @@ function makeRepo(rows: any[]) {
     },
     async save(e: any) {
       const i = rows.findIndex((r) => r.id === e.id);
-      if (i >= 0) rows[i] = e; else rows.push(e);
+      if (i >= 0) rows[i] = e;
+      else rows.push(e);
       return e;
     },
-    create(d: any) { return { ...d }; },
+    create(d: any) {
+      return { ...d };
+    },
   } as any;
 }
 
@@ -31,10 +34,21 @@ function newService(rows: any[]) {
 }
 
 test('kickDispatch：立即投递 pending 事件（无需等待 sweep）', async () => {
-  const rows: any[] = [{ id: 'e1', status: 'pending', attempts: 0, eventType: 'opportunity.signed', payload: {}, tenantId: null }];
+  const rows: any[] = [
+    {
+      id: 'e1',
+      status: 'pending',
+      attempts: 0,
+      eventType: 'opportunity.signed',
+      payload: {},
+      tenantId: null,
+    },
+  ];
   const svc = newService(rows);
   let got: any = null;
-  svc.subscribe('opportunity.signed', (e) => { got = e; });
+  svc.subscribe('opportunity.signed', (e) => {
+    got = e;
+  });
 
   await svc.kickDispatch(); // no tenant → foundation 路径
 
@@ -44,10 +58,21 @@ test('kickDispatch：立即投递 pending 事件（无需等待 sweep）', async
 });
 
 test('kickDispatch：幂等——无 pending 时不重复投递', async () => {
-  const rows = [{ id: 'e1', status: 'pending', attempts: 0, eventType: 'opportunity.signed', payload: {}, tenantId: null }];
+  const rows = [
+    {
+      id: 'e1',
+      status: 'pending',
+      attempts: 0,
+      eventType: 'opportunity.signed',
+      payload: {},
+      tenantId: null,
+    },
+  ];
   const svc = newService(rows);
   let calls = 0;
-  svc.subscribe('opportunity.signed', () => { calls++; });
+  svc.subscribe('opportunity.signed', () => {
+    calls++;
+  });
 
   await svc.kickDispatch();
   await svc.kickDispatch(); // 第二次：已 delivered，无 pending
@@ -56,9 +81,20 @@ test('kickDispatch：幂等——无 pending 时不重复投递', async () => {
 });
 
 test('kickDispatch：订阅者抛错被吞，催投 resolve（不反噬签单）', async () => {
-  const rows = [{ id: 'e1', status: 'pending', attempts: 0, eventType: 'opportunity.signed', payload: {}, tenantId: null }];
+  const rows = [
+    {
+      id: 'e1',
+      status: 'pending',
+      attempts: 0,
+      eventType: 'opportunity.signed',
+      payload: {},
+      tenantId: null,
+    },
+  ];
   const svc = newService(rows);
-  svc.subscribe('opportunity.signed', () => { throw new Error('boom'); });
+  svc.subscribe('opportunity.signed', () => {
+    throw new Error('boom');
+  });
 
   await assert.doesNotReject(() => svc.kickDispatch(), '催投必须尽力而为、绝不抛出');
   assert.equal(rows[0].attempts, 1, '失败事件应累加 attempts（留待 sweep 兜底重投）');
@@ -67,12 +103,28 @@ test('kickDispatch：订阅者抛错被吞，催投 resolve（不反噬签单）
 
 test('kickDispatch：只投 pending，delivered/dead 不动', async () => {
   const rows = [
-    { id: 'e1', status: 'delivered', attempts: 0, eventType: 'opportunity.signed', payload: {}, tenantId: null },
-    { id: 'e2', status: 'pending', attempts: 0, eventType: 'opportunity.signed', payload: {}, tenantId: null },
+    {
+      id: 'e1',
+      status: 'delivered',
+      attempts: 0,
+      eventType: 'opportunity.signed',
+      payload: {},
+      tenantId: null,
+    },
+    {
+      id: 'e2',
+      status: 'pending',
+      attempts: 0,
+      eventType: 'opportunity.signed',
+      payload: {},
+      tenantId: null,
+    },
   ];
   const svc = newService(rows);
   const seen: string[] = [];
-  svc.subscribe('opportunity.signed', (e) => { seen.push(e.id); });
+  svc.subscribe('opportunity.signed', (e) => {
+    seen.push(e.id);
+  });
 
   await svc.kickDispatch();
 

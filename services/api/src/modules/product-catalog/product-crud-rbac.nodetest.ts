@@ -44,7 +44,16 @@ test('product CRUD and site shelf API surfaces have route ownership', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { getRouteOwner } = require('../../../../../server/modules/routeOwnership');
 
-  assert.equal(getRouteOwner('/api/v2/product-catalog/devices').owner, 'services/api/src/modules/product-catalog');
-  assert.equal(getRouteOwner('/api/v2/brand-sites/rheem/product-assignments').owner, 'services/api/src/modules/brand-registry');
-  assert.equal(getRouteOwner('/api/v2/sites/rheem/products').owner, 'services/api/src/modules/brand-registry public site catalog surface');
+  assert.equal(
+    getRouteOwner('/api/v2/product-catalog/devices').owner,
+    'services/api/src/modules/product-catalog'
+  );
+  assert.equal(
+    getRouteOwner('/api/v2/brand-sites/rheem/product-assignments').owner,
+    'services/api/src/modules/brand-registry'
+  );
+  assert.equal(
+    getRouteOwner('/api/v2/sites/rheem/products').owner,
+    'services/api/src/modules/brand-registry public site catalog surface'
+  );
 });

@@ -24,7 +24,10 @@ export class ChannelRebateEntity {
   @Column() period: string;
   @Column() basis: string;
   @Column({ type: 'numeric', default: 0 }) amount: number;
-  @Column({ name: 'margin_calc', type: 'jsonb', default: () => "'{}'::jsonb" }) marginCalc: Record<string, unknown>;
+  @Column({ name: 'margin_calc', type: 'jsonb', default: () => "'{}'::jsonb" }) marginCalc: Record<
+    string,
+    unknown
+  >;
   @Column({ default: 'submitted' }) status: string;
   @Column({ type: 'varchar', nullable: true }) approver: string | null;
   @Column({ name: 'created_at', type: 'timestamptz', default: () => 'now()' }) createdAt: Date;

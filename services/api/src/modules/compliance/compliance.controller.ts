@@ -30,7 +30,7 @@ export class ComplianceController {
   status(
     @Param('tenantId') tenantId: string,
     @Param('subjectId') subjectId: string,
-    @Query('purpose') purpose: ConsentPurpose,
+    @Query('purpose') purpose: ConsentPurpose
   ) {
     return this.svc.getConsentStatus(tenantId, subjectId, purpose);
   }

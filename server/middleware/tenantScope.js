@@ -14,7 +14,7 @@ function requireTenantScope(req, res, next) {
     storeId: user.storeId || null,
     customerId: user.customerId || null,
     userId: user.userId || user.id || null,
-    role: user.role || null
+    role: user.role || null,
   };
 
   next();
@@ -24,7 +24,7 @@ function requireDealerScope(req, res, next) {
   if (!req.scope || !req.scope.dealerId) {
     return res.status(403).json({
       success: false,
-      error: '缺少经销商上下文'
+      error: '缺少经销商上下文',
     });
   }
   next();
@@ -36,13 +36,15 @@ function canAccessScope(req, target = {}) {
   if (String(target.tenantId) !== String(scope.tenantId)) return false;
 
   if (scope.role === 'platform_admin' || scope.role === 'hq_admin') return true;
-  if (target.dealerId && scope.dealerId && String(target.dealerId) !== String(scope.dealerId)) return false;
-  if (target.storeId && scope.storeId && String(target.storeId) !== String(scope.storeId)) return false;
+  if (target.dealerId && scope.dealerId && String(target.dealerId) !== String(scope.dealerId))
+    return false;
+  if (target.storeId && scope.storeId && String(target.storeId) !== String(scope.storeId))
+    return false;
   return true;
 }
 
 module.exports = {
   requireTenantScope,
   requireDealerScope,
-  canAccessScope
+  canAccessScope,
 };

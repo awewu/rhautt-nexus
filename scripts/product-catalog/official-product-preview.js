@@ -17,7 +17,8 @@ const REPORT_OUTPUT = path.join(OUTPUT_DIR, 'official-product-preview.md');
 const USER_AGENT = 'RhauttProductCatalogResearch/1.0 (+public official product data only)';
 const REQUEST_DELAY_MS = Number(process.env.OFFICIAL_CRAWL_DELAY_MS || 250);
 const BRAND_ARG_INDEX = process.argv.indexOf('--brand');
-const SELECTED_BRAND = BRAND_ARG_INDEX >= 0 ? String(process.argv[BRAND_ARG_INDEX + 1] || '').trim() : '';
+const SELECTED_BRAND =
+  BRAND_ARG_INDEX >= 0 ? String(process.argv[BRAND_ARG_INDEX + 1] || '').trim() : '';
 
 function sleep(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -118,15 +119,19 @@ async function crawlRuud() {
 async function crawlEverhot() {
   const listingUrl = `${OFFICIAL_SOURCES.Everhot}/index/products`;
   const endpoint = `${OFFICIAL_SOURCES.Everhot}/public/index/products/getList`;
-  const response = await postForm(endpoint, {
-    limit: '200',
-    page: '1',
-    type: '',
-    series: '',
-    scene: '',
-    trait: '',
-    text: '',
-  }, { referer: listingUrl });
+  const response = await postForm(
+    endpoint,
+    {
+      limit: '200',
+      page: '1',
+      type: '',
+      series: '',
+      scene: '',
+      trait: '',
+      text: '',
+    },
+    { referer: listingUrl }
+  );
   const discovered = parseEverhotList(await response.json(), listingUrl);
   const products = [];
   for (const product of discovered) {
@@ -141,8 +146,16 @@ async function crawlEverhot() {
 }
 
 function toPreviewRecord(brand, product, fetchedAt) {
-  const fallbackCategory = brand === 'Rheem' ? product.raw.segment === '10' ? 'commercial-hvac' : 'residential-comfort' : 'comfort-hvac';
-  const category = inferCategory(`${product.name} ${product.categoryLabel || ''}`, fallbackCategory);
+  const fallbackCategory =
+    brand === 'Rheem'
+      ? product.raw.segment === '10'
+        ? 'commercial-hvac'
+        : 'residential-comfort'
+      : 'comfort-hvac';
+  const category = inferCategory(
+    `${product.name} ${product.categoryLabel || ''}`,
+    fallbackCategory
+  );
   const brandCode = brand.toUpperCase();
   const fields = {
     name: product.name,
@@ -153,7 +166,9 @@ function toPreviewRecord(brand, product, fetchedAt) {
     parameters: Object.keys(product.parameters || {}).length ? product.parameters : null,
     sourceUrl: product.sourceUrl,
   };
-  const present = Object.values(fields).filter((value) => value !== null && value !== undefined && value !== '').length;
+  const present = Object.values(fields).filter(
+    (value) => value !== null && value !== undefined && value !== ''
+  ).length;
   const completeness = Math.round((present / Object.keys(fields).length) * 100);
   return {
     tenantId: null,
@@ -195,7 +210,9 @@ function summarize(records) {
   return Object.fromEntries(
     [...new Set(records.map((record) => record.brand))].map((brand) => {
       const selected = records.filter((record) => record.brand === brand);
-      const average = selected.reduce((sum, record) => sum + record.meta.fieldCompleteness.score, 0) / selected.length;
+      const average =
+        selected.reduce((sum, record) => sum + record.meta.fieldCompleteness.score, 0) /
+        selected.length;
       return [
         brand,
         {
@@ -204,7 +221,10 @@ function summarize(records) {
           missingModel: selected.filter((record) => !record.spec.officialModel).length,
           missingDescription: selected.filter((record) => !record.spec.description).length,
           missingPrice: selected.filter((record) => !record.listPrice).length,
-          warnings: selected.reduce((sum, record) => sum + record.meta.dataQualityWarnings.length, 0),
+          warnings: selected.reduce(
+            (sum, record) => sum + record.meta.dataQualityWarnings.length,
+            0
+          ),
         },
       ];
     })
@@ -224,7 +244,9 @@ function renderReport(payload) {
     '| --- | ---: | ---: | ---: | ---: | ---: | ---: |',
   ];
   for (const [brand, stats] of Object.entries(payload.summary)) {
-    lines.push(`| ${brand} | ${stats.products} | ${stats.averageCompleteness}% | ${stats.missingModel} | ${stats.missingDescription} | ${stats.missingPrice} | ${stats.warnings} |`);
+    lines.push(
+      `| ${brand} | ${stats.products} | ${stats.averageCompleteness}% | ${stats.missingModel} | ${stats.missingDescription} | ${stats.missingPrice} | ${stats.warnings} |`
+    );
   }
   const categories = Object.entries(
     payload.products.reduce((result, product) => {

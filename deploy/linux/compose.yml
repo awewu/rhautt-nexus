@@ -44,7 +44,7 @@ x-next: &next
 services:
   postgres-tools:
     image: postgres:18-bookworm
-    profiles: ["tools"]
+    profiles: ['tools']
     env_file:
       - .env
     environment:

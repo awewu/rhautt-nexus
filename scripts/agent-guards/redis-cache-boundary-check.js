@@ -54,7 +54,7 @@ function updateReleaseEvidence(patch) {
   evidence.requiredEvidence = evidence.requiredEvidence || {};
   evidence.requiredEvidence.redisCacheBoundary = {
     ...(evidence.requiredEvidence.redisCacheBoundary || {}),
-    ...patch
+    ...patch,
   };
   writeJson(RELEASE_EVIDENCE, evidence);
 }
@@ -67,7 +67,7 @@ function createBoundaryCache({ redisAvailable = true } = {}) {
     'hot-catalog-cache',
     'calculation-cache',
     'task-status',
-    'short-lived-lock'
+    'short-lived-lock',
   ]);
   const forbiddenTruthSources = new Set([
     'customers',
@@ -81,7 +81,7 @@ function createBoundaryCache({ redisAvailable = true } = {}) {
     'workflow_instances',
     'file_artifacts',
     'tenant_memberships',
-    'permissions'
+    'permissions',
   ]);
   function keyFor({ tenantId, role, key }) {
     if (!tenantId) throw new Error('tenantId is required for Redis cache key');
@@ -100,7 +100,7 @@ function createBoundaryCache({ redisAvailable = true } = {}) {
     const fullKey = keyFor({ tenantId, role, key });
     store.set(fullKey, {
       value,
-      expiresAt: Date.now() + ttlSeconds * 1000
+      expiresAt: Date.now() + ttlSeconds * 1000,
     });
     return { stored: true, key: fullKey };
   }
@@ -129,15 +129,19 @@ function renderMarkdown(report) {
     `Final launch Redis proof: ${report.finalLaunchRedisProof ? 'yes' : 'no'}`,
     '',
     '| Check | Result | Details |',
-    '|---|---|---|'
+    '|---|---|---|',
   ];
 
   for (const check of report.checks) {
-    lines.push(`| ${check.name} | ${check.passed ? 'pass' : 'fail'} | ${String(check.details || '').replace(/\n/g, ' ')} |`);
+    lines.push(
+      `| ${check.name} | ${check.passed ? 'pass' : 'fail'} | ${String(check.details || '').replace(/\n/g, ' ')} |`
+    );
   }
 
   lines.push('');
-  lines.push('Boundary: Redis is allowed for cache/session/rate-limit/task-status/short-lived-lock only. It is not a business truth source and this local report is not a staging Redis smoke proof.');
+  lines.push(
+    'Boundary: Redis is allowed for cache/session/rate-limit/task-status/short-lived-lock only. It is not a business truth source and this local report is not a staging Redis smoke proof.'
+  );
   lines.push('');
   return lines.join('\n');
 }
@@ -149,7 +153,7 @@ const report = {
   contractPath: CONTRACT_PATH,
   finalLaunchRedisProof: false,
   checks: [],
-  warnings
+  warnings,
 };
 
 if (!exists(CONTRACT_PATH)) failures.push(`missing ${CONTRACT_PATH}`);
@@ -159,21 +163,63 @@ if (!exists('package.json')) failures.push('missing package.json');
 if (!failures.length) {
   const contract = readJson(CONTRACT_PATH);
   const packageJson = readJson('package.json');
-  const cacheEngine = exists('server/core/CacheEngine.js') ? read('server/core/CacheEngine.js') : '';
-  const calculationCache = exists('server/core/CalculationCache.js') ? read('server/core/CalculationCache.js') : '';
-  const productionMiddleware = exists('server/modules/productionMiddleware.js') ? read('server/modules/productionMiddleware.js') : '';
-  const healthService = exists('server/modules/health/health.service.js') ? read('server/modules/health/health.service.js') : '';
-  const architectureContract = exists('contracts/architecture/rhautt-nexus-target-architecture.json')
+  const cacheEngine = exists('server/core/CacheEngine.js')
+    ? read('server/core/CacheEngine.js')
+    : '';
+  const calculationCache = exists('server/core/CalculationCache.js')
+    ? read('server/core/CalculationCache.js')
+    : '';
+  const productionMiddleware = exists('server/modules/productionMiddleware.js')
+    ? read('server/modules/productionMiddleware.js')
+    : '';
+  const healthService = exists('server/modules/health/health.service.js')
+    ? read('server/modules/health/health.service.js')
+    : '';
+  const architectureContract = exists(
+    'contracts/architecture/rhautt-nexus-target-architecture.json'
+  )
     ? readJson('contracts/architecture/rhautt-nexus-target-architecture.json')
     : null;
 
-  record(report, 'contract-platform', contract.platform === report.platform, 'contract platform must be Rhautt Nexus / 瑞合数智枢纽');
-  record(report, 'contract-status-boundary-only', contract.status === 'target-boundary-not-production-redis-smoke', 'Redis contract must not claim production smoke');
-  record(report, 'redis-dependency-present', Boolean(packageJson.dependencies?.redis), 'package.json must list redis dependency');
-  record(report, 'express-rate-limit-present', Boolean(packageJson.dependencies?.['express-rate-limit']), 'package.json must list express-rate-limit dependency for current compatibility rate limit');
+  record(
+    report,
+    'contract-platform',
+    contract.platform === report.platform,
+    'contract platform must be Rhautt Nexus / 瑞合数智枢纽'
+  );
+  record(
+    report,
+    'contract-status-boundary-only',
+    contract.status === 'target-boundary-not-production-redis-smoke',
+    'Redis contract must not claim production smoke'
+  );
+  record(
+    report,
+    'redis-dependency-present',
+    Boolean(packageJson.dependencies?.redis),
+    'package.json must list redis dependency'
+  );
+  record(
+    report,
+    'express-rate-limit-present',
+    Boolean(packageJson.dependencies?.['express-rate-limit']),
+    'package.json must list express-rate-limit dependency for current compatibility rate limit'
+  );
 
-  for (const role of ['session', 'rate-limit', 'hot-catalog-cache', 'calculation-cache', 'task-status', 'short-lived-lock']) {
-    record(report, `allowed-role:${role}`, contract.allowedRoles?.includes(role), `contract missing allowed role: ${role}`);
+  for (const role of [
+    'session',
+    'rate-limit',
+    'hot-catalog-cache',
+    'calculation-cache',
+    'task-status',
+    'short-lived-lock',
+  ]) {
+    record(
+      report,
+      `allowed-role:${role}`,
+      contract.allowedRoles?.includes(role),
+      `contract missing allowed role: ${role}`
+    );
   }
 
   for (const truth of [
@@ -184,34 +230,145 @@ if (!failures.length) {
     'audit_logs',
     'outbox_events',
     'workflow_instances',
-    'file_artifacts'
+    'file_artifacts',
   ]) {
-    record(report, `forbidden-truth-source:${truth}`, contract.forbiddenTruthSources?.includes(truth), `contract must forbid Redis truth source: ${truth}`);
+    record(
+      report,
+      `forbidden-truth-source:${truth}`,
+      contract.forbiddenTruthSources?.includes(truth),
+      `contract must forbid Redis truth source: ${truth}`
+    );
   }
 
-  record(report, 'key-prefix-policy', contract.keyPolicy?.prefix === 'rhautt:nexus:', 'Redis key prefix must be rhautt:nexus:');
-  record(report, 'tenant-key-policy', String(contract.keyPolicy?.tenantScopedPattern || '').includes('tenant:<tenantId>'), 'Redis key policy must require tenant scope');
-  record(report, 'ttl-required-policy', (contract.keyPolicy?.ttlRequiredFor || []).length >= 6, 'Redis key policy must require TTL for all allowed roles');
-  record(report, 'redis-unavailable-degrades', String(contract.degradationPolicy?.redisUnavailable || '').includes('Business truth writes must continue'), 'Redis unavailable policy must preserve business truth writes');
-  record(report, 'iot-handoff-only-policy', String(contract.degradationPolicy?.iotBoundary || '').includes('lifecycle handoff'), 'Redis IoT policy must allow lifecycle handoff only');
+  record(
+    report,
+    'key-prefix-policy',
+    contract.keyPolicy?.prefix === 'rhautt:nexus:',
+    'Redis key prefix must be rhautt:nexus:'
+  );
+  record(
+    report,
+    'tenant-key-policy',
+    String(contract.keyPolicy?.tenantScopedPattern || '').includes('tenant:<tenantId>'),
+    'Redis key policy must require tenant scope'
+  );
+  record(
+    report,
+    'ttl-required-policy',
+    (contract.keyPolicy?.ttlRequiredFor || []).length >= 6,
+    'Redis key policy must require TTL for all allowed roles'
+  );
+  record(
+    report,
+    'redis-unavailable-degrades',
+    String(contract.degradationPolicy?.redisUnavailable || '').includes(
+      'Business truth writes must continue'
+    ),
+    'Redis unavailable policy must preserve business truth writes'
+  );
+  record(
+    report,
+    'iot-handoff-only-policy',
+    String(contract.degradationPolicy?.iotBoundary || '').includes('lifecycle handoff'),
+    'Redis IoT policy must allow lifecycle handoff only'
+  );
 
-  record(report, 'architecture-contract-redis-boundary', architectureContract?.dataAndWorkflow?.redis?.role === 'cache, session, rate-limit, short-lived job state', 'target architecture must keep Redis as cache/session/rate-limit/job state');
-  record(report, 'cache-engine-prefix-updated', cacheEngine.includes("prefix: 'rhautt:nexus:'"), 'CacheEngine must use rhautt:nexus prefix');
-  record(report, 'cache-engine-tenant-key', cacheEngine.includes('tenant:${safeTenantId}') && cacheEngine.includes('tenantId'), 'CacheEngine must build tenant-scoped keys');
-  record(report, 'cache-engine-ttl', cacheEngine.includes('defaultTTL') && cacheEngine.includes('setex'), 'CacheEngine must set Redis TTL');
-  record(report, 'cache-engine-redis-error-miss', cacheEngine.includes('Redis get error') && cacheEngine.includes('return null'), 'CacheEngine Redis errors must degrade to miss');
-  record(report, 'cache-engine-timer-unref', cacheEngine.includes('timer.unref'), 'CacheEngine cleanup timer must not keep tests/process alive');
+  record(
+    report,
+    'architecture-contract-redis-boundary',
+    architectureContract?.dataAndWorkflow?.redis?.role ===
+      'cache, session, rate-limit, short-lived job state',
+    'target architecture must keep Redis as cache/session/rate-limit/job state'
+  );
+  record(
+    report,
+    'cache-engine-prefix-updated',
+    cacheEngine.includes("prefix: 'rhautt:nexus:'"),
+    'CacheEngine must use rhautt:nexus prefix'
+  );
+  record(
+    report,
+    'cache-engine-tenant-key',
+    cacheEngine.includes('tenant:${safeTenantId}') && cacheEngine.includes('tenantId'),
+    'CacheEngine must build tenant-scoped keys'
+  );
+  record(
+    report,
+    'cache-engine-ttl',
+    cacheEngine.includes('defaultTTL') && cacheEngine.includes('setex'),
+    'CacheEngine must set Redis TTL'
+  );
+  record(
+    report,
+    'cache-engine-redis-error-miss',
+    cacheEngine.includes('Redis get error') && cacheEngine.includes('return null'),
+    'CacheEngine Redis errors must degrade to miss'
+  );
+  record(
+    report,
+    'cache-engine-timer-unref',
+    cacheEngine.includes('timer.unref'),
+    'CacheEngine cleanup timer must not keep tests/process alive'
+  );
 
-  record(report, 'calculation-cache-official-redis', calculationCache.includes("require('redis')") && calculationCache.includes('createClient'), 'CalculationCache must use the installed redis package');
-  record(report, 'calculation-cache-configured-only', calculationCache.includes('REDIS_ENABLED') && calculationCache.includes('Redis未配置'), 'CalculationCache must only connect when Redis is configured');
-  record(report, 'calculation-cache-tenant-key', calculationCache.includes('rhautt:nexus:tenant:${tenantId}:calc'), 'CalculationCache keys must be tenant scoped');
-  record(report, 'calculation-cache-allowed-systems', calculationCache.includes('ALLOWED_SYSTEMS') && calculationCache.includes('Unsupported calculation cache system'), 'CalculationCache must restrict cache systems');
-  record(report, 'calculation-cache-ttl', calculationCache.includes('setEx') || calculationCache.includes('setex'), 'CalculationCache must set TTL for Redis writes');
-  record(report, 'calculation-cache-redis-error-miss', calculationCache.includes('Redis读取失败') && calculationCache.includes('hit: false'), 'CalculationCache Redis errors must degrade to miss');
+  record(
+    report,
+    'calculation-cache-official-redis',
+    calculationCache.includes("require('redis')") && calculationCache.includes('createClient'),
+    'CalculationCache must use the installed redis package'
+  );
+  record(
+    report,
+    'calculation-cache-configured-only',
+    calculationCache.includes('REDIS_ENABLED') && calculationCache.includes('Redis未配置'),
+    'CalculationCache must only connect when Redis is configured'
+  );
+  record(
+    report,
+    'calculation-cache-tenant-key',
+    calculationCache.includes('rhautt:nexus:tenant:${tenantId}:calc'),
+    'CalculationCache keys must be tenant scoped'
+  );
+  record(
+    report,
+    'calculation-cache-allowed-systems',
+    calculationCache.includes('ALLOWED_SYSTEMS') &&
+      calculationCache.includes('Unsupported calculation cache system'),
+    'CalculationCache must restrict cache systems'
+  );
+  record(
+    report,
+    'calculation-cache-ttl',
+    calculationCache.includes('setEx') || calculationCache.includes('setex'),
+    'CalculationCache must set TTL for Redis writes'
+  );
+  record(
+    report,
+    'calculation-cache-redis-error-miss',
+    calculationCache.includes('Redis读取失败') && calculationCache.includes('hit: false'),
+    'CalculationCache Redis errors must degrade to miss'
+  );
 
-  record(report, 'rate-limit-present', productionMiddleware.includes("app.use('/api', rateLimit") && productionMiddleware.includes("app.use(['/api/login'"), 'production middleware must keep API and auth rate limits');
-  record(report, 'rate-limit-ttl-window', productionMiddleware.includes('RATE_LIMIT_WINDOW_MS') && productionMiddleware.includes('rateLimitWindowMs'), 'rate limits must have an explicit window/TTL');
-  record(report, 'health-redis-optional', healthService.includes("redis: process.env.REDIS_URL ? 'configured' : 'not_configured'"), 'health service must keep Redis optional unless configured');
+  record(
+    report,
+    'rate-limit-present',
+    productionMiddleware.includes("app.use('/api', rateLimit") &&
+      productionMiddleware.includes("app.use(['/api/login'"),
+    'production middleware must keep API and auth rate limits'
+  );
+  record(
+    report,
+    'rate-limit-ttl-window',
+    productionMiddleware.includes('RATE_LIMIT_WINDOW_MS') &&
+      productionMiddleware.includes('rateLimitWindowMs'),
+    'rate limits must have an explicit window/TTL'
+  );
+  record(
+    report,
+    'health-redis-optional',
+    healthService.includes("redis: process.env.REDIS_URL ? 'configured' : 'not_configured'"),
+    'health service must keep Redis optional unless configured'
+  );
 
   const boundaryCache = createBoundaryCache({ redisAvailable: true });
   const stored = boundaryCache.set({
@@ -219,17 +376,17 @@ if (!failures.length) {
     role: 'task-status',
     key: 'catalog-refresh-1',
     value: { status: 'running', boundary: 'lifecycle_handoff_only' },
-    ttlSeconds: 600
+    ttlSeconds: 600,
   });
   const hit = boundaryCache.get({
     tenantId: 'tenant-a',
     role: 'task-status',
-    key: 'catalog-refresh-1'
+    key: 'catalog-refresh-1',
   });
   const crossTenantMiss = boundaryCache.get({
     tenantId: 'tenant-b',
     role: 'task-status',
-    key: 'catalog-refresh-1'
+    key: 'catalog-refresh-1',
   });
   const degradedCache = createBoundaryCache({ redisAvailable: false });
   const degradedSet = degradedCache.set({
@@ -237,53 +394,101 @@ if (!failures.length) {
     role: 'calculation-cache',
     key: 'oneclick:abc',
     value: { total: 100 },
-    ttlSeconds: 300
+    ttlSeconds: 300,
   });
   const degradedGet = degradedCache.get({
     tenantId: 'tenant-a',
     role: 'calculation-cache',
-    key: 'oneclick:abc'
+    key: 'oneclick:abc',
   });
 
   let missingTtlRejected = false;
   try {
-    boundaryCache.set({ tenantId: 'tenant-a', role: 'session', key: 'user-1', value: { userId: 'user-1' } });
+    boundaryCache.set({
+      tenantId: 'tenant-a',
+      role: 'session',
+      key: 'user-1',
+      value: { userId: 'user-1' },
+    });
   } catch (error) {
     missingTtlRejected = error.message.includes('TTL is required');
   }
 
   let truthSourceRejected = false;
   try {
-    boundaryCache.set({ tenantId: 'tenant-a', role: 'quotations', key: 'quote-1', value: { status: 'approved' }, ttlSeconds: 300 });
+    boundaryCache.set({
+      tenantId: 'tenant-a',
+      role: 'quotations',
+      key: 'quote-1',
+      value: { status: 'approved' },
+      ttlSeconds: 300,
+    });
   } catch (error) {
-    truthSourceRejected = error.message.includes('not allowed') || error.message.includes('source of truth');
+    truthSourceRejected =
+      error.message.includes('not allowed') || error.message.includes('source of truth');
   }
 
-  const handoffOnly = hit.value?.boundary === 'lifecycle_handoff_only' &&
+  const handoffOnly =
+    hit.value?.boundary === 'lifecycle_handoff_only' &&
     !Object.prototype.hasOwnProperty.call(hit.value || {}, 'controlCommand');
 
-  record(report, 'simulation-tenant-key-prefix', stored.key === 'rhautt:nexus:tenant:tenant-a:task-status:catalog-refresh-1', 'simulation must create a tenant-scoped Rhautt Nexus key');
-  record(report, 'simulation-tenant-isolation', hit.hit === true && crossTenantMiss.hit === false, 'tenant-b must not read tenant-a cache key');
-  record(report, 'simulation-missing-ttl-rejected', missingTtlRejected, 'Redis cache writes without TTL must be rejected');
-  record(report, 'simulation-truth-source-rejected', truthSourceRejected, 'Redis must reject business truth source roles such as quotations');
-  record(report, 'simulation-redis-down-degrades', degradedSet.degraded === true && degradedGet.fallbackRequired === true, 'Redis unavailable must degrade to fallback/miss');
-  record(report, 'simulation-lifecycle-handoff-only', handoffOnly, 'task-status cache must keep lifecycle_handoff_only and no controlCommand');
+  record(
+    report,
+    'simulation-tenant-key-prefix',
+    stored.key === 'rhautt:nexus:tenant:tenant-a:task-status:catalog-refresh-1',
+    'simulation must create a tenant-scoped Rhautt Nexus key'
+  );
+  record(
+    report,
+    'simulation-tenant-isolation',
+    hit.hit === true && crossTenantMiss.hit === false,
+    'tenant-b must not read tenant-a cache key'
+  );
+  record(
+    report,
+    'simulation-missing-ttl-rejected',
+    missingTtlRejected,
+    'Redis cache writes without TTL must be rejected'
+  );
+  record(
+    report,
+    'simulation-truth-source-rejected',
+    truthSourceRejected,
+    'Redis must reject business truth source roles such as quotations'
+  );
+  record(
+    report,
+    'simulation-redis-down-degrades',
+    degradedSet.degraded === true && degradedGet.fallbackRequired === true,
+    'Redis unavailable must degrade to fallback/miss'
+  );
+  record(
+    report,
+    'simulation-lifecycle-handoff-only',
+    handoffOnly,
+    'task-status cache must keep lifecycle_handoff_only and no controlCommand'
+  );
 
   const evidence = readJson(RELEASE_EVIDENCE);
   const existingRecord = evidence.requiredEvidence?.redisCacheBoundary;
   if (existingRecord) {
-    record(report, 'release-evidence-key-existing-or-generated', true, 'release evidence has redisCacheBoundary');
+    record(
+      report,
+      'release-evidence-key-existing-or-generated',
+      true,
+      'release evidence has redisCacheBoundary'
+    );
   } else {
     warnings.push('redisCacheBoundary release evidence will be created by this guard run');
   }
 
   report.summary = {
     checks: report.checks.length,
-    failures: report.checks.filter(check => !check.passed).length,
+    failures: report.checks.filter((check) => !check.passed).length,
     warnings: warnings.length,
     allowedRoles: contract.allowedRoles?.length || 0,
     forbiddenTruthSources: contract.forbiddenTruthSources?.length || 0,
-    finalLaunchRedisProof: false
+    finalLaunchRedisProof: false,
   };
 }
 
@@ -291,7 +496,7 @@ report.summary = report.summary || {
   checks: report.checks.length,
   failures: failures.length,
   warnings: warnings.length,
-  finalLaunchRedisProof: false
+  finalLaunchRedisProof: false,
 };
 
 writeJson(REPORT_JSON, report);
@@ -310,14 +515,16 @@ if (!failures.length) {
       'ttl-required',
       'redis-unavailable-safe-degrade',
       'not-business-truth-source',
-      'lifecycle_handoff_only'
+      'lifecycle_handoff_only',
     ],
     finalLaunchRedisProof: false,
-    note: 'Local deterministic Redis boundary simulation. This is not staging Redis HA/TLS/ACL or Redis-backed session/rate-limit production smoke proof.'
+    note: 'Local deterministic Redis boundary simulation. This is not staging Redis HA/TLS/ACL or Redis-backed session/rate-limit production smoke proof.',
   });
 }
 
-console.log(`Redis Cache Boundary Check: failures = ${failures.length}, warnings = ${warnings.length}`);
+console.log(
+  `Redis Cache Boundary Check: failures = ${failures.length}, warnings = ${warnings.length}`
+);
 console.log(`Report: ${REPORT_JSON}`);
 
 if (failures.length) {

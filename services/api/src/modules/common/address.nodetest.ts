@@ -14,7 +14,7 @@ test('normalizeAddress: null/undefined/blank → 空串', () => {
 test('normalizeAddress: 折叠空白并去分隔符', () => {
   assert.equal(
     normalizeAddress('上海市 浦东新区  世纪大道 100 号'),
-    normalizeAddress('上海市浦东新区世纪大道100号'),
+    normalizeAddress('上海市浦东新区世纪大道100号')
   );
 });
 

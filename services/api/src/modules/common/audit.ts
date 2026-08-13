@@ -15,19 +15,21 @@ export async function writeAudit(
     resourceId?: string | null;
     beforeState?: unknown;
     afterState?: unknown;
-  },
+  }
 ): Promise<void> {
   const repo = manager.getRepository(AuditLogEntity);
-  await repo.save(repo.create({
-    tenantId: entry.tenantId,
-    actorUserId: entry.actorUserId ?? null,
-    action: entry.action,
-    resourceType: entry.resourceType,
-    resourceId: entry.resourceId ?? null,
-    beforeState: (entry.beforeState ?? null) as any,
-    afterState: (entry.afterState ?? null) as any,
-    requestId: null,
-    traceId: null,
-    ipHash: null,
-  }));
+  await repo.save(
+    repo.create({
+      tenantId: entry.tenantId,
+      actorUserId: entry.actorUserId ?? null,
+      action: entry.action,
+      resourceType: entry.resourceType,
+      resourceId: entry.resourceId ?? null,
+      beforeState: (entry.beforeState ?? null) as any,
+      afterState: (entry.afterState ?? null) as any,
+      requestId: null,
+      traceId: null,
+      ipHash: null,
+    })
+  );
 }

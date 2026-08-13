@@ -38,19 +38,37 @@ const visibleEntrySources = [
 
 const obsoleteModules = [
   ['CRM customers', 'crm', /href:\s*['"]\/crm(?:['"/?]|$)|href=["']\/crm(?:["'/?]|$)|\/crm\b/],
-  ['projects', 'projects', /href:\s*['"]\/projects(?:['"/?]|$)|href=["']\/projects(?:["'/?]|$)|\/projects\b/],
+  [
+    'projects',
+    'projects',
+    /href:\s*['"]\/projects(?:['"/?]|$)|href=["']\/projects(?:["'/?]|$)|\/projects\b/,
+  ],
   ['design', 'design', /href:\s*['"]\/design(?:['"/?]|$)|href=["']\/design(?:["'/?]|$)|\/design\b/],
   ['BIM', 'bim', /href:\s*['"]\/bim(?:['"/?]|$)|href=["']\/bim(?:["'/?]|$)|\/bim\b/i],
-  ['finance', 'finance', /href:\s*['"]\/finance(?:['"/?]|$)|href=["']\/finance(?:["'/?]|$)|\/finance\b/],
+  [
+    'finance',
+    'finance',
+    /href:\s*['"]\/finance(?:['"/?]|$)|href=["']\/finance(?:["'/?]|$)|\/finance\b/,
+  ],
   ['team', 'team', /href:\s*['"]\/team(?:['"/?]|$)|href=["']\/team(?:["'/?]|$)|\/team\b/],
-  ['aftersales', 'aftersales', /href:\s*['"]\/aftersales(?:['"/?]|$)|href=["']\/aftersales(?:["'/?]|$)|\/aftersales\b/],
+  [
+    'aftersales',
+    'aftersales',
+    /href:\s*['"]\/aftersales(?:['"/?]|$)|href=["']\/aftersales(?:["'/?]|$)|\/aftersales\b/,
+  ],
 ];
 
 test('retained marketing-console routes still have route code', () => {
   assert.ok(exists('src', 'app', 'page.tsx'), 'login/entry route is present');
   assert.ok(exists('src', 'app', 'brand', 'page.tsx'), '/brand route is present');
-  assert.ok(exists('src', 'app', 'comfort', '[[...section]]', 'page.tsx'), '/comfort/sites and /comfort/sites/[code] route is present');
-  assert.ok(exists('src', 'app', 'growth', '[[...section]]', 'page.tsx'), '/growth route is present');
+  assert.ok(
+    exists('src', 'app', 'comfort', '[[...section]]', 'page.tsx'),
+    '/comfort/sites and /comfort/sites/[code] route is present'
+  );
+  assert.ok(
+    exists('src', 'app', 'growth', '[[...section]]', 'page.tsx'),
+    '/growth route is present'
+  );
   assert.ok(exists('src', 'app', 'products', 'page.tsx'), '/products route is present');
   assert.ok(exists('src', 'app', 'accounts', 'page.tsx'), '/accounts route is present');
 
@@ -84,7 +102,10 @@ test('top bar renders first-level and second-level titles instead of a detail br
   assert.match(dealerTopBar, /const activeItem = navItemForPath\(path\);/);
   assert.match(dealerTopBar, /primaryTitle\(activeItem\.key, activeItem\.label\)/);
   assert.match(dealerTopBar, /if \(key === 'growth'\) return '市场营销';/);
-  assert.match(dealerTopBar, /const childLabel = selectedChildLabel\(path, search, brandSiteLabels\);/);
+  assert.match(
+    dealerTopBar,
+    /const childLabel = selectedChildLabel\(path, search, brandSiteLabels\);/
+  );
   assert.match(dealerTopBar, /brandSites\.list\(\)/);
   assert.match(dealerTopBar, /brandSiteLabels\[code\]/);
   assert.match(dealerTopBar, /<h1>\{title\}<\/h1>/);
@@ -94,7 +115,11 @@ test('top bar renders first-level and second-level titles instead of a detail br
 
 test('obsolete modules are not routable app directories or visible nav/home/mobile entries', () => {
   for (const [label, directoryName, hrefPattern] of obsoleteModules) {
-    assert.equal(fs.existsSync(path.join(appRoot, directoryName)), false, `${label} app route directory should be absent`);
+    assert.equal(
+      fs.existsSync(path.join(appRoot, directoryName)),
+      false,
+      `${label} app route directory should be absent`
+    );
     for (const [sourceName, source] of visibleEntrySources) {
       assert.doesNotMatch(source, hrefPattern, `${label} should not be linked from ${sourceName}`);
     }
@@ -112,14 +137,23 @@ test('Rheem Red and marketing-console primitives remain the UI baseline', () => 
 });
 
 test('product catalog behavior remains represented in the retained product page', () => {
-  assert.match(products, /type ProductModule = 'catalog' \| 'materials' \| 'base' \| 'categories';/);
+  assert.match(
+    products,
+    /type ProductModule = 'catalog' \| 'materials' \| 'base' \| 'categories';/
+  );
   assert.match(products, /const \{ data: brandSiteData \} = useSWR\('\/api\/v2\/brand-sites'/);
   assert.match(products, /products\.list\(query\)/);
-  assert.match(products, /const basePayload = createProductPayload\(createDraft, createCategoryTree\);/);
+  assert.match(
+    products,
+    /const basePayload = createProductPayload\(createDraft, createCategoryTree\);/
+  );
   assert.match(products, /saveOfficialProductDetailContent\(createdId/);
   assert.match(products, /products\.create\(payload\)/);
   assert.match(products, /const payload = productUpdatePayload\(product, draft\);/);
-  assert.match(products, /products\.update\(product\.id, \{ \.\.\.payload, assetRefs: nextAssetRefs \}\)/);
+  assert.match(
+    products,
+    /products\.update\(product\.id, \{ \.\.\.payload, assetRefs: nextAssetRefs \}\)/
+  );
   assert.match(products, /products\.archive\(product\.id/);
   assert.match(products, /setModule\('catalog'\)/);
   assert.match(products, /setModule\('materials'\)/);
@@ -131,7 +165,17 @@ test('product catalog behavior remains represented in the retained product page'
 
 test('archived brand site delete is wired end-to-end without shelf-table manual deletes', () => {
   const brandSiteService = fs.readFileSync(
-    path.join(root, '..', '..', 'services', 'api', 'src', 'modules', 'brand-registry', 'brand-site.service.ts'),
+    path.join(
+      root,
+      '..',
+      '..',
+      'services',
+      'api',
+      'src',
+      'modules',
+      'brand-registry',
+      'brand-site.service.ts'
+    ),
     'utf8'
   );
 
@@ -172,11 +216,17 @@ test('retained brand website and growth features keep stateful controls', () => 
   assert.match(brandConsole, /siteProductAssignments\.create/);
   assert.match(brandConsole, /siteProductAssignments\.publish/);
   assert.match(brandConsole, /siteProductAssignments\.hide/);
-  assert.match(growth, /type GrowthSection = 'geo' \| 'copywriter' \| 'sentiment' \| 'automation' \| 'materials';/);
+  assert.match(
+    growth,
+    /type GrowthSection = 'geo' \| 'copywriter' \| 'sentiment' \| 'automation' \| 'materials';/
+  );
 });
 
 test('normal desktop workbench tables avoid visible horizontal scrollbars in touched shells', () => {
-  assert.match(globals, /\.workbench-table-shell \{\s*width:100%;\s*max-width:100%;\s*overflow-x:auto;\s*overflow-y:hidden;/);
+  assert.match(
+    globals,
+    /\.workbench-table-shell \{\s*width:100%;\s*max-width:100%;\s*overflow-x:auto;\s*overflow-y:hidden;/
+  );
   assert.match(globals, /\.table th,\s*\.table td \{\s*overflow-wrap:anywhere;/);
   assert.match(products, /<WorkbenchTableShell>/);
   assert.match(accounts, /<WorkbenchTableShell>/);

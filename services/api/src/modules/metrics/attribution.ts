@@ -9,7 +9,11 @@ export interface Touch {
 
 const DAY_MS = 24 * 3600 * 1000;
 
-export function touchWeights(touches: Touch[], model: AttributionModel, opts: { halfLifeMs?: number; conversionAt?: number } = {}): number[] {
+export function touchWeights(
+  touches: Touch[],
+  model: AttributionModel,
+  opts: { halfLifeMs?: number; conversionAt?: number } = {}
+): number[] {
   const n = touches.length;
   if (n === 0) return [];
   if (n === 1) return [1];
@@ -36,9 +40,15 @@ export function touchWeights(touches: Touch[], model: AttributionModel, opts: { 
 }
 
 /** 单个转化 → 各渠道信用(同渠道多次触点累加;各渠道之和 = 1)。 */
-export function attributeConversion(touches: Touch[], model: AttributionModel, opts: { halfLifeMs?: number; conversionAt?: number } = {}): Record<string, number> {
+export function attributeConversion(
+  touches: Touch[],
+  model: AttributionModel,
+  opts: { halfLifeMs?: number; conversionAt?: number } = {}
+): Record<string, number> {
   const w = touchWeights(touches, model, opts);
   const out: Record<string, number> = {};
-  touches.forEach((t, i) => { out[t.channel] = (out[t.channel] || 0) + w[i]; });
+  touches.forEach((t, i) => {
+    out[t.channel] = (out[t.channel] || 0) + w[i];
+  });
   return out;
 }

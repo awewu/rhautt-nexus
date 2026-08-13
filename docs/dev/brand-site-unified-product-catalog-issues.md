@@ -6,16 +6,16 @@ These issues are published under `docs/dev/brand-site-unified-product-catalog-is
 
 ## Issue List
 
-| Issue | Title | Type | Blocked by | Parallel wave |
-| --- | --- | --- | --- | --- |
-| 01 | Brand-filtered product listing for Rheem, Ruud, and Everhot | AFK | None | Wave 0 |
-| 02 | Paginated product query and brand console pagination controls | AFK | None | Wave 0 |
-| 03 | Responsive no-horizontal-scroll brand product table | AFK | 01 | Wave 1 |
-| 04 | Full product edit modal/drawer from brand pages | AFK | 01 | Wave 1 |
-| 05 | Row-level website shelf state and assignment enforcement | AFK | 01 | Wave 1 |
-| 06 | Website menu group options from brand navigation categories | AFK | 01 | Wave 1 |
-| 07 | Everhot 5011 published-product runtime proof | AFK | 05 | Wave 2 |
-| 08 | End-to-end smoke and regression coverage | AFK | 02, 03, 04, 05, 06, 07 | Wave 3 |
+| Issue | Title                                                         | Type | Blocked by             | Parallel wave |
+| ----- | ------------------------------------------------------------- | ---- | ---------------------- | ------------- |
+| 01    | Brand-filtered product listing for Rheem, Ruud, and Everhot   | AFK  | None                   | Wave 0        |
+| 02    | Paginated product query and brand console pagination controls | AFK  | None                   | Wave 0        |
+| 03    | Responsive no-horizontal-scroll brand product table           | AFK  | 01                     | Wave 1        |
+| 04    | Full product edit modal/drawer from brand pages               | AFK  | 01                     | Wave 1        |
+| 05    | Row-level website shelf state and assignment enforcement      | AFK  | 01                     | Wave 1        |
+| 06    | Website menu group options from brand navigation categories   | AFK  | 01                     | Wave 1        |
+| 07    | Everhot 5011 published-product runtime proof                  | AFK  | 05                     | Wave 2        |
+| 08    | End-to-end smoke and regression coverage                      | AFK  | 02, 03, 04, 05, 06, 07 | Wave 3        |
 
 ## Parallel Execution
 

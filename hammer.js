@@ -2,10 +2,10 @@
 
 /**
  * 🔨 Hammer - 工业级验证系统
- * 
+ *
  * 使用方法:
  *   node hammer.js [options]
- * 
+ *
  * 选项:
  *   --mode=<mode>      执行模式: strict|normal|fast (默认: strict)
  *   --suites=<list>    指定套件: L1,L2,L3 (逗号分隔)
@@ -15,7 +15,7 @@
  *   --format=<format>  报告格式: full|json|junit|summary (默认: full)
  *   --output=<dir>     报告输出目录 (默认: ./hammer-reports)
  *   --help             显示帮助
- * 
+ *
  * 示例:
  *   node hammer.js                                    # 完整验证
  *   node hammer.js --mode=fast --suites=L1,L2,L3     # 快速检查
@@ -33,7 +33,7 @@ function parseArgs() {
     parallel: true,
     failFast: false,
     format: 'full',
-    output: './hammer-reports'
+    output: './hammer-reports',
   };
 
   for (const arg of args) {
@@ -41,7 +41,7 @@ function parseArgs() {
       showHelp();
       process.exit(0);
     }
-    
+
     if (arg === '--parallel') {
       options.parallel = true;
     } else if (arg === '--serial') {
@@ -96,7 +96,7 @@ Quality Gates:
 
 async function main() {
   const options = parseArgs();
-  
+
   // 创建 Hammer 实例
   const hammer = new Hammer({
     basePath: process.cwd(),
@@ -106,8 +106,8 @@ async function main() {
     reporting: {
       format: options.format,
       outputDir: options.output,
-      artifacts: true
-    }
+      artifacts: true,
+    },
   });
 
   // 如果只指定部分套件，禁用其他
@@ -134,12 +134,12 @@ async function main() {
   // 执行验证
   try {
     const results = await hammer.strike({
-      suites: options.suites
+      suites: options.suites,
     });
 
     // 根据质量门禁退出
     const exitCode = results.gate.passed ? 0 : 1;
-    
+
     if (results.gate.passed) {
       console.log(`\n✅ Quality Gate: ${results.gate.name} - PASSED\n`);
     } else {
@@ -147,7 +147,6 @@ async function main() {
     }
 
     process.exit(exitCode);
-    
   } catch (error) {
     console.error('\n💥 Hammer failed with error:', error.message);
     process.exit(1);

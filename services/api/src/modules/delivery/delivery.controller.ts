@@ -1,5 +1,14 @@
 import {
-  Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { DeliveryService } from './delivery.service';
@@ -15,7 +24,11 @@ export class DeliveryController {
   }
 
   @Post('projects')
-  createProject(@Req() r: any, @Body() body: { contractId: string; customerId: string; quotationId?: string; totalAmount?: number }) {
+  createProject(
+    @Req() r: any,
+    @Body()
+    body: { contractId: string; customerId: string; quotationId?: string; totalAmount?: number }
+  ) {
     return this.svc.createProject(r.user, body);
   }
 
@@ -30,7 +43,11 @@ export class DeliveryController {
   }
 
   @Post('projects/:projectId/milestones/:milestoneKey/advance')
-  advanceMilestone(@Req() r: any, @Param('projectId') projectId: string, @Param('milestoneKey') milestoneKey: string) {
+  advanceMilestone(
+    @Req() r: any,
+    @Param('projectId') projectId: string,
+    @Param('milestoneKey') milestoneKey: string
+  ) {
     return this.svc.advanceMilestone(r.user, projectId, milestoneKey);
   }
 
@@ -40,7 +57,11 @@ export class DeliveryController {
   }
 
   @Post('projects/:projectId/payments/:paymentId/record')
-  recordPayment(@Req() r: any, @Param('projectId') projectId: string, @Param('paymentId') paymentId: string) {
+  recordPayment(
+    @Req() r: any,
+    @Param('projectId') projectId: string,
+    @Param('paymentId') paymentId: string
+  ) {
     return this.svc.recordPayment(r.user, projectId, paymentId);
   }
 
@@ -50,7 +71,17 @@ export class DeliveryController {
   }
 
   @Post('projects/:projectId/evidence')
-  uploadEvidence(@Req() r: any, @Param('projectId') projectId: string, @Body() body: { milestoneKey: string; fileKey?: string; fileUrl?: string; meta?: Record<string, unknown> }) {
+  uploadEvidence(
+    @Req() r: any,
+    @Param('projectId') projectId: string,
+    @Body()
+    body: {
+      milestoneKey: string;
+      fileKey?: string;
+      fileUrl?: string;
+      meta?: Record<string, unknown>;
+    }
+  ) {
     return this.svc.uploadEvidence(r.user, projectId, body);
   }
 }
@@ -61,17 +92,38 @@ export class AftersalesController {
   constructor(private readonly svc: DeliveryService) {}
 
   @Get('tickets')
-  listTickets(@Req() r: any, @Query('status') status?: string, @Query('category') category?: string) {
+  listTickets(
+    @Req() r: any,
+    @Query('status') status?: string,
+    @Query('category') category?: string
+  ) {
     return this.svc.listTickets(r.user, { status, category });
   }
 
   @Post('tickets')
-  createTicket(@Req() r: any, @Body() body: { title: string; category?: string; priority?: string; customerId?: string; customerName?: string; phone?: string; description?: string; bimProjectId?: string }) {
+  createTicket(
+    @Req() r: any,
+    @Body()
+    body: {
+      title: string;
+      category?: string;
+      priority?: string;
+      customerId?: string;
+      customerName?: string;
+      phone?: string;
+      description?: string;
+      bimProjectId?: string;
+    }
+  ) {
     return this.svc.createTicket(r.user, body);
   }
 
   @Patch('tickets/:ticketId')
-  updateTicket(@Req() r: any, @Param('ticketId') ticketId: string, @Body() patch: Record<string, unknown>) {
+  updateTicket(
+    @Req() r: any,
+    @Param('ticketId') ticketId: string,
+    @Body() patch: Record<string, unknown>
+  ) {
     return this.svc.updateTicket(r.user, ticketId, patch);
   }
 
@@ -81,7 +133,21 @@ export class AftersalesController {
   }
 
   @Post('warranties')
-  createWarranty(@Req() r: any, @Body() body: { warrantyNo: string; customerId?: string; customerName?: string; productName?: string; systemFamily?: string; startDate: string; endDate: string; bimProjectId?: string; terms?: Record<string, unknown> }) {
+  createWarranty(
+    @Req() r: any,
+    @Body()
+    body: {
+      warrantyNo: string;
+      customerId?: string;
+      customerName?: string;
+      productName?: string;
+      systemFamily?: string;
+      startDate: string;
+      endDate: string;
+      bimProjectId?: string;
+      terms?: Record<string, unknown>;
+    }
+  ) {
     return this.svc.createWarranty(r.user, body);
   }
 }
@@ -97,7 +163,18 @@ export class LifecycleController {
   }
 
   @Post('links')
-  upsertLifecycleLink(@Req() r: any, @Body() body: { customerId: string; opportunityId?: string; quotationId?: string; contractId?: string; designProjectId?: string; stage?: string }) {
+  upsertLifecycleLink(
+    @Req() r: any,
+    @Body()
+    body: {
+      customerId: string;
+      opportunityId?: string;
+      quotationId?: string;
+      contractId?: string;
+      designProjectId?: string;
+      stage?: string;
+    }
+  ) {
     return this.svc.upsertLifecycleLink(r.user, body);
   }
 }

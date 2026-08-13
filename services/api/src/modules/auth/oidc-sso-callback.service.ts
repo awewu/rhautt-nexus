@@ -42,7 +42,7 @@ export class OidcSsoCallbackService {
     private readonly login: OidcSsoLoginService,
     private readonly identities: SsoExternalIdentityService,
     private readonly auth: AuthService,
-    private readonly audit?: SsoAuditLogService,
+    private readonly audit?: SsoAuditLogService
   ) {}
 
   async handleCallback(input: {
@@ -61,8 +61,10 @@ export class OidcSsoCallbackService {
     let localUserId = '';
 
     try {
-      if (!code) this.fail('missing_code', new UnauthorizedException('OIDC callback is missing code'));
-      if (!state) this.fail('missing_state', new UnauthorizedException('OIDC callback is missing state'));
+      if (!code)
+        this.fail('missing_code', new UnauthorizedException('OIDC callback is missing code'));
+      if (!state)
+        this.fail('missing_state', new UnauthorizedException('OIDC callback is missing state'));
       if (!expectedState || state !== expectedState) {
         this.fail('state_mismatch', new UnauthorizedException('OIDC callback state mismatch'));
       }
@@ -74,7 +76,12 @@ export class OidcSsoCallbackService {
       const idTokenClaims = tokenSet.id_token
         ? await this.verifyIdToken(tokenSet.id_token, discovery, config)
         : {};
-      const claims = await this.enrichClaims(idTokenClaims, tokenSet.access_token, discovery, config);
+      const claims = await this.enrichClaims(
+        idTokenClaims,
+        tokenSet.access_token,
+        discovery,
+        config
+      );
       subject = this.claimString(claims.sub);
       if (!subject) this.fail('missing_subject', new UnauthorizedException('OIDC subject missing'));
 
@@ -87,7 +94,7 @@ export class OidcSsoCallbackService {
       if (resolved.status !== 'authenticated' || !resolved.user) {
         this.fail(
           'pending_authorization',
-          new ForbiddenException('SSO external identity is pending authorization'),
+          new ForbiddenException('SSO external identity is pending authorization')
         );
       }
       localUserId = resolved.user.id;
@@ -176,7 +183,7 @@ export class OidcSsoCallbackService {
     if (requireSecret && !clientSecret) {
       this.fail(
         'client_secret_missing',
-        new ServiceUnavailableException('OIDC client secret is not configured'),
+        new ServiceUnavailableException('OIDC client secret is not configured')
       );
     }
     return {
@@ -201,10 +208,13 @@ export class OidcSsoCallbackService {
   private async exchangeCode(
     discovery: OidcDiscoveryDocument,
     config: ReturnType<OidcSsoCallbackService['runtimeConfig']>,
-    code: string,
+    code: string
   ): Promise<{ id_token?: string; access_token?: string }> {
     if (typeof discovery.token_endpoint !== 'string' || !discovery.token_endpoint) {
-      this.fail('token_endpoint_missing', new ServiceUnavailableException('OIDC token endpoint missing'));
+      this.fail(
+        'token_endpoint_missing',
+        new ServiceUnavailableException('OIDC token endpoint missing')
+      );
     }
 
     let response: Response;
@@ -224,10 +234,14 @@ export class OidcSsoCallbackService {
         }),
       });
     } catch {
-      this.fail('token_endpoint_error', new ServiceUnavailableException('OIDC token exchange failed'));
+      this.fail(
+        'token_endpoint_error',
+        new ServiceUnavailableException('OIDC token exchange failed')
+      );
     }
 
-    if (!response.ok) this.fail('token_endpoint_error', new UnauthorizedException('OIDC token exchange failed'));
+    if (!response.ok)
+      this.fail('token_endpoint_error', new UnauthorizedException('OIDC token exchange failed'));
     const body = (await response.json()) as Record<string, unknown>;
     return {
       id_token: this.claimString(body.id_token),
@@ -238,10 +252,13 @@ export class OidcSsoCallbackService {
   private async verifyIdToken(
     idToken: string,
     discovery: OidcDiscoveryDocument,
-    config: ReturnType<OidcSsoCallbackService['runtimeConfig']>,
+    config: ReturnType<OidcSsoCallbackService['runtimeConfig']>
   ): Promise<Claims> {
     if (typeof discovery.jwks_uri !== 'string' || !discovery.jwks_uri) {
-      this.fail('jwks_endpoint_missing', new ServiceUnavailableException('OIDC JWKS endpoint missing'));
+      this.fail(
+        'jwks_endpoint_missing',
+        new ServiceUnavailableException('OIDC JWKS endpoint missing')
+      );
     }
     const decoded = jwt.decode(idToken, { complete: true }) as jwt.Jwt | null;
     const header = decoded?.header as jwt.JwtHeader | undefined;
@@ -264,7 +281,10 @@ export class OidcSsoCallbackService {
         clockTolerance: CLOCK_TOLERANCE_SECONDS,
       }) as Claims;
     } catch (error: any) {
-      this.fail(this.idTokenFailureReason(error), new UnauthorizedException('OIDC id_token validation failed'));
+      this.fail(
+        this.idTokenFailureReason(error),
+        new UnauthorizedException('OIDC id_token validation failed')
+      );
     }
 
     const now = Math.floor(Date.now() / 1000);
@@ -281,11 +301,13 @@ export class OidcSsoCallbackService {
     } catch {
       this.fail('jwks_fetch_failed', new ServiceUnavailableException('OIDC JWKS fetch failed'));
     }
-    if (!response.ok) this.fail('jwks_fetch_failed', new ServiceUnavailableException('OIDC JWKS fetch failed'));
+    if (!response.ok)
+      this.fail('jwks_fetch_failed', new ServiceUnavailableException('OIDC JWKS fetch failed'));
     const jwks = (await response.json()) as { keys?: OidcJwk[] };
     const keys = Array.isArray(jwks.keys) ? jwks.keys : [];
     const key = kid ? keys.find((entry) => entry.kid === kid) : keys[0];
-    if (!key) this.fail('signing_key_not_found', new UnauthorizedException('OIDC signing key not found'));
+    if (!key)
+      this.fail('signing_key_not_found', new UnauthorizedException('OIDC signing key not found'));
     return key;
   }
 
@@ -293,7 +315,7 @@ export class OidcSsoCallbackService {
     idTokenClaims: Claims,
     accessToken: string | undefined,
     discovery: OidcDiscoveryDocument,
-    config: ReturnType<OidcSsoCallbackService['runtimeConfig']>,
+    config: ReturnType<OidcSsoCallbackService['runtimeConfig']>
   ): Promise<Claims> {
     if (!this.needsUserinfo(idTokenClaims, config) || !config.userinfoEnabled) return idTokenClaims;
     if (!accessToken || typeof discovery.userinfo_endpoint !== 'string') return idTokenClaims;
@@ -301,24 +323,34 @@ export class OidcSsoCallbackService {
     const response = await fetch(discovery.userinfo_endpoint, {
       headers: { accept: 'application/json', authorization: `Bearer ${accessToken}` },
     });
-    if (!response.ok) this.fail('userinfo_failed', new UnauthorizedException('OIDC userinfo failed'));
+    if (!response.ok)
+      this.fail('userinfo_failed', new UnauthorizedException('OIDC userinfo failed'));
     const userinfo = (await response.json()) as Claims;
     if (idTokenClaims.sub && userinfo.sub && idTokenClaims.sub !== userinfo.sub) {
       this.fail(
         'userinfo_subject_mismatch',
-        new UnauthorizedException('OIDC userinfo subject mismatch'),
+        new UnauthorizedException('OIDC userinfo subject mismatch')
       );
     }
     return { ...userinfo, ...idTokenClaims, sub: idTokenClaims.sub || userinfo.sub };
   }
 
-  private needsUserinfo(claims: Claims, config: ReturnType<OidcSsoCallbackService['runtimeConfig']>) {
-    return !claims.sub || !claims.name || !claims.email || !claims[config.roleClaim] || !claims[config.orgClaim];
+  private needsUserinfo(
+    claims: Claims,
+    config: ReturnType<OidcSsoCallbackService['runtimeConfig']>
+  ) {
+    return (
+      !claims.sub ||
+      !claims.name ||
+      !claims.email ||
+      !claims[config.roleClaim] ||
+      !claims[config.orgClaim]
+    );
   }
 
   private profileFromClaims(
     claims: Claims,
-    config: ReturnType<OidcSsoCallbackService['runtimeConfig']>,
+    config: ReturnType<OidcSsoCallbackService['runtimeConfig']>
   ): Record<string, unknown> {
     return {
       sub: claims.sub,
@@ -360,7 +392,7 @@ export class OidcSsoCallbackService {
   }
 
   private singleValue(value: string | string[] | undefined): string {
-    return String(Array.isArray(value) ? value[0] ?? '' : value ?? '').trim();
+    return String(Array.isArray(value) ? (value[0] ?? '') : (value ?? '')).trim();
   }
 
   private claimString(value: unknown): string {

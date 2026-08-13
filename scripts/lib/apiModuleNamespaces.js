@@ -1,5 +1,5 @@
 const MODULE_NAMESPACE_OVERRIDES = Object.freeze({
-  tenant: Object.freeze(['/api/v2/tenants', '/api/v2/dealers', '/api/v2/stores'])
+  tenant: Object.freeze(['/api/v2/tenants', '/api/v2/dealers', '/api/v2/stores']),
 });
 
 function moduleNamespaces(moduleName) {
@@ -13,5 +13,5 @@ function namespaceMatchesModule(namespace, moduleName) {
 module.exports = {
   MODULE_NAMESPACE_OVERRIDES,
   moduleNamespaces,
-  namespaceMatchesModule
+  namespaceMatchesModule,
 };

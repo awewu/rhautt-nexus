@@ -3,7 +3,10 @@
 import { useEffect, useState } from 'react';
 import { ProductCategoryManagerCrudView } from '../../products/page';
 import { auth } from '../../../lib/api';
-import { getBrandProductPermissions, type BrandProductPermissions } from '../../../lib/brand-product-adapter';
+import {
+  getBrandProductPermissions,
+  type BrandProductPermissions,
+} from '../../../lib/brand-product-adapter';
 
 const EMPTY_PERMISSIONS: BrandProductPermissions = {
   canCreateProduct: false,
@@ -24,7 +27,8 @@ export default function MasterDataProductCategoriesPage() {
 
   useEffect(() => {
     let cancelled = false;
-    auth.me()
+    auth
+      .me()
       .then((me) => {
         if (!cancelled) setPermissions(getBrandProductPermissions(me));
       })
@@ -37,7 +41,10 @@ export default function MasterDataProductCategoriesPage() {
   }, []);
 
   return (
-    <div className="page-container" style={{ maxWidth: 'none', width: '100%', display: 'grid', gap: 16 }}>
+    <div
+      className="page-container"
+      style={{ maxWidth: 'none', width: '100%', display: 'grid', gap: 16 }}
+    >
       <ProductCategoryManagerCrudView
         canCreate={permissions.canCreateBrandLibrary}
         canUpdate={permissions.canUpdateBrandLibrary}

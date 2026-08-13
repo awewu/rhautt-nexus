@@ -26,9 +26,14 @@ test('product update accepts valid brand category binding and read returns categ
     products: [product('p1', 'everhot')],
   });
 
-  const updated = await service.update('p1', TENANT_ID, {
-    primaryCategoryId: 'l4',
-  }, ACTOR);
+  const updated = await service.update(
+    'p1',
+    TENANT_ID,
+    {
+      primaryCategoryId: 'l4',
+    },
+    ACTOR
+  );
   const meta = (updated.data.meta as any).everhot;
 
   assert.equal(meta.primaryCategoryId, 'l4');
@@ -43,7 +48,10 @@ test('product update accepts valid brand category binding and read returns categ
   assert.equal((read.data as any).categoryLevel1Id, 'l1');
   assert.equal((read.data as any).categoryLevel2Id, 'l2');
   assert.equal((read.data as any).categoryLevel3Id, 'l3');
-  assert.equal((read.data as any).categoryPath, 'Residential / Water Heating / Tankless / Ultra Deep');
+  assert.equal(
+    (read.data as any).categoryPath,
+    'Residential / Water Heating / Tankless / Ultra Deep'
+  );
   assert.equal((read.data as any).categoryAncestry.length, 4);
 });
 
@@ -74,11 +82,16 @@ test('product update accepts common base category binding for brand products', a
     products: [product('p1', 'everhot')],
   });
 
-  const updated = await service.update('p1', TENANT_ID, {
-    primaryCategoryId: 'common-l2',
-    categoryLevel1Id: 'common-l1',
-    categoryLevel2Id: 'common-l2',
-  }, ACTOR);
+  const updated = await service.update(
+    'p1',
+    TENANT_ID,
+    {
+      primaryCategoryId: 'common-l2',
+      categoryLevel1Id: 'common-l1',
+      categoryLevel2Id: 'common-l2',
+    },
+    ACTOR
+  );
   const meta = (updated.data.meta as any).everhot;
 
   assert.equal(meta.primaryCategoryId, 'common-l2');
@@ -97,10 +110,16 @@ test('product update rejects category bindings from another brand', async () => 
   });
 
   await assert.rejects(
-    () => service.update('p1', TENANT_ID, {
-      primaryCategoryId: 'ruud-l2',
-    }, ACTOR),
-    /must belong to the product brand/,
+    () =>
+      service.update(
+        'p1',
+        TENANT_ID,
+        {
+          primaryCategoryId: 'ruud-l2',
+        },
+        ACTOR
+      ),
+    /must belong to the product brand/
   );
 });
 
@@ -115,12 +134,18 @@ test('product update rejects inconsistent legacy hierarchy hints', async () => {
   });
 
   await assert.rejects(
-    () => service.update('p1', TENANT_ID, {
-      primaryCategoryId: 'l2',
-      categoryLevel1Id: 'l1',
-      categoryLevel2Id: 'l2',
-    }, ACTOR),
-    /must match the selected primary category ancestry/,
+    () =>
+      service.update(
+        'p1',
+        TENANT_ID,
+        {
+          primaryCategoryId: 'l2',
+          categoryLevel1Id: 'l1',
+          categoryLevel2Id: 'l2',
+        },
+        ACTOR
+      ),
+    /must match the selected primary category ancestry/
   );
 });
 
@@ -150,21 +175,26 @@ test('product update persists website pricing for edit form readback', async () 
     products: [product('p1', 'everhot')],
   });
 
-  const updated = await service.update('p1', TENANT_ID, {
-    websitePricing: {
-      brandCode: 'everhot',
-      siteCode: 'everhot',
-      locale: 'zh-CN',
-      priceDisplayMode: 'show_price',
-      websitePrice: 12800,
-      promoPrice: 11800,
-      currency: 'CNY',
-      priceUnit: '台',
-      priceLabel: '官网参考价',
-      priceNote: '最终成交价以经销商报价为准',
-      taxIncluded: true,
+  const updated = await service.update(
+    'p1',
+    TENANT_ID,
+    {
+      websitePricing: {
+        brandCode: 'everhot',
+        siteCode: 'everhot',
+        locale: 'zh-CN',
+        priceDisplayMode: 'show_price',
+        websitePrice: 12800,
+        promoPrice: 11800,
+        currency: 'CNY',
+        priceUnit: '台',
+        priceLabel: '官网参考价',
+        priceNote: '最终成交价以经销商报价为准',
+        taxIncluded: true,
+      },
     },
-  }, ACTOR);
+    ACTOR
+  );
 
   assert.equal(websitePricing.rows.length, 1);
   assert.equal(websitePricing.rows[0].productId, 'p1');
@@ -182,16 +212,21 @@ test('product update persists physical master-data fields for edit form readback
     products: [product('p1', 'everhot')],
   });
 
-  const updated = await service.update('p1', TENANT_ID, {
-    lengthMm: 720,
-    widthMm: 450,
-    heightMm: 260,
-    netWeightKg: 18.5,
-    packageLengthMm: 820,
-    packageWidthMm: 520,
-    packageHeightMm: 360,
-    grossWeightKg: 21,
-  }, ACTOR);
+  const updated = await service.update(
+    'p1',
+    TENANT_ID,
+    {
+      lengthMm: 720,
+      widthMm: 450,
+      heightMm: 260,
+      netWeightKg: 18.5,
+      packageLengthMm: 820,
+      packageWidthMm: 520,
+      packageHeightMm: 360,
+      grossWeightKg: 21,
+    },
+    ACTOR
+  );
 
   assert.equal(products.rows[0].lengthMm, 720);
   assert.equal(products.rows[0].netWeightKg, 18.5);
@@ -234,7 +269,7 @@ function serviceFixture({
       contentRepo as any,
       eventBus as any,
       fileArtifacts as any,
-      categoryRepo as any,
+      categoryRepo as any
     ),
     products: productRepo,
     websitePricing: websitePricingRepo,
@@ -247,7 +282,7 @@ function category(
   brandCode: string,
   level: number,
   parentId: string | null,
-  nameCn: string,
+  nameCn: string
 ): BrandProductCategoryEntity {
   return {
     id,
@@ -267,11 +302,7 @@ function category(
   };
 }
 
-function product(
-  id: string,
-  brand: string,
-  overrides: Partial<ProductEntity> = {},
-): ProductEntity {
+function product(id: string, brand: string, overrides: Partial<ProductEntity> = {}): ProductEntity {
   return {
     id,
     tenantId: TENANT_ID,

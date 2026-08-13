@@ -15,12 +15,12 @@ function createAuthRuntime({ jwtSecret }) {
     ['hq_admin', 'rheem_admin'],
     ['dealer_admin', 'store_admin'],
     ['store_manager', 'store_admin'],
-    ['customer', 'end_user']
+    ['customer', 'end_user'],
   ];
 
   const roleMatches = (actualRole, allowedRole) => {
     if (actualRole === allowedRole) return true;
-    return roleGroups.some(group => group.includes(actualRole) && group.includes(allowedRole));
+    return roleGroups.some((group) => group.includes(actualRole) && group.includes(allowedRole));
   };
 
   const authenticateToken = (req, res, next) => {
@@ -38,8 +38,13 @@ function createAuthRuntime({ jwtSecret }) {
     });
   };
 
-  const checkRole = roles => (req, res, next) => {
-    if (!req.user || !roles.some(role => roleMatches(req.user.role, role) || roleMatches(req.user.legacyRole, role))) {
+  const checkRole = (roles) => (req, res, next) => {
+    if (
+      !req.user ||
+      !roles.some(
+        (role) => roleMatches(req.user.role, role) || roleMatches(req.user.legacyRole, role)
+      )
+    ) {
       return res.status(403).json({ success: false, error: '权限不足' });
     }
     return next();
@@ -47,11 +52,11 @@ function createAuthRuntime({ jwtSecret }) {
 
   return {
     authenticateToken,
-    checkRole
+    checkRole,
   };
 }
 
 module.exports = {
   createAuthRuntime,
-  resolveJwtSecret
+  resolveJwtSecret,
 };

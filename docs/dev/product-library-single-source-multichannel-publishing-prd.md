@@ -225,16 +225,16 @@ tenant_id + brand_code + normalized_model
 
 本期核心表：
 
-| 表 | 定位 |
-| --- | --- |
-| `products` | 公共产品事实主记录 |
-| `product_skus` | 产品下的 SKU / 物料 / 配置 |
-| `product_brand_bindings` | 产品与品牌的绑定关系 |
-| `product_website_pricing` | 官网/站点价格投影 |
-| `product_content` | 产品内容、官网详情、SEO/GEO 输入 |
-| `product_import_batches` | 导入批次 |
-| `product_import_rows` | 导入源行 |
-| `product_data_issues` | 缺失项、冲突和质量问题 |
+| 表                        | 定位                             |
+| ------------------------- | -------------------------------- |
+| `products`                | 公共产品事实主记录               |
+| `product_skus`            | 产品下的 SKU / 物料 / 配置       |
+| `product_brand_bindings`  | 产品与品牌的绑定关系             |
+| `product_website_pricing` | 官网/站点价格投影                |
+| `product_content`         | 产品内容、官网详情、SEO/GEO 输入 |
+| `product_import_batches`  | 导入批次                         |
+| `product_import_rows`     | 导入源行                         |
+| `product_data_issues`     | 缺失项、冲突和质量问题           |
 
 兼容字段说明：
 
@@ -343,11 +343,11 @@ imported_draft -> needs_completion -> fact_verified
 
 状态含义：
 
-| 状态 | 含义 | 对外可见 |
-| --- | --- | --- |
-| `imported_draft` | 已导入或录入，尚未完成完整性检查 | 否 |
-| `needs_completion` | 存在缺失项、冲突或阻断问题 | 否 |
-| `fact_verified` | 指定产品事实版本已核验 | 否，本期仍不发布 |
+| 状态               | 含义                             | 对外可见         |
+| ------------------ | -------------------------------- | ---------------- |
+| `imported_draft`   | 已导入或录入，尚未完成完整性检查 | 否               |
+| `needs_completion` | 存在缺失项、冲突或阻断问题       | 否               |
+| `fact_verified`    | 指定产品事实版本已核验           | 否，本期仍不发布 |
 
 `fact_verified` 不代表：
 

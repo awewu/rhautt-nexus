@@ -44,7 +44,12 @@ module.exports = {
   overrides: [
     {
       // 不在 tsconfig.eslint.json project 内的独立脚本/声明文件：关闭 type-aware 解析
-      files: ['.eslintrc.js', 'deploy/**/*.js', 'packages/engines/src/index.js', 'packages/engines/src/index.d.ts'],
+      files: [
+        '.eslintrc.js',
+        'deploy/**/*.js',
+        'packages/engines/src/index.js',
+        'packages/engines/src/index.d.ts',
+      ],
       parserOptions: { project: null },
     },
   ],

@@ -13,24 +13,26 @@
 
 进化目标：把 D2 重新定位为**产品事实素材基座**，与板块一的**市场物料库(DAM)** 完全同构——一个是内容素材基座，一个是产品素材基座。
 
-| | 市场物料库 DAM（板块一） | 产品事实基座 D2 |
-|---|---|---|
-| 沉淀什么 | 海报 / 画册 / 视频素材 | 产品事实 + 定位 + 素材引用 |
-| 谁消费 | 各品牌站发布取用 | 问诊 / 报价 / BIM / 品牌站 / 增长中枢 |
-| 角色 | 内容基座 | 产品基座 |
-| 供给方式 | 只读引用 | 只读视图 / 事件（单一事实源，不被反写） |
+|          | 市场物料库 DAM（板块一） | 产品事实基座 D2                         |
+| -------- | ------------------------ | --------------------------------------- |
+| 沉淀什么 | 海报 / 画册 / 视频素材   | 产品事实 + 定位 + 素材引用              |
+| 谁消费   | 各品牌站发布取用         | 问诊 / 报价 / BIM / 品牌站 / 增长中枢   |
+| 角色     | 内容基座                 | 产品基座                                |
+| 供给方式 | 只读引用                 | 只读视图 / 事件（单一事实源，不被反写） |
 
 ---
 
 ## 1. 范围边界（锁定）
 
 ### 1.1 D2 负责（IN）
+
 - **产品事实**：品牌、品类、名称、SKU、核心规格（结构化）。
 - **产品定位**：卖给谁 / 渠道 / 用户画像 / 市场区域 / 设计意图与卖点（见 §2）。
 - **素材引用**：产品图、参数表、认证文件、BIM 族文件、说明文档——**只存引用**（走 DAM / `file-artifact`），不重复造存储。
 - **只读供给**：对外暴露稳定的产品只读视图 / 事件，作为全平台单一产品事实源。
 
 ### 1.2 D2 不负责（OUT，明确排除，避免又长成大杂烩）
+
 - **定价 / 折扣 / 审批**：归 `quote`(D4) + 电子合同域（`docs/RHAUTT-NEXUS-DEV-DIRECTION-FINAL.md` D2 电子合同的折扣审批）。基座只提供「牌价/成本」等**事实字段**，不做定价业务逻辑。
 - **选型 / 推荐引擎**：规则与推荐归消费方（问诊 / 报价 / BIM）。基座只提供可供筛选的**定位标签**。
 - **报价单 / 系统包报价 / 库存 / 履约**：归 D4 各业务模块。
@@ -44,12 +46,12 @@
 
 在现有产品事实之上，加一层结构化定位字段——这是「把产品说清楚」的核心：
 
-| 维度 | 字段（示意） | 取值示意 |
-|---|---|---|
-| 卖给谁（目标客户） | `target_segments[]` | 家庭 / 别墅 / 商用 / 工程 |
-| 哪个渠道 | `channels[]` | 经销商 / 工程项目 / 电商 / 直营 |
-| 哪类用户（画像） | `user_personas[]` | 高端改善 / 刚需 / 存量改造 / 新装 |
-| 哪个市场（区域/场景） | `markets[]` | 华东别墅 / 南方潮湿区 / 北方采暖区 |
+| 维度                  | 字段（示意）                                      | 取值示意                             |
+| --------------------- | ------------------------------------------------- | ------------------------------------ |
+| 卖给谁（目标客户）    | `target_segments[]`                               | 家庭 / 别墅 / 商用 / 工程            |
+| 哪个渠道              | `channels[]`                                      | 经销商 / 工程项目 / 电商 / 直营      |
+| 哪类用户（画像）      | `user_personas[]`                                 | 高端改善 / 刚需 / 存量改造 / 新装    |
+| 哪个市场（区域/场景） | `markets[]`                                       | 华东别墅 / 南方潮湿区 / 北方采暖区   |
 | 为何设计（意图/卖点） | `value_proposition` `pain_points[]` `scenarios[]` | 一句话价值主张 + 解决痛点 + 适用场景 |
 
 - 全部为**受控标签 + 少量自由文本**，标签集中管理（供各消费域一致筛选）。
@@ -69,13 +71,13 @@
 
 D2 是**单一产品事实源**，只读供给、绝不被下游反写（呼应宪章可信链隔离红线）：
 
-| 消费方 | 取用什么 | 用途 |
-|---|---|---|
-| 问诊 D3 | 定位标签 + 卖点 | 按用户画像 / 市场筛推荐产品 |
-| 报价 D4 | 产品事实 + 卖点 + 素材 | 报价单有产品说明，不再是干巴巴 SKU |
-| 设计/BIM D4 | 规格 + BIM 族引用 | 选型与建模取几何/规格 |
-| 品牌站 D1 | 定位 + 卖点 + 主图 | 只读展示 |
-| 增长中枢 D5 | 定位 + 卖点 | 喂文案/GEO（对标 Nexus Growth 蓝图 B1 品牌大脑） |
+| 消费方      | 取用什么               | 用途                                             |
+| ----------- | ---------------------- | ------------------------------------------------ |
+| 问诊 D3     | 定位标签 + 卖点        | 按用户画像 / 市场筛推荐产品                      |
+| 报价 D4     | 产品事实 + 卖点 + 素材 | 报价单有产品说明，不再是干巴巴 SKU               |
+| 设计/BIM D4 | 规格 + BIM 族引用      | 选型与建模取几何/规格                            |
+| 品牌站 D1   | 定位 + 卖点 + 主图     | 只读展示                                         |
+| 增长中枢 D5 | 定位 + 卖点            | 喂文案/GEO（对标 Nexus Growth 蓝图 B1 品牌大脑） |
 
 - 供给形态：稳定的产品**只读视图**（`product_view` 无 PII、无成本敏感字段的对外版）+ 领域事件（`product.published` 等）。
 - 谁消费谁映射：owner 已在 `services/api/src/modules/module-boundary.ts` 标注，导航/授权据此对齐。
@@ -87,25 +89,30 @@ D2 是**单一产品事实源**，只读供给、绝不被下游反写（呼应�
 > 背景：现实代码里方向是**反的**——`apps/everhot-cn/public/js/products-data.js` 是事实上的录入源，`apps/everhot-cn/scripts/sync-products-to-nexus.mjs` 把它 **push 进** D2，并用 `meta.everhot` 存完整原对象做无损往返；`database/postgres/migrations/009_everhot_brand_tenant.sql` 注明 products 目前是「HQ 共享目录」（varchar tenant_id，非 RLS）。本节收口「谁是写主、从哪来、怎么回流」，与 §4「不被反写」对齐。
 
 ### 5.1 产权裁决（写主）
+
 - D2 是产品**事实 + 定位**的唯一 master-of-record。
 - 品牌站 `products-data.js` 从「写主」降级为**一次性 seed 来源**；`meta.everhot` 无损往返是安全的迁移垫脚石。
 - **判据**：「谁能改产品事实与定位」= 只有 D2；品牌站 / 脚本只能 **seed** 或 **只读消费**，不得成为长期写主。
 
 ### 5.2 录入归属
+
 - **事实**（sku / 规格 / 品牌 / 品类）：可由品牌站 seed，或 `product_manager` 在 D2 录入。
 - **定位**（卖给谁 / 渠道 / 用户 / 市场 / 卖点）：`products-data.js` 给不出，**必须由总部 `product_manager` 在 D2 录入**——这正是 D2 该当 master 的核心理由。
 
 ### 5.3 多品牌来源策略
+
 - **everhot**：现有 `products-data.js` seed → D2；此后以 D2 为准。
 - **rheem / ruud**：外链占位站，产品**不强制入库**；如需营销/GEO 引用，仅登记「轻量事实卡」（名称 / 品类 / 定位），不建完整 SKU 目录。
 - 门牌裁定见 §5.6：产品目录以**品牌运营租户 UUID** 为唯一门牌（RLS 隔离），`rhautt_shared` 哨兵为历史 dev 残留、已退役。（本条更正 009「non-RLS 共享」的过时表述，与 §9.3 运行时拓扑 `tenant = EVERHOT_TENANT_ID` 对齐。）
 
 ### 5.4 迁移路径（seed → D2 为准 → 回流）
+
 1. **seed**：保留 `sync-products-to-nexus.mjs` 做一次性 / 低频幂等导入。
 2. **切主**：定位字段在 D2 录入后，D2 成为事实源；`products-data.js` 冻结为构建产物，或改为**从 D2 拉取生成**。
 3. **回流**：品牌站 / 问诊 / 报价改为从 D2 只读视图消费（**反转当前 push 方向**）。
 
 ### 5.5 稳定产品标识（MDM-lite）
+
 - 现状 `sku=slug`，跨品牌无统一身份。基座引入稳定 `product_key` + 去重规则（呼应宪章 M15 / MDM），避免同一产品在多站 / 多源重复。
 
 ### 5.6 共享三律 · 门牌裁定（🔒 锁定 · 模型 B · 2026-07-03）
@@ -147,15 +154,16 @@ D2 是**单一产品事实源**，只读供给、绝不被下游反写（呼应�
 
 问诊引擎（`server/modules/diagnosis/diagnosis.service.js`）产出 3 档 tier（`essential`/`balanced`/`premium`，本质预算倍率）+ 原始输入 `systems` / `home.area` / `home.city` / `painPoints`；产品未与 tier 绑定。消费方接入时，在问诊引擎侧把这些映射为 D2 `recommend` 的 `criteria`：
 
-| criteria 维度 | 来源 | 映射规则（建议默认） |
-| --- | --- | --- |
-| `personas` | tier id | `essential`→`essential`(刚需)；`premium`→`premium_upgrade`(高端改善)；`balanced`→不加约束 |
-| `segments` | `home.type` / `home.area` | 别墅或面积 ≥ **阈值①** → `villa`，否则 `home`；商用/工程另判 |
-| `markets` | `home.city` | 按**城市分类表②** → `south_humid`/`north_heating`/`tier1_city`/`east_villa` |
-| `painPoints` | `normalizePainPoints(payload)` | 原样透传（对定位 `painPoints`/`scenarios`/`valueProposition` 做文本命中） |
-| `channels` | 线索来源 | 问诊线索默认 `dealer`（可省略） |
+| criteria 维度 | 来源                           | 映射规则（建议默认）                                                                      |
+| ------------- | ------------------------------ | ----------------------------------------------------------------------------------------- |
+| `personas`    | tier id                        | `essential`→`essential`(刚需)；`premium`→`premium_upgrade`(高端改善)；`balanced`→不加约束 |
+| `segments`    | `home.type` / `home.area`      | 别墅或面积 ≥ **阈值①** → `villa`，否则 `home`；商用/工程另判                              |
+| `markets`     | `home.city`                    | 按**城市分类表②** → `south_humid`/`north_heating`/`tier1_city`/`east_villa`               |
+| `painPoints`  | `normalizePainPoints(payload)` | 原样透传（对定位 `painPoints`/`scenarios`/`valueProposition` 做文本命中）                 |
+| `channels`    | 线索来源                       | 问诊线索默认 `dealer`（可省略）                                                           |
 
 **需产品侧拍板的 3 项**：
+
 1. **阈值①**：别墅 segment 的面积下限（如 200㎡？）。
 2. **城市分类表②**：哪些城市归 `south_humid`/`north_heating`/`tier1_city`（需一份权威清单）。
 3. **tier↔persona 对应**：`balanced` 是否也给 persona，及 `retrofit`/`new_build` 如何从 payload 判定（当前 payload 未显式携带新装/改造标记）。
@@ -165,6 +173,7 @@ D2 是**单一产品事实源**，只读供给、绝不被下游反写（呼应�
 ---
 
 ## 8. 门禁（保持机器纪律）
+
 - `guard:product-fact-base` ✅ 已实现（`scripts/agent-guards/product-fact-base-check.js`）：静态强制 D2 为单一产品事实源——(A) 除 product-catalog 与 module-boundary 外，其它模块不得 import `ProductEntity` / 调用 `.upsert()`（不被下游反写）；(B) 公开控制器只读（无写动词），公开读方法（`listBrandPublic`/`recommend`/`list`）投影不得出现 `costPrice`/`cost_price`/`dealerPrice`/`dealer_price`（无成本/无 PII）；(C) 写入闸 `upsert` 仅经 AuthGuard 保护的控制器暴露。证据：`evidence/architecture/product-fact-base.json`。
 - `guard:product-authoring` ✅ 已实现（`scripts/agent-guards/product-authoring-check.js`）：静态强制品牌站脚本（`sync-products-to-nexus.mjs`）——只经 D2 upsert 端点（`POST /product-catalog/devices`）且带鉴权写入；不得直连 DB 绕过 D2（禁 `pg`/`typeorm`/`DataSource`）；不得写 D2-录入字段（`positioning`/`assetRefs`/`productKey`）；不得用破坏性动词（DELETE/PUT/PATCH）。证据：`evidence/architecture/product-authoring.json`。
 - 复用 `guard:permission-domain`：product-catalog 唯一归属 D2 产品域。
@@ -176,6 +185,7 @@ D2 是**单一产品事实源**，只读供给、绝不被下游反写（呼应�
 > 目的：把上文分散的范围/分期/供给收敛成一张「自顶向下」的层级图，便于对齐与评审。
 
 ### 9.1 平台域层级（6 域制 · D2 的位置）
+
 事实源：`docs/ADMIN-PERMISSION-DOMAINS-AND-RLS.md` + `PROJECT-CHARTER.md`。
 
 ```
@@ -187,9 +197,11 @@ D2 是**单一产品事实源**，只读供给、绝不被下游反写（呼应�
 ├── D4 客户与赋能    承接→设计→报价→施工→服务 闭环
 └── D5 增长中枢      文案 / GEO / 品牌大脑
 ```
+
 D2 与 D1(DAM) **同构**：D1 是内容素材基座，D2 是产品素材基座；两者都「只读供给、不被下游反写」。
 
 ### 9.2 D2 内部分层（自底向上 6 层）
+
 ```
 D2 产品事实基座（services/api/src/modules/product-catalog/）
 ┌────────────────────────────────────────────────────────────┐
@@ -203,9 +215,11 @@ D2 产品事实基座（services/api/src/modules/product-catalog/）
   受控词表 product-taxonomy.ts 横切 L2（segments/channels/personas/markets/assetRoles）
   发布态 draft → published 横切全层（只有 published 进 L5）
 ```
+
 文件映射：L1–L4 实体=`product-catalog.entity.ts`（迁移 `011`/`012`）；L2 词表=`product-taxonomy.ts`；核心服务=`product-catalog.service.ts`；L5 公开出口=`product-catalog.public.controller.ts`（`@Public` 脱敏只读）；L6 写入/管理=`product-catalog.controller.ts`（AuthGuard 保护，唯一写闸 `upsert`）。
 
 ### 9.3 运行时拓扑（服务 · 端口）
+
 ```
 浏览器
  ├─ :3000  legacy Express（server/index.js）── 静态门户 index.html / products.html
@@ -219,12 +233,14 @@ D2 产品事实基座（services/api/src/modules/product-catalog/）
 ```
 
 ### 9.4 鉴权分层（deny-by-default）
+
 - 全局 `APP_GUARD` = `AuthGuard` → `RolesGuard`，默认拒绝所有请求。
 - `@Public()`（`common/public.decorator.ts`）标注真正的匿名端点；两道守卫均 `getAllAndOverride(IS_PUBLIC_KEY, [handler, class])` 放行。
 - L5 公开控制器 `EverhotPublicController` 类级 `@Public()` → 覆盖 `products`/`recommend`；投影脱敏由 `recommend` + `guard:product-fact-base` 双重兜底。
 - 待办：公开面补 rate-limit（防匿名滥用）。
 
 ### 9.5 数据流与写主纪律（方向已反转）
+
 ```
 录入（唯一写主）                       供给（只读，绝不反写）
 product_manager ─upsert─▶ D2 ═══════▶ D1 品牌站  取 定位+卖点+主图
@@ -232,6 +248,7 @@ brand seed(sync脚本)─┘(不写定位/素材)  D3 问诊    取 定位标签
                                        D4 报价/BIM 取 事实+卖点+素材/BIM引用
                                        D5 增长     取 定位+卖点 → 文案/GEO
 ```
+
 写主判据：能改产品事实与定位的只有 D2；品牌站/脚本只能 `seed` 或只读消费。`sync-products-to-nexus.mjs` 不含 positioning/assetRefs/productKey → 重复 seed 不覆盖 D2 录入（`guard:product-authoring` 静态兜底）。
 
 ---
@@ -242,9 +259,11 @@ brand seed(sync脚本)─┘(不写定位/素材)  D3 问诊    取 定位标签
 > 定位：在 L1–L6 事实基座之上加**营销供给层**——沉淀「世界级品牌+营销」所需的**结构化营销事实**（多语言、SEO/GEO 结构化数据、富营销内容），仍归 D2 单一事实源；D5 只做**生成/分发**、D1 只做**渲染**、D2 不做定价/履约。
 
 ### 10.1 为什么加 L7（世界级差距）
+
 事实基座只回答「产品是什么/给谁」，但世界级营销还需要：多区域多语言（Rheem/Ruud 是美国品牌）、SEO 结构化数据（schema.org `Product`/`Offer` JSON-LD、GTIN/MPN）、AI 答案引擎可发现性（GEO）、结构化富文案（标题/卖点-利益/FAQ）。这些是「产品的营销事实」，介于 D2 与 D5 之间——**归 D2（模型 A）**，避免散落品牌站（现状混乱根因）。
 
 ### 10.2 数据模型（新增 `product_content`，per 产品 × locale）
+
 - **表**：`rhautt_nexus.product_content`，`UNIQUE(tenant_id, product_id, locale)`；`tenant_id` 跟随产品的品牌运营租户（模型 B），**FORCE RLS**（对齐 018）。
 - **L7a i18n**：`locale`（BCP-47，如 `zh-CN`/`en-US`）· `name`（本地化显示名）· `display_currency`（展示币，不做定价）。
 - **L7b SEO/GEO**：`seo` jsonb `{metaTitle, metaDescription, canonical, ogImage, keywords[]}` · `gtin` · `mpn`（schema.org 全球贸易标识）。**JSON-LD 不落库**——由服务 `buildJsonLd()` 在读时从 `products + product_content` 计算投影（避免漂移）。
@@ -252,20 +271,24 @@ brand seed(sync脚本)─┘(不写定位/素材)  D3 问诊    取 定位标签
 - **发布态**：`status` draft/published · `published_at`——**只有 published 进公开只读供给（L5）**，全程可审计。
 
 ### 10.3 端点（受保护写 + 公开本地化读）
+
 - 受保护（AuthGuard + 写闸 `requireWriteTenant`）：`POST /product-catalog/devices/:id/content`（upsert 某 locale 营销内容）· `GET /product-catalog/devices/:id/content`（列本产品各 locale 内容）。
 - 公开脱敏只读（`@Public` + 限流）：`GET /brand/:slug/products?locale=`（本地化投影 + 内联 JSON-LD）· `GET /brand/:slug/products/:sku?locale=`（单品 + JSON-LD）。
 - **回退链**：请求 locale 无内容 → 回退默认 locale → 回退 L1/L2 基础事实（保证任何品牌任何 locale 都有可渲染投影）。
 
 ### 10.4 边界（不破单一事实源）
+
 - L7 只存**营销事实/内容**；文案**生成**归 D5（吃 L7 结构化输入产出成稿），**渲染**归 D1，**定价**永远归 price_list_items/D4。
 - 公开投影延续 `guard:product-fact-base` 脱敏红线：不得出现 `cost_price`/`dealer_price`/PII。
 - **Rheem/Ruud**：§5.3「轻量事实卡、不建完整目录」**本轮维持**；世界级完整本地化目录待用户提供品牌站代码后另立子任务升级。
 
 ### 10.5 分期
+
 - **P0（本轮 MVP）**：事实基座契约+客户端+测试收口 **+** L7 表/实体/服务/端点 + i18n 回退 + SEO/JSON-LD 计算投影 + 全端点 OpenAPI + 契约测试。
 - **P1+**：L7c 富内容录入 UI（brand-console）· 发布工作流（draft→review→published+定时+审计）· 产品关系（配件/替代/对比）· 营销效果闭环。
 
 ### 10.6 L7 层级补充（并入 §9.2）
+
 ```
 │ L7 营销供给★ product_content(locale × 产品): i18n + SEO/GEO(JSON-LD计算) + 富营销内容 │ ← 世界级营销输入
 ```

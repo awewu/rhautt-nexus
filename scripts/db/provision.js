@@ -19,7 +19,11 @@ const path = require('path');
 const root = path.resolve(__dirname, '..', '..');
 function run(label, file, extraEnv = {}) {
   console.log(`\n──▶ ${label}`);
-  const r = spawnSync(process.execPath, [file], { cwd: root, stdio: 'inherit', env: { ...process.env, ...extraEnv } });
+  const r = spawnSync(process.execPath, [file], {
+    cwd: root,
+    stdio: 'inherit',
+    env: { ...process.env, ...extraEnv },
+  });
   if (r.status !== 0) {
     console.error(`\n✗ ${label} 失败(exit ${r.status})。已中止,未继续后续步骤。`);
     process.exit(r.status || 1);
@@ -34,6 +38,10 @@ run('3/4 db:verify RLS/权限体检', path.join(root, 'scripts', 'db', 'verify-r
 if (process.env.SEED_ADMIN === '1') {
   run('4/4 seed 初始管理员', path.join(root, 'scripts', 'db', 'seed-dev-admin.js'));
 } else {
-  console.log('\n──▶ 4/4 seed 初始管理员 —— 跳过(设 SEED_ADMIN=1 且提供 SEED_ADMIN_PHONE/SEED_ADMIN_PASSWORD 以创建)');
+  console.log(
+    '\n──▶ 4/4 seed 初始管理员 —— 跳过(设 SEED_ADMIN=1 且提供 SEED_ADMIN_PHONE/SEED_ADMIN_PASSWORD 以创建)'
+  );
 }
-console.log('\n🟢 生产库就绪。下一步:以 NODE_ENV=production 启动 API(npm run start:api,preflight 会再校验)与工作台。');
+console.log(
+  '\n🟢 生产库就绪。下一步:以 NODE_ENV=production 启动 API(npm run start:api,preflight 会再校验)与工作台。'
+);

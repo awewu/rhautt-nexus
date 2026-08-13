@@ -70,23 +70,25 @@ async function main() {
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
-        items: [{
-          id: 'site-everhot',
-          code: 'everhot',
-          nameCn: 'Everhot',
-          nameEn: 'Everhot',
-          appKey: 'everhot-cn',
-          deliveryType: 'self_hosted',
-          developmentUrl: 'http://localhost:5011',
-          productionUrl: 'https://www.everhot.com.cn',
-          resolvedUrl: 'http://localhost:5011',
-          resolvedEnvironment: 'development',
-          status: 'active',
-          sortOrder: 30,
-          siteNote: null,
-          deletedAt: null,
-          updatedAt: null,
-        }],
+        items: [
+          {
+            id: 'site-everhot',
+            code: 'everhot',
+            nameCn: 'Everhot',
+            nameEn: 'Everhot',
+            appKey: 'everhot-cn',
+            deliveryType: 'self_hosted',
+            developmentUrl: 'http://localhost:5011',
+            productionUrl: 'https://www.everhot.com.cn',
+            resolvedUrl: 'http://localhost:5011',
+            resolvedEnvironment: 'development',
+            status: 'active',
+            sortOrder: 30,
+            siteNote: null,
+            deletedAt: null,
+            updatedAt: null,
+          },
+        ],
         total: 1,
       }),
     });
@@ -120,7 +122,10 @@ async function main() {
   await page.route('**/api/v2/file-artifact/*', async (route) => {
     if (route.request().method() === 'DELETE') {
       deletes.push(route.request().url());
-      await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ success: true }) });
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true }),
+      });
       return;
     }
     await route.fallback();
@@ -135,14 +140,23 @@ async function main() {
         assetRefs: body.assetRefs || product.assetRefs,
         meta: body.meta || product.meta,
       };
-      await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: product }) });
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ data: product }),
+      });
       return;
     }
-    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data: product }) });
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ data: product }),
+    });
   });
 
   await page.route('**/api/v2/product-catalog/devices?**', async (route) => {
-    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(productPayload(product)) });
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify(productPayload(product)),
+    });
   });
 
   await page.goto(`${baseUrl}/comfort/sites/everhot`, { waitUntil: 'networkidle' });
@@ -177,19 +191,41 @@ async function main() {
   const deletePatch = patches[2] || {};
   const firstMain = (firstPatch.assetRefs || []).find((ref) => ref.role === 'main');
   const secondMains = (secondPatch.assetRefs || []).filter((ref) => ref.role === 'main');
-  const deletedMains = (deletePatch.assetRefs || []).filter((ref) => ref.role === 'main' || ref.role === 'card');
+  const deletedMains = (deletePatch.assetRefs || []).filter(
+    (ref) => ref.role === 'main' || ref.role === 'card'
+  );
   const scoped =
     patches.length === 3 &&
     patches.every((patch) => patch.tenantId === 'tenant-everhot') &&
-    uploads.every((upload) => upload.entityType === 'product-image' && upload.entityId === 'EH-HP-200');
-  const replaced = firstMain?.artifactId === 'asset-main-1' && secondMains.length === 1 && secondMains[0].artifactId === 'asset-main-2';
+    uploads.every(
+      (upload) => upload.entityType === 'product-image' && upload.entityId === 'EH-HP-200'
+    );
+  const replaced =
+    firstMain?.artifactId === 'asset-main-1' &&
+    secondMains.length === 1 &&
+    secondMains[0].artifactId === 'asset-main-2';
   const deleted = deletedMains.length === 0 && deletes.some((url) => url.endsWith('/asset-main-2'));
 
-  if (iframeCount !== 0 || leaked5012.length || uploads.length !== 2 || !scoped || !replaced || !deleted) {
-    throw new Error(JSON.stringify({ iframeCount, leaked5012, uploads, patches, deletes, scoped, replaced, deleted }, null, 2));
+  if (
+    iframeCount !== 0 ||
+    leaked5012.length ||
+    uploads.length !== 2 ||
+    !scoped ||
+    !replaced ||
+    !deleted
+  ) {
+    throw new Error(
+      JSON.stringify(
+        { iframeCount, leaked5012, uploads, patches, deletes, scoped, replaced, deleted },
+        null,
+        2
+      )
+    );
   }
 
-  console.log('native-brand-console image smoke passed: upload, replace, delete, scoped Nexus APIs, no iframe');
+  console.log(
+    'native-brand-console image smoke passed: upload, replace, delete, scoped Nexus APIs, no iframe'
+  );
 }
 
 main().catch((error) => {

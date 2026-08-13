@@ -21,10 +21,7 @@ const entities = [
 ];
 
 @Module({
-  imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature(entities)]),
-    AuthModule,
-  ],
+  imports: [...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature(entities)]), AuthModule],
   controllers: [DesignController],
   providers: [
     DesignService,

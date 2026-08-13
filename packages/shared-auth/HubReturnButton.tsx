@@ -44,9 +44,7 @@ export default function HubReturnButton() {
 
   useEffect(() => {
     // 已在门户宿主自身时不显示，避免自跳
-    const onHubHost =
-      typeof window !== 'undefined' &&
-      window.location.origin === dealerBaseUrl();
+    const onHubHost = typeof window !== 'undefined' && window.location.origin === dealerBaseUrl();
     if (onHubHost) return;
     if (!readToken()) return;
     setHref(hubUrl());

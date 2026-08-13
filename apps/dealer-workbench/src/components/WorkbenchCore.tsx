@@ -40,15 +40,25 @@ export function WorkbenchSectionHeader({
       <div>
         {eyebrow ? <p className="workbench-section-header__eyebrow">{eyebrow}</p> : null}
         <h2 className="workbench-section-header__title">{title}</h2>
-        {description ? <p className="workbench-section-header__description">{description}</p> : null}
+        {description ? (
+          <p className="workbench-section-header__description">{description}</p>
+        ) : null}
       </div>
       {actions ? <div>{actions}</div> : null}
     </div>
   );
 }
 
-export function WorkbenchFilterToolbar({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`workbench-filter-toolbar${className ? ` ${className}` : ''}`}>{children}</div>;
+export function WorkbenchFilterToolbar({
+  children,
+  className = '',
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={`workbench-filter-toolbar${className ? ` ${className}` : ''}`}>{children}</div>
+  );
 }
 
 export function WorkbenchTableShell({ children }: { children: ReactNode }) {
@@ -86,10 +96,17 @@ export function WorkbenchTableState({
 }) {
   const Icon = type === 'loading' ? Loader2 : type === 'error' ? AlertCircle : Inbox;
   return (
-    <div className={`workbench-state workbench-state--${type}`} role={type === 'error' ? 'alert' : 'status'}>
+    <div
+      className={`workbench-state workbench-state--${type}`}
+      role={type === 'error' ? 'alert' : 'status'}
+    >
       <div className="workbench-state__inner">
         <span className="workbench-state__icon">
-          <Icon aria-hidden="true" className={type === 'loading' ? 'animate-spin' : undefined} size={18} />
+          <Icon
+            aria-hidden="true"
+            className={type === 'loading' ? 'animate-spin' : undefined}
+            size={18}
+          />
         </span>
         <p className="workbench-state__title">{title}</p>
         {description ? <p className="workbench-state__description">{description}</p> : null}
@@ -125,11 +142,10 @@ export function WorkbenchPaginationFooter({
   const safeCurrentPage = Math.max(Math.floor(currentPage) || 1, 1);
   const atFirst = currentPage <= 1;
   const atLast = normalizedTotalPages ? safeCurrentPage >= normalizedTotalPages : false;
-  const pageText = normalizedTotalPages ? `${safeCurrentPage} / ${normalizedTotalPages}` : `第 ${safeCurrentPage} 页`;
-  const totalText =
-    typeof totalItems === 'number'
-      ? `共 ${totalItems} 条`
-      : '按当前筛选分页加载';
+  const pageText = normalizedTotalPages
+    ? `${safeCurrentPage} / ${normalizedTotalPages}`
+    : `第 ${safeCurrentPage} 页`;
+  const totalText = typeof totalItems === 'number' ? `共 ${totalItems} 条` : '按当前筛选分页加载';
   const [jumpValue, setJumpValue] = useState(String(safeCurrentPage));
   const pageItems = useMemo(() => {
     if (!normalizedTotalPages) return [];

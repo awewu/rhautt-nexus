@@ -153,26 +153,26 @@ Product
 
 建议字段：
 
-| 字段 | 类型 | 说明 |
-|---|---|---|
-| `id` | uuid | 官网展示配置 ID |
-| `tenant_id` | uuid | RLS 租户 |
-| `site_id` | uuid | 官网 ID |
-| `product_tenant_id` | uuid/string | 产品所属数据平面 |
-| `product_id` | uuid/string | 产品 ID |
-| `website_category_id` | uuid | 官网目录 ID |
-| `website_category_path` | text | 官网目录路径快照，如 `家用 / 采暖系统 / 壁挂炉` |
-| `website_series_id` | uuid | 官网系列 ID |
-| `website_series_name` | text | 官网系列名称快照 |
-| `public_slug` | text | 产品在该官网的公开路径 |
-| `display_order` | integer | 产品在该官网的排序 |
-| `is_featured` | boolean | 是否在该官网推荐 |
-| `status` | draft/published/hidden | 官网发布状态 |
-| `site_title` | text | 官网展示名称覆盖值 |
-| `site_summary` | text | 官网摘要/标语覆盖值 |
-| `site_tags` | jsonb | 官网标签覆盖值 |
-| `site_images` | jsonb | 官网图片覆盖值 |
-| `site_meta` | jsonb | 官网扩展展示配置 |
+| 字段                    | 类型                   | 说明                                            |
+| ----------------------- | ---------------------- | ----------------------------------------------- |
+| `id`                    | uuid                   | 官网展示配置 ID                                 |
+| `tenant_id`             | uuid                   | RLS 租户                                        |
+| `site_id`               | uuid                   | 官网 ID                                         |
+| `product_tenant_id`     | uuid/string            | 产品所属数据平面                                |
+| `product_id`            | uuid/string            | 产品 ID                                         |
+| `website_category_id`   | uuid                   | 官网目录 ID                                     |
+| `website_category_path` | text                   | 官网目录路径快照，如 `家用 / 采暖系统 / 壁挂炉` |
+| `website_series_id`     | uuid                   | 官网系列 ID                                     |
+| `website_series_name`   | text                   | 官网系列名称快照                                |
+| `public_slug`           | text                   | 产品在该官网的公开路径                          |
+| `display_order`         | integer                | 产品在该官网的排序                              |
+| `is_featured`           | boolean                | 是否在该官网推荐                                |
+| `status`                | draft/published/hidden | 官网发布状态                                    |
+| `site_title`            | text                   | 官网展示名称覆盖值                              |
+| `site_summary`          | text                   | 官网摘要/标语覆盖值                             |
+| `site_tags`             | jsonb                  | 官网标签覆盖值                                  |
+| `site_images`           | jsonb                  | 官网图片覆盖值                                  |
+| `site_meta`             | jsonb                  | 官网扩展展示配置                                |
 
 兼容字段：
 
@@ -189,17 +189,17 @@ site_product_series
 
 字段：
 
-| 字段 | 类型 | 说明 |
-|---|---|---|
-| `id` | uuid | 系列 ID |
-| `tenant_id` | uuid | RLS 租户 |
-| `site_id` | uuid | 官网 ID |
-| `category_id` | uuid nullable | 可选，归属某个官网目录 |
-| `name` | text | 系列名称 |
-| `code` | text | 系列编码，系统生成或后台维护 |
-| `sort_order` | integer | 排序 |
-| `status` | active/inactive | 启用状态 |
-| `description` | text | 运营备注 |
+| 字段          | 类型            | 说明                         |
+| ------------- | --------------- | ---------------------------- |
+| `id`          | uuid            | 系列 ID                      |
+| `tenant_id`   | uuid            | RLS 租户                     |
+| `site_id`     | uuid            | 官网 ID                      |
+| `category_id` | uuid nullable   | 可选，归属某个官网目录       |
+| `name`        | text            | 系列名称                     |
+| `code`        | text            | 系列编码，系统生成或后台维护 |
+| `sort_order`  | integer         | 排序                         |
+| `status`      | active/inactive | 启用状态                     |
+| `description` | text            | 运营备注                     |
 
 ### 6.3 默认值与覆盖值
 
@@ -252,17 +252,17 @@ site_product_series
 
 ### 7.3 展示字段默认值
 
-| 官网展示字段 | 默认来源 |
-|---|---|
-| 展示名称 | 产品名称 |
-| 英文名 | 产品英文名 / 品牌英文 |
-| 标语 | 产品卖点 / tagline |
-| 摘要 | 产品简介 / 产品卖点 |
-| 标签 | 产品标签 / 卖点关键词 |
-| 图片 | 产品主图 |
-| slug | 型号 / SKU 自动生成 |
-| 排序 | 默认 0 |
-| 是否推荐 | 默认否 |
+| 官网展示字段 | 默认来源              |
+| ------------ | --------------------- |
+| 展示名称     | 产品名称              |
+| 英文名       | 产品英文名 / 品牌英文 |
+| 标语         | 产品卖点 / tagline    |
+| 摘要         | 产品简介 / 产品卖点   |
+| 标签         | 产品标签 / 卖点关键词 |
+| 图片         | 产品主图              |
+| slug         | 型号 / SKU 自动生成   |
+| 排序         | 默认 0                |
+| 是否推荐     | 默认否                |
 
 ## 8. 前端方案
 
@@ -543,13 +543,13 @@ GET /api/v2/sites/everhot/product-categories
 
 ## 12. 前后端职责边界
 
-| 模块 | 职责 |
-|---|---|
-| 官网目录管理页 | 只维护官网目录树 CRUD |
-| 官网系列管理 | 维护官网系列基础资料 |
-| 产品库编辑页 | 维护产品挂载到哪些官网及各官网展示配置 |
-| 5011 官网 | 读取已发布投影展示，不反写产品库 |
-| 后端 API | 负责映射建议、字段解析、权限、唯一性校验 |
+| 模块           | 职责                                     |
+| -------------- | ---------------------------------------- |
+| 官网目录管理页 | 只维护官网目录树 CRUD                    |
+| 官网系列管理   | 维护官网系列基础资料                     |
+| 产品库编辑页   | 维护产品挂载到哪些官网及各官网展示配置   |
+| 5011 官网      | 读取已发布投影展示，不反写产品库         |
+| 后端 API       | 负责映射建议、字段解析、权限、唯一性校验 |
 
 ## 13. 实施阶段
 

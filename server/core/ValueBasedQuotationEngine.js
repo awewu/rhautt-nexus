@@ -6,15 +6,27 @@
 class ValueBasedQuotationEngine {
   constructor() {
     this.promotionRules = [
-      { type: 'discount', name: '全屋总包优惠', threshold: 50000, discount: 5000, description: '满5万减5000' },
+      {
+        type: 'discount',
+        name: '全屋总包优惠',
+        threshold: 50000,
+        discount: 5000,
+        description: '满5万减5000',
+      },
       { type: 'percentage', name: '老客户推荐', discount: 0.95, description: '额外95折' },
-      { type: 'package', name: '六系统套餐', systems: 6, discount: 10000, description: '全套优惠1万' }
+      {
+        type: 'package',
+        name: '六系统套餐',
+        systems: 6,
+        discount: 10000,
+        description: '全套优惠1万',
+      },
     ];
 
     this.marginSettings = {
       minMargin: 0.15, // 最低毛利15%
       targetMargin: 0.25, // 目标毛利25%
-      maxDiscount: 0.10 // 最大折扣10%
+      maxDiscount: 0.1, // 最大折扣10%
     };
   }
 
@@ -28,7 +40,7 @@ class ValueBasedQuotationEngine {
     const engineeringQuantity = this.calculateEngineeringQuantity(roomProfile, solution);
 
     // 2. 生成系统报价项（每项对应痛点）
-    const systemItems = baseSystems.map(system => ({
+    const systemItems = baseSystems.map((system) => ({
       category: system.category || system.name,
       name: system.name,
       products: system.products || [],
@@ -36,19 +48,23 @@ class ValueBasedQuotationEngine {
       solvedPains: this.mapSystemToPains(system, painDiagnosis),
       valueExplanation: this.generateValueExplanation(system, painDiagnosis),
       costBreakdown: this.generateCostBreakdown(system),
-      unitPriceAnalysis: this.analyzeUnitPrice({ totalPrice: this.calculateSystemPrice(system, roomProfile) })
+      unitPriceAnalysis: this.analyzeUnitPrice({
+        totalPrice: this.calculateSystemPrice(system, roomProfile),
+      }),
     }));
 
     // 3. 计算材料费用（关联痛点）
-    const materialItems = this.calculateMaterialItems(solution, roomProfile, painDiagnosis).map(item => ({
-      ...item,
-      unitPriceAnalysis: this.analyzeUnitPrice(item)
-    }));
+    const materialItems = this.calculateMaterialItems(solution, roomProfile, painDiagnosis).map(
+      (item) => ({
+        ...item,
+        unitPriceAnalysis: this.analyzeUnitPrice(item),
+      })
+    );
 
     // 4. 计算人工费用
-    const laborItems = this.calculateLaborItems(roomProfile, solution).map(item => ({
+    const laborItems = this.calculateLaborItems(roomProfile, solution).map((item) => ({
       ...item,
-      unitPriceAnalysis: this.analyzeUnitPrice(item)
+      unitPriceAnalysis: this.analyzeUnitPrice(item),
     }));
 
     // 5. 汇总所有项目
@@ -73,7 +89,7 @@ class ValueBasedQuotationEngine {
       painSummary: {
         totalPains: painDiagnosis.allTags?.length || 0,
         solvedPains: this.countSolvedPains(allItems),
-        coverage: this.calculatePainCoverage(painDiagnosis, allItems)
+        coverage: this.calculatePainCoverage(painDiagnosis, allItems),
       },
       items: allItems,
       subtotal,
@@ -82,7 +98,7 @@ class ValueBasedQuotationEngine {
       financing: this.generateFinancingOptions(finalTotal),
       valueHighlights: this.generateValueHighlights(allItems, painDiagnosis),
       ownerBenefits: this.generateOwnerBenefits(painDiagnosis),
-      exportFormats: ['PDF', 'Excel', '图片']
+      exportFormats: ['PDF', 'Excel', '图片'],
     };
   }
 
@@ -91,12 +107,12 @@ class ValueBasedQuotationEngine {
    */
   calculateSystemPrice(system, roomProfile) {
     const basePrices = {
-      '中央热水系统': { base: 12000, perSqm: 30 },
-      '五恒恒温系统': { base: 30000, perSqm: 150 },
-      '新风除湿系统': { base: 8000, perSqm: 40 },
-      '全屋净水系统': { base: 10000, perSqm: 50 },
-      '中央空调系统': { base: 20000, perSqm: 100 },
-      '瑞美全屋总包方案': { base: 50000, perSqm: 300 }
+      中央热水系统: { base: 12000, perSqm: 30 },
+      五恒恒温系统: { base: 30000, perSqm: 150 },
+      新风除湿系统: { base: 8000, perSqm: 40 },
+      全屋净水系统: { base: 10000, perSqm: 50 },
+      中央空调系统: { base: 20000, perSqm: 100 },
+      瑞美全屋总包方案: { base: 50000, perSqm: 300 },
     };
 
     const priceConfig = basePrices[system.name] || { base: 10000, perSqm: 50 };
@@ -118,22 +134,26 @@ class ValueBasedQuotationEngine {
       byFloor: Array.from({ length: floors }, (_, i) => ({
         floor: `${i + 1}F`,
         area: areaPerFloor,
-        rooms: this.generateRoomsForFloor(areaPerFloor, i + 1)
+        rooms: this.generateRoomsForFloor(areaPerFloor, i + 1),
       })),
       // 分段计算
       bySection: {
-        '水系统': { length: Math.round(area * 1.2), diameter: 'DN25', note: '按面积估算管路长度' },
-        '风系统': { area: Math.round(area * 0.8), thickness: '0.5mm', note: '按面积估算风管面积' },
-        '电系统': { length: Math.round(area * 1.5), wire: 'BV-2.5mm²', note: '按面积估算线路长度' }
+        水系统: { length: Math.round(area * 1.2), diameter: 'DN25', note: '按面积估算管路长度' },
+        风系统: { area: Math.round(area * 0.8), thickness: '0.5mm', note: '按面积估算风管面积' },
+        电系统: { length: Math.round(area * 1.5), wire: 'BV-2.5mm²', note: '按面积估算线路长度' },
       },
       // 分部位计算
       byLocation: {
-        '主机房': { area: Math.max(10, Math.round(area * 0.1)), equipment: solution.systems?.length || 1, note: '设备安装区域' },
-        '管道井': { length: Math.round(area * 0.2), pipe: Math.round(area * 0.15), note: '管路通道' },
-        '配电箱': { location: '入户处', count: 1, note: '电源接入点' }
+        主机房: {
+          area: Math.max(10, Math.round(area * 0.1)),
+          equipment: solution.systems?.length || 1,
+          note: '设备安装区域',
+        },
+        管道井: { length: Math.round(area * 0.2), pipe: Math.round(area * 0.15), note: '管路通道' },
+        配电箱: { location: '入户处', count: 1, note: '电源接入点' },
       },
       totalArea: area,
-      totalFloors: floors
+      totalFloors: floors,
     };
   }
 
@@ -148,7 +168,7 @@ class ValueBasedQuotationEngine {
     return roomTypes.slice(0, roomCount).map((type, i) => ({
       name: `${type}${floorNum > 1 ? floorNum : ''}`,
       area: areaPerRoom,
-      type: type
+      type: type,
     }));
   }
 
@@ -157,23 +177,21 @@ class ValueBasedQuotationEngine {
    */
   mapSystemToPains(system, painDiagnosis) {
     const painMapping = {
-      '中央热水系统': ['tag_11', 'tag_12', 'tag_13', 'tag_14', 'tag_15'],
-      '五恒恒温系统': ['tag_01', 'tag_02', 'tag_03', 'tag_04', 'tag_05'],
-      '新风除湿系统': ['tag_21', 'tag_22', 'tag_23', 'tag_24', 'tag_25'],
-      '全屋净水系统': ['tag_31', 'tag_32', 'tag_33', 'tag_34'],
-      '中央空调系统': ['tag_01', 'tag_02', 'tag_04'],
-      '瑞美全屋总包方案': ['tag_41', 'tag_42', 'tag_43', 'tag_44']
+      中央热水系统: ['tag_11', 'tag_12', 'tag_13', 'tag_14', 'tag_15'],
+      五恒恒温系统: ['tag_01', 'tag_02', 'tag_03', 'tag_04', 'tag_05'],
+      新风除湿系统: ['tag_21', 'tag_22', 'tag_23', 'tag_24', 'tag_25'],
+      全屋净水系统: ['tag_31', 'tag_32', 'tag_33', 'tag_34'],
+      中央空调系统: ['tag_01', 'tag_02', 'tag_04'],
+      瑞美全屋总包方案: ['tag_41', 'tag_42', 'tag_43', 'tag_44'],
     };
 
     const systemPains = painMapping[system.name] || [];
-    const solvedPains = painDiagnosis.allTags?.filter(tag => 
-      systemPains.includes(tag.id)
-    ) || [];
+    const solvedPains = painDiagnosis.allTags?.filter((tag) => systemPains.includes(tag.id)) || [];
 
-    return solvedPains.map(pain => ({
+    return solvedPains.map((pain) => ({
       id: pain.id,
       name: pain.name,
-      category: pain.category
+      category: pain.category,
     }));
   }
 
@@ -182,12 +200,12 @@ class ValueBasedQuotationEngine {
    */
   generateValueExplanation(system, painDiagnosis) {
     const explanations = {
-      '中央热水系统': '解决热水等待、水温波动、储水不足等痛点，实现全屋零冷水',
-      '五恒恒温系统': '解决温差、直吹、干燥等痛点，实现恒温恒湿无风感',
-      '新风除湿系统': '解决发霉、返潮、干燥等痛点，实现24小时干爽空气',
-      '全屋净水系统': '解决水质异味、结垢、健康担忧等痛点，实现全程净化',
-      '中央空调系统': '解决温度不均、空间占用等痛点，实现美观舒适制冷',
-      '瑞美全屋总包方案': '解决多品牌对接、增项风险、售后复杂等痛点，实现一站式服务'
+      中央热水系统: '解决热水等待、水温波动、储水不足等痛点，实现全屋零冷水',
+      五恒恒温系统: '解决温差、直吹、干燥等痛点，实现恒温恒湿无风感',
+      新风除湿系统: '解决发霉、返潮、干燥等痛点，实现24小时干爽空气',
+      全屋净水系统: '解决水质异味、结垢、健康担忧等痛点，实现全程净化',
+      中央空调系统: '解决温度不均、空间占用等痛点，实现美观舒适制冷',
+      瑞美全屋总包方案: '解决多品牌对接、增项风险、售后复杂等痛点，实现一站式服务',
     };
 
     return explanations[system.name] || '提升居住舒适度';
@@ -200,9 +218,9 @@ class ValueBasedQuotationEngine {
     const totalPrice = system.price || 10000;
     return {
       equipment: Math.round(totalPrice * 0.65), // 设备65%
-      materials: Math.round(totalPrice * 0.20), // 材料20%
-      labor: Math.round(totalPrice * 0.15),   // 人工15%
-      note: '价格包含设备、材料、安装调试费用'
+      materials: Math.round(totalPrice * 0.2), // 材料20%
+      labor: Math.round(totalPrice * 0.15), // 人工15%
+      note: '价格包含设备、材料、安装调试费用',
     };
   }
 
@@ -213,35 +231,35 @@ class ValueBasedQuotationEngine {
     const totalPrice = item.totalPrice || item.basePrice || 10000;
     return {
       laborCost: {
-        amount: Math.round(totalPrice * 0.20),
+        amount: Math.round(totalPrice * 0.2),
         percentage: 20,
-        description: '人工费：专业安装师傅施工'
+        description: '人工费：专业安装师傅施工',
       },
       materialCost: {
-        amount: Math.round(totalPrice * 0.50),
+        amount: Math.round(totalPrice * 0.5),
         percentage: 50,
-        description: '材料费：设备、管材、配件等'
+        description: '材料费：设备、管材、配件等',
       },
       machineryCost: {
-        amount: Math.round(totalPrice * 0.10),
+        amount: Math.round(totalPrice * 0.1),
         percentage: 10,
-        description: '机械使用费：施工机械、工具等'
+        description: '机械使用费：施工机械、工具等',
       },
       managementCost: {
-        amount: Math.round(totalPrice * 0.10),
+        amount: Math.round(totalPrice * 0.1),
         percentage: 10,
-        description: '管理费：项目管理、质量控制'
+        description: '管理费：项目管理、质量控制',
       },
       profit: {
         amount: Math.round(totalPrice * 0.08),
         percentage: 8,
-        description: '利润：合理利润'
+        description: '利润：合理利润',
       },
       riskFactor: {
         amount: Math.round(totalPrice * 0.02),
         percentage: 2,
-        description: '风险因素：价格波动、施工风险'
-      }
+        description: '风险因素：价格波动、施工风险',
+      },
     };
   }
 
@@ -306,13 +324,43 @@ class ValueBasedQuotationEngine {
     const items = [];
     const systems = solution.systems || [];
 
-    systems.forEach(system => {
+    systems.forEach((system) => {
       const equipmentMap = {
-        '中央热水系统': { name: '瑞美中央热水器', brand: 'Rheem', model: 'RHS-200L', unitPrice: 12000, specs: '容量200L，功率3kW' },
-        '五恒恒温系统': { name: '瑞美五恒主机', brand: 'Rheem', model: '5H-300', unitPrice: 25000, specs: '制冷量15kW，制热量18kW' },
-        '新风除湿系统': { name: '瑞美新风机', brand: 'Rheem', model: 'XF-500', unitPrice: 8000, specs: '风量500m³/h，除湿量30L/天' },
-        '全屋净水系统': { name: '瑞美净水器', brand: 'Rheem', model: 'WP-1000', unitPrice: 10000, specs: '流量1000L/h，五级过滤' },
-        '中央空调系统': { name: '鲁德中央空调', brand: 'Ruud', model: 'AC-180', unitPrice: 20000, specs: '制冷量18kW，变频' }
+        中央热水系统: {
+          name: '瑞美中央热水器',
+          brand: 'Rheem',
+          model: 'RHS-200L',
+          unitPrice: 12000,
+          specs: '容量200L，功率3kW',
+        },
+        五恒恒温系统: {
+          name: '瑞美五恒主机',
+          brand: 'Rheem',
+          model: '5H-300',
+          unitPrice: 25000,
+          specs: '制冷量15kW，制热量18kW',
+        },
+        新风除湿系统: {
+          name: '瑞美新风机',
+          brand: 'Rheem',
+          model: 'XF-500',
+          unitPrice: 8000,
+          specs: '风量500m³/h，除湿量30L/天',
+        },
+        全屋净水系统: {
+          name: '瑞美净水器',
+          brand: 'Rheem',
+          model: 'WP-1000',
+          unitPrice: 10000,
+          specs: '流量1000L/h，五级过滤',
+        },
+        中央空调系统: {
+          name: '鲁德中央空调',
+          brand: 'Ruud',
+          model: 'AC-180',
+          unitPrice: 20000,
+          specs: '制冷量18kW，变频',
+        },
       };
 
       const equipment = equipmentMap[system.name];
@@ -328,7 +376,7 @@ class ValueBasedQuotationEngine {
           totalPrice: equipment.unitPrice,
           solvedPains: this.mapSystemToPains(system, painDiagnosis),
           valueExplanation: this.generateValueExplanation(system, painDiagnosis),
-          specifications: equipment.specs
+          specifications: equipment.specs,
         });
       }
     });
@@ -341,7 +389,7 @@ class ValueBasedQuotationEngine {
    */
   generateInsulationList(area, painDiagnosis) {
     const items = [];
-    const hasTempPain = painDiagnosis.allTags?.some(t => t.category === '温度体感痛点');
+    const hasTempPain = painDiagnosis.allTags?.some((t) => t.category === '温度体感痛点');
 
     if (hasTempPain) {
       items.push({
@@ -355,7 +403,7 @@ class ValueBasedQuotationEngine {
         totalPrice: Math.round(area * 0.5 * 1200),
         solvedPains: [{ name: '温度保持', category: '节能舒适' }],
         valueExplanation: '优质保温，减少能量损失，降低运行费用30%',
-        specifications: '厚度20mm，导热系数≤0.034W/(m·K)'
+        specifications: '厚度20mm，导热系数≤0.034W/(m·K)',
       });
     }
 
@@ -367,7 +415,9 @@ class ValueBasedQuotationEngine {
    */
   generatePipeList(area, solution) {
     const items = [];
-    const hasWaterSystem = solution.systems?.some(s => s.name.includes('热水') || s.name.includes('净水'));
+    const hasWaterSystem = solution.systems?.some(
+      (s) => s.name.includes('热水') || s.name.includes('净水')
+    );
 
     if (hasWaterSystem) {
       items.push({
@@ -381,7 +431,7 @@ class ValueBasedQuotationEngine {
         totalPrice: Math.round(area * 1.2 * 45),
         solvedPains: [{ name: '管路设计', category: '施工保障' }],
         valueExplanation: '优质管材+专业施工，确保系统稳定运行20年',
-        specifications: '壁厚3.2mm，镀锌层≥120g/m²'
+        specifications: '壁厚3.2mm，镀锌层≥120g/m²',
       });
     }
 
@@ -393,7 +443,9 @@ class ValueBasedQuotationEngine {
    */
   generateDuctList(area, solution) {
     const items = [];
-    const hasAirSystem = solution.systems?.some(s => s.name.includes('新风') || s.name.includes('空调'));
+    const hasAirSystem = solution.systems?.some(
+      (s) => s.name.includes('新风') || s.name.includes('空调')
+    );
 
     if (hasAirSystem) {
       items.push({
@@ -407,7 +459,7 @@ class ValueBasedQuotationEngine {
         totalPrice: Math.round(area * 0.8 * 80),
         solvedPains: [{ name: '风路设计', category: '施工保障' }],
         valueExplanation: '优质风管，低阻力，低噪音',
-        specifications: '厚度0.5mm，镀锌层≥120g/m²'
+        specifications: '厚度0.5mm，镀锌层≥120g/m²',
       });
     }
 
@@ -418,19 +470,21 @@ class ValueBasedQuotationEngine {
    * 生成支吊架清单
    */
   generateSupportList(area) {
-    return [{
-      category: '支吊架',
-      name: '角钢支架',
-      brand: '友发',
-      model: 'L40×4',
-      quantity: Math.round(area * 0.3),
-      unit: '套',
-      unitPrice: 150,
-      totalPrice: Math.round(area * 0.3 * 150),
-      solvedPains: [{ name: '安装稳固', category: '施工保障' }],
-      valueExplanation: '标准支架，除锈刷漆，防腐耐用',
-      specifications: '角钢40×4mm，热镀锌'
-    }];
+    return [
+      {
+        category: '支吊架',
+        name: '角钢支架',
+        brand: '友发',
+        model: 'L40×4',
+        quantity: Math.round(area * 0.3),
+        unit: '套',
+        unitPrice: 150,
+        totalPrice: Math.round(area * 0.3 * 150),
+        solvedPains: [{ name: '安装稳固', category: '施工保障' }],
+        valueExplanation: '标准支架，除锈刷漆，防腐耐用',
+        specifications: '角钢40×4mm，热镀锌',
+      },
+    ];
   }
 
   /**
@@ -438,7 +492,7 @@ class ValueBasedQuotationEngine {
    */
   generateCopperList(area, solution) {
     const items = [];
-    const hasACSystem = solution.systems?.some(s => s.name.includes('空调'));
+    const hasACSystem = solution.systems?.some((s) => s.name.includes('空调'));
 
     if (hasACSystem) {
       items.push({
@@ -452,7 +506,7 @@ class ValueBasedQuotationEngine {
         totalPrice: Math.round(area * 0.8 * 65),
         solvedPains: [{ name: '制冷传输', category: '系统性能' }],
         valueExplanation: '优质铜管，高导热，耐腐蚀',
-        specifications: '外径9.52mm，壁厚0.8mm，TP2材质'
+        specifications: '外径9.52mm，壁厚0.8mm，TP2材质',
       });
     }
 
@@ -463,19 +517,21 @@ class ValueBasedQuotationEngine {
    * 生成水管件清单
    */
   generateFittingList(area) {
-    return [{
-      category: '水管件',
-      name: '阀门配件套装',
-      brand: '伟星',
-      model: 'DN25',
-      quantity: Math.round(area * 0.2),
-      unit: '套',
-      unitPrice: 200,
-      totalPrice: Math.round(area * 0.2 * 200),
-      solvedPains: [{ name: '控制调节', category: '系统性能' }],
-      valueExplanation: '优质阀门，密封性好，操作灵活',
-      specifications: '含球阀、截止阀、止回阀各1个'
-    }];
+    return [
+      {
+        category: '水管件',
+        name: '阀门配件套装',
+        brand: '伟星',
+        model: 'DN25',
+        quantity: Math.round(area * 0.2),
+        unit: '套',
+        unitPrice: 200,
+        totalPrice: Math.round(area * 0.2 * 200),
+        solvedPains: [{ name: '控制调节', category: '系统性能' }],
+        valueExplanation: '优质阀门，密封性好，操作灵活',
+        specifications: '含球阀、截止阀、止回阀各1个',
+      },
+    ];
   }
 
   /**
@@ -483,7 +539,7 @@ class ValueBasedQuotationEngine {
    */
   generateWaterEquipmentList(solution) {
     const items = [];
-    const hasWaterSystem = solution.systems?.some(s => s.name.includes('热水'));
+    const hasWaterSystem = solution.systems?.some((s) => s.name.includes('热水'));
 
     if (hasWaterSystem) {
       items.push({
@@ -497,7 +553,7 @@ class ValueBasedQuotationEngine {
         totalPrice: 2500,
         solvedPains: [{ name: '水循环', category: '系统性能' }],
         valueExplanation: '高效循环，低噪音，长寿命',
-        specifications: '流量3m³/h，扬程8m，功率0.25kW'
+        specifications: '流量3m³/h，扬程8m，功率0.25kW',
       });
     }
 
@@ -509,7 +565,9 @@ class ValueBasedQuotationEngine {
    */
   generateAirComponentList(area, solution) {
     const items = [];
-    const hasAirSystem = solution.systems?.some(s => s.name.includes('新风') || s.name.includes('空调'));
+    const hasAirSystem = solution.systems?.some(
+      (s) => s.name.includes('新风') || s.name.includes('空调')
+    );
 
     if (hasAirSystem) {
       items.push({
@@ -523,7 +581,7 @@ class ValueBasedQuotationEngine {
         totalPrice: Math.round(area * 0.1 * 180),
         solvedPains: [{ name: '气流分布', category: '舒适度' }],
         valueExplanation: '均匀送风，低噪音，美观大方',
-        specifications: '含风口、风阀、软接各1个'
+        specifications: '含风口、风阀、软接各1个',
       });
     }
 
@@ -534,19 +592,21 @@ class ValueBasedQuotationEngine {
    * 生成电系统清单
    */
   generateElectricalList(area) {
-    return [{
-      category: '电系统',
-      name: '配电箱',
-      brand: '正泰',
-      model: 'PZ30',
-      quantity: 1,
-      unit: '台',
-      unitPrice: 1200,
-      totalPrice: 1200,
-      solvedPains: [{ name: '电源控制', category: '安全保障' }],
-      valueExplanation: '专业配电，安全可靠',
-      specifications: '12回路，含断路器'
-    }];
+    return [
+      {
+        category: '电系统',
+        name: '配电箱',
+        brand: '正泰',
+        model: 'PZ30',
+        quantity: 1,
+        unit: '台',
+        unitPrice: 1200,
+        totalPrice: 1200,
+        solvedPains: [{ name: '电源控制', category: '安全保障' }],
+        valueExplanation: '专业配电，安全可靠',
+        specifications: '12回路，含断路器',
+      },
+    ];
   }
 
   /**
@@ -566,7 +626,7 @@ class ValueBasedQuotationEngine {
       totalPrice: 2000,
       solvedPains: [{ name: '系统调试', category: '服务保障' }],
       valueExplanation: '专业调试，确保系统正常运行',
-      specifications: '含调试、验收、培训'
+      specifications: '含调试、验收、培训',
     });
 
     items.push({
@@ -580,7 +640,7 @@ class ValueBasedQuotationEngine {
       totalPrice: 1000,
       solvedPains: [{ name: '设备运输', category: '服务保障' }],
       valueExplanation: '专业运输，确保设备安全',
-      specifications: '含装卸、搬运、保险'
+      specifications: '含装卸、搬运、保险',
     });
 
     return items;
@@ -593,20 +653,22 @@ class ValueBasedQuotationEngine {
     const area = roomProfile.area || 100;
     const systemCount = solution.systems?.length || 1;
 
-    return [{
-      category: '专业服务',
-      name: '设计安装服务',
-      products: ['现场测量', '方案设计', '专业安装', '调试验收'],
-      basePrice: Math.round(area * 50 + systemCount * 1000),
-      solvedPains: [{ name: '专业服务', category: '质量保障' }],
-      valueExplanation: '瑞美认证工程师，标准化施工，2年质保终身维护',
-      costBreakdown: { 
-        equipment: 0, 
-        materials: 0, 
-        labor: Math.round(area * 50 + systemCount * 1000),
-        note: '含设计费+安装费' 
-      }
-    }];
+    return [
+      {
+        category: '专业服务',
+        name: '设计安装服务',
+        products: ['现场测量', '方案设计', '专业安装', '调试验收'],
+        basePrice: Math.round(area * 50 + systemCount * 1000),
+        solvedPains: [{ name: '专业服务', category: '质量保障' }],
+        valueExplanation: '瑞美认证工程师，标准化施工，2年质保终身维护',
+        costBreakdown: {
+          equipment: 0,
+          materials: 0,
+          labor: Math.round(area * 50 + systemCount * 1000),
+          note: '含设计费+安装费',
+        },
+      },
+    ];
   }
 
   /**
@@ -643,12 +705,12 @@ class ValueBasedQuotationEngine {
         // 检查毛利保护
         const discountedTotal = subtotal - totalDiscount - discountAmount;
         const margin = (discountedTotal - this.estimateCost(subtotal)) / discountedTotal;
-        
+
         if (margin >= this.marginSettings.minMargin) {
           appliedPromotions.push({
             name: rule.name,
             description: rule.description,
-            discount: discountAmount
+            discount: discountAmount,
           });
           totalDiscount += discountAmount;
         }
@@ -658,7 +720,7 @@ class ValueBasedQuotationEngine {
     return {
       appliedPromotions,
       totalDiscount,
-      note: '促销已自动应用，确保经销商合理毛利'
+      note: '促销已自动应用，确保经销商合理毛利',
     };
   }
 
@@ -674,8 +736,8 @@ class ValueBasedQuotationEngine {
    */
   countSolvedPains(items) {
     const uniquePains = new Set();
-    items.forEach(item => {
-      item.solvedPains?.forEach(pain => uniquePains.add(pain.name));
+    items.forEach((item) => {
+      item.solvedPains?.forEach((pain) => uniquePains.add(pain.name));
     });
     return uniquePains.size;
   }
@@ -686,7 +748,7 @@ class ValueBasedQuotationEngine {
   calculatePainCoverage(painDiagnosis, items) {
     const totalPains = painDiagnosis.allTags?.length || 0;
     const solvedPains = this.countSolvedPains(items);
-    return totalPains > 0 ? Math.round(solvedPains / totalPains * 100) : 0;
+    return totalPains > 0 ? Math.round((solvedPains / totalPains) * 100) : 0;
   }
 
   /**
@@ -695,7 +757,7 @@ class ValueBasedQuotationEngine {
   generateFinancingOptions(total) {
     return [
       { months: 12, monthly: Math.round(total / 12), note: '12期免息' },
-      { months: 24, monthly: Math.round(total / 24 * 1.05), note: '24期低息' }
+      { months: 24, monthly: Math.round((total / 24) * 1.05), note: '24期低息' },
     ];
   }
 
@@ -704,16 +766,20 @@ class ValueBasedQuotationEngine {
    */
   generateValueHighlights(items, painDiagnosis) {
     const highlights = [];
-    
+
     // 痛点解决亮点
     const solvedCount = this.countSolvedPains(items);
     const totalPains = painDiagnosis.allTags?.length || 0;
     if (totalPains > 0) {
-      highlights.push(`✓ 解决${solvedCount}/${totalPains}个居住痛点，覆盖率${Math.round(solvedCount/totalPains*100)}%`);
+      highlights.push(
+        `✓ 解决${solvedCount}/${totalPains}个居住痛点，覆盖率${Math.round((solvedCount / totalPains) * 100)}%`
+      );
     }
 
     // 系统联动亮点
-    const systemCount = items.filter(i => i.category !== '基础材料' && i.category !== '专业服务').length;
+    const systemCount = items.filter(
+      (i) => i.category !== '基础材料' && i.category !== '专业服务'
+    ).length;
     if (systemCount > 1) {
       highlights.push(`✓ ${systemCount}大系统智能联动，统一控制更便捷`);
     }
@@ -734,7 +800,7 @@ class ValueBasedQuotationEngine {
       energySaving: '每年节省能耗费用约2000元',
       timeSaving: '售后维护一次搞定，省时省心',
       valueAdded: '房屋增值约5-8%',
-      healthBenefit: '空气质量达到WHO标准'
+      healthBenefit: '空气质量达到WHO标准',
     };
   }
 
@@ -750,8 +816,8 @@ class ValueBasedQuotationEngine {
         { type: 'summary', content: quote.painSummary },
         { type: 'details', content: quote.items },
         { type: 'total', content: { price: quote.finalTotal, promotions: quote.promotions } },
-        { type: 'value', content: quote.valueHighlights }
-      ]
+        { type: 'value', content: quote.valueHighlights },
+      ],
     };
   }
 }

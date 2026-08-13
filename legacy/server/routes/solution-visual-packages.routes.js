@@ -6,11 +6,13 @@ const { getRuntimeEngine } = require('../modules/runtimeEngineAccess');
 function createSolutionVisualPackagesRouter(options = {}) {
   const router = express.Router();
   const threeTier = options.threeTier || getRuntimeEngine('threeTier', options);
-  const service = options.service || new SolutionVisualPackageService({
-    drawingRenderer: options.drawingRenderer || getRuntimeEngine('drawingSvgRenderer', options),
-    renderer3D: options.renderer3D || getRuntimeEngine('renderer3D', options),
-    now: options.now
-  });
+  const service =
+    options.service ||
+    new SolutionVisualPackageService({
+      drawingRenderer: options.drawingRenderer || getRuntimeEngine('drawingSvgRenderer', options),
+      renderer3D: options.renderer3D || getRuntimeEngine('renderer3D', options),
+      now: options.now,
+    });
 
   function ensureResult(body = {}) {
     if (body.result && body.result.solutions) return body.result;

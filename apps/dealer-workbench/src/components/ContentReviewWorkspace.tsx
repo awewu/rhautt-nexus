@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
-import { AlertCircle, CheckCircle2, Eye, FileText, RefreshCw, ShieldCheck, XCircle } from 'lucide-react';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Eye,
+  FileText,
+  RefreshCw,
+  ShieldCheck,
+  XCircle,
+} from 'lucide-react';
 import { PageHeader, useToast } from '@rhautt/ui';
 import { content } from '../lib/api';
 
@@ -45,7 +53,10 @@ const REJECTION_REASONS = [
 ];
 
 function factGatePassed(row: ContentReviewRow) {
-  return Boolean((row.factRefs || []).length) && (row.factRefs || []).every((ref) => ref.id && ref.verified);
+  return (
+    Boolean((row.factRefs || []).length) &&
+    (row.factRefs || []).every((ref) => ref.id && ref.verified)
+  );
 }
 
 function factSummary(row: ContentReviewRow) {
@@ -74,11 +85,20 @@ export default function ContentReviewWorkspace() {
     if (!selectedId || !rows.some((row) => row.id === selectedId)) setSelectedId(rows[0].id);
   }, [rows, selectedId]);
 
-  async function decide(id: string, decision: 'approved' | 'rejected', data: Record<string, unknown> = {}) {
+  async function decide(
+    id: string,
+    decision: 'approved' | 'rejected',
+    data: Record<string, unknown> = {}
+  ) {
     setReviewBusy(true);
     try {
       await content.decide(id, decision, data);
-      toast(decision === 'approved' ? '已核准，回到内容工厂后可进入发布检查' : '已驳回，内容回到工厂处理', 'success');
+      toast(
+        decision === 'approved'
+          ? '已核准，回到内容工厂后可进入发布检查'
+          : '已驳回，内容回到工厂处理',
+        'success'
+      );
       setRejectOpen(false);
       setRejectForm({ rejectionReason: 'fact_missing', reviewNote: '' });
       review.mutate();
@@ -111,7 +131,11 @@ export default function ContentReviewWorkspace() {
             <p className="t-label">待审核队列</p>
             <h2>来自内容工厂的送审稿</h2>
           </div>
-          <button className="btn btn-outline btn-sm" onClick={() => review.mutate()} disabled={review.isLoading}>
+          <button
+            className="btn btn-outline btn-sm"
+            onClick={() => review.mutate()}
+            disabled={review.isLoading}
+          >
             <RefreshCw size={14} className={review.isLoading ? 'animate-spin' : undefined} />
             刷新
           </button>
@@ -142,7 +166,15 @@ export default function ContentReviewWorkspace() {
                 const factsOk = factGatePassed(row);
                 const active = selected?.id === row.id;
                 return (
-                  <button key={row.id} type="button" className={`content-review-item ${active ? 'is-selected' : ''}`} onClick={() => { setSelectedId(row.id); setRejectOpen(false); }}>
+                  <button
+                    key={row.id}
+                    type="button"
+                    className={`content-review-item ${active ? 'is-selected' : ''}`}
+                    onClick={() => {
+                      setSelectedId(row.id);
+                      setRejectOpen(false);
+                    }}
+                  >
                     <div className="content-review-item__main">
                       <div className="content-review-item__title">
                         <FileText size={16} />
@@ -164,10 +196,19 @@ export default function ContentReviewWorkspace() {
               <aside className="content-review-preview">
                 <div className="content-review-preview__head">
                   <div>
-                    <p className="t-label"><Eye size={13} />审核预览</p>
+                    <p className="t-label">
+                      <Eye size={13} />
+                      审核预览
+                    </p>
                     <h3>{selected.title}</h3>
                   </div>
-                  <span className={factGatePassed(selected) ? 'status-pill status-pill-success' : 'status-pill status-pill-warning'}>
+                  <span
+                    className={
+                      factGatePassed(selected)
+                        ? 'status-pill status-pill-success'
+                        : 'status-pill status-pill-warning'
+                    }
+                  >
                     {factSummary(selected)}
                   </span>
                 </div>
@@ -175,7 +216,9 @@ export default function ContentReviewWorkspace() {
                 <div className="content-review-preview__meta">
                   <span>{KIND_LABEL[selected.kind || ''] || selected.kind || '内容'}</span>
                   <span>{selected.channel || '未指定渠道'}</span>
-                  {selected.sourceLabel || selected.sourceType ? <span>来源：{selected.sourceLabel || selected.sourceType}</span> : null}
+                  {selected.sourceLabel || selected.sourceType ? (
+                    <span>来源：{selected.sourceLabel || selected.sourceType}</span>
+                  ) : null}
                 </div>
 
                 <div className="content-review-preview__body">
@@ -183,28 +226,61 @@ export default function ContentReviewWorkspace() {
                 </div>
 
                 <div className="content-review-facts">
-                  <strong><ShieldCheck size={14} />事实源</strong>
-                  {(selected.factRefs || []).length ? selected.factRefs!.map((ref) => (
-                    <span key={`${ref.id}-${ref.label}`} className={ref.verified ? 'is-ok' : 'is-warning'}>
-                      {ref.label || ref.id}{ref.verified ? ' · 已校验' : ' · 待校验'}
-                    </span>
-                  )) : <span className="is-warning">未绑定事实源</span>}
+                  <strong>
+                    <ShieldCheck size={14} />
+                    事实源
+                  </strong>
+                  {(selected.factRefs || []).length ? (
+                    selected.factRefs!.map((ref) => (
+                      <span
+                        key={`${ref.id}-${ref.label}`}
+                        className={ref.verified ? 'is-ok' : 'is-warning'}
+                      >
+                        {ref.label || ref.id}
+                        {ref.verified ? ' · 已校验' : ' · 待校验'}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="is-warning">未绑定事实源</span>
+                  )}
                 </div>
 
                 {rejectOpen ? (
                   <div className="content-review-decision">
-                    <select className="input" value={rejectForm.rejectionReason} onChange={(event) => setRejectForm({ ...rejectForm, rejectionReason: event.target.value })}>
-                      {REJECTION_REASONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                    <select
+                      className="input"
+                      value={rejectForm.rejectionReason}
+                      onChange={(event) =>
+                        setRejectForm({ ...rejectForm, rejectionReason: event.target.value })
+                      }
+                    >
+                      {REJECTION_REASONS.map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
                     </select>
                     <textarea
                       className="textarea"
                       value={rejectForm.reviewNote}
-                      onChange={(event) => setRejectForm({ ...rejectForm, reviewNote: event.target.value })}
+                      onChange={(event) =>
+                        setRejectForm({ ...rejectForm, reviewNote: event.target.value })
+                      }
                       placeholder="写清楚需要怎么改，例如：缺少产品手册引用，请补充事实源后重新提交。"
                     />
                     <div className="content-review-item__actions">
-                      <button className="btn btn-outline btn-sm" onClick={() => setRejectOpen(false)} disabled={reviewBusy}>取消</button>
-                      <button className="btn btn-brand btn-sm" onClick={rejectSelected} disabled={reviewBusy || !rejectForm.reviewNote.trim()}>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => setRejectOpen(false)}
+                        disabled={reviewBusy}
+                      >
+                        取消
+                      </button>
+                      <button
+                        className="btn btn-brand btn-sm"
+                        onClick={rejectSelected}
+                        disabled={reviewBusy || !rejectForm.reviewNote.trim()}
+                      >
                         <XCircle size={14} />
                         驳回并退回修改
                       </button>
@@ -212,11 +288,19 @@ export default function ContentReviewWorkspace() {
                   </div>
                 ) : (
                   <div className="content-review-item__actions">
-                    <button className="btn btn-brand btn-sm" onClick={() => decide(selected.id, 'approved')} disabled={reviewBusy}>
+                    <button
+                      className="btn btn-brand btn-sm"
+                      onClick={() => decide(selected.id, 'approved')}
+                      disabled={reviewBusy}
+                    >
                       <CheckCircle2 size={14} />
                       核准
                     </button>
-                    <button className="btn btn-outline btn-sm" onClick={() => setRejectOpen(true)} disabled={reviewBusy}>
+                    <button
+                      className="btn btn-outline btn-sm"
+                      onClick={() => setRejectOpen(true)}
+                      disabled={reviewBusy}
+                    >
                       <XCircle size={14} />
                       驳回
                     </button>

@@ -1,55 +1,97 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import type { JwtPayload } from '../auth/auth.service';
 import { Permissions } from '../common/permissions.decorator';
 import { Roles } from '../common/roles.decorator';
 import { ProductCatalogService } from './product-catalog.service';
 import { ProductMgmtService } from './product-mgmt.service';
-import { requireProductPermission, requireProductWrite, resolveProductTenant } from './product-catalog-access';
+import {
+  requireProductPermission,
+  requireProductWrite,
+  resolveProductTenant,
+} from './product-catalog-access';
 
-interface AuthRequest { user: JwtPayload; }
+interface AuthRequest {
+  user: JwtPayload;
+}
 
 @UseGuards(AuthGuard)
 @Controller('product-catalog')
 export class ProductCatalogController {
-  constructor(private readonly svc: ProductCatalogService, private readonly mgmt: ProductMgmtService) {}
+  constructor(
+    private readonly svc: ProductCatalogService,
+    private readonly mgmt: ProductMgmtService
+  ) {}
 
   // ── 4.4 生命周期 / 4.5 NPI 上市 / 4.10 卖点 / 4.17 定价审批(毛利闸) ──
   @Patch('devices/:id/lifecycle')
   @Permissions('product.catalog.update')
-  setLifecycle(@Req() req: AuthRequest, @Param('id') id: string, @Body('stage') stage: string) { return this.mgmt.setLifecycleStage(req.user, id, stage); }
+  setLifecycle(@Req() req: AuthRequest, @Param('id') id: string, @Body('stage') stage: string) {
+    return this.mgmt.setLifecycleStage(req.user, id, stage);
+  }
 
   @Post('launches')
   @Permissions('product.catalog.update')
-  createLaunch(@Req() req: AuthRequest, @Body() b: any) { return this.mgmt.createLaunch(req.user, b); }
+  createLaunch(@Req() req: AuthRequest, @Body() b: any) {
+    return this.mgmt.createLaunch(req.user, b);
+  }
 
   @Get('launches')
   @Permissions('product.catalog.read')
-  listLaunches(@Req() req: AuthRequest) { return this.mgmt.listLaunches(req.user); }
+  listLaunches(@Req() req: AuthRequest) {
+    return this.mgmt.listLaunches(req.user);
+  }
 
   @Patch('launches/:id/status')
   @Permissions('product.catalog.update')
-  updateLaunch(@Req() req: AuthRequest, @Param('id') id: string, @Body('status') status: string) { return this.mgmt.updateLaunchStatus(req.user, id, status); }
+  updateLaunch(@Req() req: AuthRequest, @Param('id') id: string, @Body('status') status: string) {
+    return this.mgmt.updateLaunchStatus(req.user, id, status);
+  }
 
   @Post('selling-points')
   @Permissions('product.catalog.update')
-  addSellingPoint(@Req() req: AuthRequest, @Body() b: any) { return this.mgmt.addSellingPoint(req.user, b); }
+  addSellingPoint(@Req() req: AuthRequest, @Body() b: any) {
+    return this.mgmt.addSellingPoint(req.user, b);
+  }
 
   @Get('selling-points')
   @Permissions('product.catalog.read')
-  listSellingPoints(@Req() req: AuthRequest, @Query('productId') productId?: string) { return this.mgmt.listSellingPoints(req.user, productId); }
+  listSellingPoints(@Req() req: AuthRequest, @Query('productId') productId?: string) {
+    return this.mgmt.listSellingPoints(req.user, productId);
+  }
 
   @Post('pricing-policies')
   @Permissions('product.catalog.update')
-  submitPricing(@Req() req: AuthRequest, @Body() b: any) { return this.mgmt.submitPricingPolicy(req.user, b); }
+  submitPricing(@Req() req: AuthRequest, @Body() b: any) {
+    return this.mgmt.submitPricingPolicy(req.user, b);
+  }
 
   @Get('pricing-policies')
   @Permissions('product.catalog.read')
-  listPricing(@Req() req: AuthRequest) { return this.mgmt.listPricingPolicies(req.user); }
+  listPricing(@Req() req: AuthRequest) {
+    return this.mgmt.listPricingPolicies(req.user);
+  }
 
   @Post('pricing-policies/:id/decision')
   @Permissions('product.catalog.update')
-  decidePricing(@Req() req: AuthRequest, @Param('id') id: string, @Body() b: { decision: 'approved' | 'rejected'; note?: string }) { return this.mgmt.decidePricingPolicy(req.user, id, b?.decision, b?.note); }
+  decidePricing(
+    @Req() req: AuthRequest,
+    @Param('id') id: string,
+    @Body() b: { decision: 'approved' | 'rejected'; note?: string }
+  ) {
+    return this.mgmt.decidePricingPolicy(req.user, id, b?.decision, b?.note);
+  }
 
   @Get('taxonomy')
   @Permissions('product.catalog.read')
@@ -108,13 +150,12 @@ export class ProductCatalogController {
   @Roles('platform_admin', 'hq_admin', 'brand_admin')
   @Permissions('product.catalog.update', 'product.catalog.publish')
   @Patch('devices/:id')
-  update(
-    @Req() req: AuthRequest,
-    @Param('id') id: string,
-    @Body() body: Record<string, unknown>,
-  ) {
+  update(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: Record<string, unknown>) {
     const updatesStatus = Object.prototype.hasOwnProperty.call(body, 'status');
-    requireProductPermission(req.user, updatesStatus ? 'product.catalog.publish' : 'product.catalog.update');
+    requireProductPermission(
+      req.user,
+      updatesStatus ? 'product.catalog.publish' : 'product.catalog.update'
+    );
     const tenantId = resolveProductTenant(req.user, body.tenantId);
     return this.svc.update(id, tenantId, body, req.user);
   }
@@ -131,14 +172,22 @@ export class ProductCatalogController {
   // ── L7 营销供给层（i18n + SEO/GEO + 富营销内容）· 受保护写/读 ──────────────
   @Get('devices/:id/content')
   @Permissions('product.content.read')
-  listContent(@Req() req: AuthRequest, @Param('id') id: string, @Query('tenantId') requested?: string) {
+  listContent(
+    @Req() req: AuthRequest,
+    @Param('id') id: string,
+    @Query('tenantId') requested?: string
+  ) {
     return this.svc.listContent(id, resolveProductTenant(req.user, requested));
   }
 
   @Post('devices/:id/content')
   @Roles('platform_admin', 'hq_admin', 'brand_admin')
   @Permissions('product.content.create', 'product.content.update')
-  upsertContent(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: Record<string, unknown>) {
+  upsertContent(
+    @Req() req: AuthRequest,
+    @Param('id') id: string,
+    @Body() body: Record<string, unknown>
+  ) {
     const tenantId = resolveProductTenant(req.user, body.tenantId);
     return this.svc.upsertContent(id, { ...body, tenantId });
   }
@@ -151,7 +200,7 @@ export class ProductCatalogController {
     @Req() req: AuthRequest,
     @Param('id') id: string,
     @Param('locale') locale: string,
-    @Body() body: Record<string, unknown>,
+    @Body() body: Record<string, unknown>
   ) {
     const tenantId = resolveProductTenant(req.user, body.tenantId);
     return this.svc.transitionContent(id, locale, String(body.action || ''), {
@@ -173,21 +222,33 @@ export class ProductCatalogController {
   // ── A4 i18n 覆盖率报表：哪些 SKU 缺哪些语言（运营翻译缺口视图）──────────────
   @Get('content/coverage')
   @Permissions('product.content.read')
-  contentCoverage(@Req() req: AuthRequest, @Query('tenantId') requested?: string, @Query('brand') brand?: string) {
+  contentCoverage(
+    @Req() req: AuthRequest,
+    @Query('tenantId') requested?: string,
+    @Query('brand') brand?: string
+  ) {
     return this.svc.contentCoverage(resolveProductTenant(req.user, requested), brand);
   }
 
   // ── 产品关系：配件/兼容/替代/交叉·向上销售/对比 ────────────────────────────
   @Get('devices/:id/relations')
   @Permissions('product.content.read')
-  listRelations(@Req() req: AuthRequest, @Param('id') id: string, @Query('tenantId') requested?: string) {
+  listRelations(
+    @Req() req: AuthRequest,
+    @Param('id') id: string,
+    @Query('tenantId') requested?: string
+  ) {
     return this.svc.listRelations(id, resolveProductTenant(req.user, requested));
   }
 
   @Post('devices/:id/relations')
   @Roles('platform_admin', 'hq_admin', 'brand_admin')
   @Permissions('product.content.create', 'product.content.update')
-  upsertRelation(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: Record<string, unknown>) {
+  upsertRelation(
+    @Req() req: AuthRequest,
+    @Param('id') id: string,
+    @Body() body: Record<string, unknown>
+  ) {
     const tenantId = resolveProductTenant(req.user, body.tenantId);
     return this.svc.upsertRelation(id, { ...body, tenantId });
   }
@@ -195,7 +256,11 @@ export class ProductCatalogController {
   @Delete('relations/:relId')
   @Roles('platform_admin', 'hq_admin', 'brand_admin')
   @Permissions('product.content.delete')
-  deleteRelation(@Req() req: AuthRequest, @Param('relId') relId: string, @Query('tenantId') requested?: string) {
+  deleteRelation(
+    @Req() req: AuthRequest,
+    @Param('relId') relId: string,
+    @Query('tenantId') requested?: string
+  ) {
     return this.svc.deleteRelation(relId, resolveProductTenant(req.user, requested));
   }
 }

@@ -13,22 +13,17 @@ const {
   InternalError,
   errorHandler,
   notFoundHandler,
-  asyncHandler
+  asyncHandler,
 } = require('./error-handler');
 
-const {
-  rateLimitMiddleware,
-  apiLimiter,
-  strictLimiter,
-  loginLimiter
-} = require('./rate-limiter');
+const { rateLimitMiddleware, apiLimiter, strictLimiter, loginLimiter } = require('./rate-limiter');
 
 const {
   requestTracer,
   performanceMonitor,
   accessLogger,
   getRequestLogs,
-  getPerformanceStats
+  getPerformanceStats,
 } = require('./request-logger');
 
 module.exports = {
@@ -56,5 +51,5 @@ module.exports = {
   performanceMonitor,
   accessLogger,
   getRequestLogs,
-  getPerformanceStats
+  getPerformanceStats,
 };

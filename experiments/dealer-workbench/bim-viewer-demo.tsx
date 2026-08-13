@@ -3,10 +3,15 @@
 import dynamic from 'next/dynamic';
 import { PageHeader } from '@rhautt/ui';
 
-const BimIfcViewer = dynamic(() => import('../../../apps/dealer-workbench/src/components/BimIfcViewer'), {
-  ssr: false,
-  loading: () => <div style={{ padding: 32, textAlign: 'center', color: '#888' }}>加载 BIM 查看器…</div>,
-});
+const BimIfcViewer = dynamic(
+  () => import('../../../apps/dealer-workbench/src/components/BimIfcViewer'),
+  {
+    ssr: false,
+    loading: () => (
+      <div style={{ padding: 32, textAlign: 'center', color: '#888' }}>加载 BIM 查看器…</div>
+    ),
+  }
+);
 
 export default function BimViewerDemoPage() {
   return (

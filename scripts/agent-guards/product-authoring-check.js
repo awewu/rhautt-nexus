@@ -28,8 +28,13 @@ const warnings = [];
 const checks = [];
 
 const abs = (rel) => path.join(ROOT, rel);
-function pass(name) { checks.push({ name, ok: true }); }
-function fail(name, detail) { checks.push({ name, ok: false, detail }); failures.push(`${name}: ${detail}`); }
+function pass(name) {
+  checks.push({ name, ok: true });
+}
+function fail(name, detail) {
+  checks.push({ name, ok: false, detail });
+  failures.push(`${name}: ${detail}`);
+}
 
 if (!fs.existsSync(abs(SEED_SCRIPT))) {
   fail('exists', `${SEED_SCRIPT} 缺失`);
@@ -37,35 +42,54 @@ if (!fs.existsSync(abs(SEED_SCRIPT))) {
   const src = fs.readFileSync(abs(SEED_SCRIPT), 'utf8');
 
   // 1. 只经 D2 upsert 端点写入（带鉴权）。
-  const hitsUpsertEndpoint = /product-catalog\/devices/.test(src) && /method:\s*['"]POST['"]/i.test(src);
+  const hitsUpsertEndpoint =
+    /product-catalog\/devices/.test(src) && /method:\s*['"]POST['"]/i.test(src);
   if (hitsUpsertEndpoint) pass('1.through-d2-upsert-gate');
-  else fail('1.through-d2-upsert-gate', '未见对 product-catalog/devices 的 POST（须经 D2 upsert 闸）');
+  else
+    fail('1.through-d2-upsert-gate', '未见对 product-catalog/devices 的 POST（须经 D2 upsert 闸）');
   if (/Bearer|jwt\.sign\s*\(/.test(src)) pass('1b.authenticated');
   else fail('1b.authenticated', '写入未携带鉴权令牌（Bearer / jwt.sign）');
 
   // 2. 不得直连 DB 绕过 D2。
-  const dbBypass = /from\s+['"]pg['"]|require\(\s*['"]pg['"]\s*\)|from\s+['"]typeorm['"]|\bnew\s+DataSource\b|\bnew\s+Pool\b/.exec(src);
+  const dbBypass =
+    /from\s+['"]pg['"]|require\(\s*['"]pg['"]\s*\)|from\s+['"]typeorm['"]|\bnew\s+DataSource\b|\bnew\s+Pool\b/.exec(
+      src
+    );
   if (dbBypass) fail('2.no-db-bypass', `脚本疑似直连 DB 绕过 D2：${dbBypass[0]}`);
   else pass('2.no-db-bypass');
 
   // 3. 不得写 D2-录入字段。
   const authored = D2_AUTHORED_FIELDS.filter((f) => new RegExp(`\\b${f}\\b`).test(src));
-  if (authored.length) fail('3.no-authoring-d2-fields', `seed 不得写 D2 录入字段：${authored.join(', ')}（须由 product_manager 在 D2 录入）`);
+  if (authored.length)
+    fail(
+      '3.no-authoring-d2-fields',
+      `seed 不得写 D2 录入字段：${authored.join(', ')}（须由 product_manager 在 D2 录入）`
+    );
   else pass('3.no-authoring-d2-fields');
 
   // 4. 无破坏性动词。
   const destructive = /method:\s*['"](DELETE|PUT|PATCH)['"]/i.exec(src);
-  if (destructive) fail('4.no-destructive-verbs', `seed 使用了破坏性动词 ${destructive[1]}（只能 seed/upsert）`);
+  if (destructive)
+    fail('4.no-destructive-verbs', `seed 使用了破坏性动词 ${destructive[1]}（只能 seed/upsert）`);
   else pass('4.no-destructive-verbs');
 
   // 5. 门牌退役（模型B 第1律）：不得再出现 rhautt_shared 共享哨兵。
-  if (/rhautt_shared/.test(src)) fail('5.no-retired-sentinel', 'seed 仍含 rhautt_shared 共享哨兵门牌（模型B 已退役，产品门牌须为品牌运营租户 UUID）');
+  if (/rhautt_shared/.test(src))
+    fail(
+      '5.no-retired-sentinel',
+      'seed 仍含 rhautt_shared 共享哨兵门牌（模型B 已退役，产品门牌须为品牌运营租户 UUID）'
+    );
   else pass('5.no-retired-sentinel');
 
   // 6. UUID 门牌闸：写入门牌须来自 EVERHOT_TENANT_ID 且经 UUID 强校验后才铸令牌。
-  const hasUuidGate = /EVERHOT_TENANT_ID/.test(src) && /UUID_RE/.test(src) && /process\.exit\(1\)/.test(src);
+  const hasUuidGate =
+    /EVERHOT_TENANT_ID/.test(src) && /UUID_RE/.test(src) && /process\.exit\(1\)/.test(src);
   if (hasUuidGate) pass('6.uuid-tenant-gate');
-  else fail('6.uuid-tenant-gate', 'seed 未强校验产品门牌为品牌运营租户 UUID（须 EVERHOT_TENANT_ID + UUID_RE 校验 + 非法即退出）');
+  else
+    fail(
+      '6.uuid-tenant-gate',
+      'seed 未强校验产品门牌为品牌运营租户 UUID（须 EVERHOT_TENANT_ID + UUID_RE 校验 + 非法即退出）'
+    );
 }
 
 const summary = {
@@ -95,6 +119,8 @@ try {
   warnings.push(`evidence write failed: ${e.message}`);
 }
 
-console.log(`Product Authoring Check: checks = ${checks.length}, failures = ${failures.length}, warnings = ${warnings.length}`);
+console.log(
+  `Product Authoring Check: checks = ${checks.length}, failures = ${failures.length}, warnings = ${warnings.length}`
+);
 for (const f of failures) console.log(`- ${f}`);
 process.exit(failures.length ? 1 : 0);

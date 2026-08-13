@@ -21,7 +21,8 @@ function isAuthExpired(status: number, details: any): boolean {
 }
 
 function redirectToLogin(path: string, status: number, details: any) {
-  if (path === AUTH_LOGIN_PATH || typeof window === 'undefined' || !isAuthExpired(status, details)) return;
+  if (path === AUTH_LOGIN_PATH || typeof window === 'undefined' || !isAuthExpired(status, details))
+    return;
   if (window.location.pathname === '/') return;
 
   clearToken();
@@ -33,7 +34,7 @@ function redirectToLogin(path: string, status: number, details: any) {
 }
 
 export async function apiFetch(path: string, opts: RequestInit = {}) {
-  const token = typeof window !== 'undefined' ? (getToken() || localStorage.getItem('token')) : null;
+  const token = typeof window !== 'undefined' ? getToken() || localStorage.getItem('token') : null;
   const hasBody = opts.body !== undefined && opts.body !== null;
   let res: Response;
   try {
@@ -81,7 +82,10 @@ export const auth = {
   sendSms: (phone: string) =>
     apiFetch('/api/v2/auth/send-sms', { method: 'POST', body: JSON.stringify({ phone }) }),
   loginSms: (phone: string, smsCode: string) =>
-    apiFetch('/api/v2/auth/login-sms', { method: 'POST', body: JSON.stringify({ phone, smsCode }) }),
+    apiFetch('/api/v2/auth/login-sms', {
+      method: 'POST',
+      body: JSON.stringify({ phone, smsCode }),
+    }),
 };
 
 export const adminUsers = {
@@ -90,13 +94,29 @@ export const adminUsers = {
   create: (data: Record<string, unknown>) =>
     apiFetch('/api/v2/auth/admin/users', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: string, patch: Record<string, unknown>) =>
-    apiFetch('/api/v2/auth/admin/users/' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify(patch) }),
+    apiFetch('/api/v2/auth/admin/users/' + encodeURIComponent(id), {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
   resetPassword: (id: string, newPassword: string) =>
-    apiFetch('/api/v2/auth/admin/users/' + encodeURIComponent(id) + '/reset-password', { method: 'POST', body: JSON.stringify({ newPassword }) }),
+    apiFetch('/api/v2/auth/admin/users/' + encodeURIComponent(id) + '/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ newPassword }),
+    }),
   remove: (id: string) =>
     apiFetch('/api/v2/auth/admin/users/' + encodeURIComponent(id), { method: 'DELETE' }),
-  setRoles: (id: string, data: { roleIds: string[]; primaryRoleId?: string; scope?: { scopeType?: string; scopeDimension?: string | null; scopeRef?: string | null } }) =>
-    apiFetch('/api/v2/auth/admin/users/' + encodeURIComponent(id) + '/roles', { method: 'PUT', body: JSON.stringify(data) }),
+  setRoles: (
+    id: string,
+    data: {
+      roleIds: string[];
+      primaryRoleId?: string;
+      scope?: { scopeType?: string; scopeDimension?: string | null; scopeRef?: string | null };
+    }
+  ) =>
+    apiFetch('/api/v2/auth/admin/users/' + encodeURIComponent(id) + '/roles', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
   effectivePermissions: (id: string) =>
     apiFetch('/api/v2/auth/admin/users/' + encodeURIComponent(id) + '/effective-permissions'),
 };
@@ -107,9 +127,15 @@ export const adminRbac = {
   createRole: (data: Record<string, unknown>) =>
     apiFetch('/api/v2/auth/admin/roles', { method: 'POST', body: JSON.stringify(data) }),
   updateRole: (id: string, data: Record<string, unknown>) =>
-    apiFetch('/api/v2/auth/admin/roles/' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify(data) }),
+    apiFetch('/api/v2/auth/admin/roles/' + encodeURIComponent(id), {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
   setRolePermissions: (id: string, permissions: string[]) =>
-    apiFetch('/api/v2/auth/admin/roles/' + encodeURIComponent(id) + '/permissions', { method: 'PUT', body: JSON.stringify({ permissions }) }),
+    apiFetch('/api/v2/auth/admin/roles/' + encodeURIComponent(id) + '/permissions', {
+      method: 'PUT',
+      body: JSON.stringify({ permissions }),
+    }),
   businessUnits: () => apiFetch('/api/v2/auth/admin/business-units'),
 };
 
@@ -123,7 +149,9 @@ export const products = {
     apiFetch('/api/v2/product-catalog/devices?' + new URLSearchParams(query || {}).toString()),
   get: (id: string, query?: Record<string, string>) => {
     const qs = new URLSearchParams(query || {}).toString();
-    return apiFetch(`/api/v2/product-catalog/devices/${encodeURIComponent(id)}${qs ? `?${qs}` : ''}`);
+    return apiFetch(
+      `/api/v2/product-catalog/devices/${encodeURIComponent(id)}${qs ? `?${qs}` : ''}`
+    );
   },
   taxonomy: () => apiFetch('/api/v2/product-catalog/taxonomy'),
   create: (data: Record<string, unknown>) =>
@@ -135,7 +163,9 @@ export const products = {
     }),
   listContent: (id: string, query?: Record<string, string>) => {
     const qs = new URLSearchParams(query || {}).toString();
-    return apiFetch(`/api/v2/product-catalog/devices/${encodeURIComponent(id)}/content${qs ? `?${qs}` : ''}`);
+    return apiFetch(
+      `/api/v2/product-catalog/devices/${encodeURIComponent(id)}/content${qs ? `?${qs}` : ''}`
+    );
   },
   upsertContent: (id: string, data: Record<string, unknown>) =>
     apiFetch(`/api/v2/product-catalog/devices/${encodeURIComponent(id)}/content`, {
@@ -178,8 +208,7 @@ export const fileArtifacts = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-  getBase64: (id: string) =>
-    apiFetch(`/api/v2/file-artifact/${encodeURIComponent(id)}/base64`),
+  getBase64: (id: string) => apiFetch(`/api/v2/file-artifact/${encodeURIComponent(id)}/base64`),
   remove: (id: string) =>
     apiFetch(`/api/v2/file-artifact/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 };
@@ -209,13 +238,21 @@ export const wechatPublishing = {
       body: JSON.stringify({ status }),
     }),
   testConnection: (id: string) =>
-    apiFetch(`/api/v2/marketing/wechat/accounts/${encodeURIComponent(id)}/test-connection`, { method: 'POST' }),
+    apiFetch(`/api/v2/marketing/wechat/accounts/${encodeURIComponent(id)}/test-connection`, {
+      method: 'POST',
+    }),
   availableAccounts: (brandId: string) =>
     apiFetch(`/api/v2/marketing/wechat/accounts/available?brandId=${encodeURIComponent(brandId)}`),
   createReviewVersion: (data: Record<string, unknown>) =>
-    apiFetch('/api/v2/marketing/content-review-versions', { method: 'POST', body: JSON.stringify(data) }),
+    apiFetch('/api/v2/marketing/content-review-versions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   pendingReviews: (query?: Record<string, string>) =>
-    apiFetch('/api/v2/marketing/content-review-versions/pending?' + new URLSearchParams(query || {}).toString()),
+    apiFetch(
+      '/api/v2/marketing/content-review-versions/pending?' +
+        new URLSearchParams(query || {}).toString()
+    ),
   reviewDetail: (id: string) =>
     apiFetch(`/api/v2/marketing/content-review-versions/${encodeURIComponent(id)}`),
   approveReview: (id: string, comment?: string) =>
@@ -224,10 +261,13 @@ export const wechatPublishing = {
       body: JSON.stringify({ comment }),
     }),
   requestChanges: (id: string, reason: string) =>
-    apiFetch(`/api/v2/marketing/content-review-versions/${encodeURIComponent(id)}/request-changes`, {
-      method: 'POST',
-      body: JSON.stringify({ reason }),
-    }),
+    apiFetch(
+      `/api/v2/marketing/content-review-versions/${encodeURIComponent(id)}/request-changes`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
+      }
+    ),
   voidReview: (id: string, reason: string) =>
     apiFetch(`/api/v2/marketing/content-review-versions/${encodeURIComponent(id)}/void`, {
       method: 'POST',
@@ -268,10 +308,7 @@ export const brandSites = {
     apiFetch(`/api/v2/brand-sites/${encodeURIComponent(id)}/publish`, { method: 'POST' }),
   logo: (id: string, opts?: RequestInit) =>
     apiFetch(`/api/v2/brand-sites/${encodeURIComponent(id)}/logo`, opts),
-  uploadLogo: (
-    id: string,
-    data: { filename?: string; mimeType?: string; dataBase64?: string }
-  ) =>
+  uploadLogo: (id: string, data: { filename?: string; mimeType?: string; dataBase64?: string }) =>
     apiFetch(`/api/v2/brand-sites/${encodeURIComponent(id)}/logo`, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -287,16 +324,21 @@ export const siteBasicSettings = {
       body: JSON.stringify(data),
     }),
   updateSection: (siteCode: string, section: string, data: Record<string, unknown>) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/basic-settings/${encodeURIComponent(section)}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/basic-settings/${encodeURIComponent(section)}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }
+    ),
 };
 
 export const siteProductAssignments = {
   list: (siteCode: string, query?: Record<string, string>) => {
     const qs = new URLSearchParams(query || {}).toString();
-    return apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-assignments${qs ? `?${qs}` : ''}`);
+    return apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-assignments${qs ? `?${qs}` : ''}`
+    );
   },
   create: (siteCode: string, data: Record<string, unknown>) =>
     apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-assignments`, {
@@ -314,10 +356,13 @@ export const siteProductAssignments = {
       { method: 'POST' }
     ),
   batchPublish: (siteCode: string, items: Array<Record<string, unknown>>) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-assignments/batch/publish`, {
-      method: 'POST',
-      body: JSON.stringify({ items }),
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-assignments/batch/publish`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ items }),
+      }
+    ),
   batchHide: (siteCode: string, items: Array<Record<string, unknown>>) =>
     apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-assignments/batch/hide`, {
       method: 'POST',
@@ -341,8 +386,12 @@ export const siteProductCategories = {
     return apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-categories${qs}`);
   },
   suggestion: (siteCode: string, query: { productId: string; productTenantId?: string }) => {
-    const qs = new URLSearchParams(Object.fromEntries(Object.entries(query).filter(([, value]) => value))).toString();
-    return apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-categories/suggestion${qs ? `?${qs}` : ''}`);
+    const qs = new URLSearchParams(
+      Object.fromEntries(Object.entries(query).filter(([, value]) => value))
+    ).toString();
+    return apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-categories/suggestion${qs ? `?${qs}` : ''}`
+    );
   },
   create: (siteCode: string, data: Record<string, unknown>) =>
     apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-categories`, {
@@ -350,22 +399,31 @@ export const siteProductCategories = {
       body: JSON.stringify(data),
     }),
   updateById: (siteCode: string, id: string, data: Record<string, unknown>) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-categories/${encodeURIComponent(id)}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-categories/${encodeURIComponent(id)}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }
+    ),
   removeById: (siteCode: string, id: string, moveTo?: string) => {
     const query = new URLSearchParams();
     if (moveTo) query.set('moveTo', moveTo);
     const qs = query.toString();
-    return apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-categories/${encodeURIComponent(id)}${qs ? `?${qs}` : ''}`, {
-      method: 'DELETE',
-    });
+    return apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-categories/${encodeURIComponent(id)}${qs ? `?${qs}` : ''}`,
+      {
+        method: 'DELETE',
+      }
+    );
   },
   importEverhot: (siteCode: string) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-categories/import-everhot`, {
-      method: 'POST',
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-categories/import-everhot`,
+      {
+        method: 'POST',
+      }
+    ),
   update: (siteCode: string, data: Record<string, unknown>) =>
     apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-categories`, {
       method: 'PATCH',
@@ -374,9 +432,12 @@ export const siteProductCategories = {
   clear: (siteCode: string, category: string, moveTo?: string) => {
     const query = new URLSearchParams({ category });
     if (moveTo) query.set('moveTo', moveTo);
-    return apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-categories?${query.toString()}`, {
-      method: 'DELETE',
-    });
+    return apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/product-categories?${query.toString()}`,
+      {
+        method: 'DELETE',
+      }
+    );
   },
 };
 
@@ -394,7 +455,9 @@ export const publicSiteProducts = {
 export const siteNews = {
   list: (siteCode: string, query?: Record<string, string>) => {
     const qs = new URLSearchParams(query || {}).toString();
-    return apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/news${qs ? `?${qs}` : ''}`);
+    return apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/news${qs ? `?${qs}` : ''}`
+    );
   },
   create: (siteCode: string, data: Record<string, unknown>) =>
     apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/news`, {
@@ -402,33 +465,50 @@ export const siteNews = {
       body: JSON.stringify(data),
     }),
   update: (siteCode: string, articleId: string, data: Record<string, unknown>) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/news/${encodeURIComponent(articleId)}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/news/${encodeURIComponent(articleId)}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }
+    ),
   publish: (siteCode: string, articleId: string) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/news/${encodeURIComponent(articleId)}/publish`, {
-      method: 'POST',
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/news/${encodeURIComponent(articleId)}/publish`,
+      {
+        method: 'POST',
+      }
+    ),
   hide: (siteCode: string, articleId: string) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/news/${encodeURIComponent(articleId)}/hide`, {
-      method: 'POST',
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/news/${encodeURIComponent(articleId)}/hide`,
+      {
+        method: 'POST',
+      }
+    ),
   archive: (siteCode: string, articleId: string) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/news/${encodeURIComponent(articleId)}`, {
-      method: 'DELETE',
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/news/${encodeURIComponent(articleId)}`,
+      {
+        method: 'DELETE',
+      }
+    ),
 };
 
 export const siteInquiries = {
   list: (siteCode: string, query?: Record<string, string>) => {
     const qs = new URLSearchParams(query || {}).toString();
-    return apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/inquiries${qs ? `?${qs}` : ''}`);
+    return apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/inquiries${qs ? `?${qs}` : ''}`
+    );
   },
   remove: (siteCode: string, inquiryId: string) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/inquiries/${encodeURIComponent(inquiryId)}`, {
-      method: 'DELETE',
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/inquiries/${encodeURIComponent(inquiryId)}`,
+      {
+        method: 'DELETE',
+      }
+    ),
 };
 
 export const siteDocuments = {
@@ -440,17 +520,25 @@ export const siteDocuments = {
       body: JSON.stringify(data),
     }),
   updateCategory: (siteCode: string, categoryId: string, data: Record<string, unknown>) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/document-categories/${encodeURIComponent(categoryId)}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/document-categories/${encodeURIComponent(categoryId)}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }
+    ),
   deleteCategory: (siteCode: string, categoryId: string) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/document-categories/${encodeURIComponent(categoryId)}`, {
-      method: 'DELETE',
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/document-categories/${encodeURIComponent(categoryId)}`,
+      {
+        method: 'DELETE',
+      }
+    ),
   list: (siteCode: string, query?: Record<string, string>) => {
     const qs = new URLSearchParams(query || {}).toString();
-    return apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/documents${qs ? `?${qs}` : ''}`);
+    return apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/documents${qs ? `?${qs}` : ''}`
+    );
   },
   upload: (siteCode: string, data: Record<string, unknown>) =>
     apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/documents`, {
@@ -458,28 +546,42 @@ export const siteDocuments = {
       body: JSON.stringify(data),
     }),
   update: (siteCode: string, documentId: string, data: Record<string, unknown>) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/documents/${encodeURIComponent(documentId)}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/documents/${encodeURIComponent(documentId)}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }
+    ),
   publish: (siteCode: string, documentId: string) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/documents/${encodeURIComponent(documentId)}/publish`, {
-      method: 'POST',
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/documents/${encodeURIComponent(documentId)}/publish`,
+      {
+        method: 'POST',
+      }
+    ),
   hide: (siteCode: string, documentId: string) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/documents/${encodeURIComponent(documentId)}/hide`, {
-      method: 'POST',
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/documents/${encodeURIComponent(documentId)}/hide`,
+      {
+        method: 'POST',
+      }
+    ),
   archive: (siteCode: string, documentId: string) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/documents/${encodeURIComponent(documentId)}`, {
-      method: 'DELETE',
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/documents/${encodeURIComponent(documentId)}`,
+      {
+        method: 'DELETE',
+      }
+    ),
 };
 
 export const siteDealers = {
   list: (siteCode: string, query?: Record<string, string>) => {
     const qs = new URLSearchParams(query || {}).toString();
-    return apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/dealers${qs ? `?${qs}` : ''}`);
+    return apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/dealers${qs ? `?${qs}` : ''}`
+    );
   },
   create: (siteCode: string, data: Record<string, unknown>) =>
     apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/dealers`, {
@@ -487,21 +589,28 @@ export const siteDealers = {
       body: JSON.stringify(data),
     }),
   update: (siteCode: string, dealerId: string, data: Record<string, unknown>) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/dealers/${encodeURIComponent(dealerId)}`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/dealers/${encodeURIComponent(dealerId)}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }
+    ),
   get: (siteCode: string, dealerId: string) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/dealers/${encodeURIComponent(dealerId)}`),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/dealers/${encodeURIComponent(dealerId)}`
+    ),
   archive: (siteCode: string, dealerId: string) =>
-    apiFetch(`/api/v2/brand-sites/${encodeURIComponent(siteCode)}/dealers/${encodeURIComponent(dealerId)}/archive`, {
-      method: 'POST',
-    }),
+    apiFetch(
+      `/api/v2/brand-sites/${encodeURIComponent(siteCode)}/dealers/${encodeURIComponent(dealerId)}/archive`,
+      {
+        method: 'POST',
+      }
+    ),
 };
 
 export const siteMaterials = {
-  list: (brandCode: string) =>
-    apiFetch(`/api/v2/site-materials/${encodeURIComponent(brandCode)}`),
+  list: (brandCode: string) => apiFetch(`/api/v2/site-materials/${encodeURIComponent(brandCode)}`),
   upload: (
     brandCode: string,
     data: { key: string; filename: string; mimeType: string; dataBase64: string }
@@ -540,13 +649,22 @@ export const growthMaterials = {
     const qs = new URLSearchParams(query || {}).toString();
     return apiFetch(`/api/v2/growth/materials${qs ? `?${qs}` : ''}`);
   },
-  get: (id: string) =>
-    apiFetch(`/api/v2/growth/materials/${encodeURIComponent(id)}`),
+  get: (id: string) => apiFetch(`/api/v2/growth/materials/${encodeURIComponent(id)}`),
   create: (data: Record<string, unknown>) =>
     apiFetch('/api/v2/growth/materials', { method: 'POST', body: JSON.stringify(data) }),
   // 多模态生成：AI 文生图 → 落物料库（经 Tandem 图像网关）
-  generateImage: (data: { prompt: string; title?: string; brandSlug?: string; channel?: string; size?: string; negativePrompt?: string }) =>
-    apiFetch('/api/v2/growth/materials/generate-image', { method: 'POST', body: JSON.stringify(data) }),
+  generateImage: (data: {
+    prompt: string;
+    title?: string;
+    brandSlug?: string;
+    channel?: string;
+    size?: string;
+    negativePrompt?: string;
+  }) =>
+    apiFetch('/api/v2/growth/materials/generate-image', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   update: (id: string, data: Record<string, unknown>) =>
     apiFetch(`/api/v2/growth/materials/${encodeURIComponent(id)}`, {
       method: 'PATCH',
@@ -572,8 +690,7 @@ export const growthContentAssets = {
     const qs = new URLSearchParams(query || {}).toString();
     return apiFetch(`/api/v2/growth/content-assets${qs ? `?${qs}` : ''}`);
   },
-  get: (id: string) =>
-    apiFetch(`/api/v2/growth/content-assets/${encodeURIComponent(id)}`),
+  get: (id: string) => apiFetch(`/api/v2/growth/content-assets/${encodeURIComponent(id)}`),
   create: (data: Record<string, unknown>) =>
     apiFetch('/api/v2/growth/content-assets', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: string, data: Record<string, unknown>) =>
@@ -619,12 +736,21 @@ export const growthGeo = {
     apiFetch(`/api/v2/growth/geo/questions/${encodeURIComponent(id)}/disable`, { method: 'POST' }),
   removeQuestion: (id: string) =>
     apiFetch(`/api/v2/growth/geo/questions/${encodeURIComponent(id)}`, { method: 'DELETE' }),
-  saveGeneratedQuestions: (data: { brandSlug?: string; category?: string; questions?: Array<Record<string, unknown>> }) =>
+  saveGeneratedQuestions: (data: {
+    brandSlug?: string;
+    category?: string;
+    questions?: Array<Record<string, unknown>>;
+  }) =>
     apiFetch('/api/v2/growth/geo/question-set/save-generated', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
-  probeWorklist: (data: { brandSlug?: string; category?: string; stage?: string; engines?: string[] }) =>
+  probeWorklist: (data: {
+    brandSlug?: string;
+    category?: string;
+    stage?: string;
+    engines?: string[];
+  }) =>
     apiFetch('/api/v2/growth/geo/probe-worklist', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -655,9 +781,10 @@ export const growthGeo = {
     }),
   streamProbeJob: async (
     data: { question: string; engine?: string; brandSlug?: string; competitors?: string[] },
-    onEvent: (event: Record<string, any>) => void,
+    onEvent: (event: Record<string, any>) => void
   ) => {
-    const token = typeof window !== 'undefined' ? (getToken() || localStorage.getItem('token')) : null;
+    const token =
+      typeof window !== 'undefined' ? getToken() || localStorage.getItem('token') : null;
     const res = await fetch(`${API}/api/v2/growth/geo/probe-jobs/stream`, {
       method: 'POST',
       credentials: 'include',
@@ -693,9 +820,14 @@ export const growthGeo = {
     }
   },
   probeJobs: () => apiFetch('/api/v2/growth/geo/probe-jobs'),
-  probeJob: (id: string) =>
-    apiFetch(`/api/v2/growth/geo/probe-jobs/${encodeURIComponent(id)}`),
-  runProbeBatch: (data: { brandSlug?: string; category?: string; stage?: string; questionIds?: string[]; competitors?: string[] }) =>
+  probeJob: (id: string) => apiFetch(`/api/v2/growth/geo/probe-jobs/${encodeURIComponent(id)}`),
+  runProbeBatch: (data: {
+    brandSlug?: string;
+    category?: string;
+    stage?: string;
+    questionIds?: string[];
+    competitors?: string[];
+  }) =>
     apiFetch('/api/v2/growth/geo/probe-batches/run', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -738,9 +870,10 @@ export const growthGeo = {
       contentGaps?: Array<Record<string, unknown>>;
       sources?: Array<Record<string, unknown>>;
     },
-    onEvent: (event: Record<string, any>) => void,
+    onEvent: (event: Record<string, any>) => void
   ) => {
-    const token = typeof window !== 'undefined' ? (getToken() || localStorage.getItem('token')) : null;
+    const token =
+      typeof window !== 'undefined' ? getToken() || localStorage.getItem('token') : null;
     const res = await fetch(`${API}/api/v2/growth/geo/optimization-content/stream`, {
       method: 'POST',
       credentials: 'include',
@@ -780,44 +913,80 @@ export const growthGeo = {
     const qs = new URLSearchParams(query || {}).toString();
     return apiFetch(`/api/v2/growth/geo/experiments${qs ? `?${qs}` : ''}`);
   },
-  experiment: (id: string) =>
-    apiFetch(`/api/v2/growth/geo/experiments/${encodeURIComponent(id)}`),
-  startExperiment: (data: { brandSlug?: string; category?: string; questionId?: string; question?: string; hypothesis?: string; killCriteria?: string; competitors?: string[] }) =>
-    apiFetch('/api/v2/growth/geo/experiments', { method: 'POST', body: JSON.stringify(data) }),
-  generateExperimentContent: (id: string, data: { kind?: 'faq' | 'comparison' | 'topic'; competitors?: string[] } = {}) =>
-    apiFetch(`/api/v2/growth/geo/experiments/${encodeURIComponent(id)}/generate-content`, { method: 'POST', body: JSON.stringify(data) }),
+  experiment: (id: string) => apiFetch(`/api/v2/growth/geo/experiments/${encodeURIComponent(id)}`),
+  startExperiment: (data: {
+    brandSlug?: string;
+    category?: string;
+    questionId?: string;
+    question?: string;
+    hypothesis?: string;
+    killCriteria?: string;
+    competitors?: string[];
+  }) => apiFetch('/api/v2/growth/geo/experiments', { method: 'POST', body: JSON.stringify(data) }),
+  generateExperimentContent: (
+    id: string,
+    data: { kind?: 'faq' | 'comparison' | 'topic'; competitors?: string[] } = {}
+  ) =>
+    apiFetch(`/api/v2/growth/geo/experiments/${encodeURIComponent(id)}/generate-content`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   linkExperimentContent: (id: string, data: { copyAssetId: string; publicationUrl: string }) =>
-    apiFetch(`/api/v2/growth/geo/experiments/${encodeURIComponent(id)}/link-content`, { method: 'POST', body: JSON.stringify(data) }),
+    apiFetch(`/api/v2/growth/geo/experiments/${encodeURIComponent(id)}/link-content`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   verifyExperiment: (id: string, data: { competitors?: string[] } = {}) =>
-    apiFetch(`/api/v2/growth/geo/experiments/${encodeURIComponent(id)}/verify`, { method: 'POST', body: JSON.stringify(data) }),
+    apiFetch(`/api/v2/growth/geo/experiments/${encodeURIComponent(id)}/verify`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   // 自进化策略权重（由实验 lift 反哺）
   strategyWeights: (brandSlug?: string) =>
-    apiFetch(`/api/v2/growth/geo/strategy-weights${brandSlug ? `?brandSlug=${encodeURIComponent(brandSlug)}` : ''}`),
+    apiFetch(
+      `/api/v2/growth/geo/strategy-weights${brandSlug ? `?brandSlug=${encodeURIComponent(brandSlug)}` : ''}`
+    ),
   // AI 视角 SWOT（由探测数据派生，可测而非自评）
   swot: (q: { brandSlug?: string; category?: string; windowDays?: number } = {}) => {
     const qs = new URLSearchParams(
-      Object.entries(q).filter(([, v]) => v !== undefined && v !== '').map(([k, v]) => [k, String(v)]),
+      Object.entries(q)
+        .filter(([, v]) => v !== undefined && v !== '')
+        .map(([k, v]) => [k, String(v)])
     ).toString();
     return apiFetch(`/api/v2/growth/geo/swot${qs ? `?${qs}` : ''}`);
   },
   // 场景库 → prompt 簇（选题上游）
   scenarios: (q: { category?: string; brandSlug?: string } = {}) => {
     const qs = new URLSearchParams(
-      Object.entries(q).filter(([, v]) => v !== undefined && v !== '').map(([k, v]) => [k, String(v)]),
+      Object.entries(q)
+        .filter(([, v]) => v !== undefined && v !== '')
+        .map(([k, v]) => [k, String(v)])
     ).toString();
     return apiFetch(`/api/v2/growth/geo/scenarios${qs ? `?${qs}` : ''}`);
   },
   seedScenarios: (data: {
-    brandSlug: string; category: string;
-    painPoints?: string[]; audiences?: string[]; maxScenarios?: number; dryRun?: boolean;
-  }) => apiFetch('/api/v2/growth/geo/scenarios/seed', { method: 'POST', body: JSON.stringify(data) }),
+    brandSlug: string;
+    category: string;
+    painPoints?: string[];
+    audiences?: string[];
+    maxScenarios?: number;
+    dryRun?: boolean;
+  }) =>
+    apiFetch('/api/v2/growth/geo/scenarios/seed', { method: 'POST', body: JSON.stringify(data) }),
   deriveScenario: (id: string, data: { brandSlug?: string; dryRun?: boolean } = {}) =>
-    apiFetch(`/api/v2/growth/geo/scenarios/${encodeURIComponent(id)}/derive`, { method: 'POST', body: JSON.stringify(data) }),
+    apiFetch(`/api/v2/growth/geo/scenarios/${encodeURIComponent(id)}/derive`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   // 新品牌/品类启动序列（播种→派生选题→基线探测）
   bootstrap: (data: {
-    brandSlug: string; category: string;
-    painPoints?: string[]; audiences?: string[]; maxScenarios?: number;
-    runBaseline?: boolean; dryRun?: boolean;
+    brandSlug: string;
+    category: string;
+    painPoints?: string[];
+    audiences?: string[];
+    maxScenarios?: number;
+    runBaseline?: boolean;
+    dryRun?: boolean;
   }) => apiFetch('/api/v2/growth/geo/bootstrap', { method: 'POST', body: JSON.stringify(data) }),
   // 受治理动作引擎（Foundry 式）
   actions: () => apiFetch('/api/v2/growth/geo/actions'),
@@ -828,7 +997,12 @@ export const growthCopy = {
     const qs = new URLSearchParams(query || {}).toString();
     return apiFetch(`/api/v2/growth/copy${qs ? `?${qs}` : ''}`);
   },
-  generate: (data: { channel: string; prompt?: string; brandSlug?: string; promptTemplateId?: string }) =>
+  generate: (data: {
+    channel: string;
+    prompt?: string;
+    brandSlug?: string;
+    promptTemplateId?: string;
+  }) =>
     apiFetch('/api/v2/growth/copy/generate', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -854,14 +1028,35 @@ export const growthCopy = {
     const qs = new URLSearchParams(query || {}).toString();
     return apiFetch(`/api/v2/growth/prompt-templates${qs ? `?${qs}` : ''}`);
   },
-  createPromptTemplate: (data: { name: string; promptBody: string; brandSlug?: string | null; category?: string | null; channel?: string | null }) =>
-    apiFetch('/api/v2/growth/prompt-templates', { method: 'POST', body: JSON.stringify(data) }),
-  updatePromptTemplate: (id: string, data: { name?: string; promptBody?: string; brandSlug?: string | null; category?: string | null; channel?: string | null }) =>
-    apiFetch(`/api/v2/growth/prompt-templates/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  createPromptTemplate: (data: {
+    name: string;
+    promptBody: string;
+    brandSlug?: string | null;
+    category?: string | null;
+    channel?: string | null;
+  }) => apiFetch('/api/v2/growth/prompt-templates', { method: 'POST', body: JSON.stringify(data) }),
+  updatePromptTemplate: (
+    id: string,
+    data: {
+      name?: string;
+      promptBody?: string;
+      brandSlug?: string | null;
+      category?: string | null;
+      channel?: string | null;
+    }
+  ) =>
+    apiFetch(`/api/v2/growth/prompt-templates/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
   archivePromptTemplate: (id: string) =>
-    apiFetch(`/api/v2/growth/prompt-templates/${encodeURIComponent(id)}/archive`, { method: 'POST' }),
+    apiFetch(`/api/v2/growth/prompt-templates/${encodeURIComponent(id)}/archive`, {
+      method: 'POST',
+    }),
   restorePromptTemplate: (id: string) =>
-    apiFetch(`/api/v2/growth/prompt-templates/${encodeURIComponent(id)}/restore`, { method: 'POST' }),
+    apiFetch(`/api/v2/growth/prompt-templates/${encodeURIComponent(id)}/restore`, {
+      method: 'POST',
+    }),
   savePromptTemplate: (copyAssetId: string, data: { name?: string } = {}) =>
     apiFetch(`/api/v2/growth/copy/${encodeURIComponent(copyAssetId)}/save-prompt-template`, {
       method: 'POST',
@@ -933,7 +1128,10 @@ export const presale = {
     apiFetch('/api/v2/design/projects', { method: 'POST', body: JSON.stringify(data) }),
   listProjects: () => apiFetch('/api/v2/design/projects'),
   calc: (projectId: string, data: Record<string, unknown>) =>
-    apiFetch(`/api/v2/design/calc/${encodeURIComponent(projectId)}`, { method: 'POST', body: JSON.stringify(data) }),
+    apiFetch(`/api/v2/design/calc/${encodeURIComponent(projectId)}`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   generateQuote: (data: Record<string, unknown>) =>
     apiFetch('/api/v2/quotation/generate', { method: 'POST', body: JSON.stringify(data) }),
 };
@@ -944,7 +1142,10 @@ export const dealerCrm = {
   customers: () => apiFetch('/api/v2/crm/customers'),
   customer: (id: string) => apiFetch(`/api/v2/crm/customers/${encodeURIComponent(id)}`),
   updateStage: (oppId: string, stage: string) =>
-    apiFetch(`/api/v2/crm/opportunities/${encodeURIComponent(oppId)}/stage`, { method: 'PUT', body: JSON.stringify({ stage }) }),
+    apiFetch(`/api/v2/crm/opportunities/${encodeURIComponent(oppId)}/stage`, {
+      method: 'PUT',
+      body: JSON.stringify({ stage }),
+    }),
   addInteraction: (data: { customerId: string; kind?: string; note?: string }) =>
     apiFetch('/api/v2/crm/interactions', { method: 'POST', body: JSON.stringify(data) }),
   quotations: (query?: Record<string, string>) => {
@@ -959,13 +1160,21 @@ export const dealerCrm = {
 // 北极星驾驶舱（Phase 1）
 export const cockpit = {
   northStar: (period?: string) =>
-    apiFetch(`/api/v2/growth/cockpit/north-star${period ? `?period=${encodeURIComponent(period)}` : ''}`),
+    apiFetch(
+      `/api/v2/growth/cockpit/north-star${period ? `?period=${encodeURIComponent(period)}` : ''}`
+    ),
   dealerSuccess: (period?: string) =>
-    apiFetch(`/api/v2/growth/cockpit/dealer-success${period ? `?period=${encodeURIComponent(period)}` : ''}`),
+    apiFetch(
+      `/api/v2/growth/cockpit/dealer-success${period ? `?period=${encodeURIComponent(period)}` : ''}`
+    ),
   brandHealth: (period?: string) =>
-    apiFetch(`/api/v2/growth/cockpit/brand-health${period ? `?period=${encodeURIComponent(period)}` : ''}`),
+    apiFetch(
+      `/api/v2/growth/cockpit/brand-health${period ? `?period=${encodeURIComponent(period)}` : ''}`
+    ),
   aarrrFunnel: (period?: string) =>
-    apiFetch(`/api/v2/growth/cockpit/aarrr-funnel${period ? `?period=${encodeURIComponent(period)}` : ''}`),
+    apiFetch(
+      `/api/v2/growth/cockpit/aarrr-funnel${period ? `?period=${encodeURIComponent(period)}` : ''}`
+    ),
   geoLoop: () => apiFetch('/api/v2/growth/cockpit/geo-loop'),
   leadRouting: () => apiFetch('/api/v2/growth/cockpit/lead-routing'),
   trends: (metric: string, days = 30) =>
@@ -973,84 +1182,156 @@ export const cockpit = {
   recompute: (data: { dealerId: string; amount: number; period?: string }) =>
     apiFetch('/api/v2/growth/cockpit/recompute', { method: 'POST', body: JSON.stringify(data) }),
   cmo: (q: { period?: string; buType?: string; buId?: string } = {}) =>
-    apiFetch('/api/v2/growth/cockpit/cmo?' + new URLSearchParams(Object.fromEntries(Object.entries(q).filter(([, v]) => v))).toString()),
+    apiFetch(
+      '/api/v2/growth/cockpit/cmo?' +
+        new URLSearchParams(Object.fromEntries(Object.entries(q).filter(([, v]) => v))).toString()
+    ),
 };
 
 // 产品管理（4.4/4.5/4.10/4.17）
 export const productMgmt = {
   setLifecycle: (id: string, stage: string) =>
-    apiFetch(`/api/v2/product-catalog/devices/${encodeURIComponent(id)}/lifecycle`, { method: 'PATCH', body: JSON.stringify({ stage }) }),
+    apiFetch(`/api/v2/product-catalog/devices/${encodeURIComponent(id)}/lifecycle`, {
+      method: 'PATCH',
+      body: JSON.stringify({ stage }),
+    }),
   listLaunches: () => apiFetch('/api/v2/product-catalog/launches'),
   createLaunch: (data: Record<string, unknown>) =>
     apiFetch('/api/v2/product-catalog/launches', { method: 'POST', body: JSON.stringify(data) }),
   updateLaunch: (id: string, status: string) =>
-    apiFetch(`/api/v2/product-catalog/launches/${encodeURIComponent(id)}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+    apiFetch(`/api/v2/product-catalog/launches/${encodeURIComponent(id)}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    }),
   listSellingPoints: (productId?: string) =>
-    apiFetch('/api/v2/product-catalog/selling-points' + (productId ? `?productId=${encodeURIComponent(productId)}` : '')),
+    apiFetch(
+      '/api/v2/product-catalog/selling-points' +
+        (productId ? `?productId=${encodeURIComponent(productId)}` : '')
+    ),
   addSellingPoint: (data: Record<string, unknown>) =>
-    apiFetch('/api/v2/product-catalog/selling-points', { method: 'POST', body: JSON.stringify(data) }),
+    apiFetch('/api/v2/product-catalog/selling-points', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   listPricing: () => apiFetch('/api/v2/product-catalog/pricing-policies'),
   submitPricing: (data: Record<string, unknown>) =>
-    apiFetch('/api/v2/product-catalog/pricing-policies', { method: 'POST', body: JSON.stringify(data) }),
+    apiFetch('/api/v2/product-catalog/pricing-policies', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   decidePricing: (id: string, decision: 'approved' | 'rejected', note?: string) =>
-    apiFetch(`/api/v2/product-catalog/pricing-policies/${encodeURIComponent(id)}/decision`, { method: 'POST', body: JSON.stringify({ decision, note }) }),
+    apiFetch(`/api/v2/product-catalog/pricing-policies/${encodeURIComponent(id)}/decision`, {
+      method: 'POST',
+      body: JSON.stringify({ decision, note }),
+    }),
 };
 
 // 内容工厂（模块8）
 export const content = {
-  list: (q: Record<string, string> = {}) => apiFetch('/api/v2/content?' + new URLSearchParams(q).toString()),
-  create: (data: Record<string, unknown>) => apiFetch('/api/v2/content', { method: 'POST', body: JSON.stringify(data) }),
+  list: (q: Record<string, string> = {}) =>
+    apiFetch('/api/v2/content?' + new URLSearchParams(q).toString()),
+  create: (data: Record<string, unknown>) =>
+    apiFetch('/api/v2/content', { method: 'POST', body: JSON.stringify(data) }),
   update: (id: string, data: Record<string, unknown>) =>
-    apiFetch('/api/v2/content/' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify(data) }),
+    apiFetch('/api/v2/content/' + encodeURIComponent(id), {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
   productionContext: (q: Record<string, string> = {}) =>
     apiFetch('/api/v2/content/production-context?' + new URLSearchParams(q).toString()),
-  factSources: (q: Record<string, string> = {}) => apiFetch('/api/v2/content/fact-sources?' + new URLSearchParams(q).toString()),
+  factSources: (q: Record<string, string> = {}) =>
+    apiFetch('/api/v2/content/fact-sources?' + new URLSearchParams(q).toString()),
   bindFactRefs: (id: string, factRefs: Array<Record<string, unknown>>) =>
-    apiFetch('/api/v2/content/' + encodeURIComponent(id) + '/fact-refs', { method: 'POST', body: JSON.stringify({ factRefs }) }),
-  submit: (id: string) => apiFetch('/api/v2/content/' + encodeURIComponent(id) + '/submit', { method: 'POST' }),
+    apiFetch('/api/v2/content/' + encodeURIComponent(id) + '/fact-refs', {
+      method: 'POST',
+      body: JSON.stringify({ factRefs }),
+    }),
+  submit: (id: string) =>
+    apiFetch('/api/v2/content/' + encodeURIComponent(id) + '/submit', { method: 'POST' }),
   decide: (id: string, decision: 'approved' | 'rejected', data: Record<string, unknown> = {}) =>
-    apiFetch('/api/v2/content/' + encodeURIComponent(id) + '/decision', { method: 'POST', body: JSON.stringify({ decision, ...data }) }),
-  publishTasks: (q: Record<string, string> = {}) => apiFetch('/api/v2/content/publish-tasks?' + new URLSearchParams(q).toString()),
+    apiFetch('/api/v2/content/' + encodeURIComponent(id) + '/decision', {
+      method: 'POST',
+      body: JSON.stringify({ decision, ...data }),
+    }),
+  publishTasks: (q: Record<string, string> = {}) =>
+    apiFetch('/api/v2/content/publish-tasks?' + new URLSearchParams(q).toString()),
   createPublishTask: (id: string, data: Record<string, unknown>) =>
-    apiFetch('/api/v2/content/' + encodeURIComponent(id) + '/publish-tasks', { method: 'POST', body: JSON.stringify(data) }),
+    apiFetch('/api/v2/content/' + encodeURIComponent(id) + '/publish-tasks', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   completePublishTask: (taskId: string, data: Record<string, unknown>) =>
-    apiFetch('/api/v2/content/publish-tasks/' + encodeURIComponent(taskId) + '/evidence', { method: 'POST', body: JSON.stringify(data) }),
+    apiFetch('/api/v2/content/publish-tasks/' + encodeURIComponent(taskId) + '/evidence', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };
 
 // 战役/预算 MROI + OKR（模块7/10）
 export const gtmplan = {
   listCampaigns: () => apiFetch('/api/v2/gtmplan/campaigns'),
-  createCampaign: (data: Record<string, unknown>) => apiFetch('/api/v2/gtmplan/campaigns', { method: 'POST', body: JSON.stringify(data) }),
-  updateCampaign: (id: string, patch: Record<string, unknown>) => apiFetch('/api/v2/gtmplan/campaigns/' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify(patch) }),
+  createCampaign: (data: Record<string, unknown>) =>
+    apiFetch('/api/v2/gtmplan/campaigns', { method: 'POST', body: JSON.stringify(data) }),
+  updateCampaign: (id: string, patch: Record<string, unknown>) =>
+    apiFetch('/api/v2/gtmplan/campaigns/' + encodeURIComponent(id), {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
   mroi: () => apiFetch('/api/v2/gtmplan/mroi'),
   listOkrs: (level?: string) => apiFetch('/api/v2/gtmplan/okrs' + (level ? '?level=' + level : '')),
-  upsertOkr: (data: Record<string, unknown>) => apiFetch('/api/v2/gtmplan/okrs', { method: 'POST', body: JSON.stringify(data) }),
+  upsertOkr: (data: Record<string, unknown>) =>
+    apiFetch('/api/v2/gtmplan/okrs', { method: 'POST', body: JSON.stringify(data) }),
   okrSummary: () => apiFetch('/api/v2/gtmplan/okr-summary'),
 };
 
 // 活动运营（模块5）
 export const activation = {
-  list: (q: Record<string, string> = {}) => apiFetch('/api/v2/activation/activities?' + new URLSearchParams(q).toString()),
-  create: (data: Record<string, unknown>) => apiFetch('/api/v2/activation/activities', { method: 'POST', body: JSON.stringify(data) }),
-  setStatus: (id: string, status: string) => apiFetch('/api/v2/activation/activities/' + encodeURIComponent(id) + '/status', { method: 'POST', body: JSON.stringify({ status }) }),
+  list: (q: Record<string, string> = {}) =>
+    apiFetch('/api/v2/activation/activities?' + new URLSearchParams(q).toString()),
+  create: (data: Record<string, unknown>) =>
+    apiFetch('/api/v2/activation/activities', { method: 'POST', body: JSON.stringify(data) }),
+  setStatus: (id: string, status: string) =>
+    apiFetch('/api/v2/activation/activities/' + encodeURIComponent(id) + '/status', {
+      method: 'POST',
+      body: JSON.stringify({ status }),
+    }),
 };
 
 // 度量中台（读模型 + 多触点归因）
 export const metrics = {
-  refresh: (period?: string, model?: string) => apiFetch('/api/v2/metrics/refresh', { method: 'POST', body: JSON.stringify({ period, model }) }),
-  daily: (from?: string, to?: string) => apiFetch('/api/v2/metrics/daily?' + new URLSearchParams({ ...(from ? { from } : {}), ...(to ? { to } : {}) }).toString()),
-  attribution: (period: string, model = 'position') => apiFetch('/api/v2/metrics/attribution?period=' + encodeURIComponent(period) + '&model=' + model),
+  refresh: (period?: string, model?: string) =>
+    apiFetch('/api/v2/metrics/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ period, model }),
+    }),
+  daily: (from?: string, to?: string) =>
+    apiFetch(
+      '/api/v2/metrics/daily?' +
+        new URLSearchParams({ ...(from ? { from } : {}), ...(to ? { to } : {}) }).toString()
+    ),
+  attribution: (period: string, model = 'position') =>
+    apiFetch(
+      '/api/v2/metrics/attribution?period=' + encodeURIComponent(period) + '&model=' + model
+    ),
 };
 
 // 竞品情报（模块1·按品类）
 export const insight = {
   listByCategory: (category: string, dimension?: string) =>
-    apiFetch('/api/v2/insight/competitor?category=' + encodeURIComponent(category) + (dimension ? '&dimension=' + dimension : '')),
-  sov: (category: string) => apiFetch('/api/v2/insight/sov?category=' + encodeURIComponent(category)),
+    apiFetch(
+      '/api/v2/insight/competitor?category=' +
+        encodeURIComponent(category) +
+        (dimension ? '&dimension=' + dimension : '')
+    ),
+  sov: (category: string) =>
+    apiFetch('/api/v2/insight/sov?category=' + encodeURIComponent(category)),
   // 竞争格局：HHI 集中度 + 动量 + 头部差距 + 威胁评分（需 GEO 探测时序数据）
   landscape: (category: string, windowDays?: number) =>
-    apiFetch('/api/v2/insight/landscape?category=' + encodeURIComponent(category)
-      + (windowDays ? '&windowDays=' + windowDays : '')),
+    apiFetch(
+      '/api/v2/insight/landscape?category=' +
+        encodeURIComponent(category) +
+        (windowDays ? '&windowDays=' + windowDays : '')
+    ),
   recordCompetitor: (data: Record<string, unknown>) =>
     apiFetch('/api/v2/insight/competitor', { method: 'POST', body: JSON.stringify(data) }),
   listSignals: (q: Record<string, string> = {}) =>
@@ -1066,23 +1347,35 @@ export const channel = {
   recruit: (data: Record<string, unknown>) =>
     apiFetch('/api/v2/channel/partners', { method: 'POST', body: JSON.stringify(data) }),
   updatePartner: (id: string, patch: Record<string, unknown>) =>
-    apiFetch('/api/v2/channel/partners/' + encodeURIComponent(id), { method: 'PATCH', body: JSON.stringify(patch) }),
+    apiFetch('/api/v2/channel/partners/' + encodeURIComponent(id), {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
   listRebates: () => apiFetch('/api/v2/channel/rebates'),
   submitRebate: (data: Record<string, unknown>) =>
     apiFetch('/api/v2/channel/rebates', { method: 'POST', body: JSON.stringify(data) }),
   decideRebate: (id: string, decision: string) =>
-    apiFetch('/api/v2/channel/rebates/' + encodeURIComponent(id) + '/decision', { method: 'POST', body: JSON.stringify({ decision }) }),
+    apiFetch('/api/v2/channel/rebates/' + encodeURIComponent(id) + '/decision', {
+      method: 'POST',
+      body: JSON.stringify({ decision }),
+    }),
   health: () => apiFetch('/api/v2/channel/health'),
 };
 
 // 品牌定位 messaging house（模块2）
 export const positioning = {
   listHouses: (brandCode?: string) =>
-    apiFetch('/api/v2/positioning/houses' + (brandCode ? '?brandCode=' + encodeURIComponent(brandCode) : '')),
+    apiFetch(
+      '/api/v2/positioning/houses' +
+        (brandCode ? '?brandCode=' + encodeURIComponent(brandCode) : '')
+    ),
   upsertHouse: (data: Record<string, unknown>) =>
     apiFetch('/api/v2/positioning/house', { method: 'POST', body: JSON.stringify(data) }),
   setStatus: (id: string, status: string) =>
-    apiFetch('/api/v2/positioning/house/' + encodeURIComponent(id) + '/status', { method: 'POST', body: JSON.stringify({ status }) }),
+    apiFetch('/api/v2/positioning/house/' + encodeURIComponent(id) + '/status', {
+      method: 'POST',
+      body: JSON.stringify({ status }),
+    }),
 };
 
 // AgenticGEO 自主闭环 + GEO 进化(借鉴分众智投)
@@ -1090,28 +1383,51 @@ export const agenticGeo = {
   plan: (data: Record<string, unknown>) =>
     apiFetch('/api/v2/growth/geo/agentic/plan', { method: 'POST', body: JSON.stringify(data) }),
   approve: (actionId: string, input: unknown) =>
-    apiFetch('/api/v2/growth/geo/agentic/approve', { method: 'POST', body: JSON.stringify({ actionId, input }) }),
+    apiFetch('/api/v2/growth/geo/agentic/approve', {
+      method: 'POST',
+      body: JSON.stringify({ actionId, input }),
+    }),
   status: () => apiFetch('/api/v2/growth/geo/agentic/status'),
   ignite: (category: string, segment?: string, limit?: number) =>
-    apiFetch('/api/v2/growth/geo/agentic/ignite', { method: 'POST', body: JSON.stringify({ category, segment, limit }) }),
+    apiFetch('/api/v2/growth/geo/agentic/ignite', {
+      method: 'POST',
+      body: JSON.stringify({ category, segment, limit }),
+    }),
 };
 
 // GEO 选点 / 千问千面 / 认知资产漏斗（分众式进化）
 export const geoFocus = {
   listTargets: (category?: string) =>
-    apiFetch('/api/v2/growth/geo/focus/targets' + (category ? '?category=' + encodeURIComponent(category) : '')),
+    apiFetch(
+      '/api/v2/growth/geo/focus/targets' +
+        (category ? '?category=' + encodeURIComponent(category) : '')
+    ),
   listProbePool: (q: Record<string, string> = {}) =>
     apiFetch('/api/v2/growth/geo/focus/probe-pool?' + new URLSearchParams(q).toString()),
   seedProbePool: (data: Record<string, unknown>) =>
-    apiFetch('/api/v2/growth/geo/focus/probe-pool/seed', { method: 'POST', body: JSON.stringify(data) }),
+    apiFetch('/api/v2/growth/geo/focus/probe-pool/seed', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
   upsertTarget: (data: Record<string, unknown>) =>
     apiFetch('/api/v2/growth/geo/focus/targets', { method: 'POST', body: JSON.stringify(data) }),
   select: (category: string, segment?: string, limit?: number) =>
-    apiFetch('/api/v2/growth/geo/focus/select?category=' + encodeURIComponent(category) + (segment ? '&segment=' + encodeURIComponent(segment) : '') + (limit ? '&limit=' + limit : '')),
+    apiFetch(
+      '/api/v2/growth/geo/focus/select?category=' +
+        encodeURIComponent(category) +
+        (segment ? '&segment=' + encodeURIComponent(segment) : '') +
+        (limit ? '&limit=' + limit : '')
+    ),
   recordCognition: (data: Record<string, unknown>) =>
     apiFetch('/api/v2/growth/geo/focus/cognition', { method: 'POST', body: JSON.stringify(data) }),
   cognitionFunnel: (category?: string) =>
-    apiFetch('/api/v2/growth/geo/focus/cognition' + (category ? '?category=' + encodeURIComponent(category) : '')),
+    apiFetch(
+      '/api/v2/growth/geo/focus/cognition' +
+        (category ? '?category=' + encodeURIComponent(category) : '')
+    ),
   reallocate: (adjustments: Array<{ id: string; deltaPriority: number }>) =>
-    apiFetch('/api/v2/growth/geo/focus/reallocate', { method: 'POST', body: JSON.stringify({ adjustments }) }),
+    apiFetch('/api/v2/growth/geo/focus/reallocate', {
+      method: 'POST',
+      body: JSON.stringify({ adjustments }),
+    }),
 };

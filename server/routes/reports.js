@@ -36,11 +36,12 @@ router.post('/consultation', (req, res) => {
       result,
       customer: req.body.customer || {},
       salesperson: req.body.salesperson || {},
-      brand: req.body.brand
+      brand: req.body.brand,
     });
     res.json({ success: true, data: out });
   } catch (e) {
-    if (/必填|必须|缺少/.test(e.message)) return res.status(400).json({ success: false, message: e.message });
+    if (/必填|必须|缺少/.test(e.message))
+      return res.status(400).json({ success: false, message: e.message });
     return errorResponse(res, e);
   }
 });
@@ -52,11 +53,12 @@ router.post('/proposal', (req, res) => {
       result,
       customer: req.body.customer || {},
       salesperson: req.body.salesperson || {},
-      brand: req.body.brand
+      brand: req.body.brand,
     });
     res.json({ success: true, data: out });
   } catch (e) {
-    if (/必填|必须|缺少/.test(e.message)) return res.status(400).json({ success: false, message: e.message });
+    if (/必填|必须|缺少/.test(e.message))
+      return res.status(400).json({ success: false, message: e.message });
     return errorResponse(res, e);
   }
 });
@@ -78,22 +80,24 @@ router.get('/:id/pdf', async (req, res) => {
     const meta = reportGen.getReport(req.params.id);
     if (!meta) return res.status(404).json({ success: false, message: '报告不存在' });
     const htmlPath = path.join(__dirname, '..', '..', 'exports', 'reports', meta.id + '.html');
-    const pdfPath  = path.join(__dirname, '..', '..', 'exports', 'reports', meta.id + '.pdf');
+    const pdfPath = path.join(__dirname, '..', '..', 'exports', 'reports', meta.id + '.pdf');
 
     // 若已生成且 HTML 未更新，直接返回缓存
-    const needRender = !fs.existsSync(pdfPath) || fs.statSync(pdfPath).mtimeMs < fs.statSync(htmlPath).mtimeMs;
+    const needRender =
+      !fs.existsSync(pdfPath) || fs.statSync(pdfPath).mtimeMs < fs.statSync(htmlPath).mtimeMs;
     if (needRender) {
       await renderFileToPdf(htmlPath, pdfPath, {
         format: (req.query.format || 'A4').toString(),
-        landscape: req.query.landscape === '1' || req.query.landscape === 'true'
+        landscape: req.query.landscape === '1' || req.query.landscape === 'true',
       });
     }
 
     const filename = `${meta.kind === 'proposal' ? '方案建议书' : 'AI问诊报告'}-${meta.customer?.name || meta.id}.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition',
+    res.setHeader(
+      'Content-Disposition',
       (req.query.inline === '1' ? 'inline' : 'attachment') +
-      `; filename*=UTF-8''${encodeURIComponent(filename)}`
+        `; filename*=UTF-8''${encodeURIComponent(filename)}`
     );
     fs.createReadStream(pdfPath).pipe(res);
   } catch (e) {
@@ -102,7 +106,7 @@ router.get('/:id/pdf', async (req, res) => {
       return res.status(503).json({
         success: false,
         message: e.message,
-        hint: '请在服务器端执行：npx playwright install chromium'
+        hint: '请在服务器端执行：npx playwright install chromium',
       });
     }
     return errorResponse(res, e);
@@ -124,7 +128,9 @@ router.post('/:id/share', (req, res) => {
   const tierName = meta.summary?.tierName || '';
   const priceText = meta.summary?.packagePrice
     ? `套餐价 ¥${Number(meta.summary.packagePrice).toLocaleString()}`
-    : (meta.summary?.detailPrice ? `参考价 ¥${Number(meta.summary.detailPrice).toLocaleString()}` : '');
+    : meta.summary?.detailPrice
+      ? `参考价 ¥${Number(meta.summary.detailPrice).toLocaleString()}`
+      : '';
 
   const isProposal = meta.kind === 'proposal';
   const title = isProposal
@@ -143,13 +149,13 @@ router.post('/:id/share', (req, res) => {
       viewUrl,
       messages: {
         wechat: `${title}\n\n${body}`,
-        sms:    `${title.replace(/【.*?】/, '')} ${absUrl}`,
-        email:  { subject: title, body },
-        copy:   absUrl
+        sms: `${title.replace(/【.*?】/, '')} ${absUrl}`,
+        email: { subject: title, body },
+        copy: absUrl,
       },
       qrPayload: absUrl,
-      qrImageUrl: `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(absUrl)}`
-    }
+      qrImageUrl: `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(absUrl)}`,
+    },
   });
 });
 

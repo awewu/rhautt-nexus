@@ -34,14 +34,22 @@ function lineForIndex(content, index) {
 function resolveRequirePath(fromFile, requestPath) {
   if (!requestPath || !requestPath.startsWith('.')) return null;
   const base = path.resolve(path.dirname(fromFile), requestPath);
-  const candidates = [base, base + '.js', base + '.cjs', base + '.mjs', path.join(base, 'index.js')];
-  return candidates.find(candidate => fs.existsSync(candidate)) || null;
+  const candidates = [
+    base,
+    base + '.js',
+    base + '.cjs',
+    base + '.mjs',
+    path.join(base, 'index.js'),
+  ];
+  return candidates.find((candidate) => fs.existsSync(candidate)) || null;
 }
 
 function collectRequireAliases(file, content) {
   const aliases = new Map();
-  const directRequireRegex = /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*require\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
-  const destructuredRequireRegex = /\b(?:const|let|var)\s+\{([^}]+)\}\s*=\s*require\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
+  const directRequireRegex =
+    /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*require\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
+  const destructuredRequireRegex =
+    /\b(?:const|let|var)\s+\{([^}]+)\}\s*=\s*require\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
   let match;
 
   while ((match = directRequireRegex.exec(content))) {
@@ -61,7 +69,17 @@ function collectRequireAliases(file, content) {
   return aliases;
 }
 
-function addMount({ root, sourceFile, targetFile, parentPrefix, mountPrefix, line, byFile, mounts, queue }) {
+function addMount({
+  root,
+  sourceFile,
+  targetFile,
+  parentPrefix,
+  mountPrefix,
+  line,
+  byFile,
+  mounts,
+  queue,
+}) {
   const prefix = joinRoute(parentPrefix, mountPrefix || '/');
   const target = rel(root, targetFile);
   const existing = byFile.get(target) || [];
@@ -79,24 +97,66 @@ function collectMountsFromFile({ root, file, parentPrefix, byFile, mounts, queue
   const aliases = collectRequireAliases(file, content);
   let match;
 
-  const inlineWithPrefixRegex = /\b(?:app|router)\.use\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*require\(\s*['"`]([^'"`]+)['"`]\s*\)(?:\s*\([^)]*\))?/g;
+  const inlineWithPrefixRegex =
+    /\b(?:app|router)\.use\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*require\(\s*['"`]([^'"`]+)['"`]\s*\)(?:\s*\([^)]*\))?/g;
   while ((match = inlineWithPrefixRegex.exec(content))) {
     const targetFile = resolveRequirePath(file, match[2]);
-    if (targetFile) addMount({ root, sourceFile: file, targetFile, parentPrefix, mountPrefix: match[1], line: lineForIndex(content, match.index), byFile, mounts, queue });
+    if (targetFile)
+      addMount({
+        root,
+        sourceFile: file,
+        targetFile,
+        parentPrefix,
+        mountPrefix: match[1],
+        line: lineForIndex(content, match.index),
+        byFile,
+        mounts,
+        queue,
+      });
   }
-  const inlineWithoutPrefixRegex = /\b(?:app|router)\.use\s*\(\s*require\(\s*['"`]([^'"`]+)['"`]\s*\)(?:\s*\([^)]*\))?/g;
+  const inlineWithoutPrefixRegex =
+    /\b(?:app|router)\.use\s*\(\s*require\(\s*['"`]([^'"`]+)['"`]\s*\)(?:\s*\([^)]*\))?/g;
   while ((match = inlineWithoutPrefixRegex.exec(content))) {
     const targetFile = resolveRequirePath(file, match[1]);
-    if (targetFile) addMount({ root, sourceFile: file, targetFile, parentPrefix, mountPrefix: '/', line: lineForIndex(content, match.index), byFile, mounts, queue });
+    if (targetFile)
+      addMount({
+        root,
+        sourceFile: file,
+        targetFile,
+        parentPrefix,
+        mountPrefix: '/',
+        line: lineForIndex(content, match.index),
+        byFile,
+        mounts,
+        queue,
+      });
   }
-  const aliasWithPrefixRegex = /\b(?:app|router)\.use\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*([A-Za-z_$][\w$]*)\b/g;
+  const aliasWithPrefixRegex =
+    /\b(?:app|router)\.use\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*([A-Za-z_$][\w$]*)\b/g;
   while ((match = aliasWithPrefixRegex.exec(content))) {
     const targetFile = aliases.get(match[2]);
-    if (targetFile) addMount({ root, sourceFile: file, targetFile, parentPrefix, mountPrefix: match[1], line: lineForIndex(content, match.index), byFile, mounts, queue });
+    if (targetFile)
+      addMount({
+        root,
+        sourceFile: file,
+        targetFile,
+        parentPrefix,
+        mountPrefix: match[1],
+        line: lineForIndex(content, match.index),
+        byFile,
+        mounts,
+        queue,
+      });
   }
 }
 
-function collectMountsFromProductionCatalog({ root, byFile, mounts, queue, includeProductionCandidates }) {
+function collectMountsFromProductionCatalog({
+  root,
+  byFile,
+  mounts,
+  queue,
+  includeProductionCandidates,
+}) {
   const catalogFile = path.join(root, 'server/modules/productionRouteCatalog.js');
   if (!fs.existsSync(catalogFile)) return;
   let catalogModule;
@@ -110,26 +170,53 @@ function collectMountsFromProductionCatalog({ root, byFile, mounts, queue, inclu
   for (const entry of getMetadata()) {
     if (!includeProductionCandidates && entry.status === 'production-candidate') continue;
     const targetFile = resolveRequirePath(catalogFile, entry.modulePath);
-    if (targetFile) addMount({ root, sourceFile: catalogFile, targetFile, parentPrefix: '/', mountPrefix: entry.prefix || '/', line: 1, byFile, mounts, queue });
+    if (targetFile)
+      addMount({
+        root,
+        sourceFile: catalogFile,
+        targetFile,
+        parentPrefix: '/',
+        mountPrefix: entry.prefix || '/',
+        line: 1,
+        byFile,
+        mounts,
+        queue,
+      });
   }
 }
 
-function getProductionMountPrefixes({ root, entryFile, registrarFiles = [], includeProductionCandidates = false }) {
+function getProductionMountPrefixes({
+  root,
+  entryFile,
+  registrarFiles = [],
+  includeProductionCandidates = false,
+}) {
   const defaultRegistrar = path.join(root, 'server/modules/productionRouteRegistrar.js');
-  const initialFiles = [entryFile, fs.existsSync(defaultRegistrar) ? defaultRegistrar : null, ...registrarFiles].filter(Boolean);
+  const initialFiles = [
+    entryFile,
+    fs.existsSync(defaultRegistrar) ? defaultRegistrar : null,
+    ...registrarFiles,
+  ].filter(Boolean);
   const byFile = new Map();
   const mounts = [];
   const scanned = new Set();
-  const queue = initialFiles.map(file => ({ file, prefix: '/' }));
+  const queue = initialFiles.map((file) => ({ file, prefix: '/' }));
   collectMountsFromProductionCatalog({ root, byFile, mounts, queue, includeProductionCandidates });
   while (queue.length) {
     const current = queue.shift();
     const key = `${rel(root, current.file)}@${current.prefix}`;
     if (scanned.has(key)) continue;
     scanned.add(key);
-    collectMountsFromFile({ root, file: current.file, parentPrefix: current.prefix, byFile, mounts, queue });
+    collectMountsFromFile({
+      root,
+      file: current.file,
+      parentPrefix: current.prefix,
+      byFile,
+      mounts,
+      queue,
+    });
   }
-  return { byFile, mounts, scannedFiles: [...scanned].map(item => item.split('@')[0]) };
+  return { byFile, mounts, scannedFiles: [...scanned].map((item) => item.split('@')[0]) };
 }
 
 module.exports = { getProductionMountPrefixes, joinRoute, normalizeRoutePath, resolveRequirePath };

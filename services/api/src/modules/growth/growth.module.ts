@@ -65,11 +65,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class GrowthBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('growth');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('growth')
 export class GrowthBoundaryController {
   constructor(private readonly s: GrowthBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

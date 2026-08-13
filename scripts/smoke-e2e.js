@@ -23,7 +23,11 @@ async function run() {
     // 2. 进入统一门户
     console.log('2. 等待进入统一门户...');
     await page.waitForURL('http://localhost:5000/brand', { timeout: 10000 });
-    const hubTitle = await page.locator('text=产品目录').first().isVisible().catch(() => false);
+    const hubTitle = await page
+      .locator('text=产品目录')
+      .first()
+      .isVisible()
+      .catch(() => false);
     console.log('   门户可见:', hubTitle);
 
     // 3. 点击产品目录卡片（5000 内部 /products 链接）
@@ -35,7 +39,11 @@ async function run() {
     // 4. 5000 原生产品库
     console.log('4. 等待 5000 原生产品库...');
     await page.waitForURL(/:5000\/products/, { timeout: 10000 });
-    const productName = await page.locator('text=5000 原生产品库').first().isVisible().catch(() => false);
+    const productName = await page
+      .locator('text=5000 原生产品库')
+      .first()
+      .isVisible()
+      .catch(() => false);
     console.log('   原生产品库已显示:', productName);
 
     // 5. 返回门户按钮
@@ -61,4 +69,7 @@ async function run() {
   }
 }
 
-run().catch((e) => { console.error(e); process.exit(1); });
+run().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

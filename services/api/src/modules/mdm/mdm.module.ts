@@ -17,7 +17,9 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 @Global()
 @Module({
   imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([GlobalProductEntity, OutboxEventEntity])]),
+    ...(TARGET_API_BOOT_SMOKE
+      ? []
+      : [TypeOrmModule.forFeature([GlobalProductEntity, OutboxEventEntity])]),
     AuthModule,
   ],
   controllers: [MdmController],
@@ -25,7 +27,10 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
     MdmService,
     EventBusService,
     ...(TARGET_API_BOOT_SMOKE
-      ? [bootSmokeRepositoryProvider(GlobalProductEntity), bootSmokeRepositoryProvider(OutboxEventEntity)]
+      ? [
+          bootSmokeRepositoryProvider(GlobalProductEntity),
+          bootSmokeRepositoryProvider(OutboxEventEntity),
+        ]
       : []),
   ],
   exports: [MdmService, EventBusService],

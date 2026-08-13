@@ -30,10 +30,7 @@ test('发布能力按品牌配置解析，未配置品牌明确 unsupported', ()
 
 test('品牌发布服务层对只读角色 fail closed', () => {
   assert.doesNotThrow(() => requireBrandPublishWrite(user));
-  assert.throws(
-    () => requireBrandPublishWrite({ role: 'brand_viewer' }),
-    /无品牌发布权限/,
-  );
+  assert.throws(() => requireBrandPublishWrite({ role: 'brand_viewer' }), /无品牌发布权限/);
 });
 
 test('静态备份计划只执行所选品牌的受控服务端脚本并汇总日志', async () => {
@@ -49,7 +46,10 @@ test('静态备份计划只执行所选品牌的受控服务端脚本并汇总�
   });
 
   assert.equal(calls.length, 2);
-  assert.equal(calls.every((call) => call.file === process.execPath), true);
+  assert.equal(
+    calls.every((call) => call.file === process.execPath),
+    true
+  );
   assert.match(calls[0].args[0], /fetch-products-from-nexus\.mjs$/);
   assert.match(calls[1].args[0], /fetch-product-images-from-dam\.mjs$/);
   assert.deepEqual(calls[1].args.slice(-2), ['--tenant', 'tenant-products']);
@@ -61,14 +61,15 @@ test('静态备份计划只执行所选品牌的受控服务端脚本并汇总�
 test('脚本失败保留服务端执行日志', async () => {
   const plan = createBrandPublishPlan(everhot, user, { workspaceRoot: 'D:/workspace' });
   await assert.rejects(
-    () => executeBrandPublishPlan(plan, async () => {
-      const error = Object.assign(new Error('script failed'), { stderr: 'network unavailable' });
-      throw error;
-    }),
+    () =>
+      executeBrandPublishPlan(plan, async () => {
+        const error = Object.assign(new Error('script failed'), { stderr: 'network unavailable' });
+        throw error;
+      }),
     (error: BrandPublishExecutionError) => {
       assert.match(error.log, /script failed/);
       assert.match(error.log, /network unavailable/);
       return true;
-    },
+    }
   );
 });

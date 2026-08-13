@@ -17,21 +17,21 @@ class DataEncryption {
    */
   encrypt(text) {
     if (!text) return null;
-    
+
     try {
       // 生成随机IV
       const iv = crypto.randomBytes(16);
-      
+
       // 创建加密器
       const cipher = crypto.createCipheriv(this.algorithm, this.key, iv);
-      
+
       // 加密数据
       let encrypted = cipher.update(text, 'utf8', 'hex');
       encrypted += cipher.final('hex');
-      
+
       // 获取认证标签
       const authTag = cipher.getAuthTag();
-      
+
       // 返回IV + authTag + encrypted的组合
       return iv.toString('hex') + ':' + authTag.toString('hex') + ':' + encrypted;
     } catch (error) {
@@ -45,24 +45,24 @@ class DataEncryption {
    */
   decrypt(encryptedData) {
     if (!encryptedData) return null;
-    
+
     try {
       // 解析IV、authTag和encrypted
       const parts = encryptedData.split(':');
       if (parts.length !== 3) return null;
-      
+
       const iv = Buffer.from(parts[0], 'hex');
       const authTag = Buffer.from(parts[1], 'hex');
       const encrypted = parts[2];
-      
+
       // 创建解密器
       const decipher = crypto.createDecipheriv(this.algorithm, this.key, iv);
       decipher.setAuthTag(authTag);
-      
+
       // 解密数据
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
-      
+
       return decrypted;
     } catch (error) {
       console.error('解密失败:', error);
@@ -96,13 +96,13 @@ class DataEncryption {
    */
   encryptSensitiveFields(data, fieldsToEncrypt) {
     const encrypted = { ...data };
-    
-    fieldsToEncrypt.forEach(field => {
+
+    fieldsToEncrypt.forEach((field) => {
       if (data[field]) {
         encrypted[field] = this.encrypt(data[field]);
       }
     });
-    
+
     return encrypted;
   }
 
@@ -111,13 +111,13 @@ class DataEncryption {
    */
   decryptSensitiveFields(data, fieldsToEncrypt) {
     const decrypted = { ...data };
-    
-    fieldsToEncrypt.forEach(field => {
+
+    fieldsToEncrypt.forEach((field) => {
       if (data[field]) {
         decrypted[field] = this.decrypt(data[field]);
       }
     });
-    
+
     return decrypted;
   }
 }
@@ -132,7 +132,7 @@ class EncryptedDatabase {
     this.sensitiveFields = {
       users: ['phone', 'name', 'password'],
       projects: ['customer', 'roomProfile'],
-      customers: ['phone', 'address', 'name']
+      customers: ['phone', 'address', 'name'],
     };
   }
 
@@ -142,16 +142,16 @@ class EncryptedDatabase {
   save(collection, id, data) {
     const sensitiveFields = this.sensitiveFields[collection] || [];
     const encrypted = this.encryption.encryptSensitiveFields(data, sensitiveFields);
-    
+
     if (!this.db[collection]) this.db[collection] = [];
-    
-    const index = this.db[collection].findIndex(item => item.id === id);
+
+    const index = this.db[collection].findIndex((item) => item.id === id);
     if (index >= 0) {
       this.db[collection][index] = { ...encrypted, id, updatedAt: new Date().toISOString() };
     } else {
       this.db[collection].push({ ...encrypted, id, createdAt: new Date().toISOString() });
     }
-    
+
     return { success: true, id };
   }
 
@@ -160,10 +160,10 @@ class EncryptedDatabase {
    */
   get(collection, id) {
     if (!this.db[collection]) return null;
-    
-    const encrypted = this.db[collection].find(item => item.id === id);
+
+    const encrypted = this.db[collection].find((item) => item.id === id);
     if (!encrypted) return null;
-    
+
     const sensitiveFields = this.sensitiveFields[collection] || [];
     return this.encryption.decryptSensitiveFields(encrypted, sensitiveFields);
   }
@@ -173,9 +173,9 @@ class EncryptedDatabase {
    */
   getAll(collection) {
     if (!this.db[collection]) return [];
-    
+
     const sensitiveFields = this.sensitiveFields[collection] || [];
-    return this.db[collection].map(item => 
+    return this.db[collection].map((item) =>
       this.encryption.decryptSensitiveFields(item, sensitiveFields)
     );
   }

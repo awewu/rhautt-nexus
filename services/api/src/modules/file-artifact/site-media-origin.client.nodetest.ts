@@ -54,7 +54,11 @@ test('B mirrors public website JPG files to A and verifies the public URL', asyn
   assert.equal(shouldSyncPublicSiteImage('product-image', 'image/jpeg'), true);
   assert.equal(shouldSyncPublicSiteImage('floor_plan', 'image/jpeg'), false);
   const fileKey = 'tenant/product-image/example.jpg';
-  const url = await syncPublicSiteImage({ fileKey, mimeType: 'image/jpeg', buffer: Buffer.from('jpg') });
+  const url = await syncPublicSiteImage({
+    fileKey,
+    mimeType: 'image/jpeg',
+    buffer: Buffer.from('jpg'),
+  });
   assert.equal(url, publicSiteImageUrl(fileKey));
   assert.deepEqual(await readPublicSiteImage(fileKey), Buffer.from('jpg'));
 });

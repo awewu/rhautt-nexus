@@ -38,4 +38,3 @@ This issue does not need to deliver full DAM production readiness unless the exi
 ## Blocked by
 
 Phase 1 simulated `其他素材` tab.
-

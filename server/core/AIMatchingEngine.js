@@ -11,7 +11,7 @@ class AIMatchingEngine {
       { trigger: 'tag_33(水质)', recommend: '全屋净水系统', confidence: 0.94 },
       { trigger: 'tag_01(温差大)', recommend: '五恒恒温系统', confidence: 0.91 },
       { trigger: 'tag_02(西晒)', recommend: '中央空调系统', confidence: 0.93 },
-      { trigger: 'tag_44(省心)', recommend: '全屋总包服务', confidence: 0.90 }
+      { trigger: 'tag_44(省心)', recommend: '全屋总包服务', confidence: 0.9 },
     ];
   }
 
@@ -20,17 +20,17 @@ class AIMatchingEngine {
    */
   matchSystems(painDiagnosis, roomProfile) {
     const matchedSystems = [];
-    
-    this.rules.forEach(rule => {
+
+    this.rules.forEach((rule) => {
       if (this.shouldApplyRule(rule, painDiagnosis, roomProfile)) {
         matchedSystems.push({
           name: rule.recommend,
           confidence: rule.confidence,
-          reason: rule.trigger
+          reason: rule.trigger,
         });
       }
     });
-    
+
     return matchedSystems;
   }
 
@@ -39,10 +39,8 @@ class AIMatchingEngine {
    */
   shouldApplyRule(rule, painDiagnosis, roomProfile) {
     if (!painDiagnosis || !painDiagnosis.allTags) return false;
-    
-    return painDiagnosis.allTags.some(tag => 
-      tag.id.includes(rule.trigger.match(/tag_\d+/)[0])
-    );
+
+    return painDiagnosis.allTags.some((tag) => tag.id.includes(rule.trigger.match(/tag_\d+/)[0]));
   }
 }
 

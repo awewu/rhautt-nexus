@@ -22,32 +22,81 @@ async function main() {
 
   let sites = [
     {
-      id: 'site-group', code: 'rhautt-group', nameCn: '瑞合瑞德暖通科技集团', nameEn: 'Rhautt Comfort', appKey: null,
-      deliveryType: 'self_hosted', status: 'active', sortOrder: 0, deletedAt: null,
+      id: 'site-group',
+      code: 'rhautt-group',
+      nameCn: '瑞合瑞德暖通科技集团',
+      nameEn: 'Rhautt Comfort',
+      appKey: null,
+      deliveryType: 'self_hosted',
+      status: 'active',
+      sortOrder: 0,
+      deletedAt: null,
     },
     {
-      id: 'site-rheem', code: 'rheem', nameCn: '瑞美', nameEn: 'Rheem', appKey: 'rheem-cn',
-      deliveryType: 'self_hosted', status: 'active', sortOrder: 10, deletedAt: null,
+      id: 'site-rheem',
+      code: 'rheem',
+      nameCn: '瑞美',
+      nameEn: 'Rheem',
+      appKey: 'rheem-cn',
+      deliveryType: 'self_hosted',
+      status: 'active',
+      sortOrder: 10,
+      deletedAt: null,
     },
     {
-      id: 'site-ruud', code: 'ruud', nameCn: '瑞德', nameEn: 'Ruud', appKey: 'ruud-cn',
-      deliveryType: 'self_hosted', status: 'active', sortOrder: 20, deletedAt: null,
+      id: 'site-ruud',
+      code: 'ruud',
+      nameCn: '瑞德',
+      nameEn: 'Ruud',
+      appKey: 'ruud-cn',
+      deliveryType: 'self_hosted',
+      status: 'active',
+      sortOrder: 20,
+      deletedAt: null,
     },
     {
-      id: 'site-nova', code: 'nova', nameCn: '新牌', nameEn: 'Nova', appKey: null,
-      deliveryType: 'self_hosted', status: 'active', sortOrder: 25, deletedAt: null,
+      id: 'site-nova',
+      code: 'nova',
+      nameCn: '新牌',
+      nameEn: 'Nova',
+      appKey: null,
+      deliveryType: 'self_hosted',
+      status: 'active',
+      sortOrder: 25,
+      deletedAt: null,
     },
     {
-      id: 'site-everhot', code: 'everhot', nameCn: '恒热', nameEn: 'Everhot', appKey: 'everhot-cn',
-      deliveryType: 'self_hosted', status: 'active', sortOrder: 30, deletedAt: null,
+      id: 'site-everhot',
+      code: 'everhot',
+      nameCn: '恒热',
+      nameEn: 'Everhot',
+      appKey: 'everhot-cn',
+      deliveryType: 'self_hosted',
+      status: 'active',
+      sortOrder: 30,
+      deletedAt: null,
     },
     {
-      id: 'site-inactive', code: 'inactive-brand', nameCn: '停用品牌', nameEn: 'Inactive', appKey: null,
-      deliveryType: 'self_hosted', status: 'inactive', sortOrder: 5, deletedAt: null,
+      id: 'site-inactive',
+      code: 'inactive-brand',
+      nameCn: '停用品牌',
+      nameEn: 'Inactive',
+      appKey: null,
+      deliveryType: 'self_hosted',
+      status: 'inactive',
+      sortOrder: 5,
+      deletedAt: null,
     },
     {
-      id: 'site-archived', code: 'archived-brand', nameCn: '归档品牌', nameEn: 'Archived', appKey: null,
-      deliveryType: 'self_hosted', status: 'active', sortOrder: 15, deletedAt: '2026-07-01T00:00:00.000Z',
+      id: 'site-archived',
+      code: 'archived-brand',
+      nameCn: '归档品牌',
+      nameEn: 'Archived',
+      appKey: null,
+      deliveryType: 'self_hosted',
+      status: 'active',
+      sortOrder: 15,
+      deletedAt: '2026-07-01T00:00:00.000Z',
     },
   ];
 
@@ -63,7 +112,10 @@ async function main() {
   await page.route('**/api/v2/brand-sites**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
-    if (request.method() === 'DELETE' && url.pathname.endsWith('/api/v2/brand-sites/site-archived')) {
+    if (
+      request.method() === 'DELETE' &&
+      url.pathname.endsWith('/api/v2/brand-sites/site-archived')
+    ) {
       archivedDeleteCalled = true;
       sites = sites.filter((site) => site.id !== 'site-archived');
       await route.fulfill({
@@ -132,14 +184,27 @@ async function main() {
   });
 
   await page.goto(`${baseUrl}/comfort/sites`, { waitUntil: 'networkidle' });
-  await page.locator('.workbench-section-header__title').filter({ hasText: '品牌官网管理' }).waitFor();
-  const masterCrudVisible = await page.getByRole('button', { name: '新增官网', exact: true }).isVisible();
+  await page
+    .locator('.workbench-section-header__title')
+    .filter({ hasText: '品牌官网管理' })
+    .waitFor();
+  const masterCrudVisible = await page
+    .getByRole('button', { name: '新增官网', exact: true })
+    .isVisible();
   const subnav = page.getByRole('navigation', { name: '品牌官网管理二级菜单' });
   const menuLabels = (await subnav.locator('a').allTextContents()).map((label) => label.trim());
-  const menuHrefs = await subnav.locator('a').evaluateAll((links) =>
-    links.map((link) => link.getAttribute('href'))
-  );
-  const expectedLabels = ['品牌官网管理', '瑞合瑞德暖通科技集团 Rhautt Comfort', '瑞美 Rheem', '瑞德 Ruud', '新牌 Nova', '恒热 Everhot', '品牌运营'];
+  const menuHrefs = await subnav
+    .locator('a')
+    .evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+  const expectedLabels = [
+    '品牌官网管理',
+    '瑞合瑞德暖通科技集团 Rhautt Comfort',
+    '瑞美 Rheem',
+    '瑞德 Ruud',
+    '新牌 Nova',
+    '恒热 Everhot',
+    '品牌运营',
+  ];
   const expectedHrefs = [
     '/comfort/sites',
     '/comfort/sites/rhautt-group',
@@ -157,21 +222,28 @@ async function main() {
   await page.getByPlaceholder('archived-brand').fill('archived-brand');
   await page.getByRole('button', { name: /永久删除/ }).click();
   await page.waitForFunction(() => !document.body.innerText.includes('archived-brand'));
-  const archivedDeletedFromList = await page.getByText('archived-brand').count() === 0;
+  const archivedDeletedFromList = (await page.getByText('archived-brand').count()) === 0;
 
   await subnav.locator('a[href="/comfort/sites/rhautt-group"]').click();
   await page.waitForURL('**/comfort/sites/rhautt-group');
   await page.waitForFunction(() => {
-    return document.querySelector('.dealer-topbar-title p')?.textContent === '瑞合瑞德暖通科技集团 Rhautt Comfort';
+    return (
+      document.querySelector('.dealer-topbar-title p')?.textContent ===
+      '瑞合瑞德暖通科技集团 Rhautt Comfort'
+    );
   });
-  const groupTopbarConsistent = await page.locator('.dealer-topbar-title p').textContent() === '瑞合瑞德暖通科技集团 Rhautt Comfort';
+  const groupTopbarConsistent =
+    (await page.locator('.dealer-topbar-title p').textContent()) ===
+    '瑞合瑞德暖通科技集团 Rhautt Comfort';
 
   await subnav.locator('a[href="/comfort/sites/nova"]').click();
   await page.waitForURL('**/comfort/sites/nova');
   await page.getByText('该品牌还没有官网产品', { exact: true }).waitFor();
   const newBrandNative = await page.locator('.brand-console-shell').isVisible();
   const newBrandScoped = await page.getByText('Nova website products', { exact: true }).isVisible();
-  const emptyStateVisible = await page.getByText('该品牌还没有官网产品', { exact: true }).isVisible();
+  const emptyStateVisible = await page
+    .getByText('该品牌还没有官网产品', { exact: true })
+    .isVisible();
   const emptyActionVisible = await page.getByRole('link', { name: /打开产品目录/ }).isVisible();
   const leakedEverhotProduct = await page.getByText('EH-HP-200', { exact: true }).count();
 
@@ -192,28 +264,30 @@ async function main() {
   await page.getByText('EH-HP-200').waitFor({ state: 'visible' });
   const everhotSkuVisible = await page.getByText('EH-HP-200').isVisible();
   const everhotSlugVisible = await page.getByText('heat-pump-200l').isVisible();
-  const usesWorkbenchVi = await page.locator('.brand-console-shell .page-container .table').isVisible();
+  const usesWorkbenchVi = await page
+    .locator('.brand-console-shell .page-container .table')
+    .isVisible();
 
   await browser.close();
 
   if (
-    !masterCrudVisible
-    || JSON.stringify(menuLabels) !== JSON.stringify(expectedLabels)
-    || JSON.stringify(menuHrefs) !== JSON.stringify(expectedHrefs)
-    || !archivedDeleteVisible
-    || !archivedDeleteCalled
-    || !archivedDeletedFromList
-    || !groupTopbarConsistent
-    || !newBrandNative
-    || !newBrandScoped
-    || !emptyStateVisible
-    || !emptyActionVisible
-    || leakedEverhotProduct !== 0
-    || !Object.values(nativeBrandResults).every(Boolean)
-    || !everhotSkuVisible
-    || !everhotSlugVisible
-    || !usesWorkbenchVi
-    || iframeCount !== 0
+    !masterCrudVisible ||
+    JSON.stringify(menuLabels) !== JSON.stringify(expectedLabels) ||
+    JSON.stringify(menuHrefs) !== JSON.stringify(expectedHrefs) ||
+    !archivedDeleteVisible ||
+    !archivedDeleteCalled ||
+    !archivedDeletedFromList ||
+    !groupTopbarConsistent ||
+    !newBrandNative ||
+    !newBrandScoped ||
+    !emptyStateVisible ||
+    !emptyActionVisible ||
+    leakedEverhotProduct !== 0 ||
+    !Object.values(nativeBrandResults).every(Boolean) ||
+    !everhotSkuVisible ||
+    !everhotSlugVisible ||
+    !usesWorkbenchVi ||
+    iframeCount !== 0
   ) {
     throw new Error(
       JSON.stringify({

@@ -16,9 +16,18 @@ test('lists selected brand category tree ordered by sortOrder', async () => {
   const result = await service.list('everhot');
 
   assert.equal(result.data.total, 3);
-  assert.deepEqual(result.data.items.map((item) => item.code), ['home', 'water', 'floor']);
-  assert.deepEqual(result.data.tree!.map((item) => item.code), ['home']);
-  assert.deepEqual(result.data.tree![0].children.map((item) => item.code), ['water', 'floor']);
+  assert.deepEqual(
+    result.data.items.map((item) => item.code),
+    ['home', 'water', 'floor']
+  );
+  assert.deepEqual(
+    result.data.tree!.map((item) => item.code),
+    ['home']
+  );
+  assert.deepEqual(
+    result.data.tree![0].children.map((item) => item.code),
+    ['water', 'floor']
+  );
 });
 
 test('lazy category list returns only root rows with tree-table metadata', async () => {
@@ -31,12 +40,15 @@ test('lazy category list returns only root rows with tree-table metadata', async
     [
       product('p-root', 'everhot', { primaryCategoryId: 'root' }),
       product('p-child', 'everhot', { primaryCategoryId: 'child' }),
-    ],
+    ]
   );
 
   const result = await service.list('everhot', 'root');
 
-  assert.deepEqual(result.data.items.map((item: any) => item.id), ['root', 'other-root']);
+  assert.deepEqual(
+    result.data.items.map((item: any) => item.id),
+    ['root', 'other-root']
+  );
   assert.equal((result.data.items[0] as any).hasChildren, true);
   assert.equal((result.data.items[0] as any).directProductCount, 1);
   assert.equal((result.data.items[0] as any).descendantProductCount, 1);
@@ -51,7 +63,10 @@ test('lazy category list returns direct children for parentId only', async () =>
 
   const result = await service.list('everhot', 'root-id');
 
-  assert.deepEqual(result.data.items.map((item: any) => item.id), ['child']);
+  assert.deepEqual(
+    result.data.items.map((item: any) => item.id),
+    ['child']
+  );
   assert.equal((result.data.items[0] as any).hasChildren, true);
   assert.equal((result.data.items[0] as any).childCategoryCount, 1);
 });
@@ -69,7 +84,7 @@ test('lazy category metrics count legacy product knowledge fields before id back
       product('p-system', 'everhot', { everhot: { system: 'water' } }),
       { ...product('p-archived', 'everhot', { everhot: { system: 'water' } }), status: 'archived' },
       product('p-cross-brand', 'ruud', { ruud: { system: 'water' } }),
-    ],
+    ]
   );
 
   const result = await service.list('everhot', 'root');
@@ -97,9 +112,18 @@ test('public category tree is brand-scoped and exposes only website-safe fields'
   const items = result.data.items as Array<Record<string, unknown>>;
 
   assert.equal(result.data.brandCode, 'everhot');
-  assert.deepEqual(items.map((item) => item.code), ['home', 'water']);
-  assert.deepEqual(result.data.tree.map((item) => item.code), ['home']);
-  assert.deepEqual(result.data.tree[0].children.map((item) => item.code), ['water']);
+  assert.deepEqual(
+    items.map((item) => item.code),
+    ['home', 'water']
+  );
+  assert.deepEqual(
+    result.data.tree.map((item) => item.code),
+    ['home']
+  );
+  assert.deepEqual(
+    result.data.tree[0].children.map((item) => item.code),
+    ['water']
+  );
   assert.ok(items.every((item) => item.brandCode === 'everhot'));
   for (const item of items) {
     for (const field of ['description', 'deletedAt', 'createdAt', 'updatedAt']) {
@@ -123,7 +147,10 @@ test('public category tree hides a category when it or an ancestor is hidden fro
 
   const result = await service.publicList('everhot');
 
-  assert.deepEqual(result.data.items.map((item) => item.code), ['home', 'visible-child']);
+  assert.deepEqual(
+    result.data.items.map((item) => item.code),
+    ['home', 'visible-child']
+  );
 });
 
 test('public category tree rejects invalid brand codes', async () => {
@@ -131,7 +158,7 @@ test('public category tree rejects invalid brand codes', async () => {
 
   await assert.rejects(
     () => service.publicList('../everhot'),
-    /brandCode must use lowercase letters/,
+    /brandCode must use lowercase letters/
   );
 });
 
@@ -177,14 +204,21 @@ test('rejects invalid root and parent-level mismatches but not deep parents', as
 
   await assert.rejects(
     () => service.create({ brandCode: 'everhot', level: 2, code: 'orphan', nameCn: 'Orphan' }),
-    /Root categories must use level 1/,
+    /Root categories must use level 1/
   );
   await assert.rejects(
-    () => service.create({ brandCode: 'everhot', parentId: 'root', level: 3, code: 'wrong-level', nameCn: 'Wrong' }),
-    /must be 2/,
+    () =>
+      service.create({
+        brandCode: 'everhot',
+        parentId: 'root',
+        level: 3,
+        code: 'wrong-level',
+        nameCn: 'Wrong',
+      }),
+    /must be 2/
   );
-  await assert.doesNotReject(
-    () => service.create({ brandCode: 'everhot', parentId: 'leaf', code: 'level-4', nameCn: 'Level 4' }),
+  await assert.doesNotReject(() =>
+    service.create({ brandCode: 'everhot', parentId: 'leaf', code: 'level-4', nameCn: 'Level 4' })
   );
 });
 
@@ -196,17 +230,21 @@ test('prevents duplicate code under the same brand and parent', async () => {
 
   await assert.rejects(
     () => service.create({ brandCode: 'everhot', level: 1, code: 'home', nameCn: 'Duplicate' }),
-    /already exists/,
+    /already exists/
   );
-  await assert.doesNotReject(
-    () => service.create({ brandCode: 'ruud', parentId: 'other-root', level: 2, code: 'home', nameCn: 'Allowed child' }),
+  await assert.doesNotReject(() =>
+    service.create({
+      brandCode: 'ruud',
+      parentId: 'other-root',
+      level: 2,
+      code: 'home',
+      nameCn: 'Allowed child',
+    })
   );
 });
 
 test('updates category fields and disables through status patch', async () => {
-  const { service } = serviceFixture([
-    category('root', 'everhot', 1, null, 'home', 10),
-  ]);
+  const { service } = serviceFixture([category('root', 'everhot', 1, null, 'home', 10)]);
 
   const result = await service.update('root', {
     nameCn: 'Home Comfort',
@@ -235,10 +273,7 @@ test('moves categories and rejects cycles', async () => {
 
   assert.equal(moved.data.parentId, 'other');
   assert.equal(moved.data.level, 2);
-  await assert.rejects(
-    () => service.update('other', { parentId: 'leaf' }),
-    /cycle/,
-  );
+  await assert.rejects(() => service.update('other', { parentId: 'leaf' }), /cycle/);
 });
 
 test('soft deletes categories without bound products', async () => {
@@ -263,10 +298,7 @@ test('delete rejects categories with child categories', async () => {
   const usage = await service.usage('root');
 
   assert.equal(usage.data.childCategoryCount, 1);
-  await assert.rejects(
-    () => service.delete('root'),
-    /child category/,
-  );
+  await assert.rejects(() => service.delete('root'), /child category/);
 });
 
 test('usage returns bound product count and delete rejects bound categories', async () => {
@@ -277,7 +309,7 @@ test('usage returns bound product count and delete rejects bound categories', as
       product('p2', 'everhot', { categoryLevel2Id: 'other' }),
       product('p3', 'ruud', { categoryLevel1Id: 'root' }),
       { ...product('p4', 'everhot', { categoryLevel1Id: 'root' }), status: 'archived' },
-    ],
+    ]
   );
 
   const usage = await service.usage('root');
@@ -286,7 +318,7 @@ test('usage returns bound product count and delete rejects bound categories', as
   assert.equal(usage.data.descendantBoundProductCount, 1);
   await assert.rejects(
     () => service.delete('root'),
-    /Move or clear product category bindings first/,
+    /Move or clear product category bindings first/
   );
 });
 
@@ -307,7 +339,7 @@ test('usage boundProductCount follows the existing frontend category-level filte
         primaryCategoryId: 'deep',
         categoryBindings: [{ categoryId: 'deep', role: 'primary' }],
       }),
-    ],
+    ]
   );
 
   const root = await service.usage('root');
@@ -329,22 +361,20 @@ test('brand product category API surface has route ownership', () => {
 
   assert.equal(
     getRouteOwner('/api/v2/brand-product-categories').owner,
-    'services/api/src/modules/brand-product-category',
+    'services/api/src/modules/brand-product-category'
   );
   assert.equal(
     getRouteOwner('/api/v2/brand-product-categories/root/usage').owner,
-    'services/api/src/modules/brand-product-category',
+    'services/api/src/modules/brand-product-category'
   );
 });
 
 function serviceFixture(
   categoryRows: BrandProductCategoryEntity[] = [],
-  productRows: Record<string, unknown>[] = [],
+  productRows: Record<string, unknown>[] = []
 ) {
   const categories = new InMemoryRepository<BrandProductCategoryEntity>().seed(...categoryRows);
-  const { ds } = makeFakeDataSource([
-    [BrandProductCategoryEntity, categories],
-  ]);
+  const { ds } = makeFakeDataSource([[BrandProductCategoryEntity, categories]]);
   // D2 单一事实源：产品行经 product-catalog 只读出口供给，此处以最小假实现替身。
   const productCatalog = {
     listRawByBrand: async (brand: string) => productRows.filter((p) => p.brand === brand),
@@ -361,7 +391,7 @@ function category(
   level: number,
   parentId: string | null,
   code: string,
-  sortOrder: number,
+  sortOrder: number
 ): BrandProductCategoryEntity {
   return {
     id,
@@ -382,7 +412,11 @@ function category(
   };
 }
 
-function product(id: string, brand: string, meta: Record<string, unknown>): Record<string, unknown> {
+function product(
+  id: string,
+  brand: string,
+  meta: Record<string, unknown>
+): Record<string, unknown> {
   return {
     id,
     tenantId: 'rhautt_shared',

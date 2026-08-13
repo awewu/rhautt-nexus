@@ -1,6 +1,10 @@
 import {
-  Column, CreateDateColumn, Entity, Index,
-  PrimaryGeneratedColumn, UpdateDateColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('design_projects')
@@ -39,7 +43,8 @@ export class FloorPlanEntity {
   @Column({ type: 'jsonb', nullable: true }) furniture: Record<string, unknown> | null;
   @Column({ type: 'jsonb', nullable: true }) pipes: Record<string, unknown> | null;
   @Column({ type: 'jsonb', nullable: true }) devices: Record<string, unknown> | null;
-  @Column({ type: 'varchar', name: 'cad_image_url', nullable: true, length: 2048 }) cadImageUrl: string | null;
+  @Column({ type: 'varchar', name: 'cad_image_url', nullable: true, length: 2048 }) cadImageUrl:
+    string | null;
   @Column({ type: 'jsonb', default: () => "'{}'::jsonb" }) meta: Record<string, unknown>;
 
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
@@ -58,7 +63,8 @@ export class DesignReleaseEntity {
   @Column({ type: 'uuid', name: 'customer_id', nullable: true }) customerId: string | null;
 
   @Column({ default: 'draft' }) status: string;
-  @Column({ type: 'jsonb', name: 'calc_snapshot', default: () => "'{}'::jsonb" }) calcSnapshot: Record<string, unknown>;
+  @Column({ type: 'jsonb', name: 'calc_snapshot', default: () => "'{}'::jsonb" })
+  calcSnapshot: Record<string, unknown>;
   @Column({ type: 'boolean', name: 'gate_pass', nullable: true }) gatePass: boolean | null;
   @Column({ type: 'boolean', name: 'gate_blocked', default: false }) gateBlocked: boolean;
 
@@ -66,14 +72,16 @@ export class DesignReleaseEntity {
   @Column({ type: 'boolean', name: 'override_signed', default: false }) overrideSigned: boolean;
   @Column({ type: 'uuid', name: 'override_by', nullable: true }) overrideBy: string | null;
   @Column({ type: 'text', name: 'override_reason', nullable: true }) overrideReason: string | null;
-  @Column({ type: 'timestamptz', name: 'override_signed_at', nullable: true }) overrideSignedAt: Date | null;
+  @Column({ type: 'timestamptz', name: 'override_signed_at', nullable: true })
+  overrideSignedAt: Date | null;
 
   @Column({ type: 'uuid', name: 'reviewed_by', nullable: true }) reviewedBy: string | null;
   @Column({ type: 'timestamptz', name: 'reviewed_at', nullable: true }) reviewedAt: Date | null;
   @Column({ type: 'uuid', name: 'released_by', nullable: true }) releasedBy: string | null;
   @Column({ type: 'timestamptz', name: 'released_at', nullable: true }) releasedAt: Date | null;
 
-  @Column({ type: 'boolean', name: 'disclaimer_accepted', default: false }) disclaimerAccepted: boolean;
+  @Column({ type: 'boolean', name: 'disclaimer_accepted', default: false })
+  disclaimerAccepted: boolean;
 
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
@@ -89,10 +97,15 @@ export class DesignRysnovaBimSyncEntity {
   @Column({ name: 'design_id' }) designId: string;
   @Column({ name: 'design_version' }) designVersion: string;
   @Column({ type: 'uuid', name: 'artifact_id', nullable: true }) artifactId: string | null;
-  @Column({ type: 'varchar', name: 'artifact_version', nullable: true }) artifactVersion: string | null;
+  @Column({ type: 'varchar', name: 'artifact_version', nullable: true }) artifactVersion:
+    string | null;
 
-  @Column({ name: 'sync_state', default: 'in_sync' }) syncState: 'in_sync' | 'stale' | 'proposed_change';
-  @Column({ type: 'jsonb', name: 'change_proposal', nullable: true }) changeProposal: Record<string, unknown> | null;
+  @Column({ name: 'sync_state', default: 'in_sync' }) syncState:
+    'in_sync' | 'stale' | 'proposed_change';
+  @Column({ type: 'jsonb', name: 'change_proposal', nullable: true }) changeProposal: Record<
+    string,
+    unknown
+  > | null;
   @Column({ type: 'varchar', name: 'reviewed_by', nullable: true }) reviewedBy: string | null;
   @Column({ type: 'timestamptz', name: 'reviewed_at', nullable: true }) reviewedAt: Date | null;
 

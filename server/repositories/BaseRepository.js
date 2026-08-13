@@ -43,8 +43,8 @@ class BaseRepository {
         ...(Object.keys(setOnInsert).length ? { $setOnInsert: setOnInsert } : {}),
         $set: {
           ...setPayload,
-          updatedAt: new Date()
-        }
+          updatedAt: new Date(),
+        },
       };
     }
     return {
@@ -53,8 +53,8 @@ class BaseRepository {
       $set: {
         ...setPayload,
         tenantId: this.requireTenant(scope),
-        updatedAt: new Date()
-      }
+        updatedAt: new Date(),
+      },
     };
   }
 
@@ -62,7 +62,7 @@ class BaseRepository {
     const payload = this.tenantScoped
       ? { ...data, tenantId: this.requireTenant(scope) }
       : { ...data };
-    return this.model.create([payload], options).then(items => items[0]);
+    return this.model.create([payload], options).then((items) => items[0]);
   }
 
   async findById(scope, id, options = {}) {
@@ -79,14 +79,22 @@ class BaseRepository {
 
   async list(scope, query = {}, options = {}) {
     const page = Math.max(parseInt(options.page || 1, 10), 1);
-    const limit = Math.min(Math.max(parseInt(options.limit || this.defaultLimit, 10), 1), this.maxLimit);
+    const limit = Math.min(
+      Math.max(parseInt(options.limit || this.defaultLimit, 10), 1),
+      this.maxLimit
+    );
     const skip = (page - 1) * limit;
     const sort = options.sort || { updatedAt: -1 };
     const q = this.withTenant(scope, query);
 
     const [items, total] = await Promise.all([
-      this.model.find(q, options.projection).sort(sort).skip(skip).limit(limit).lean(options.lean !== false),
-      this.model.countDocuments(q)
+      this.model
+        .find(q, options.projection)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .lean(options.lean !== false),
+      this.model.countDocuments(q),
     ]);
 
     return {
@@ -95,19 +103,15 @@ class BaseRepository {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     };
   }
 
   async updateById(scope, id, update = {}, options = {}) {
     const payload = this.sanitizeTenantUpdate(scope, update);
     return this.model
-      .findOneAndUpdate(
-        this.withTenant(scope, { _id: id }),
-        payload,
-        { new: true, ...options }
-      )
+      .findOneAndUpdate(this.withTenant(scope, { _id: id }), payload, { new: true, ...options })
       .lean(options.lean !== false);
   }
 }

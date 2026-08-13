@@ -24,11 +24,11 @@ function isValidExcelOrCsvBuffer(buffer, mimetype, originalname) {
 
   // XLSX 文件以 PK 开头 (ZIP 格式)
   if (ext === 'xlsx') {
-    return buffer[0] === 0x50 && buffer[1] === 0x4B; // 'PK'
+    return buffer[0] === 0x50 && buffer[1] === 0x4b; // 'PK'
   }
   // XLS 文件 (OLE2)
   if (ext === 'xls') {
-    return buffer[0] === 0xD0 && buffer[1] === 0xCF; // OLE2 签名
+    return buffer[0] === 0xd0 && buffer[1] === 0xcf; // OLE2 签名
   }
   // CSV 文件应该是纯文本
   if (ext === 'csv') {
@@ -53,16 +53,18 @@ const uploadFile = multer({
 
     // MIME 类型白名单
     const validMimes = [
-      'text/csv', 'application/csv',
+      'text/csv',
+      'application/csv',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-excel', 'application/octet-stream'
+      'application/vnd.ms-excel',
+      'application/octet-stream',
     ];
-    if (file.mimetype && !validMimes.some(m => file.mimetype.includes(m))) {
+    if (file.mimetype && !validMimes.some((m) => file.mimetype.includes(m))) {
       console.warn(`[Security] 可疑的 MIME 类型: ${file.mimetype} for ${file.originalname}`);
     }
 
     cb(null, true);
-  }
+  },
 });
 
 /**
@@ -79,7 +81,7 @@ router.get('/', async (req, res) => {
       brand,
       search,
       status = 'active',
-      sort = '-createdAt'
+      sort = '-createdAt',
     } = req.query;
 
     // 构建查询条件
@@ -87,7 +89,7 @@ router.get('/', async (req, res) => {
     if (category) filter.category = category;
     if (subcategory) filter.subcategory = subcategory;
     if (brand) filter.brand = brand;
-    
+
     // 文本搜索
     if (search) {
       filter.$text = { $search: search };
@@ -95,14 +97,10 @@ router.get('/', async (req, res) => {
 
     // 执行查询
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    
+
     const [products, total] = await Promise.all([
-      Product.find(filter)
-        .sort(sort)
-        .skip(skip)
-        .limit(parseInt(limit))
-        .lean(),
-      Product.countDocuments(filter)
+      Product.find(filter).sort(sort).skip(skip).limit(parseInt(limit)).lean(),
+      Product.countDocuments(filter),
     ]);
 
     res.json({
@@ -113,11 +111,10 @@ router.get('/', async (req, res) => {
           page: parseInt(page),
           limit: parseInt(limit),
           total,
-          pages: Math.ceil(total / parseInt(limit))
-        }
-      }
+          pages: Math.ceil(total / parseInt(limit)),
+        },
+      },
     });
-    
   } catch (error) {
     console.error('[Products API] 查询失败:', error);
     return errorResponse(res, error);
@@ -136,8 +133,8 @@ router.get('/categories', async (req, res) => {
         $group: {
           _id: { category: '$category', subcategory: '$subcategory' },
           count: { $sum: 1 },
-          brands: { $addToSet: '$brand' }
-        }
+          brands: { $addToSet: '$brand' },
+        },
       },
       {
         $group: {
@@ -146,24 +143,23 @@ router.get('/categories', async (req, res) => {
             $push: {
               name: '$_id.subcategory',
               count: '$count',
-              brands: '$brands'
-            }
+              brands: '$brands',
+            },
           },
-          totalCount: { $sum: '$count' }
-        }
+          totalCount: { $sum: '$count' },
+        },
       },
-      { $sort: { _id: 1 } }
+      { $sort: { _id: 1 } },
     ]);
 
     res.json({
       success: true,
-      data: categories.map(c => ({
+      data: categories.map((c) => ({
         category: c._id,
         totalCount: c.totalCount,
-        subcategories: c.subcategories
-      }))
+        subcategories: c.subcategories,
+      })),
     });
-    
   } catch (error) {
     return errorResponse(res, error);
   }
@@ -176,19 +172,18 @@ router.get('/categories', async (req, res) => {
 router.get('/:sku', async (req, res) => {
   try {
     const product = await Product.findOne({ sku: req.params.sku });
-    
+
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: '产品不存在'
+        message: '产品不存在',
       });
     }
 
     res.json({
       success: true,
-      data: product
+      data: product,
     });
-    
   } catch (error) {
     return errorResponse(res, error);
   }
@@ -204,8 +199,8 @@ router.post('/', async (req, res) => {
       ...req.body,
       dataSource: {
         type: 'manual',
-        verified: true
-      }
+        verified: true,
+      },
     };
 
     const product = new Product(productData);
@@ -214,14 +209,13 @@ router.post('/', async (req, res) => {
     res.status(201).json({
       success: true,
       message: '产品创建成功',
-      data: product
+      data: product,
     });
-    
   } catch (error) {
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
-        message: 'SKU已存在'
+        message: 'SKU已存在',
       });
     }
     return errorResponse(res, error);
@@ -236,32 +230,30 @@ router.put('/:sku', async (req, res) => {
   try {
     const updates = {
       ...req.body,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
-    
+
     // 不允许修改SKU
     delete updates.sku;
     delete updates._id;
 
-    const product = await Product.findOneAndUpdate(
-      { sku: req.params.sku },
-      updates,
-      { new: true, runValidators: true }
-    );
+    const product = await Product.findOneAndUpdate({ sku: req.params.sku }, updates, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: '产品不存在'
+        message: '产品不存在',
       });
     }
 
     res.json({
       success: true,
       message: '产品更新成功',
-      data: product
+      data: product,
     });
-    
   } catch (error) {
     return errorResponse(res, error);
   }
@@ -274,14 +266,14 @@ router.put('/:sku', async (req, res) => {
 router.patch('/:sku/price', async (req, res) => {
   try {
     const { cost, retail, wholesale } = req.body;
-    
+
     const product = await Product.findOneAndUpdate(
       { sku: req.params.sku },
       {
         'pricing.cost': cost,
         'pricing.retail': retail,
         'pricing.wholesale': wholesale,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       { new: true }
     );
@@ -289,7 +281,7 @@ router.patch('/:sku/price', async (req, res) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: '产品不存在'
+        message: '产品不存在',
       });
     }
 
@@ -298,10 +290,9 @@ router.patch('/:sku/price', async (req, res) => {
       message: '价格更新成功',
       data: {
         sku: product.sku,
-        pricing: product.pricing
-      }
+        pricing: product.pricing,
+      },
     });
-    
   } catch (error) {
     return errorResponse(res, error);
   }
@@ -314,14 +305,14 @@ router.patch('/:sku/price', async (req, res) => {
 router.patch('/:sku/stock', async (req, res) => {
   try {
     const { stock, supplier, leadTime } = req.body;
-    
+
     const product = await Product.findOneAndUpdate(
       { sku: req.params.sku },
       {
         'inventory.stock': stock,
         'inventory.supplier': supplier,
         'inventory.leadTime': leadTime,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
       { new: true }
     );
@@ -329,7 +320,7 @@ router.patch('/:sku/stock', async (req, res) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: '产品不存在'
+        message: '产品不存在',
       });
     }
 
@@ -338,10 +329,9 @@ router.patch('/:sku/stock', async (req, res) => {
       message: '库存更新成功',
       data: {
         sku: product.sku,
-        inventory: product.inventory
-      }
+        inventory: product.inventory,
+      },
     });
-    
   } catch (error) {
     return errorResponse(res, error);
   }
@@ -361,7 +351,7 @@ router.delete('/series', async (req, res) => {
     if (!brand) {
       return res.status(400).json({
         success: false,
-        message: '必须指定 brand 参数'
+        message: '必须指定 brand 参数',
       });
     }
 
@@ -372,7 +362,7 @@ router.delete('/series', async (req, res) => {
     if (affected === 0) {
       return res.status(404).json({
         success: false,
-        message: `未找到匹配 brand=${brand}${series ? `, series=${series}` : ''} 的产品`
+        message: `未找到匹配 brand=${brand}${series ? `, series=${series}` : ''} 的产品`,
       });
     }
 
@@ -382,11 +372,11 @@ router.delete('/series', async (req, res) => {
       return res.json({
         success: true,
         message: `已永久删除 ${result.deletedCount} 个产品`,
-        data: { mode: 'hard', affected: result.deletedCount, filter }
+        data: { mode: 'hard', affected: result.deletedCount, filter },
       });
     } else {
       result = await Product.updateMany(filter, {
-        $set: { status: 'discontinued', updatedAt: new Date() }
+        $set: { status: 'discontinued', updatedAt: new Date() },
       });
       return res.json({
         success: true,
@@ -394,8 +384,8 @@ router.delete('/series', async (req, res) => {
         data: {
           mode: 'soft',
           affected: result.modifiedCount || result.nModified || 0,
-          filter
-        }
+          filter,
+        },
       });
     }
   } catch (error) {
@@ -418,15 +408,14 @@ router.delete('/:sku', async (req, res) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: '产品不存在'
+        message: '产品不存在',
       });
     }
 
     res.json({
       success: true,
-      message: '产品已停用'
+      message: '产品已停用',
     });
-    
   } catch (error) {
     return errorResponse(res, error);
   }
@@ -439,33 +428,33 @@ router.delete('/:sku', async (req, res) => {
 router.post('/bulk-import', async (req, res) => {
   try {
     const { products } = req.body;
-    
+
     if (!Array.isArray(products) || products.length === 0) {
       return res.status(400).json({
         success: false,
-        message: '请提供产品数组'
+        message: '请提供产品数组',
       });
     }
 
     // 添加数据源标记
-    const productsToImport = products.map(p => ({
+    const productsToImport = products.map((p) => ({
       ...p,
       dataSource: {
         type: 'imported',
         scrapedAt: new Date(),
-        verified: false
-      }
+        verified: false,
+      },
     }));
 
     // 使用upsert批量导入
     const results = await Promise.all(
       productsToImport.map(async (p) => {
         try {
-          await Product.findOneAndUpdate(
-            { sku: p.sku },
-            p,
-            { upsert: true, new: true, runValidators: true }
-          );
+          await Product.findOneAndUpdate({ sku: p.sku }, p, {
+            upsert: true,
+            new: true,
+            runValidators: true,
+          });
           return { sku: p.sku, status: 'success' };
         } catch (err) {
           return { sku: p.sku, status: 'error', message: err.message };
@@ -473,8 +462,8 @@ router.post('/bulk-import', async (req, res) => {
       })
     );
 
-    const successCount = results.filter(r => r.status === 'success').length;
-    const errorCount = results.filter(r => r.status === 'error').length;
+    const successCount = results.filter((r) => r.status === 'success').length;
+    const errorCount = results.filter((r) => r.status === 'error').length;
 
     res.json({
       success: true,
@@ -483,10 +472,9 @@ router.post('/bulk-import', async (req, res) => {
         total: products.length,
         success: successCount,
         errors: errorCount,
-        details: results
-      }
+        details: results,
+      },
     });
-    
   } catch (error) {
     return errorResponse(res, error);
   }
@@ -500,7 +488,7 @@ function parseSpreadsheet(file) {
   const wb = XLSX.read(file.buffer, {
     type: 'buffer',
     raw: false,
-    cellDates: true
+    cellDates: true,
   });
   const sheetName = wb.SheetNames[0];
   if (!sheetName) throw new Error('文件无有效工作表');
@@ -513,20 +501,43 @@ function parseSpreadsheet(file) {
  * 字段映射：把用户表头（中英文皆可）映射到 Product 模型字段
  */
 const FIELD_MAP = {
-  'sku': 'sku', 'SKU': 'sku', '编码': 'sku', '产品编码': 'sku', '型号': 'sku',
-  'name': 'name', '名称': 'name', '产品名称': 'name',
-  'brand': 'brand', '品牌': 'brand',
-  'series': 'series', '系列': 'series',
-  'category': 'category', '分类': 'category',
-  'subcategory': 'subcategory', '子分类': 'subcategory',
-  'description': 'description', '描述': 'description', '产品描述': 'description',
-  'cost': 'pricing.cost', '成本价': 'pricing.cost', '成本': 'pricing.cost',
-  'retail': 'pricing.retail', '零售价': 'pricing.retail', '售价': 'pricing.retail', '价格': 'pricing.retail',
-  'wholesale': 'pricing.wholesale', '批发价': 'pricing.wholesale',
-  'capacity': 'technicalParams.capacity', '制冷量': 'technicalParams.capacity', '功率': 'technicalParams.capacity',
-  'diameter': 'pipeParams.diameter', '管径': 'pipeParams.diameter',
-  'stock': 'inventory.stock', '库存': 'inventory.stock',
-  'status': 'status', '状态': 'status'
+  sku: 'sku',
+  SKU: 'sku',
+  编码: 'sku',
+  产品编码: 'sku',
+  型号: 'sku',
+  name: 'name',
+  名称: 'name',
+  产品名称: 'name',
+  brand: 'brand',
+  品牌: 'brand',
+  series: 'series',
+  系列: 'series',
+  category: 'category',
+  分类: 'category',
+  subcategory: 'subcategory',
+  子分类: 'subcategory',
+  description: 'description',
+  描述: 'description',
+  产品描述: 'description',
+  cost: 'pricing.cost',
+  成本价: 'pricing.cost',
+  成本: 'pricing.cost',
+  retail: 'pricing.retail',
+  零售价: 'pricing.retail',
+  售价: 'pricing.retail',
+  价格: 'pricing.retail',
+  wholesale: 'pricing.wholesale',
+  批发价: 'pricing.wholesale',
+  capacity: 'technicalParams.capacity',
+  制冷量: 'technicalParams.capacity',
+  功率: 'technicalParams.capacity',
+  diameter: 'pipeParams.diameter',
+  管径: 'pipeParams.diameter',
+  stock: 'inventory.stock',
+  库存: 'inventory.stock',
+  status: 'status',
+  状态: 'status',
 };
 
 function mapRow(row) {
@@ -569,7 +580,7 @@ router.post('/upload-file/preview', uploadFile.single('file'), async (req, res) 
     }
     const headers = Object.keys(rows[0]);
     const mapped = rows.slice(0, 10).map(mapRow);
-    const unmappedHeaders = headers.filter(h => !FIELD_MAP[h] && !FIELD_MAP[h.toLowerCase()]);
+    const unmappedHeaders = headers.filter((h) => !FIELD_MAP[h] && !FIELD_MAP[h.toLowerCase()]);
     res.json({
       success: true,
       data: {
@@ -579,8 +590,8 @@ router.post('/upload-file/preview', uploadFile.single('file'), async (req, res) 
         headers,
         unmappedHeaders,
         previewMapped: mapped,
-        previewRaw: rows.slice(0, 10)
-      }
+        previewRaw: rows.slice(0, 10),
+      },
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -616,10 +627,13 @@ router.post('/upload-file', uploadFile.single('file'), async (req, res) => {
       try {
         if (mode === 'insert') {
           const exists = await Product.findOne({ sku: mapped.sku }).lean();
-          if (exists) { results.skipped++; continue; }
+          if (exists) {
+            results.skipped++;
+            continue;
+          }
           await new Product({
             ...mapped,
-            dataSource: { type: 'imported', verified: false, importedAt: new Date() }
+            dataSource: { type: 'imported', verified: false, importedAt: new Date() },
           }).save();
         } else {
           // upsert 模式
@@ -629,7 +643,7 @@ router.post('/upload-file', uploadFile.single('file'), async (req, res) => {
               ...mapped,
               'dataSource.type': 'imported',
               'dataSource.importedAt': new Date(),
-              updatedAt: new Date()
+              updatedAt: new Date(),
             },
             { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
           );
@@ -644,7 +658,7 @@ router.post('/upload-file', uploadFile.single('file'), async (req, res) => {
     res.json({
       success: true,
       message: `导入完成：成功 ${results.success}，跳过 ${results.skipped}，失败 ${results.failed}`,
-      data: results
+      data: results,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -658,14 +672,14 @@ router.post('/upload-file', uploadFile.single('file'), async (req, res) => {
 router.post('/match-for-project', async (req, res) => {
   try {
     const { devices, pipes } = req.body;
-    
+
     const matchedProducts = {
       devices: [],
       pipes: [],
       fittings: [],
       insulation: [],
       totalCost: 0,
-      totalRetail: 0
+      totalRetail: 0,
     };
 
     // 匹配设备
@@ -674,17 +688,17 @@ router.post('/match-for-project', async (req, res) => {
         const match = await Product.findOne({
           category: 'HVAC',
           subcategory: device.type,
-          status: 'active'
+          status: 'active',
         }).sort({ 'technicalParams.capacity': 1 });
-        
+
         if (match) {
           matchedProducts.devices.push({
             ...device,
             matchedProduct: {
               sku: match.sku,
               name: match.name,
-              price: match.pricing.retail
-            }
+              price: match.pricing.retail,
+            },
           });
           matchedProducts.totalRetail += match.pricing.retail;
           matchedProducts.totalCost += match.pricing.cost;
@@ -696,15 +710,15 @@ router.post('/match-for-project', async (req, res) => {
     if (Array.isArray(pipes)) {
       for (const pipe of pipes) {
         const diameter = pipe.diameter;
-        const material = pipe.type === 'refrigerant' ? '铜' : 
-                        pipe.type === 'condensate' ? 'PVC-U' : 'PPR';
-        
+        const material =
+          pipe.type === 'refrigerant' ? '铜' : pipe.type === 'condensate' ? 'PVC-U' : 'PPR';
+
         const match = await Product.findOne({
           'pipeParams.diameter': { $gte: diameter - 2, $lte: diameter + 2 },
           'pipeParams.material': material,
-          status: 'active'
+          status: 'active',
         });
-        
+
         if (match) {
           const length = pipe.length || 1;
           matchedProducts.pipes.push({
@@ -713,8 +727,8 @@ router.post('/match-for-project', async (req, res) => {
               sku: match.sku,
               name: match.name,
               unitPrice: match.pricing.retail,
-              totalPrice: match.pricing.retail * length
-            }
+              totalPrice: match.pricing.retail * length,
+            },
           });
           matchedProducts.totalRetail += match.pricing.retail * length;
           matchedProducts.totalCost += match.pricing.cost * length;
@@ -724,9 +738,8 @@ router.post('/match-for-project', async (req, res) => {
 
     res.json({
       success: true,
-      data: matchedProducts
+      data: matchedProducts,
     });
-    
   } catch (error) {
     return errorResponse(res, error);
   }
@@ -744,27 +757,29 @@ router.get('/stats/overview', async (req, res) => {
           _id: null,
           totalProducts: { $sum: 1 },
           activeProducts: {
-            $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] }
+            $sum: { $cond: [{ $eq: ['$status', 'active'] }, 1, 0] },
           },
           discontinuedProducts: {
-            $sum: { $cond: [{ $eq: ['$status', 'discontinued'] }, 1, 0] }
+            $sum: { $cond: [{ $eq: ['$status', 'discontinued'] }, 1, 0] },
           },
           avgRetailPrice: { $avg: '$pricing.retail' },
           avgCost: { $avg: '$pricing.cost' },
           unverifiedScraped: {
             $sum: {
               $cond: [
-                { $and: [
-                  { $eq: ['$dataSource.type', 'scraped'] },
-                  { $eq: ['$dataSource.verified', false] }
-                ]},
+                {
+                  $and: [
+                    { $eq: ['$dataSource.type', 'scraped'] },
+                    { $eq: ['$dataSource.verified', false] },
+                  ],
+                },
                 1,
-                0
-              ]
-            }
-          }
-        }
-      }
+                0,
+              ],
+            },
+          },
+        },
+      },
     ]);
 
     const categoryStats = await Product.aggregate([
@@ -772,20 +787,19 @@ router.get('/stats/overview', async (req, res) => {
       {
         $group: {
           _id: '$category',
-          count: { $sum: 1 }
-        }
+          count: { $sum: 1 },
+        },
       },
-      { $sort: { count: -1 } }
+      { $sort: { count: -1 } },
     ]);
 
     res.json({
       success: true,
       data: {
         overview: stats[0] || {},
-        byCategory: categoryStats
-      }
+        byCategory: categoryStats,
+      },
     });
-    
   } catch (error) {
     return errorResponse(res, error);
   }
@@ -804,7 +818,7 @@ router.get('/json/all', async (req, res) => {
     const products = JSON.parse(data);
 
     // 统计包含成本价的产品
-    const withCost = products.filter(p => p.cost !== undefined).length;
+    const withCost = products.filter((p) => p.cost !== undefined).length;
     const total = products.length;
 
     res.json({
@@ -814,9 +828,9 @@ router.get('/json/all', async (req, res) => {
         stats: {
           total,
           withCost,
-          costCoverage: Math.round((withCost / total) * 100) + '%'
-        }
-      }
+          costCoverage: Math.round((withCost / total) * 100) + '%',
+        },
+      },
     });
   } catch (error) {
     console.error('[Products API] 读取JSON失败:', error);
@@ -831,11 +845,11 @@ router.get('/json/:id', async (req, res) => {
     const data = fs.readFileSync(filePath, 'utf8');
     const products = JSON.parse(data);
 
-    const product = products.find(p => p.id === req.params.id);
+    const product = products.find((p) => p.id === req.params.id);
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: '产品不存在'
+        message: '产品不存在',
       });
     }
 
@@ -849,9 +863,9 @@ router.get('/json/:id', async (req, res) => {
         ...product,
         profit: {
           grossProfit,
-          profitMargin: parseFloat(profitMargin)
-        }
-      }
+          profitMargin: parseFloat(profitMargin),
+        },
+      },
     });
   } catch (error) {
     console.error('[Products API] 读取产品详情失败:', error);

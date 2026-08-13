@@ -24,7 +24,9 @@ const ALGO = 'aes-256-gcm';
 function resolveKey() {
   const raw = process.env.PII_ENCRYPTION_KEY;
   if (raw) {
-    const buf = /^[0-9a-fA-F]{64}$/.test(raw) ? Buffer.from(raw, 'hex') : Buffer.from(raw, 'base64');
+    const buf = /^[0-9a-fA-F]{64}$/.test(raw)
+      ? Buffer.from(raw, 'hex')
+      : Buffer.from(raw, 'base64');
     if (buf.length === 32) return buf;
   }
   return crypto.createHash('sha256').update('rhautt-nexus-dev-pii-key').digest();
@@ -54,26 +56,42 @@ const ACCOUNTS = [
   // 全权限超级号：role=platform_admin 命中所有 @Roles 白名单，配合下方给 DEFAULT 租户
   // 开通全部可售模块，即可通过 EntitlementGuard，一个账号进所有应用、看所有功能。
   // 支持邮箱账号登录（normalizeIdentifier 兼容）。
-  { phone: 'admin@rhautt.local', password: 'Test1234!', name: '系统管理员', role: 'platform_admin' },
-  { phone: '13900000000', password: 'Super@2026',  name: '超级管理员', role: 'platform_admin' },
+  {
+    phone: 'admin@rhautt.local',
+    password: 'Test1234!',
+    name: '系统管理员',
+    role: 'platform_admin',
+  },
+  { phone: '13900000000', password: 'Super@2026', name: '超级管理员', role: 'platform_admin' },
   // 品牌方员工：准入策略要求企业邮箱（rhautt.com / rhautt.local）。
-  { phone: 'hq@rhautt.local',     password: 'Hq@2026',     name: '总部管理员', role: 'hq_admin' },
-  { phone: 'region@rhautt.local', password: 'Region@2026', name: '区域经理',   role: 'regional_manager' },
+  { phone: 'hq@rhautt.local', password: 'Hq@2026', name: '总部管理员', role: 'hq_admin' },
+  {
+    phone: 'region@rhautt.local',
+    password: 'Region@2026',
+    name: '区域经理',
+    role: 'regional_manager',
+  },
   // 经销商侧员工：手机号登录。
-  { phone: '13900000001', password: 'Dealer@2026', name: '王经理',   role: 'dealer_admin' },
-  { phone: '13900000005', password: 'Store@2026',  name: '刘店长',   role: 'store_manager' },
+  { phone: '13900000001', password: 'Dealer@2026', name: '王经理', role: 'dealer_admin' },
+  { phone: '13900000005', password: 'Store@2026', name: '刘店长', role: 'store_manager' },
   { phone: '13900000002', password: 'Design@2026', name: '李设计师', role: 'designer' },
-  { phone: '13900000003', password: 'Sales@2026',  name: '张销售',   role: 'sales' },
+  { phone: '13900000003', password: 'Sales@2026', name: '张销售', role: 'sales' },
   { phone: '13900000004', password: 'Support@2026', name: '陈技术支持', role: 'engineer' },
-  { phone: '13900000006', password: 'Install@2026', name: '赵安装',  role: 'installer' },
+  { phone: '13900000006', password: 'Install@2026', name: '赵安装', role: 'installer' },
   // 终端客户：正式登录走短信验证码(/auth/login-sms)，此处播密码仅便于本地测试。
   { phone: '13900000009', password: 'Customer@2026', name: '钱客户', role: 'customer' },
 ];
 
 // 全部可售模块（与 subscription.entity.ts 的 SELLABLE_MODULES 保持一致）。
 const SELLABLE_MODULES = [
-  'site', 'product-catalog', 'growth',
-  'crm', 'diagnosis', 'quote', 'delivery', 'lifecycle',
+  'site',
+  'product-catalog',
+  'growth',
+  'crm',
+  'diagnosis',
+  'quote',
+  'delivery',
+  'lifecycle',
   'analytics',
 ];
 
@@ -91,7 +109,9 @@ async function run() {
   await client.connect();
 
   // rhautt_nexus.users.tenant_id → rhautt_nexus.tenants(id)。确保 DEFAULT 租户存在于该 schema。
-  let { rows: [tenant] } = await client.query("SELECT id FROM rhautt_nexus.tenants WHERE code = 'DEFAULT'");
+  let {
+    rows: [tenant],
+  } = await client.query("SELECT id FROM rhautt_nexus.tenants WHERE code = 'DEFAULT'");
   if (!tenant) {
     const id = uuidv4();
     await client.query(
@@ -106,7 +126,9 @@ async function run() {
   console.log('tenantId:', tenantId);
 
   // DEFAULT 工作台组织骨架：固定业务 code + ON CONFLICT，重复执行不会制造重复组织。
-  const { rows: [dealer] } = await client.query(
+  const {
+    rows: [dealer],
+  } = await client.query(
     `INSERT INTO rhautt_nexus.dealers
        (id, tenant_id, code, name, province, city, status, contract_level, contact, created_at, updated_at)
      VALUES ($1,$2,'DEFAULT-DEALER','瑞合瑞德·默认演示经销商','上海','上海','active','standard','{}'::jsonb,NOW(),NOW())
@@ -118,7 +140,9 @@ async function run() {
   );
   const dealerId = dealer.id;
 
-  const { rows: [store] } = await client.query(
+  const {
+    rows: [store],
+  } = await client.query(
     `INSERT INTO rhautt_nexus.stores
        (id, tenant_id, dealer_id, code, name, city, address, status, created_at, updated_at)
      VALUES ($1,$2,$3,'DEFAULT-STORE','上海默认舒适家体验店','上海',NULL,'active',NOW(),NOW())
@@ -137,12 +161,23 @@ async function run() {
       'SELECT id FROM rhautt_nexus.users WHERE tenant_id = $1 AND phone_hash = $2',
       [tenantId, phoneHash]
     );
-    if (exist.length) { console.log(`已存在: ${a.phone} (${a.role})`); continue; }
+    if (exist.length) {
+      console.log(`已存在: ${a.phone} (${a.role})`);
+      continue;
+    }
     await client.query(
       `INSERT INTO rhautt_nexus.users
          (id, tenant_id, phone_hash, phone_encrypted, password_hash, display_name, role, permissions, status, login_attempts, created_at, updated_at)
        VALUES ($1,$2,$3,$4,$5,$6,$7,'[]'::jsonb,'active',0,NOW(),NOW())`,
-      [uuidv4(), tenantId, phoneHash, encryptPII(id), await bcrypt.hash(a.password, 10), a.name, a.role]
+      [
+        uuidv4(),
+        tenantId,
+        phoneHash,
+        encryptPII(id),
+        await bcrypt.hash(a.password, 10),
+        a.name,
+        a.role,
+      ]
     );
     console.log(`✅ 创建: ${a.phone} / ${a.password} / ${a.role} (${a.name})`);
   }
@@ -197,4 +232,7 @@ async function run() {
   await client.end();
 }
 
-run().catch(e => { console.error('❌', e.message); process.exit(1); });
+run().catch((e) => {
+  console.error('❌', e.message);
+  process.exit(1);
+});

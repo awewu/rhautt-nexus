@@ -44,18 +44,20 @@ npm run build
 ```
 
 常用单步：
-| 命令 | 作用 |
-|---|---|
-| `npm run fetch:products` | 从 Nexus 公开端点重生成 `public/js/products-data.js` |
-| `npm run fetch:images` | 从 DAM 拉产品图，重生成 `public/js/product-images.js` |
-| `npm run sync:products` | 把 `products-data.js` 导入 Nexus（幂等） |
-| `npm run sync:images` | 把产品图上传 DAM（默认只传 `owned` 授权图） |
-| `npm run gen:subtypes` | 生成商用子类型 SEO 落地页 |
+
+| 命令                     | 作用                                                  |
+| ------------------------ | ----------------------------------------------------- |
+| `npm run fetch:products` | 从 Nexus 公开端点重生成 `public/js/products-data.js`  |
+| `npm run fetch:images`   | 从 DAM 拉产品图，重生成 `public/js/product-images.js` |
+| `npm run sync:products`  | 把 `products-data.js` 导入 Nexus（幂等）              |
+| `npm run sync:images`    | 把产品图上传 DAM（默认只传 `owned` 授权图）           |
+| `npm run gen:subtypes`   | 生成商用子类型 SEO 落地页                             |
 
 > ⚠️ `public/js/products-data.js`、`public/js/product-images.js`、`public/assets/img/products/` 是**构建产物，勿手改**。
 > 改数据请走后台 `apps/brand-console`（:5012）或直接改 Nexus，再「发布/构建」重生成。
 
 ## 关联文档
+
 - 总纲：[`docs/EVERHOT-WEBSITE-HANDBOOK.md`](../../docs/EVERHOT-WEBSITE-HANDBOOK.md)
 - VI 规范：[`VI-SPEC.md`](./VI-SPEC.md) · 设计令牌：[`DESIGN-TOKENS-README.md`](./DESIGN-TOKENS-README.md)
 - 对标审计：[`docs/EVERHOT-RHEEM-PARITY-AUDIT.md`](../../docs/EVERHOT-RHEEM-PARITY-AUDIT.md)

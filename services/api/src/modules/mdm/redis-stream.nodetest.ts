@@ -1,6 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { InMemoryStreamClient, OutboxStreamDispatcher, EVENT_STREAM_KEY, EVENT_STREAM_GROUP } from './redis-stream';
+import {
+  InMemoryStreamClient,
+  OutboxStreamDispatcher,
+  EVENT_STREAM_KEY,
+  EVENT_STREAM_GROUP,
+} from './redis-stream';
 
 // P0-2 · Redis Stream 消费组语义证明（确定性，无需真实 Redis）：
 //  1) 多消费者不重复投递：一条流消息只被组内一个消费者处理；
@@ -21,7 +26,9 @@ function deliverFactory() {
 test('多消费者不重复投递：5 条消息经 2 个消费者恰好各投递一次', async () => {
   const stream = new InMemoryStreamClient();
   const dispatcher = new OutboxStreamDispatcher(stream);
-  await dispatcher.relay([1, 2, 3, 4, 5].map((i) => ({ id: `evt-${i}`, tenantId: 't', eventType: 'x' })));
+  await dispatcher.relay(
+    [1, 2, 3, 4, 5].map((i) => ({ id: `evt-${i}`, tenantId: 't', eventType: 'x' }))
+  );
 
   const { deliver, deliveredCount } = deliverFactory();
   // 两个消费者交替各读一批（每批 3）
@@ -31,7 +38,8 @@ test('多消费者不重复投递：5 条消息经 2 个消费者恰好各投递
   assert.equal(a.read + b.read, 5, '总读取应等于消息数（互斥，不重复读）');
   assert.equal(a.delivered + b.delivered, 5);
   // 每条恰好一次
-  for (let i = 1; i <= 5; i++) assert.equal(deliveredCount.get(`evt-${i}`), 1, `evt-${i} 应恰好投递一次`);
+  for (let i = 1; i <= 5; i++)
+    assert.equal(deliveredCount.get(`evt-${i}`), 1, `evt-${i} 应恰好投递一次`);
   // 全部 ack → PEL 清空
   assert.equal(await stream.pending(EVENT_STREAM_KEY, EVENT_STREAM_GROUP), 0);
 });
@@ -65,5 +73,9 @@ test('失败不 ack：失败消息留在 PEL 供重试', async () => {
 
   const r1 = await dispatcher.consumeOnce('consumer-A', 10, 0, deliver);
   assert.equal(r1.failed, 1);
-  assert.equal(await stream.pending(EVENT_STREAM_KEY, EVENT_STREAM_GROUP), 1, '失败未 ack → 留 PEL');
+  assert.equal(
+    await stream.pending(EVENT_STREAM_KEY, EVENT_STREAM_GROUP),
+    1,
+    '失败未 ack → 留 PEL'
+  );
 });

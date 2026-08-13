@@ -10,20 +10,20 @@ class LocationService {
   constructor() {
     this.version = '1.0.0';
     this.name = 'LocationService';
-    
+
     // 行政区划数据缓存
     this.regionsCache = null;
     this.regionsCachePath = path.join(__dirname, '../../data/regions.json');
-    
+
     // 初始化
     this.init();
   }
-  
+
   init() {
     this.loadRegions();
     console.log('[LocationService] 初始化完成');
   }
-  
+
   /**
    * 加载行政区划数据
    */
@@ -43,7 +43,7 @@ class LocationService {
       this.regionsCache = this.getBuiltInRegions();
     }
   }
-  
+
   /**
    * 保存行政区划数据到文件
    */
@@ -58,7 +58,7 @@ class LocationService {
       console.warn('[LocationService] 保存行政区划数据失败:', error.message);
     }
   }
-  
+
   /**
    * 获取内置行政区划数据（中国主要省市）
    */
@@ -94,10 +94,10 @@ class LocationService {
                 { code: '110116', name: '怀柔区', center: { lat: 40.316053, lng: 116.631933 } },
                 { code: '110117', name: '平谷区', center: { lat: 40.140595, lng: 117.121352 } },
                 { code: '110118', name: '密云区', center: { lat: 40.376834, lng: 116.843172 } },
-                { code: '110119', name: '延庆区', center: { lat: 40.456951, lng: 115.985428 } }
-              ]
-            }
-          ]
+                { code: '110119', name: '延庆区', center: { lat: 40.456951, lng: 115.985428 } },
+              ],
+            },
+          ],
         },
         {
           code: '310000',
@@ -126,10 +126,10 @@ class LocationService {
                 { code: '310117', name: '松江区', center: { lat: 31.032243, lng: 121.227747 } },
                 { code: '310118', name: '青浦区', center: { lat: 31.15068, lng: 121.124178 } },
                 { code: '310120', name: '奉贤区', center: { lat: 30.918606, lng: 121.473945 } },
-                { code: '310151', name: '崇明区', center: { lat: 31.623587, lng: 121.397585 } }
-              ]
-            }
-          ]
+                { code: '310151', name: '崇明区', center: { lat: 31.623587, lng: 121.397585 } },
+              ],
+            },
+          ],
         },
         {
           code: '440000',
@@ -153,8 +153,8 @@ class LocationService {
                 { code: '440114', name: '花都区', center: { lat: 23.404165, lng: 113.220463 } },
                 { code: '440115', name: '南沙区', center: { lat: 22.771446, lng: 113.608479 } },
                 { code: '440117', name: '从化区', center: { lat: 23.548748, lng: 113.586759 } },
-                { code: '440118', name: '增城区', center: { lat: 23.261587, lng: 113.815668 } }
-              ]
+                { code: '440118', name: '增城区', center: { lat: 23.261587, lng: 113.815668 } },
+              ],
             },
             {
               code: '440300',
@@ -170,8 +170,8 @@ class LocationService {
                 { code: '440308', name: '盐田区', center: { lat: 22.594428, lng: 114.236833 } },
                 { code: '440309', name: '龙华区', center: { lat: 22.654285, lng: 114.037933 } },
                 { code: '440310', name: '坪山区', center: { lat: 22.691819, lng: 114.365542 } },
-                { code: '440311', name: '光明区', center: { lat: 22.743214, lng: 113.935396 } }
-              ]
+                { code: '440311', name: '光明区', center: { lat: 22.743214, lng: 113.935396 } },
+              ],
             },
             {
               code: '440600',
@@ -183,10 +183,10 @@ class LocationService {
                 { code: '440605', name: '南海区', center: { lat: 23.028933, lng: 113.142811 } },
                 { code: '440606', name: '顺德区', center: { lat: 22.805242, lng: 113.293359 } },
                 { code: '440607', name: '三水区', center: { lat: 23.155936, lng: 112.896593 } },
-                { code: '440608', name: '高明区', center: { lat: 22.900181, lng: 112.892573 } }
-              ]
-            }
-          ]
+                { code: '440608', name: '高明区', center: { lat: 22.900181, lng: 112.892573 } },
+              ],
+            },
+          ],
         },
         {
           code: '330000',
@@ -209,8 +209,8 @@ class LocationService {
                 { code: '330111', name: '富阳区', center: { lat: 30.048958, lng: 119.960076 } },
                 { code: '330112', name: '临安区', center: { lat: 30.233873, lng: 119.724733 } },
                 { code: '330113', name: '临平区', center: { lat: 30.421894, lng: 120.298344 } },
-                { code: '330114', name: '钱塘区', center: { lat: 30.3225, lng: 120.490857 } }
-              ]
+                { code: '330114', name: '钱塘区', center: { lat: 30.3225, lng: 120.490857 } },
+              ],
             },
             {
               code: '330200',
@@ -223,10 +223,10 @@ class LocationService {
                 { code: '330206', name: '北仑区', center: { lat: 29.899378, lng: 121.845551 } },
                 { code: '330211', name: '镇海区', center: { lat: 29.948882, lng: 121.713162 } },
                 { code: '330212', name: '鄞州区', center: { lat: 29.826799, lng: 121.558088 } },
-                { code: '330213', name: '奉化区', center: { lat: 29.656142, lng: 121.406997 } }
-              ]
-            }
-          ]
+                { code: '330213', name: '奉化区', center: { lat: 29.656142, lng: 121.406997 } },
+              ],
+            },
+          ],
         },
         {
           code: '320000',
@@ -250,8 +250,8 @@ class LocationService {
                 { code: '320115', name: '江宁区', center: { lat: 31.953418, lng: 118.850138 } },
                 { code: '320116', name: '六合区', center: { lat: 32.360264, lng: 118.85063 } },
                 { code: '320117', name: '溧水区', center: { lat: 31.65305, lng: 119.028296 } },
-                { code: '320118', name: '高淳区', center: { lat: 31.328784, lng: 118.876192 } }
-              ]
+                { code: '320118', name: '高淳区', center: { lat: 31.328784, lng: 118.876192 } },
+              ],
             },
             {
               code: '320500',
@@ -264,10 +264,10 @@ class LocationService {
                 { code: '320507', name: '相城区', center: { lat: 31.368664, lng: 120.642647 } },
                 { code: '320508', name: '姑苏区', center: { lat: 31.335792, lng: 120.622227 } },
                 { code: '320509', name: '吴江区', center: { lat: 31.138677, lng: 120.647158 } },
-                { code: '320571', name: '工业园区', center: { lat: 31.318671, lng: 120.734836 } }
-              ]
-            }
-          ]
+                { code: '320571', name: '工业园区', center: { lat: 31.318671, lng: 120.734836 } },
+              ],
+            },
+          ],
         },
         {
           code: '510000',
@@ -292,10 +292,10 @@ class LocationService {
                 { code: '510115', name: '温江区', center: { lat: 30.682203, lng: 103.856464 } },
                 { code: '510116', name: '双流区', center: { lat: 30.574449, lng: 103.923486 } },
                 { code: '510117', name: '郫都区', center: { lat: 30.79591, lng: 103.90377 } },
-                { code: '510118', name: '新津区', center: { lat: 30.411152, lng: 103.810785 } }
-              ]
-            }
-          ]
+                { code: '510118', name: '新津区', center: { lat: 30.411152, lng: 103.810785 } },
+              ],
+            },
+          ],
         },
         {
           code: '610000',
@@ -319,10 +319,10 @@ class LocationService {
                 { code: '610115', name: '临潼区', center: { lat: 34.367069, lng: 109.214238 } },
                 { code: '610116', name: '长安区', center: { lat: 34.157581, lng: 108.946511 } },
                 { code: '610117', name: '高陵区', center: { lat: 34.535092, lng: 109.088297 } },
-                { code: '610118', name: '鄠邑区', center: { lat: 34.109251, lng: 108.605251 } }
-              ]
-            }
-          ]
+                { code: '610118', name: '鄠邑区', center: { lat: 34.109251, lng: 108.605251 } },
+              ],
+            },
+          ],
         },
         {
           code: '420000',
@@ -348,10 +348,10 @@ class LocationService {
                 { code: '420114', name: '蔡甸区', center: { lat: 30.582866, lng: 114.030303 } },
                 { code: '420115', name: '江夏区', center: { lat: 30.376052, lng: 114.321829 } },
                 { code: '420116', name: '黄陂区', center: { lat: 30.881062, lng: 114.347995 } },
-                { code: '420117', name: '新洲区', center: { lat: 30.841543, lng: 114.802102 } }
-              ]
-            }
-          ]
+                { code: '420117', name: '新洲区', center: { lat: 30.841543, lng: 114.802102 } },
+              ],
+            },
+          ],
         },
         {
           code: '120000',
@@ -380,10 +380,10 @@ class LocationService {
                 { code: '120116', name: '滨海新区', center: { lat: 39.003735, lng: 117.7101 } },
                 { code: '120117', name: '宁河区', center: { lat: 39.33111, lng: 117.826724 } },
                 { code: '120118', name: '静海区', center: { lat: 38.947512, lng: 116.974232 } },
-                { code: '120119', name: '蓟州区', center: { lat: 40.045957, lng: 117.408073 } }
-              ]
-            }
-          ]
+                { code: '120119', name: '蓟州区', center: { lat: 40.045957, lng: 117.408073 } },
+              ],
+            },
+          ],
         },
         {
           code: '500000',
@@ -409,15 +409,15 @@ class LocationService {
                 { code: '500110', name: '綦江区', center: { lat: 29.029056, lng: 106.651283 } },
                 { code: '500111', name: '大足区', center: { lat: 29.707896, lng: 105.721742 } },
                 { code: '500112', name: '渝北区', center: { lat: 29.718297, lng: 106.630272 } },
-                { code: '500113', name: '巴南区', center: { lat: 29.398828, lng: 106.540256 } }
-              ]
-            }
-          ]
-        }
-      ]
+                { code: '500113', name: '巴南区', center: { lat: 29.398828, lng: 106.540256 } },
+              ],
+            },
+          ],
+        },
+      ],
     };
   }
-  
+
   /**
    * 获取所有省份列表
    */
@@ -425,15 +425,15 @@ class LocationService {
     if (!this.regionsCache) {
       return [];
     }
-    
-    return this.regionsCache.provinces.map(p => ({
+
+    return this.regionsCache.provinces.map((p) => ({
       code: p.code,
       name: p.name,
       level: p.level,
-      center: p.center
+      center: p.center,
     }));
   }
-  
+
   /**
    * 获取城市列表
    */
@@ -441,21 +441,21 @@ class LocationService {
     if (!this.regionsCache) {
       return [];
     }
-    
-    const province = this.regionsCache.provinces.find(p => p.code === provinceCode);
+
+    const province = this.regionsCache.provinces.find((p) => p.code === provinceCode);
     if (!province) {
       return [];
     }
-    
-    return province.cities.map(c => ({
+
+    return province.cities.map((c) => ({
       code: c.code,
       name: c.name,
       level: c.level,
       center: c.center,
-      province: province.name
+      province: province.name,
     }));
   }
-  
+
   /**
    * 获取区县列表
    */
@@ -463,26 +463,26 @@ class LocationService {
     if (!this.regionsCache) {
       return [];
     }
-    
-    const province = this.regionsCache.provinces.find(p => p.code === provinceCode);
+
+    const province = this.regionsCache.provinces.find((p) => p.code === provinceCode);
     if (!province) {
       return [];
     }
-    
-    const city = province.cities.find(c => c.code === cityCode);
+
+    const city = province.cities.find((c) => c.code === cityCode);
     if (!city) {
       return [];
     }
-    
-    return city.districts.map(d => ({
+
+    return city.districts.map((d) => ({
       code: d.code,
       name: d.name,
       center: d.center,
       city: city.name,
-      province: province.name
+      province: province.name,
     }));
   }
-  
+
   /**
    * 逆地理编码（经纬度转地址）
    */
@@ -490,16 +490,18 @@ class LocationService {
     // 查找最近的行政区划
     let nearest = null;
     let minDistance = Infinity;
-    
-    this.regionsCache.provinces.forEach(province => {
-      province.cities.forEach(city => {
-        city.districts.forEach(district => {
+
+    this.regionsCache.provinces.forEach((province) => {
+      province.cities.forEach((city) => {
+        city.districts.forEach((district) => {
           if (district.center) {
             const distance = this.calculateDistance(
-              latitude, longitude,
-              district.center.lat, district.center.lng
+              latitude,
+              longitude,
+              district.center.lat,
+              district.center.lng
             );
-            
+
             if (distance < minDistance) {
               minDistance = distance;
               nearest = {
@@ -507,14 +509,14 @@ class LocationService {
                 city: city.name,
                 district: district.name,
                 code: district.code,
-                distance: Math.round(distance * 1000) // 转换为米
+                distance: Math.round(distance * 1000), // 转换为米
               };
             }
           }
         });
       });
     });
-    
+
     if (nearest) {
       return {
         success: true,
@@ -526,17 +528,17 @@ class LocationService {
           formattedAddress: `${nearest.province}${nearest.city}${nearest.district}`,
           latitude: latitude,
           longitude: longitude,
-          accuracy: nearest.distance
-        }
+          accuracy: nearest.distance,
+        },
       };
     }
-    
+
     return {
       success: false,
-      error: '无法确定位置所属行政区划'
+      error: '无法确定位置所属行政区划',
     };
   }
-  
+
   /**
    * 计算两点间距离（使用Haversine公式）
    */
@@ -544,38 +546,53 @@ class LocationService {
     const R = 6371; // 地球半径（公里）
     const dLat = this.toRad(lat2 - lat1);
     const dLng = this.toRad(lng2 - lng1);
-    
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-              Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) *
-              Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRad(lat1)) *
+        Math.cos(this.toRad(lat2)) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    
+
     return R * c;
   }
-  
+
   toRad(degrees) {
     return degrees * (Math.PI / 180);
   }
-  
+
   /**
    * 地址搜索/联想
    */
   searchAddress(keyword, city = null, limit = 10) {
     // 模拟搜索结果（实际应连接地图服务API）
     const mockResults = [
-      { name: `${keyword}大厦`, address: `${city || '北京'}市${keyword}路1号`, location: { lat: 39.9, lng: 116.4 } },
-      { name: `${keyword}小区`, address: `${city || '北京'}市${keyword}街2号`, location: { lat: 39.91, lng: 116.41 } },
-      { name: `${keyword}购物中心`, address: `${city || '北京'}市${keyword}大道3号`, location: { lat: 39.92, lng: 116.42 } }
+      {
+        name: `${keyword}大厦`,
+        address: `${city || '北京'}市${keyword}路1号`,
+        location: { lat: 39.9, lng: 116.4 },
+      },
+      {
+        name: `${keyword}小区`,
+        address: `${city || '北京'}市${keyword}街2号`,
+        location: { lat: 39.91, lng: 116.41 },
+      },
+      {
+        name: `${keyword}购物中心`,
+        address: `${city || '北京'}市${keyword}大道3号`,
+        location: { lat: 39.92, lng: 116.42 },
+      },
     ];
-    
+
     return {
       success: true,
       data: mockResults.slice(0, limit),
-      total: mockResults.length
+      total: mockResults.length,
     };
   }
-  
+
   /**
    * 获取附近地址
    */
@@ -584,17 +601,17 @@ class LocationService {
     const nearby = [
       { name: '某某商场', distance: 200, address: '距离200米', type: '购物' },
       { name: '某某地铁站', distance: 500, address: '距离500米', type: '交通' },
-      { name: '某某医院', distance: 800, address: '距离800米', type: '医疗' }
+      { name: '某某医院', distance: 800, address: '距离800米', type: '医疗' },
     ];
-    
+
     return {
       success: true,
       data: nearby.slice(0, limit),
       center: { lat: latitude, lng: longitude },
-      radius: radius
+      radius: radius,
     };
   }
-  
+
   /**
    * 解析完整地址
    */
@@ -606,40 +623,40 @@ class LocationService {
       district: '',
       street: '',
       building: '',
-      room: ''
+      room: '',
     };
-    
+
     // 匹配省/直辖市
     const provinceMatch = address.match(/([^省市自治区]+(?:省|市|自治区))/);
     if (provinceMatch) {
       result.province = provinceMatch[1];
     }
-    
+
     // 匹配市
     const cityMatch = address.match(/([^省市]+市)/);
     if (cityMatch) {
       result.city = cityMatch[1];
     }
-    
+
     // 匹配区/县
     const districtMatch = address.match(/([^区县]+(?:区|县))/);
     if (districtMatch) {
       result.district = districtMatch[1];
     }
-    
+
     // 匹配街道/路
     const streetMatch = address.match(/([^街道路]+(?:街道|路|街))/);
     if (streetMatch) {
       result.street = streetMatch[1];
     }
-    
+
     return {
       success: true,
       data: result,
-      original: address
+      original: address,
     };
   }
-  
+
   /**
    * 健康检查
    */
@@ -650,7 +667,7 @@ class LocationService {
       name: this.name,
       regionsLoaded: !!this.regionsCache,
       provinceCount: this.regionsCache?.provinces?.length || 0,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }

@@ -7,6 +7,10 @@ import { BrandService } from './brand.service';
 export class BrandController {
   constructor(private readonly svc: BrandService) {}
 
-  @Get()  data() { return this.svc.getData(); }
-  @Post('sync') sync() { return this.svc.sync(); }
+  @Get() data() {
+    return this.svc.getData();
+  }
+  @Post('sync') sync() {
+    return this.svc.sync();
+  }
 }

@@ -10,10 +10,26 @@ export const metadata: Metadata = {
 };
 
 const WHY = [
-  { title: '独家授权', desc: '瑞美集团（Rheem）正式授权，中国区唯一运营主体。', accent: 'var(--rh-green)' },
-  { title: '系统集成', desc: '三大品牌横跨热水、采暖制冷、净水，覆盖建筑全系统需求。', accent: 'var(--rh-green)' },
-  { title: '工程交付', desc: '全国认证工程师团队，从设计到安装验收一站完成。', accent: 'var(--rh-green)' },
-  { title: 'AI 辅助', desc: '自主研发瑞诺瓦 Rysnova 选型与 AI 问诊工具，提升方案精度。', accent: 'var(--rh-green)' },
+  {
+    title: '独家授权',
+    desc: '瑞美集团（Rheem）正式授权，中国区唯一运营主体。',
+    accent: 'var(--rh-green)',
+  },
+  {
+    title: '系统集成',
+    desc: '三大品牌横跨热水、采暖制冷、净水，覆盖建筑全系统需求。',
+    accent: 'var(--rh-green)',
+  },
+  {
+    title: '工程交付',
+    desc: '全国认证工程师团队，从设计到安装验收一站完成。',
+    accent: 'var(--rh-green)',
+  },
+  {
+    title: 'AI 辅助',
+    desc: '自主研发瑞诺瓦 Rysnova 选型与 AI 问诊工具，提升方案精度。',
+    accent: 'var(--rh-green)',
+  },
 ];
 
 const BRAND_DETAIL = [
@@ -58,19 +74,45 @@ const BRAND_DETAIL = [
 export default function BrandsPage() {
   return (
     <main id="main">
-
       {/* ── Hero ── */}
       <PageHero
         eyebrow="OUR BRANDS · 旗下品牌"
-        title={<>旗下<span style={{ color: 'var(--rh-green)' }}>品牌</span></>}
-        lead={<>{GROUP.nameShort}以 Rheem · Ruud · EverHot 中国独家运营资源，为住宅与商用客户提供热水、采暖制冷与空气品质的创新解决方案。</>}
+        title={
+          <>
+            旗下<span style={{ color: 'var(--rh-green)' }}>品牌</span>
+          </>
+        }
+        lead={
+          <>
+            {GROUP.nameShort}以 Rheem · Ruud · EverHot
+            中国独家运营资源，为住宅与商用客户提供热水、采暖制冷与空气品质的创新解决方案。
+          </>
+        }
       />
 
       {/* ── Featured Brands section header ── */}
-      <div style={{ background: '#fff', padding: '48px 32px 0', borderBottom: '1px solid var(--rh-border)' }}>
+      <div
+        style={{
+          background: '#fff',
+          padding: '48px 32px 0',
+          borderBottom: '1px solid var(--rh-border)',
+        }}
+      >
         <div className="rh-container">
-          <p className="rh-eyebrow" style={{ marginBottom: 8 }}>Featured Brands</p>
-          <h2 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 0, paddingBottom: 32 }}>全部品牌</h2>
+          <p className="rh-eyebrow" style={{ marginBottom: 8 }}>
+            Featured Brands
+          </p>
+          <h2
+            style={{
+              fontSize: 28,
+              fontWeight: 800,
+              letterSpacing: '-0.02em',
+              marginBottom: 0,
+              paddingBottom: 32,
+            }}
+          >
+            全部品牌
+          </h2>
         </div>
       </div>
 
@@ -78,38 +120,102 @@ export default function BrandsPage() {
       <section className="rh-section" style={{ background: 'var(--rh-s1)' }}>
         <div className="rh-container" style={{ display: 'flex', flexDirection: 'column', gap: 48 }}>
           {BRAND_DETAIL.map((b, i) => (
-            <div key={b.name} className="rh-card-hover" style={{
-              display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))',
-              gap: 36, alignItems: 'start',
-              background: i % 2 === 0 ? '#fff' : '#F5F0EB',
-              borderRadius: 'var(--rh-r-lg)', padding: '40px 36px',
-              border: '1px solid var(--rh-border)', position: 'relative', overflow: 'hidden',
-            }}>
+            <div
+              key={b.name}
+              className="rh-card-hover"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))',
+                gap: 36,
+                alignItems: 'start',
+                background: i % 2 === 0 ? '#fff' : '#F5F0EB',
+                borderRadius: 'var(--rh-r-lg)',
+                padding: '40px 36px',
+                border: '1px solid var(--rh-border)',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
               {/* 顶线 accent */}
-              <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: b.accentColor }} />
+              <div
+                aria-hidden
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 3,
+                  background: b.accentColor,
+                }}
+              />
 
               <div>
-                <div style={{ height: 52, display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+                <div
+                  style={{ height: 52, display: 'flex', alignItems: 'center', marginBottom: 10 }}
+                >
                   <BrandLogo name={b.name} />
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--rh-t3)', fontStyle: 'italic', marginBottom: 18 }}>{b.tagline}</div>
-                <p style={{ fontSize: 14, color: 'var(--rh-t2)', lineHeight: 1.85, marginBottom: 20 }}>{b.desc}</p>
-                <span className="rh-badge rh-badge-auth" style={{ marginBottom: 24, display: 'inline-block' }}>{b.relation}</span>
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: 'var(--rh-t3)',
+                    fontStyle: 'italic',
+                    marginBottom: 18,
+                  }}
+                >
+                  {b.tagline}
+                </div>
+                <p
+                  style={{
+                    fontSize: 14,
+                    color: 'var(--rh-t2)',
+                    lineHeight: 1.85,
+                    marginBottom: 20,
+                  }}
+                >
+                  {b.desc}
+                </p>
+                <span
+                  className="rh-badge rh-badge-auth"
+                  style={{ marginBottom: 24, display: 'inline-block' }}
+                >
+                  {b.relation}
+                </span>
                 <br />
-                <a href={b.href} target="_blank" rel="noreferrer" className="rh-btn rh-btn-brand" style={{ padding: '10px 24px', fontSize: 13, display: 'inline-flex' }}>
+                <a
+                  href={b.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rh-btn rh-btn-brand"
+                  style={{ padding: '10px 24px', fontSize: 13, display: 'inline-flex' }}
+                >
                   访问品牌官网 →
                 </a>
               </div>
 
               <div>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--rh-t3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 16 }}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: 'var(--rh-t3)',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    marginBottom: 16,
+                  }}
+                >
                   产品覆盖
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {b.features.map(f => (
+                  {b.features.map((f) => (
                     <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div className="rh-bolt" style={{ flexShrink: 0, background: b.accentColor }} />
-                      <span style={{ fontSize: 14, color: 'var(--rh-t1)', fontWeight: 500 }}>{f}</span>
+                      <div
+                        className="rh-bolt"
+                        style={{ flexShrink: 0, background: b.accentColor }}
+                      />
+                      <span style={{ fontSize: 14, color: 'var(--rh-t1)', fontWeight: 500 }}>
+                        {f}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -123,22 +229,57 @@ export default function BrandsPage() {
       <section className="rh-section" style={{ background: 'var(--rh-s2)', color: 'var(--rh-t1)' }}>
         <div className="rh-container">
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <p className="rh-eyebrow" style={{ color: 'var(--rh-green)', marginBottom: 10 }}>WHY {GROUP.nameShort.toUpperCase()}?</p>
-            <h2 className="rh-display" style={{ fontSize: 'clamp(22px,3vw,40px)', fontWeight: 400, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--rh-t1)' }}>
+            <p className="rh-eyebrow" style={{ color: 'var(--rh-green)', marginBottom: 10 }}>
+              WHY {GROUP.nameShort.toUpperCase()}?
+            </p>
+            <h2
+              className="rh-display"
+              style={{
+                fontSize: 'clamp(22px,3vw,40px)',
+                fontWeight: 400,
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                color: 'var(--rh-t1)',
+              }}
+            >
               Why <span style={{ color: 'var(--rh-green)' }}>{GROUP.nameShort}</span>?
             </h2>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 20 }}>
-            {WHY.map(w => (
-              <div key={w.title} style={{
-                padding: '32px 24px',
-                border: '1px solid var(--rh-border)',
-                borderRadius: 'var(--rh-r-lg)',
-                background: '#fff',
-                position: 'relative', overflow: 'hidden',
-              }}>
-                <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'var(--rh-green)' }} />
-                <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 10, color: 'var(--rh-t1)' }}>{w.title}</div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))',
+              gap: 20,
+            }}
+          >
+            {WHY.map((w) => (
+              <div
+                key={w.title}
+                style={{
+                  padding: '32px 24px',
+                  border: '1px solid var(--rh-border)',
+                  borderRadius: 'var(--rh-r-lg)',
+                  background: '#fff',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  aria-hidden
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: 3,
+                    background: 'var(--rh-green)',
+                  }}
+                />
+                <div
+                  style={{ fontWeight: 700, fontSize: 16, marginBottom: 10, color: 'var(--rh-t1)' }}
+                >
+                  {w.title}
+                </div>
                 <div style={{ fontSize: 13, color: 'var(--rh-t2)', lineHeight: 1.7 }}>{w.desc}</div>
               </div>
             ))}
@@ -147,17 +288,43 @@ export default function BrandsPage() {
       </section>
 
       {/* CTA */}
-      <section style={{ background: 'var(--rh-s2)', padding: '64px 32px', textAlign: 'center', borderTop: '1px solid var(--rh-border)' }}>
+      <section
+        style={{
+          background: 'var(--rh-s2)',
+          padding: '64px 32px',
+          textAlign: 'center',
+          borderTop: '1px solid var(--rh-border)',
+        }}
+      >
         <div className="rh-container">
-          <h2 style={{ fontFamily: 'var(--rh-display)', fontSize: 'clamp(22px,3vw,38px)', fontWeight: 400, letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--rh-t1)', marginBottom: 16 }}>
+          <h2
+            style={{
+              fontFamily: 'var(--rh-display)',
+              fontSize: 'clamp(22px,3vw,38px)',
+              fontWeight: 400,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              color: 'var(--rh-t1)',
+              marginBottom: 16,
+            }}
+          >
             了解适合您项目的品牌方案
           </h2>
-          <a href="/contact" className="rh-btn rh-btn-brand" style={{ padding: '14px 36px', fontSize: 14, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <a
+            href="/contact"
+            className="rh-btn rh-btn-brand"
+            style={{
+              padding: '14px 36px',
+              fontSize: 14,
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+            }}
+          >
             联系我们
           </a>
         </div>
       </section>
-
     </main>
   );
 }

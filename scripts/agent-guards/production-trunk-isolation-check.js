@@ -2,9 +2,13 @@
 
 const fs = require('fs');
 const path = require('path');
-require('./_artifact-gate').requireArtifactOrSkip('archive/legacy-ui/public/legacy-surface-manifest.json', {
-  guard: 'guard:production-trunk-isolation', reason: '遗留 UI 已归档移除，archive/ 在 .gitignore 且无生成步骤',
-});
+require('./_artifact-gate').requireArtifactOrSkip(
+  'archive/legacy-ui/public/legacy-surface-manifest.json',
+  {
+    guard: 'guard:production-trunk-isolation',
+    reason: '遗留 UI 已归档移除，archive/ 在 .gitignore 且无生成步骤',
+  }
+);
 const { execFileSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..', '..');
@@ -15,13 +19,10 @@ const MD_OUTPUT = path.join(ROOT, 'audit', 'production-trunk-isolation-report.md
 const ALLOWED_REACHABLE_BUCKETS = new Set([
   'production-active-page',
   'production-trunk',
-  'production-compatibility-runtime'
+  'production-compatibility-runtime',
 ]);
 
-const ALLOWED_EAGER_BUCKETS = new Set([
-  'production-active-page',
-  'production-trunk'
-]);
+const ALLOWED_EAGER_BUCKETS = new Set(['production-active-page', 'production-trunk']);
 
 const FORBIDDEN_PRODUCTION_BUCKETS = new Set([
   'backup-excluded',
@@ -38,7 +39,7 @@ const FORBIDDEN_PRODUCTION_BUCKETS = new Set([
   'legacy-html-migration-candidate',
   'legacy-html-archive',
   'desktop-shell',
-  'dev-tooling-and-agent-knowledge'
+  'dev-tooling-and-agent-knowledge',
 ]);
 
 const MAX_REACHABLE_COMPATIBILITY_FILES = 15; // 已恢复业务引擎后更新
@@ -51,7 +52,7 @@ function ensureCodeSizeReport() {
   try {
     execFileSync(process.execPath, ['scripts/agent-guards/code-size-trunk-check.js'], {
       cwd: ROOT,
-      stdio: 'pipe'
+      stdio: 'pipe',
     });
   } catch (error) {
     if (error.stdout) process.stdout.write(error.stdout);
@@ -61,15 +62,15 @@ function ensureCodeSizeReport() {
 }
 
 function bucketFor(report, file) {
-  const topFile = report.topFiles.find(item => item.file === file);
+  const topFile = report.topFiles.find((item) => item.file === file);
   return topFile ? topFile.bucket : 'unknown';
 }
 
 function toRows(report, files) {
-  return files.map(item => ({
+  return files.map((item) => ({
     file: item.file,
     lines: item.lines,
-    bucket: bucketFor(report, item.file)
+    bucket: bucketFor(report, item.file),
   }));
 }
 
@@ -92,15 +93,19 @@ function renderMarkdown(report) {
     '## Reachable Buckets',
     '',
     '| Bucket | Files | Lines |',
-    '|---|---:|---:|'
+    '|---|---:|---:|',
   ];
 
-  for (const [bucket, summary] of Object.entries(report.reachableRuntime.buckets).sort((a, b) => b[1].lines - a[1].lines)) {
+  for (const [bucket, summary] of Object.entries(report.reachableRuntime.buckets).sort(
+    (a, b) => b[1].lines - a[1].lines
+  )) {
     lines.push(`| ${bucket} | ${summary.files} | ${summary.lines} |`);
   }
 
   lines.push('', '## Eager Buckets', '', '| Bucket | Files | Lines |', '|---|---:|---:|');
-  for (const [bucket, summary] of Object.entries(report.eagerRuntime.buckets).sort((a, b) => b[1].lines - a[1].lines)) {
+  for (const [bucket, summary] of Object.entries(report.eagerRuntime.buckets).sort(
+    (a, b) => b[1].lines - a[1].lines
+  )) {
     lines.push(`| ${bucket} | ${summary.files} | ${summary.lines} |`);
   }
 
@@ -142,29 +147,43 @@ function main() {
 
   for (const row of reachableRows) {
     if (!ALLOWED_REACHABLE_BUCKETS.has(row.bucket)) {
-      failures.push(`reachable production runtime includes disallowed bucket ${row.bucket}: ${row.file}`);
+      failures.push(
+        `reachable production runtime includes disallowed bucket ${row.bucket}: ${row.file}`
+      );
     }
     if (FORBIDDEN_PRODUCTION_BUCKETS.has(row.bucket)) {
-      failures.push(`reachable production runtime includes forbidden production bucket ${row.bucket}: ${row.file}`);
+      failures.push(
+        `reachable production runtime includes forbidden production bucket ${row.bucket}: ${row.file}`
+      );
     }
   }
 
   for (const row of eagerRows) {
     if (!ALLOWED_EAGER_BUCKETS.has(row.bucket)) {
-      failures.push(`eager production runtime includes disallowed bucket ${row.bucket}: ${row.file}`);
+      failures.push(
+        `eager production runtime includes disallowed bucket ${row.bucket}: ${row.file}`
+      );
     }
     if (FORBIDDEN_PRODUCTION_BUCKETS.has(row.bucket)) {
-      failures.push(`eager production runtime includes forbidden production bucket ${row.bucket}: ${row.file}`);
+      failures.push(
+        `eager production runtime includes forbidden production bucket ${row.bucket}: ${row.file}`
+      );
     }
   }
 
-  const reachableCompatibilityRows = reachableRows.filter(row => row.bucket === 'production-compatibility-runtime');
+  const reachableCompatibilityRows = reachableRows.filter(
+    (row) => row.bucket === 'production-compatibility-runtime'
+  );
   if (reachableCompatibilityRows.length > MAX_REACHABLE_COMPATIBILITY_FILES) {
-    failures.push(`reachable compatibility files exceed ${MAX_REACHABLE_COMPATIBILITY_FILES}: ${reachableCompatibilityRows.length}`);
+    failures.push(
+      `reachable compatibility files exceed ${MAX_REACHABLE_COMPATIBILITY_FILES}: ${reachableCompatibilityRows.length}`
+    );
   }
 
   if ((codeSizeReport.activeMismatch || []).length) {
-    failures.push(`active HTML classification mismatch: ${codeSizeReport.activeMismatch.join(', ')}`);
+    failures.push(
+      `active HTML classification mismatch: ${codeSizeReport.activeMismatch.join(', ')}`
+    );
   }
 
   const report = {
@@ -174,35 +193,41 @@ function main() {
       allowedReachableBuckets: [...ALLOWED_REACHABLE_BUCKETS],
       allowedEagerBuckets: [...ALLOWED_EAGER_BUCKETS],
       forbiddenProductionBuckets: [...FORBIDDEN_PRODUCTION_BUCKETS],
-      maxReachableCompatibilityFiles: MAX_REACHABLE_COMPATIBILITY_FILES
+      maxReachableCompatibilityFiles: MAX_REACHABLE_COMPATIBILITY_FILES,
     },
     reachableRuntime: {
       files: reachableRows.length,
       compatibilityFiles: reachableCompatibilityRows.length,
       buckets: summarizeBuckets(reachableRows),
-      disallowed: reachableRows.filter(row => !ALLOWED_REACHABLE_BUCKETS.has(row.bucket))
+      disallowed: reachableRows.filter((row) => !ALLOWED_REACHABLE_BUCKETS.has(row.bucket)),
     },
     eagerRuntime: {
       files: eagerRows.length,
       buckets: summarizeBuckets(eagerRows),
-      disallowed: eagerRows.filter(row => !ALLOWED_EAGER_BUCKETS.has(row.bucket))
+      disallowed: eagerRows.filter((row) => !ALLOWED_EAGER_BUCKETS.has(row.bucket)),
     },
-    failures
+    failures,
   };
 
   fs.mkdirSync(path.dirname(JSON_OUTPUT), { recursive: true });
   fs.writeFileSync(JSON_OUTPUT, JSON.stringify(report, null, 2));
   fs.writeFileSync(MD_OUTPUT, renderMarkdown(report));
 
-  console.log(JSON.stringify({
-    status: report.status,
-    outputPath: path.relative(ROOT, JSON_OUTPUT),
-    markdownPath: path.relative(ROOT, MD_OUTPUT),
-    reachableRuntimeFiles: report.reachableRuntime.files,
-    reachableCompatibilityFiles: report.reachableRuntime.compatibilityFiles,
-    eagerRuntimeFiles: report.eagerRuntime.files,
-    failures
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        status: report.status,
+        outputPath: path.relative(ROOT, JSON_OUTPUT),
+        markdownPath: path.relative(ROOT, MD_OUTPUT),
+        reachableRuntimeFiles: report.reachableRuntime.files,
+        reachableCompatibilityFiles: report.reachableRuntime.compatibilityFiles,
+        eagerRuntimeFiles: report.eagerRuntime.files,
+        failures,
+      },
+      null,
+      2
+    )
+  );
 
   if (failures.length) process.exit(1);
 }

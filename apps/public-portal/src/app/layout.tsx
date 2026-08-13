@@ -19,7 +19,16 @@ export const metadata: Metadata = {
   },
   description: `${GROUP.nameCn}（${GROUP.nameEn}）— 瑞美集团 Rheem · Ruud · EverHot 中国独家授权运营，中央热水 / 采暖制冷 / 空气品质 / 水处理 / 智控系统集成服务商。`,
   applicationName: GROUP.nameCn,
-  keywords: ['瑞合瑞德', 'Rhautt', 'Rheem 中国', 'Ruud', 'EverHot', '中央热水', '采暖制冷', '暖通系统集成'],
+  keywords: [
+    '瑞合瑞德',
+    'Rhautt',
+    'Rheem 中国',
+    'Ruud',
+    'EverHot',
+    '中央热水',
+    '采暖制冷',
+    '暖通系统集成',
+  ],
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
@@ -68,10 +77,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh-CN">
       <head>
-        <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-v20-latin-regular.woff2" crossOrigin="anonymous" />
-        <link rel="preload" as="font" type="font/woff2" href="/fonts/poppins-v24-latin-700.woff2" crossOrigin="anonymous" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }} />
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href="/fonts/inter-v20-latin-regular.woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href="/fonts/poppins-v24-latin-700.woff2"
+          crossOrigin="anonymous"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+        />
       </head>
       <body>
         <SiteHeader />

@@ -7,7 +7,7 @@ const EXPECTED = 8;
 
 test('全部内核算出且无自报阻断 → 合规闸放行', () => {
   const systems = Object.fromEntries(
-    Array.from({ length: EXPECTED }, (_, i) => [`k${i}`, { ok: true }]),
+    Array.from({ length: EXPECTED }, (_, i) => [`k${i}`, { ok: true }])
   );
   const { gate, coverage } = evaluateCalcGate(systems, {}, EXPECTED);
   assert.equal(gate.pass, true);
@@ -20,8 +20,13 @@ test('全部内核算出且无自报阻断 → 合规闸放行', () => {
 test('8 个内核挂 7 个 → 必须阻断（静默降级回归防线）', () => {
   const systems = { load: { ok: true } };
   const failures = {
-    heating: 'boom', hotWater: 'boom', airConditioning: 'boom',
-    freshAir: 'boom', hydraulic: 'boom', noise: 'boom', water: 'boom',
+    heating: 'boom',
+    hotWater: 'boom',
+    airConditioning: 'boom',
+    freshAir: 'boom',
+    hydraulic: 'boom',
+    noise: 'boom',
+    water: 'boom',
   };
   const { gate, coverage } = evaluateCalcGate(systems, failures, EXPECTED);
   assert.equal(gate.pass, false, '大部分内核失败时绝不允许通过合规闸');
@@ -33,7 +38,7 @@ test('8 个内核挂 7 个 → 必须阻断（静默降级回归防线）', () =
 
 test('仅 1 个内核失败 → 也必须阻断（不允许部分合规）', () => {
   const systems = Object.fromEntries(
-    Array.from({ length: EXPECTED - 1 }, (_, i) => [`k${i}`, { ok: true }]),
+    Array.from({ length: EXPECTED - 1 }, (_, i) => [`k${i}`, { ok: true }])
   );
   const { gate } = evaluateCalcGate(systems, { water: '水系统内核异常' }, EXPECTED);
   assert.equal(gate.pass, false);
@@ -42,7 +47,7 @@ test('仅 1 个内核失败 → 也必须阻断（不允许部分合规）', () 
 
 test('内核自报 gate.blocked → 阻断', () => {
   const systems: Record<string, unknown> = Object.fromEntries(
-    Array.from({ length: EXPECTED - 1 }, (_, i) => [`k${i}`, { ok: true }]),
+    Array.from({ length: EXPECTED - 1 }, (_, i) => [`k${i}`, { ok: true }])
   );
   systems.heating = { gate: { blocked: true } };
   const { gate } = evaluateCalcGate(systems, {}, EXPECTED);

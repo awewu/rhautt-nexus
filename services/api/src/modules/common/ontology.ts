@@ -17,11 +17,11 @@
 
 /** 落地状态：诚实区分「已有表」「有实现但未入图」「仅设计」。 */
 export type ObjectPersistence =
-  | 'entity'            // 已有数据库表
-  | 'code-only'         // 有代码实现但未持久化为图节点（如 HVAC 内核）
-  | 'registry-file'     // 由仓库内注册文件描述（如 brand-registry.json）
-  | 'vocabulary'        // 词表常量（气候区/角色）
-  | 'planned';          // 仅设计，尚无实现
+  | 'entity' // 已有数据库表
+  | 'code-only' // 有代码实现但未持久化为图节点（如 HVAC 内核）
+  | 'registry-file' // 由仓库内注册文件描述（如 brand-registry.json）
+  | 'vocabulary' // 词表常量（气候区/角色）
+  | 'planned'; // 仅设计，尚无实现
 
 export interface ObjectTypeDef {
   /** 稳定标识（PascalCase，与事实图谱节点名一致） */
@@ -50,71 +50,131 @@ export interface ObjectTypeDef {
  */
 export const OBJECT_TYPES = {
   Brand: {
-    id: 'Brand', label: '品牌', module: 'brand-registry', persistence: 'registry-file',
-    backing: 'config/brand-registry.json', factGraphNode: true,
+    id: 'Brand',
+    label: '品牌',
+    module: 'brand-registry',
+    persistence: 'registry-file',
+    backing: 'config/brand-registry.json',
+    factGraphNode: true,
   },
   ProductCategory: {
-    id: 'ProductCategory', label: '产品品类（三级树）', module: 'brand-product-category', persistence: 'entity',
-    backing: 'rhautt_nexus.brand_product_categories', factGraphNode: true,
+    id: 'ProductCategory',
+    label: '产品品类（三级树）',
+    module: 'brand-product-category',
+    persistence: 'entity',
+    backing: 'rhautt_nexus.brand_product_categories',
+    factGraphNode: true,
   },
   Product: {
-    id: 'Product', label: '产品（SKU 级事实）', module: 'product-catalog', persistence: 'entity',
-    backing: 'rhautt_nexus.products', factGraphNode: true,
+    id: 'Product',
+    label: '产品（SKU 级事实）',
+    module: 'product-catalog',
+    persistence: 'entity',
+    backing: 'rhautt_nexus.products',
+    factGraphNode: true,
     note: '产品事实基座（D2）是对外产品声明的唯一来源；下游模块只读，不得直连其实体',
   },
   TechKernel: {
-    id: 'TechKernel', label: 'HVAC 技术内核', module: 'packages/domain/hvac-kernels', persistence: 'code-only',
-    backing: 'packages/domain/hvac-kernels', factGraphNode: true,
+    id: 'TechKernel',
+    label: 'HVAC 技术内核',
+    module: 'packages/domain/hvac-kernels',
+    persistence: 'code-only',
+    backing: 'packages/domain/hvac-kernels',
+    factGraphNode: true,
     note: '9 域精算内核已实现，但尚未作为图节点持久化（事实图谱 Phase 1 待办）',
   },
   SystemPack: {
-    id: 'SystemPack', label: '系统包（内核组合）', module: 'system-packs', persistence: 'code-only',
-    backing: 'packages/domain/system-packs', factGraphNode: true,
+    id: 'SystemPack',
+    label: '系统包（内核组合）',
+    module: 'system-packs',
+    persistence: 'code-only',
+    backing: 'packages/domain/system-packs',
+    factGraphNode: true,
   },
   Scenario: {
-    id: 'Scenario', label: '场景（品类×角色×痛点×房型×气候区）', module: 'growth', persistence: 'entity',
-    backing: 'rhautt_nexus.growth_scenario', factGraphNode: true,
+    id: 'Scenario',
+    label: '场景（品类×角色×痛点×房型×气候区）',
+    module: 'growth',
+    persistence: 'entity',
+    backing: 'rhautt_nexus.growth_scenario',
+    factGraphNode: true,
   },
   Question: {
-    id: 'Question', label: 'GEO 选题（prompt）', module: 'growth', persistence: 'entity',
-    backing: 'rhautt_nexus.growth_geo_question', factGraphNode: true,
+    id: 'Question',
+    label: 'GEO 选题（prompt）',
+    module: 'growth',
+    persistence: 'entity',
+    backing: 'rhautt_nexus.growth_geo_question',
+    factGraphNode: true,
   },
   ContentAsset: {
-    id: 'ContentAsset', label: '内容资产（文案/GEO 内容）', module: 'growth', persistence: 'entity',
-    backing: 'rhautt_nexus.growth_copy_asset', factGraphNode: true,
+    id: 'ContentAsset',
+    label: '内容资产（文案/GEO 内容）',
+    module: 'growth',
+    persistence: 'entity',
+    backing: 'rhautt_nexus.growth_copy_asset',
+    factGraphNode: true,
     // 收敛已发生的命名分叉：动作层曾用 CopyAsset，事实图谱设计用 ContentAsset。
     aliases: ['CopyAsset'],
     note: '统一取事实图谱名 ContentAsset；CopyAsset 为历史别名，不得新增使用',
   },
   BrandSitePage: {
-    id: 'BrandSitePage', label: '品牌站页面（发布产物）', module: 'brand-sites', persistence: 'entity',
-    backing: 'rhautt_nexus.tenant_brand_sites', factGraphNode: true,
+    id: 'BrandSitePage',
+    label: '品牌站页面（发布产物）',
+    module: 'brand-sites',
+    persistence: 'entity',
+    backing: 'rhautt_nexus.tenant_brand_sites',
+    factGraphNode: true,
   },
   Dealer: {
-    id: 'Dealer', label: '经销商', module: 'crm', persistence: 'entity',
-    backing: 'rhautt_nexus.dealers', factGraphNode: true,
+    id: 'Dealer',
+    label: '经销商',
+    module: 'crm',
+    persistence: 'entity',
+    backing: 'rhautt_nexus.dealers',
+    factGraphNode: true,
     note: '图谱中只放服务能力（区域×品类），终端用户 PII 不入图',
   },
   ClimateZone: {
-    id: 'ClimateZone', label: '气候区（GB 建筑气候区划）', module: 'growth', persistence: 'vocabulary',
-    backing: 'geo-scenarios.CLIMATE_ZONES', factGraphNode: true,
+    id: 'ClimateZone',
+    label: '气候区（GB 建筑气候区划）',
+    module: 'growth',
+    persistence: 'vocabulary',
+    backing: 'geo-scenarios.CLIMATE_ZONES',
+    factGraphNode: true,
   },
   Audience: {
-    id: 'Audience', label: '角色（业主/装修/设计/安装）', module: 'growth', persistence: 'vocabulary',
-    backing: 'geo-scenarios.ScenarioAudience', factGraphNode: true,
+    id: 'Audience',
+    label: '角色（业主/装修/设计/安装）',
+    module: 'growth',
+    persistence: 'vocabulary',
+    backing: 'geo-scenarios.ScenarioAudience',
+    factGraphNode: true,
   },
   Competitor: {
-    id: 'Competitor', label: '竞品', module: 'insight', persistence: 'entity',
-    backing: 'rhautt_nexus.insight_competitor', factGraphNode: true,
+    id: 'Competitor',
+    label: '竞品',
+    module: 'insight',
+    persistence: 'entity',
+    backing: 'rhautt_nexus.insight_competitor',
+    factGraphNode: true,
   },
   GeoExperiment: {
-    id: 'GeoExperiment', label: 'GEO 闭环实验（lift 验证单元）', module: 'growth', persistence: 'entity',
-    backing: 'rhautt_nexus.growth_geo_experiment', factGraphNode: false,
+    id: 'GeoExperiment',
+    label: 'GEO 闭环实验（lift 验证单元）',
+    module: 'growth',
+    persistence: 'entity',
+    backing: 'rhautt_nexus.growth_geo_experiment',
+    factGraphNode: false,
     note: '实验是过程对象而非事实节点，不入事实图谱；但受治理动作需锚定它',
   },
   GeoBootstrap: {
-    id: 'GeoBootstrap', label: '新品牌/品类启动序列', module: 'growth', persistence: 'planned',
-    backing: null, factGraphNode: false,
+    id: 'GeoBootstrap',
+    label: '新品牌/品类启动序列',
+    module: 'growth',
+    persistence: 'planned',
+    backing: null,
+    factGraphNode: false,
     note: '编排动作的锚点，无独立持久化对象（步骤结果落在场景/选题/探测上）',
   },
 } as const satisfies Record<string, ObjectTypeDef>;

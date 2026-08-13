@@ -1,4 +1,3 @@
-
 // [Hermes Auto-Optimization 2026-04-18T18:39:49.158Z]
 // Action: enhance_load_algorithm
 // Change: 优化负荷计算算法，增加气候补偿系数
@@ -36,15 +35,15 @@ class SmartBrainEngine {
    */
   optimizeEnergySchedule(input) {
     const { electricityPrice, gasPrice, outdoorTemp, loadDemand, timeOfDay } = input;
-    
+
     console.log('[SmartBrain] 执行能源优化调度...');
-    
+
     // 能源成本计算 (元/kWh)
     const costs = {
-      solar: 0.1,      // 太阳能成本最低
-      heatpump: electricityPrice / 3.5,  // COP=3.5
-      gas: gasPrice / 10,  // 1立方气=10kWh
-      electricity: electricityPrice
+      solar: 0.1, // 太阳能成本最低
+      heatpump: electricityPrice / 3.5, // COP=3.5
+      gas: gasPrice / 10, // 1立方气=10kWh
+      electricity: electricityPrice,
     };
 
     // 根据条件选择最优组合
@@ -62,7 +61,11 @@ class SmartBrainEngine {
     // 策略2: 温度适宜 -> 空气能热泵
     if (outdoorTemp > -5 && outdoorTemp < 35) {
       const heatpumpOutput = Math.min(remainingLoad * 0.5, 10);
-      schedule.push({ source: 'heatpump', amount: heatpumpOutput, cost: heatpumpOutput * costs.heatpump });
+      schedule.push({
+        source: 'heatpump',
+        amount: heatpumpOutput,
+        cost: heatpumpOutput * costs.heatpump,
+      });
       remainingLoad -= heatpumpOutput;
     }
 
@@ -75,22 +78,26 @@ class SmartBrainEngine {
 
     // 策略4: 剩余 -> 电加热保底
     if (remainingLoad > 0) {
-      schedule.push({ source: 'electricity', amount: remainingLoad, cost: remainingLoad * costs.electricity });
+      schedule.push({
+        source: 'electricity',
+        amount: remainingLoad,
+        cost: remainingLoad * costs.electricity,
+      });
     }
 
     // 计算总成本
     totalCost = schedule.reduce((sum, item) => sum + item.cost, 0);
-    
+
     // 计算节能效果 (对比纯燃气)
     const pureGasCost = loadDemand * costs.gas;
-    const savings = ((pureGasCost - totalCost) / pureGasCost * 100).toFixed(1);
+    const savings = (((pureGasCost - totalCost) / pureGasCost) * 100).toFixed(1);
 
     return {
       timestamp: new Date().toISOString(),
       schedule,
       totalCost: totalCost.toFixed(2),
       savings: `${savings}%`,
-      recommended: this.generateRecommendations(schedule, input)
+      recommended: this.generateRecommendations(schedule, input),
     };
   }
 
@@ -101,7 +108,7 @@ class SmartBrainEngine {
    */
   predictMaintenance(deviceData) {
     const { deviceId, runtime, temperature, vibration, energyConsumption } = deviceData;
-    
+
     console.log(`[SmartBrain] 分析设备 ${deviceId} 健康状况...`);
 
     // 风险评估算法
@@ -109,7 +116,8 @@ class SmartBrainEngine {
     const risks = [];
 
     // 指标1: 运行时间过长
-    if (runtime > 8760) { // 超过1年运行
+    if (runtime > 8760) {
+      // 超过1年运行
       riskScore += 20;
       risks.push({ type: 'wear', level: 'medium', desc: '设备运行超1年，建议保养' });
     }
@@ -135,7 +143,7 @@ class SmartBrainEngine {
     // 风险等级判定
     let riskLevel = 'low';
     let daysUntilFailure = 30;
-    
+
     if (riskScore >= 70) {
       riskLevel = 'high';
       daysUntilFailure = 3;
@@ -152,7 +160,7 @@ class SmartBrainEngine {
       daysUntilFailure,
       risks,
       suggestedActions: this.generateMaintenanceActions(risks),
-      estimatedCost: this.calculateMaintenanceCost(risks)
+      estimatedCost: this.calculateMaintenanceCost(risks),
     };
   }
 
@@ -163,7 +171,7 @@ class SmartBrainEngine {
    */
   autoSwitchScenario(context) {
     const { occupancy, timeOfDay, outdoorTemp, userPreference, historicalPattern } = context;
-    
+
     console.log('[SmartBrain] 分析最优场景...');
 
     let scenario = 'home';
@@ -175,7 +183,7 @@ class SmartBrainEngine {
       config = {
         heating: { enabled: false, temp: 10 },
         cooling: { enabled: false, temp: 30 },
-        ventilation: { enabled: true, level: 'low' }
+        ventilation: { enabled: true, level: 'low' },
       };
     }
     // 规则2: 夜间 -> 睡眠模式
@@ -185,7 +193,7 @@ class SmartBrainEngine {
         heating: { enabled: true, temp: 20 },
         cooling: { enabled: true, temp: 26 },
         ventilation: { enabled: true, level: 'silent' },
-        lighting: { enabled: false }
+        lighting: { enabled: false },
       };
     }
     // 规则3: 白天有人 -> 居家模式
@@ -195,7 +203,7 @@ class SmartBrainEngine {
         heating: { enabled: outdoorTemp < 18, temp: 22 },
         cooling: { enabled: outdoorTemp > 28, temp: 24 },
         ventilation: { enabled: true, level: 'medium' },
-        hotWater: { enabled: true, temp: 45 }
+        hotWater: { enabled: true, temp: 45 },
       };
     }
 
@@ -209,7 +217,7 @@ class SmartBrainEngine {
       scenario,
       config,
       reason: this.generateScenarioReason(scenario, context),
-      nextCheck: new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30分钟后再次检查
+      nextCheck: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30分钟后再次检查
     };
   }
 
@@ -218,7 +226,7 @@ class SmartBrainEngine {
    */
   generateRealtimeSuggestions(systemState) {
     const suggestions = [];
-    
+
     // 建议1: 电价低谷蓄水
     const hour = new Date().getHours();
     if (hour >= 23 || hour <= 7) {
@@ -227,7 +235,7 @@ class SmartBrainEngine {
         priority: 'high',
         action: '启动谷电蓄热模式',
         saving: '预计节省电费30%',
-        autoExecutable: true
+        autoExecutable: true,
       });
     }
 
@@ -238,7 +246,7 @@ class SmartBrainEngine {
         priority: 'medium',
         action: '明日高温预警，建议提前预冷',
         action: '今晚22:00启动预冷',
-        autoExecutable: true
+        autoExecutable: true,
       });
     }
 
@@ -248,7 +256,7 @@ class SmartBrainEngine {
         type: 'maintenance',
         priority: 'medium',
         action: '设备运行超8000小时，建议保养',
-        autoExecutable: false
+        autoExecutable: false,
       });
     }
 
@@ -259,7 +267,7 @@ class SmartBrainEngine {
   generateRecommendations(schedule, input) {
     const recs = [];
     const primary = schedule[0];
-    
+
     if (primary.source === 'solar') {
       recs.push('当前光照充足，建议最大化利用太阳能');
     }
@@ -269,16 +277,16 @@ class SmartBrainEngine {
     if (input.electricityPrice > 0.8) {
       recs.push('当前电价较高，建议减少电加热使用');
     }
-    
+
     return recs;
   }
 
   generateMaintenanceActions(risks) {
-    return risks.map(risk => ({
+    return risks.map((risk) => ({
       issue: risk.desc,
       action: this.getActionForRisk(risk.type),
       urgency: risk.level,
-      estimatedTime: risk.level === 'high' ? '24小时内' : '7天内'
+      estimatedTime: risk.level === 'high' ? '24小时内' : '7天内',
     }));
   }
 
@@ -287,7 +295,7 @@ class SmartBrainEngine {
       wear: '更换磨损部件',
       overheat: '清洗散热器，检查风扇',
       mechanical: '紧固螺丝，润滑轴承',
-      efficiency: '清洗滤网，检查冷媒'
+      efficiency: '清洗滤网，检查冷媒',
     };
     return actions[type] || '联系技术人员检修';
   }
@@ -310,7 +318,7 @@ class SmartBrainEngine {
     const reasons = {
       away: `检测到无人 (${context.occupancy ? '有人' : '无人'})，切换离家模式节能`,
       sleep: `夜间时段 (${context.timeOfDay})，切换睡眠模式`,
-      home: `白天有人，根据室外温度${context.outdoorTemp}℃自动调节`
+      home: `白天有人，根据室外温度${context.outdoorTemp}℃自动调节`,
     };
     return reasons[scenario] || '自动场景切换';
   }
@@ -318,13 +326,13 @@ class SmartBrainEngine {
   async loadModels() {
     // 模拟加载AI模型
     console.log('[SmartBrain] 加载AI预测模型...');
-    return new Promise(resolve => setTimeout(resolve, 100));
+    return new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   async connectDevices() {
     // 模拟连接设备
     console.log('[SmartBrain] 连接智能设备...');
-    return new Promise(resolve => setTimeout(resolve, 100));
+    return new Promise((resolve) => setTimeout(resolve, 100));
   }
 }
 

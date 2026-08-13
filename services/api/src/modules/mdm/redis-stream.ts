@@ -19,7 +19,13 @@ export interface StreamClient {
   xadd(key: string, fields: Record<string, string>): Promise<string>;
   ensureGroup(key: string, group: string): Promise<void>;
   /** 读取尚未投递给本组的新消息（'>'）；无则空数组。 */
-  readGroup(key: string, group: string, consumer: string, count: number, blockMs: number): Promise<StreamMessage[]>;
+  readGroup(
+    key: string,
+    group: string,
+    consumer: string,
+    count: number,
+    blockMs: number
+  ): Promise<StreamMessage[]>;
   ack(key: string, group: string, ids: string[]): Promise<void>;
   /** 组内待确认（PEL）条数，用于健康/烟雾探测。 */
   pending(key: string, group: string): Promise<number>;
@@ -49,7 +55,13 @@ export class InMemoryStreamClient implements StreamClient {
     if (!g.has(group)) g.set(group, { cursor: 0, pel: new Set() });
   }
 
-  async readGroup(key: string, group: string, _consumer: string, count: number, _blockMs: number): Promise<StreamMessage[]> {
+  async readGroup(
+    key: string,
+    group: string,
+    _consumer: string,
+    count: number,
+    _blockMs: number
+  ): Promise<StreamMessage[]> {
     await this.ensureGroup(key, group);
     const g = this.groups.get(key)!.get(group)!;
     const list = this.streams.get(key) ?? [];
@@ -92,16 +104,18 @@ export class RedisStreamClient implements StreamClient {
     }
   }
 
-  async readGroup(key: string, group: string, consumer: string, count: number, blockMs: number): Promise<StreamMessage[]> {
+  async readGroup(
+    key: string,
+    group: string,
+    consumer: string,
+    count: number,
+    blockMs: number
+  ): Promise<StreamMessage[]> {
     // 注意：Redis 语义中 BLOCK 0 = 永久阻塞。轮询场景须在 blockMs<=0 时省略 BLOCK，
     // 使 XREADGROUP 立即返回（无消息则空），避免调度循环被无限阻塞、堆积并发读。
     const opts: Record<string, number> = { COUNT: count };
     if (blockMs > 0) opts.BLOCK = blockMs;
-    const res = await this.client.xReadGroup(
-      group, consumer,
-      [{ key, id: '>' }],
-      opts,
-    );
+    const res = await this.client.xReadGroup(group, consumer, [{ key, id: '>' }], opts);
     if (!res || res.length === 0) return [];
     const messages = res[0]?.messages ?? [];
     return messages.map((m: any) => ({ id: m.id, fields: m.message ?? {} }));
@@ -115,7 +129,9 @@ export class RedisStreamClient implements StreamClient {
     try {
       const info = await this.client.xPending(key, group);
       return Number(info?.pending ?? 0);
-    } catch { return 0; }
+    } catch {
+      return 0;
+    }
   }
 }
 
@@ -130,7 +146,9 @@ export class OutboxStreamDispatcher {
   constructor(private readonly stream: StreamClient) {}
 
   /** 生产侧：把一批 pending outbox 事件 id 放进流（先写库后进流的第二步）。 */
-  async relay(events: Array<{ id: string; tenantId?: string | null; eventType?: string }>): Promise<number> {
+  async relay(
+    events: Array<{ id: string; tenantId?: string | null; eventType?: string }>
+  ): Promise<number> {
     let n = 0;
     for (const e of events) {
       await this.stream.xadd(EVENT_STREAM_KEY, {
@@ -151,11 +169,19 @@ export class OutboxStreamDispatcher {
     consumer: string,
     count: number,
     blockMs: number,
-    deliver: (outboxId: string, tenantId: string) => Promise<'delivered' | 'skipped' | 'failed'>,
+    deliver: (outboxId: string, tenantId: string) => Promise<'delivered' | 'skipped' | 'failed'>
   ): Promise<{ read: number; delivered: number; skipped: number; failed: number }> {
     await this.stream.ensureGroup(EVENT_STREAM_KEY, EVENT_STREAM_GROUP);
-    const msgs = await this.stream.readGroup(EVENT_STREAM_KEY, EVENT_STREAM_GROUP, consumer, count, blockMs);
-    let delivered = 0, skipped = 0, failed = 0;
+    const msgs = await this.stream.readGroup(
+      EVENT_STREAM_KEY,
+      EVENT_STREAM_GROUP,
+      consumer,
+      count,
+      blockMs
+    );
+    let delivered = 0,
+      skipped = 0,
+      failed = 0;
     const toAck: string[] = [];
     for (const m of msgs) {
       const outboxId = m.fields.outboxId;
@@ -167,9 +193,15 @@ export class OutboxStreamDispatcher {
         // 单条投递抛错（如脏消息）不得中断整批：记为 failed，留 PEL 供重试/后续人工处置。
         r = 'failed';
       }
-      if (r === 'delivered') { delivered++; toAck.push(m.id); }
-      else if (r === 'skipped') { skipped++; toAck.push(m.id); }
-      else { failed++; } // 不 ack，留 PEL 重试
+      if (r === 'delivered') {
+        delivered++;
+        toAck.push(m.id);
+      } else if (r === 'skipped') {
+        skipped++;
+        toAck.push(m.id);
+      } else {
+        failed++;
+      } // 不 ack，留 PEL 重试
     }
     if (toAck.length) await this.stream.ack(EVENT_STREAM_KEY, EVENT_STREAM_GROUP, toAck);
     return { read: msgs.length, delivered, skipped, failed };

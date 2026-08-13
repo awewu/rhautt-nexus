@@ -227,11 +227,12 @@ async function processBrandSite(client, config, env, apply) {
     if (apply) {
       for (const candidate of plan.candidates) {
         if (await insertCandidate(client, candidate)) inserted += 1;
-        else writeConflicts.push({
-          type: 'concurrent-conflict',
-          productId: candidate.productId,
-          slug: candidate.publicSlug,
-        });
+        else
+          writeConflicts.push({
+            type: 'concurrent-conflict',
+            productId: candidate.productId,
+            slug: candidate.publicSlug,
+          });
       }
       await client.query('COMMIT');
     } else {
@@ -299,8 +300,15 @@ async function main() {
     return;
   }
 
-  require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env.nestjs'), quiet: true });
-  require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env'), override: false, quiet: true });
+  require('dotenv').config({
+    path: path.resolve(__dirname, '..', '..', '.env.nestjs'),
+    quiet: true,
+  });
+  require('dotenv').config({
+    path: path.resolve(__dirname, '..', '..', '.env'),
+    override: false,
+    quiet: true,
+  });
   const { Client } = require('pg');
   const client = new Client(clientConfig(process.env));
   await client.connect();

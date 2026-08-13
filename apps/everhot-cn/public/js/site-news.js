@@ -24,9 +24,27 @@
     var template = document.createElement('template');
     template.innerHTML = raw;
     var allowed = {
-      P: true, BR: true, STRONG: true, B: true, EM: true, I: true, U: true, S: true, STRIKE: true,
-      UL: true, OL: true, LI: true, A: true, H2: true, H3: true, BLOCKQUOTE: true,
-      CODE: true, SPAN: true, FIGURE: true, FIGCAPTION: true, IMG: true
+      P: true,
+      BR: true,
+      STRONG: true,
+      B: true,
+      EM: true,
+      I: true,
+      U: true,
+      S: true,
+      STRIKE: true,
+      UL: true,
+      OL: true,
+      LI: true,
+      A: true,
+      H2: true,
+      H3: true,
+      BLOCKQUOTE: true,
+      CODE: true,
+      SPAN: true,
+      FIGURE: true,
+      FIGCAPTION: true,
+      IMG: true,
     };
     var textSizes = /^(12|14|16|18|20|24|28)$/;
     var textColors = /^(default|ink|gray|muted|brand)$/;
@@ -84,8 +102,10 @@
       if (tag === 'FIGURE') {
         var figureSize = node.getAttribute('data-size') || '';
         var figureAlign = node.getAttribute('data-align') || '';
-        if (/^(small|medium|large|full)$/.test(figureSize)) output.setAttribute('data-size', figureSize);
-        if (/^(left|center|right)$/.test(figureAlign)) output.setAttribute('data-align', figureAlign);
+        if (/^(small|medium|large|full)$/.test(figureSize))
+          output.setAttribute('data-size', figureSize);
+        if (/^(left|center|right)$/.test(figureAlign))
+          output.setAttribute('data-align', figureAlign);
       }
       Array.prototype.forEach.call(node.childNodes, function (child) {
         var clean = cleanNode(child);
@@ -140,9 +160,11 @@
 
   function sortNewsItems(items) {
     return (items || []).slice().sort(function (left, right) {
-      return newsRank(left) - newsRank(right)
-        || (Number(left.sortOrder) || 0) - (Number(right.sortOrder) || 0)
-        || newsTimestamp(right) - newsTimestamp(left);
+      return (
+        newsRank(left) - newsRank(right) ||
+        (Number(left.sortOrder) || 0) - (Number(right.sortOrder) || 0) ||
+        newsTimestamp(right) - newsTimestamp(left)
+      );
     });
   }
 
@@ -155,13 +177,25 @@
     var title = item.title || '恒热资讯';
     var summary = item.summary || item.description || '';
     return [
-      '<a href="', escapeHtml(newsUrl(item)), '" class="news-card', isFeaturedNews(item) ? ' is-featured' : '', '">',
-      '<div class="news-img"><img src="', escapeHtml(newsImage(item)), '" alt="" loading="lazy" decoding="async"></div>',
+      '<a href="',
+      escapeHtml(newsUrl(item)),
+      '" class="news-card',
+      isFeaturedNews(item) ? ' is-featured' : '',
+      '">',
+      '<div class="news-img"><img src="',
+      escapeHtml(newsImage(item)),
+      '" alt="" loading="lazy" decoding="async"></div>',
       isFeaturedNews(item) ? '<span class="news-featured-badge">精选</span>' : '',
       '<div class="news-body">',
-      '<h4>', escapeHtml(title), '</h4>',
-      '<p>', escapeHtml(summary), '</p>',
-      '<div class="news-meta"><span class="news-date">', escapeHtml(newsDate(item)), '</span><span class="news-link">了解更多 ›</span></div>',
+      '<h4>',
+      escapeHtml(title),
+      '</h4>',
+      '<p>',
+      escapeHtml(summary),
+      '</p>',
+      '<div class="news-meta"><span class="news-date">',
+      escapeHtml(newsDate(item)),
+      '</span><span class="news-link">了解更多 ›</span></div>',
       '</div>',
       '</a>',
     ].join('');
@@ -178,7 +212,9 @@
     var params = new URLSearchParams(window.location.search || '');
     var slug = params.get('news');
     if (!slug) return false;
-    var item = items.filter(function (row) { return String(row.slug || '') === slug; })[0];
+    var item = items.filter(function (row) {
+      return String(row.slug || '') === slug;
+    })[0];
     var mount = document.querySelector('[data-news-detail]');
     var listSection = document.querySelector('[data-news-list-section]');
     if (!mount) return false;
@@ -193,23 +229,43 @@
     var next = index >= 0 && index < items.length - 1 ? items[index + 1] : null;
     function navItem(label, row) {
       if (!row) return '<span class="news-detail-nav-disabled">' + label + '：暂无</span>';
-      return '<a href="' + escapeHtml(newsUrl(row)) + '">' + label + '：' + escapeHtml(row.title || '恒热资讯') + '</a>';
+      return (
+        '<a href="' +
+        escapeHtml(newsUrl(row)) +
+        '">' +
+        label +
+        '：' +
+        escapeHtml(row.title || '恒热资讯') +
+        '</a>'
+      );
     }
     mount.innerHTML = [
       '<article class="news-detail">',
       '<a class="news-detail-back" href="/news/">返回资讯列表</a>',
-      '<div class="news-detail-cover"><img src="', escapeHtml(newsImage(item)), '" alt="" loading="lazy" decoding="async"></div>',
+      '<div class="news-detail-cover"><img src="',
+      escapeHtml(newsImage(item)),
+      '" alt="" loading="lazy" decoding="async"></div>',
       '<div class="news-detail-body">',
-      '<div class="news-detail-meta"><span class="news-date">', escapeHtml(newsDate(item)), '</span>', isFeaturedNews(item) ? '<span class="news-featured-inline">精选</span>' : '', '</div>',
-      '<h2>', escapeHtml(item.title || '恒热资讯'), '</h2>',
-      '<p class="news-detail-summary">', escapeHtml(item.summary || ''), '</p>',
-      '<div class="news-detail-content">', sanitizeBody(item.body || item.content || item.summary || ''), '</div>',
+      '<div class="news-detail-meta"><span class="news-date">',
+      escapeHtml(newsDate(item)),
+      '</span>',
+      isFeaturedNews(item) ? '<span class="news-featured-inline">精选</span>' : '',
+      '</div>',
+      '<h2>',
+      escapeHtml(item.title || '恒热资讯'),
+      '</h2>',
+      '<p class="news-detail-summary">',
+      escapeHtml(item.summary || ''),
+      '</p>',
+      '<div class="news-detail-content">',
+      sanitizeBody(item.body || item.content || item.summary || ''),
+      '</div>',
       '<nav class="news-detail-nav" aria-label="上一篇和下一篇">',
       navItem('上一篇', prev),
       navItem('下一篇', next),
       '</nav>',
       '</div>',
-      '</article>'
+      '</article>',
     ].join('');
     if (listSection) listSection.style.display = 'none';
     return true;
@@ -219,7 +275,8 @@
     if (!window.fetch) return;
     var grid = document.querySelector('.news-grid');
     var limit = grid ? Math.max(Number(grid.getAttribute('data-news-limit') || 3) || 3, 1) : 3;
-    var newsApi = '/api/v2/sites/' + encodeURIComponent(SITE_CODE) + '/news?limit=' + encodeURIComponent(limit);
+    var newsApi =
+      '/api/v2/sites/' + encodeURIComponent(SITE_CODE) + '/news?limit=' + encodeURIComponent(limit);
     fetch(API_BASE + newsApi, { cache: 'no-store' })
       .then(function (response) {
         if (!response.ok) throw new Error('HTTP ' + response.status);

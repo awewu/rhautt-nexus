@@ -7,7 +7,11 @@ import { QuotationEntity } from './quote.entity';
 import { QuoteService } from './quote.service';
 
 const USER: any = {
-  tenantId: 'tenant-a', dealerId: 'dealer-a', storeId: 'store-a', userId: 'seller-a', role: 'sales',
+  tenantId: 'tenant-a',
+  dealerId: 'dealer-a',
+  storeId: 'store-a',
+  userId: 'seller-a',
+  role: 'sales',
 };
 
 function fixture(options: { customer?: any; opportunity?: any; quote?: any } = {}) {
@@ -15,12 +19,25 @@ function fixture(options: { customer?: any; opportunity?: any; quote?: any } = {
   const opportunities = new InMemoryRepository<any>();
   const quotations = new InMemoryRepository<any>();
   const audits = new InMemoryRepository<any>();
-  if (options.customer !== null) customers.seed(options.customer || {
-    id: 'customer-a', tenantId: 'tenant-a', dealerId: 'dealer-a', storeId: 'store-a',
-  });
-  if (options.opportunity !== null) opportunities.seed(options.opportunity || {
-    id: 'opp-a', tenantId: 'tenant-a', dealerId: 'dealer-a', storeId: 'store-a', customerId: 'customer-a',
-  });
+  if (options.customer !== null)
+    customers.seed(
+      options.customer || {
+        id: 'customer-a',
+        tenantId: 'tenant-a',
+        dealerId: 'dealer-a',
+        storeId: 'store-a',
+      }
+    );
+  if (options.opportunity !== null)
+    opportunities.seed(
+      options.opportunity || {
+        id: 'opp-a',
+        tenantId: 'tenant-a',
+        dealerId: 'dealer-a',
+        storeId: 'store-a',
+        customerId: 'customer-a',
+      }
+    );
   if (options.quote) quotations.seed(options.quote);
   const { ds, repoFor } = makeFakeDataSource([
     [CustomerEntity, customers],
@@ -29,8 +46,17 @@ function fixture(options: { customer?: any; opportunity?: any; quote?: any } = {
     [AuditLogEntity, audits],
   ]);
   const events: any[] = [];
-  const eventBus = { async publishInTx(_em: unknown, event: any) { events.push(event); return event; } };
-  const guardrail = { async evaluate() { return { blocked: false, passed: true, violations: [], facts: {} }; } };
+  const eventBus = {
+    async publishInTx(_em: unknown, event: any) {
+      events.push(event);
+      return event;
+    },
+  };
+  const guardrail = {
+    async evaluate() {
+      return { blocked: false, passed: true, violations: [], facts: {} };
+    },
+  };
   const service = new QuoteService(ds, guardrail as any, eventBus as any);
   return {
     service,
@@ -45,8 +71,15 @@ function fixture(options: { customer?: any; opportunity?: any; quote?: any } = {
 test('persist scopes the complete parent graph, ignores ownership injection, and writes audit plus outbox', async () => {
   const f = fixture();
   const quote = await f.service.persist(USER, {
-    customerId: 'customer-a', opportunityId: 'opp-a', status: 'draft', items: [],
-    tenantId: 'tenant-b', dealerId: 'dealer-b', storeId: 'store-b', ownerUserId: 'other-user', projectId: 'other-project',
+    customerId: 'customer-a',
+    opportunityId: 'opp-a',
+    status: 'draft',
+    items: [],
+    tenantId: 'tenant-b',
+    dealerId: 'dealer-b',
+    storeId: 'store-b',
+    ownerUserId: 'other-user',
+    projectId: 'other-project',
   });
 
   assert.equal(quote.tenantId, 'tenant-a');
@@ -64,25 +97,42 @@ test('persist rejects cross-store customers and mismatched opportunities', async
   });
   await assert.rejects(
     () => crossCustomer.service.persist(USER, { customerId: 'customer-a', items: [] }),
-    /客户不存在/,
+    /客户不存在/
   );
 
   const wrongOpportunity = fixture({
     opportunity: {
-      id: 'opp-a', tenantId: 'tenant-a', dealerId: 'dealer-a', storeId: 'store-a', customerId: 'customer-other',
+      id: 'opp-a',
+      tenantId: 'tenant-a',
+      dealerId: 'dealer-a',
+      storeId: 'store-a',
+      customerId: 'customer-other',
     },
   });
   await assert.rejects(
-    () => wrongOpportunity.service.persist(USER, { customerId: 'customer-a', opportunityId: 'opp-a', items: [] }),
-    /商机不存在/,
+    () =>
+      wrongOpportunity.service.persist(USER, {
+        customerId: 'customer-a',
+        opportunityId: 'opp-a',
+        items: [],
+      }),
+    /商机不存在/
   );
 });
 
 test('lock returns not found for an unowned quote and audits a successful price freeze', async () => {
-  const f = fixture({ quote: {
-    id: 'quote-a', tenantId: 'tenant-a', dealerId: 'dealer-a', storeId: 'store-a', customerId: 'customer-a',
-    status: 'draft', items: [{ sku: 'HW-1', price: 8000, quantity: 1 }], quotationLock: {},
-  } });
+  const f = fixture({
+    quote: {
+      id: 'quote-a',
+      tenantId: 'tenant-a',
+      dealerId: 'dealer-a',
+      storeId: 'store-a',
+      customerId: 'customer-a',
+      status: 'draft',
+      items: [{ sku: 'HW-1', price: 8000, quantity: 1 }],
+      quotationLock: {},
+    },
+  });
   await assert.rejects(() => f.service.lockQuotation(USER, 'missing'), /报价不存在/);
 
   const locked = await f.service.lockQuotation(USER, 'quote-a');

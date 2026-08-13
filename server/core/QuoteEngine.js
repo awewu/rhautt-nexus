@@ -11,16 +11,16 @@ class QuoteEngine {
 
   generate(params) {
     const { design, devices, services = [] } = params;
-    
+
     // 基础价格计算
     const deviceCost = this.calculateDeviceCost(devices);
     const installationCost = this.calculateInstallationCost(design);
     const serviceCost = this.calculateServiceCost(services);
-    
+
     const subtotal = deviceCost + installationCost + serviceCost;
     const tax = subtotal * 0.13; // 13%增值税
     const total = subtotal + tax;
-    
+
     return {
       quoteId: `QT${Date.now()}`,
       timestamp: new Date().toISOString(),
@@ -28,24 +28,24 @@ class QuoteEngine {
         subtotal: Math.round(subtotal),
         tax: Math.round(tax),
         total: Math.round(total),
-        currency: 'CNY'
+        currency: 'CNY',
       },
       details: {
         devices: {
           items: devices || [],
-          total: Math.round(deviceCost)
+          total: Math.round(deviceCost),
         },
         installation: {
           description: design ? '标准安装' : '基础安装',
-          total: Math.round(installationCost)
+          total: Math.round(installationCost),
         },
         services: {
           items: services,
-          total: Math.round(serviceCost)
-        }
+          total: Math.round(serviceCost),
+        },
       },
       validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      terms: '报价有效期30天，最终价格以合同为准'
+      terms: '报价有效期30天，最终价格以合同为准',
     };
   }
 
@@ -65,12 +65,12 @@ class QuoteEngine {
   calculateServiceCost(services) {
     if (!services || !Array.isArray(services)) return 0;
     const servicePrices = {
-      'design': 3000,
-      'consulting': 1000,
-      'maintenance_1y': 2000,
-      'maintenance_3y': 5000
+      design: 3000,
+      consulting: 1000,
+      maintenance_1y: 2000,
+      maintenance_3y: 5000,
     };
-    
+
     return services.reduce((sum, service) => {
       return sum + (servicePrices[service] || 1000);
     }, 0);
@@ -81,7 +81,7 @@ class QuoteEngine {
       status: 'ok',
       name: this.name,
       version: this.version,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }

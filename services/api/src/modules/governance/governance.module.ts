@@ -4,12 +4,8 @@ import { Module } from '@nestjs/common';
 import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smoke';
 
 @Module({
-  imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([AuditLogEntity])])
-  ],
-  providers: [
-    ...(TARGET_API_BOOT_SMOKE ? [bootSmokeRepositoryProvider(AuditLogEntity)] : [])
-  ],
+  imports: [...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([AuditLogEntity])])],
+  providers: [...(TARGET_API_BOOT_SMOKE ? [bootSmokeRepositoryProvider(AuditLogEntity)] : [])],
 })
 export class GovernanceModule {}
 
@@ -21,11 +17,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class GovernanceBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('governance');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('governance')
 export class GovernanceBoundaryController {
   constructor(private readonly s: GovernanceBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

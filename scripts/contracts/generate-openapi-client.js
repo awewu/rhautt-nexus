@@ -33,7 +33,7 @@ function collectOperations(spec) {
         method: method.toUpperCase(),
         path: routePath,
         operationId: operation.operationId,
-        binary: false
+        binary: false,
       });
     }
   }
@@ -65,13 +65,20 @@ function renderSchemaType(schema) {
   if (!schema || typeof schema !== 'object') return 'unknown';
   if (schema.$ref) return schemaNameFromRef(schema.$ref);
   if (Object.prototype.hasOwnProperty.call(schema, 'const')) return literalType(schema.const);
-  if (Array.isArray(schema.enum)) return uniqueTypes(schema.enum.map(literalType)).join(' | ') || 'unknown';
-  if (Array.isArray(schema.anyOf)) return uniqueTypes(schema.anyOf.map(renderSchemaType)).join(' | ') || 'unknown';
-  if (Array.isArray(schema.oneOf)) return uniqueTypes(schema.oneOf.map(renderSchemaType)).join(' | ') || 'unknown';
-  if (Array.isArray(schema.allOf)) return uniqueTypes(schema.allOf.map(renderSchemaType)).join(' & ') || 'unknown';
+  if (Array.isArray(schema.enum))
+    return uniqueTypes(schema.enum.map(literalType)).join(' | ') || 'unknown';
+  if (Array.isArray(schema.anyOf))
+    return uniqueTypes(schema.anyOf.map(renderSchemaType)).join(' | ') || 'unknown';
+  if (Array.isArray(schema.oneOf))
+    return uniqueTypes(schema.oneOf.map(renderSchemaType)).join(' | ') || 'unknown';
+  if (Array.isArray(schema.allOf))
+    return uniqueTypes(schema.allOf.map(renderSchemaType)).join(' & ') || 'unknown';
 
   if (Array.isArray(schema.type)) {
-    return uniqueTypes(schema.type.map(type => renderSchemaType({ ...schema, type }))).join(' | ') || 'unknown';
+    return (
+      uniqueTypes(schema.type.map((type) => renderSchemaType({ ...schema, type }))).join(' | ') ||
+      'unknown'
+    );
   }
 
   switch (schema.type) {
@@ -106,7 +113,9 @@ function renderObjectSchemaType(schema) {
 
   const lines = ['{'];
   for (const [name, propertySchema] of propertyEntries) {
-    lines.push(`  ${propertyKey(name)}${required.has(name) ? '' : '?'}: ${renderSchemaType(propertySchema)};`);
+    lines.push(
+      `  ${propertyKey(name)}${required.has(name) ? '' : '?'}: ${renderSchemaType(propertySchema)};`
+    );
   }
   lines.push('}');
   const objectType = lines.join('\n');
@@ -124,20 +133,22 @@ function renderSchemas(spec) {
 function renderClient(spec, operations) {
   const hash = specHash();
   const schemaTypes = renderSchemas(spec);
-  const methods = operations.map(operation => {
-    if (operation.binary) {
+  const methods = operations
+    .map((operation) => {
+      if (operation.binary) {
+        return [
+          `  async ${operation.operationId}(params: ClientParams = {}): Promise<Response> {`,
+          `    return this.requestBlob(${JSON.stringify(operation.method)}, ${JSON.stringify(operation.path)}, params);`,
+          '  }',
+        ].join('\n');
+      }
       return [
-        `  async ${operation.operationId}(params: ClientParams = {}): Promise<Response> {`,
-        `    return this.requestBlob(${JSON.stringify(operation.method)}, ${JSON.stringify(operation.path)}, params);`,
-        '  }'
+        `  async ${operation.operationId}<T = unknown>(params: ClientParams = {}): Promise<ApiEnvelope<T>> {`,
+        `    return this.request<T>(${JSON.stringify(operation.method)}, ${JSON.stringify(operation.path)}, params);`,
+        '  }',
       ].join('\n');
-    }
-    return [
-      `  async ${operation.operationId}<T = unknown>(params: ClientParams = {}): Promise<ApiEnvelope<T>> {`,
-      `    return this.request<T>(${JSON.stringify(operation.method)}, ${JSON.stringify(operation.path)}, params);`,
-      '  }'
-    ].join('\n');
-  }).join('\n\n');
+    })
+    .join('\n\n');
 
   return [
     '/* eslint-disable */',
@@ -181,7 +192,7 @@ function renderClient(spec, operations) {
     '  private buildUrl(routePath: string, params: ClientParams) {',
     '    let url = routePath;',
     '    for (const [key, value] of Object.entries(params.path || {})) {',
-    "      url = url.replace(`{${key}}`, encodeURIComponent(String(value)));",
+    '      url = url.replace(`{${key}}`, encodeURIComponent(String(value)));',
     '    }',
     '    const query = new URLSearchParams();',
     '    for (const [key, value] of Object.entries(params.query || {})) {',
@@ -225,7 +236,7 @@ function renderClient(spec, operations) {
     'export function createRhauttNexusClient(options: RhauttNexusClientOptions = {}) {',
     '  return new RhauttNexusClient(options);',
     '}',
-    ''
+    '',
   ].join('\n');
 }
 
@@ -234,7 +245,9 @@ function main() {
   const operations = collectOperations(spec);
   fs.mkdirSync(path.dirname(CLIENT_PATH), { recursive: true });
   fs.writeFileSync(CLIENT_PATH, renderClient(spec, operations));
-  console.log(`Generated client: ${path.relative(ROOT, CLIENT_PATH)} (${operations.length} operations)`);
+  console.log(
+    `Generated client: ${path.relative(ROOT, CLIENT_PATH)} (${operations.length} operations)`
+  );
 }
 
 if (require.main === module) main();

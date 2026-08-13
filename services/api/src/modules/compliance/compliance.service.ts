@@ -22,21 +22,24 @@ export interface RecordConsentDto {
  * 数据保留策略（PIPL 第19条：保留期限为实现处理目的所必要的最短时间）。
  * 按数据分类给出默认保留天数；到期由 purgeExpired 触发清理/匿名化。
  */
-export const DATA_RETENTION_POLICY: Record<string, { days: number; action: 'purge' | 'anonymize'; note: string }> = {
-  diagnosis_lead:   { days: 365,  action: 'anonymize', note: '问诊留资：1 年未转化匿名化' },
-  marketing_consent:{ days: 730,  action: 'purge',     note: '营销同意：2 年' },
-  customer_record:  { days: 3650, action: 'anonymize', note: '已签约客户：10 年（保修/合同期）' },
-  audit_log:        { days: 1825, action: 'purge',     note: '审计日志：5 年（等保要求）' },
+export const DATA_RETENTION_POLICY: Record<
+  string,
+  { days: number; action: 'purge' | 'anonymize'; note: string }
+> = {
+  diagnosis_lead: { days: 365, action: 'anonymize', note: '问诊留资：1 年未转化匿名化' },
+  marketing_consent: { days: 730, action: 'purge', note: '营销同意：2 年' },
+  customer_record: { days: 3650, action: 'anonymize', note: '已签约客户：10 年（保修/合同期）' },
+  audit_log: { days: 1825, action: 'purge', note: '审计日志：5 年（等保要求）' },
 };
 
 @Injectable()
 export class ComplianceService {
-  constructor(
-    @InjectDataSource() private readonly ds: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private readonly ds: DataSource) {}
 
   async recordConsent(dto: RecordConsentDto): Promise<ConsentEntity> {
-    return withRlsTransaction(this.ds, (em) => this.recordConsentInTx(em, dto), { tenantId: dto.tenantId });
+    return withRlsTransaction(this.ds, (em) => this.recordConsentInTx(em, dto), {
+      tenantId: dto.tenantId,
+    });
   }
 
   /**
@@ -67,11 +70,18 @@ export class ComplianceService {
   }
 
   async getConsentStatus(tenantId: string, subjectId: string, purpose: ConsentPurpose) {
-    const rows = await withRlsTransaction(this.ds, (em) =>
-      em.getRepository(ConsentEntity).find({ where: { tenantId, subjectId, purpose } }), { tenantId });
-    const latest = rows.sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))[0];
+    const rows = await withRlsTransaction(
+      this.ds,
+      (em) => em.getRepository(ConsentEntity).find({ where: { tenantId, subjectId, purpose } }),
+      { tenantId }
+    );
+    const latest = rows.sort(
+      (a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0)
+    )[0];
     return {
-      tenantId, subjectId, purpose,
+      tenantId,
+      subjectId,
+      purpose,
       active: latest ? latest.isActive : false,
       policyVersion: latest?.policyVersion || null,
       grantedAt: latest?.grantedAt || null,
@@ -81,12 +91,21 @@ export class ComplianceService {
 
   async withdrawConsent(tenantId: string, subjectId: string, purpose: ConsentPurpose) {
     // PIPL 第15条：撤回同意须与给予同样便捷
-    return this.recordConsent({ tenantId, subjectId, purpose, policyVersion: 'withdraw', granted: false });
+    return this.recordConsent({
+      tenantId,
+      subjectId,
+      purpose,
+      policyVersion: 'withdraw',
+      granted: false,
+    });
   }
 
   async listConsents(tenantId: string, subjectId: string) {
-    return withRlsTransaction(this.ds, (em) =>
-      em.getRepository(ConsentEntity).find({ where: { tenantId, subjectId } }), { tenantId });
+    return withRlsTransaction(
+      this.ds,
+      (em) => em.getRepository(ConsentEntity).find({ where: { tenantId, subjectId } }),
+      { tenantId }
+    );
   }
 
   dataRetentionPolicy() {

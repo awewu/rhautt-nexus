@@ -23,8 +23,9 @@ export interface RegisterMasterDto {
 @Injectable()
 export class MdmService {
   constructor(
-    @InjectRepository(GlobalProductEntity) private readonly products: Repository<GlobalProductEntity>,
-    private readonly bus: EventBusService,
+    @InjectRepository(GlobalProductEntity)
+    private readonly products: Repository<GlobalProductEntity>,
+    private readonly bus: EventBusService
   ) {}
 
   private makeGlobalId(tier: SourceTier, brand: string | null, sku: string): string {
@@ -60,7 +61,11 @@ export class MdmService {
       eventType: 'product.master.updated',
       aggregateType: 'global_product',
       aggregateId: saved.globalProductId,
-      payload: { globalProductId: saved.globalProductId, sourceTier: saved.sourceTier, version: saved.sourceVersion },
+      payload: {
+        globalProductId: saved.globalProductId,
+        sourceTier: saved.sourceTier,
+        version: saved.sourceVersion,
+      },
     });
     return saved;
   }

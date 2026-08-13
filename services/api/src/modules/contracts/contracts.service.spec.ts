@@ -20,9 +20,10 @@ const mockEm = () => ({
   getRepository: jest.fn(() => mockRepo()),
 });
 
-const mockDs = () => ({
-  transaction: jest.fn(async (cb: any) => cb(mockEm())),
-}) as any;
+const mockDs = () =>
+  ({
+    transaction: jest.fn(async (cb: any) => cb(mockEm())),
+  }) as any;
 
 const user = {
   userId: 'u1',
@@ -65,7 +66,12 @@ describe('ContractsService', () => {
   it('marks a contract as signed', async () => {
     const ds = mockDs();
     const repo = mockRepo();
-    repo.findOne = jest.fn(async () => ({ id: 'ct-1', contractNo: 'CT-1', status: 'pending_signature', terms: {} }));
+    repo.findOne = jest.fn(async () => ({
+      id: 'ct-1',
+      contractNo: 'CT-1',
+      status: 'pending_signature',
+      terms: {},
+    }));
     ds.transaction = jest.fn(async (cb: any) => cb({ getRepository: () => repo }));
     svc = new ContractsService(ds);
 
@@ -77,17 +83,29 @@ describe('ContractsService', () => {
   it('throws ConflictException when signing a pending_approval contract', async () => {
     const ds = mockDs();
     const repo = mockRepo();
-    repo.findOne = jest.fn(async () => ({ id: 'ct-1', contractNo: 'CT-1', status: 'pending_approval', terms: {} }));
+    repo.findOne = jest.fn(async () => ({
+      id: 'ct-1',
+      contractNo: 'CT-1',
+      status: 'pending_approval',
+      terms: {},
+    }));
     ds.transaction = jest.fn(async (cb: any) => cb({ getRepository: () => repo }));
     svc = new ContractsService(ds);
 
-    await expect(svc.markSigned(user, 'CT-1', {})).rejects.toThrow('contract approval is required before signature');
+    await expect(svc.markSigned(user, 'CT-1', {})).rejects.toThrow(
+      'contract approval is required before signature'
+    );
   });
 
   it('decides approval — approved moves to pending_signature', async () => {
     const ds = mockDs();
     const repo = mockRepo();
-    repo.findOne = jest.fn(async () => ({ id: 'ct-1', contractNo: 'CT-1', status: 'pending_approval', terms: {} }));
+    repo.findOne = jest.fn(async () => ({
+      id: 'ct-1',
+      contractNo: 'CT-1',
+      status: 'pending_approval',
+      terms: {},
+    }));
     ds.transaction = jest.fn(async (cb: any) => cb({ getRepository: () => repo }));
     svc = new ContractsService(ds);
 
@@ -98,7 +116,12 @@ describe('ContractsService', () => {
   it('decides approval — rejected moves to voided', async () => {
     const ds = mockDs();
     const repo = mockRepo();
-    repo.findOne = jest.fn(async () => ({ id: 'ct-1', contractNo: 'CT-1', status: 'pending_approval', terms: {} }));
+    repo.findOne = jest.fn(async () => ({
+      id: 'ct-1',
+      contractNo: 'CT-1',
+      status: 'pending_approval',
+      terms: {},
+    }));
     ds.transaction = jest.fn(async (cb: any) => cb({ getRepository: () => repo }));
     svc = new ContractsService(ds);
 
@@ -110,7 +133,9 @@ describe('ContractsService', () => {
     const ds = mockDs();
     const repo = mockRepo();
     repo.findOne = jest.fn(async () => ({
-      id: 'ct-1', contractNo: 'CT-1', status: 'signed',
+      id: 'ct-1',
+      contractNo: 'CT-1',
+      status: 'signed',
       terms: { paymentSchedule: [{ key: 'deposit', amount: 15000, paidAmount: 0 }] },
     }));
     ds.transaction = jest.fn(async (cb: any) => cb({ getRepository: () => repo }));
@@ -123,17 +148,29 @@ describe('ContractsService', () => {
   it('throws BadRequestException for zero payment', async () => {
     const ds = mockDs();
     const repo = mockRepo();
-    repo.findOne = jest.fn(async () => ({ id: 'ct-1', contractNo: 'CT-1', status: 'signed', terms: {} }));
+    repo.findOne = jest.fn(async () => ({
+      id: 'ct-1',
+      contractNo: 'CT-1',
+      status: 'signed',
+      terms: {},
+    }));
     ds.transaction = jest.fn(async (cb: any) => cb({ getRepository: () => repo }));
     svc = new ContractsService(ds);
 
-    await expect(svc.recordPayment(user, 'CT-1', { amount: 0 })).rejects.toThrow('payment amount must be greater than zero');
+    await expect(svc.recordPayment(user, 'CT-1', { amount: 0 })).rejects.toThrow(
+      'payment amount must be greater than zero'
+    );
   });
 
   it('starts delivery on a signed contract', async () => {
     const ds = mockDs();
     const repo = mockRepo();
-    repo.findOne = jest.fn(async () => ({ id: 'ct-1', contractNo: 'CT-1', status: 'signed', terms: {} }));
+    repo.findOne = jest.fn(async () => ({
+      id: 'ct-1',
+      contractNo: 'CT-1',
+      status: 'signed',
+      terms: {},
+    }));
     ds.transaction = jest.fn(async (cb: any) => cb({ getRepository: () => repo }));
     svc = new ContractsService(ds);
 
@@ -144,10 +181,17 @@ describe('ContractsService', () => {
   it('throws ConflictException when starting delivery on draft contract', async () => {
     const ds = mockDs();
     const repo = mockRepo();
-    repo.findOne = jest.fn(async () => ({ id: 'ct-1', contractNo: 'CT-1', status: 'draft', terms: {} }));
+    repo.findOne = jest.fn(async () => ({
+      id: 'ct-1',
+      contractNo: 'CT-1',
+      status: 'draft',
+      terms: {},
+    }));
     ds.transaction = jest.fn(async (cb: any) => cb({ getRepository: () => repo }));
     svc = new ContractsService(ds);
 
-    await expect(svc.startDelivery(user, 'CT-1', {})).rejects.toThrow('contract must be signed before delivery can start');
+    await expect(svc.startDelivery(user, 'CT-1', {})).rejects.toThrow(
+      'contract must be signed before delivery can start'
+    );
   });
 });

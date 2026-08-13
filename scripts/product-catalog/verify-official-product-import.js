@@ -5,7 +5,12 @@ const dotenv = require('dotenv');
 const { Client } = require('pg');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const RESULT_PATH = path.join(ROOT, 'evidence', 'provenance', 'official-product-db-verification.json');
+const RESULT_PATH = path.join(
+  ROOT,
+  'evidence',
+  'provenance',
+  'official-product-db-verification.json'
+);
 
 dotenv.config({ path: path.join(ROOT, '.env.nestjs'), quiet: true });
 dotenv.config({ path: path.join(ROOT, '.env'), override: false, quiet: true });
@@ -73,8 +78,13 @@ async function main() {
       duplicateTenantSkus: duplicates,
       invalidSources,
       productsWithImageUrls,
-      passed: total === 69 && active === 69 && verified === 69
-        && duplicates.length === 0 && invalidSources.length === 0 && productsWithImageUrls.length === 0,
+      passed:
+        total === 69 &&
+        active === 69 &&
+        verified === 69 &&
+        duplicates.length === 0 &&
+        invalidSources.length === 0 &&
+        productsWithImageUrls.length === 0,
     };
     fs.writeFileSync(RESULT_PATH, `${JSON.stringify(result, null, 2)}\n`, 'utf8');
     console.log(JSON.stringify(result, null, 2));

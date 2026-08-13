@@ -18,10 +18,5 @@
     "*.js",
     "*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    ".next",
-    "out"
-  ]
+  "exclude": ["node_modules", "dist", ".next", "out"]
 }

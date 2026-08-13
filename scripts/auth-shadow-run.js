@@ -29,17 +29,42 @@ const TEST_PHONE = process.env.TEST_PHONE || '';
 const TEST_PASSWORD = process.env.TEST_PASSWORD || '';
 
 const PUBLIC_CASES = [
-  { name: 'login', method: 'POST', path: '/login', body: { phone: TEST_PHONE || '13800000000', password: 'wrong-password' } },
-  { name: 'login-sms', method: 'POST', path: '/login-sms', body: { phone: TEST_PHONE || '13800000000', smsCode: '123456' } },
-  { name: 'send-sms', method: 'POST', path: '/send-sms', body: { phone: TEST_PHONE || '13800000000' } },
-  { name: 'register', method: 'POST', path: '/register', body: { phone: TEST_PHONE || '13800000000', password: 'password123' } },
+  {
+    name: 'login',
+    method: 'POST',
+    path: '/login',
+    body: { phone: TEST_PHONE || '13800000000', password: 'wrong-password' },
+  },
+  {
+    name: 'login-sms',
+    method: 'POST',
+    path: '/login-sms',
+    body: { phone: TEST_PHONE || '13800000000', smsCode: '123456' },
+  },
+  {
+    name: 'send-sms',
+    method: 'POST',
+    path: '/send-sms',
+    body: { phone: TEST_PHONE || '13800000000' },
+  },
+  {
+    name: 'register',
+    method: 'POST',
+    path: '/register',
+    body: { phone: TEST_PHONE || '13800000000', password: 'password123' },
+  },
 ];
 
 const PROTECTED_CASES = [
   { name: 'me', method: 'GET', path: '/me', body: null },
   { name: 'user', method: 'GET', path: '/user', body: null },
   { name: 'update-user', method: 'PUT', path: '/user', body: { name: 'Shadow Runner' } },
-  { name: 'password', method: 'PUT', path: '/password', body: { oldPassword: 'wrong-old', newPassword: 'short' } },
+  {
+    name: 'password',
+    method: 'PUT',
+    path: '/password',
+    body: { oldPassword: 'wrong-old', newPassword: 'short' },
+  },
   { name: 'refresh-token', method: 'POST', path: '/refresh-token', body: null },
   { name: 'logout', method: 'POST', path: '/logout', body: null },
 ];
@@ -56,7 +81,11 @@ async function fetchJson(baseUrl, apiPath, { method, body, token }) {
     });
     const text = await res.text();
     let json = null;
-    try { json = JSON.parse(text); } catch { /* not JSON */ }
+    try {
+      json = JSON.parse(text);
+    } catch {
+      /* not JSON */
+    }
     return { status: res.status, body: json ?? text };
   } catch (err) {
     return { status: 0, error: err.message, body: null };
@@ -85,7 +114,10 @@ function shapeDiff(left, right) {
 
 async function obtainToken(baseUrl, label) {
   if (!TEST_PHONE || !TEST_PASSWORD) return null;
-  const res = await fetchJson(baseUrl, '/login', { method: 'POST', body: { phone: TEST_PHONE, password: TEST_PASSWORD } });
+  const res = await fetchJson(baseUrl, '/login', {
+    method: 'POST',
+    body: { phone: TEST_PHONE, password: TEST_PASSWORD },
+  });
   if (res.status === 200 && res.body?.data?.token) {
     return res.body.data.token;
   }
@@ -115,7 +147,12 @@ async function runAll() {
     : [];
 
   const rows = [];
-  const maxLen = Math.max(publicLegacy.length, publicNestjs.length, protectedLegacy.length, protectedNestjs.length);
+  const maxLen = Math.max(
+    publicLegacy.length,
+    publicNestjs.length,
+    protectedLegacy.length,
+    protectedNestjs.length
+  );
   for (let i = 0; i < maxLen; i++) {
     const l = publicLegacy[i] || protectedLegacy[i - publicLegacy.length];
     const r = publicNestjs[i] || protectedNestjs[i - publicNestjs.length];
@@ -181,18 +218,26 @@ async function runAll() {
   console.log(`NestJS: ${NESTJS_URL}`);
   console.log(`Credentials: ${report.meta.hasCredentials ? 'yes' : 'no'}`);
   console.log(`Protected compared: ${report.meta.protectedCompared ? 'yes' : 'no'}`);
-  console.log(`\nResults: ${report.summary.statusMatch}/${report.summary.total} status match, ${report.summary.shapeMatch}/${report.summary.total} shape match\n`);
-  console.table(rows.map((r) => ({
-    name: r.name,
-    method: r.method,
-    legacy: r.legacyStatus,
-    nestjs: r.nestjsStatus,
-    status: r.statusMatch ? '✅' : '❌',
-    shape: r.shapeMatch ? '✅' : JSON.stringify(r.shapeDiff),
-  })));
+  console.log(
+    `\nResults: ${report.summary.statusMatch}/${report.summary.total} status match, ${report.summary.shapeMatch}/${report.summary.total} shape match\n`
+  );
+  console.table(
+    rows.map((r) => ({
+      name: r.name,
+      method: r.method,
+      legacy: r.legacyStatus,
+      nestjs: r.nestjsStatus,
+      status: r.statusMatch ? '✅' : '❌',
+      shape: r.shapeMatch ? '✅' : JSON.stringify(r.shapeDiff),
+    }))
+  );
   console.log(`\nReports written:\n  ${jsonPath}\n  ${mdPath}`);
 
-  const exitCode = report.summary.statusMatch === report.summary.total && report.summary.shapeMatch === report.summary.total ? 0 : 1;
+  const exitCode =
+    report.summary.statusMatch === report.summary.total &&
+    report.summary.shapeMatch === report.summary.total
+      ? 0
+      : 1;
   process.exit(exitCode);
 }
 

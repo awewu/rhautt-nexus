@@ -2,9 +2,15 @@ import { Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import {
-  listPainPoints, findPainPoint, autoDetectPainPoints, inferImplicitPainPoints,
-  painPointsToSystems, progressiveNextQuestion, painPointsToGeoQuestions,
-  type SystemCode, type GeoQuestionSeed,
+  listPainPoints,
+  findPainPoint,
+  autoDetectPainPoints,
+  inferImplicitPainPoints,
+  painPointsToSystems,
+  progressiveNextQuestion,
+  painPointsToGeoQuestions,
+  type SystemCode,
+  type GeoQuestionSeed,
 } from './diagnosis-painpoints';
 import { SYSTEM_LABELS, inferSystems } from './diagnosis-engine';
 import { BailianDiagnosisModelClient } from './diagnosis-model-client';
@@ -20,26 +26,37 @@ import { BailianDiagnosisModelClient } from './diagnosis-model-client';
  */
 
 export interface DiagnosisAdviceInput {
-  text?: string;                    // 业主自由描述
-  profile?: Record<string, any>;    // 户型/家庭 profile
-  selected?: string[];              // 已手选痛点 id
+  text?: string; // 业主自由描述
+  profile?: Record<string, any>; // 户型/家庭 profile
+  selected?: string[]; // 已手选痛点 id
 }
 
 export interface DiagnosisAdvice {
-  requestId: string;                    // 服务端调用追踪号（不含 PII）
-  source: 'model' | 'rules';        // 如实标注产出路径
-  mappedPainIds: string[];          // 命中的已知痛点 id（受控词表内）
-  discoveredPains: string[];        // 词表外的新痛点说法（迭代候选，待人工审核）
+  requestId: string; // 服务端调用追踪号（不含 PII）
+  source: 'model' | 'rules'; // 如实标注产出路径
+  mappedPainIds: string[]; // 命中的已知痛点 id（受控词表内）
+  discoveredPains: string[]; // 词表外的新痛点说法（迭代候选，待人工审核）
   implicit: { id: string; name: string; reason: string; strength: string }[]; // 推断的隐性痛点
-  systems: SystemCode[];            // 系统建议 code
+  systems: SystemCode[]; // 系统建议 code
   systemLabels: string[];
-  nextQuestion: string | null;      // 渐进追问；null 表示可进入归纳
-  summary: string;                  // 需求共识画像（诚实，无编造数字）
-  geoSeeds: GeoQuestionSeed[];      // 痛点 → GEO 选题
+  nextQuestion: string | null; // 渐进追问；null 表示可进入归纳
+  summary: string; // 需求共识画像（诚实，无编造数字）
+  geoSeeds: GeoQuestionSeed[]; // 痛点 → GEO 选题
 }
 
 // 《广告法》绝对化用语最小基线（与 AiGateway 同源思路，防止归纳文案越线）。
-const FORBIDDEN_TERMS = ['最好', '最佳', '第一', '唯一', '100%', '绝对', '永久', '根治', '包治', '顶级'];
+const FORBIDDEN_TERMS = [
+  '最好',
+  '最佳',
+  '第一',
+  '唯一',
+  '100%',
+  '绝对',
+  '永久',
+  '根治',
+  '包治',
+  '顶级',
+];
 
 const ModelOutSchema = z.object({
   mappedPainIds: z.array(z.string().max(80)).max(48).default([]),
@@ -113,7 +130,7 @@ export class DiagnosisAiService {
   private async modelAdvise(
     input: DiagnosisAdviceInput,
     apiKey: string,
-    requestId: string,
+    requestId: string
   ): Promise<DiagnosisAdvice> {
     const client = new BailianDiagnosisModelClient({
       apiKey,
@@ -121,7 +138,9 @@ export class DiagnosisAiService {
       model: this.model,
     });
 
-    const catalog = listPainPoints().map((p) => `${p.id}=${p.name}`).join('；');
+    const catalog = listPainPoints()
+      .map((p) => `${p.id}=${p.name}`)
+      .join('；');
     const system = [
       '你是瑞诺瓦舒适家的顾问式问诊助手（初诊，不做精算）。',
       '任务：听懂业主的生活化描述，映射到给定痛点清单，并推进一个自然的追问。',
@@ -146,8 +165,12 @@ export class DiagnosisAiService {
 
     // 只保留受控词表内的 id；模型自选 + 业主已选合并。
     const known = parsed.mappedPainIds.filter((id) => !!findPainPoint(id));
-    const mapped = [...new Set([...(input.selected || []).filter((id) => !!findPainPoint(id)), ...known])];
-    const discovered = [...new Set(parsed.discoveredPains.map((s) => String(s).trim()).filter(Boolean))].slice(0, 8);
+    const mapped = [
+      ...new Set([...(input.selected || []).filter((id) => !!findPainPoint(id)), ...known]),
+    ];
+    const discovered = [
+      ...new Set(parsed.discoveredPains.map((s) => String(s).trim()).filter(Boolean)),
+    ].slice(0, 8);
     this.log('diagnosis.ai.provider', {
       requestId,
       provider: 'bailian',
@@ -170,13 +193,17 @@ export class DiagnosisAiService {
     mapped: string[],
     discovered: string[],
     profile: Record<string, any>,
-    modelText?: { nextQuestion: string | null; summary: string },
+    modelText?: { nextQuestion: string | null; summary: string }
   ): DiagnosisAdvice {
     const systems = painPointsToSystems(mapped);
     const implicit = inferImplicitPainPoints(profile, mapped).map((x) => ({
-      id: x.id, name: x.name, reason: x.reason, strength: x.strength,
+      id: x.id,
+      name: x.name,
+      reason: x.reason,
+      strength: x.strength,
     }));
-    const nextQuestion = modelText?.nextQuestion ?? progressiveNextQuestion(mapped)?.question ?? null;
+    const nextQuestion =
+      modelText?.nextQuestion ?? progressiveNextQuestion(mapped)?.question ?? null;
     const summary = this.sanitize(modelText?.summary || this.ruleSummary(profile, mapped, systems));
     return {
       requestId,
@@ -193,16 +220,27 @@ export class DiagnosisAiService {
   }
 
   /** 规则归纳（无模型时）：只用已知信息拼装，不含任何编造数字。 */
-  private ruleSummary(profile: Record<string, any>, mapped: string[], systems: SystemCode[]): string {
+  private ruleSummary(
+    profile: Record<string, any>,
+    mapped: string[],
+    systems: SystemCode[]
+  ): string {
     const bits: string[] = [];
     const t = profile.propertyType || profile.type;
     if (t) bits.push(String(t));
     if (profile.area) bits.push(`${profile.area}㎡`);
     if (profile.city) bits.push(String(profile.city));
     const head = bits.length ? `${bits.join(' · ')}。` : '';
-    const painNames = mapped.map((id) => findPainPoint(id)?.name).filter(Boolean).slice(0, 5);
-    const painPart = painNames.length ? `主要关注：${painNames.join('、')}。` : '暂未锁定具体痛点，建议继续沟通。';
-    const sysPart = systems.length ? `方向建议：${systems.map((s) => SYSTEM_LABELS[s]).join('、')}（具体选型与报价以现场勘测为准）。` : '';
+    const painNames = mapped
+      .map((id) => findPainPoint(id)?.name)
+      .filter(Boolean)
+      .slice(0, 5);
+    const painPart = painNames.length
+      ? `主要关注：${painNames.join('、')}。`
+      : '暂未锁定具体痛点，建议继续沟通。';
+    const sysPart = systems.length
+      ? `方向建议：${systems.map((s) => SYSTEM_LABELS[s]).join('、')}（具体选型与报价以现场勘测为准）。`
+      : '';
     return `${head}${painPart}${sysPart}`.trim();
   }
 
@@ -214,13 +252,23 @@ export class DiagnosisAiService {
 
   private toModelProfile(profile: Record<string, any>): Record<string, unknown> {
     const allowed = [
-      'city', 'area', 'type', 'houseType', 'floors', 'hasBasement', 'hasElderly',
-      'hasInfant', 'hasPet', 'renovationStage', 'residents', 'budget',
+      'city',
+      'area',
+      'type',
+      'houseType',
+      'floors',
+      'hasBasement',
+      'hasElderly',
+      'hasInfant',
+      'hasPet',
+      'renovationStage',
+      'residents',
+      'budget',
     ];
     return Object.fromEntries(
       allowed
         .filter((key) => profile[key] !== undefined && profile[key] !== null && profile[key] !== '')
-        .map((key) => [key, profile[key]]),
+        .map((key) => [key, profile[key]])
     );
   }
 
@@ -272,11 +320,14 @@ export class DiagnosisAiService {
     const systems = inferSystems({ painPoints });
     const systemLabels = systems.map((s) => SYSTEM_LABELS[s] || s);
     const coreLabels = systemLabels.filter((l) => l !== SYSTEM_LABELS.smart_control);
-    const wuheng = systems.includes('hot_water') && (systems.includes('heating') || systems.includes('air'));
+    const wuheng =
+      systems.includes('hot_water') && (systems.includes('heating') || systems.includes('air'));
     const combination = wuheng ? '五恒系统' : coreLabels.join('+') || '舒适家基础组合';
-    const painPart = painPoints.length ? `围绕您反馈的「${painPoints.slice(0, 3).join('、')}」等困扰，` : '按常见舒适家需求，';
+    const painPart = painPoints.length
+      ? `围绕您反馈的「${painPoints.slice(0, 3).join('、')}」等困扰，`
+      : '按常见舒适家需求，';
     const reasoning = this.sanitize(
-      `${painPart}建议以 ${combination} 为方向，覆盖 ${coreLabels.join('、')}${systems.includes('smart_control') ? '，并配套智能控制联动' : ''}。具体选型与报价以现场勘测为准。`,
+      `${painPart}建议以 ${combination} 为方向，覆盖 ${coreLabels.join('、')}${systems.includes('smart_control') ? '，并配套智能控制联动' : ''}。具体选型与报价以现场勘测为准。`
     );
     return {
       source: 'rules',
@@ -289,7 +340,10 @@ export class DiagnosisAiService {
   }
 
   /** 模型路径：沿 Legacy prompt 口径做结构化推荐，Zod 校验 + 词表内过滤。 */
-  private async modelQuickAnalyze(input: QuickAnalyzeInput, apiKey: string): Promise<QuickAnalyzeResult> {
+  private async modelQuickAnalyze(
+    input: QuickAnalyzeInput,
+    apiKey: string
+  ): Promise<QuickAnalyzeResult> {
     const client = new BailianDiagnosisModelClient({
       apiKey,
       baseUrl: this.baseUrl,
@@ -311,7 +365,9 @@ export class DiagnosisAiService {
       input.occupants ? `常住人数：${input.occupants}` : '',
       `居家困扰：${(input.painPoints || []).length ? (input.painPoints || []).join('、') : '未选择（按默认舒适需求推荐）'}`,
       '请分析并推荐最合适的 HVAC 系统组合。',
-    ].filter(Boolean).join('\n');
+    ]
+      .filter(Boolean)
+      .join('\n');
 
     const completion = await client.completeJson({ system, user, maxTokens: 512 });
     const match = completion.content.match(/\{[\s\S]*\}/);
@@ -324,7 +380,8 @@ export class DiagnosisAiService {
       source: 'model',
       systems,
       systemLabels: systems.map((s) => SYSTEM_LABELS[s]),
-      combination: this.sanitize(parsed.combination) || systems.map((s) => SYSTEM_LABELS[s]).join('+'),
+      combination:
+        this.sanitize(parsed.combination) || systems.map((s) => SYSTEM_LABELS[s]).join('+'),
       reasoning: this.sanitize(parsed.reasoning),
       priority: this.sanitize(parsed.priority),
     };

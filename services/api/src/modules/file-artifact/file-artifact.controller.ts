@@ -1,6 +1,19 @@
 import {
-  BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Post, Query,
-  Request, Res, StreamableFile, UploadedFile, UseGuards, UseInterceptors,
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+  Request,
+  Res,
+  StreamableFile,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Response } from 'express';
@@ -14,7 +27,7 @@ import { JwtPayload } from '../auth/auth.service';
 export class FileArtifactController {
   constructor(
     private readonly svc: FileArtifactService,
-    private readonly evidence: ObjectStorageEvidenceService,
+    private readonly evidence: ObjectStorageEvidenceService
   ) {}
 
   @Post('upload')
@@ -23,15 +36,15 @@ export class FileArtifactController {
     @Request() req: { user: JwtPayload },
     @UploadedFile() file: Express.Multer.File,
     @Query('entityType') entityType: string,
-    @Query('entityId')   entityId: string,
+    @Query('entityId') entityId: string
   ) {
     if (!file) throw new BadRequestException('file is required');
     return this.svc.save(req.user, {
       entityType: entityType || 'general',
-      entityId:   entityId   || 'unlinked',
+      entityId: entityId || 'unlinked',
       originalName: file.originalname,
-      mimeType:     file.mimetype,
-      buffer:       file.buffer,
+      mimeType: file.mimetype,
+      buffer: file.buffer,
     });
   }
 
@@ -39,13 +52,20 @@ export class FileArtifactController {
   @Post('upload-base64')
   uploadBase64(
     @Request() req: { user: JwtPayload },
-    @Body() body: { entityType?: string; entityId?: string; filename: string; mimeType?: string; dataBase64: string },
+    @Body()
+    body: {
+      entityType?: string;
+      entityId?: string;
+      filename: string;
+      mimeType?: string;
+      dataBase64: string;
+    }
   ) {
     return this.svc.saveBase64(req.user, {
       entityType: body.entityType || 'general',
-      entityId:   body.entityId   || 'unlinked',
-      filename:   body.filename,
-      mimeType:   body.mimeType,
+      entityId: body.entityId || 'unlinked',
+      filename: body.filename,
+      mimeType: body.mimeType,
       dataBase64: body.dataBase64,
     });
   }
@@ -54,7 +74,7 @@ export class FileArtifactController {
   list(
     @Request() req: { user: JwtPayload },
     @Query('entityType') entityType: string,
-    @Query('entityId')   entityId: string,
+    @Query('entityId') entityId: string
   ) {
     return this.svc.list(req.user, entityType, entityId);
   }
@@ -90,7 +110,7 @@ export class FileArtifactController {
         entityId: row.entityId || 'unlinked',
         fileKey: row.fileKey,
       },
-      { tenantId: req.user.tenantId, actorId: req.user.userId ?? undefined },
+      { tenantId: req.user.tenantId, actorId: req.user.userId ?? undefined }
     );
   }
 
@@ -104,7 +124,7 @@ export class FileArtifactController {
       req.user.tenantId,
       row.entityType || 'general',
       row.entityId || 'unlinked',
-      { tenantId: req.user.tenantId, actorId: req.user.userId ?? undefined },
+      { tenantId: req.user.tenantId, actorId: req.user.userId ?? undefined }
     );
   }
 

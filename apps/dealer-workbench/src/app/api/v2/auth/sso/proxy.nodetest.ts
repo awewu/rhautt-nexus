@@ -15,13 +15,10 @@ test('SSO proxy preserves path and query when forwarding to NestJS', () => {
   const target = buildSsoProxyTarget(
     ['callback'],
     'http://localhost:5000/api/v2/auth/sso/callback?code=a&state=b',
-    { API_URL: 'http://localhost:5500/' },
+    { API_URL: 'http://localhost:5500/' }
   );
 
-  assert.equal(
-    target,
-    'http://localhost:5500/api/v2/auth/sso/callback?code=a&state=b',
-  );
+  assert.equal(target, 'http://localhost:5500/api/v2/auth/sso/callback?code=a&state=b');
 });
 
 test('SSO proxy prefers NEXUS_API_URL over API_URL', () => {
@@ -37,7 +34,5 @@ test('SSO proxy copies set-cookie headers', () => {
   const headers = new Headers();
   headers.append('set-cookie', 'nx_sso_state=a; Path=/api/v2/auth/sso; HttpOnly');
 
-  assert.deepEqual(setCookieHeaders(headers), [
-    'nx_sso_state=a; Path=/api/v2/auth/sso; HttpOnly',
-  ]);
+  assert.deepEqual(setCookieHeaders(headers), ['nx_sso_state=a; Path=/api/v2/auth/sso; HttpOnly']);
 });

@@ -19,16 +19,13 @@ export class TenantContextInterceptor implements NestInterceptor {
       return next.handle();
     }
     return new Observable((subscriber) => {
-      runWithTenantScope(
-        { tenantId: user.tenantId, actorId: user.userId, role: user.role },
-        () => {
-          next.handle().subscribe({
-            next: (value) => subscriber.next(value),
-            error: (err) => subscriber.error(err),
-            complete: () => subscriber.complete(),
-          });
-        },
-      );
+      runWithTenantScope({ tenantId: user.tenantId, actorId: user.userId, role: user.role }, () => {
+        next.handle().subscribe({
+          next: (value) => subscriber.next(value),
+          error: (err) => subscriber.error(err),
+          complete: () => subscriber.complete(),
+        });
+      });
     });
   }
 }

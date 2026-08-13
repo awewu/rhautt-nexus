@@ -35,7 +35,8 @@ const { Client } = require('pg');
 
 // 复用单一真相源的地址规范化规则（避免与应用/前端漂移）。
 process.env.TS_NODE_PROJECT =
-  process.env.TS_NODE_PROJECT || path.join(__dirname, '..', '..', 'services', 'api', 'tsconfig.json');
+  process.env.TS_NODE_PROJECT ||
+  path.join(__dirname, '..', '..', 'services', 'api', 'tsconfig.json');
 require('ts-node/register/transpile-only');
 const { normalizeAddress } = require('../../services/api/src/modules/common/address');
 
@@ -122,15 +123,17 @@ const STAGE_MATCHERS = {
 async function columnExists(client, table, column) {
   const { rows } = await client.query(
     `SELECT 1 FROM information_schema.columns WHERE table_schema=$1 AND table_name=$2 AND column_name=$3`,
-    [SCHEMA, table, column],
+    [SCHEMA, table, column]
   );
   return rows.length > 0;
 }
 
 async function preflight(client) {
   const missing = [];
-  if (!(await columnExists(client, 'lifecycle_links', 'phone_hash'))) missing.push('lifecycle_links.phone_hash');
-  if (!(await columnExists(client, 'lifecycle_links', 'address_normalized'))) missing.push('lifecycle_links.address_normalized');
+  if (!(await columnExists(client, 'lifecycle_links', 'phone_hash')))
+    missing.push('lifecycle_links.phone_hash');
+  if (!(await columnExists(client, 'lifecycle_links', 'address_normalized')))
+    missing.push('lifecycle_links.address_normalized');
   for (const t of Object.keys(STAGE_MATCHERS)) {
     if (!(await columnExists(client, t, 'project_id'))) missing.push(`${t}.project_id`);
   }
@@ -159,7 +162,7 @@ async function processTenant(client, tenantId, report) {
        FROM ${SCHEMA}.lifecycle_links l
        LEFT JOIN ${SCHEMA}.customers c ON c.id = l.customer_id AND c.tenant_id = l.tenant_id
        WHERE l.tenant_id = $1`,
-      [tenantId],
+      [tenantId]
     );
 
     for (const l of links) {
@@ -174,22 +177,29 @@ async function processTenant(client, tenantId, report) {
       if (keys.length === 0) continue;
       report.links.filled++;
       if (!patch.phone_hash && l.phone_hash == null && !l.cust_phone_hash) report.links.noPhone++;
-      if (patch.address_normalized == null && l.address_normalized == null) report.links.noAddress++;
+      if (patch.address_normalized == null && l.address_normalized == null)
+        report.links.noAddress++;
       if (APPLY) {
         const sets = keys.map((k, i) => `${k} = $${i + 2}`).join(', ');
-        await client.query(
-          `UPDATE ${SCHEMA}.lifecycle_links SET ${sets} WHERE id = $1`,
-          [l.id, ...keys.map((k) => patch[k])],
-        );
+        await client.query(`UPDATE ${SCHEMA}.lifecycle_links SET ${sets} WHERE id = $1`, [
+          l.id,
+          ...keys.map((k) => patch[k]),
+        ]);
       }
     }
 
     // 缺手机号/地址无法组唯一键的行（P2 唯一约束前必须清零）
     for (const l of links) {
       const finalPhone = l.phone_hash || l.cust_phone_hash;
-      const finalAddr = l.address_normalized || normalizeAddress(l.project_address || l.cust_address);
+      const finalAddr =
+        l.address_normalized || normalizeAddress(l.project_address || l.cust_address);
       if (!finalPhone || !finalAddr) {
-        report.links.unkeyable.push({ id: l.id, customerId: l.customer_id, hasPhone: !!finalPhone, hasAddress: !!finalAddr });
+        report.links.unkeyable.push({
+          id: l.id,
+          customerId: l.customer_id,
+          hasPhone: !!finalPhone,
+          hasAddress: !!finalAddr,
+        });
       }
     }
 
@@ -202,7 +212,7 @@ async function processTenant(client, tenantId, report) {
        SELECT customer_id, (project->>'address') FROM ${SCHEMA}.bim_projects WHERE tenant_id = $1
        UNION ALL
        SELECT customer_id, (project->>'address') FROM ${SCHEMA}.quotations WHERE tenant_id = $1`,
-      [tenantId],
+      [tenantId]
     );
     const addrByCustomer = new Map();
     for (const r of addrRows) {
@@ -224,7 +234,7 @@ async function processTenant(client, tenantId, report) {
        FROM ${SCHEMA}.lifecycle_links
        WHERE tenant_id = $1 AND phone_hash IS NOT NULL AND address_normalized IS NOT NULL
        GROUP BY phone_hash, address_normalized HAVING count(*) > 1`,
-      [tenantId],
+      [tenantId]
     );
     for (const d of dups) {
       report.duplicateKeys.push({ tenantId, count: Number(d.c), ids: d.ids });
@@ -236,10 +246,16 @@ async function processTenant(client, tenantId, report) {
       const st = (report.stages[table] ||= { scanned: 0, matched: 0, unmatched: 0 });
       for (const row of rows) {
         st.scanned++;
-        if (!row.project_id) { st.unmatched++; continue; }
+        if (!row.project_id) {
+          st.unmatched++;
+          continue;
+        }
         st.matched++;
         if (APPLY) {
-          await client.query(`UPDATE ${SCHEMA}.${table} SET project_id = $2 WHERE id = $1`, [row.stage_id, row.project_id]);
+          await client.query(`UPDATE ${SCHEMA}.${table} SET project_id = $2 WHERE id = $1`, [
+            row.stage_id,
+            row.project_id,
+          ]);
         }
       }
     }
@@ -252,43 +268,64 @@ async function processTenant(client, tenantId, report) {
 }
 
 function printReport(report) {
-  if (AS_JSON) { console.log(JSON.stringify(report, null, 2)); return; }
+  if (AS_JSON) {
+    console.log(JSON.stringify(report, null, 2));
+    return;
+  }
   const line = '─'.repeat(64);
   console.log(`\n${line}`);
   console.log(`项目主线回填${APPLY ? '（已执行 --apply）' : '（DRY-RUN，只读，未写入）'}`);
   console.log(line);
   console.log(`租户数: ${report.tenants}`);
   console.log(`\nlifecycle_links:`);
-  console.log(`  扫描 ${report.links.scanned} · 需回填 ${report.links.filled} · 缺手机号 ${report.links.noPhone} · 缺地址 ${report.links.noAddress}`);
+  console.log(
+    `  扫描 ${report.links.scanned} · 需回填 ${report.links.filled} · 缺手机号 ${report.links.noPhone} · 缺地址 ${report.links.noAddress}`
+  );
   console.log(`  无法组唯一键（P2 前须清零）: ${report.links.unkeyable.length}`);
   for (const u of report.links.unkeyable.slice(0, 10)) {
-    console.log(`    - link ${u.id} customer=${u.customerId} phone=${u.hasPhone} addr=${u.hasAddress}`);
+    console.log(
+      `    - link ${u.id} customer=${u.customerId} phone=${u.hasPhone} addr=${u.hasAddress}`
+    );
   }
-  if (report.links.unkeyable.length > 10) console.log(`    …(+${report.links.unkeyable.length - 10} 更多)`);
+  if (report.links.unkeyable.length > 10)
+    console.log(`    …(+${report.links.unkeyable.length - 10} 更多)`);
 
   console.log(`\n各阶段 project_id 匹配:`);
   for (const [t, s] of Object.entries(report.stages)) {
     const flag = s.unmatched > 0 ? ' ⚠' : '';
-    console.log(`  ${t.padEnd(20)} 扫描 ${String(s.scanned).padStart(5)} · 匹配 ${String(s.matched).padStart(5)} · 未匹配 ${String(s.unmatched).padStart(5)}${flag}`);
+    console.log(
+      `  ${t.padEnd(20)} 扫描 ${String(s.scanned).padStart(5)} · 匹配 ${String(s.matched).padStart(5)} · 未匹配 ${String(s.unmatched).padStart(5)}${flag}`
+    );
   }
 
-  console.log(`\n[信息] 一客户多地址（合法 Customer 1:N Project，非阻塞）: ${report.multiAddress.length}`);
+  console.log(
+    `\n[信息] 一客户多地址（合法 Customer 1:N Project，非阻塞）: ${report.multiAddress.length}`
+  );
   for (const m of report.multiAddress.slice(0, 5)) {
     console.log(`  - tenant ${m.tenantId} customer ${m.customerId}: ${m.addresses.join(' | ')}`);
   }
   if (report.multiAddress.length > 5) console.log(`  …(+${report.multiAddress.length - 5} 更多)`);
 
-  console.log(`\n[阻塞] 重复项目键 (tenant+phone_hash+address_normalized 撞车，P2 前须清零): ${report.duplicateKeys.length}`);
+  console.log(
+    `\n[阻塞] 重复项目键 (tenant+phone_hash+address_normalized 撞车，P2 前须清零): ${report.duplicateKeys.length}`
+  );
   for (const d of report.duplicateKeys.slice(0, 10)) {
     console.log(`  - tenant ${d.tenantId} ×${d.count}: ${d.ids.join(', ')}`);
   }
-  if (report.duplicateKeys.length > 10) console.log(`  …(+${report.duplicateKeys.length - 10} 更多)`);
+  if (report.duplicateKeys.length > 10)
+    console.log(`  …(+${report.duplicateKeys.length - 10} 更多)`);
 
   const stageUnmatched = Object.values(report.stages).reduce((n, s) => n + s.unmatched, 0);
-  const clean = report.links.unkeyable.length === 0 && report.duplicateKeys.length === 0 && stageUnmatched === 0;
+  const clean =
+    report.links.unkeyable.length === 0 &&
+    report.duplicateKeys.length === 0 &&
+    stageUnmatched === 0;
   console.log(`\n${line}`);
-  console.log(clean ? '✅ 报告干净：可进入 P2（唯一约束 + NOT NULL）。' :
-    '⚠ 存在阻塞项：先清理无法组键/重复键/未匹配行，再进 P2。');
+  console.log(
+    clean
+      ? '✅ 报告干净：可进入 P2（唯一约束 + NOT NULL）。'
+      : '⚠ 存在阻塞项：先清理无法组键/重复键/未匹配行，再进 P2。'
+  );
   console.log(`${line}\n`);
 }
 
@@ -298,7 +335,9 @@ async function main() {
   try {
     const missing = await preflight(client);
     if (missing.length) {
-      console.error(`✗ 迁移 036 尚未应用，缺列：\n  ${missing.join('\n  ')}\n请先运行: npm run db:migrate`);
+      console.error(
+        `✗ 迁移 036 尚未应用，缺列：\n  ${missing.join('\n  ')}\n请先运行: npm run db:migrate`
+      );
       process.exit(2);
     }
     const tenants = await listTenants(client);

@@ -28,7 +28,8 @@ export interface CompetitorHits {
 // ── HHI 集中度 ────────────────────────────────────────────────────────────
 
 /** 美国 DOJ/FTC 2023 版合并指南阈值（1800 为高集中门槛；早期版本为 2500，此处采用现行口径）。 */
-export type ConcentrationBand = 'unconcentrated' | 'moderately-concentrated' | 'highly-concentrated';
+export type ConcentrationBand =
+  'unconcentrated' | 'moderately-concentrated' | 'highly-concentrated';
 
 export interface HhiResult {
   /** 0-10000。单一主体垄断=10000 */
@@ -51,9 +52,8 @@ export function computeHhi(rows: CompetitorHits[]): HhiResult {
     sumSq += share * share;
   }
   const hhi = Math.round(sumSq * 10000);
-  const band: ConcentrationBand = hhi > 1800
-    ? 'highly-concentrated'
-    : hhi >= 1000 ? 'moderately-concentrated' : 'unconcentrated';
+  const band: ConcentrationBand =
+    hhi > 1800 ? 'highly-concentrated' : hhi >= 1000 ? 'moderately-concentrated' : 'unconcentrated';
   return {
     hhi,
     band,
@@ -89,7 +89,7 @@ export const MOMENTUM_FLAT_PP = 2;
 export function computeMomentum(
   current: CompetitorHits[],
   previous: CompetitorHits[],
-  opts: { minSample?: number; flatPp?: number } = {},
+  opts: { minSample?: number; flatPp?: number } = {}
 ): MomentumResult[] {
   const minSample = Math.max(Number(opts.minSample ?? MOMENTUM_MIN_SAMPLE), 0);
   const flatPp = Math.max(Number(opts.flatPp ?? MOMENTUM_FLAT_PP), 0);
@@ -105,25 +105,37 @@ export function computeMomentum(
     // 任一窗口总量为 0 → 份额无从比较；或合计样本过小 → 不出结论
     if (!curTotal || !prevTotal) {
       return {
-        competitor, currentHits, previousHits, shareDeltaPp: null,
+        competitor,
+        currentHits,
+        previousHits,
+        shareDeltaPp: null,
         verdict: 'insufficient-data' as const,
         reason: !curTotal && !prevTotal ? '两窗口均无探测数据' : '仅单个窗口有数据，无从比较趋势',
       };
     }
     if (currentHits + previousHits < minSample) {
       return {
-        competitor, currentHits, previousHits, shareDeltaPp: null,
+        competitor,
+        currentHits,
+        previousHits,
+        shareDeltaPp: null,
         verdict: 'insufficient-data' as const,
         reason: `样本不足（合计 ${currentHits + previousHits} < ${minSample}），不出趋势结论`,
       };
     }
-    const deltaPp = Math.round(((currentHits / curTotal) - (previousHits / prevTotal)) * 1000) / 10;
-    const verdict: MomentumVerdict = Math.abs(deltaPp) < flatPp ? 'flat' : deltaPp > 0 ? 'rising' : 'falling';
+    const deltaPp = Math.round((currentHits / curTotal - previousHits / prevTotal) * 1000) / 10;
+    const verdict: MomentumVerdict =
+      Math.abs(deltaPp) < flatPp ? 'flat' : deltaPp > 0 ? 'rising' : 'falling';
     return {
-      competitor, currentHits, previousHits, shareDeltaPp: deltaPp, verdict,
-      reason: verdict === 'flat'
-        ? `份额变化 ${deltaPp}pp 落在噪声带（±${flatPp}pp）内`
-        : `份额${deltaPp > 0 ? '上升' : '下降'} ${Math.abs(deltaPp)}pp`,
+      competitor,
+      currentHits,
+      previousHits,
+      shareDeltaPp: deltaPp,
+      verdict,
+      reason:
+        verdict === 'flat'
+          ? `份额变化 ${deltaPp}pp 落在噪声带（±${flatPp}pp）内`
+          : `份额${deltaPp > 0 ? '上升' : '下降'} ${Math.abs(deltaPp)}pp`,
     };
   });
 }
@@ -143,10 +155,7 @@ export interface ThreatScore {
  * 设计意图：**只大不涨**的老牌与**小而猛涨**的新秀都要被看见，前者靠存量、后者靠动量。
  * ⚠️ 这是可解释启发式而非统计模型；因子全量返回，权重写死在此便于审阅与争论。
  */
-export function scoreThreats(
-  current: CompetitorHits[],
-  momentum: MomentumResult[],
-): ThreatScore[] {
+export function scoreThreats(current: CompetitorHits[], momentum: MomentumResult[]): ThreatScore[] {
   const total = current.reduce((s, r) => s + Number(r.hits || 0), 0);
   const momMap = new Map(momentum.map((m) => [m.competitor, m]));
   const leaderHits = Math.max(...current.map((r) => Number(r.hits || 0)), 0);
@@ -159,9 +168,10 @@ export function scoreThreats(
       const shareFactor = Math.round(share * 60);
       const mom = momMap.get(r.competitor);
       // 动量因子：份额上升 1pp 记 3 分，上限 30；无结论/下降记 0（不因样本不足而扣分或加分）
-      const momentumFactor = mom?.verdict === 'rising' && mom.shareDeltaPp !== null
-        ? Math.min(Math.round(mom.shareDeltaPp * 3), 30)
-        : 0;
+      const momentumFactor =
+        mom?.verdict === 'rising' && mom.shareDeltaPp !== null
+          ? Math.min(Math.round(mom.shareDeltaPp * 3), 30)
+          : 0;
       const leaderFactor = leaderHits > 0 && hits === leaderHits ? 10 : 0;
       const score = Math.min(shareFactor + momentumFactor + leaderFactor, 100);
       const bits = [`份额 ${(share * 100).toFixed(1)}%`];
@@ -194,13 +204,20 @@ export interface LeaderGap {
 /** 我方与头部的份额差距。注意 selfShare=null 表示**没有我方口径**，与"份额为 0"是两件事。 */
 export function computeLeaderGap(rows: CompetitorHits[]): LeaderGap {
   const total = rows.reduce((s, r) => s + Number(r.hits || 0), 0);
-  if (!total) return { leader: null, leaderShare: 0, selfShare: null, gapPp: null, selfIsLeader: false };
+  if (!total)
+    return { leader: null, leaderShare: 0, selfShare: null, gapPp: null, selfIsLeader: false };
   const sorted = [...rows].sort((a, b) => Number(b.hits || 0) - Number(a.hits || 0));
   const leader = sorted[0];
   const leaderShare = Number(leader.hits || 0) / total;
   const self = rows.find((r) => r.isSelf);
   if (!self) {
-    return { leader: leader.competitor, leaderShare, selfShare: null, gapPp: null, selfIsLeader: false };
+    return {
+      leader: leader.competitor,
+      leaderShare,
+      selfShare: null,
+      gapPp: null,
+      selfIsLeader: false,
+    };
   }
   const selfShare = Number(self.hits || 0) / total;
   return {

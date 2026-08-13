@@ -5,30 +5,33 @@
 > 各品牌站与后台 `apps/brand-console` 消费，**禁止在前端硬编码品牌要素**。
 
 ## 与既有 `brand` 模块的区别
+
 - `modules/brand`：Rheem 官网**内容抓取器**（news/products/trainings），auth 保护。
 - `modules/brand-registry`（本模块）：**品牌注册表读取**，公开只读。
 
 ## 端点（全局前缀 `/api/v2`）
-| 方法 | 路径 | 说明 | 鉴权 |
-|---|---|---|---|
-| GET | `/api/v2/brands` | 品牌清单（摘要）+ 供应商元数据。支持 `?type=` `?selfBuilt=` 过滤 | 公开 |
-| GET | `/api/v2/brands/_meta` | 治理元数据（供应商定位 / 已决 / 待决） | 公开 |
-| GET | `/api/v2/brands/:slug` | 单品牌完整要素（fundamentals / VI / NAP / 外链） | 公开 |
-| POST | `/api/v2/brands/reload` | 改注册表文件后强制重载缓存 | AuthGuard |
-| GET/PUT | `/api/v2/brand-sites/:siteCode/basic-settings` | 管理官网基本信息、SEO、联系信息、备案版权等基础配置 | AuthGuard + RBAC |
-| GET/POST | `/api/v2/brand-sites/:siteCode/product-assignments` | 管理网站产品货架 | AuthGuard + RBAC |
-| PATCH/DELETE | `/api/v2/brand-sites/:siteCode/product-assignments/:id` | 更新或归档货架项 | AuthGuard + RBAC |
-| POST | `/api/v2/brand-sites/:siteCode/product-assignments/:id/publish` | 发布货架项 | AuthGuard + RBAC |
-| POST | `/api/v2/brand-sites/:siteCode/product-assignments/:id/hide` | 下架货架项 | AuthGuard + RBAC |
-| GET | `/api/v2/sites/:siteCode/basic-settings` | 网站公开基本信息投影 | 公开、限流、脱敏 |
-| GET | `/api/v2/sites/:siteCode/products` | 网站公开产品列表 | 公开、限流、脱敏 |
-| GET | `/api/v2/sites/:siteCode/products/:publicSlug` | 网站公开产品详情 | 公开、限流、脱敏 |
+
+| 方法         | 路径                                                            | 说明                                                             | 鉴权             |
+| ------------ | --------------------------------------------------------------- | ---------------------------------------------------------------- | ---------------- |
+| GET          | `/api/v2/brands`                                                | 品牌清单（摘要）+ 供应商元数据。支持 `?type=` `?selfBuilt=` 过滤 | 公开             |
+| GET          | `/api/v2/brands/_meta`                                          | 治理元数据（供应商定位 / 已决 / 待决）                           | 公开             |
+| GET          | `/api/v2/brands/:slug`                                          | 单品牌完整要素（fundamentals / VI / NAP / 外链）                 | 公开             |
+| POST         | `/api/v2/brands/reload`                                         | 改注册表文件后强制重载缓存                                       | AuthGuard        |
+| GET/PUT      | `/api/v2/brand-sites/:siteCode/basic-settings`                  | 管理官网基本信息、SEO、联系信息、备案版权等基础配置              | AuthGuard + RBAC |
+| GET/POST     | `/api/v2/brand-sites/:siteCode/product-assignments`             | 管理网站产品货架                                                 | AuthGuard + RBAC |
+| PATCH/DELETE | `/api/v2/brand-sites/:siteCode/product-assignments/:id`         | 更新或归档货架项                                                 | AuthGuard + RBAC |
+| POST         | `/api/v2/brand-sites/:siteCode/product-assignments/:id/publish` | 发布货架项                                                       | AuthGuard + RBAC |
+| POST         | `/api/v2/brand-sites/:siteCode/product-assignments/:id/hide`    | 下架货架项                                                       | AuthGuard + RBAC |
+| GET          | `/api/v2/sites/:siteCode/basic-settings`                        | 网站公开基本信息投影                                             | 公开、限流、脱敏 |
+| GET          | `/api/v2/sites/:siteCode/products`                              | 网站公开产品列表                                                 | 公开、限流、脱敏 |
+| GET          | `/api/v2/sites/:siteCode/products/:publicSlug`                  | 网站公开产品详情                                                 | 公开、限流、脱敏 |
 
 `/brands*` 响应字段来源即 `brand-registry.json`；未提供的业务/法务信息以 `__TODO(...)__`
 占位，前端应渲染占位而非杜撰。`basic-settings` 来源于租户站点配置表，并与恒热官网当前
 默认值合并返回。
 
 ## 新增一个品牌（标准流程 · 零改代码）
+
 1. 在 `brand-registry.json` 的 `brands[]` 增加一条，至少包含：
    `slug` `name_cn` `name_en` `domain` `type` `delivery` `selfBuilt` `app`
    `fundamentals.vi`（`tokenCss` + `primary`）`crossLinks`。
@@ -37,6 +40,7 @@
 4. `POST /api/v2/brands/reload`（或等缓存过期）→ 品牌即出现在 `/api/v2/brands`。
 
 ## 路径解析
+
 默认从进程 cwd / 模块目录逐级向上查找仓库根的 `brand-registry.json`；
 容器/非常规部署可用环境变量 `BRAND_REGISTRY_PATH` 显式指定。
 

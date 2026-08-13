@@ -24,9 +24,7 @@
       "targetDomain": "rheem.com.cn",
       "embeddedInRhauttPortal": true,
       "standaloneLaunchable": true,
-      "entrySurfaces": [
-        "apps/rheem-cn/public/index.html"
-      ],
+      "entrySurfaces": ["apps/rheem-cn/public/index.html"],
       "portalIntegration": {
         "embeddedInRhauttPortal": true,
         "embeddedEntry": "/rheem-cn/index.html",
@@ -35,18 +33,12 @@
       "crossLinks": {
         "groupPortal": "apps/public-portal",
         "consumerSystem": "apps/consumer-diagnosis",
-        "siblingBrandSites": [
-          "apps/ruud-cn",
-          "apps/everhot-cn"
-        ]
+        "siblingBrandSites": ["apps/ruud-cn", "apps/everhot-cn"]
       },
       "logoPolicy": {
         "primaryLogo": "Rheem wordmark",
         "poweredBy": "Powered by Rhautt Comfort",
-        "forbiddenPrimaryLogo": [
-          "Rhautt Comfort",
-          "瑞诺瓦"
-        ]
+        "forbiddenPrimaryLogo": ["Rhautt Comfort", "瑞诺瓦"]
       },
       "dataDomain": {
         "postgresRegistry": "rhautt_nexus.product_modules",
@@ -67,9 +59,7 @@
       "targetDomain": "ruud.com.cn",
       "embeddedInRhauttPortal": true,
       "standaloneLaunchable": true,
-      "entrySurfaces": [
-        "apps/ruud-cn/public/index.html"
-      ],
+      "entrySurfaces": ["apps/ruud-cn/public/index.html"],
       "portalIntegration": {
         "embeddedInRhauttPortal": true,
         "embeddedEntry": "/ruud-cn/index.html",
@@ -78,18 +68,12 @@
       "crossLinks": {
         "groupPortal": "apps/public-portal",
         "consumerSystem": "apps/consumer-diagnosis",
-        "siblingBrandSites": [
-          "apps/rheem-cn",
-          "apps/everhot-cn"
-        ]
+        "siblingBrandSites": ["apps/rheem-cn", "apps/everhot-cn"]
       },
       "logoPolicy": {
         "primaryLogo": "Ruud wordmark",
         "poweredBy": "Powered by Rhautt Comfort",
-        "forbiddenPrimaryLogo": [
-          "Rhautt Comfort",
-          "瑞诺瓦"
-        ]
+        "forbiddenPrimaryLogo": ["Rhautt Comfort", "瑞诺瓦"]
       },
       "dataDomain": {
         "postgresRegistry": "rhautt_nexus.product_modules",
@@ -110,9 +94,7 @@
       "targetDomain": "everhot.com.cn",
       "embeddedInRhauttPortal": true,
       "standaloneLaunchable": true,
-      "entrySurfaces": [
-        "apps/everhot-cn/public/index.html"
-      ],
+      "entrySurfaces": ["apps/everhot-cn/public/index.html"],
       "portalIntegration": {
         "embeddedInRhauttPortal": true,
         "embeddedEntry": "/everhot-cn/index.html",
@@ -121,18 +103,12 @@
       "crossLinks": {
         "groupPortal": "apps/public-portal",
         "consumerSystem": "apps/consumer-diagnosis",
-        "siblingBrandSites": [
-          "apps/rheem-cn",
-          "apps/ruud-cn"
-        ]
+        "siblingBrandSites": ["apps/rheem-cn", "apps/ruud-cn"]
       },
       "logoPolicy": {
         "primaryLogo": "Everhot wordmark",
         "poweredBy": "Powered by Rhautt Comfort",
-        "forbiddenPrimaryLogo": [
-          "Rhautt Comfort",
-          "瑞诺瓦"
-        ]
+        "forbiddenPrimaryLogo": ["Rhautt Comfort", "瑞诺瓦"]
       },
       "dataDomain": {
         "postgresRegistry": "rhautt_nexus.product_modules",

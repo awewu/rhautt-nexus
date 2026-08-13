@@ -10,9 +10,13 @@
  */
 const fs = require('fs');
 const path = require('path');
-require('./_artifact-gate').requireArtifactOrSkip('apps/nexus-console/src/components/DamLibraryManager.tsx', {
-  guard: 'guard:data-ownership', reason: 'apps/nexus-console 不存在；现役工作台为 apps/dealer-workbench，本门禁待按新路径重写',
-});
+require('./_artifact-gate').requireArtifactOrSkip(
+  'apps/nexus-console/src/components/DamLibraryManager.tsx',
+  {
+    guard: 'guard:data-ownership',
+    reason: 'apps/nexus-console 不存在；现役工作台为 apps/dealer-workbench，本门禁待按新路径重写',
+  }
+);
 
 const ROOT = path.join(__dirname, '..', '..');
 
@@ -43,13 +47,9 @@ const SKIP_DIRS = new Set([
   'evidence',
   'hammer-reports',
 ]);
-const SKIP_FILES = new Set([
-  'scripts/agent-guards/data-ownership-check.js',
-]);
+const SKIP_FILES = new Set(['scripts/agent-guards/data-ownership-check.js']);
 
-const ALLOWED_DOC_RHAUTT_CRM = new Set([
-  'docs/dev/rhautt-nexus-brand-marketing-dam-prd.md',
-]);
+const ALLOWED_DOC_RHAUTT_CRM = new Set(['docs/dev/rhautt-nexus-brand-marketing-dam-prd.md']);
 
 const REQUIRED_OWNED_SURFACES = [
   ['auth module', 'services/api/src/modules/auth/auth.module.ts'],
@@ -61,21 +61,33 @@ const REQUIRED_OWNED_SURFACES = [
   ['product data entity', 'services/api/src/modules/product-catalog/product-catalog.entity.ts'],
   ['content asset taxonomy', 'services/api/src/modules/product-catalog/product-taxonomy.ts'],
   ['marketing asset migration', 'database/postgres/migrations/010_growth_marketing_foundation.sql'],
-  ['publication event entity', 'services/api/src/modules/product-catalog/product-catalog.entity.ts'],
+  [
+    'publication event entity',
+    'services/api/src/modules/product-catalog/product-catalog.entity.ts',
+  ],
   ['brand DAM UI', 'apps/nexus-console/src/components/DamLibraryManager.tsx'],
   ['brand publish UI', 'apps/nexus-console/src/components/BrandPublishManager.tsx'],
-  ['brand site registry API', 'services/api/src/modules/brand-registry/brand-registry.controller.ts'],
+  [
+    'brand site registry API',
+    'services/api/src/modules/brand-registry/brand-registry.controller.ts',
+  ],
 ];
 
 const REQUIRED_CONTENT_MARKERS = [
   ['services/api/src/modules/product-catalog/product-catalog.entity.ts', 'ProductContentEntity'],
-  ['services/api/src/modules/product-catalog/product-catalog.entity.ts', 'ProductContentEventEntity'],
+  [
+    'services/api/src/modules/product-catalog/product-catalog.entity.ts',
+    'ProductContentEventEntity',
+  ],
   ['services/api/src/modules/product-catalog/product-catalog.service.ts', 'transitionContent'],
   ['services/api/src/modules/product-catalog/product-catalog.service.ts', 'publishDueContent'],
   ['database/postgres/migrations/010_growth_marketing_foundation.sql', 'growth_copy_asset'],
   ['database/postgres/migrations/010_growth_marketing_foundation.sql', 'growth_campaign'],
   ['apps/nexus-console/src/components/DamLibraryManager.tsx', '/api/file-artifact/upload-base64'],
-  ['apps/nexus-console/src/components/BrandPublishManager.tsx', '从产品目录与 DAM 同步生成站点数据'],
+  [
+    'apps/nexus-console/src/components/BrandPublishManager.tsx',
+    '从产品目录与 DAM 同步生成站点数据',
+  ],
 ];
 
 const FORBIDDEN_PATTERNS = [
@@ -90,15 +102,18 @@ const FORBIDDEN_PATTERNS = [
   },
   {
     name: 'cross-repo shared permission service',
-    regex: /\b(shared-permission|shared-permissions|sharedPermissionService|SHARED_PERMISSION_URL|SHARED_PERMISSIONS_URL)\b/i,
+    regex:
+      /\b(shared-permission|shared-permissions|sharedPermissionService|SHARED_PERMISSION_URL|SHARED_PERMISSIONS_URL)\b/i,
   },
   {
     name: 'cross-repo shared file storage service',
-    regex: /\b(shared-file-storage|shared-storage-service|sharedFileStorage|SHARED_FILE_STORAGE_URL|SHARED_STORAGE_URL)\b/i,
+    regex:
+      /\b(shared-file-storage|shared-storage-service|sharedFileStorage|SHARED_FILE_STORAGE_URL|SHARED_STORAGE_URL)\b/i,
   },
   {
     name: 'cross-repo shared product data service',
-    regex: /\b(shared-product-data|shared-product-service|sharedProductData|SHARED_PRODUCT_DATA_URL|SHARED_PRODUCT_SERVICE_URL)\b/i,
+    regex:
+      /\b(shared-product-data|shared-product-service|sharedProductData|SHARED_PRODUCT_DATA_URL|SHARED_PRODUCT_SERVICE_URL)\b/i,
   },
   {
     name: 'cross-repo shared DAM service',
@@ -183,15 +198,22 @@ for (const [file, marker] of REQUIRED_CONTENT_MARKERS) {
 
 if (exists('packages/shared-auth/package.json')) {
   const pkg = JSON.parse(read('packages/shared-auth/package.json'));
-  if (pkg.private !== true) failures.push('packages/shared-auth must remain private to this repository');
-  if (pkg.name !== '@rhautt/shared-auth') failures.push('packages/shared-auth package name changed unexpectedly');
+  if (pkg.private !== true)
+    failures.push('packages/shared-auth must remain private to this repository');
+  if (pkg.name !== '@rhautt/shared-auth')
+    failures.push('packages/shared-auth package name changed unexpectedly');
 } else {
   failures.push('missing private workspace cookie helper: packages/shared-auth/package.json');
 }
 
 for (const file of scannedFiles.filter((f) => /package\.json$/.test(f))) {
   const pkg = JSON.parse(read(file));
-  for (const field of ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']) {
+  for (const field of [
+    'dependencies',
+    'devDependencies',
+    'peerDependencies',
+    'optionalDependencies',
+  ]) {
     const value = pkg[field]?.['@rhautt/shared-auth'];
     if (value !== undefined && value !== 'workspace:*') {
       failures.push(`${file}: @rhautt/shared-auth must resolve to workspace:* only`);
@@ -199,7 +221,9 @@ for (const file of scannedFiles.filter((f) => /package\.json$/.test(f))) {
   }
 }
 
-console.log(`Data Ownership Check: files=${scannedFiles.length}, failures=${failures.length}, warnings=${warnings.length}`);
+console.log(
+  `Data Ownership Check: files=${scannedFiles.length}, failures=${failures.length}, warnings=${warnings.length}`
+);
 for (const warning of warnings) console.warn(`- warning: ${warning}`);
 for (const failure of failures) console.error(`- ${failure}`);
 process.exit(failures.length ? 1 : 0);

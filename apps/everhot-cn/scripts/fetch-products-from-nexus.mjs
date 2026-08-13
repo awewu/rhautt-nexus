@@ -18,9 +18,15 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const EVERHOT = join(SCRIPT_DIR, '..');
 const DATA_FILE = join(EVERHOT, 'public', 'js', 'products-data.js');
 
-const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > -1 ? process.argv[i + 1] : d; };
+const arg = (k, d) => {
+  const i = process.argv.indexOf('--' + k);
+  return i > -1 ? process.argv[i + 1] : d;
+};
 const BASE = arg('base', process.env.EVERHOT_API_BASE || 'http://localhost:5500/api/v2');
-const URLS = [`${BASE}/sites/everhot/products?locale=zh-CN`, `${BASE}/brand/everhot/products?locale=zh-CN`];
+const URLS = [
+  `${BASE}/sites/everhot/products?locale=zh-CN`,
+  `${BASE}/brand/everhot/products?locale=zh-CN`,
+];
 
 const PRODUCTS_MARKER = 'window.EVERHOT_PRODUCTS';
 const CATALOG_MARKER = '/* 分类工具';

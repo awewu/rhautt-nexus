@@ -1,5 +1,15 @@
 import {
-  Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query, Req, UseGuards,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { ProjectsCandidateService } from './projects-candidate.service';
@@ -67,7 +77,11 @@ export class ProjectsCandidateController {
   }
 
   @Put(':projectId')
-  update(@Req() r: any, @Param('projectId') projectId: string, @Body() body: Record<string, unknown>) {
+  update(
+    @Req() r: any,
+    @Param('projectId') projectId: string,
+    @Body() body: Record<string, unknown>
+  ) {
     return this.svc.update(r.user, projectId, body);
   }
 

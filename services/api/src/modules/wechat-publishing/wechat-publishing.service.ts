@@ -17,8 +17,27 @@ const REVIEW_STATUSES = new Set(['pending_review', 'changes_requested', 'approve
 const WECHAT_API_BASE = 'https://api.weixin.qq.com/cgi-bin';
 const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 const ALLOWED_HTML_TAGS = new Set([
-  'p', 'br', 'h1', 'h2', 'h3', 'strong', 'b', 'em', 'i', 'ul', 'ol', 'li',
-  'blockquote', 'a', 'img', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+  'p',
+  'br',
+  'h1',
+  'h2',
+  'h3',
+  'strong',
+  'b',
+  'em',
+  'i',
+  'ul',
+  'ol',
+  'li',
+  'blockquote',
+  'a',
+  'img',
+  'table',
+  'thead',
+  'tbody',
+  'tr',
+  'th',
+  'td',
 ]);
 
 function text(value: unknown, fallback = '') {
@@ -63,22 +82,40 @@ function decryptSecret(ciphertext: string) {
 
 function mapWechatTokenError(errcode: number, errmsg: string) {
   if ([40013, 40125, 41002, 41004].includes(errcode)) {
-    return { status: 'credential_error' as const, message: 'AppID or AppSecret is invalid. Reset AppSecret in WeChat Developer Platform and retry.' };
+    return {
+      status: 'credential_error' as const,
+      message:
+        'AppID or AppSecret is invalid. Reset AppSecret in WeChat Developer Platform and retry.',
+    };
   }
   if (errcode === 40164) {
-    return { status: 'ip_whitelist_error' as const, message: 'Backend public IP is not in WeChat API IP whitelist. Add it in WeChat Developer Platform and retry.' };
+    return {
+      status: 'ip_whitelist_error' as const,
+      message:
+        'Backend public IP is not in WeChat API IP whitelist. Add it in WeChat Developer Platform and retry.',
+    };
   }
   if ([48001, 50001].includes(errcode)) {
-    return { status: 'permission_error' as const, message: 'Official Account API permission is unavailable for this account.' };
+    return {
+      status: 'permission_error' as const,
+      message: 'Official Account API permission is unavailable for this account.',
+    };
   }
-  return { status: 'temporary_error' as const, message: `WeChat API returned ${errcode || 'an error'}: ${errmsg || 'unknown error'}` };
+  return {
+    status: 'temporary_error' as const,
+    message: `WeChat API returned ${errcode || 'an error'}: ${errmsg || 'unknown error'}`,
+  };
 }
 
 function assertAllowedHtml(html: string) {
-  const tags = Array.from(html.matchAll(/<\/?\s*([a-zA-Z0-9-]+)/g)).map((match) => match[1].toLowerCase());
+  const tags = Array.from(html.matchAll(/<\/?\s*([a-zA-Z0-9-]+)/g)).map((match) =>
+    match[1].toLowerCase()
+  );
   const unsupported = tags.filter((tag) => !ALLOWED_HTML_TAGS.has(tag));
   if (unsupported.length) {
-    throw new BadRequestException(`unsupported html tags: ${Array.from(new Set(unsupported)).join(', ')}`);
+    throw new BadRequestException(
+      `unsupported html tags: ${Array.from(new Set(unsupported)).join(', ')}`
+    );
   }
   if (/javascript:/i.test(html) || /<\s*(script|iframe|style|video|audio|form)\b/i.test(html)) {
     throw new BadRequestException('content contains unsupported interactive or unsafe structure');
@@ -86,28 +123,38 @@ function assertAllowedHtml(html: string) {
 }
 
 function asArray(value: unknown): Array<Record<string, unknown>> {
-  return Array.isArray(value) ? value.filter((item) => item && typeof item === 'object') as Array<Record<string, unknown>> : [];
+  return Array.isArray(value)
+    ? (value.filter((item) => item && typeof item === 'object') as Array<Record<string, unknown>>)
+    : [];
 }
 
 @Injectable()
 export class WechatPublishingService {
   constructor(
     @InjectDataSource() private readonly ds: DataSource,
-    @InjectRepository(WechatOfficialAccountEntity) private readonly accounts: Repository<WechatOfficialAccountEntity>,
-    @InjectRepository(WechatContentReviewVersionEntity) private readonly versions: Repository<WechatContentReviewVersionEntity>,
-    @InjectRepository(WechatDraftSyncTaskEntity) private readonly tasks: Repository<WechatDraftSyncTaskEntity>,
-    @InjectRepository(WechatPublishAuditEventEntity) private readonly audit: Repository<WechatPublishAuditEventEntity>,
-    private readonly files: FileArtifactService,
+    @InjectRepository(WechatOfficialAccountEntity)
+    private readonly accounts: Repository<WechatOfficialAccountEntity>,
+    @InjectRepository(WechatContentReviewVersionEntity)
+    private readonly versions: Repository<WechatContentReviewVersionEntity>,
+    @InjectRepository(WechatDraftSyncTaskEntity)
+    private readonly tasks: Repository<WechatDraftSyncTaskEntity>,
+    @InjectRepository(WechatPublishAuditEventEntity)
+    private readonly audit: Repository<WechatPublishAuditEventEntity>,
+    private readonly files: FileArtifactService
   ) {}
 
   async listAccounts(user: JwtPayload) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const items = await manager.getRepository(WechatOfficialAccountEntity).find({
-        where: { tenantId: user.tenantId },
-        order: { createdAt: 'DESC' },
-      });
-      return { items: items.map((item) => this.accountDto(item)) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const items = await manager.getRepository(WechatOfficialAccountEntity).find({
+          where: { tenantId: user.tenantId },
+          order: { createdAt: 'DESC' },
+        });
+        return { items: items.map((item) => this.accountDto(item)) };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   async createAccount(user: JwtPayload, body: any) {
@@ -119,293 +166,367 @@ export class WechatPublishingService {
     if (!displayName || !brandId || !appId || !appSecret) {
       throw new BadRequestException('displayName, brandId, appId and appSecret are required');
     }
-    return withRlsTransaction(this.ds, async (manager) => {
-      const repo = manager.getRepository(WechatOfficialAccountEntity);
-      const account = await repo.save(repo.create({
-        tenantId: user.tenantId,
-        brandId,
-        displayName,
-        appId,
-        originalId,
-        appSecretCiphertext: encryptSecret(appSecret),
-        status: 'disabled',
-        connectionStatus: 'untested',
-        connectionErrorSummary: null,
-        createdBy: user.userId,
-        updatedBy: user.userId,
-      }));
-      await manager.getRepository(WechatPublishAuditEventEntity).save({
-        tenantId: user.tenantId,
-        actorId: user.userId,
-        eventType: 'wechat_account.created',
-        objectType: 'wechat_official_account',
-        objectId: account.id,
-        beforeState: null,
-        afterState: this.accountDto(account),
-        metadata: {},
-      });
-      return { account: this.accountDto(account) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const repo = manager.getRepository(WechatOfficialAccountEntity);
+        const account = await repo.save(
+          repo.create({
+            tenantId: user.tenantId,
+            brandId,
+            displayName,
+            appId,
+            originalId,
+            appSecretCiphertext: encryptSecret(appSecret),
+            status: 'disabled',
+            connectionStatus: 'untested',
+            connectionErrorSummary: null,
+            createdBy: user.userId,
+            updatedBy: user.userId,
+          })
+        );
+        await manager.getRepository(WechatPublishAuditEventEntity).save({
+          tenantId: user.tenantId,
+          actorId: user.userId,
+          eventType: 'wechat_account.created',
+          objectType: 'wechat_official_account',
+          objectId: account.id,
+          beforeState: null,
+          afterState: this.accountDto(account),
+          metadata: {},
+        });
+        return { account: this.accountDto(account) };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   async updateSecret(user: JwtPayload, id: string, body: any) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const account = await this.getAccount(user, id, manager);
-      const appSecret = text(body.appSecret);
-      if (!appSecret) throw new BadRequestException('appSecret is required');
-      const before = this.accountDto(account);
-      account.appSecretCiphertext = encryptSecret(appSecret);
-      account.status = 'disabled';
-      account.connectionStatus = 'untested';
-      account.connectionErrorSummary = null;
-      account.lastTestedAt = null;
-      account.updatedBy = user.userId;
-      const saved = await manager.getRepository(WechatOfficialAccountEntity).save(account);
-      await manager.getRepository(WechatPublishAuditEventEntity).save({
-        tenantId: user.tenantId,
-        actorId: user.userId,
-        eventType: 'wechat_account.secret_updated',
-        objectType: 'wechat_official_account',
-        objectId: saved.id,
-        beforeState: before,
-        afterState: this.accountDto(saved),
-        metadata: {},
-      });
-      return { account: this.accountDto(saved) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const account = await this.getAccount(user, id, manager);
+        const appSecret = text(body.appSecret);
+        if (!appSecret) throw new BadRequestException('appSecret is required');
+        const before = this.accountDto(account);
+        account.appSecretCiphertext = encryptSecret(appSecret);
+        account.status = 'disabled';
+        account.connectionStatus = 'untested';
+        account.connectionErrorSummary = null;
+        account.lastTestedAt = null;
+        account.updatedBy = user.userId;
+        const saved = await manager.getRepository(WechatOfficialAccountEntity).save(account);
+        await manager.getRepository(WechatPublishAuditEventEntity).save({
+          tenantId: user.tenantId,
+          actorId: user.userId,
+          eventType: 'wechat_account.secret_updated',
+          objectType: 'wechat_official_account',
+          objectId: saved.id,
+          beforeState: before,
+          afterState: this.accountDto(saved),
+          metadata: {},
+        });
+        return { account: this.accountDto(saved) };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   async updateAccount(user: JwtPayload, id: string, body: any) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const account = await this.getAccount(user, id, manager);
-      const displayName = text(body.displayName);
-      const brandId = text(body.brandId);
-      const originalId = nullableText(body.originalId);
-      if (!displayName || !brandId) throw new BadRequestException('displayName and brandId are required');
-      const before = this.accountDto(account);
-      account.displayName = displayName;
-      account.brandId = brandId;
-      account.originalId = originalId;
-      account.updatedBy = user.userId;
-      const saved = await manager.getRepository(WechatOfficialAccountEntity).save(account);
-      await manager.getRepository(WechatPublishAuditEventEntity).save({
-        tenantId: user.tenantId,
-        actorId: user.userId,
-        eventType: 'wechat_account.updated',
-        objectType: 'wechat_official_account',
-        objectId: saved.id,
-        beforeState: before,
-        afterState: this.accountDto(saved),
-        metadata: {},
-      });
-      return { account: this.accountDto(saved) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const account = await this.getAccount(user, id, manager);
+        const displayName = text(body.displayName);
+        const brandId = text(body.brandId);
+        const originalId = nullableText(body.originalId);
+        if (!displayName || !brandId)
+          throw new BadRequestException('displayName and brandId are required');
+        const before = this.accountDto(account);
+        account.displayName = displayName;
+        account.brandId = brandId;
+        account.originalId = originalId;
+        account.updatedBy = user.userId;
+        const saved = await manager.getRepository(WechatOfficialAccountEntity).save(account);
+        await manager.getRepository(WechatPublishAuditEventEntity).save({
+          tenantId: user.tenantId,
+          actorId: user.userId,
+          eventType: 'wechat_account.updated',
+          objectType: 'wechat_official_account',
+          objectId: saved.id,
+          beforeState: before,
+          afterState: this.accountDto(saved),
+          metadata: {},
+        });
+        return { account: this.accountDto(saved) };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   async updateStatus(user: JwtPayload, id: string, body: any) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const account = await this.getAccount(user, id, manager);
-      const status = text(body.status);
-      if (!['enabled', 'disabled'].includes(status)) throw new BadRequestException('status must be enabled or disabled');
-      if (status === 'enabled' && account.connectionStatus !== 'normal') {
-        throw new BadRequestException('connection test must be normal before enabling account');
-      }
-      const before = this.accountDto(account);
-      account.status = status as 'enabled' | 'disabled';
-      account.updatedBy = user.userId;
-      const saved = await manager.getRepository(WechatOfficialAccountEntity).save(account);
-      await manager.getRepository(WechatPublishAuditEventEntity).save({
-        tenantId: user.tenantId,
-        actorId: user.userId,
-        eventType: `wechat_account.${status}`,
-        objectType: 'wechat_official_account',
-        objectId: saved.id,
-        beforeState: before,
-        afterState: this.accountDto(saved),
-        metadata: {},
-      });
-      return { account: this.accountDto(saved) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const account = await this.getAccount(user, id, manager);
+        const status = text(body.status);
+        if (!['enabled', 'disabled'].includes(status))
+          throw new BadRequestException('status must be enabled or disabled');
+        if (status === 'enabled' && account.connectionStatus !== 'normal') {
+          throw new BadRequestException('connection test must be normal before enabling account');
+        }
+        const before = this.accountDto(account);
+        account.status = status as 'enabled' | 'disabled';
+        account.updatedBy = user.userId;
+        const saved = await manager.getRepository(WechatOfficialAccountEntity).save(account);
+        await manager.getRepository(WechatPublishAuditEventEntity).save({
+          tenantId: user.tenantId,
+          actorId: user.userId,
+          eventType: `wechat_account.${status}`,
+          objectType: 'wechat_official_account',
+          objectId: saved.id,
+          beforeState: before,
+          afterState: this.accountDto(saved),
+          metadata: {},
+        });
+        return { account: this.accountDto(saved) };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   async testConnection(user: JwtPayload, id: string) {
-    const account = await withRlsTransaction(this.ds, (manager) => this.getAccount(user, id, manager), {
-      tenantId: user.tenantId,
-      actorId: user.userId,
-    });
-    const before = this.accountDto(account);
-    const result = await this.testWechatAccessToken(account.appId, decryptSecret(account.appSecretCiphertext));
-    return withRlsTransaction(this.ds, async (manager) => {
-      const current = await this.getAccount(user, id, manager);
-      current.connectionStatus = result.status;
-      current.connectionErrorSummary = result.status === 'normal' ? null : result.message;
-      current.lastTestedAt = new Date();
-      current.updatedBy = user.userId;
-      const saved = await manager.getRepository(WechatOfficialAccountEntity).save(current);
-      await manager.getRepository(WechatPublishAuditEventEntity).save({
+    const account = await withRlsTransaction(
+      this.ds,
+      (manager) => this.getAccount(user, id, manager),
+      {
         tenantId: user.tenantId,
         actorId: user.userId,
-        eventType: 'wechat_account.connection_tested',
-        objectType: 'wechat_official_account',
-        objectId: saved.id,
-        beforeState: before,
-        afterState: this.accountDto(saved),
-        metadata: {},
-      });
-      return {
-        status: saved.connectionStatus,
-        message: result.message,
-        account: this.accountDto(saved),
-      };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+      }
+    );
+    const before = this.accountDto(account);
+    const result = await this.testWechatAccessToken(
+      account.appId,
+      decryptSecret(account.appSecretCiphertext)
+    );
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const current = await this.getAccount(user, id, manager);
+        current.connectionStatus = result.status;
+        current.connectionErrorSummary = result.status === 'normal' ? null : result.message;
+        current.lastTestedAt = new Date();
+        current.updatedBy = user.userId;
+        const saved = await manager.getRepository(WechatOfficialAccountEntity).save(current);
+        await manager.getRepository(WechatPublishAuditEventEntity).save({
+          tenantId: user.tenantId,
+          actorId: user.userId,
+          eventType: 'wechat_account.connection_tested',
+          objectType: 'wechat_official_account',
+          objectId: saved.id,
+          beforeState: before,
+          afterState: this.accountDto(saved),
+          metadata: {},
+        });
+        return {
+          status: saved.connectionStatus,
+          message: result.message,
+          account: this.accountDto(saved),
+        };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   async availableAccounts(user: JwtPayload, brandId: string) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const items = await manager.getRepository(WechatOfficialAccountEntity).find({
-        where: { tenantId: user.tenantId, brandId, status: 'enabled', connectionStatus: 'normal' },
-        order: { displayName: 'ASC' },
-      });
-      return { items: items.map((item) => this.accountDto(item)) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const items = await manager.getRepository(WechatOfficialAccountEntity).find({
+          where: {
+            tenantId: user.tenantId,
+            brandId,
+            status: 'enabled',
+            connectionStatus: 'normal',
+          },
+          order: { displayName: 'ASC' },
+        });
+        return { items: items.map((item) => this.accountDto(item)) };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   async createReviewVersion(user: JwtPayload, body: any) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const versionRepo = manager.getRepository(WechatContentReviewVersionEntity);
-      const account = await this.getAccount(user, text(body.accountId), manager);
-      if (account.status !== 'enabled' || account.connectionStatus !== 'normal') {
-        throw new BadRequestException('selected account is not enabled and normal');
-      }
-      const payload = this.normalizeWechatPayload(body);
-      if (text(body.brandId) !== account.brandId) throw new BadRequestException('brand and account binding mismatch');
-      const pending = await versionRepo
-        .createQueryBuilder('version')
-        .where('version.tenantId = :tenantId', { tenantId: user.tenantId })
-        .andWhere('version.sourceContentId = :sourceContentId', { sourceContentId: text(body.sourceContentId) })
-        .andWhere('version.reviewStatus = :status', { status: 'pending_review' })
-        .andWhere("version.targetSnapshot ->> 'accountId' = :accountId", { accountId: account.id })
-        .getOne();
-      if (pending) return { version: this.versionDto(pending), duplicate: true };
-      const last = await versionRepo.findOne({
-        where: { tenantId: user.tenantId, sourceContentId: text(body.sourceContentId) },
-        order: { versionNo: 'DESC' },
-      });
-      const targetSnapshot = {
-        brandId: account.brandId,
-        brandName: text(body.brandName, account.brandId),
-        accountId: account.id,
-        accountName: account.displayName,
-        maskedAppId: maskAppId(account.appId),
-      };
-      const version = await versionRepo.save(versionRepo.create({
-        tenantId: user.tenantId,
-        sourceContentId: text(body.sourceContentId),
-        versionNo: (last?.versionNo || 0) + 1,
-        reviewStatus: 'pending_review',
-        wechatPayload: payload,
-        reviewContentHash: hashJson(payload),
-        wechatPayloadHash: hashJson(payload),
-        assetSnapshots: asArray(body.assetSnapshots),
-        targetSnapshot,
-        submitterId: user.userId,
-        reviewerId: null,
-        reviewComment: null,
-        submittedAt: new Date(),
-      }));
-      await manager.getRepository(WechatPublishAuditEventEntity).save({
-        tenantId: user.tenantId,
-        actorId: user.userId,
-        eventType: 'content_review.submitted',
-        objectType: 'wechat_content_review_version',
-        objectId: version.id,
-        beforeState: null,
-        afterState: this.versionDto(version),
-        metadata: {},
-      });
-      return { version: this.versionDto(version) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const versionRepo = manager.getRepository(WechatContentReviewVersionEntity);
+        const account = await this.getAccount(user, text(body.accountId), manager);
+        if (account.status !== 'enabled' || account.connectionStatus !== 'normal') {
+          throw new BadRequestException('selected account is not enabled and normal');
+        }
+        const payload = this.normalizeWechatPayload(body);
+        if (text(body.brandId) !== account.brandId)
+          throw new BadRequestException('brand and account binding mismatch');
+        const pending = await versionRepo
+          .createQueryBuilder('version')
+          .where('version.tenantId = :tenantId', { tenantId: user.tenantId })
+          .andWhere('version.sourceContentId = :sourceContentId', {
+            sourceContentId: text(body.sourceContentId),
+          })
+          .andWhere('version.reviewStatus = :status', { status: 'pending_review' })
+          .andWhere("version.targetSnapshot ->> 'accountId' = :accountId", {
+            accountId: account.id,
+          })
+          .getOne();
+        if (pending) return { version: this.versionDto(pending), duplicate: true };
+        const last = await versionRepo.findOne({
+          where: { tenantId: user.tenantId, sourceContentId: text(body.sourceContentId) },
+          order: { versionNo: 'DESC' },
+        });
+        const targetSnapshot = {
+          brandId: account.brandId,
+          brandName: text(body.brandName, account.brandId),
+          accountId: account.id,
+          accountName: account.displayName,
+          maskedAppId: maskAppId(account.appId),
+        };
+        const version = await versionRepo.save(
+          versionRepo.create({
+            tenantId: user.tenantId,
+            sourceContentId: text(body.sourceContentId),
+            versionNo: (last?.versionNo || 0) + 1,
+            reviewStatus: 'pending_review',
+            wechatPayload: payload,
+            reviewContentHash: hashJson(payload),
+            wechatPayloadHash: hashJson(payload),
+            assetSnapshots: asArray(body.assetSnapshots),
+            targetSnapshot,
+            submitterId: user.userId,
+            reviewerId: null,
+            reviewComment: null,
+            submittedAt: new Date(),
+          })
+        );
+        await manager.getRepository(WechatPublishAuditEventEntity).save({
+          tenantId: user.tenantId,
+          actorId: user.userId,
+          eventType: 'content_review.submitted',
+          objectType: 'wechat_content_review_version',
+          objectId: version.id,
+          beforeState: null,
+          afterState: this.versionDto(version),
+          metadata: {},
+        });
+        return { version: this.versionDto(version) };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   async listPending(user: JwtPayload, query: any = {}) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const items = await manager.getRepository(WechatContentReviewVersionEntity).find({
-        where: { tenantId: user.tenantId, reviewStatus: 'pending_review' },
-        order: { submittedAt: 'DESC' },
-      });
-      const filtered = items.filter((item) => {
-        const target = item.targetSnapshot || {};
-        if (query.brandId && target.brandId !== query.brandId) return false;
-        if (query.accountId && target.accountId !== query.accountId) return false;
-        if (query.submitterId && item.submitterId !== query.submitterId) return false;
-        return true;
-      });
-      return { items: filtered.map((item) => this.versionDto(item)) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const items = await manager.getRepository(WechatContentReviewVersionEntity).find({
+          where: { tenantId: user.tenantId, reviewStatus: 'pending_review' },
+          order: { submittedAt: 'DESC' },
+        });
+        const filtered = items.filter((item) => {
+          const target = item.targetSnapshot || {};
+          if (query.brandId && target.brandId !== query.brandId) return false;
+          if (query.accountId && target.accountId !== query.accountId) return false;
+          if (query.submitterId && item.submitterId !== query.submitterId) return false;
+          return true;
+        });
+        return { items: filtered.map((item) => this.versionDto(item)) };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   async getVersion(user: JwtPayload, id: string) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const version = await manager.getRepository(WechatContentReviewVersionEntity).findOne({ where: { tenantId: user.tenantId, id } });
-      if (!version) throw new NotFoundException('review version not found');
-      return { version: this.versionDto(version) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const version = await manager
+          .getRepository(WechatContentReviewVersionEntity)
+          .findOne({ where: { tenantId: user.tenantId, id } });
+        if (!version) throw new NotFoundException('review version not found');
+        return { version: this.versionDto(version) };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   async approve(user: JwtPayload, id: string, body: any) {
-    const approved = await withRlsTransaction(this.ds, async (manager) => {
-      const repo = manager.getRepository(WechatContentReviewVersionEntity);
-      const taskRepo = manager.getRepository(WechatDraftSyncTaskEntity);
-      const version = await repo.findOne({ where: { tenantId: user.tenantId, id } });
-      if (!version) throw new NotFoundException('review version not found');
-      if (version.reviewStatus !== 'pending_review') throw new BadRequestException('review version is not pending');
-      const currentPayloadHash = hashJson(version.wechatPayload);
-      if (version.reviewContentHash !== currentPayloadHash) {
-        if (process.env.WECHAT_REVIEW_STRICT_HASH === 'true') {
-          throw new BadRequestException('review content hash mismatch');
+    const approved = await withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const repo = manager.getRepository(WechatContentReviewVersionEntity);
+        const taskRepo = manager.getRepository(WechatDraftSyncTaskEntity);
+        const version = await repo.findOne({ where: { tenantId: user.tenantId, id } });
+        if (!version) throw new NotFoundException('review version not found');
+        if (version.reviewStatus !== 'pending_review')
+          throw new BadRequestException('review version is not pending');
+        const currentPayloadHash = hashJson(version.wechatPayload);
+        if (version.reviewContentHash !== currentPayloadHash) {
+          if (process.env.WECHAT_REVIEW_STRICT_HASH === 'true') {
+            throw new BadRequestException('review content hash mismatch');
+          }
+          version.reviewContentHash = currentPayloadHash;
+          version.wechatPayloadHash = currentPayloadHash;
         }
-        version.reviewContentHash = currentPayloadHash;
-        version.wechatPayloadHash = currentPayloadHash;
-      }
-      const target = version.targetSnapshot as any;
-      const account = await manager.getRepository(WechatOfficialAccountEntity).findOne({
-        where: { tenantId: user.tenantId, id: target.accountId },
-      });
-      if (!account || account.status !== 'enabled' || account.brandId !== target.brandId) {
-        throw new BadRequestException('target account is unavailable');
-      }
-      version.reviewStatus = 'approved';
-      version.reviewerId = user.userId;
-      version.reviewComment = nullableText(body.comment);
-      version.reviewedAt = new Date();
-      const saved = await repo.save(version);
-      const task = await taskRepo.save(taskRepo.create({
-        tenantId: user.tenantId,
-        reviewVersionId: saved.id,
-        accountId: account.id,
-        idempotencyKey: `wechat-draft:${saved.id}`,
-        syncStatus: 'queued',
-        attempts: 0,
-        materialMapping: {},
-      }));
-      await manager.getRepository(WechatPublishAuditEventEntity).save({
-        tenantId: user.tenantId,
-        actorId: user.userId,
-        eventType: 'content_review.approved',
-        objectType: 'wechat_content_review_version',
-        objectId: saved.id,
-        beforeState: { reviewStatus: 'pending_review' },
-        afterState: { reviewStatus: 'approved', taskId: task.id },
-        metadata: {},
-      });
-      return { version: this.versionDto(saved), task: this.taskDto(task) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+        const target = version.targetSnapshot as any;
+        const account = await manager.getRepository(WechatOfficialAccountEntity).findOne({
+          where: { tenantId: user.tenantId, id: target.accountId },
+        });
+        if (!account || account.status !== 'enabled' || account.brandId !== target.brandId) {
+          throw new BadRequestException('target account is unavailable');
+        }
+        version.reviewStatus = 'approved';
+        version.reviewerId = user.userId;
+        version.reviewComment = nullableText(body.comment);
+        version.reviewedAt = new Date();
+        const saved = await repo.save(version);
+        const task = await taskRepo.save(
+          taskRepo.create({
+            tenantId: user.tenantId,
+            reviewVersionId: saved.id,
+            accountId: account.id,
+            idempotencyKey: `wechat-draft:${saved.id}`,
+            syncStatus: 'queued',
+            attempts: 0,
+            materialMapping: {},
+          })
+        );
+        await manager.getRepository(WechatPublishAuditEventEntity).save({
+          tenantId: user.tenantId,
+          actorId: user.userId,
+          eventType: 'content_review.approved',
+          objectType: 'wechat_content_review_version',
+          objectId: saved.id,
+          beforeState: { reviewStatus: 'pending_review' },
+          afterState: { reviewStatus: 'approved', taskId: task.id },
+          metadata: {},
+        });
+        return { version: this.versionDto(saved), task: this.taskDto(task) };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
     const syncedTask = await this.processTaskById(user, approved.task.id);
     return { version: approved.version, task: syncedTask };
   }
 
   async requestChanges(user: JwtPayload, id: string, body: any) {
-    return this.finishReview(user, id, 'changes_requested', 'content_review.changes_requested', body.reason);
+    return this.finishReview(
+      user,
+      id,
+      'changes_requested',
+      'content_review.changes_requested',
+      body.reason
+    );
   }
 
   async voidVersion(user: JwtPayload, id: string, body: any) {
@@ -413,63 +534,95 @@ export class WechatPublishingService {
   }
 
   async listTasks(user: JwtPayload) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const tasks = await manager.getRepository(WechatDraftSyncTaskEntity).find({
-        where: { tenantId: user.tenantId },
-        order: { createdAt: 'DESC' },
-      });
-      const visibleTasks = tasks.filter((task) => task.syncStatus !== 'superseded');
-      const versionIds = visibleTasks.map((task) => task.reviewVersionId);
-      const versions = versionIds.length
-        ? await manager.getRepository(WechatContentReviewVersionEntity).find({ where: { tenantId: user.tenantId, id: In(versionIds) } })
-        : [];
-      const versionMap = new Map(versions.map((version) => [version.id, version]));
-      return { items: visibleTasks.map((task) => this.taskDto(task, versionMap.get(task.reviewVersionId))) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const tasks = await manager.getRepository(WechatDraftSyncTaskEntity).find({
+          where: { tenantId: user.tenantId },
+          order: { createdAt: 'DESC' },
+        });
+        const visibleTasks = tasks.filter((task) => task.syncStatus !== 'superseded');
+        const versionIds = visibleTasks.map((task) => task.reviewVersionId);
+        const versions = versionIds.length
+          ? await manager
+              .getRepository(WechatContentReviewVersionEntity)
+              .find({ where: { tenantId: user.tenantId, id: In(versionIds) } })
+          : [];
+        const versionMap = new Map(versions.map((version) => [version.id, version]));
+        return {
+          items: visibleTasks.map((task) =>
+            this.taskDto(task, versionMap.get(task.reviewVersionId))
+          ),
+        };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   async getTask(user: JwtPayload, id: string) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const task = await manager.getRepository(WechatDraftSyncTaskEntity).findOne({ where: { tenantId: user.tenantId, id } });
-      if (!task) throw new NotFoundException('sync task not found');
-      const version = await manager.getRepository(WechatContentReviewVersionEntity).findOne({ where: { tenantId: user.tenantId, id: task.reviewVersionId } });
-      return { task: this.taskDto(task, version || undefined) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const task = await manager
+          .getRepository(WechatDraftSyncTaskEntity)
+          .findOne({ where: { tenantId: user.tenantId, id } });
+        if (!task) throw new NotFoundException('sync task not found');
+        const version = await manager
+          .getRepository(WechatContentReviewVersionEntity)
+          .findOne({ where: { tenantId: user.tenantId, id: task.reviewVersionId } });
+        return { task: this.taskDto(task, version || undefined) };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   async addTaskNote(user: JwtPayload, id: string, body: any) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const task = await manager.getRepository(WechatDraftSyncTaskEntity).findOne({ where: { tenantId: user.tenantId, id } });
-      if (!task) throw new NotFoundException('sync task not found');
-      task.manualHandlerId = user.userId;
-      task.manualHandledAt = new Date();
-      task.manualNote = text(body.note);
-      const saved = await manager.getRepository(WechatDraftSyncTaskEntity).save(task);
-      await manager.getRepository(WechatPublishAuditEventEntity).save({
-        tenantId: user.tenantId,
-        actorId: user.userId,
-        eventType: 'draft_sync.manual_note',
-        objectType: 'wechat_draft_sync_task',
-        objectId: saved.id,
-        beforeState: null,
-        afterState: { note: saved.manualNote },
-        metadata: {},
-      });
-      return { task: this.taskDto(saved) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const task = await manager
+          .getRepository(WechatDraftSyncTaskEntity)
+          .findOne({ where: { tenantId: user.tenantId, id } });
+        if (!task) throw new NotFoundException('sync task not found');
+        task.manualHandlerId = user.userId;
+        task.manualHandledAt = new Date();
+        task.manualNote = text(body.note);
+        const saved = await manager.getRepository(WechatDraftSyncTaskEntity).save(task);
+        await manager.getRepository(WechatPublishAuditEventEntity).save({
+          tenantId: user.tenantId,
+          actorId: user.userId,
+          eventType: 'draft_sync.manual_note',
+          objectType: 'wechat_draft_sync_task',
+          objectId: saved.id,
+          beforeState: null,
+          afterState: { note: saved.manualNote },
+          metadata: {},
+        });
+        return { task: this.taskDto(saved) };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   async processQueuedTasks(user: JwtPayload, limit = 10) {
-    const queued = await withRlsTransaction(this.ds, async (manager) => manager
-      .getRepository(WechatDraftSyncTaskEntity)
-      .createQueryBuilder('task')
-      .where('task.tenantId = :tenantId', { tenantId: user.tenantId })
-      .andWhere("(task.syncStatus IN (:...statuses) OR task.wechatDraftId LIKE 'mock-draft-%')", {
-        statuses: ['queued', 'unconfirmed'],
-      })
-      .orderBy('task.createdAt', 'ASC')
-      .take(limit)
-      .getMany(), { tenantId: user.tenantId, actorId: user.userId });
+    const queued = await withRlsTransaction(
+      this.ds,
+      async (manager) =>
+        manager
+          .getRepository(WechatDraftSyncTaskEntity)
+          .createQueryBuilder('task')
+          .where('task.tenantId = :tenantId', { tenantId: user.tenantId })
+          .andWhere(
+            "(task.syncStatus IN (:...statuses) OR task.wechatDraftId LIKE 'mock-draft-%')",
+            {
+              statuses: ['queued', 'unconfirmed'],
+            }
+          )
+          .orderBy('task.createdAt', 'ASC')
+          .take(limit)
+          .getMany(),
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
     const results: Array<Record<string, unknown>> = [];
     for (const task of queued) {
       results.push(await this.processTaskById(user, task.id));
@@ -478,11 +631,17 @@ export class WechatPublishingService {
   }
 
   private async processTaskById(user: JwtPayload, taskId: string) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const task = await manager.getRepository(WechatDraftSyncTaskEntity).findOne({ where: { tenantId: user.tenantId, id: taskId } });
-      if (!task) throw new NotFoundException('sync task not found');
-      return this.processTask(task, manager);
-    }, { tenantId: user.tenantId, actorId: user.userId });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const task = await manager
+          .getRepository(WechatDraftSyncTaskEntity)
+          .findOne({ where: { tenantId: user.tenantId, id: taskId } });
+        if (!task) throw new NotFoundException('sync task not found');
+        return this.processTask(task, manager);
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   private async processTask(task: WechatDraftSyncTaskEntity, manager: EntityManager) {
@@ -494,20 +653,28 @@ export class WechatPublishingService {
     task.startedAt = new Date();
     task.attempts += 1;
     await taskRepo.save(task);
-    const version = await versionRepo.findOne({ where: { tenantId: task.tenantId, id: task.reviewVersionId } });
+    const version = await versionRepo.findOne({
+      where: { tenantId: task.tenantId, id: task.reviewVersionId },
+    });
     if (!version) {
       task.syncStatus = 'failed';
       task.errorType = 'content';
       task.errorSummary = '审核版本不存在';
     } else {
-      const account = await accountRepo.findOne({ where: { tenantId: task.tenantId, id: task.accountId } });
+      const account = await accountRepo.findOne({
+        where: { tenantId: task.tenantId, id: task.accountId },
+      });
       if (!account || account.status !== 'enabled' || account.connectionStatus !== 'normal') {
         task.syncStatus = 'failed';
         task.errorType = 'account';
         task.errorSummary = '目标公众号不可用，请先测试连接并启用账号';
       } else {
         try {
-          const result = await this.createWechatDraft(task.tenantId, account, version.wechatPayload as any);
+          const result = await this.createWechatDraft(
+            task.tenantId,
+            account,
+            version.wechatPayload as any
+          );
           task.syncStatus = 'succeeded';
           task.wechatDraftId = result.draftMediaId;
           task.materialMapping = result.materialMapping;
@@ -523,7 +690,10 @@ export class WechatPublishingService {
     task.finishedAt = new Date();
     const saved = await taskRepo.save(task);
     if (saved.syncStatus === 'succeeded') {
-      await accountRepo.update({ tenantId: saved.tenantId, id: saved.accountId }, { lastSuccessfulSyncAt: new Date() });
+      await accountRepo.update(
+        { tenantId: saved.tenantId, id: saved.accountId },
+        { lastSuccessfulSyncAt: new Date() }
+      );
     }
     await auditRepo.save({
       tenantId: saved.tenantId,
@@ -538,32 +708,43 @@ export class WechatPublishingService {
     return this.taskDto(saved, version || undefined);
   }
 
-  private async finishReview(user: JwtPayload, id: string, status: 'changes_requested' | 'voided', eventType: string, reason: unknown) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const versionRepo = manager.getRepository(WechatContentReviewVersionEntity);
-      const version = await versionRepo.findOne({ where: { tenantId: user.tenantId, id } });
-      if (!version) throw new NotFoundException('review version not found');
-      if (version.reviewStatus !== 'pending_review') throw new BadRequestException('review version is not pending');
-      const comment = text(reason);
-      if (!comment) throw new BadRequestException('reason is required');
-      const before = this.versionDto(version);
-      version.reviewStatus = status;
-      version.reviewerId = user.userId;
-      version.reviewComment = comment;
-      version.reviewedAt = new Date();
-      const saved = await versionRepo.save(version);
-      await manager.getRepository(WechatPublishAuditEventEntity).save({
-        tenantId: user.tenantId,
-        actorId: user.userId,
-        eventType,
-        objectType: 'wechat_content_review_version',
-        objectId: saved.id,
-        beforeState: before,
-        afterState: this.versionDto(saved),
-        metadata: {},
-      });
-      return { version: this.versionDto(saved) };
-    }, { tenantId: user.tenantId, actorId: user.userId });
+  private async finishReview(
+    user: JwtPayload,
+    id: string,
+    status: 'changes_requested' | 'voided',
+    eventType: string,
+    reason: unknown
+  ) {
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const versionRepo = manager.getRepository(WechatContentReviewVersionEntity);
+        const version = await versionRepo.findOne({ where: { tenantId: user.tenantId, id } });
+        if (!version) throw new NotFoundException('review version not found');
+        if (version.reviewStatus !== 'pending_review')
+          throw new BadRequestException('review version is not pending');
+        const comment = text(reason);
+        if (!comment) throw new BadRequestException('reason is required');
+        const before = this.versionDto(version);
+        version.reviewStatus = status;
+        version.reviewerId = user.userId;
+        version.reviewComment = comment;
+        version.reviewedAt = new Date();
+        const saved = await versionRepo.save(version);
+        await manager.getRepository(WechatPublishAuditEventEntity).save({
+          tenantId: user.tenantId,
+          actorId: user.userId,
+          eventType,
+          objectType: 'wechat_content_review_version',
+          objectId: saved.id,
+          beforeState: before,
+          afterState: this.versionDto(saved),
+          metadata: {},
+        });
+        return { version: this.versionDto(saved) };
+      },
+      { tenantId: user.tenantId, actorId: user.userId }
+    );
   }
 
   private normalizeWechatPayload(body: any) {
@@ -571,9 +752,12 @@ export class WechatPublishingService {
     const title = text(body.title);
     const digest = text(body.digest);
     const contentHtml = text(body.contentHtml);
-    const coverImage = body.coverImage && typeof body.coverImage === 'object' ? body.coverImage : null;
+    const coverImage =
+      body.coverImage && typeof body.coverImage === 'object' ? body.coverImage : null;
     if (!sourceContentId || !title || !digest || !contentHtml || !coverImage) {
-      throw new BadRequestException('sourceContentId, title, digest, contentHtml and coverImage are required');
+      throw new BadRequestException(
+        'sourceContentId, title, digest, contentHtml and coverImage are required'
+      );
     }
     assertAllowedHtml(contentHtml);
     return {
@@ -607,23 +791,36 @@ export class WechatPublishingService {
     };
   }
 
-  private async createWechatDraft(tenantId: string, account: WechatOfficialAccountEntity, payload: any) {
-    const token = await this.fetchWechatAccessToken(account.appId, decryptSecret(account.appSecretCiphertext));
+  private async createWechatDraft(
+    tenantId: string,
+    account: WechatOfficialAccountEntity,
+    payload: any
+  ) {
+    const token = await this.fetchWechatAccessToken(
+      account.appId,
+      decryptSecret(account.appSecretCiphertext)
+    );
     const coverAssetId = text(payload.coverImage?.assetId);
-    const cover = UUID_RE.test(coverAssetId) ? await this.files.getReadableById(this.syncUser(tenantId), coverAssetId) : null;
-    const coverUpload = cover && String(cover.row.mimeType || '').toLowerCase().startsWith('image/')
-      ? {
-          filename: String(cover.row.originalName || 'cover.png'),
-          mimeType: String(cover.row.mimeType || 'image/png').toLowerCase(),
-          buffer: cover.buffer,
-          source: 'file_artifact',
-        }
-      : {
-          filename: 'wechat-mvp-cover.png',
-          mimeType: 'image/png',
-          buffer: await this.generateFallbackCover(text(payload.title)),
-          source: 'generated_fallback',
-        };
+    const cover = UUID_RE.test(coverAssetId)
+      ? await this.files.getReadableById(this.syncUser(tenantId), coverAssetId)
+      : null;
+    const coverUpload =
+      cover &&
+      String(cover.row.mimeType || '')
+        .toLowerCase()
+        .startsWith('image/')
+        ? {
+            filename: String(cover.row.originalName || 'cover.png'),
+            mimeType: String(cover.row.mimeType || 'image/png').toLowerCase(),
+            buffer: cover.buffer,
+            source: 'file_artifact',
+          }
+        : {
+            filename: 'wechat-mvp-cover.png',
+            mimeType: 'image/png',
+            buffer: await this.generateFallbackCover(text(payload.title)),
+            source: 'generated_fallback',
+          };
 
     const thumb = await this.uploadWechatPermanentMaterial(token, {
       type: 'thumb',
@@ -653,10 +850,9 @@ export class WechatPublishingService {
   private async generateFallbackCover(title: string) {
     const safeTitle = title || '微信公众号草稿';
     const lines = safeTitle.match(/.{1,18}/g)?.slice(0, 3) || ['微信公众号草稿'];
-    const escapedLines = lines.map((line) => line
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;'));
+    const escapedLines = lines.map((line) =>
+      line.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    );
     const svg = `
       <svg width="900" height="500" viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg">
         <rect width="900" height="500" fill="#ffffff"/>
@@ -681,34 +877,42 @@ export class WechatPublishingService {
         force_refresh: false,
       }),
     });
-    const payload = await response.json().catch(() => ({})) as {
+    const payload = (await response.json().catch(() => ({}))) as {
       access_token?: string;
       errcode?: number;
       errmsg?: string;
     };
     if (payload.access_token) return payload.access_token;
-    const mapped = mapWechatTokenError(Number(payload.errcode || 0), text(payload.errmsg, response.statusText));
+    const mapped = mapWechatTokenError(
+      Number(payload.errcode || 0),
+      text(payload.errmsg, response.statusText)
+    );
     throw new BadRequestException(mapped.message);
   }
 
   private async uploadWechatPermanentMaterial(
     accessToken: string,
-    input: { type: 'thumb'; filename: string; mimeType: string; buffer: Buffer },
+    input: { type: 'thumb'; filename: string; mimeType: string; buffer: Buffer }
   ) {
     const form = new FormData();
     form.append('media', new Blob([input.buffer as any], { type: input.mimeType }), input.filename);
-    const response = await fetch(`${WECHAT_API_BASE}/material/add_material?access_token=${encodeURIComponent(accessToken)}&type=${input.type}`, {
-      method: 'POST',
-      body: form as any,
-    });
-    const payload = await response.json().catch(() => ({})) as {
+    const response = await fetch(
+      `${WECHAT_API_BASE}/material/add_material?access_token=${encodeURIComponent(accessToken)}&type=${input.type}`,
+      {
+        method: 'POST',
+        body: form as any,
+      }
+    );
+    const payload = (await response.json().catch(() => ({}))) as {
       media_id?: string;
       url?: string;
       errcode?: number;
       errmsg?: string;
     };
     if (payload.media_id) return { mediaId: payload.media_id, url: payload.url || null };
-    throw new BadRequestException(this.wechatApiError('上传微信封面素材失败', payload, response.statusText));
+    throw new BadRequestException(
+      this.wechatApiError('上传微信封面素材失败', payload, response.statusText)
+    );
   }
 
   private async addWechatDraft(
@@ -720,39 +924,51 @@ export class WechatPublishingService {
       content: string;
       contentSourceUrl: string | null;
       thumbMediaId: string;
-    },
+    }
   ) {
-    const response = await fetch(`${WECHAT_API_BASE}/draft/add?access_token=${encodeURIComponent(accessToken)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        articles: [{
-          title: input.title,
-          author: input.author,
-          digest: input.digest,
-          content: input.content,
-          content_source_url: input.contentSourceUrl || '',
-          thumb_media_id: input.thumbMediaId,
-          need_open_comment: 0,
-          only_fans_can_comment: 0,
-        }],
-      }),
-    });
-    const payload = await response.json().catch(() => ({})) as {
+    const response = await fetch(
+      `${WECHAT_API_BASE}/draft/add?access_token=${encodeURIComponent(accessToken)}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          articles: [
+            {
+              title: input.title,
+              author: input.author,
+              digest: input.digest,
+              content: input.content,
+              content_source_url: input.contentSourceUrl || '',
+              thumb_media_id: input.thumbMediaId,
+              need_open_comment: 0,
+              only_fans_can_comment: 0,
+            },
+          ],
+        }),
+      }
+    );
+    const payload = (await response.json().catch(() => ({}))) as {
       media_id?: string;
       errcode?: number;
       errmsg?: string;
     };
     if (payload.media_id) return { mediaId: payload.media_id };
-    throw new BadRequestException(this.wechatApiError('创建微信草稿失败', payload, response.statusText));
+    throw new BadRequestException(
+      this.wechatApiError('创建微信草稿失败', payload, response.statusText)
+    );
   }
 
-  private wechatApiError(prefix: string, payload: { errcode?: number; errmsg?: string }, fallback: string) {
+  private wechatApiError(
+    prefix: string,
+    payload: { errcode?: number; errmsg?: string },
+    fallback: string
+  ) {
     const code = Number(payload.errcode || 0);
     const message = text(payload.errmsg, fallback);
     if (code === 40164) return `${prefix}：API IP 白名单未包含当前后端公网 IP`;
     if ([40013, 40125, 41002, 41004].includes(code)) return `${prefix}：AppID 或 AppSecret 不正确`;
-    if ([48001, 50001].includes(code)) return `${prefix}：公众号接口权限不足，当前公众号可能未认证或不支持该接口`;
+    if ([48001, 50001].includes(code))
+      return `${prefix}：公众号接口权限不足，当前公众号可能未认证或不支持该接口`;
     if (code === 45009) return `${prefix}：微信接口调用次数达到上限`;
     return `${prefix}：${code || 'unknown'} ${message}`;
   }
@@ -769,19 +985,25 @@ export class WechatPublishingService {
           force_refresh: false,
         }),
       });
-      const payload = await response.json().catch(() => ({})) as {
+      const payload = (await response.json().catch(() => ({}))) as {
         access_token?: string;
         expires_in?: number;
         errcode?: number;
         errmsg?: string;
       };
       if (payload.access_token) {
-        return { status: 'normal' as const, message: 'WeChat credential and API IP whitelist check passed.' };
+        return {
+          status: 'normal' as const,
+          message: 'WeChat credential and API IP whitelist check passed.',
+        };
       }
       const errcode = Number(payload.errcode || 0);
       return mapWechatTokenError(errcode, text(payload.errmsg, response.statusText));
     } catch {
-      return { status: 'temporary_error' as const, message: 'Cannot reach api.weixin.qq.com from backend network.' };
+      return {
+        status: 'temporary_error' as const,
+        message: 'Cannot reach api.weixin.qq.com from backend network.',
+      };
     }
   }
 
@@ -791,7 +1013,7 @@ export class WechatPublishingService {
     objectType: string,
     objectId: string,
     beforeState: Record<string, unknown> | null,
-    afterState: Record<string, unknown> | null,
+    afterState: Record<string, unknown> | null
   ) {
     await this.audit.save({
       tenantId: user.tenantId,

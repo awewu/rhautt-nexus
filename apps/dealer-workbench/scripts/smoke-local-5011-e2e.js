@@ -8,7 +8,11 @@ const everhotUrl = process.env.EVERHOT_SITE_URL || 'http://localhost:5011';
 const repoRoot = path.resolve(__dirname, '..', '..', '..');
 const reportPath = path.join(repoRoot, 'runtime-logs', 'local-5011-e2e-smoke.json');
 const failureScreenshot = path.join(repoRoot, 'runtime-logs', 'local-5011-e2e-smoke-failure.png');
-const controlFailureScreenshot = path.join(repoRoot, 'runtime-logs', 'local-5011-e2e-control-failure.png');
+const controlFailureScreenshot = path.join(
+  repoRoot,
+  'runtime-logs',
+  'local-5011-e2e-control-failure.png'
+);
 const uploadFixturePath = path.join(repoRoot, 'runtime-logs', 'local-5011-e2e-upload.png');
 const SHELF_UNLISTED = '\u672a\u4e0a\u67b6';
 const SHELF_PUBLISHED = '\u5df2\u4e0a\u67b6';
@@ -134,7 +138,10 @@ for (let index = 1; index <= 22; index += 1) {
     name: `Everhot Pagination Smoke ${String(index).padStart(2, '0')}`,
     category: index % 2 === 0 ? 'hot_water' : 'air_conditioning',
     status: index === 22 ? 'inactive' : 'active',
-    spec: { officialModel: `PG-5011-${index}`, system: index % 2 === 0 ? 'water_heating' : 'comfort' },
+    spec: {
+      officialModel: `PG-5011-${index}`,
+      system: index % 2 === 0 ? 'water_heating' : 'comfort',
+    },
     meta: {
       everhot: {
         slug: `everhot-pagination-smoke-${String(index).padStart(2, '0')}`,
@@ -314,7 +321,9 @@ function siteCodeFromPath(requestPath) {
 }
 
 function productBrand(product) {
-  return String(product.brand || '').trim().toLowerCase();
+  return String(product.brand || '')
+    .trim()
+    .toLowerCase();
 }
 
 function matchesKeyword(product, keyword) {
@@ -328,7 +337,9 @@ function matchesKeyword(product, keyword) {
     product.spec?.officialModel,
     product.spec?.system,
     product.meta?.[brand]?.slug,
-  ].join(' ').toLowerCase();
+  ]
+    .join(' ')
+    .toLowerCase();
   return haystack.includes(keyword.toLowerCase());
 }
 
@@ -346,10 +357,11 @@ function productCatalogPayload(url) {
   const page = Math.max(Number(url.searchParams.get('page')) || 1, 1);
   const pageSize = Math.min(Math.max(Number(url.searchParams.get('pageSize')) || 20, 1), 100);
   const scoped = products.filter((product) => !brand || productBrand(product) === brand);
-  const filtered = scoped.filter((product) =>
-    matchesKeyword(product, keyword) &&
-    (!status || product.status === status) &&
-    (!category || product.category === category)
+  const filtered = scoped.filter(
+    (product) =>
+      matchesKeyword(product, keyword) &&
+      (!status || product.status === status) &&
+      (!category || product.category === category)
   );
   const start = (page - 1) * pageSize;
   const items = filtered.slice(start, start + pageSize);
@@ -389,7 +401,8 @@ function applyProductPatch(productId, patch) {
 }
 
 async function ensureUploadFixture() {
-  const pngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=';
+  const pngBase64 =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=';
   await fs.promises.mkdir(path.dirname(uploadFixturePath), { recursive: true });
   await fs.promises.writeFile(uploadFixturePath, Buffer.from(pngBase64, 'base64'));
 }
@@ -408,13 +421,23 @@ async function routeControlPanel(page) {
     const requestPath = url.pathname;
     if (requestPath.endsWith('/product-assignments') && request.method() === 'GET') {
       const siteCode = siteCodeFromPath(requestPath);
-      const siteAssignments = assignments.filter((assignment) => !siteCode || assignment.siteCode === siteCode);
-      await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: siteAssignments, total: siteAssignments.length }) });
+      const siteAssignments = assignments.filter(
+        (assignment) => !siteCode || assignment.siteCode === siteCode
+      );
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ items: siteAssignments, total: siteAssignments.length }),
+      });
       return;
     }
     if (requestPath.endsWith('/product-assignments') && request.method() === 'POST') {
       const body = request.postDataJSON();
-      const created = { id: `assignment-e2e-created-${assignments.length}`, ...body, status: 'draft', siteCode: siteCodeFromPath(requestPath) };
+      const created = {
+        id: `assignment-e2e-created-${assignments.length}`,
+        ...body,
+        status: 'draft',
+        siteCode: siteCodeFromPath(requestPath),
+      };
       mutationLog.createdAssignments.push(body);
       assignments.push(created);
       await route.fulfill({ contentType: 'application/json', body: JSON.stringify(created) });
@@ -439,56 +462,63 @@ async function routeControlPanel(page) {
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
-        items: [{
-          id: 'site-everhot',
-          code: 'everhot',
-          nameCn: 'Everhot',
-          nameEn: 'Everhot',
-          appKey: 'everhot-cn',
-          deliveryType: 'self_hosted',
-          developmentUrl: 'http://localhost:5011/',
-          productionUrl: 'https://www.everhot.com.cn/',
-          resolvedUrl: 'http://localhost:5011/',
-          resolvedEnvironment: 'development',
-          status: 'active',
-          sortOrder: 30,
-          deletedAt: null,
-        }, {
-          id: 'site-rheem',
-          code: 'rheem',
-          nameCn: 'Rheem',
-          nameEn: 'Rheem',
-          appKey: 'rheem-cn',
-          deliveryType: 'self_hosted',
-          developmentUrl: 'http://localhost:5014/',
-          productionUrl: 'https://www.rheem.com.cn/',
-          resolvedUrl: 'http://localhost:5014/',
-          resolvedEnvironment: 'development',
-          status: 'active',
-          sortOrder: 10,
-          deletedAt: null,
-        }, {
-          id: 'site-ruud',
-          code: 'ruud',
-          nameCn: 'Ruud',
-          nameEn: 'Ruud',
-          appKey: 'ruud-cn',
-          deliveryType: 'self_hosted',
-          developmentUrl: 'http://localhost:5015/',
-          productionUrl: 'https://www.ruud.com.cn/',
-          resolvedUrl: 'http://localhost:5015/',
-          resolvedEnvironment: 'development',
-          status: 'active',
-          sortOrder: 20,
-          deletedAt: null,
-        }],
+        items: [
+          {
+            id: 'site-everhot',
+            code: 'everhot',
+            nameCn: 'Everhot',
+            nameEn: 'Everhot',
+            appKey: 'everhot-cn',
+            deliveryType: 'self_hosted',
+            developmentUrl: 'http://localhost:5011/',
+            productionUrl: 'https://www.everhot.com.cn/',
+            resolvedUrl: 'http://localhost:5011/',
+            resolvedEnvironment: 'development',
+            status: 'active',
+            sortOrder: 30,
+            deletedAt: null,
+          },
+          {
+            id: 'site-rheem',
+            code: 'rheem',
+            nameCn: 'Rheem',
+            nameEn: 'Rheem',
+            appKey: 'rheem-cn',
+            deliveryType: 'self_hosted',
+            developmentUrl: 'http://localhost:5014/',
+            productionUrl: 'https://www.rheem.com.cn/',
+            resolvedUrl: 'http://localhost:5014/',
+            resolvedEnvironment: 'development',
+            status: 'active',
+            sortOrder: 10,
+            deletedAt: null,
+          },
+          {
+            id: 'site-ruud',
+            code: 'ruud',
+            nameCn: 'Ruud',
+            nameEn: 'Ruud',
+            appKey: 'ruud-cn',
+            deliveryType: 'self_hosted',
+            developmentUrl: 'http://localhost:5015/',
+            productionUrl: 'https://www.ruud.com.cn/',
+            resolvedUrl: 'http://localhost:5015/',
+            resolvedEnvironment: 'development',
+            status: 'active',
+            sortOrder: 20,
+            deletedAt: null,
+          },
+        ],
         total: 3,
       }),
     });
   });
 
   await page.route('**/api/v2/product-catalog/taxonomy**', async (route) => {
-    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ targetSegments: [], channels: [], assetRoles: [] }) });
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ targetSegments: [], channels: [], assetRoles: [] }),
+    });
   });
 
   await page.route('**/api/v2/file-artifact/upload-base64', async (route) => {
@@ -512,8 +542,13 @@ async function routeControlPanel(page) {
   await page.route('**/api/v2/file-artifact/**', async (route) => {
     const request = route.request();
     if (request.method() === 'DELETE') {
-      mutationLog.deletedArtifacts.push(decodeURIComponent(new URL(request.url()).pathname.split('/').pop() || ''));
-      await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ success: true }) });
+      mutationLog.deletedArtifacts.push(
+        decodeURIComponent(new URL(request.url()).pathname.split('/').pop() || '')
+      );
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ success: true }),
+      });
       return;
     }
     await route.fallback();
@@ -532,7 +567,10 @@ async function routeControlPanel(page) {
         productId: id,
         body,
       });
-      await route.fulfill({ contentType: 'application/json', body: JSON.stringify(updated || { id, ...body }) });
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify(updated || { id, ...body }),
+      });
       return;
     }
     await route.fallback();
@@ -543,7 +581,10 @@ async function routeControlPanel(page) {
     const url = new URL(request.url());
     if (request.method() === 'GET') {
       mutationLog.catalogReads.push(request.url());
-      await route.fulfill({ contentType: 'application/json', body: JSON.stringify(productCatalogPayload(url)) });
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify(productCatalogPayload(url)),
+      });
       return;
     }
     mutationLog.catalogWrites.push({
@@ -551,7 +592,10 @@ async function routeControlPanel(page) {
       url: request.url(),
       body: request.postData(),
     });
-    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: products, total: products.length }) });
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ items: products, total: products.length }),
+    });
   });
 }
 
@@ -559,13 +603,24 @@ async function routeEverhotRuntime(page, runtimeAvailable) {
   await page.route('**/api/v2/sites/everhot/products**', async (route) => {
     mutationLog.runtimeRequests.push(route.request().url());
     if (!runtimeAvailable()) {
-      await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ message: 'runtime unavailable' }) });
+      await route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'runtime unavailable' }),
+      });
       return;
     }
-    await route.fulfill({ contentType: 'application/json', body: JSON.stringify(publicProductsPayload()) });
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify(publicProductsPayload()),
+    });
   });
   await page.route('**/api/v2/brand/everhot/products**', async (route) => {
-    await route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ message: 'legacy runtime unavailable' }) });
+    await route.fulfill({
+      status: 503,
+      contentType: 'application/json',
+      body: JSON.stringify({ message: 'legacy runtime unavailable' }),
+    });
   });
 }
 
@@ -583,7 +638,10 @@ async function expectMissingText(page, text, label) {
 }
 
 async function assertShelfStatus(page, sku, status) {
-  await page.getByTestId(`website-shelf-status-${sku}`).filter({ hasText: status }).waitFor({ timeout: 15000 });
+  await page
+    .getByTestId(`website-shelf-status-${sku}`)
+    .filter({ hasText: status })
+    .waitFor({ timeout: 15000 });
 }
 
 async function expectConsoleBrandIsolation(page, brand, visibleSku, hiddenSkus) {
@@ -601,7 +659,10 @@ async function assertNoDesktopHorizontalScroll(page) {
     bodyClientWidth: document.documentElement.clientWidth,
     bodyScrollWidth: document.documentElement.scrollWidth,
   }));
-  if (metrics.scrollWidth > metrics.clientWidth || metrics.bodyScrollWidth > metrics.bodyClientWidth) {
+  if (
+    metrics.scrollWidth > metrics.clientWidth ||
+    metrics.bodyScrollWidth > metrics.bodyClientWidth
+  ) {
     throw new Error(`desktop table has horizontal overflow: ${JSON.stringify(metrics)}`);
   }
 }
@@ -630,17 +691,22 @@ async function assertImageUploadPersists(page) {
   await page.goto(`${dealerUrl}/comfort/sites/rheem`, { waitUntil: 'networkidle' });
   await page.getByTestId('main-image-input-RHM-E2E-PUBLISHED').setInputFiles(uploadFixturePath);
   await waitForCondition('main image assetRef', () =>
-    (productById('product-e2e-rheem')?.assetRefs || []).some((ref) => ref.role === 'main' && ref.artifactId)
+    (productById('product-e2e-rheem')?.assetRefs || []).some(
+      (ref) => ref.role === 'main' && ref.artifactId
+    )
   );
   await page.getByTestId('detail-image-input-RHM-E2E-PUBLISHED').setInputFiles(uploadFixturePath);
   await waitForCondition('detail image assetRef', () =>
-    (productById('product-e2e-rheem')?.assetRefs || []).some((ref) => ref.role === 'detail' && ref.artifactId)
+    (productById('product-e2e-rheem')?.assetRefs || []).some(
+      (ref) => ref.role === 'detail' && ref.artifactId
+    )
   );
 
   const refs = productById('product-e2e-rheem')?.assetRefs || [];
   const hasMain = refs.some((ref) => ref.role === 'main' && ref.artifactId);
   const hasDetail = refs.some((ref) => ref.role === 'detail' && ref.artifactId);
-  if (!hasMain || !hasDetail) throw new Error(`image upload did not persist assetRefs: ${JSON.stringify(refs)}`);
+  if (!hasMain || !hasDetail)
+    throw new Error(`image upload did not persist assetRefs: ${JSON.stringify(refs)}`);
 }
 
 async function assertPaginationSearchFilter(page) {
@@ -648,8 +714,15 @@ async function assertPaginationSearchFilter(page) {
   await assertNoDesktopHorizontalScroll(page);
   await page.getByLabel('Products per page').selectOption('10');
   await expectVisibleText(page, 'EH-E2E-PAGE-07', 'first paginated Everhot page');
-  await expectMissingText(page, 'EH-E2E-PAGE-22', 'first paginated Everhot page should not load all rows');
-  await page.locator('.brand-product-pagination').getByRole('button', { name: 'Next', exact: true }).click();
+  await expectMissingText(
+    page,
+    'EH-E2E-PAGE-22',
+    'first paginated Everhot page should not load all rows'
+  );
+  await page
+    .locator('.brand-product-pagination')
+    .getByRole('button', { name: 'Next', exact: true })
+    .click();
   await expectVisibleText(page, 'EH-E2E-PAGE-08', 'second paginated Everhot page');
   await page.locator('.brand-product-search input').fill('Published Smoke');
   await expectVisibleText(page, 'EH-E2E-PUBLISHED', 'keyword-filtered Everhot product');
@@ -679,8 +752,14 @@ async function main() {
   await routeEverhotRuntime(site, () => runtimeAvailable);
 
   try {
-    await expectConsoleBrandIsolation(control, 'rheem', 'RHM-E2E-PUBLISHED', ['EH-E2E-PUBLISHED', 'RUUD-E2E-PUBLISHED']);
-    await expectConsoleBrandIsolation(control, 'ruud', 'RUUD-E2E-PUBLISHED', ['EH-E2E-PUBLISHED', 'RHM-E2E-PUBLISHED']);
+    await expectConsoleBrandIsolation(control, 'rheem', 'RHM-E2E-PUBLISHED', [
+      'EH-E2E-PUBLISHED',
+      'RUUD-E2E-PUBLISHED',
+    ]);
+    await expectConsoleBrandIsolation(control, 'ruud', 'RUUD-E2E-PUBLISHED', [
+      'EH-E2E-PUBLISHED',
+      'RHM-E2E-PUBLISHED',
+    ]);
     await assertConsoleEditPersists(control);
     await assertImageUploadPersists(control);
     await assertPaginationSearchFilter(control);
@@ -697,29 +776,64 @@ async function main() {
     await assertShelfStatus(control, 'EH-E2E-PUBLISHED', '已下架');
 
     await site.goto(everhotUrl, { waitUntil: 'networkidle' });
-    await site.waitForFunction(() => window.EVERHOT_PRODUCTS_STATUS === 'runtime', null, { timeout: 15000 });
-    await expectVisibleText(site, 'Everhot Local 5011 Unlisted Smoke', 'newly published 5011 product');
-    await expectMissingText(site, 'Everhot Local 5011 Published Smoke', 'hidden formerly published 5011 product');
+    await site.waitForFunction(() => window.EVERHOT_PRODUCTS_STATUS === 'runtime', null, {
+      timeout: 15000,
+    });
+    await expectVisibleText(
+      site,
+      'Everhot Local 5011 Unlisted Smoke',
+      'newly published 5011 product'
+    );
+    await expectMissingText(
+      site,
+      'Everhot Local 5011 Published Smoke',
+      'hidden formerly published 5011 product'
+    );
     await expectMissingText(site, 'Everhot Local 5011 Hidden Smoke', 'hidden 5011 product');
-    await expectMissingText(site, 'Rheem Local 5011 Wrong Brand Smoke', 'Rheem wrong-brand 5011 product');
-    await expectMissingText(site, 'Ruud Local 5011 Wrong Brand Smoke', 'Ruud wrong-brand 5011 product');
+    await expectMissingText(
+      site,
+      'Rheem Local 5011 Wrong Brand Smoke',
+      'Rheem wrong-brand 5011 product'
+    );
+    await expectMissingText(
+      site,
+      'Ruud Local 5011 Wrong Brand Smoke',
+      'Ruud wrong-brand 5011 product'
+    );
 
     runtimeAvailable = false;
     await site.reload({ waitUntil: 'networkidle' });
-    await site.waitForFunction(() => window.EVERHOT_PRODUCTS_STATUS === 'fallback', null, { timeout: 15000 });
+    await site.waitForFunction(() => window.EVERHOT_PRODUCTS_STATUS === 'fallback', null, {
+      timeout: 15000,
+    });
 
     await browser.close();
 
     const created = mutationLog.createdAssignments[0];
-    const rheemWrite = mutationLog.catalogWrites.find((write) => write.productId === 'product-e2e-rheem');
-    const pagedRequest = mutationLog.catalogReadDetails.find((read) =>
-      read.brand === 'everhot' && read.page === 2 && read.pageSize === 10 && read.returned <= 10 && read.total > read.returned
+    const rheemWrite = mutationLog.catalogWrites.find(
+      (write) => write.productId === 'product-e2e-rheem'
     );
-    const keywordRequest = mutationLog.catalogReadDetails.find((read) =>
-      read.brand === 'everhot' && read.keyword === 'Published Smoke' && read.page === 1 && read.pageSize === 10
+    const pagedRequest = mutationLog.catalogReadDetails.find(
+      (read) =>
+        read.brand === 'everhot' &&
+        read.page === 2 &&
+        read.pageSize === 10 &&
+        read.returned <= 10 &&
+        read.total > read.returned
     );
-    const filteredRequest = mutationLog.catalogReadDetails.find((read) =>
-      read.brand === 'everhot' && read.status === 'inactive' && read.category === 'hot_water' && read.returned <= read.pageSize
+    const keywordRequest = mutationLog.catalogReadDetails.find(
+      (read) =>
+        read.brand === 'everhot' &&
+        read.keyword === 'Published Smoke' &&
+        read.page === 1 &&
+        read.pageSize === 10
+    );
+    const filteredRequest = mutationLog.catalogReadDetails.find(
+      (read) =>
+        read.brand === 'everhot' &&
+        read.status === 'inactive' &&
+        read.category === 'hot_water' &&
+        read.returned <= read.pageSize
     );
     const rheemRefs = productById('product-e2e-rheem')?.assetRefs || [];
     const passed =
@@ -758,7 +872,9 @@ async function main() {
         '5011 switched to static fallback when runtime and legacy endpoints were unavailable.',
       ],
       mutationLog,
-      publicProductsAfterOperatorActions: publicProductsPayload().data.items.map((item) => item.sku),
+      publicProductsAfterOperatorActions: publicProductsPayload().data.items.map(
+        (item) => item.sku
+      ),
     };
     await writeReport(report);
     stopLocalSurfaces(startedSurfaces);

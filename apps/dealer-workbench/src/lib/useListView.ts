@@ -31,7 +31,13 @@ export function useListView<T extends Record<string, any>>(rows: T[], config: Li
     let out = rows || [];
     const query = q.trim().toLowerCase();
     if (query && config.searchFields?.length) {
-      out = out.filter((r) => config.searchFields!.some((f) => String(getPath(r, f) ?? '').toLowerCase().includes(query)));
+      out = out.filter((r) =>
+        config.searchFields!.some((f) =>
+          String(getPath(r, f) ?? '')
+            .toLowerCase()
+            .includes(query)
+        )
+      );
     }
     for (const [k, v] of Object.entries(filterVals)) {
       if (v) out = out.filter((r) => String(getPath(r, k) ?? '') === v);
@@ -53,7 +59,19 @@ export function useListView<T extends Record<string, any>>(rows: T[], config: Li
     setPage(1);
   }
 
-  return { q, onSearch, filterVals, setFilter, page: clampedPage, setPage, pageCount, total, pageRows, filtered, pageSize };
+  return {
+    q,
+    onSearch,
+    filterVals,
+    setFilter,
+    page: clampedPage,
+    setPage,
+    pageCount,
+    total,
+    pageRows,
+    filtered,
+    pageSize,
+  };
 }
 
 /** 把当前(已筛选)行导出为 CSV 并下载。 */

@@ -37,7 +37,10 @@ const RESET = process.argv.includes('--reset');
   const journeys = Object.values(data.journeys || {});
   console.log('读取 JSON: ' + journeys.length + ' 个案例');
 
-  if (journeys.length === 0) { console.log('⚠ JSON 为空，退出'); process.exit(0); }
+  if (journeys.length === 0) {
+    console.log('⚠ JSON 为空，退出');
+    process.exit(0);
+  }
 
   console.log('连接 MongoDB ...');
   await mongoose.connect(MONGODB_URI, { serverSelectionTimeoutMS: 5000 });
@@ -48,11 +51,16 @@ const RESET = process.argv.includes('--reset');
     console.log('✓ 清空旧数据: ' + r.deletedCount + ' 条');
   }
 
-  let ok = 0, skip = 0, fail = 0;
+  let ok = 0,
+    skip = 0,
+    fail = 0;
   for (const j of journeys) {
     try {
       const exists = await Journey.findOne({ caseId: j.caseId }).lean();
-      if (exists) { skip++; continue; }
+      if (exists) {
+        skip++;
+        continue;
+      }
       await Journey.create(j);
       ok++;
     } catch (e) {
@@ -75,7 +83,7 @@ const RESET = process.argv.includes('--reset');
   await mongoose.disconnect();
   console.log('✓ 断开连接');
   process.exit(fail > 0 ? 1 : 0);
-})().catch(e => {
+})().catch((e) => {
   console.error('FATAL:', e);
   process.exit(1);
 });

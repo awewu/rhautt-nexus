@@ -8,17 +8,17 @@ const path = require('path');
 
 describe('E2E测试 - 页面文件验证', () => {
   const publicDir = path.join(__dirname, '../../public');
-  
+
   test('pain-diagnosis.html存在', () => {
     const filePath = path.join(publicDir, 'pain-diagnosis.html');
     expect(fs.existsSync(filePath)).toBe(true);
   });
-  
+
   test('designer.html存在', () => {
     const filePath = path.join(publicDir, 'designer.html');
     expect(fs.existsSync(filePath)).toBe(true);
   });
-  
+
   test('index.html存在', () => {
     const filePath = path.join(publicDir, 'index.html');
     expect(fs.existsSync(filePath)).toBe(true);

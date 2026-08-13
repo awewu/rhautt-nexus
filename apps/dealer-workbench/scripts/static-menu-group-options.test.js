@@ -35,11 +35,17 @@ test('Everhot menu group options mirror the local website navigation categories'
 
 test('menu group values are edited through option controls in the brand product editor', () => {
   assert.match(shell, /getBrandMenuGroupOptions\(brandCode, draft\.websiteMenuCategory\)/);
-  assert.match(shell, /getBrandMenuGroupOptions\(\s*String\(product\.raw\.brand \|\| brandCode\),\s*draft\.websiteMenuCategory/s);
+  assert.match(
+    shell,
+    /getBrandMenuGroupOptions\(\s*String\(product\.raw\.brand \|\| brandCode\),\s*draft\.websiteMenuCategory/s
+  );
   assert.match(shell, /<select[\s\S]+value=\{value\}[\s\S]+option\.label[\s\S]+<\/select>/);
 });
 
 test('unknown existing menu group values are preserved as selectable current values', () => {
-  assert.match(adapter, /if \(current && !values\.includes\(current\)\) values\.unshift\(current\);/);
+  assert.match(
+    adapter,
+    /if \(current && !values\.includes\(current\)\) values\.unshift\(current\);/
+  );
   assert.match(adapter, /\$\{value\}（当前值）/);
 });
