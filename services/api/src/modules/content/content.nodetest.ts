@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { makeFakeDataSource, InMemoryRepository } from '../common/testing/fake-datasource';
-import { ProductEntity } from '../product-catalog/product-catalog.entity';
+import { productFactEntity } from '../product-catalog/product-fact-read';
 import { ProductSellingPointEntity } from '../product-catalog/product-mgmt.entity';
 import { FileArtifactEntity } from '../file-artifact/file-artifact.entity';
 import { GrowthContentAssetEntity } from '../growth/growth.entities';
@@ -40,7 +40,7 @@ function fixture(rows: any[] = []) {
   const { ds } = makeFakeDataSource([
     [ContentAssetEntity, repo],
     [ContentPublishTaskEntity, taskRepo],
-    [ProductEntity, productRepo],
+    [productFactEntity, productRepo],
     [ProductSellingPointEntity, sellingPointRepo],
     [FileArtifactEntity, fileRepo],
     [GrowthContentAssetEntity, contentAssetRepo],

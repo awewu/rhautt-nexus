@@ -5,7 +5,7 @@ import { withRlsTransaction } from '../common/rls';
 import { writeAudit } from '../common/audit';
 import type { JwtPayload } from '../auth/auth.service';
 import { ContentAssetEntity, ContentPublishTaskEntity } from './content.entity';
-import { ProductEntity } from '../product-catalog/product-catalog.entity';
+import { productEnabled, productFactReady, productFactRepo } from '../product-catalog/product-fact-read';
 import { ProductSellingPointEntity } from '../product-catalog/product-mgmt.entity';
 import { FileArtifactEntity } from '../file-artifact/file-artifact.entity';
 import { GrowthContentAssetEntity } from '../growth/growth.entities';
@@ -27,19 +27,6 @@ function text(value: unknown) {
 
 function factRefKey(ref: ContentFactRef) {
   return `${ref.type}:${ref.id}`;
-}
-
-function productFactReady(product: ProductEntity) {
-  return Boolean(product.factsVerifiedAt)
-    || product.dataReadinessStatus === 'fact_verified'
-    || product.dataReadinessStatus === 'ready';
-}
-
-function productEnabled(product: ProductEntity) {
-  return product.status === 'active'
-    && product.recordStatus === 'active'
-    && product.published === true
-    && !product.deletedAt;
 }
 
 function artifactContentUrl(id?: string | null) {
@@ -114,7 +101,7 @@ export class ContentService {
       const needle = text(q.query).toLowerCase();
       const brandCode = text(q.brandCode).toLowerCase();
       const limit = Math.min(Math.max(Number(q.limit) || 24, 1), 50);
-      const products = await em.getRepository(ProductEntity).find({
+      const products = await productFactRepo(em).find({
         where: [{ tenantId: actor.tenantId }, { tenantId: 'rhautt_shared' }],
         order: { updatedAt: 'DESC' as const },
         take: limit,
@@ -194,7 +181,7 @@ export class ContentService {
       const limit = Math.min(Math.max(Number(q.limit) || 18, 1), 50);
       const matches = (...values: unknown[]) => !needle || values.some((value) => text(value).toLowerCase().includes(needle));
 
-      const products = (await em.getRepository(ProductEntity).find({
+      const products = (await productFactRepo(em).find({
         where: { tenantId: productTenantId },
         order: { updatedAt: 'DESC' as const },
         take: limit * 2,
@@ -429,7 +416,7 @@ export class ContentService {
     });
     const unique = Array.from(new Map(normalized.map((ref) => [factRefKey(ref), ref])).values());
 
-    const productRepo = em.getRepository(ProductEntity);
+    const productRepo = productFactRepo(em);
     const sellingPointRepo = em.getRepository(ProductSellingPointEntity);
     const fileRepo = em.getRepository(FileArtifactEntity);
     const verified: ContentFactRef[] = [];
