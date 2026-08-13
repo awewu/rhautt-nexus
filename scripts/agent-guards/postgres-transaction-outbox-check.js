@@ -226,6 +226,10 @@ function lifecycleHandoffWrite(tx, scope, aggregateId) {
 }
 
 function inspect() {
+  // 先写回本轮 evidence 记录再读取校验：evidence 是本门禁自身的运行记录，
+  // 不能依赖"上一次运行的残留产物"——否则干净检出的首次运行必然红一次（先读后写顺序依赖）。
+  recordEvidence();
+
   for (const file of [MIGRATION_PATH, RELEASE_EVIDENCE]) {
     if (!exists(file)) failures.push(`missing database transaction evidence file: ${file}`);
   }
@@ -359,11 +363,7 @@ function renderMarkdown(report) {
   return lines.join('\n');
 }
 
-const report = inspect();
-
-if (report) {
-  writeJson(REPORT_JSON, report);
-  fs.writeFileSync(fullPath(REPORT_MD), renderMarkdown(report));
+function recordEvidence() {
   updateReleaseEvidence('postgresTransactionOutbox', {
     command: 'npm run guard:postgres-transaction-outbox',
     status: 'target-transaction-simulated',
@@ -381,6 +381,13 @@ if (report) {
     finalLaunchDatabaseProof: false,
     note: 'Local deterministic simulation for target PostgreSQL transaction and outbox atomicity. This is not staging-applied PostgreSQL transaction proof.'
   });
+}
+
+const report = inspect();
+
+if (report) {
+  writeJson(REPORT_JSON, report);
+  fs.writeFileSync(fullPath(REPORT_MD), renderMarkdown(report));
 }
 
 console.log(`PostgreSQL Transaction + Outbox Check: failures = ${failures.length}`);
