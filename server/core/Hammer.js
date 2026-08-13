@@ -771,9 +771,9 @@ class Hammer extends EventEmitter {
   // ═════════════════════════════════════════════════════════════════
 
   async v_L1_S01_CoreEngines() {
+    // SystemCoordinationEngine / EconetEngine 已随迁移退役（server/core 中不存在），不再要求。
     const requiredEngines = [
       'DOASComplianceEngine.js',
-      'SystemCoordinationEngine.js',
       'ReheatModuleEngine.js',
       'WaterSystemEngine.js',
       'FreshAirProEngine.js',
@@ -783,7 +783,6 @@ class Hammer extends EventEmitter {
       'LocationService.js',
       'QuoteEngine.js',
       'ReportEngine.js',
-      'EconetEngine.js',
       'AIMatchingEngine.js',
     ];
 
@@ -816,16 +815,18 @@ class Hammer extends EventEmitter {
   }
 
   async v_L1_S02_DirectoryStructure() {
+    // 根级 public/config 已随迁移退役：静态资源在 apps/*/public，配置在 server/config 与 services/api。
     const requiredDirs = [
       'server/core',
       'server/api',
-      'public',
+      'server/modules',
+      'services/api',
+      'apps',
       'database',
       'docs',
       'middleware',
       'scripts',
       'test',
-      'config',
     ];
 
     const missing = requiredDirs.filter(
@@ -1054,13 +1055,14 @@ class Hammer extends EventEmitter {
   }
 
   async v_L4_C02_Docker() {
-    const dockerfile = path.join(this.config.basePath, 'Dockerfile');
+    // 本仓 Dockerfile 命名为 Dockerfile.backend（前端为静态站点，另行构建）。
+    const dockerfile = path.join(this.config.basePath, 'Dockerfile.backend');
     const dockerCompose = path.join(this.config.basePath, 'docker-compose.yml');
 
     const issues = [];
 
     if (!fs.existsSync(dockerfile)) {
-      issues.push('Dockerfile 不存在');
+      issues.push('Dockerfile.backend 不存在');
     }
     if (!fs.existsSync(dockerCompose)) {
       issues.push('docker-compose.yml 不存在');
@@ -1173,24 +1175,20 @@ class Hammer extends EventEmitter {
   // ═════════════════════════════════════════════════════════════════
 
   async v_L6_F01_APIRoutes() {
-    const serverFile = path.join(this.config.basePath, 'server-production.js');
-    const content = fs.readFileSync(serverFile, 'utf8');
+    // /api/agent/* 已退役；健康检查现状：legacy /api/health + NestJS /api/v2/health（routeOwnership 为权威账本）。
+    const ownershipFile = path.join(this.config.basePath, 'server', 'modules', 'routeOwnership.js');
+    const content = fs.readFileSync(ownershipFile, 'utf8');
 
-    const requiredRoutes = [
-      '/api/agent/execute',
-      '/api/agent/status',
-      '/api/agent/health',
-      '/api/system/health',
-    ];
+    const requiredRoutes = ['/api/health', '/api/v2/health'];
 
-    const missing = requiredRoutes.filter((route) => !content.includes(route));
+    const missing = requiredRoutes.filter((route) => !content.includes(`'${route}'`));
 
     if (missing.length > 0) {
       return {
         success: false,
         severity: 'CRITICAL',
         message: `缺失 API 路由: ${missing.join(', ')}`,
-        fix: '在 server-production.js 中注册路由',
+        fix: '在 server/modules/routeOwnership.js 中登记健康检查路由归属',
       };
     }
 
@@ -1198,12 +1196,13 @@ class Hammer extends EventEmitter {
   }
 
   async v_L6_F02_EngineInstances() {
-    const serverFile = path.join(this.config.basePath, 'server-production.js');
-    const content = fs.readFileSync(serverFile, 'utf8');
+    // 引擎实例化已从 server-production.js 迁到 engineRegistry 的惰性注册表。
+    const registryFile = path.join(this.config.basePath, 'server', 'modules', 'engineRegistry.js');
+    const content = fs.readFileSync(registryFile, 'utf8');
 
     const engineChecks = [
-      { name: 'DOASComplianceEngine', patterns: ['new DOASComplianceEngine'] },
-      { name: 'CacheEngine', patterns: ['new CacheEngine'] },
+      { name: 'doasCompliance', patterns: ["lazyClassEngine('doasCompliance'"] },
+      { name: 'calculationCache', patterns: ["lazyClassEngine('calculationCache'"] },
     ];
 
     const missing = [];
@@ -1217,7 +1216,7 @@ class Hammer extends EventEmitter {
         success: false,
         severity: 'HIGH',
         message: `引擎未实例化: ${missing.join(', ')}`,
-        fix: '在引擎注册表中添加实例化代码',
+        fix: '在 server/modules/engineRegistry.js 惰性注册表中登记引擎',
       };
     }
 
@@ -1225,7 +1224,13 @@ class Hammer extends EventEmitter {
   }
 
   async v_L6_F03_Middleware() {
-    const serverFile = path.join(this.config.basePath, 'server-production.js');
+    // 中间件装配已从 server-production.js 迁到 productionMiddleware.js。
+    const serverFile = path.join(
+      this.config.basePath,
+      'server',
+      'modules',
+      'productionMiddleware.js'
+    );
     const content = fs.readFileSync(serverFile, 'utf8');
 
     const checks = [
@@ -1350,7 +1355,13 @@ class Hammer extends EventEmitter {
   }
 
   async v_L9_X03_CORS() {
-    const serverFile = path.join(this.config.basePath, 'server-production.js');
+    // CORS 配置在 productionMiddleware.js（createCorsOptions + app.use(cors(...))）。
+    const serverFile = path.join(
+      this.config.basePath,
+      'server',
+      'modules',
+      'productionMiddleware.js'
+    );
     const content = fs.readFileSync(serverFile, 'utf8');
 
     if (!content.includes('cors(')) {

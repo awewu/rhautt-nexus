@@ -18,7 +18,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          # 根 package.json engines 要求 node>=20.9（Next.js 16 同样要求）。
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -45,7 +46,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          # 根 package.json engines 要求 node>=20.9（Next.js 16 同样要求）。
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install dependencies
