@@ -120,13 +120,13 @@ jobs:
           node -e "const e=require('./server/core/OneClickCalculationEngine');const c=new e();console.log('净水:',c.calculateWater({area:120,people:4,bathrooms:2,kitchens:1}))"
 
           echo "💨 新风系统验证"
-          node -e "const e=require('./server/core/OneClickCalculationEngine');const c=new e();console.log('新风:',c.calculateFreshAir({rooms:[{name:'主卧',type:'卧室',area:20,people:2},{name:'客厅',type:'客厅',area:30,people:4}],buildingType:'住宅',totalArea:120}))"
+          node -e "const e=require('./server/core/OneClickCalculationEngine');const c=new e();console.log('新风:',c.calculateFreshAir({rooms:[{name:'主卧',type:'卧室',area:20,people:2},{name:'客厅',type:'客厅',area:30,people:4}],area:120,climateZone:'夏热冬冷'}))"
 
           echo "❄️ 制冷系统验证"
-          node -e "const e=require('./server/core/OneClickCalculationEngine');const c=new e();console.log('制冷:',c.calculateCooling({rooms:[{name:'主卧',area:20,people:2},{name:'客厅',area:30,people:4}],outdoorTemp:35,indoorTemp:24,orientation:'南北'}))"
+          node -e "const e=require('./server/core/OneClickCalculationEngine');const c=new e();console.log('制冷:',c.calculateCooling({rooms:[{name:'主卧',area:20,people:2},{name:'客厅',area:30,people:4}],area:120,climateZone:'夏热冬冷',city:'上海'}))"
 
           echo "🌡️ DOAS系统验证"
-          node -e "const e=require('./server/core/OneClickCalculationEngine');const c=new e();console.log('DOAS:',c.calculateDOAS({freshAirFlow:300,outdoorTemp:35,outdoorHumidity:60,indoorTemp:24,indoorHumidity:50,radiantSurfaceTemp:18,hasRadiantSystem:true}))"
+          node -e "const e=require('./server/core/OneClickCalculationEngine');const c=new e();console.log('DOAS:',c.calculateDOAS({area:120,rooms:[{name:'主卧',area:20,people:2},{name:'客厅',area:30,people:4}],climateZone:'夏热冬冷',hasRadiant:true}))"
 
           echo "🔥 供暖系统验证"
           node -e "const e=require('./server/core/OneClickCalculationEngine');const c=new e();console.log('供暖:',c.calculateHeating({area:120,climateZone:'夏热冬冷',city:'北京',rooms:[{name:'主卧',area:20}]}))"

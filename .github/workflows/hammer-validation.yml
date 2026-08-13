@@ -28,6 +28,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# PR Comment 步骤需要写权限；仓库默认 token 为只读时会 403。
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   # ═══════════════════════════════════════════════════════════════
   # Phase 1: Fast Validation (L1-L3) - Structure, Syntax, Dependency
@@ -171,6 +177,8 @@ jobs:
       - name: 📝 PR Comment
         if: github.event_name == 'pull_request' && always()
         uses: actions/github-script@v7
+        # 评论仅为便利报告，token 权限不足时不应阻断质量门禁。
+        continue-on-error: true
         with:
           script: |
             const fs = require('fs');
