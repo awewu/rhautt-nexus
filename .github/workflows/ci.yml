@@ -24,6 +24,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - name: decision.v1 contract sync gate
+        run: node scripts/check-decision-contract-sync.mjs
       - run: npm run lint --if-present
       - run: npm test --if-present
       - run: npm run test:production-readiness

@@ -16,3 +16,6 @@ apps/*/public/tech/
 apps/*/public/packages/tokens/
 # 站点 public/ 为生成器/GEO 注入产物：prettier 改写会触发 everhot-static-gates 的无漂移门禁
 apps/*/public/
+
+# decision.v1 vendored 契约：必须与 hermes-tandem 权威副本逐字节一致，禁止格式化器改写
+services/api/src/contracts/decision/decision.v1.contract.ts
