@@ -43,6 +43,13 @@ interface HermesSseResult {
   tokensCost: number;
 }
 
+/** Tandem 统一治理网关 (POST /api/gateway/ai-chat) 响应（与 StratOS tandem-gateway 客户端同姿势）。 */
+interface TandemGatewayResult {
+  text: string;
+  checkId?: string;
+  warnings?: string[];
+}
+
 // 《广告法》第九条等：绝对化用语与虚假承诺（最小基线词库；生产由 compliance 域集中维护）。
 const FORBIDDEN_TERMS = [
   '国家级',
@@ -187,7 +194,32 @@ export class AiGatewayService {
     };
   }
 
+  /**
+   * 中枢 AI 调用阶梯（对齐 contracts/ai/tandem-governed-chat.contract.md）：
+   *   1. Tandem 统一治理网关 POST /api/gateway/ai-chat（TANDEM_AI_GATEWAY_URL/TOKEN，收口目标）；
+   *   2. 过渡回退：Hermes /api/llm-stream（HERMES_CENTER_AI_*，待治理网关全量后移除）；
+   *   3. 兜底：确定性草稿（仅 requireRealProvider=false）。
+   * 三条路径产出一律本地 scanCompliance 打标（双保险，不依赖上游治理闸）。
+   */
   private async generateHermesDraft(req: AiDraftRequest): Promise<AiDraftResult> {
+    if (this.tandemGatewayConfigured()) {
+      try {
+        const governed = await this.callTandemGovernedChat(req);
+        return {
+          draft: governed.text,
+          model: 'tandem-governed-chat',
+          // 网关响应暂不透传 usage，成本在 Tandem 侧集中计量（auditId/checkId 可溯）。
+          tokensCost: 0,
+          complianceFlags: this.scanCompliance(governed.text, req.bannedTerms ?? []),
+          provider: 'hermes-center-ai',
+        };
+      } catch (err: unknown) {
+        this.logger.warn(
+          `Tandem governed gateway failed, falling back to legacy llm-stream: ${String(err)}`
+        );
+      }
+    }
+
     try {
       const { text: draft, tokensCost } = await this.callHermesCenterAi(req);
       const complianceFlags = this.scanCompliance(draft, req.bannedTerms ?? []);
@@ -216,6 +248,65 @@ export class AiGatewayService {
         provider: 'stub',
       };
     }
+  }
+
+  private tandemGatewayConfigured(): boolean {
+    return Boolean(
+      String(process.env.TANDEM_AI_GATEWAY_URL || '').trim() &&
+        String(process.env.TANDEM_AI_GATEWAY_TOKEN || '').trim()
+    );
+  }
+
+  /**
+   * Tandem 统一治理网关调用（输入闸 → LLM router → 输出闸 → 审计，收口路径）。
+   * 网关禁止调用方注入 system 角色（治理层统一注入），system 提示词并入首条 user 消息。
+   */
+  private async callTandemGovernedChat(req: AiDraftRequest): Promise<TandemGatewayResult> {
+    const baseUrl = String(process.env.TANDEM_AI_GATEWAY_URL || '')
+      .trim()
+      .replace(/\/+$/, '');
+    const token = String(process.env.TANDEM_AI_GATEWAY_TOKEN || '').trim();
+    const timeoutMs = Math.max(Number(process.env.TANDEM_AI_GATEWAY_TIMEOUT_MS) || 60000, 5000);
+
+    const response = await this.withTimeout(
+      fetch(`${baseUrl}/api/gateway/ai-chat`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          intent: `gtm.copy.${String(req.channel || 'generic').trim() || 'generic'}`,
+          scenario: 'high_frequency',
+          temperature: 0.72,
+          messages: [
+            {
+              role: 'user',
+              content: `[指令]\n${this.hermesCopySystemPrompt(req)}\n\n[输入]\n${this.hermesCopyUserPrompt(req)}`,
+            },
+          ],
+        }),
+      }),
+      timeoutMs,
+      'Tandem governed gateway request timed out'
+    );
+
+    const data = (await response.json().catch(() => null)) as {
+      ok?: boolean;
+      answer?: string;
+      error?: string;
+      checkId?: string;
+      warnings?: string[];
+    } | null;
+
+    if (!response.ok || !data?.ok) {
+      throw new Error(
+        `Tandem gateway returned HTTP ${response.status}: ${data?.error || response.statusText}`
+      );
+    }
+    const text = String(data.answer || '').trim();
+    if (!text) throw new Error('Tandem gateway returned empty answer');
+    return { text, checkId: data.checkId, warnings: data.warnings };
   }
 
   private async callHermesCenterAi(req: AiDraftRequest): Promise<HermesSseResult> {
