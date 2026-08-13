@@ -15,7 +15,10 @@ function readSpec() {
 }
 
 function specHash() {
-  return crypto.createHash('sha256').update(fs.readFileSync(SPEC_PATH)).digest('hex');
+  // 先归一化行尾再取哈希：Windows autocrlf 检出为 CRLF、Linux CI 检出为 LF，
+  // 若直接对字节取哈希会导致同一份 spec 在两类环境产生不同指纹。
+  const normalized = fs.readFileSync(SPEC_PATH, 'utf8').replace(/\r\n/g, '\n');
+  return crypto.createHash('sha256').update(normalized).digest('hex');
 }
 
 function collectOperations(spec) {
