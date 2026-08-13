@@ -514,9 +514,9 @@
         window.scrollTo({top:0,behavior:'smooth'});
       });
       document.body.appendChild(backTop);
-      function updateBackTop(){
+      const updateBackTop=function(){
         backTop.classList.toggle('is-visible',window.scrollY>360);
-      }
+      };
       updateBackTop();
       window.addEventListener('scroll',updateBackTop,{passive:true});
     }

@@ -602,7 +602,6 @@ export default function GrowthMaterialsTable() {
           </div>
           {aiPreview ? (
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={aiPreview} alt="AI 生成预览" style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--surface-3)' }} />
               <div style={{ fontSize: 13, color: 'var(--success)' }}>
                 已生成并入库，可在下方物料列表查看。

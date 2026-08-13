@@ -5,7 +5,7 @@ import { ContentController } from './content.controller';
 import { ContentService } from './content.service';
 import { ContentAssetEntity, ContentPublishTaskEntity } from './content.entity';
 import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smoke';
-import { ProductEntity } from '../product-catalog/product-catalog.entity';
+import { productFactEntity } from '../product-catalog/product-fact-read';
 import { ProductSellingPointEntity } from '../product-catalog/product-mgmt.entity';
 import { FileArtifactEntity } from '../file-artifact/file-artifact.entity';
 import { GrowthContentAssetEntity, GrowthMarketingMaterialEntity } from '../growth/growth.entities';
@@ -13,7 +13,7 @@ import { GrowthContentAssetEntity, GrowthMarketingMaterialEntity } from '../grow
 const CONTENT_REPOSITORIES = [
   ContentAssetEntity,
   ContentPublishTaskEntity,
-  ProductEntity,
+  productFactEntity,
   ProductSellingPointEntity,
   FileArtifactEntity,
   GrowthContentAssetEntity,
@@ -31,7 +31,7 @@ const CONTENT_REPOSITORIES = [
     ...(TARGET_API_BOOT_SMOKE ? [
       bootSmokeRepositoryProvider(ContentAssetEntity),
       bootSmokeRepositoryProvider(ContentPublishTaskEntity),
-      bootSmokeRepositoryProvider(ProductEntity),
+      bootSmokeRepositoryProvider(productFactEntity),
       bootSmokeRepositoryProvider(ProductSellingPointEntity),
       bootSmokeRepositoryProvider(FileArtifactEntity),
       bootSmokeRepositoryProvider(GrowthContentAssetEntity),

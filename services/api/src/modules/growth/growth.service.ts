@@ -748,7 +748,6 @@ export class GrowthGeoService {
       this.geoActionsRegistered = true;
       return;
     }
-    const self = this;
     const actions: GeoActionType[] = [
       {
         id: 'geo.generate-content',
@@ -756,7 +755,7 @@ export class GrowthGeoService {
         label: '生成 GEO 优化内容',
         zone: 'yellow', // 产出对外内容 → AI 代行需人工核准（对齐宪章 §12 draft→approved）
         validate: (input: any) => (input?.question ? { ok: true, errors: [] } : { ok: false, errors: ['question required'], code: 'invalid' }),
-        execute: (input: any, ctx: GeoActionContext) => self.generateOptimizationContent(self.actorToJwt(ctx), input),
+        execute: (input: any, ctx: GeoActionContext) => this.generateOptimizationContent(this.actorToJwt(ctx), input),
       },
       {
         id: 'geo.run-experiment',
@@ -764,7 +763,7 @@ export class GrowthGeoService {
         label: '开启 GEO 闭环实验（基线探测）',
         zone: 'green', // 探测只读外部引擎，不改对外内容 → 可自动
         validate: (input: any) => (input?.questionId || input?.question ? { ok: true, errors: [] } : { ok: false, errors: ['question or questionId required'], code: 'invalid' }),
-        execute: (input: any, ctx: GeoActionContext) => self.startGeoExperiment(self.actorToJwt(ctx), input),
+        execute: (input: any, ctx: GeoActionContext) => this.startGeoExperiment(this.actorToJwt(ctx), input),
       },
       {
         id: 'geo.verify-lift',
@@ -772,7 +771,7 @@ export class GrowthGeoService {
         label: '复投验证 lift',
         zone: 'green', // 复投探测只读，验证效果，不改内容 → 可自动
         validate: (input: any) => (input?.id ? { ok: true, errors: [] } : { ok: false, errors: ['experiment id required'], code: 'invalid' }),
-        execute: (input: any, ctx: GeoActionContext) => self.verifyGeoExperiment(self.actorToJwt(ctx), input.id, input),
+        execute: (input: any, ctx: GeoActionContext) => this.verifyGeoExperiment(this.actorToJwt(ctx), input.id, input),
       },
     ];
     for (const a of actions) geoActionRegistry.register(a);

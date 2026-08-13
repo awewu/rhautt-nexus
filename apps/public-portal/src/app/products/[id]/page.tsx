@@ -41,7 +41,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         <div className="rh-container rh-two-col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56, padding: '56px 32px', alignItems: 'center' }}>
           <div style={{ background: product.bg, borderRadius: 'var(--rh-r-lg)', minHeight: 360, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--rh-border)', overflow: 'hidden' }}>
             {product.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img src={product.image} alt={product.name} style={{ width: '100%', height: 360, objectFit: 'contain' }} />
             ) : (
               <div className="rh-bolt-frame" style={{ width: 110, height: 120, fontSize: 22 }}>{product.code}</div>

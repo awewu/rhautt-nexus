@@ -6897,7 +6897,6 @@ function ProductCatalogImagePreview({ src, alt }: { src: string; alt: string }) 
           cursor: 'zoom-in',
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={src}
           alt={alt}
@@ -6979,7 +6978,6 @@ function ProductCatalogImageLightbox({
             图片加载失败
           </div>
         ) : (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={src}
             alt={alt}
