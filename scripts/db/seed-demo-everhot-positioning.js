@@ -23,52 +23,76 @@ const TENANT = process.env.EVERHOT_TENANT_ID || 'e5e40000-0000-4000-8000-0000000
 // sku → positioning（受控标签取值须与 product-taxonomy.ts 词表一致）
 const POSITIONING = {
   'everflow-z16': {
-    targetSegments: ['home'], channels: ['dealer', 'ecommerce'],
-    userPersonas: ['essential', 'new_build'], markets: ['tier1_city', 'south_humid'],
+    targetSegments: ['home'],
+    channels: ['dealer', 'ecommerce'],
+    userPersonas: ['essential', 'new_build'],
+    markets: ['tier1_city', 'south_humid'],
     valueProposition: '零冷水即开即热，告别等待与忽冷忽热',
-    painPoints: ['热水不稳定', '忽冷忽热', '制热慢'], scenarios: ['生活热水', '即热淋浴'],
+    painPoints: ['热水不稳定', '忽冷忽热', '制热慢'],
+    scenarios: ['生活热水', '即热淋浴'],
   },
   'everelec-80': {
-    targetSegments: ['home'], channels: ['dealer', 'ecommerce'],
-    userPersonas: ['essential', 'retrofit'], markets: ['south_humid'],
+    targetSegments: ['home'],
+    channels: ['dealer', 'ecommerce'],
+    userPersonas: ['essential', 'retrofit'],
+    markets: ['south_humid'],
     valueProposition: '速热大水量，小户型友好',
-    painPoints: ['热水不稳定', '制热慢'], scenarios: ['生活热水'],
+    painPoints: ['热水不稳定', '制热慢'],
+    scenarios: ['生活热水'],
   },
   'everduo-x12': {
-    targetSegments: ['home'], channels: ['dealer'],
-    userPersonas: ['retrofit', 'essential'], markets: ['north_heating'],
+    targetSegments: ['home'],
+    channels: ['dealer'],
+    userPersonas: ['retrofit', 'essential'],
+    markets: ['north_heating'],
     valueProposition: '采暖+热水一体，省空间省心',
-    painPoints: ['能耗高', '热水不稳定', '采暖不均'], scenarios: ['采暖', '生活热水'],
+    painPoints: ['能耗高', '热水不稳定', '采暖不均'],
+    scenarios: ['采暖', '生活热水'],
   },
   'everwarm-c26': {
-    targetSegments: ['home', 'villa'], channels: ['dealer'],
-    userPersonas: ['premium_upgrade', 'retrofit'], markets: ['north_heating'],
+    targetSegments: ['home', 'villa'],
+    channels: ['dealer'],
+    userPersonas: ['premium_upgrade', 'retrofit'],
+    markets: ['north_heating'],
     valueProposition: '冷凝技术高效采暖+生活热水，节能又舒适',
-    painPoints: ['采暖不均', '能耗高', '忽冷忽热'], scenarios: ['冬季采暖', '生活热水'],
+    painPoints: ['采暖不均', '能耗高', '忽冷忽热'],
+    scenarios: ['冬季采暖', '生活热水'],
   },
-  'everfloor': {
-    targetSegments: ['villa', 'home'], channels: ['dealer', 'project'],
-    userPersonas: ['premium_upgrade', 'new_build'], markets: ['north_heating', 'east_villa'],
+  everfloor: {
+    targetSegments: ['villa', 'home'],
+    channels: ['dealer', 'project'],
+    userPersonas: ['premium_upgrade', 'new_build'],
+    markets: ['north_heating', 'east_villa'],
     valueProposition: '地暖均匀采暖，脚暖头凉更舒适',
-    painPoints: ['采暖不均', '制热慢'], scenarios: ['冬季采暖'],
+    painPoints: ['采暖不均', '制热慢'],
+    scenarios: ['冬季采暖'],
   },
-  'evergeo': {
-    targetSegments: ['villa'], channels: ['dealer', 'project'],
-    userPersonas: ['premium_upgrade', 'new_build'], markets: ['east_villa', 'north_heating'],
+  evergeo: {
+    targetSegments: ['villa'],
+    channels: ['dealer', 'project'],
+    userPersonas: ['premium_upgrade', 'new_build'],
+    markets: ['east_villa', 'north_heating'],
     valueProposition: '地源热泵超低能耗，冬暖夏凉全年恒温',
-    painPoints: ['能耗高', '采暖不均', '噪音大'], scenarios: ['别墅冷暖', '全年恒温'],
+    painPoints: ['能耗高', '采暖不均', '噪音大'],
+    scenarios: ['别墅冷暖', '全年恒温'],
   },
   'evercool-multi': {
-    targetSegments: ['home', 'villa'], channels: ['dealer'],
-    userPersonas: ['premium_upgrade'], markets: ['south_humid', 'tier1_city'],
+    targetSegments: ['home', 'villa'],
+    channels: ['dealer'],
+    userPersonas: ['premium_upgrade'],
+    markets: ['south_humid', 'tier1_city'],
     valueProposition: '全屋恒温静音，舒适不干燥',
-    painPoints: ['噪音大', '温度不均', '能耗高'], scenarios: ['夏季制冷', '冬季制热'],
+    painPoints: ['噪音大', '温度不均', '能耗高'],
+    scenarios: ['夏季制冷', '冬季制热'],
   },
-  'everfresh': {
-    targetSegments: ['home', 'villa'], channels: ['dealer'],
-    userPersonas: ['premium_upgrade'], markets: ['tier1_city'],
+  everfresh: {
+    targetSegments: ['home', 'villa'],
+    channels: ['dealer'],
+    userPersonas: ['premium_upgrade'],
+    markets: ['tier1_city'],
     valueProposition: '24小时洁净新风，PM2.5 高效过滤',
-    painPoints: ['空气差', '空气干燥', '异味'], scenarios: ['室内空气净化'],
+    painPoints: ['空气差', '空气干燥', '异味'],
+    scenarios: ['室内空气净化'],
   },
 };
 
@@ -83,7 +107,9 @@ async function run() {
   await client.connect();
   await client.query('SET search_path TO rhautt_nexus, public');
 
-  let filled = 0, skipped = 0, missing = 0;
+  let filled = 0,
+    skipped = 0,
+    missing = 0;
   for (const [sku, positioning] of Object.entries(POSITIONING)) {
     // 只填 positioning 为空的行：不覆盖 D2 已录入定位（幂等 + 写主纪律）
     const res = await client.query(
@@ -94,17 +120,30 @@ async function run() {
        RETURNING sku`,
       [TENANT, sku, JSON.stringify(positioning)]
     );
-    if (res.rowCount > 0) { filled++; continue; }
+    if (res.rowCount > 0) {
+      filled++;
+      continue;
+    }
 
     // 区分「已有定位（跳过）」与「产品不存在（缺失）」
     const { rows } = await client.query(
-      'SELECT 1 FROM rhautt_nexus.products WHERE tenant_id=$1 AND sku=$2', [TENANT, sku]
+      'SELECT 1 FROM rhautt_nexus.products WHERE tenant_id=$1 AND sku=$2',
+      [TENANT, sku]
     );
-    if (rows.length) skipped++; else { missing++; console.warn(`  ⚠ 未找到产品 sku=${sku}（先跑品牌同步 seed）`); }
+    if (rows.length) skipped++;
+    else {
+      missing++;
+      console.warn(`  ⚠ 未找到产品 sku=${sku}（先跑品牌同步 seed）`);
+    }
   }
 
-  console.log(`✅ everhot positioning：填充 ${filled} · 已有跳过 ${skipped} · 缺失 ${missing}（tenant=${TENANT}）`);
+  console.log(
+    `✅ everhot positioning：填充 ${filled} · 已有跳过 ${skipped} · 缺失 ${missing}（tenant=${TENANT}）`
+  );
   await client.end();
 }
 
-run().catch((e) => { console.error('❌', e.message); process.exit(1); });
+run().catch((e) => {
+  console.error('❌', e.message);
+  process.exit(1);
+});

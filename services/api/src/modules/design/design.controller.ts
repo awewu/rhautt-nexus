@@ -1,5 +1,14 @@
 import {
-  Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { DesignService } from './design.service';
@@ -15,7 +24,16 @@ export class DesignController {
   }
 
   @Post('projects')
-  createProject(@Req() r: any, @Body() body: { name: string; customerId?: string; opportunityId?: string; meta?: Record<string, unknown> }) {
+  createProject(
+    @Req() r: any,
+    @Body()
+    body: {
+      name: string;
+      customerId?: string;
+      opportunityId?: string;
+      meta?: Record<string, unknown>;
+    }
+  ) {
     return this.svc.createProject(r.user, body);
   }
 
@@ -25,7 +43,11 @@ export class DesignController {
   }
 
   @Patch('projects/:projectId')
-  updateProject(@Req() r: any, @Param('projectId') projectId: string, @Body() patch: Record<string, unknown>) {
+  updateProject(
+    @Req() r: any,
+    @Param('projectId') projectId: string,
+    @Body() patch: Record<string, unknown>
+  ) {
     return this.svc.updateProject(r.user, projectId, patch);
   }
 
@@ -35,7 +57,11 @@ export class DesignController {
   }
 
   @Post('calc/:projectId')
-  runCalc(@Req() r: any, @Param('projectId') projectId: string, @Body() input: Record<string, unknown>) {
+  runCalc(
+    @Req() r: any,
+    @Param('projectId') projectId: string,
+    @Body() input: Record<string, unknown>
+  ) {
     return this.svc.runCalc(r.user, projectId, input);
   }
 
@@ -45,7 +71,11 @@ export class DesignController {
   }
 
   @Post('floor-plans/:projectId')
-  saveFloorPlan(@Req() r: any, @Param('projectId') projectId: string, @Body() body: Record<string, unknown>) {
+  saveFloorPlan(
+    @Req() r: any,
+    @Param('projectId') projectId: string,
+    @Body() body: Record<string, unknown>
+  ) {
     return this.svc.saveFloorPlan(r.user, projectId, body);
   }
 
@@ -55,12 +85,27 @@ export class DesignController {
   }
 
   @Post('releases')
-  createRelease(@Req() r: any, @Body() body: { projectId: string; calcSnapshot: Record<string, unknown>; gatePass?: boolean; gateBlocked?: boolean; disclaimerAccepted?: boolean }) {
+  createRelease(
+    @Req() r: any,
+    @Body()
+    body: {
+      projectId: string;
+      calcSnapshot: Record<string, unknown>;
+      gatePass?: boolean;
+      gateBlocked?: boolean;
+      disclaimerAccepted?: boolean;
+    }
+  ) {
     return this.svc.createRelease(r.user, body);
   }
 
   @Post('releases/:releaseId/:action')
-  signRelease(@Req() r: any, @Param('releaseId') releaseId: string, @Param('action') action: 'review' | 'release' | 'override', @Body() body?: { reason?: string }) {
+  signRelease(
+    @Req() r: any,
+    @Param('releaseId') releaseId: string,
+    @Param('action') action: 'review' | 'release' | 'override',
+    @Body() body?: { reason?: string }
+  ) {
     return this.svc.signRelease(r.user, releaseId, action, body);
   }
 
@@ -70,7 +115,11 @@ export class DesignController {
   }
 
   @Post('sync/:designId/propose-change')
-  proposeChange(@Req() r: any, @Param('designId') designId: string, @Body() body: { designVersion: string; changeProposal: Record<string, unknown> }) {
+  proposeChange(
+    @Req() r: any,
+    @Param('designId') designId: string,
+    @Body() body: { designVersion: string; changeProposal: Record<string, unknown> }
+  ) {
     return this.svc.proposeChange(r.user, designId, body);
   }
 

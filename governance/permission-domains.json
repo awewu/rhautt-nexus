@@ -8,7 +8,18 @@
     "D0": {
       "name": "平台与系统",
       "board": "底座",
-      "ownedModules": ["auth", "entitlement", "tenant", "governance", "notification", "workflow", "mdm", "compliance", "analytics", "cdp"],
+      "ownedModules": [
+        "auth",
+        "entitlement",
+        "tenant",
+        "governance",
+        "notification",
+        "workflow",
+        "mdm",
+        "compliance",
+        "analytics",
+        "cdp"
+      ],
       "dataPlane": ["底座主库", "分析数仓"],
       "rlsKey": "platform-role",
       "roles": ["platform_admin", "sre", "security", "compliance", "hq_ops"]
@@ -48,7 +59,16 @@
     "D4": {
       "name": "客户与赋能",
       "board": "板块二",
-      "ownedModules": ["crm", "quote", "design", "rysnova-bim", "ai-design", "delivery", "lifecycle", "aftersales"],
+      "ownedModules": [
+        "crm",
+        "quote",
+        "design",
+        "rysnova-bim",
+        "ai-design",
+        "delivery",
+        "lifecycle",
+        "aftersales"
+      ],
       "dataPlane": ["赋能库", "mongodb", "object-storage"],
       "rlsKey": "tenant+dealer+store+role",
       "trustBoundary": "bound-tenant",
@@ -57,7 +77,15 @@
     "D5": {
       "name": "推广与增长",
       "board": "板块三",
-      "ownedModules": ["growth", "insight", "channel", "gtmplan", "content", "activation", "metrics"],
+      "ownedModules": [
+        "growth",
+        "insight",
+        "channel",
+        "gtmplan",
+        "content",
+        "activation",
+        "metrics"
+      ],
       "dataPlane": ["增长库"],
       "rlsKey": "tenant=hq + hq_marketing",
       "roles": ["hq_marketing", "brand_ops"],
@@ -72,8 +100,25 @@
     "file-artifact": ["D2", "D4"],
     "product-catalog": ["D3", "D4"]
   },
-  "plannedModules": ["brand", "ingress", "quote", "design", "contracts", "bim", "rysnova-bim", "ai-design", "delivery", "lifecycle", "aftersales"],
+  "plannedModules": [
+    "brand",
+    "ingress",
+    "quote",
+    "design",
+    "contracts",
+    "bim",
+    "rysnova-bim",
+    "ai-design",
+    "delivery",
+    "lifecycle",
+    "aftersales"
+  ],
   "domainToDomainMigrations": [
-    { "from": "D3", "to": "D4", "trigger": ["lead.assigned", "lead.converted"], "note": "留资成交单向迁入，保留获客归因，PIPL 二次同意" }
+    {
+      "from": "D3",
+      "to": "D4",
+      "trigger": ["lead.assigned", "lead.converted"],
+      "note": "留资成交单向迁入，保留获客归因，PIPL 二次同意"
+    }
   ]
 }

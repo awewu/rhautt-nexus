@@ -7,9 +7,20 @@ export interface RebateMarginResult {
   gatePassed: boolean;
 }
 
-export function computeRebateMargin(amount: number, gmv: number, baseMarginRate: number, floor: number): RebateMarginResult {
+export function computeRebateMargin(
+  amount: number,
+  gmv: number,
+  baseMarginRate: number,
+  floor: number
+): RebateMarginResult {
   const rebateRatio = gmv > 0 ? (Number(amount) || 0) / gmv : 0;
   const base = Number(baseMarginRate) || 0;
   const netMarginRate = base - rebateRatio;
-  return { rebateRatio, baseMarginRate: base, netMarginRate, floor, gatePassed: netMarginRate >= floor };
+  return {
+    rebateRatio,
+    baseMarginRate: base,
+    netMarginRate,
+    floor,
+    gatePassed: netMarginRate >= floor,
+  };
 }

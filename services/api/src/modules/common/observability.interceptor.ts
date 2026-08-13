@@ -12,14 +12,27 @@ import { tap } from 'rxjs/operators';
  *  OBSERVABILITY_LOG_REQUESTS=true 打开成功请求日志（默认关,避免噪声）
  *  OBSERVABILITY_SLOW_MS=1000       慢请求阈值(ms)
  */
-export type ErrorSink = (err: unknown, ctx: { traceId: string; method: string; url: string }) => void;
+export type ErrorSink = (
+  err: unknown,
+  ctx: { traceId: string; method: string; url: string }
+) => void;
 
 // 默认错误接收器:结构化日志。生产接 Sentry/OTel 时替换本函数即可（见 setErrorSink）。
 let errorSink: ErrorSink = (err, ctx) => {
   const e = err as { message?: string; status?: number };
-  Logger.error(JSON.stringify({ evt: 'request.error', ...ctx, status: e?.status ?? 500, message: e?.message ?? String(err) }), 'Observability');
+  Logger.error(
+    JSON.stringify({
+      evt: 'request.error',
+      ...ctx,
+      status: e?.status ?? 500,
+      message: e?.message ?? String(err),
+    }),
+    'Observability'
+  );
 };
-export function setErrorSink(sink: ErrorSink) { errorSink = sink; }
+export function setErrorSink(sink: ErrorSink) {
+  errorSink = sink;
+}
 
 @Injectable()
 export class ObservabilityInterceptor implements NestInterceptor {
@@ -35,7 +48,11 @@ export class ObservabilityInterceptor implements NestInterceptor {
 
     const traceId = String(req.headers?.['x-trace-id'] || randomUUID());
     req.traceId = traceId;
-    try { res?.header?.('x-trace-id', traceId); } catch { /* fastify reply */ }
+    try {
+      res?.header?.('x-trace-id', traceId);
+    } catch {
+      /* fastify reply */
+    }
 
     const method = req.method;
     const url = req.url;
@@ -52,7 +69,7 @@ export class ObservabilityInterceptor implements NestInterceptor {
           }
         },
         error: (err) => errorSink(err, { traceId, method, url }),
-      }),
+      })
     );
   }
 }

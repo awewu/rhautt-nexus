@@ -2,13 +2,23 @@
 
 const fs = require('fs');
 const path = require('path');
-require('./_artifact-gate').requireArtifactOrSkip('archive/legacy-ui/public/legacy-surface-manifest.json', {
-  guard: 'guard:legacy-surface-ownership', reason: '遗留 UI 已归档移除，archive/ 在 .gitignore 且无生成步骤',
-});
+require('./_artifact-gate').requireArtifactOrSkip(
+  'archive/legacy-ui/public/legacy-surface-manifest.json',
+  {
+    guard: 'guard:legacy-surface-ownership',
+    reason: '遗留 UI 已归档移除，archive/ 在 .gitignore 且无生成步骤',
+  }
+);
 const { ACTIVE_HTML_PATHS } = require('../../server/middleware/productionStaticSurfaceGuard');
 
 const ROOT = path.join(__dirname, '..', '..');
-const MANIFEST_PATH = path.join(ROOT, 'archive', 'legacy-ui', 'public', 'legacy-surface-manifest.json');
+const MANIFEST_PATH = path.join(
+  ROOT,
+  'archive',
+  'legacy-ui',
+  'public',
+  'legacy-surface-manifest.json'
+);
 const REGISTRY_PATH = path.join(ROOT, 'audit', 'legacy-fusion-registry.json');
 const REPORT_JSON = path.join(ROOT, 'audit', 'legacy-surface-ownership-report.json');
 const REPORT_MD = path.join(ROOT, 'audit', 'legacy-surface-ownership-report.md');
@@ -34,7 +44,7 @@ const DOMAIN_OWNERS = {
   quality: 'test-harness-builder',
   governance: 'enterprise-ai-control-architect',
   'shared-platform': 'architecture-governor',
-  'legacy-archive': 'legacy-fusion-migrator'
+  'legacy-archive': 'legacy-fusion-migrator',
 };
 
 const DOMAIN_TARGETS = {
@@ -55,28 +65,83 @@ const DOMAIN_TARGETS = {
   quality: 'test harness, quality ledger, and visual acceptance module',
   governance: 'enterprise AI control and governance module',
   'shared-platform': 'shared platform package or common runtime module',
-  'legacy-archive': 'legacy reference archive outside production navigation'
+  'legacy-archive': 'legacy reference archive outside production navigation',
 };
 
 const DOMAIN_EVIDENCE = {
-  'group-portal': ['docs/_archive/PRODUCT-PORTAL-ARCHITECTURE.md', 'scripts/agent-guards/portal-architecture-check.js'],
-  'brand-portal': ['docs/_archive/RUUD-VI-RESEARCH.md', 'scripts/agent-guards/rheem-vi-production-audit.js'],
-  'rysnova-diagnosis': ['apps/public-portal/src/app/page.tsx', 'scripts/agent-guards/frontend-api-contract-check.js'],
-  'customer-lifecycle': ['docs/RHAUTT-NEXUS-CUSTOMER-LIFECYCLE-STATE-MODEL.md', 'services/api/src/modules/module-boundary.ts'],
-  'business-console': ['apps/dealer-workbench/src/app/page.tsx', 'services/api/src/modules/governance/governance.entity.ts'],
-  'staff-portal': ['docs/_archive/RHAUTT-NEXUS-ENTERPRISE-AI-CONTROL-ARCHITECTURE.md', 'archive/legacy-ui/public/staff-portal.html'],
-  'auth-platform': ['database/postgres/migrations/001_rhautt_nexus_core_ledger.sql', 'services/api/src/modules/auth/auth.service.ts'],
-  crm: ['server/modules/crm/crm.service.js', 'test/production-readiness/repository-and-crm.test.js'],
-  'ops-analytics': ['server/modules/analytics/analytics.service.js', 'test/production-readiness/analytics-service.test.js'],
-  delivery: ['contracts/openapi/rhautt-nexus-v2.openapi.json', 'services/api/src/modules/module-boundary.ts', 'test/production-readiness/delivery-contract.test.js'],
-  'lifecycle-iot': ['docs/_archive/LIFECYCLE-IOT-BRIDGE.md', 'services/api/src/modules/module-boundary.ts'],
-  'standards-calculation': ['docs/_archive/COMFORT-HOME-STANDARDS-MATRIX.md', 'server/modules/system-packs/system-packs.service.js'],
-  'quote-cost': ['server/modules/quotation/quotation.service.js', 'test/production-readiness/quotation-v2-bom.test.js'],
-  'product-catalog': ['server/modules/system-packs/system-packs.service.js', 'test/production-readiness/system-packs.test.js'],
-  quality: ['audit/architecture-harness.js', 'test/production-readiness/operational-readiness-harness.test.js'],
-  governance: ['docs/_archive/RHAUTT-NEXUS-ENTERPRISE-AI-CONTROL-ARCHITECTURE.md', 'scripts/agent-guards/ai-control-plane-check.js'],
-  'shared-platform': ['docs/_archive/RHAUTT-NEXUS-HARNESS-ENGINEERING-ARCHITECTURE.md', 'scripts/agent-guards/production-trunk-isolation-check.js'],
-  'legacy-archive': ['archive/legacy-ui/public/legacy-surface-manifest.json', 'server/middleware/productionStaticSurfaceGuard.js']
+  'group-portal': [
+    'docs/_archive/PRODUCT-PORTAL-ARCHITECTURE.md',
+    'scripts/agent-guards/portal-architecture-check.js',
+  ],
+  'brand-portal': [
+    'docs/_archive/RUUD-VI-RESEARCH.md',
+    'scripts/agent-guards/rheem-vi-production-audit.js',
+  ],
+  'rysnova-diagnosis': [
+    'apps/public-portal/src/app/page.tsx',
+    'scripts/agent-guards/frontend-api-contract-check.js',
+  ],
+  'customer-lifecycle': [
+    'docs/RHAUTT-NEXUS-CUSTOMER-LIFECYCLE-STATE-MODEL.md',
+    'services/api/src/modules/module-boundary.ts',
+  ],
+  'business-console': [
+    'apps/dealer-workbench/src/app/page.tsx',
+    'services/api/src/modules/governance/governance.entity.ts',
+  ],
+  'staff-portal': [
+    'docs/_archive/RHAUTT-NEXUS-ENTERPRISE-AI-CONTROL-ARCHITECTURE.md',
+    'archive/legacy-ui/public/staff-portal.html',
+  ],
+  'auth-platform': [
+    'database/postgres/migrations/001_rhautt_nexus_core_ledger.sql',
+    'services/api/src/modules/auth/auth.service.ts',
+  ],
+  crm: [
+    'server/modules/crm/crm.service.js',
+    'test/production-readiness/repository-and-crm.test.js',
+  ],
+  'ops-analytics': [
+    'server/modules/analytics/analytics.service.js',
+    'test/production-readiness/analytics-service.test.js',
+  ],
+  delivery: [
+    'contracts/openapi/rhautt-nexus-v2.openapi.json',
+    'services/api/src/modules/module-boundary.ts',
+    'test/production-readiness/delivery-contract.test.js',
+  ],
+  'lifecycle-iot': [
+    'docs/_archive/LIFECYCLE-IOT-BRIDGE.md',
+    'services/api/src/modules/module-boundary.ts',
+  ],
+  'standards-calculation': [
+    'docs/_archive/COMFORT-HOME-STANDARDS-MATRIX.md',
+    'server/modules/system-packs/system-packs.service.js',
+  ],
+  'quote-cost': [
+    'server/modules/quotation/quotation.service.js',
+    'test/production-readiness/quotation-v2-bom.test.js',
+  ],
+  'product-catalog': [
+    'server/modules/system-packs/system-packs.service.js',
+    'test/production-readiness/system-packs.test.js',
+  ],
+  quality: [
+    'audit/architecture-harness.js',
+    'test/production-readiness/operational-readiness-harness.test.js',
+  ],
+  governance: [
+    'docs/_archive/RHAUTT-NEXUS-ENTERPRISE-AI-CONTROL-ARCHITECTURE.md',
+    'scripts/agent-guards/ai-control-plane-check.js',
+  ],
+  'shared-platform': [
+    'docs/_archive/RHAUTT-NEXUS-HARNESS-ENGINEERING-ARCHITECTURE.md',
+    'scripts/agent-guards/production-trunk-isolation-check.js',
+  ],
+  'legacy-archive': [
+    'archive/legacy-ui/public/legacy-surface-manifest.json',
+    'server/middleware/productionStaticSurfaceGuard.js',
+  ],
 };
 
 const ACTIVE_DOMAIN_BY_FILE = {
@@ -92,23 +157,56 @@ const ACTIVE_DOMAIN_BY_FILE = {
   'archive/legacy-ui/public/pain-diagnosis.html': 'rysnova-diagnosis',
   'archive/legacy-ui/public/staff-portal.html': 'staff-portal',
   'archive/legacy-ui/public/privacy.html': 'governance',
-  'archive/legacy-ui/public/consent.html': 'governance'
+  'archive/legacy-ui/public/consent.html': 'governance',
 };
 
 const DOMAIN_RULES = [
   { domain: 'customer-lifecycle', pattern: /(?:customer-journeys)/i },
-  { domain: 'quote-cost', pattern: /(?:quotation|quote|material|oneclick|package-purchase|price|commercial-tax)/i },
-  { domain: 'product-catalog', pattern: /(?:admin\/products|products|product-|product_|showcase|presentation|custom-configurator|device-selection|technical-(?:manual|support))/i },
-  { domain: 'lifecycle-iot', pattern: /(?:econet|maintenance|operation-maintenance|service-ticket|service-tickets|predictive|workorders|hvac-dashboard)/i },
-  { domain: 'delivery', pattern: /(?:construction|contract|delivery|workflow|schedule|acceptance)/i },
-  { domain: 'crm', pattern: /(?:crm|sales|customers|channel|store|marketing|mobile-sales-assistant)/i },
-  { domain: 'standards-calculation', pattern: /(?:calculation|calc|load-|doas|water-system|water_|hvac|energy|hydraulic)/i },
+  {
+    domain: 'quote-cost',
+    pattern: /(?:quotation|quote|material|oneclick|package-purchase|price|commercial-tax)/i,
+  },
+  {
+    domain: 'product-catalog',
+    pattern:
+      /(?:admin\/products|products|product-|product_|showcase|presentation|custom-configurator|device-selection|technical-(?:manual|support))/i,
+  },
+  {
+    domain: 'lifecycle-iot',
+    pattern:
+      /(?:econet|maintenance|operation-maintenance|service-ticket|service-tickets|predictive|workorders|hvac-dashboard)/i,
+  },
+  {
+    domain: 'delivery',
+    pattern: /(?:construction|contract|delivery|workflow|schedule|acceptance)/i,
+  },
+  {
+    domain: 'crm',
+    pattern: /(?:crm|sales|customers|channel|store|marketing|mobile-sales-assistant)/i,
+  },
+  {
+    domain: 'standards-calculation',
+    pattern: /(?:calculation|calc|load-|doas|water-system|water_|hvac|energy|hydraulic)/i,
+  },
   { domain: 'quality', pattern: /(?:quality|accuracy|performance-monitor|perf)/i },
-  { domain: 'governance', pattern: /(?:ai-|ai_|chatbot|voice|assistant|command|agency-agent|governance)/i },
-  { domain: 'ops-analytics', pattern: /(?:admin-dashboard|hq-admin|analytics|business-analytics|dashboard|notifications|messages|settings)/i },
-  { domain: 'brand-portal', pattern: /(?:four-brand|rheem|ruud|brand|premium|index-v2|index-premium)/i },
-  { domain: 'rysnova-diagnosis', pattern: /(?:solution|pain-diagnosis-v3|simple-proposal|quick-lock)/i },
-  { domain: 'shared-platform', pattern: /(?:desktop-layout|mobile\.html|help|api-docs|login)/i }
+  {
+    domain: 'governance',
+    pattern: /(?:ai-|ai_|chatbot|voice|assistant|command|agency-agent|governance)/i,
+  },
+  {
+    domain: 'ops-analytics',
+    pattern:
+      /(?:admin-dashboard|hq-admin|analytics|business-analytics|dashboard|notifications|messages|settings)/i,
+  },
+  {
+    domain: 'brand-portal',
+    pattern: /(?:four-brand|rheem|ruud|brand|premium|index-v2|index-premium)/i,
+  },
+  {
+    domain: 'rysnova-diagnosis',
+    pattern: /(?:solution|pain-diagnosis-v3|simple-proposal|quick-lock)/i,
+  },
+  { domain: 'shared-platform', pattern: /(?:desktop-layout|mobile\.html|help|api-docs|login)/i },
 ];
 
 const DELETE_GATE = [
@@ -119,7 +217,7 @@ const DELETE_GATE = [
   'route/API contract is unaffected or replaced',
   'tests/guards are updated and passing',
   'rollback note exists',
-  'legacy manifest and ownership report are updated'
+  'legacy manifest and ownership report are updated',
 ];
 
 function readJson(file) {
@@ -167,7 +265,8 @@ function inferDomain(file) {
 
   const comparable = file.replace(/^archive\/legacy-ui\/public\//, '');
   for (const rule of DOMAIN_RULES) {
-    if (rule.pattern.test(comparable)) return { domain: rule.domain, source: `rule:${rule.pattern}` };
+    if (rule.pattern.test(comparable))
+      return { domain: rule.domain, source: `rule:${rule.pattern}` };
   }
   return { domain: 'legacy-archive', source: 'fallback' };
 }
@@ -175,7 +274,8 @@ function inferDomain(file) {
 function actionFor(file, bucket, registryEntry, domain) {
   if (bucket === 'active') return 'active';
   if (registryEntry?.action) return registryEntry.action;
-  if (bucket === 'migration-candidate') return domain === 'governance' || domain === 'shared-platform' ? 'wrap' : 'migrate';
+  if (bucket === 'migration-candidate')
+    return domain === 'governance' || domain === 'shared-platform' ? 'wrap' : 'migrate';
   return 'archive';
 }
 
@@ -191,7 +291,7 @@ function evidenceFor(bucket, domain) {
     'archive/legacy-ui/public/legacy-surface-manifest.json',
     'server/middleware/productionStaticSurfaceGuard.js',
     'scripts/agent-guards/active-navigation-check.js',
-    'scripts/agent-guards/production-trunk-isolation-check.js'
+    'scripts/agent-guards/production-trunk-isolation-check.js',
   ];
   if (bucket === 'active') {
     evidence.push('scripts/agent-guards/active-page-static-acceptance.js');
@@ -203,7 +303,7 @@ function evidenceFor(bucket, domain) {
 
 function buildRows(manifestRows, registry) {
   const pageAssets = registry.pageAssets || {};
-  return manifestRows.map(row => {
+  return manifestRows.map((row) => {
     const registryEntry = pageAssets[row.file] || null;
     const inferred = inferDomain(row.file);
     const domain = registryEntry?.domain || inferred.domain;
@@ -216,17 +316,23 @@ function buildRows(manifestRows, registry) {
       ownerAgent: DOMAIN_OWNERS[domain] || null,
       ownerAssignmentSource: registryEntry ? 'legacy-fusion-registry' : inferred.source,
       action,
-      priority: registryEntry?.priority || (row.manifestBucket === 'migration-candidate' ? 'P1' : row.manifestBucket === 'active' ? 'P0' : 'P2'),
+      priority:
+        registryEntry?.priority ||
+        (row.manifestBucket === 'migration-candidate'
+          ? 'P1'
+          : row.manifestBucket === 'active'
+            ? 'P0'
+            : 'P2'),
       migrationStatus: statusFor(row.manifestBucket, action),
       targetSurface: registryEntry?.target || DOMAIN_TARGETS[domain],
-      nextAction: registryEntry?.next || (
-        row.manifestBucket === 'active'
+      nextAction:
+        registryEntry?.next ||
+        (row.manifestBucket === 'active'
           ? 'Keep active surface covered by active-page, navigation, visual, and API contract guards.'
-          : 'Retain behind productionStaticSurfaceGuard until the target module has replacement implementation, tests, and rollback evidence.'
-      ),
+          : 'Retain behind productionStaticSurfaceGuard until the target module has replacement implementation, tests, and rollback evidence.'),
       replacementEvidence: evidenceFor(row.manifestBucket, domain),
       deletionGate: DELETE_GATE,
-      deletionSafe: false
+      deletionSafe: false,
     };
   });
 }
@@ -245,9 +351,10 @@ function validate({ publicHtml, manifestRows, declared, rows }) {
 
   for (const pathName of ACTIVE_HTML_PATHS) {
     const manifestFile = `archive/legacy-ui/public${pathName}`;
-    const row = rows.find(item => item.file === manifestFile);
+    const row = rows.find((item) => item.file === manifestFile);
     if (!row) failures.push(`${pathName} is active but missing ownership row`);
-    else if (row.manifestBucket !== 'active' || row.action !== 'active') failures.push(`${manifestFile} active ownership mismatch`);
+    else if (row.manifestBucket !== 'active' || row.action !== 'active')
+      failures.push(`${manifestFile} active ownership mismatch`);
   }
 
   for (const row of rows) {
@@ -262,12 +369,16 @@ function validate({ publicHtml, manifestRows, declared, rows }) {
     if (!Array.isArray(row.deletionGate) || row.deletionGate.length < DELETE_GATE.length) {
       failures.push(`${row.file}: incomplete deletionGate`);
     }
-    if (row.ownerAssignmentSource === 'fallback') failures.push(`${row.file}: owner assigned by fallback legacy archive rule`);
-    if (row.manifestBucket !== 'active' && row.action === 'active') failures.push(`${row.file}: non-active page cannot have active action`);
-    if (row.manifestBucket === 'active' && row.action !== 'active') failures.push(`${row.file}: active page must have active action`);
+    if (row.ownerAssignmentSource === 'fallback')
+      failures.push(`${row.file}: owner assigned by fallback legacy archive rule`);
+    if (row.manifestBucket !== 'active' && row.action === 'active')
+      failures.push(`${row.file}: non-active page cannot have active action`);
+    if (row.manifestBucket === 'active' && row.action !== 'active')
+      failures.push(`${row.file}: active page must have active action`);
 
     for (const evidence of row.replacementEvidence || []) {
-      if (!exists(evidence)) failures.push(`${row.file}: replacement evidence does not exist: ${evidence}`);
+      if (!exists(evidence))
+        failures.push(`${row.file}: replacement evidence does not exist: ${evidence}`);
     }
   }
 
@@ -298,7 +409,7 @@ function renderMarkdown(report) {
     '## Bucket Counts',
     '',
     '| Bucket | Count |',
-    '|---|---:|'
+    '|---|---:|',
   ];
 
   for (const [bucket, count] of Object.entries(report.summary.bucketCounts)) {
@@ -310,9 +421,17 @@ function renderMarkdown(report) {
     lines.push(`| ${action} | ${count} |`);
   }
 
-  lines.push('', '## Surface Ownership', '', '| File | Bucket | Domain | Owner | Action | Target |', '|---|---|---|---|---|---|');
+  lines.push(
+    '',
+    '## Surface Ownership',
+    '',
+    '| File | Bucket | Domain | Owner | Action | Target |',
+    '|---|---|---|---|---|---|'
+  );
   for (const row of report.surfaces) {
-    lines.push(`| ${row.file} | ${row.manifestBucket} | ${row.domain} | ${row.ownerAgent} | ${row.action} | ${String(row.targetSurface).replace(/\|/g, '/')} |`);
+    lines.push(
+      `| ${row.file} | ${row.manifestBucket} | ${row.domain} | ${row.ownerAgent} | ${row.action} | ${String(row.targetSurface).replace(/\|/g, '/')} |`
+    );
   }
 
   lines.push('', '## Deletion Policy', '');
@@ -336,7 +455,7 @@ function main() {
     publicHtml,
     manifestRows: classified.rows,
     declared: classified.seen,
-    rows
+    rows,
   });
   const failures = [...classified.failures, ...validation.failures];
   const warnings = validation.warnings;
@@ -348,8 +467,10 @@ function main() {
     acc[row.action] = (acc[row.action] || 0) + 1;
     return acc;
   }, {});
-  const ownerCoverage = rows.filter(row => row.ownerAgent).length;
-  const evidenceCoverage = rows.filter(row => Array.isArray(row.replacementEvidence) && row.replacementEvidence.length >= 3).length;
+  const ownerCoverage = rows.filter((row) => row.ownerAgent).length;
+  const evidenceCoverage = rows.filter(
+    (row) => Array.isArray(row.replacementEvidence) && row.replacementEvidence.length >= 3
+  ).length;
   const report = {
     generatedAt: new Date().toISOString(),
     sourceManifest: 'archive/legacy-ui/public/legacy-surface-manifest.json',
@@ -359,29 +480,31 @@ function main() {
       nonActivePagesRemainBehindProductionStaticSurfaceGuard: true,
       deletionSafeByDefault: false,
       allowedActions: [...VALID_ACTIONS],
-      deletionGate: DELETE_GATE
+      deletionGate: DELETE_GATE,
     },
     summary: {
       publicHtml: publicHtml.length,
       manifestRows: rows.length,
-      activeSurfaces: rows.filter(row => row.activeSurface).length,
-      nonActiveGovernedAssets: rows.filter(row => !row.activeSurface).length,
+      activeSurfaces: rows.filter((row) => row.activeSurface).length,
+      nonActiveGovernedAssets: rows.filter((row) => !row.activeSurface).length,
       ownerCoverage,
       evidenceCoverage,
       bucketCounts,
       actionCounts,
       failures: failures.length,
-      warnings: warnings.length
+      warnings: warnings.length,
     },
     surfaces: rows,
     failures,
-    warnings
+    warnings,
   };
 
   fs.writeFileSync(REPORT_JSON, JSON.stringify(report, null, 2));
   fs.writeFileSync(REPORT_MD, renderMarkdown(report));
 
-  console.log(`Legacy Surface Ownership Check: html = ${publicHtml.length}, rows = ${rows.length}, ownerCoverage = ${ownerCoverage}, failures = ${failures.length}, warnings = ${warnings.length}`);
+  console.log(
+    `Legacy Surface Ownership Check: html = ${publicHtml.length}, rows = ${rows.length}, ownerCoverage = ${ownerCoverage}, failures = ${failures.length}, warnings = ${warnings.length}`
+  );
   if (failures.length) {
     for (const failure of failures) console.error(`- ${failure}`);
     process.exit(1);

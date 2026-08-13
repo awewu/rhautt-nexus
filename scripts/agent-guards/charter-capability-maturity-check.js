@@ -65,9 +65,7 @@ const ROADMAP_CAPABILITIES = [
   { name: 'HA/DR 故障切换与恢复演练', keys: ['HA/DR', 'PITR', '故障切换'] },
 ];
 
-const matrixRows = section
-  .split('\n')
-  .filter((line) => line.trim().startsWith('|'));
+const matrixRows = section.split('\n').filter((line) => line.trim().startsWith('|'));
 
 for (const cap of ROADMAP_CAPABILITIES) {
   const rows = matrixRows.filter((row) => cap.keys.some((k) => row.includes(k)));
@@ -77,15 +75,21 @@ for (const cap of ROADMAP_CAPABILITIES) {
   }
   for (const row of rows) {
     if (row.includes('已建成')) {
-      failures.push(`${CHARTER} §5.5.6: 「${cap.name}」不得标注为「已建成」（尚未落地运行实例）— 行: ${row.trim().slice(0, 80)}`);
+      failures.push(
+        `${CHARTER} §5.5.6: 「${cap.name}」不得标注为「已建成」（尚未落地运行实例）— 行: ${row.trim().slice(0, 80)}`
+      );
     }
     if (!row.includes('规划')) {
-      failures.push(`${CHARTER} §5.5.6: 「${cap.name}」矩阵行须标注「规划」— 行: ${row.trim().slice(0, 80)}`);
+      failures.push(
+        `${CHARTER} §5.5.6: 「${cap.name}」矩阵行须标注「规划」— 行: ${row.trim().slice(0, 80)}`
+      );
     }
   }
 }
 
-console.log(`Charter Capability Maturity Check: section=${startIdx === -1 ? 'MISSING' : 'present'}, matrixRows=${matrixRows.length}, failures=${failures.length}`);
+console.log(
+  `Charter Capability Maturity Check: section=${startIdx === -1 ? 'MISSING' : 'present'}, matrixRows=${matrixRows.length}, failures=${failures.length}`
+);
 
 if (failures.length) {
   for (const f of failures) console.error(`- ${f}`);

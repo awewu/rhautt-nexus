@@ -21,7 +21,7 @@ export const apiModuleBoundary = [
   'gtmplan',
   'content',
   'activation',
-  'metrics'
+  'metrics',
 ] as const;
 
 // 客户赋能(独立产品线)模块：已从营销中台停挂载(目录留存·代码保留·可逆)，营销中台不暴露其 API，
@@ -33,10 +33,10 @@ export const plannedApiInterfaces = [
   'bim',
   'delivery',
   'lifecycle',
-  'aftersales'
+  'aftersales',
 ] as const;
 
-export type ApiModuleName = typeof apiModuleBoundary[number];
+export type ApiModuleName = (typeof apiModuleBoundary)[number];
 
 export interface ApiModuleBoundarySpec {
   name: ApiModuleName;
@@ -62,7 +62,7 @@ export const apiModuleBoundarySpecs: Record<ApiModuleName, ApiModuleBoundarySpec
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: false
+    writeApisRequireOutbox: false,
   },
   entitlement: {
     name: 'entitlement',
@@ -73,7 +73,7 @@ export const apiModuleBoundarySpecs: Record<ApiModuleName, ApiModuleBoundarySpec
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: false
+    writeApisRequireOutbox: false,
   },
   cdp: {
     name: 'cdp',
@@ -84,7 +84,7 @@ export const apiModuleBoundarySpecs: Record<ApiModuleName, ApiModuleBoundarySpec
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: false
+    writeApisRequireOutbox: false,
   },
   insight: {
     name: 'insight',
@@ -95,29 +95,31 @@ export const apiModuleBoundarySpecs: Record<ApiModuleName, ApiModuleBoundarySpec
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: false
+    writeApisRequireOutbox: false,
   },
   channel: {
     name: 'channel',
     apiNamespace: '/api/v2/channel',
     owner: 'backend-platform-builder',
-    productSurface: 'channel/partner marketing: recruitment, tiering/certification, rebate (margin-gated), performance',
+    productSurface:
+      'channel/partner marketing: recruitment, tiering/certification, rebate (margin-gated), performance',
     dataStores: ['postgresql'],
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: false
+    writeApisRequireOutbox: false,
   },
   positioning: {
     name: 'positioning',
     apiNamespace: '/api/v2/positioning',
     owner: 'brand-experience-architect',
-    productSurface: 'brand messaging house per brand x category (promise, pillars, proof points, differentiation)',
+    productSurface:
+      'brand messaging house per brand x category (promise, pillars, proof points, differentiation)',
     dataStores: ['postgresql'],
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: false
+    writeApisRequireOutbox: false,
   },
   gtmplan: {
     name: 'gtmplan',
@@ -128,40 +130,43 @@ export const apiModuleBoundarySpecs: Record<ApiModuleName, ApiModuleBoundarySpec
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: false
+    writeApisRequireOutbox: false,
   },
   content: {
     name: 'content',
     apiNamespace: '/api/v2/content',
     owner: 'brand-experience-architect',
-    productSurface: 'content factory: brief to draft to review to publish, fact-grounded and compliance-gated',
+    productSurface:
+      'content factory: brief to draft to review to publish, fact-grounded and compliance-gated',
     dataStores: ['postgresql'],
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: false
+    writeApisRequireOutbox: false,
   },
   activation: {
     name: 'activation',
     apiNamespace: '/api/v2/activation',
     owner: 'backend-platform-builder',
-    productSurface: 'promotion/activation: coupon, groupon, flashsale, fission, referral programs and participation',
+    productSurface:
+      'promotion/activation: coupon, groupon, flashsale, fission, referral programs and participation',
     dataStores: ['postgresql'],
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: false
+    writeApisRequireOutbox: false,
   },
   metrics: {
     name: 'metrics',
     apiNamespace: '/api/v2/metrics',
     owner: 'data-platform-architect',
-    productSurface: 'metrics semantic layer: RLS read-model rollups + multi-touch attribution (replaces live OLTP aggregation)',
+    productSurface:
+      'metrics semantic layer: RLS read-model rollups + multi-touch attribution (replaces live OLTP aggregation)',
     dataStores: ['postgresql'],
     requiresTenantScope: true,
     requiresAuditLog: false,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: false
+    writeApisRequireOutbox: false,
   },
   tenant: {
     name: 'tenant',
@@ -173,7 +178,7 @@ export const apiModuleBoundarySpecs: Record<ApiModuleName, ApiModuleBoundarySpec
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: true
+    writeApisRequireOutbox: true,
   },
   crm: {
     name: 'crm',
@@ -184,7 +189,7 @@ export const apiModuleBoundarySpecs: Record<ApiModuleName, ApiModuleBoundarySpec
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: true
+    writeApisRequireOutbox: true,
   },
   diagnosis: {
     name: 'diagnosis',
@@ -195,7 +200,7 @@ export const apiModuleBoundarySpecs: Record<ApiModuleName, ApiModuleBoundarySpec
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: true
+    writeApisRequireOutbox: true,
   },
   'product-catalog': {
     name: 'product-catalog',
@@ -206,7 +211,7 @@ export const apiModuleBoundarySpecs: Record<ApiModuleName, ApiModuleBoundarySpec
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: true
+    writeApisRequireOutbox: true,
   },
   analytics: {
     name: 'analytics',
@@ -217,7 +222,7 @@ export const apiModuleBoundarySpecs: Record<ApiModuleName, ApiModuleBoundarySpec
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: false
+    writeApisRequireOutbox: false,
   },
   governance: {
     name: 'governance',
@@ -228,7 +233,7 @@ export const apiModuleBoundarySpecs: Record<ApiModuleName, ApiModuleBoundarySpec
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: true
+    writeApisRequireOutbox: true,
   },
   'file-artifact': {
     name: 'file-artifact',
@@ -239,18 +244,19 @@ export const apiModuleBoundarySpecs: Record<ApiModuleName, ApiModuleBoundarySpec
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: true
+    writeApisRequireOutbox: true,
   },
   'site-materials': {
     name: 'site-materials',
     apiNamespace: '/api/v2/site-materials',
     owner: 'brand-experience',
-    productSurface: 'brand site local materials, Everhot banner carousel, and public preview assets',
+    productSurface:
+      'brand site local materials, Everhot banner carousel, and public preview assets',
     dataStores: ['filesystem', 'object-storage'],
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: false
+    writeApisRequireOutbox: false,
   },
   notification: {
     name: 'notification',
@@ -261,52 +267,56 @@ export const apiModuleBoundarySpecs: Record<ApiModuleName, ApiModuleBoundarySpec
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: true
+    writeApisRequireOutbox: true,
   },
   workflow: {
     name: 'workflow',
     apiNamespace: '/api/v2/workflow',
     owner: 'backend-platform-builder',
-    productSurface: 'Temporal workflows, outbox delivery, retry, replay, and dead-letter operations',
+    productSurface:
+      'Temporal workflows, outbox delivery, retry, replay, and dead-letter operations',
     dataStores: ['postgresql', 'temporal-outbox'],
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: true
+    writeApisRequireOutbox: true,
   },
   compliance: {
     name: 'compliance',
     apiNamespace: '/api/v2/compliance',
     owner: 'security-supply-chain',
-    productSurface: 'PIPL consent, withdrawal, data retention policy, and PII encryption (等保2.0/PIPL/数据安全法)',
+    productSurface:
+      'PIPL consent, withdrawal, data retention policy, and PII encryption (等保2.0/PIPL/数据安全法)',
     dataStores: ['postgresql'],
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: true
+    writeApisRequireOutbox: true,
   },
   mdm: {
     name: 'mdm',
     apiNamespace: '/api/v2/mdm',
     owner: 'data-platform-architect',
-    productSurface: 'cross-board master data (global_product_id), single-writer reconciliation, and the outbox event bus',
+    productSurface:
+      'cross-board master data (global_product_id), single-writer reconciliation, and the outbox event bus',
     dataStores: ['postgresql', 'temporal-outbox'],
     requiresTenantScope: false,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: true
+    writeApisRequireOutbox: true,
   },
   growth: {
     name: 'growth',
     apiNamespace: '/api/v2/growth',
     owner: 'orchestrator-chief',
-    productSurface: '增长中枢 / Nexus Growth: opinion radar, copy copilot, GEO analyzer, and campaign ops (HQ marketing control plane)',
+    productSurface:
+      '增长中枢 / Nexus Growth: opinion radar, copy copilot, GEO analyzer, and campaign ops (HQ marketing control plane)',
     dataStores: ['postgresql', 'mongodb', 'object-storage'],
     requiresTenantScope: true,
     requiresAuditLog: true,
     requiresOpenApiContract: true,
-    writeApisRequireOutbox: true
-  }
+    writeApisRequireOutbox: true,
+  },
 };
 
 export const targetApiSourceContract = {
@@ -316,7 +326,7 @@ export const targetApiSourceContract = {
   architecture: 'DDD modular monolith',
   moduleCount: apiModuleBoundary.length,
   productionClaim: false,
-  completionRule: 'source contract only until dependencies install and runtime boot proof passes'
+  completionRule: 'source contract only until dependencies install and runtime boot proof passes',
 } as const;
 
 export function getApiModuleBoundary(name: ApiModuleName): ApiModuleBoundarySpec {

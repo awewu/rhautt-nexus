@@ -24,7 +24,10 @@ test('brand product table keeps six compact high-signal columns', () => {
 });
 
 test('brand product summary row renders six body cells', () => {
-  const row = source.slice(source.indexOf('function ProductSummaryRow('), source.indexOf('function ProductEditModal('));
+  const row = source.slice(
+    source.indexOf('function ProductSummaryRow('),
+    source.indexOf('function ProductEditModal(')
+  );
   assert.equal((row.match(/<td/g) || []).length, 6);
   for (const className of [
     'brand-product-identity-col',
@@ -39,21 +42,36 @@ test('brand product summary row renders six body cells', () => {
 });
 
 test('normal desktop table stays centered inside the product panel', () => {
-  assert.match(source, /\.brand-product-table-wrap \{\s*display: flex;\s*justify-content: center;\s*overflow-x: hidden;/);
-  assert.match(source, /\.brand-product-table \{\s*width: min\(100%, 1120px\);\s*table-layout: fixed;/);
+  assert.match(
+    source,
+    /\.brand-product-table-wrap \{\s*display: flex;\s*justify-content: center;\s*overflow-x: hidden;/
+  );
+  assert.match(
+    source,
+    /\.brand-product-table \{\s*width: min\(100%, 1120px\);\s*table-layout: fixed;/
+  );
   assert.doesNotMatch(source, /\.brand-product-table \{\s*min-width: 1480px;/);
 });
 
 test('desktop table column widths fit exactly within the workbench content width', () => {
-  const widths = [...source.matchAll(/\.brand-product-table th:nth-child\(\d\),\s*\.brand-product-table td:nth-child\(\d\) \{\s*width: (\d+)%;/g)]
-    .map((match) => Number(match[1]));
+  const widths = [
+    ...source.matchAll(
+      /\.brand-product-table th:nth-child\(\d\),\s*\.brand-product-table td:nth-child\(\d\) \{\s*width: (\d+)%;/g
+    ),
+  ].map((match) => Number(match[1]));
   assert.deepEqual(widths, [22, 15, 16, 12, 8, 27]);
-  assert.equal(widths.reduce((sum, value) => sum + value, 0), 100);
+  assert.equal(
+    widths.reduce((sum, value) => sum + value, 0),
+    100
+  );
 });
 
 test('long product text is constrained inside cells', () => {
   assert.match(source, /text-overflow: ellipsis;/);
   assert.match(source, /white-space: nowrap;/);
-  assert.match(source, /\.brand-product-table \.inline-edit-input \{\s*min-width: 0;\s*max-width: 100%;/);
+  assert.match(
+    source,
+    /\.brand-product-table \.inline-edit-input \{\s*min-width: 0;\s*max-width: 100%;/
+  );
   assert.match(source, /\.inline-edit-input \{\s*min-width: 0;\s*width: 100%;/);
 });

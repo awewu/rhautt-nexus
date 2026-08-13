@@ -173,16 +173,16 @@ Website-facing product cards and detail data are composed from:
 
 Fallback rules:
 
-| Website field | Fallback |
-|---|---|
-| Display title | `assignment.siteTitle` -> product content name -> `products.name` |
-| Display summary | `assignment.siteSummary` -> product tagline -> `products.category` |
-| Public slug | `assignment.publicSlug` -> product brand meta slug -> `products.sku` |
+| Website field    | Fallback                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------ |
+| Display title    | `assignment.siteTitle` -> product content name -> `products.name`                          |
+| Display summary  | `assignment.siteSummary` -> product tagline -> `products.category`                         |
+| Public slug      | `assignment.publicSlug` -> product brand meta slug -> `products.sku`                       |
 | Website category | `assignment.websiteCategory` -> product brand meta website category -> `products.category` |
-| Menu group | `assignment.menuGroup` -> product system -> empty |
-| Display order | `assignment.displayOrder` -> product brand meta display order -> product sort order -> `0` |
-| Main image | product main asset ref -> product brand meta image -> default placeholder |
-| Badges | product brand meta badges -> empty list |
+| Menu group       | `assignment.menuGroup` -> product system -> empty                                          |
+| Display order    | `assignment.displayOrder` -> product brand meta display order -> product sort order -> `0` |
+| Main image       | product main asset ref -> product brand meta image -> default placeholder                  |
+| Badges           | product brand meta badges -> empty list                                                    |
 
 Missing website-specific fields must not break the product list or detail page.
 

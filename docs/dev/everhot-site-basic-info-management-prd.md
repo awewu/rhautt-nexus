@@ -86,38 +86,38 @@ Tab 顺序调整为：
 
 字段：
 
-| 字段 | 当前官网值 | 说明 |
-| --- | --- | --- |
-| `siteTitle` | `恒热 Everhot | 中央采暖·热水·制冷整体解决方案` | 首页 title / 默认标题 |
-| `siteName` | `Everhot 中国 Everhot China` | 结构化数据与 OG 站点名 |
-| `brandNameCn` | `恒热` | 中文品牌名 |
-| `brandNameEn` | `Everhot` | 英文品牌名 |
-| `logoUrl` | `/assets/img/brand/everhot-logo.png` | 页眉与结构化数据 Logo |
-| `whiteLogoUrl` | `/assets/img/brand/everhot-logo-white.png` | 深色弹层/品牌场景 Logo |
-| `favicon16Url` | `/favicon-16x16.png` | favicon |
-| `favicon32Url` | `/favicon-32x32.png` | favicon |
-| `faviconIcoUrl` | `/favicon.ico` | favicon |
-| `appleTouchIconUrl` | `/apple-touch-icon.png` | Apple icon |
-| `themeColor` | `#BF1924` | meta theme-color |
-| `siteUrl` | `https://www.everhot.com.cn` | 官网基础域名 |
-| `localeLabel` | `中国 · 简体中文` | 顶部地区/语言展示 |
+| 字段                | 当前官网值                                 | 说明                            |
+| ------------------- | ------------------------------------------ | ------------------------------- |
+| `siteTitle`         | `恒热 Everhot                              | 中央采暖·热水·制冷整体解决方案` | 首页 title / 默认标题 |
+| `siteName`          | `Everhot 中国 Everhot China`               | 结构化数据与 OG 站点名          |
+| `brandNameCn`       | `恒热`                                     | 中文品牌名                      |
+| `brandNameEn`       | `Everhot`                                  | 英文品牌名                      |
+| `logoUrl`           | `/assets/img/brand/everhot-logo.png`       | 页眉与结构化数据 Logo           |
+| `whiteLogoUrl`      | `/assets/img/brand/everhot-logo-white.png` | 深色弹层/品牌场景 Logo          |
+| `favicon16Url`      | `/favicon-16x16.png`                       | favicon                         |
+| `favicon32Url`      | `/favicon-32x32.png`                       | favicon                         |
+| `faviconIcoUrl`     | `/favicon.ico`                             | favicon                         |
+| `appleTouchIconUrl` | `/apple-touch-icon.png`                    | Apple icon                      |
+| `themeColor`        | `#BF1924`                                  | meta theme-color                |
+| `siteUrl`           | `https://www.everhot.com.cn`               | 官网基础域名                    |
+| `localeLabel`       | `中国 · 简体中文`                          | 顶部地区/语言展示               |
 
 ### 6.3 品牌主张与首页首屏
 
 字段：
 
-| 字段 | 当前官网值 | 说明 |
-| --- | --- | --- |
-| `heroEyebrow` | `瑞美（Rheem）集团旗下 · 瑞合瑞德集团中国运营` | 首页 Hero 顶部说明 |
-| `heroTitleLine1` | `百年恒续` | 首页 H1 第一行 |
-| `heroTitleLine2` | `为爱恒热` | 首页 H1 第二行 |
-| `heroSloganEn` | `EVERHOT FOR EVERLOVE` | 英文口号 |
-| `heroClaim` | `大户型选恒热，多点用水没烦恼` | 首页主张 |
-| `ctaSlogan` | `大户型选恒热 · 多点用水没烦恼` | `nav.js` 注入到 CTA 的口号 |
-| `primaryCtaText` | `家用产品` | 首页首屏主按钮 |
-| `primaryCtaHref` | `#residential` | 首页首屏主按钮链接 |
-| `secondaryCtaText` | `商用方案` | 首页首屏次按钮 |
-| `secondaryCtaHref` | `#commercial` | 首页首屏次按钮链接 |
+| 字段               | 当前官网值                                     | 说明                       |
+| ------------------ | ---------------------------------------------- | -------------------------- |
+| `heroEyebrow`      | `瑞美（Rheem）集团旗下 · 瑞合瑞德集团中国运营` | 首页 Hero 顶部说明         |
+| `heroTitleLine1`   | `百年恒续`                                     | 首页 H1 第一行             |
+| `heroTitleLine2`   | `为爱恒热`                                     | 首页 H1 第二行             |
+| `heroSloganEn`     | `EVERHOT FOR EVERLOVE`                         | 英文口号                   |
+| `heroClaim`        | `大户型选恒热，多点用水没烦恼`                 | 首页主张                   |
+| `ctaSlogan`        | `大户型选恒热 · 多点用水没烦恼`                | `nav.js` 注入到 CTA 的口号 |
+| `primaryCtaText`   | `家用产品`                                     | 首页首屏主按钮             |
+| `primaryCtaHref`   | `#residential`                                 | 首页首屏主按钮链接         |
+| `secondaryCtaText` | `商用方案`                                     | 首页首屏次按钮             |
+| `secondaryCtaHref` | `#commercial`                                  | 首页首屏次按钮链接         |
 
 ### 6.4 首页基础数字/卖点
 
@@ -127,20 +127,18 @@ Tab 顺序调整为：
 
 当前官网值：
 
-| 数值 | 标签 |
-| --- | --- |
-| `≥105%` | `冷凝热效率` |
-| `≤5s` | `出热水时间` |
-| `COP 4.2+` | `系统能效比` |
-| `24h` | `商用连续供热` |
+| 数值       | 标签           |
+| ---------- | -------------- |
+| `≥105%`    | `冷凝热效率`   |
+| `≤5s`      | `出热水时间`   |
+| `COP 4.2+` | `系统能效比`   |
+| `24h`      | `商用连续供热` |
 
 建议结构：
 
 ```json
 {
-  "technicalStats": [
-    { "value": "≥105%", "label": "冷凝热效率", "sortOrder": 0, "visible": true }
-  ]
+  "technicalStats": [{ "value": "≥105%", "label": "冷凝热效率", "sortOrder": 0, "visible": true }]
 }
 ```
 
@@ -148,9 +146,9 @@ Tab 顺序调整为：
 
 当前官网值：
 
-| 数值 | 标签 |
-| --- | --- |
-| `38%` | `平均能耗降低` |
+| 数值     | 标签           |
+| -------- | -------------- |
+| `38%`    | `平均能耗降低` |
 | `1,200+` | `节能改造项目` |
 | `6,800t` | `年减少碳排放` |
 
@@ -168,54 +166,54 @@ Tab 顺序调整为：
 
 当前官网值：
 
-| 字段 | 当前官网值 |
-| --- | --- |
-| `serviceProvinceCount` | `30` |
-| `serviceOutletCount` | `200+` |
-| `serviceNetworkText` | `覆盖全国 30 省市，200+ 授权服务网点` |
+| 字段                   | 当前官网值                            |
+| ---------------------- | ------------------------------------- |
+| `serviceProvinceCount` | `30`                                  |
+| `serviceOutletCount`   | `200+`                                |
+| `serviceNetworkText`   | `覆盖全国 30 省市，200+ 授权服务网点` |
 
 ### 6.5 企业与集团关系
 
 字段：
 
-| 字段 | 当前官网值 |
-| --- | --- |
-| `operatorGroupName` | `瑞合瑞德暖通科技集团` |
-| `operatorGroupNameEn` | `Rhautt Comfort` |
-| `operatorGroupUrl` | `https://rhautt.com` |
+| 字段                      | 当前官网值                                     |
+| ------------------------- | ---------------------------------------------- |
+| `operatorGroupName`       | `瑞合瑞德暖通科技集团`                         |
+| `operatorGroupNameEn`     | `Rhautt Comfort`                               |
+| `operatorGroupUrl`        | `https://rhautt.com`                           |
 | `parentBrandRelationText` | `瑞美（Rheem）集团旗下 · 瑞合瑞德集团中国运营` |
-| `rheemUrl` | `https://www.rheem.com.cn` |
-| `ruudUrl` | `https://www.ruud.com.cn` |
-| `groupSiteUrl` | `https://rhautt.com` |
+| `rheemUrl`                | `https://www.rheem.com.cn`                     |
+| `ruudUrl`                 | `https://www.ruud.com.cn`                      |
+| `groupSiteUrl`            | `https://rhautt.com`                           |
 
 ### 6.6 联系信息
 
 字段：
 
-| 字段 | 当前官网值 | 说明 |
-| --- | --- | --- |
-| `customerServiceHotline` | `400-888-8888` | 全国客服热线 |
-| `customerServiceTelHref` | `tel:4008888888` | 电话链接 |
-| `serviceHours` | `周一至周六 9:00—18:00` | 服务时间 |
-| `businessEmail` | `business@everhot.com.cn` | 工程与商务合作 |
-| `mediaEmail` | `pr@everhot.com.cn` | 媒体与品牌 |
-| `privacyEmail` | `privacy@everhot.com.cn` | 个人信息保护负责人邮箱 |
-| `dealerJoinEmail` | `dealer@rhautt.com` | 经销商加盟 |
-| `contactFormSuccessText` | `留言已提交，恒热客服将尽快与您联系。` | 联系表单成功文案 |
-| `urgentRepairNote` | `提交后将由客服回拨。紧急报修请直接致电 400-888-8888。` | 联系表单底部说明 |
+| 字段                     | 当前官网值                                              | 说明                   |
+| ------------------------ | ------------------------------------------------------- | ---------------------- |
+| `customerServiceHotline` | `400-888-8888`                                          | 全国客服热线           |
+| `customerServiceTelHref` | `tel:4008888888`                                        | 电话链接               |
+| `serviceHours`           | `周一至周六 9:00—18:00`                                 | 服务时间               |
+| `businessEmail`          | `business@everhot.com.cn`                               | 工程与商务合作         |
+| `mediaEmail`             | `pr@everhot.com.cn`                                     | 媒体与品牌             |
+| `privacyEmail`           | `privacy@everhot.com.cn`                                | 个人信息保护负责人邮箱 |
+| `dealerJoinEmail`        | `dealer@rhautt.com`                                     | 经销商加盟             |
+| `contactFormSuccessText` | `留言已提交，恒热客服将尽快与您联系。`                  | 联系表单成功文案       |
+| `urgentRepairNote`       | `提交后将由客服回拨。紧急报修请直接致电 400-888-8888。` | 联系表单底部说明       |
 
 ### 6.7 联系页入口卡片
 
 当前联系页存在以下入口卡片。基本信息管理应允许维护卡片文案，但不做表单字段设计器。
 
-| 类型 | 标题 | 说明/动作 |
-| --- | --- | --- |
-| 客服 | 全国客服热线 | 产品咨询、使用指导、售后报修，展示热线和服务时间 |
-| 售后 | 预约上门维修 | 链接 `/find-a-pro/`，按钮 `立即预约` |
-| 商务 | 工程与商务合作 | 展示商务邮箱 |
-| 加盟 | 经销商加盟 | 链接 `/professionals/residential/partner-programs/`，按钮 `加盟申请` |
-| 媒体 | 媒体与品牌 | 展示媒体邮箱 |
-| 集团 | 集团与其他品牌 | 链接 `https://rhautt.com`，按钮/链接 `访问集团官网` |
+| 类型 | 标题           | 说明/动作                                                            |
+| ---- | -------------- | -------------------------------------------------------------------- |
+| 客服 | 全国客服热线   | 产品咨询、使用指导、售后报修，展示热线和服务时间                     |
+| 售后 | 预约上门维修   | 链接 `/find-a-pro/`，按钮 `立即预约`                                 |
+| 商务 | 工程与商务合作 | 展示商务邮箱                                                         |
+| 加盟 | 经销商加盟     | 链接 `/professionals/residential/partner-programs/`，按钮 `加盟申请` |
+| 媒体 | 媒体与品牌     | 展示媒体邮箱                                                         |
+| 集团 | 集团与其他品牌 | 链接 `https://rhautt.com`，按钮/链接 `访问集团官网`                  |
 
 建议结构：
 
@@ -239,17 +237,17 @@ Tab 顺序调整为：
 
 字段：
 
-| 字段 | 当前官网值 |
-| --- | --- |
-| `dealerLocatorButtonText` | `查找经销商` |
-| `dealerLocatorPageTitle` | `查找授权经销商 | 恒热 Everhot` |
+| 字段                       | 当前官网值                                                            |
+| -------------------------- | --------------------------------------------------------------------- |
+| `dealerLocatorButtonText`  | `查找经销商`                                                          |
+| `dealerLocatorPageTitle`   | `查找授权经销商                                                       | 恒热 Everhot` |
 | `dealerLocatorDescription` | `覆盖全国 30 省市，200+ 授权服务网点，专业安装工程师，完善售后保障。` |
-| `dealerSearchPlaceholder` | `输入城市 / 区域 / 地址，如：上海 浦东` |
-| `nearestDealerButtonText` | `离我最近` |
-| `dealerJoinTitle` | `成为恒热授权经销商` |
-| `dealerJoinDescription` | `加入恒热经销商网络，获取独家授权、培训支持与市场资源` |
-| `dealerJoinButtonText` | `申请加盟` |
-| `dealerJoinHref` | `mailto:dealer@rhautt.com` |
+| `dealerSearchPlaceholder`  | `输入城市 / 区域 / 地址，如：上海 浦东`                               |
+| `nearestDealerButtonText`  | `离我最近`                                                            |
+| `dealerJoinTitle`          | `成为恒热授权经销商`                                                  |
+| `dealerJoinDescription`    | `加入恒热经销商网络，获取独家授权、培训支持与市场资源`                |
+| `dealerJoinButtonText`     | `申请加盟`                                                            |
+| `dealerJoinHref`           | `mailto:dealer@rhautt.com`                                            |
 
 本期不管理经销商门店明细。`apps/everhot-cn/public/js/dealers.js` 中的门店列表保持现状。
 
@@ -257,12 +255,12 @@ Tab 顺序调整为：
 
 当前 `find-a-pro` 页面存在四个授权标准：
 
-| 数值/标题 | 标签 |
-| --- | --- |
+| 数值/标题   | 标签                 |
+| ----------- | -------------------- |
 | `Rheem认证` | `官方认证安装工程师` |
-| `5年质保` | `整机售后保障` |
-| `48h响应` | `售后上门时效` |
-| `正品承诺` | `官方渠道授权货源` |
+| `5年质保`   | `整机售后保障`       |
+| `48h响应`   | `售后上门时效`       |
+| `正品承诺`  | `官方渠道授权货源`   |
 
 建议结构：
 
@@ -283,31 +281,31 @@ Tab 顺序调整为：
 
 字段：
 
-| 字段 | 当前官网值 |
-| --- | --- |
-| `icpNumber` | `沪ICP备XXXXXXXX号` |
-| `icpUrl` | `https://beian.miit.gov.cn/` |
-| `copyrightText` | `© 2026 Everhot 恒热 · 瑞合瑞德暖通科技集团 · Everhot 为注册商标` |
-| `copyrightYear` | `2026` |
-| `copyrightOwner` | `瑞合瑞德暖通科技集团` |
-| `trademarkText` | `Everhot / 恒热 为注册商标` |
-| `privacyPolicyHref` | `/privacy/` |
-| `cookiePolicyHref` | `/privacy/#cookie` |
-| `legalStatementHref` | `/privacy/#terms` |
+| 字段                 | 当前官网值                                                        |
+| -------------------- | ----------------------------------------------------------------- |
+| `icpNumber`          | `沪ICP备XXXXXXXX号`                                               |
+| `icpUrl`             | `https://beian.miit.gov.cn/`                                      |
+| `copyrightText`      | `© 2026 Everhot 恒热 · 瑞合瑞德暖通科技集团 · Everhot 为注册商标` |
+| `copyrightYear`      | `2026`                                                            |
+| `copyrightOwner`     | `瑞合瑞德暖通科技集团`                                            |
+| `trademarkText`      | `Everhot / 恒热 为注册商标`                                       |
+| `privacyPolicyHref`  | `/privacy/`                                                       |
+| `cookiePolicyHref`   | `/privacy/#cookie`                                                |
+| `legalStatementHref` | `/privacy/#terms`                                                 |
 
 ### 6.11 隐私政策基础信息
 
 字段：
 
-| 字段 | 当前官网值 |
-| --- | --- |
-| `privacyEffectiveDate` | `2026-XX-XX` |
-| `privacyLastUpdatedDate` | `2026-XX-XX` |
-| `privacyVersion` | `v1.0` |
-| `legalOperatorName` | 当前为占位：`【运营主体全称】` |
-| `registeredAddress` | 当前为占位：`【注册地址】` |
-| `privacyContactEmail` | `privacy@everhot.com.cn` |
-| `privacyContactHotline` | `400-888-8888` |
+| 字段                     | 当前官网值                     |
+| ------------------------ | ------------------------------ |
+| `privacyEffectiveDate`   | `2026-XX-XX`                   |
+| `privacyLastUpdatedDate` | `2026-XX-XX`                   |
+| `privacyVersion`         | `v1.0`                         |
+| `legalOperatorName`      | 当前为占位：`【运营主体全称】` |
+| `registeredAddress`      | 当前为占位：`【注册地址】`     |
+| `privacyContactEmail`    | `privacy@everhot.com.cn`       |
+| `privacyContactHotline`  | `400-888-8888`                 |
 
 验收时必须确认隐私政策页不再显示 `【运营主体全称】`、`【注册地址】` 这类占位文本，除非后台字段明确为空且产品决定允许占位。
 
@@ -315,21 +313,21 @@ Tab 顺序调整为：
 
 字段：
 
-| 字段 | 当前官网值 |
-| --- | --- |
-| `homeMetaTitle` | `恒热 Everhot | 中央采暖·热水·制冷整体解决方案` |
-| `homeMetaDescription` | `恒热 Everhot —— 百年恒续，为爱恒热。专注家用与商用中央采暖、热水、制冷整体解决方案，瑞美集团旗下品牌。` |
-| `homeMetaKeywords` | `恒热,Everhot,壁挂炉,热水器,中央热水,中央采暖,空气能,商用热水,家用采暖` |
-| `ogSiteName` | `Everhot 中国 Everhot China` |
-| `defaultOgImage` | `https://www.everhot.com.cn/assets/img/hero-poster-desktop.webp` |
-| `defaultTwitterImage` | `https://www.everhot.com.cn/assets/img/hero-poster-desktop.webp` |
-| `canonicalBaseUrl` | `https://www.everhot.com.cn/` |
-| `organizationName` | `Everhot 中国 Everhot China` |
-| `organizationLogo` | `https://www.everhot.com.cn/assets/img/brand/everhot-logo.png` |
-| `parentOrganizationName` | `Rhautt Comfort 瑞合瑞德暖通科技集团` |
-| `parentOrganizationUrl` | `https://rhautt.com` |
-| `sameAs` | `https://rhautt.com` |
-| `sitemapUrl` | `https://www.everhot.com.cn/sitemap.xml` |
+| 字段                     | 当前官网值                                                                                               |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `homeMetaTitle`          | `恒热 Everhot                                                                                            | 中央采暖·热水·制冷整体解决方案` |
+| `homeMetaDescription`    | `恒热 Everhot —— 百年恒续，为爱恒热。专注家用与商用中央采暖、热水、制冷整体解决方案，瑞美集团旗下品牌。` |
+| `homeMetaKeywords`       | `恒热,Everhot,壁挂炉,热水器,中央热水,中央采暖,空气能,商用热水,家用采暖`                                  |
+| `ogSiteName`             | `Everhot 中国 Everhot China`                                                                             |
+| `defaultOgImage`         | `https://www.everhot.com.cn/assets/img/hero-poster-desktop.webp`                                         |
+| `defaultTwitterImage`    | `https://www.everhot.com.cn/assets/img/hero-poster-desktop.webp`                                         |
+| `canonicalBaseUrl`       | `https://www.everhot.com.cn/`                                                                            |
+| `organizationName`       | `Everhot 中国 Everhot China`                                                                             |
+| `organizationLogo`       | `https://www.everhot.com.cn/assets/img/brand/everhot-logo.png`                                           |
+| `parentOrganizationName` | `Rhautt Comfort 瑞合瑞德暖通科技集团`                                                                    |
+| `parentOrganizationUrl`  | `https://rhautt.com`                                                                                     |
+| `sameAs`                 | `https://rhautt.com`                                                                                     |
+| `sitemapUrl`             | `https://www.everhot.com.cn/sitemap.xml`                                                                 |
 
 本期不要求提供每个页面独立 SEO 编辑器。只做恒热官网默认信息与当前基础页面已使用的全局信息。
 
@@ -339,13 +337,13 @@ Tab 顺序调整为：
 
 字段：
 
-| 字段 | 当前官网行为 |
-| --- | --- |
-| `analyticsEndpoint` | 当前读取 `window.EV_ANALYTICS_ENDPOINT`，默认不上报 |
-| `analyticsConsentEnabled` | 当前可通过 `window.EV_ANALYTICS_CONSENT=false` 关闭 |
-| `cookieConsentText` | `本站使用 Cookie 与匿名统计以保障基本功能并改善体验。继续浏览即表示同意，您也可拒绝非必要统计。详见隐私政策。` |
-| `cookieDenyText` | `拒绝非必要` |
-| `cookieAcceptText` | `同意` |
+| 字段                      | 当前官网行为                                                                                                   |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `analyticsEndpoint`       | 当前读取 `window.EV_ANALYTICS_ENDPOINT`，默认不上报                                                            |
+| `analyticsConsentEnabled` | 当前可通过 `window.EV_ANALYTICS_CONSENT=false` 关闭                                                            |
+| `cookieConsentText`       | `本站使用 Cookie 与匿名统计以保障基本功能并改善体验。继续浏览即表示同意，您也可拒绝非必要统计。详见隐私政策。` |
+| `cookieDenyText`          | `拒绝非必要`                                                                                                   |
+| `cookieAcceptText`        | `同意`                                                                                                         |
 
 ## 7. 数据模型建议
 
@@ -357,26 +355,26 @@ Tab 顺序调整为：
 
 核心字段：
 
-| 字段 | 类型 | 说明 |
-| --- | --- | --- |
-| `id` | uuid | 主键 |
-| `tenant_id` | uuid | 租户隔离 |
-| `site_id` | uuid | 关联 `tenant_brand_sites.id` |
-| `site_code` | text | 冗余 `everhot`，便于本地静态消费 |
-| `identity` | jsonb | 站点身份 |
-| `brand_claims` | jsonb | 品牌主张 / 首页首屏 |
-| `stats` | jsonb | 首页数字 |
-| `organization` | jsonb | 企业与集团关系 |
-| `contact` | jsonb | 联系信息 |
-| `dealer_service` | jsonb | 经销商服务入口 |
-| `legal` | jsonb | 备案版权 |
-| `privacy` | jsonb | 隐私基础信息 |
-| `seo` | jsonb | 默认 SEO / 分享 |
-| `analytics` | jsonb | Cookie / 匿名统计配置 |
-| `created_by` | uuid | 创建人 |
-| `updated_by` | uuid | 更新人 |
-| `created_at` | timestamptz | 创建时间 |
-| `updated_at` | timestamptz | 更新时间 |
+| 字段             | 类型        | 说明                             |
+| ---------------- | ----------- | -------------------------------- |
+| `id`             | uuid        | 主键                             |
+| `tenant_id`      | uuid        | 租户隔离                         |
+| `site_id`        | uuid        | 关联 `tenant_brand_sites.id`     |
+| `site_code`      | text        | 冗余 `everhot`，便于本地静态消费 |
+| `identity`       | jsonb       | 站点身份                         |
+| `brand_claims`   | jsonb       | 品牌主张 / 首页首屏              |
+| `stats`          | jsonb       | 首页数字                         |
+| `organization`   | jsonb       | 企业与集团关系                   |
+| `contact`        | jsonb       | 联系信息                         |
+| `dealer_service` | jsonb       | 经销商服务入口                   |
+| `legal`          | jsonb       | 备案版权                         |
+| `privacy`        | jsonb       | 隐私基础信息                     |
+| `seo`            | jsonb       | 默认 SEO / 分享                  |
+| `analytics`      | jsonb       | Cookie / 匿名统计配置            |
+| `created_by`     | uuid        | 创建人                           |
+| `updated_by`     | uuid        | 更新人                           |
+| `created_at`     | timestamptz | 创建时间                         |
+| `updated_at`     | timestamptz | 更新时间                         |
 
 约束：
 

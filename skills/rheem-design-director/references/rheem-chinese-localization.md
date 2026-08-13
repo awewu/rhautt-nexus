@@ -18,14 +18,14 @@ Avoid consumer-flashy language. Do not turn Rheem into "红色科技感" or a ge
 
 ## Color To Chinese Tone
 
-| Token | Use | Chinese tone | Good words | Avoid |
-| --- | --- | --- | --- | --- |
-| Rheem Red `#E4002B` | Logo, primary CTA, urgent commercial action, active state | 果断、可靠、推进 | 稳供、确认、联系专家、提交审核、关键路径 | 激情、爆款、火力全开、网红红 |
-| Blue `#1B365D` | Engineering specs, documents, professional navigation | 工程、标准、权威 | 规格、蓝本、定规、技术支持、图纸 | 炫酷、科技蓝、未来感 |
-| Gray `#63666A` / `#97999B` | Work surfaces, tables, secondary copy | 中性、承压、耐看 | 参数、校核、工况、记录、状态 | 高级灰、大牌灰 |
-| Teal `#4F868E` | Water/system continuity, smart routing, support ecology | 清洁、流动、系统 | 水路、恒供、联动、系统流 | 清新、治愈、薄荷 |
-| Green `#789D4A` | Efficiency and sustainability | 节能、低碳、长期价值 | 低碳、节能、善度、可持续、减排 | 绿色生活方式泛化 |
-| Orange `#ED8B00` | Rebates, warnings, pending checks | 提醒、机会、待确认 | 补贴、提示、待核、窗口期 | 焦虑、抢购、警报化 |
+| Token                      | Use                                                       | Chinese tone         | Good words                               | Avoid                        |
+| -------------------------- | --------------------------------------------------------- | -------------------- | ---------------------------------------- | ---------------------------- |
+| Rheem Red `#E4002B`        | Logo, primary CTA, urgent commercial action, active state | 果断、可靠、推进     | 稳供、确认、联系专家、提交审核、关键路径 | 激情、爆款、火力全开、网红红 |
+| Blue `#1B365D`             | Engineering specs, documents, professional navigation     | 工程、标准、权威     | 规格、蓝本、定规、技术支持、图纸         | 炫酷、科技蓝、未来感         |
+| Gray `#63666A` / `#97999B` | Work surfaces, tables, secondary copy                     | 中性、承压、耐看     | 参数、校核、工况、记录、状态             | 高级灰、大牌灰               |
+| Teal `#4F868E`             | Water/system continuity, smart routing, support ecology   | 清洁、流动、系统     | 水路、恒供、联动、系统流                 | 清新、治愈、薄荷             |
+| Green `#789D4A`            | Efficiency and sustainability                             | 节能、低碳、长期价值 | 低碳、节能、善度、可持续、减排           | 绿色生活方式泛化             |
+| Orange `#ED8B00`           | Rebates, warnings, pending checks                         | 提醒、机会、待确认   | 补贴、提示、待核、窗口期                 | 焦虑、抢购、警报化           |
 
 ## Phrase Mapping
 

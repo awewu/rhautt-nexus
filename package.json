@@ -74,6 +74,8 @@
     "demo:flywheel": "node scripts/nexus-flywheel/closed-loop-demo.mjs",
     "guard:standards": "node scripts/agent-guards/standards-metadata-check.js",
     "guard:ui-vi": "node scripts/agent-guards/ui-vi-check.js",
+    "guard:ui-tokens": "node scripts/agent-guards/ui-token-audit.mjs --strict",
+    "audit:ui-tokens": "node scripts/agent-guards/ui-token-audit.mjs",
     "guard:ruud-vi": "node scripts/agent-guards/ruud-vi-research-check.js",
     "guard:rheem-vi-production": "node scripts/agent-guards/rheem-vi-production-audit.js",
     "guard:rheem-vi-production:strict": "node scripts/agent-guards/rheem-vi-production-audit.js --fail-on-blocked",

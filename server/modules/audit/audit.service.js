@@ -32,7 +32,7 @@ class AuditService {
       before: entry.before || null,
       after: entry.after || null,
       ip: entry.ip || null,
-      userAgent: entry.userAgent || null
+      userAgent: entry.userAgent || null,
     };
   }
 
@@ -45,7 +45,7 @@ class AuditService {
         id: `AUD-${String(this.memoryDb.auditLogs.length + 1).padStart(6, '0')}`,
         ...payload,
         createdAt: new Date().toISOString(),
-        storageMode: 'memory'
+        storageMode: 'memory',
       };
       this.memoryDb.auditLogs.push(item);
       return item;
@@ -56,12 +56,13 @@ class AuditService {
 
   async list(scope, query = {}) {
     if (this.shouldUseMemoryMode()) {
-      const items = (this.memoryDb.auditLogs || []).filter(item => {
+      const items = (this.memoryDb.auditLogs || []).filter((item) => {
         if (String(item.tenantId) !== String(scope.tenantId)) return false;
         if (query.action && item.action !== query.action) return false;
         if (query.resourceType && item.resourceType !== query.resourceType) return false;
         if (query.resourceId && String(item.resourceId) !== String(query.resourceId)) return false;
-        if (query.actorUserId && String(item.actorUserId) !== String(query.actorUserId)) return false;
+        if (query.actorUserId && String(item.actorUserId) !== String(query.actorUserId))
+          return false;
         return true;
       });
       return {
@@ -70,9 +71,9 @@ class AuditService {
           page: 1,
           limit: items.length,
           total: items.length,
-          pages: 1
+          pages: 1,
         },
-        storageMode: 'memory'
+        storageMode: 'memory',
       };
     }
 
@@ -84,7 +85,7 @@ class AuditService {
     return this.auditRepo.list(scope, q, {
       page: query.page,
       limit: query.limit,
-      sort: { createdAt: -1 }
+      sort: { createdAt: -1 },
     });
   }
 }

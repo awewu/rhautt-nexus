@@ -4,14 +4,14 @@ Use this reference to choose which external AI design tool/agent pattern to lear
 
 ## Tool Map
 
-| Target | Best-fit tools / agents | Use for |
-| --- | --- | --- |
-| Fast UI concept generation | Google Stitch | Natural-language high-fidelity screens, UI flows, and multi-screen design exploration. |
-| Figma design collaboration | Figma AI / Figma Make | Prompt-to-design exploration, interactive prototypes, editable design collaboration, and web app mockups in the Figma workflow. |
-| React / Next.js UI delivery | Vercel v0 | Frontend components, pages, dashboards, SaaS UI, React/Tailwind/shadcn-style implementation drafts. |
-| Full-stack MVP | Lovable / Bolt / Replit Agent | Quickly produce runnable product prototypes with UI, app logic, and basic backend or deployment flow. |
-| Brand VI / visual system | Canva AI / Adobe Firefly / Recraft / Brandmark | Logo directions, brand colors, typography exploration, campaign visuals, social assets, and visual identity boards. |
-| Code-level refinement | Codex / Claude Code / Cursor Agent | Turn design into maintainable production code, fix layout, responsiveness, accessibility, interaction states, and integration issues. |
+| Target                      | Best-fit tools / agents                        | Use for                                                                                                                               |
+| --------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Fast UI concept generation  | Google Stitch                                  | Natural-language high-fidelity screens, UI flows, and multi-screen design exploration.                                                |
+| Figma design collaboration  | Figma AI / Figma Make                          | Prompt-to-design exploration, interactive prototypes, editable design collaboration, and web app mockups in the Figma workflow.       |
+| React / Next.js UI delivery | Vercel v0                                      | Frontend components, pages, dashboards, SaaS UI, React/Tailwind/shadcn-style implementation drafts.                                   |
+| Full-stack MVP              | Lovable / Bolt / Replit Agent                  | Quickly produce runnable product prototypes with UI, app logic, and basic backend or deployment flow.                                 |
+| Brand VI / visual system    | Canva AI / Adobe Firefly / Recraft / Brandmark | Logo directions, brand colors, typography exploration, campaign visuals, social assets, and visual identity boards.                   |
+| Code-level refinement       | Codex / Claude Code / Cursor Agent             | Turn design into maintainable production code, fix layout, responsiveness, accessibility, interaction states, and integration issues. |
 
 ## Selection Rules
 

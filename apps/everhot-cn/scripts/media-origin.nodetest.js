@@ -25,7 +25,10 @@ test('server A accepts authenticated JPG sync and serves site material manifest'
   const server = http.createServer((req, res) => {
     const urlPath = new URL(req.url, 'http://localhost').pathname;
     if (media.handleSync(req, res, send)) return;
-    if (media.tryServe(urlPath, req, res, send, { '.jpg': 'image/jpeg', '.json': 'application/json' })) return;
+    if (
+      media.tryServe(urlPath, req, res, send, { '.jpg': 'image/jpeg', '.json': 'application/json' })
+    )
+      return;
     send(res, 404, 'not found');
   });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -55,7 +58,13 @@ test('server A accepts authenticated JPG sync and serves site material manifest'
     body: JSON.stringify({
       kind: 'site-material-bundle',
       manifest,
-      files: [{ path: 'brand-story-1.jpg', mimeType: 'image/jpeg', dataBase64: Buffer.from('jpg!').toString('base64') }],
+      files: [
+        {
+          path: 'brand-story-1.jpg',
+          mimeType: 'image/jpeg',
+          dataBase64: Buffer.from('jpg!').toString('base64'),
+        },
+      ],
     }),
   });
   assert.equal(sync.status, 200);
@@ -92,7 +101,10 @@ test('server A rejects media sync without the shared token', async () => {
   process.env.EVERHOT_MEDIA_ROOT = path.join(root, 'media');
   process.env.EVERHOT_MEDIA_SYNC_TOKEN = 'expected-token';
   const media = createMediaOrigin({ publicDir: root });
-  const send = (res, status, body, headers = {}) => { res.writeHead(status, headers); res.end(body); };
+  const send = (res, status, body, headers = {}) => {
+    res.writeHead(status, headers);
+    res.end(body);
+  };
   const server = http.createServer((req, res) => {
     if (!media.handleSync(req, res, send)) send(res, 404, 'not found');
   });

@@ -16,7 +16,10 @@ const sourcePath = path.join(
 const source = fs.readFileSync(sourcePath, 'utf8');
 const apiSource = fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', 'api.ts'), 'utf8');
 const everhotPublicPath = path.join(__dirname, '..', '..', 'everhot-cn', 'public');
-const siteMaterialsJs = fs.readFileSync(path.join(everhotPublicPath, 'js', 'site-materials.js'), 'utf8');
+const siteMaterialsJs = fs.readFileSync(
+  path.join(everhotPublicPath, 'js', 'site-materials.js'),
+  'utf8'
+);
 const homepageHtml = fs.readFileSync(path.join(everhotPublicPath, 'index.html'), 'utf8');
 
 test('brand site content switch keeps products and simulated materials separate', () => {
@@ -63,7 +66,16 @@ test('homepage modules expose editable audience entry card fields in the existin
   assert.match(source, /\.site-audience-table-wrap\s*\{[^}]*overflow-x:\s*hidden;/);
   assert.match(source, /\.site-audience-table\s*\{[^}]*table-layout:\s*fixed;/);
   assert.doesNotMatch(source, /\.site-audience-table\s*\{[^}]*min-width:\s*1560px;/);
-  for (const field of ['tagZh', 'tagEn', 'title', 'description', 'primaryLabel', 'primaryHref', 'secondaryLabel', 'secondaryHref']) {
+  for (const field of [
+    'tagZh',
+    'tagEn',
+    'title',
+    'description',
+    'primaryLabel',
+    'primaryHref',
+    'secondaryLabel',
+    'secondaryHref',
+  ]) {
     assert.match(source, new RegExp(field));
   }
   assert.match(source, /home-audience-cards/);

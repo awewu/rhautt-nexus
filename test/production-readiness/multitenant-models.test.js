@@ -19,19 +19,58 @@ describe('production multitenant models', () => {
       [Tenant, ['code_1']],
       [Dealer, ['tenantId_1_code_1', 'tenantId_1_status_1']],
       [Store, ['tenantId_1_dealerId_1_code_1', 'tenantId_1_dealerId_1_status_1']],
-      [UserV2, ['phone_1', 'tenantId_1_dealerId_1_role_1_status_1', 'tenantId_1_customerId_1_role_1_status_1']],
-      [CustomerV2, ['tenantId_1_phoneHash_1', 'tenantId_1_ownerUserId_1_status_1_updatedAt_-1', 'tenantId_1_productModuleId_1_productDeploymentMode_1_updatedAt_-1']],
-      [Opportunity, ['tenantId_1_ownerUserId_1_stage_1_updatedAt_-1', 'tenantId_1_customerId_1', 'tenantId_1_productModuleId_1_productDeploymentMode_1_updatedAt_-1']],
+      [
+        UserV2,
+        [
+          'phone_1',
+          'tenantId_1_dealerId_1_role_1_status_1',
+          'tenantId_1_customerId_1_role_1_status_1',
+        ],
+      ],
+      [
+        CustomerV2,
+        [
+          'tenantId_1_phoneHash_1',
+          'tenantId_1_ownerUserId_1_status_1_updatedAt_-1',
+          'tenantId_1_productModuleId_1_productDeploymentMode_1_updatedAt_-1',
+        ],
+      ],
+      [
+        Opportunity,
+        [
+          'tenantId_1_ownerUserId_1_stage_1_updatedAt_-1',
+          'tenantId_1_customerId_1',
+          'tenantId_1_productModuleId_1_productDeploymentMode_1_updatedAt_-1',
+        ],
+      ],
       [Interaction, ['tenantId_1_customerId_1_createdAt_-1']],
       [AuditLog, ['tenantId_1_resourceType_1_resourceId_1_createdAt_-1']],
-      [LifecycleLink, ['tenantId_1_contractId_1', 'tenantId_1_customerId_1_lifecycleStage_1_updatedAt_-1', 'tenantId_1_installedAssets.assetId_1']],
+      [
+        LifecycleLink,
+        [
+          'tenantId_1_contractId_1',
+          'tenantId_1_customerId_1_lifecycleStage_1_updatedAt_-1',
+          'tenantId_1_installedAssets.assetId_1',
+        ],
+      ],
       [OutboxEvent, ['tenantId_1_idempotencyKey_1', 'status_1_availableAt_1_attempts_1']],
       [Quotation, ['tenantId_1_quotationNo_1', 'tenantId_1_dealerId_1_status_1_createdAt_-1']],
-      [QuotationV2, ['tenantId_1_quotationNo_1', 'tenantId_1_customerId_1_status_1_updatedAt_-1', 'tenantId_1_productModuleId_1_productDeploymentMode_1_updatedAt_-1']]
+      [
+        QuotationV2,
+        [
+          'tenantId_1_quotationNo_1',
+          'tenantId_1_customerId_1_status_1_updatedAt_-1',
+          'tenantId_1_productModuleId_1_productDeploymentMode_1_updatedAt_-1',
+        ],
+      ],
     ];
 
     for (const [model, expectedIndexNames] of specs) {
-      const indexes = model.schema.indexes().map(([fields]) => Object.entries(fields).map(([k, v]) => `${k}_${v}`).join('_'));
+      const indexes = model.schema.indexes().map(([fields]) =>
+        Object.entries(fields)
+          .map(([k, v]) => `${k}_${v}`)
+          .join('_')
+      );
       for (const name of expectedIndexNames) {
         expect(indexes).toContain(name);
       }
@@ -39,7 +78,19 @@ describe('production multitenant models', () => {
   });
 
   test('tenant-scoped documents include required tenant field', () => {
-    for (const model of [Dealer, Store, UserV2, CustomerV2, Opportunity, Interaction, AuditLog, LifecycleLink, OutboxEvent, Quotation, QuotationV2]) {
+    for (const model of [
+      Dealer,
+      Store,
+      UserV2,
+      CustomerV2,
+      Opportunity,
+      Interaction,
+      AuditLog,
+      LifecycleLink,
+      OutboxEvent,
+      Quotation,
+      QuotationV2,
+    ]) {
       expect(model.schema.path('tenantId')).toBeTruthy();
     }
   });

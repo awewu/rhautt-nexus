@@ -19,32 +19,54 @@
  *   可选 env：API_BASE / TEST_STAFF_ID / TEST_STAFF_PW / TEST_DEALER_ID / TEST_DEALER_PW
  */
 const BASE = process.env.API_BASE || 'http://127.0.0.1:3300';
-const STAFF = { phone: process.env.TEST_STAFF_ID || 'admin@rhautt.local', password: process.env.TEST_STAFF_PW || 'Test1234!' };
-const DEALER = { phone: process.env.TEST_DEALER_ID || '13900000001', password: process.env.TEST_DEALER_PW || 'Dealer@2026' };
+const STAFF = {
+  phone: process.env.TEST_STAFF_ID || 'admin@rhautt.local',
+  password: process.env.TEST_STAFF_PW || 'Test1234!',
+};
+const DEALER = {
+  phone: process.env.TEST_DEALER_ID || '13900000001',
+  password: process.env.TEST_DEALER_PW || 'Dealer@2026',
+};
 const SWEEP_WAIT_MS = Number(process.env.SWEEP_WAIT_MS || 8000);
 
 let passed = 0;
 const failures = [];
 
 function check(name, ok, detail = '') {
-  if (ok) { passed += 1; console.log(`  ✅ ${name}`); }
-  else { failures.push(`${name}${detail ? ` — ${detail}` : ''}`); console.log(`  ❌ ${name}${detail ? ` — ${detail}` : ''}`); }
+  if (ok) {
+    passed += 1;
+    console.log(`  ✅ ${name}`);
+  } else {
+    failures.push(`${name}${detail ? ` — ${detail}` : ''}`);
+    console.log(`  ❌ ${name}${detail ? ` — ${detail}` : ''}`);
+  }
 }
 
 async function api(path, { method = 'GET', token, body } = {}) {
   const res = await fetch(`${BASE}${path}`, {
     method,
-    headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
+    headers: {
+      'content-type': 'application/json',
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
+    },
     body: body ? JSON.stringify(body) : undefined,
   });
   let json = null;
-  try { json = await res.json(); } catch { /* 无 body */ }
+  try {
+    json = await res.json();
+  } catch {
+    /* 无 body */
+  }
   return { status: res.status, body: json };
 }
 
 async function login(creds) {
   const r = await api('/api/v2/auth/login', { method: 'POST', body: creds });
-  return { status: r.status, token: r.body?.token || r.body?.accessToken || null, user: r.body?.user };
+  return {
+    status: r.status,
+    token: r.body?.token || r.body?.accessToken || null,
+    user: r.body?.user,
+  };
 }
 
 async function main() {
@@ -60,7 +82,11 @@ async function main() {
   const staff = await login(STAFF);
   check('1a. 员工登录 200 且发证', staff.status === 200 && !!staff.token, `status=${staff.status}`);
   const dealer = await login(DEALER);
-  check('1b. 经销商登录 200 且发证', dealer.status === 200 && !!dealer.token, `status=${dealer.status}`);
+  check(
+    '1b. 经销商登录 200 且发证',
+    dealer.status === 200 && !!dealer.token,
+    `status=${dealer.status}`
+  );
   if (!staff.token || !dealer.token) return finish();
 
   // 2) createLead 多表写（含 project-spine 回归防线）
@@ -70,10 +96,15 @@ async function main() {
 
   const phone = `139${String(Date.now()).slice(-8)}`;
   const lead = await api('/api/v2/crm/leads', {
-    method: 'POST', token: dealer.token,
+    method: 'POST',
+    token: dealer.token,
     body: { phone, name: '集成测试客户', city: '上海', source: 'integration-test' },
   });
-  check('2a. createLead 201（未因 project_id NOT NULL 失败）', lead.status === 201, `status=${lead.status} body=${JSON.stringify(lead.body).slice(0, 160)}`);
+  check(
+    '2a. createLead 201（未因 project_id NOT NULL 失败）',
+    lead.status === 201,
+    `status=${lead.status} body=${JSON.stringify(lead.body).slice(0, 160)}`
+  );
   const customerId = lead.body?.customer?.id;
   check('2b. 返回客户 id', !!customerId);
 
@@ -81,36 +112,78 @@ async function main() {
     const c360 = await api(`/api/v2/crm/customers/${customerId}`, { token: dealer.token });
     const opp = c360.body?.opportunities?.[0];
     check('2c. 商机已建', !!opp);
-    check('2d. 商机锚定项目主线 projectId 非空（project-spine 回归防线）', !!opp?.projectId, `projectId=${opp?.projectId}`);
+    check(
+      '2d. 商机锚定项目主线 projectId 非空（project-spine 回归防线）',
+      !!opp?.projectId,
+      `projectId=${opp?.projectId}`
+    );
   }
 
   // 3) 驾驶舱读契约
   console.log('\n[3] 驾驶舱读（契约 + 类型）');
   const ns = await api('/api/v2/growth/cockpit/north-star', { token: staff.token });
-  check('3a. 北极星 200 且字段完整', ns.status === 200 && typeof ns.body?.activeProfitableDealers === 'number' && typeof ns.body?.networkGmv === 'number');
+  check(
+    '3a. 北极星 200 且字段完整',
+    ns.status === 200 &&
+      typeof ns.body?.activeProfitableDealers === 'number' &&
+      typeof ns.body?.networkGmv === 'number'
+  );
   const fn = await api('/api/v2/growth/cockpit/aarrr-funnel', { token: staff.token });
   check('3b. AARRR 六阶段齐全', fn.status === 200 && fn.body?.stages?.length === 6);
   const gl = await api('/api/v2/growth/cockpit/geo-loop', { token: staff.token });
-  check('3c. GEO 闭环含 缺口/被引率/内容状态', gl.status === 200 && typeof gl.body?.gaps === 'number' && typeof gl.body?.citedRate === 'number' && !!gl.body?.content);
+  check(
+    '3c. GEO 闭环含 缺口/被引率/内容状态',
+    gl.status === 200 &&
+      typeof gl.body?.gaps === 'number' &&
+      typeof gl.body?.citedRate === 'number' &&
+      !!gl.body?.content
+  );
   const lr = await api('/api/v2/growth/cockpit/lead-routing', { token: staff.token });
-  check('3d. 线索分配含 成功率/未覆盖样本', lr.status === 200 && typeof lr.body?.routingRate === 'number' && Array.isArray(lr.body?.unroutedSamples));
+  check(
+    '3d. 线索分配含 成功率/未覆盖样本',
+    lr.status === 200 &&
+      typeof lr.body?.routingRate === 'number' &&
+      Array.isArray(lr.body?.unroutedSamples)
+  );
   const bh = await api('/api/v2/growth/cockpit/brand-health', { token: staff.token });
-  check('3e. 品牌健康度接真数据字段', bh.status === 200 && typeof bh.body?.citedRate === 'number' && typeof bh.body?.positiveSentiment === 'number');
+  check(
+    '3e. 品牌健康度接真数据字段',
+    bh.status === 200 &&
+      typeof bh.body?.citedRate === 'number' &&
+      typeof bh.body?.positiveSentiment === 'number'
+  );
 
   // 4) 日快照写 + 趋势读
   console.log('\n[4] 脱敏聚合日快照 + 趋势');
-  const snap = await api('/api/v2/growth/cockpit/snapshot', { method: 'POST', token: staff.token, body: {} });
+  const snap = await api('/api/v2/growth/cockpit/snapshot', {
+    method: 'POST',
+    token: staff.token,
+    body: {},
+  });
   check('4a. 日快照写入 201', snap.status === 201, `status=${snap.status}`);
-  check('4b. 快照含北极星与漏斗指标', !!snap.body?.metrics?.network_gmv !== undefined && snap.body?.metrics?.funnel_revenue !== undefined);
-  const tr = await api('/api/v2/growth/cockpit/trends?metric=network_gmv&days=7', { token: staff.token });
-  check('4c. 趋势序列可读', tr.status === 200 && Array.isArray(tr.body?.series) && tr.body.series.length >= 1);
+  check(
+    '4b. 快照含北极星与漏斗指标',
+    !!snap.body?.metrics?.network_gmv !== undefined &&
+      snap.body?.metrics?.funnel_revenue !== undefined
+  );
+  const tr = await api('/api/v2/growth/cockpit/trends?metric=network_gmv&days=7', {
+    token: staff.token,
+  });
+  check(
+    '4c. 趋势序列可读',
+    tr.status === 200 && Array.isArray(tr.body?.series) && tr.body.series.length >= 1
+  );
 
   // 5) 事件驱动：lead.created → 漏斗线索 +1（等 outbox sweep）
   console.log(`\n[5] 事件驱动闭环（等 outbox sweep ${SWEEP_WAIT_MS}ms）`);
   await new Promise((r) => setTimeout(r, SWEEP_WAIT_MS));
   const funnelAfter = await api('/api/v2/growth/cockpit/aarrr-funnel', { token: dealer.token });
   const leadAfter = funnelAfter.body?.stages?.find((s) => s.stage === 'lead')?.count ?? 0;
-  check('5a. lead.created 经事件总线归集到漏斗「线索」', leadAfter > leadBefore, `before=${leadBefore} after=${leadAfter}`);
+  check(
+    '5a. lead.created 经事件总线归集到漏斗「线索」',
+    leadAfter > leadBefore,
+    `before=${leadBefore} after=${leadAfter}`
+  );
 
   finish();
 }
@@ -126,4 +199,7 @@ function finish() {
   process.exit(1);
 }
 
-main().catch((e) => { console.error('集成测试异常:', e.message); process.exit(1); });
+main().catch((e) => {
+  console.error('集成测试异常:', e.message);
+  process.exit(1);
+});

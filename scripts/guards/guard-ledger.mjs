@@ -28,9 +28,11 @@ const TIMEOUT_MS = Number(process.env.GUARD_TIMEOUT_MS || 90_000);
 
 // 聚合脚本（会串联子门禁，逐项跑时排除，避免重复与中断语义）
 // 聚合脚本 + 本工具自身（否则递归自调用）
-const AGGREGATES = /^(guard:all|guard:all:nonvisual|guard:all:nonvisual:evidence|harness:all|guard:ledger)$/;
+const AGGREGATES =
+  /^(guard:all|guard:all:nonvisual|guard:all:nonvisual:evidence|harness:all|guard:ledger)$/;
 // 依赖外部环境（浏览器/staging/redis/在跑的服务），默认跳过，--all 时执行
-const ENV_DEPENDENT = /(browser-visual|staging-smoke|redis-runtime|rls-enforcement|target-api-boot-smoke)/;
+const ENV_DEPENDENT =
+  /(browser-visual|staging-smoke|redis-runtime|rls-enforcement|target-api-boot-smoke)/;
 
 // 分类用的正则必须在执行循环**之前**求值：classify() 虽被提升，但 const 有暂时性死区，
 // 若声明在循环之后，第一个失败的门禁就会抛 ReferenceError 并让整个账本崩溃（已踩过）。
@@ -54,13 +56,24 @@ const flush = (complete) => {
   const p = rows.filter((r) => r.status === 'PASS').length;
   const f = rows.filter((r) => r.status === 'FAIL' || r.status === 'TIMEOUT').length;
   const s = rows.filter((r) => r.status === 'SKIP').length;
-  writeFileSync(OUT_PATH, JSON.stringify({
-    generatedAt: new Date().toISOString(),
-    complete,
-    total: names.length,
-    ran: rows.length,
-    pass: p, fail: f, skip: s, rows,
-  }, null, 2), 'utf8');
+  writeFileSync(
+    OUT_PATH,
+    JSON.stringify(
+      {
+        generatedAt: new Date().toISOString(),
+        complete,
+        total: names.length,
+        ran: rows.length,
+        pass: p,
+        fail: f,
+        skip: s,
+        rows,
+      },
+      null,
+      2
+    ),
+    'utf8'
+  );
 };
 flush(false);
 
@@ -71,7 +84,11 @@ for (const name of names) {
   }
   const started = Date.now();
   try {
-    const out = execSync(`npm run --silent ${name}`, { cwd: ROOT, stdio: 'pipe', timeout: TIMEOUT_MS }).toString();
+    const out = execSync(`npm run --silent ${name}`, {
+      cwd: ROOT,
+      stdio: 'pipe',
+      timeout: TIMEOUT_MS,
+    }).toString();
     // 门禁通过 _artifact-gate 主动 SKIP（依赖的产物未生成/已退役）→ 不计通过、不阻断
     if (/^SKIPPED:/m.test(out)) {
       const why = (out.match(/^SKIPPED:.*$/m) || [''])[0].slice(9, 150);
@@ -132,8 +149,12 @@ if (AS_JSON) {
   console.log(JSON.stringify(report, null, 2));
 } else {
   const byKind = (k) => fail.filter((r) => r.kind === k);
-  console.log(`\n门禁红绿账（${rows.length} 项：PASS ${pass.length} / FAIL ${fail.length} / SKIP ${skip.length}）`);
-  console.log(`失败分类：REAL ${byKind('REAL').length}（真问题，必修） · ARTIFACT ${byKind('ARTIFACT').length}（依赖缺失产物） · BROKEN ${byKind('BROKEN').length}（门禁脚本自身坏）\n`);
+  console.log(
+    `\n门禁红绿账（${rows.length} 项：PASS ${pass.length} / FAIL ${fail.length} / SKIP ${skip.length}）`
+  );
+  console.log(
+    `失败分类：REAL ${byKind('REAL').length}（真问题，必修） · ARTIFACT ${byKind('ARTIFACT').length}（依赖缺失产物） · BROKEN ${byKind('BROKEN').length}（门禁脚本自身坏）\n`
+  );
   for (const kind of ['REAL', 'BROKEN', 'ARTIFACT']) {
     const list = byKind(kind);
     if (!list.length) continue;
@@ -153,6 +174,8 @@ if (AS_JSON) {
 const FAIL_ON_REAL = args.has('--fail-on=real');
 const blocking = FAIL_ON_REAL ? fail.filter((r) => r.kind === 'REAL') : fail;
 if (blocking.length) {
-  console.error(`\n阻断项 ${blocking.length}${FAIL_ON_REAL ? '（仅计 REAL）' : ''}：${blocking.map((r) => r.name).join(', ')}`);
+  console.error(
+    `\n阻断项 ${blocking.length}${FAIL_ON_REAL ? '（仅计 REAL）' : ''}：${blocking.map((r) => r.name).join(', ')}`
+  );
 }
 process.exit(blocking.length ? 1 : 0);

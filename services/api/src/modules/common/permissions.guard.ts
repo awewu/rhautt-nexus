@@ -23,7 +23,8 @@ export class PermissionsGuard implements CanActivate {
     const req = ctx.switchToHttp().getRequest();
     const permissions = new Set<string>(req.user?.permissions ?? []);
     if (req.user?.role === 'platform_admin' || req.user?.role === 'hq_admin') return true;
-    if (permissions.has('*') || required.some((permission) => permissions.has(permission))) return true;
+    if (permissions.has('*') || required.some((permission) => permissions.has(permission)))
+      return true;
     throw new ForbiddenException('current account lacks the required permission');
   }
 }

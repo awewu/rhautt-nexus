@@ -42,11 +42,11 @@ const DEFAULT_CATALOG = {
     instant: {
       type: '燃气热水器',
       capacityMap: {
-        '一居': '13L/min',
-        '二居': '16L/min',
-        '三居': '16-20L/min',
-        '四居': '20-24L/min',
-        '别墅': '24L/min以上',
+        一居: '13L/min',
+        二居: '16L/min',
+        三居: '16-20L/min',
+        四居: '20-24L/min',
+        别墅: '24L/min以上',
       },
       brands: [],
       features: ['零冷水', '恒温', '防冻'],

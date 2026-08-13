@@ -69,10 +69,19 @@ describe('product-catalog D2 事实基座 + L7 营销供给层 · 契约与接�
 
   test('生成客户端暴露全部 11 个 product-catalog / brand 方法', () => {
     for (const method of [
-      'getProductTaxonomy', 'getProductDedupeCandidates', 'listProductDevices', 'upsertProductDevice',
-      'recommendProducts', 'getProductDevice', 'updateProductDevice', 'archiveProductDevice',
-      'listProductContent', 'upsertProductContent',
-      'listBrandProducts', 'getBrandProduct', 'recommendBrandProducts',
+      'getProductTaxonomy',
+      'getProductDedupeCandidates',
+      'listProductDevices',
+      'upsertProductDevice',
+      'recommendProducts',
+      'getProductDevice',
+      'updateProductDevice',
+      'archiveProductDevice',
+      'listProductContent',
+      'upsertProductContent',
+      'listBrandProducts',
+      'getBrandProduct',
+      'recommendBrandProducts',
     ]) {
       expect(client).toContain(`async ${method}`);
     }
@@ -80,8 +89,12 @@ describe('product-catalog D2 事实基座 + L7 营销供给层 · 契约与接�
 
   test('模块源文件齐备（事实基座 + L7）', () => {
     for (const f of [
-      'product-catalog.entity.ts', 'product-taxonomy.ts', 'product-catalog.service.ts',
-      'product-catalog.controller.ts', 'product-catalog.public.controller.ts', 'product-catalog.module.ts',
+      'product-catalog.entity.ts',
+      'product-taxonomy.ts',
+      'product-catalog.service.ts',
+      'product-catalog.controller.ts',
+      'product-catalog.public.controller.ts',
+      'product-catalog.module.ts',
     ]) {
       expect(fs.existsSync(path.join(ROOT, MODULE_DIR, f))).toBe(true);
     }
@@ -162,11 +175,13 @@ describe('product-catalog D2 事实基座 + L7 营销供给层 · 契约与接�
 
 describe('product-catalog P1 · 发布工作流 + 产品关系', () => {
   test('OpenAPI 暴露工作流端点（状态流转 + 定时发布结算）', () => {
-    const transition = spec.paths['/api/v2/product-catalog/devices/{id}/content/{locale}/transition']?.post;
+    const transition =
+      spec.paths['/api/v2/product-catalog/devices/{id}/content/{locale}/transition']?.post;
     const publishDue = spec.paths['/api/v2/product-catalog/content/publish-due']?.post;
     expect(transition.operationId).toBe('transitionProductContent');
     expect(publishDue.operationId).toBe('publishDueProductContent');
-    const actions = transition.requestBody.content['application/json'].schema.properties.action.enum;
+    const actions =
+      transition.requestBody.content['application/json'].schema.properties.action.enum;
     expect(actions).toEqual(['submit', 'approve', 'schedule', 'reject', 'unpublish']);
     expect(transition.security).toEqual([{ bearerAuth: [] }]);
   });
@@ -178,14 +193,26 @@ describe('product-catalog P1 · 发布工作流 + 产品关系', () => {
     expect(list.operationId).toBe('listProductRelations');
     expect(upsert.operationId).toBe('upsertProductRelation');
     expect(del.operationId).toBe('deleteProductRelation');
-    const types = upsert.requestBody.content['application/json'].schema.properties.relationType.enum;
-    expect(types).toEqual(['accessory', 'compatible', 'replaces', 'replaced_by', 'cross_sell', 'up_sell', 'compare']);
+    const types =
+      upsert.requestBody.content['application/json'].schema.properties.relationType.enum;
+    expect(types).toEqual([
+      'accessory',
+      'compatible',
+      'replaces',
+      'replaced_by',
+      'cross_sell',
+      'up_sell',
+      'compare',
+    ]);
   });
 
   test('生成客户端暴露 5 个 P1 方法', () => {
     for (const m of [
-      'transitionProductContent', 'publishDueProductContent',
-      'listProductRelations', 'upsertProductRelation', 'deleteProductRelation',
+      'transitionProductContent',
+      'publishDueProductContent',
+      'listProductRelations',
+      'upsertProductRelation',
+      'deleteProductRelation',
     ]) {
       expect(client).toContain(`async ${m}`);
     }
@@ -232,7 +259,12 @@ describe('product-catalog P1 · 发布工作流 + 产品关系', () => {
 
   test('工作流/关系写入均经模型B写闸 + RLS 事务', () => {
     const service = read(`${MODULE_DIR}/product-catalog.service.ts`);
-    for (const fn of ['transitionContent', 'publishDueContent', 'upsertRelation', 'deleteRelation']) {
+    for (const fn of [
+      'transitionContent',
+      'publishDueContent',
+      'upsertRelation',
+      'deleteRelation',
+    ]) {
       const idx = service.indexOf(`async ${fn}(`); // 加括号避免误配 upsertRelationRow
       expect(idx).toBeGreaterThan(-1);
       expect(service.slice(idx, idx + 500)).toContain('requireWriteTenant');
@@ -332,7 +364,12 @@ describe('product-catalog 遗憾补齐 · 调度器 / 双向关系 / i18n 覆盖
     expect(deps['class-transformer']).toBeUndefined();
     // 校验模块存在并导出全部校验器
     const val = read(`${MODULE_DIR}/product-catalog.validation.ts`);
-    for (const fn of ['validateContentInput', 'validateTransitionInput', 'validateRelationInput', 'validateProductUpsertInput']) {
+    for (const fn of [
+      'validateContentInput',
+      'validateTransitionInput',
+      'validateRelationInput',
+      'validateProductUpsertInput',
+    ]) {
       expect(val).toContain(`export function ${fn}`);
     }
     // 服务在每个写入方法开头接线校验
@@ -345,39 +382,53 @@ describe('product-catalog 遗憾补齐 · 调度器 / 双向关系 / i18n 覆盖
   test('B1 输入校验：错误类型硬失败、合法输入透明放行（functional，运行时转译）', () => {
     const ts = require('typescript');
     const src = read(`${MODULE_DIR}/product-catalog.validation.ts`);
-    const out = ts.transpileModule(src, { compilerOptions: { module: 'commonjs', target: 'es2019' } }).outputText;
+    const out = ts.transpileModule(src, {
+      compilerOptions: { module: 'commonjs', target: 'es2019' },
+    }).outputText;
     const mod = { exports: {} };
     // eslint-disable-next-line no-new-func
     new Function('module', 'exports', 'require', out)(mod, mod.exports, require);
     const V = mod.exports;
 
     // 合法输入透明放行
-    expect(() => V.validateContentInput({ locale: 'zh-CN', seo: {}, marketing: {}, gtin: 'x' })).not.toThrow();
-    expect(() => V.validateRelationInput({ relatedProductId: 'p2', relationType: 'accessory', sortOrder: 3 })).not.toThrow();
+    expect(() =>
+      V.validateContentInput({ locale: 'zh-CN', seo: {}, marketing: {}, gtin: 'x' })
+    ).not.toThrow();
+    expect(() =>
+      V.validateRelationInput({ relatedProductId: 'p2', relationType: 'accessory', sortOrder: 3 })
+    ).not.toThrow();
     expect(() => V.validateTransitionInput({ action: 'submit' })).not.toThrow();
     expect(() => V.validateProductUpsertInput({ sku: 'S1', listPrice: 100 })).not.toThrow();
-    expect(() => V.validateProductUpsertInput({
-      sku: 'S1',
-      meta: {
-        everhot: {
-          specs: [{ k: 'capacity', v: '200 L' }],
-          badges: ['energy-saving'],
-          features: [{ title: 'stable', desc: 'wide range' }],
-          highlights: [{ label: 'COP', value: '4.2' }],
+    expect(() =>
+      V.validateProductUpsertInput({
+        sku: 'S1',
+        meta: {
+          everhot: {
+            specs: [{ k: 'capacity', v: '200 L' }],
+            badges: ['energy-saving'],
+            features: [{ title: 'stable', desc: 'wide range' }],
+            highlights: [{ label: 'COP', value: '4.2' }],
+          },
         },
-      },
-    })).not.toThrow();
+      })
+    ).not.toThrow();
 
     // 错误类型硬失败（400）
-    expect(() => V.validateContentInput({ seo: [] })).toThrow();          // seo 传数组
-    expect(() => V.validateContentInput({ locale: 123 })).toThrow();       // locale 非字符串
-    expect(() => V.validateRelationInput({ relatedProductId: 'p2', relationType: 'accessory', sortOrder: 'abc' })).toThrow();
+    expect(() => V.validateContentInput({ seo: [] })).toThrow(); // seo 传数组
+    expect(() => V.validateContentInput({ locale: 123 })).toThrow(); // locale 非字符串
+    expect(() =>
+      V.validateRelationInput({
+        relatedProductId: 'p2',
+        relationType: 'accessory',
+        sortOrder: 'abc',
+      })
+    ).toThrow();
     expect(() => V.validateRelationInput({ relationType: 'accessory' })).toThrow(); // 缺 relatedProductId
-    expect(() => V.validateTransitionInput({ action: '' })).toThrow();     // action 空
+    expect(() => V.validateTransitionInput({ action: '' })).toThrow(); // action 空
     expect(() => V.validateProductUpsertInput({ listPrice: 'notnum' })).toThrow();
     expect(() => V.validateProductUpsertInput({ meta: { everhot: { specs: 'bad' } } })).toThrow();
     expect(() => V.validateProductUpsertInput({ meta: { everhot: { badges: [{}] } } })).toThrow();
-    expect(() => V.validateProductUpsertInput([])).toThrow();              // body 非对象
+    expect(() => V.validateProductUpsertInput([])).toThrow(); // body 非对象
   });
 
   test('B4 OpenAPI 无重复对象键（真正的 tokenizer 级去重校验）', () => {
@@ -394,7 +445,10 @@ describe('product-catalog 遗憾补齐 · 调度器 / 双向关系 / i18n 覆盖
         if (ch === '"') {
           let j = i + 1;
           while (j < n) {
-            if (text[j] === '\\') { j += 2; continue; }
+            if (text[j] === '\\') {
+              j += 2;
+              continue;
+            }
             if (text[j] === '"') break;
             j += 1;
           }
@@ -408,10 +462,27 @@ describe('product-catalog 遗憾补齐 · 调度器 / 双向关系 / i18n 覆盖
           }
           continue;
         }
-        if (ch === '{') { stack.push({ isObject: true, keys: new Set(), expectKey: true }); i += 1; continue; }
-        if (ch === '[') { stack.push({ isObject: false }); i += 1; continue; }
-        if (ch === '}' || ch === ']') { stack.pop(); i += 1; continue; }
-        if (ch === ',') { const f = stack[stack.length - 1]; if (f && f.isObject) f.expectKey = true; i += 1; continue; }
+        if (ch === '{') {
+          stack.push({ isObject: true, keys: new Set(), expectKey: true });
+          i += 1;
+          continue;
+        }
+        if (ch === '[') {
+          stack.push({ isObject: false });
+          i += 1;
+          continue;
+        }
+        if (ch === '}' || ch === ']') {
+          stack.pop();
+          i += 1;
+          continue;
+        }
+        if (ch === ',') {
+          const f = stack[stack.length - 1];
+          if (f && f.isObject) f.expectKey = true;
+          i += 1;
+          continue;
+        }
         i += 1;
       }
       return dups;
@@ -429,8 +500,11 @@ describe('Issue 07 - Everhot runtime product consumers and E2E readiness', () =>
 
   test('catalog.js owns a single same-origin runtime loader with loading/fallback/empty states', () => {
     expect(catalog).toContain("RUNTIME_SITE_CODE = window.EVERHOT_SITE_CODE || 'everhot'");
-    expect(catalog).toContain("RUNTIME_PRODUCTS_API = '/api/v2/sites/' + RUNTIME_SITE_CODE + '/products?locale=zh-CN'");
-    expect(catalog).toContain("LEGACY_PRODUCTS_API = '/api/v2/brand/' + RUNTIME_SITE_CODE + '/products?locale=zh-CN'");
+    expect(catalog).toContain(
+      "RUNTIME_PRODUCTS_API = '/api/v2/sites/' + RUNTIME_SITE_CODE + '/products?locale=zh-CN'"
+    );
+    // legacy /api/v2/brand 回退已从运行时 loader 退役，不得回潮
+    expect(catalog).not.toContain('LEGACY_PRODUCTS_API');
     expect(catalog).toContain('window.EVERHOT_PRODUCTS_READY');
     expect(catalog).toContain('window.EVERHOT_LOAD_PRODUCTS');
     expect(catalog).toContain('window.EVERHOT_LOAD_PRODUCT');
@@ -458,7 +532,11 @@ describe('Issue 07 - Everhot runtime product consumers and E2E readiness', () =>
       const html = read(rel);
       expect(html.indexOf('/js/catalog.js')).toBeGreaterThan(-1);
       expect(html.indexOf('/js/catalog.js')).toBeLessThan(
-        Math.max(html.indexOf('/js/search.js'), html.indexOf('/js/selector.js'), html.indexOf('/js/pro.js')),
+        Math.max(
+          html.indexOf('/js/search.js'),
+          html.indexOf('/js/selector.js'),
+          html.indexOf('/js/pro.js')
+        )
       );
     }
   });
@@ -469,7 +547,9 @@ describe('Issue 07 - Everhot runtime product consumers and E2E readiness', () =>
     expect(service).toContain('mainImage: projected.mainImage');
     expect(service).toContain('tags: projected.tags');
     expect(service).toContain('summary: projected.tagline');
-    expect(service).toContain('detailUrl: `/products/detail/?model=${encodeURIComponent(String(projected.slug))}`');
+    expect(service).toContain(
+      'detailUrl: `/products/detail/?model=${encodeURIComponent(String(projected.slug))}`'
+    );
     expect(catalog).toContain('configuredRelated');
     expect(catalog).toContain('r.summary || r.tagline || r.headline');
   });
@@ -479,7 +559,9 @@ describe('Issue 05 - Everhot specifications and highlights', () => {
   const service = read(`${MODULE_DIR}/product-catalog.service.ts`);
   const validation = read(`${MODULE_DIR}/product-catalog.validation.ts`);
   const adapter = read('apps/dealer-workbench/src/lib/brand-product-adapter.ts');
-  const consoleUi = read('apps/dealer-workbench/src/app/comfort/[[...section]]/BrandSiteConsoleShell.tsx');
+  const consoleUi = read(
+    'apps/dealer-workbench/src/app/comfort/[[...section]]/BrandSiteConsoleShell.tsx'
+  );
 
   test('product upsert validates the public structured list shapes', () => {
     for (const token of [
@@ -499,19 +581,26 @@ describe('Issue 05 - Everhot specifications and highlights', () => {
       expect(consoleUi).toContain(token);
     }
     expect(adapter).toContain('buildBrandStructuredContentUpdatePayload');
-    expect(adapter).toContain('mergeKeyValueShape(previousBrandMeta.specs');
-    expect(adapter).toContain('mergeKeyValueShape(previousBrandMeta.highlights');
+    // prettier 可能将实参换行，用正则容忍空白
+    expect(adapter).toMatch(/mergeKeyValueShape\(\s*previousBrandMeta\.specs/);
+    expect(adapter).toMatch(/mergeKeyValueShape\(\s*previousBrandMeta\.highlights/);
     expect(consoleUi).toContain('StructuredContentEditor');
     expect(consoleUi).toContain('onChange={(specs) => update({ specs })}');
     expect(consoleUi).toContain('onChange={(highlights) => update({ highlights })}');
   });
 
   test('public brand projection preserves the current website contract for specs, badges, features, and highlights', () => {
-    const projection = service.slice(service.indexOf('private publicProductProjection'), service.indexOf('private async assertBrandSlugUnique'));
-    expect(projection).toContain('specs: Array.isArray(meta.specs)');
-    expect(projection).toContain('badges: Array.isArray(meta.badges)');
-    expect(projection).toContain('features: Array.isArray(meta.features)');
-    expect(projection).toContain('highlights: Array.isArray(meta.highlights)');
+    const projection = service.slice(
+      service.indexOf('private publicProductProjection'),
+      service.indexOf('private async assertBrandSlugUnique')
+    );
+    // 投影改从 marketing 内容模型取值（content?.marketing），保持四列表字段的数组把关
+    expect(projection).toContain('marketingSpecs = Array.isArray((marketing as any).specs)');
+    expect(projection).toContain('marketingBadges = Array.isArray((marketing as any).badges)');
+    expect(projection).toContain('marketingFeatures = Array.isArray((marketing as any).features)');
+    expect(projection).toContain(
+      'marketingHighlights = Array.isArray((marketing as any).highlights)'
+    );
   });
 });
 
@@ -519,7 +608,9 @@ describe('Issue 03 - Everhot product status and website order', () => {
   const service = read(`${MODULE_DIR}/product-catalog.service.ts`);
   const validation = read(`${MODULE_DIR}/product-catalog.validation.ts`);
   const adapter = read('apps/dealer-workbench/src/lib/brand-product-adapter.ts');
-  const consoleUi = read('apps/dealer-workbench/src/app/comfort/[[...section]]/BrandSiteConsoleShell.tsx');
+  const consoleUi = read(
+    'apps/dealer-workbench/src/app/comfort/[[...section]]/BrandSiteConsoleShell.tsx'
+  );
 
   test('product-catalog supports active/inactive/archived and keeps archived out of default management lists', () => {
     expect(validation).toContain("['active', 'inactive', 'archived']");
@@ -547,7 +638,9 @@ describe('Issue 03 - Everhot product status and website order', () => {
 describe('Issue 01 · Everhot 基础产品 CRUD 闭环', () => {
   const service = read(`${MODULE_DIR}/product-catalog.service.ts`);
   const adapter = read('apps/dealer-workbench/src/lib/brand-product-adapter.ts');
-  const consoleUi = read('apps/dealer-workbench/src/app/comfort/[[...section]]/BrandSiteConsoleShell.tsx');
+  const consoleUi = read(
+    'apps/dealer-workbench/src/app/comfort/[[...section]]/BrandSiteConsoleShell.tsx'
+  );
   const catalog = read('apps/everhot-cn/public/js/catalog.js');
 
   test('后端以 product-catalog 为唯一产品事实源，并校验 Everhot 公开 slug 唯一', () => {
@@ -560,7 +653,17 @@ describe('Issue 01 · Everhot 基础产品 CRUD 闭环', () => {
   });
 
   test('管理端支持分页搜索和基础字段编辑：名称、型号、slug、分类、系统、系列、简介、标签', () => {
-    for (const token of ['q', 'page', 'pageSize', 'publicSlug', 'model', 'category', 'system', 'series', 'tagline']) {
+    for (const token of [
+      'q',
+      'page',
+      'pageSize',
+      'publicSlug',
+      'model',
+      'category',
+      'system',
+      'series',
+      'tagline',
+    ]) {
       expect(adapter).toContain(token);
       expect(consoleUi).toContain(token);
     }
@@ -573,12 +676,20 @@ describe('Issue 01 · Everhot 基础产品 CRUD 闭环', () => {
     expect(service).toContain('model: meta.model');
     expect(service).toContain('tags: Array.isArray(meta.tags)');
     expect(service).toContain('getBrandProductLocalized');
-    expect(service).toContain("p.sku = :sku OR COALESCE(NULLIF(p.meta -> :brand ->> 'slug', ''), p.sku) = :slug");
-    const projection = service.slice(service.indexOf('private publicProductProjection'), service.indexOf('private async assertBrandSlugUnique'));
+    expect(service).toContain(
+      "p.sku = :sku OR COALESCE(NULLIF(p.meta -> :brand ->> 'slug', ''), p.sku) = :slug"
+    );
+    const projection = service.slice(
+      service.indexOf('private publicProductProjection'),
+      service.indexOf('private async assertBrandSlugUnique')
+    );
     expect(projection).not.toContain('costPrice');
     expect(projection).not.toContain('listPrice');
     expect(projection).not.toContain('imageArtifactId');
-    const recommend = service.slice(service.indexOf('async recommend'), service.indexOf('async priceBandsForSystems'));
+    const recommend = service.slice(
+      service.indexOf('async recommend'),
+      service.indexOf('async priceBandsForSystems')
+    );
     expect(recommend).toContain('this.publicProductProjection');
     expect(recommend).not.toContain('tenantId: p.tenantId');
     expect(recommend).not.toContain('listPrice: Number');
@@ -586,7 +697,6 @@ describe('Issue 01 · Everhot 基础产品 CRUD 闭环', () => {
 
   test('Everhot 官网 catalog 运行时读取公开 API，失败时保留 products-data 静态兜底', () => {
     expect(catalog).toContain('/api/v2/sites/');
-    expect(catalog).toContain('/api/v2/brand/');
     expect(catalog).toContain('RUNTIME_SITE_CODE');
     expect(catalog).toContain('loadRuntimeProducts');
     expect(catalog).toContain('installCatalog');
@@ -602,7 +712,9 @@ describe('Issue 04 · Everhot 产品主图与详情图片闭环', () => {
   const pub = read(`${MODULE_DIR}/product-catalog.public.controller.ts`);
   const fileSvc = read('services/api/src/modules/file-artifact/file-artifact.service.ts');
   const adapter = read('apps/dealer-workbench/src/lib/brand-product-adapter.ts');
-  const consoleUi = read('apps/dealer-workbench/src/app/comfort/[[...section]]/BrandSiteConsoleShell.tsx');
+  const consoleUi = read(
+    'apps/dealer-workbench/src/app/comfort/[[...section]]/BrandSiteConsoleShell.tsx'
+  );
   const catalog = read('apps/everhot-cn/public/js/catalog.js');
 
   test('AssetRef 支持一张主图与多张有序详情图', () => {
@@ -617,14 +729,19 @@ describe('Issue 04 · Everhot 产品主图与详情图片闭环', () => {
     expect(pub).toContain("@Get(':slug/products/:sku/images/:artifactId')");
     expect(pub).toContain('StreamableFile');
     expect(service).toContain('getPublicProductImage');
-    expect(service).toContain("p.status = :status");
+    expect(service).toContain('p.status = :status');
     expect(service).toContain("['main', 'card', 'icon', 'detail'].includes(r.role)");
     expect(fileSvc).toContain('getPublicActiveArtifact');
     expect(fileSvc).toContain("status: 'active'");
   });
 
   test('管理端支持上传预览、替换主图、删除和详情图排序', () => {
-    for (const token of ['uploadBrandProductMainImage', 'deleteBrandProductMainImage', 'uploadBrandProductDetailImage', 'reorderBrandProductDetailImages']) {
+    for (const token of [
+      'uploadBrandProductMainImage',
+      'deleteBrandProductMainImage',
+      'uploadBrandProductDetailImage',
+      'reorderBrandProductDetailImages',
+    ]) {
       expect(consoleUi).toContain(token);
     }
     for (const token of ['dataBase64', 'assetRefs', "role: 'main'", "role: 'detail'"]) {

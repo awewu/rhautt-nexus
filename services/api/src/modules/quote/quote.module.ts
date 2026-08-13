@@ -12,22 +12,31 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 
 @Module({
   imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([
-      QuotationEntity, CustomerEntity, OpportunityEntity, AuditLogEntity,
-    ])]),
+    ...(TARGET_API_BOOT_SMOKE
+      ? []
+      : [
+          TypeOrmModule.forFeature([
+            QuotationEntity,
+            CustomerEntity,
+            OpportunityEntity,
+            AuditLogEntity,
+          ]),
+        ]),
     AuthModule,
-    MdmModule
+    MdmModule,
   ],
   controllers: [QuoteController],
   providers: [
     QuoteService,
     PriceGuardrailService,
-    ...(TARGET_API_BOOT_SMOKE ? [
-      bootSmokeRepositoryProvider(QuotationEntity),
-      bootSmokeRepositoryProvider(CustomerEntity),
-      bootSmokeRepositoryProvider(OpportunityEntity),
-      bootSmokeRepositoryProvider(AuditLogEntity),
-    ] : [])
+    ...(TARGET_API_BOOT_SMOKE
+      ? [
+          bootSmokeRepositoryProvider(QuotationEntity),
+          bootSmokeRepositoryProvider(CustomerEntity),
+          bootSmokeRepositoryProvider(OpportunityEntity),
+          bootSmokeRepositoryProvider(AuditLogEntity),
+        ]
+      : []),
   ],
   exports: [QuoteService, PriceGuardrailService],
 })
@@ -47,5 +56,7 @@ export class QuoteBoundaryService {
 @Controller('quote')
 export class QuoteBoundaryController {
   constructor(private readonly s: QuoteBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

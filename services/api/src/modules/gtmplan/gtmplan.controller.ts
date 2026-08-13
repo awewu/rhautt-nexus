@@ -8,23 +8,37 @@ export class GtmplanController {
   constructor(private readonly svc: GtmplanService) {}
 
   @Post('campaigns')
-  createCampaign(@Req() r: any, @Body() b: any) { return this.svc.createCampaign(r.user, b); }
+  createCampaign(@Req() r: any, @Body() b: any) {
+    return this.svc.createCampaign(r.user, b);
+  }
 
   @Patch('campaigns/:id')
-  updateCampaign(@Req() r: any, @Param('id') id: string, @Body() b: any) { return this.svc.updateCampaign(r.user, id, b); }
+  updateCampaign(@Req() r: any, @Param('id') id: string, @Body() b: any) {
+    return this.svc.updateCampaign(r.user, id, b);
+  }
 
   @Get('campaigns')
-  listCampaigns(@Req() r: any) { return this.svc.listCampaigns(r.user); }
+  listCampaigns(@Req() r: any) {
+    return this.svc.listCampaigns(r.user);
+  }
 
   @Get('mroi')
-  mroi(@Req() r: any) { return this.svc.mroiSummary(r.user); }
+  mroi(@Req() r: any) {
+    return this.svc.mroiSummary(r.user);
+  }
 
   @Post('okrs')
-  upsertOkr(@Req() r: any, @Body() b: any) { return this.svc.upsertOkr(r.user, b); }
+  upsertOkr(@Req() r: any, @Body() b: any) {
+    return this.svc.upsertOkr(r.user, b);
+  }
 
   @Get('okrs')
-  listOkrs(@Req() r: any, @Query('level') level?: string) { return this.svc.listOkrs(r.user, level); }
+  listOkrs(@Req() r: any, @Query('level') level?: string) {
+    return this.svc.listOkrs(r.user, level);
+  }
 
   @Get('okr-summary')
-  okrSummary(@Req() r: any) { return this.svc.okrSummary(r.user); }
+  okrSummary(@Req() r: any) {
+    return this.svc.okrSummary(r.user);
+  }
 }

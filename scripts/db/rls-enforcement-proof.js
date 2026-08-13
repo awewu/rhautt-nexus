@@ -33,33 +33,39 @@ async function countWith(client, tenantId) {
 async function main() {
   const user = process.env.APP_DB_USER || 'rhautt_app';
   const password = process.env.APP_DB_PASSWORD;
-  if (!password) { console.error('APP_DB_PASSWORD 必填'); process.exit(1); }
+  if (!password) {
+    console.error('APP_DB_PASSWORD 必填');
+    process.exit(1);
+  }
 
   const client = new Client({
     host: process.env.POSTGRES_HOST || 'localhost',
     port: Number(process.env.POSTGRES_PORT || 5432),
-    user, password,
+    user,
+    password,
     database: process.env.POSTGRES_DB || 'rhautt_GOT',
   });
   await client.connect();
 
-  const role = (await client.query('SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user')).rows[0];
+  const role = (
+    await client.query('SELECT rolsuper, rolbypassrls FROM pg_roles WHERE rolname = current_user')
+  ).rows[0];
   console.log(`连接角色 ${user}: superuser=${role.rolsuper} bypassrls=${role.rolbypassrls}`);
   if (role.rolsuper || role.rolbypassrls) {
     console.error('❌ 应用角色仍可绕过 RLS —— 隔离无效');
-    await client.end(); process.exit(1);
+    await client.end();
+    process.exit(1);
   }
 
-  const own = (await client.query("SELECT id FROM rhautt_nexus.tenants LIMIT 1")).rows;
+  const own = (await client.query('SELECT id FROM rhautt_nexus.tenants LIMIT 1')).rows;
   // tenants 表本身可能非租户隔离；取一个已有业务数据的租户
-  const seed = (await client.query(
-    `SELECT tenant_id FROM ${TABLE} LIMIT 1`,
-  )).rows;
+  const seed = (await client.query(`SELECT tenant_id FROM ${TABLE} LIMIT 1`)).rows;
 
   const noCtx = await countWith(client, null);
   const wrongCtx = await countWith(client, OTHER_TENANT);
   // 无上下文时读不到任何行 → 需用超级用户旁路取一个真实 tenant_id 做 C 组
-  const realTenant = process.env.PROOF_TENANT_ID || (seed[0] && seed[0].tenant_id) || (own[0] && own[0].id);
+  const realTenant =
+    process.env.PROOF_TENANT_ID || (seed[0] && seed[0].tenant_id) || (own[0] && own[0].id);
   const rightCtx = realTenant ? await countWith(client, realTenant) : 0;
 
   console.log(`A) 未设 tenant 上下文        → ${noCtx} 行（期望 0）`);
@@ -83,10 +89,15 @@ async function main() {
       ownTenantRows: rightCtx,
       table: TABLE,
     });
-  } catch { /* 台账不可写不应影响证明结论 */ }
+  } catch {
+    /* 台账不可写不应影响证明结论 */
+  }
 
   await client.end();
   process.exit(ok ? 0 : 1);
 }
 
-main().catch((e) => { console.error('proof 失败:', e.message); process.exit(1); });
+main().catch((e) => {
+  console.error('proof 失败:', e.message);
+  process.exit(1);
+});

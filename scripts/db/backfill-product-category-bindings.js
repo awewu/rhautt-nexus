@@ -5,12 +5,22 @@ const path = require('node:path');
 const SCHEMA = 'rhautt_nexus';
 
 process.env.TS_NODE_PROJECT =
-  process.env.TS_NODE_PROJECT || path.join(__dirname, '..', '..', 'services', 'api', 'tsconfig.json');
+  process.env.TS_NODE_PROJECT ||
+  path.join(__dirname, '..', '..', 'services', 'api', 'tsconfig.json');
 require('ts-node/register/transpile-only');
-const { planProductCategoryBackfill } = require('../../services/api/src/modules/product-catalog/product-category-backfill');
+const {
+  planProductCategoryBackfill,
+} = require('../../services/api/src/modules/product-catalog/product-category-backfill');
 
 function parseArgs(argv) {
-  const options = { apply: false, json: false, help: false, brand: null, tenant: null, aliases: null };
+  const options = {
+    apply: false,
+    json: false,
+    help: false,
+    brand: null,
+    tenant: null,
+    aliases: null,
+  };
   for (const arg of argv) {
     if (arg === '--apply') options.apply = true;
     else if (arg === '--json') options.json = true;
@@ -46,11 +56,15 @@ function loadAliases(filePath) {
   const resolved = path.resolve(filePath);
   const parsed = JSON.parse(fs.readFileSync(resolved, 'utf8'));
   if (!Array.isArray(parsed)) throw new Error('--aliases must point to a JSON array');
-  return parsed.map((row) => ({
-    brandCode: String(row.brandCode || '').trim().toLowerCase(),
-    legacyValue: String(row.legacyValue || '').trim(),
-    categoryId: String(row.categoryId || '').trim(),
-  })).filter((row) => row.brandCode && row.legacyValue && row.categoryId);
+  return parsed
+    .map((row) => ({
+      brandCode: String(row.brandCode || '')
+        .trim()
+        .toLowerCase(),
+      legacyValue: String(row.legacyValue || '').trim(),
+      categoryId: String(row.categoryId || '').trim(),
+    }))
+    .filter((row) => row.brandCode && row.legacyValue && row.categoryId);
 }
 
 async function listCategories(client, brandCode) {
@@ -144,11 +158,12 @@ async function runBackfill({ client, options, aliases }) {
     if (options.apply) {
       for (const candidate of plan.matched) {
         if (await applyCandidate(client, candidate)) updated += 1;
-        else writeConflicts.push({
-          productId: candidate.productId,
-          sku: candidate.sku,
-          reason: 'concurrent-or-existing-binding',
-        });
+        else
+          writeConflicts.push({
+            productId: candidate.productId,
+            sku: candidate.sku,
+            reason: 'concurrent-or-existing-binding',
+          });
       }
       await client.query('COMMIT');
     } else {
@@ -186,7 +201,8 @@ function printReport(report, json) {
       `invalidExistingBindings=${report.invalidExistingBindings.length} crossBrand=${report.crossBrand.length}`
   );
   for (const row of report.unmatched) console.log(`unmatched ${JSON.stringify(row)}`);
-  for (const row of report.invalidExistingBindings) console.log(`invalid-existing ${JSON.stringify(row)}`);
+  for (const row of report.invalidExistingBindings)
+    console.log(`invalid-existing ${JSON.stringify(row)}`);
   for (const row of report.crossBrand) console.log(`cross-brand ${JSON.stringify(row)}`);
   for (const row of report.writeConflicts) console.log(`write-conflict ${JSON.stringify(row)}`);
 }
@@ -194,21 +210,36 @@ function printReport(report, json) {
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
-    console.log('Usage: node scripts/db/backfill-product-category-bindings.js [--apply] [--json] [--brand=everhot] [--tenant=UUID] [--aliases=aliases.json]');
+    console.log(
+      'Usage: node scripts/db/backfill-product-category-bindings.js [--apply] [--json] [--brand=everhot] [--tenant=UUID] [--aliases=aliases.json]'
+    );
     console.log('Default mode is dry-run. --apply is required for database writes.');
-    console.log('Alias file shape: [{ "brandCode": "everhot", "legacyValue": "dhw", "categoryId": "..." }]');
+    console.log(
+      'Alias file shape: [{ "brandCode": "everhot", "legacyValue": "dhw", "categoryId": "..." }]'
+    );
     return;
   }
 
-  require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env.nestjs'), quiet: true });
-  require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env'), override: false, quiet: true });
+  require('dotenv').config({
+    path: path.resolve(__dirname, '..', '..', '.env.nestjs'),
+    quiet: true,
+  });
+  require('dotenv').config({
+    path: path.resolve(__dirname, '..', '..', '.env'),
+    override: false,
+    quiet: true,
+  });
   const { Client } = require('pg');
   const client = new Client(clientConfig(process.env));
   await client.connect();
   try {
     const report = await runBackfill({ client, options, aliases: loadAliases(options.aliases) });
     printReport(report, options.json);
-    if (report.invalidExistingBindings.length || report.crossBrand.length || report.writeConflicts.length) {
+    if (
+      report.invalidExistingBindings.length ||
+      report.crossBrand.length ||
+      report.writeConflicts.length
+    ) {
       process.exitCode = 1;
     }
   } finally {

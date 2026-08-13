@@ -9,7 +9,9 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 
 @Module({
   imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([CdpProfileEntity, CdpSegmentEntity, CdpConsentEntity])]),
+    ...(TARGET_API_BOOT_SMOKE
+      ? []
+      : [TypeOrmModule.forFeature([CdpProfileEntity, CdpSegmentEntity, CdpConsentEntity])]),
     AuthModule,
     MdmModule,
   ],
@@ -18,10 +20,10 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
     CdpService,
     ...(TARGET_API_BOOT_SMOKE
       ? [
-        bootSmokeRepositoryProvider(CdpProfileEntity),
-        bootSmokeRepositoryProvider(CdpSegmentEntity),
-        bootSmokeRepositoryProvider(CdpConsentEntity),
-      ]
+          bootSmokeRepositoryProvider(CdpProfileEntity),
+          bootSmokeRepositoryProvider(CdpSegmentEntity),
+          bootSmokeRepositoryProvider(CdpConsentEntity),
+        ]
       : []),
   ],
   exports: [CdpService],
@@ -36,11 +38,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class CdpBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('cdp');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('cdp')
 export class CdpBoundaryController {
   constructor(private readonly s: CdpBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

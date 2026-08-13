@@ -59,26 +59,26 @@ npm run guard:workflow-outbox-contract
 
 ### 用户量
 
-| 类别 | 估算 |
-|---|---:|
-| 经销商/门店组织 | 500+ |
-| 设计师/销售/店长/总部人员 | 2,000+ |
-| 终端客户/业主档案 | 100,000+ |
-| 项目/方案 | 150,000-300,000 |
-| 报价单 | 300,000-600,000 |
-| 施工/合同记录 | 30,000-80,000 |
-| 交付文件 | 500,000+ 对象 |
+| 类别                      |            估算 |
+| ------------------------- | --------------: |
+| 经销商/门店组织           |            500+ |
+| 设计师/销售/店长/总部人员 |          2,000+ |
+| 终端客户/业主档案         |        100,000+ |
+| 项目/方案                 | 150,000-300,000 |
+| 报价单                    | 300,000-600,000 |
+| 施工/合同记录             |   30,000-80,000 |
+| 交付文件                  |   500,000+ 对象 |
 
 ### 并发估算
 
-| 场景 | 峰值估算 |
-|---|---:|
-| 登录/认证 | 50-150 RPS |
+| 场景          |    峰值估算 |
+| ------------- | ----------: |
+| 登录/认证     |  50-150 RPS |
 | CRM 查询/跟进 | 100-300 RPS |
 | 产品/价格查询 | 200-500 RPS |
-| 报价生成 | 30-100 RPS |
-| AI 问诊/讲解 | 20-80 RPS |
-| 施工/验收上传 | 20-100 RPS |
+| 报价生成      |  30-100 RPS |
+| AI 问诊/讲解  |   20-80 RPS |
+| 施工/验收上传 |  20-100 RPS |
 
 架构目标不是一次性支撑互联网级流量，而是能稳定承载全国经销商网络的高峰业务日。
 
@@ -89,13 +89,13 @@ npm run guard:workflow-outbox-contract
 核心字段：
 
 ```js
-tenantId     // 经销商集团/区域代理/总部租户
-dealerId     // 经销商
-storeId      // 门店
-ownerUserId  // 负责人，通常是销售/设计师
-createdBy
-updatedBy
-regionCode
+tenantId; // 经销商集团/区域代理/总部租户
+dealerId; // 经销商
+storeId; // 门店
+ownerUserId; // 负责人，通常是销售/设计师
+createdBy;
+updatedBy;
+regionCode;
 ```
 
 推荐组织层级：
@@ -143,16 +143,7 @@ Tenant
 
 ```js
 {
-  _id,
-  tenantId,
-  name,
-  province,
-  city,
-  contact,
-  status,
-  contractLevel,
-  createdAt,
-  updatedAt
+  (_id, tenantId, name, province, city, contact, status, contractLevel, createdAt, updatedAt);
 }
 ```
 
@@ -167,14 +158,7 @@ Tenant
 
 ```js
 {
-  _id,
-  tenantId,
-  dealerId,
-  name,
-  city,
-  address,
-  managerUserId,
-  status
+  (_id, tenantId, dealerId, name, city, address, managerUserId, status);
 }
 ```
 
@@ -207,21 +191,21 @@ customer
 
 ```js
 {
-  _id,
-  tenantId,
-  dealerId,
-  storeId,
-  phone,
-  passwordHash,
-  name,
-  role,
-  permissions,
-  status,
-  lastLoginAt,
-  loginAttempts,
-  lockUntil,
-  createdAt,
-  updatedAt
+  (_id,
+    tenantId,
+    dealerId,
+    storeId,
+    phone,
+    passwordHash,
+    name,
+    role,
+    permissions,
+    status,
+    lastLoginAt,
+    loginAttempts,
+    lockUntil,
+    createdAt,
+    updatedAt);
 }
 ```
 
@@ -341,17 +325,17 @@ AI 问诊结果需要单独落库，方便复盘、推荐、二次跟进。
 
 ```js
 {
-  _id,
-  tenantId,
-  customerId,
-  opportunityId,
-  input,
-  painPoints,
-  recommendedSystems,
-  aiSummary,
-  standardVersion,
-  createdBy,
-  createdAt
+  (_id,
+    tenantId,
+    customerId,
+    opportunityId,
+    input,
+    painPoints,
+    recommendedSystems,
+    aiSummary,
+    standardVersion,
+    createdBy,
+    createdAt);
 }
 ```
 
@@ -517,15 +501,7 @@ AI 问诊结果需要单独落库，方便复盘、推荐、二次跟进。
 
 ```js
 {
-  _id,
-  tenantId,
-  dealerId,
-  name,
-  scope,
-  currency,
-  validFrom,
-  validUntil,
-  status
+  (_id, tenantId, dealerId, name, scope, currency, validFrom, validUntil, status);
 }
 ```
 
@@ -533,16 +509,16 @@ AI 问诊结果需要单独落库，方便复盘、推荐、二次跟进。
 
 ```js
 {
-  _id,
-  tenantId,
-  priceBookId,
-  productId,
-  sku,
-  cost,
-  retail,
-  dealerPrice,
-  minAllowedPrice,
-  updatedAt
+  (_id,
+    tenantId,
+    priceBookId,
+    productId,
+    sku,
+    cost,
+    retail,
+    dealerPrice,
+    minAllowedPrice,
+    updatedAt);
 }
 ```
 
@@ -557,19 +533,19 @@ AI 问诊结果需要单独落库，方便复盘、推荐、二次跟进。
 
 ```js
 {
-  _id,
-  tenantId,
-  dealerId,
-  name,
-  type,
-  rules,
-  applicableSystems,
-  applicableProducts,
-  startDate,
-  endDate,
-  status,
-  createdAt,
-  updatedAt
+  (_id,
+    tenantId,
+    dealerId,
+    name,
+    type,
+    rules,
+    applicableSystems,
+    applicableProducts,
+    startDate,
+    endDate,
+    status,
+    createdAt,
+    updatedAt);
 }
 ```
 
@@ -588,24 +564,24 @@ AI 问诊结果需要单独落库，方便复盘、推荐、二次跟进。
 
 ```js
 {
-  _id,
-  tenantId,
-  dealerId,
-  storeId,
-  contractNo,
-  quoteId,
-  projectId,
-  customerId,
-  status,
-  totalPrice,
-  signedAt,
-  expectedCompletion,
-  actualCompletion,
-  salesUserId,
-  designerUserId,
-  engineerUserId,
-  createdAt,
-  updatedAt
+  (_id,
+    tenantId,
+    dealerId,
+    storeId,
+    contractNo,
+    quoteId,
+    projectId,
+    customerId,
+    status,
+    totalPrice,
+    signedAt,
+    expectedCompletion,
+    actualCompletion,
+    salesUserId,
+    designerUserId,
+    engineerUserId,
+    createdAt,
+    updatedAt);
 }
 ```
 
@@ -621,19 +597,19 @@ AI 问诊结果需要单独落库，方便复盘、推荐、二次跟进。
 
 ```js
 {
-  _id,
-  tenantId,
-  contractId,
-  phase,
-  assignedTeamId,
-  assignedUserIds,
-  startDate,
-  endDate,
-  status,
-  progress,
-  dependencies,
-  createdAt,
-  updatedAt
+  (_id,
+    tenantId,
+    contractId,
+    phase,
+    assignedTeamId,
+    assignedUserIds,
+    startDate,
+    endDate,
+    status,
+    progress,
+    dependencies,
+    createdAt,
+    updatedAt);
 }
 ```
 
@@ -649,16 +625,16 @@ AI 问诊结果需要单独落库，方便复盘、推荐、二次跟进。
 
 ```js
 {
-  _id,
-  tenantId,
-  contractId,
-  projectId,
-  status,
-  items,
-  requestedBy,
-  approvedBy,
-  createdAt,
-  updatedAt
+  (_id,
+    tenantId,
+    contractId,
+    projectId,
+    status,
+    items,
+    requestedBy,
+    approvedBy,
+    createdAt,
+    updatedAt);
 }
 ```
 
@@ -666,18 +642,18 @@ AI 问诊结果需要单独落库，方便复盘、推荐、二次跟进。
 
 ```js
 {
-  _id,
-  tenantId,
-  contractId,
-  projectId,
-  phase,
-  checklist,
-  measurements,
-  photoRefs,
-  customerSignatureRef,
-  status,
-  submittedBy,
-  submittedAt
+  (_id,
+    tenantId,
+    contractId,
+    projectId,
+    phase,
+    checklist,
+    measurements,
+    photoRefs,
+    customerSignatureRef,
+    status,
+    submittedBy,
+    submittedAt);
 }
 ```
 
@@ -754,15 +730,15 @@ events/audit_logs
 
 Redis 缓存内容：
 
-| Key | TTL | 用途 |
-|---|---:|---|
-| `auth:session:{tokenId}` | 24h | 会话/权限缓存 |
-| `rate:{ip}:{route}` | 15m | 限流 |
-| `product:list:{hash}` | 5-15m | 产品列表 |
-| `price:{tenantId}:{sku}` | 5m | 价格 |
-| `promotion:active:{tenantId}` | 1m | 生效促销 |
-| `quote:job:{jobId}` | 1h | 异步报价生成状态 |
-| `ai:diagnosis:{hash}` | 1h | 问诊缓存 |
+| Key                           |   TTL | 用途             |
+| ----------------------------- | ----: | ---------------- |
+| `auth:session:{tokenId}`      |   24h | 会话/权限缓存    |
+| `rate:{ip}:{route}`           |   15m | 限流             |
+| `product:list:{hash}`         | 5-15m | 产品列表         |
+| `price:{tenantId}:{sku}`      |    5m | 价格             |
+| `promotion:active:{tenantId}` |    1m | 生效促销         |
+| `quote:job:{jobId}`           |    1h | 异步报价生成状态 |
+| `ai:diagnosis:{hash}`         |    1h | 问诊缓存         |
 
 写入产品、价格、促销后必须主动失效相关 key。
 
@@ -835,17 +811,17 @@ Repository 层规则：
 
 ```js
 {
-  _id,
-  tenantId,
-  actorUserId,
-  action,
-  resourceType,
-  resourceId,
-  before,
-  after,
-  ip,
-  userAgent,
-  createdAt
+  (_id,
+    tenantId,
+    actorUserId,
+    action,
+    resourceType,
+    resourceId,
+    before,
+    after,
+    ip,
+    userAgent,
+    createdAt);
 }
 ```
 
@@ -903,16 +879,16 @@ Repository 层规则：
 
 上线前必须通过：
 
-| 场景 | 指标 |
-|---|---:|
-| 登录 | P95 < 300ms |
-| CRM 客户列表 | P95 < 500ms |
-| 客户 360 视图 | P95 < 800ms |
-| 产品/价格查询 | P95 < 300ms |
-| 报价生成 | P95 < 2s，复杂报价可异步 |
-| 施工任务列表 | P95 < 500ms |
-| Dashboard 汇总 | P95 < 1s，使用快照 |
-| 1000 并发连接 | 错误率 < 1% |
+| 场景           |                       指标 |
+| -------------- | -------------------------: |
+| 登录           |                P95 < 300ms |
+| CRM 客户列表   |                P95 < 500ms |
+| 客户 360 视图  |                P95 < 800ms |
+| 产品/价格查询  |                P95 < 300ms |
+| 报价生成       |   P95 < 2s，复杂报价可异步 |
+| 施工任务列表   |                P95 < 500ms |
+| Dashboard 汇总 |         P95 < 1s，使用快照 |
+| 1000 并发连接  |                错误率 < 1% |
 | 100 并发写报价 | 无重复 quoteNo，无数据丢失 |
 
 ## 12. 当前代码需修正的点

@@ -10,7 +10,7 @@ function createFrontOfficeRuntimeRouter({ db, engines, authenticateToken, checkR
 
   router.post('/api/quick-session/start', auth, role(['sales', 'store_admin']), (req, res) => {
     const { customerInfo } = req.body || {};
-    const salesProfile = db.users.find(u => u.id === req.user.id);
+    const salesProfile = db.users.find((u) => u.id === req.user.id);
     const session = engines.quickLock.startSession(customerInfo, salesProfile);
     res.json({ success: true, data: session });
   });
@@ -21,7 +21,7 @@ function createFrontOfficeRuntimeRouter({ db, engines, authenticateToken, checkR
       success: true,
       step: 1,
       roomProfile,
-      nextStep: '痛点勾选'
+      nextStep: '痛点勾选',
     });
   });
 
@@ -31,7 +31,7 @@ function createFrontOfficeRuntimeRouter({ db, engines, authenticateToken, checkR
       success: true,
       step: 2,
       painPoints,
-      nextStep: 'AI匹配'
+      nextStep: 'AI匹配',
     });
   });
 
@@ -44,7 +44,7 @@ function createFrontOfficeRuntimeRouter({ db, engines, authenticateToken, checkR
         success: true,
         step: 3,
         solution: matchResult,
-        nextStep: '报价'
+        nextStep: '报价',
       });
     } catch (error) {
       return errorResponse(res, error);
@@ -59,7 +59,7 @@ function createFrontOfficeRuntimeRouter({ db, engines, authenticateToken, checkR
         success: true,
         step: 4,
         complete: true,
-        quote
+        quote,
       });
     } catch (error) {
       return errorResponse(res, error);
@@ -93,7 +93,7 @@ function createFrontOfficeRuntimeRouter({ db, engines, authenticateToken, checkR
       name,
       data: projectData,
       createdBy: req.user.id,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
     db.templates.push(template);
     res.json({ success: true, data: template });
@@ -135,7 +135,11 @@ function createFrontOfficeRuntimeRouter({ db, engines, authenticateToken, checkR
   router.post('/api/visuals/principle-diagrams', auth, (req, res) => {
     const { diagnosis, matchResult, session } = req.body || {};
     try {
-      const presentationPackage = engines.visuals.generatePresentationPackage(diagnosis, matchResult, session);
+      const presentationPackage = engines.visuals.generatePresentationPackage(
+        diagnosis,
+        matchResult,
+        session
+      );
       res.json({ success: true, data: presentationPackage });
     } catch (error) {
       return errorResponse(res, error);
@@ -155,7 +159,10 @@ function createFrontOfficeRuntimeRouter({ db, engines, authenticateToken, checkR
   router.post('/api/ai/detect-pain-points', (req, res) => {
     const { roomProfile, selectedTags } = req.body || {};
     try {
-      const aiResult = engines.conditionalField.aiRecognizeHiddenPainPoints(roomProfile, selectedTags || []);
+      const aiResult = engines.conditionalField.aiRecognizeHiddenPainPoints(
+        roomProfile,
+        selectedTags || []
+      );
       res.json({ success: true, data: aiResult });
     } catch (error) {
       return errorResponse(res, error);
@@ -207,7 +214,7 @@ function createFrontOfficeRuntimeRouter({ db, engines, authenticateToken, checkR
         userId: req.user?.id || 'anonymous',
         userRole: req.user?.role || 'guest',
         browser: req.headers['user-agent'],
-        os: req.headers['sec-ch-ua-platform'] || 'unknown'
+        os: req.headers['sec-ch-ua-platform'] || 'unknown',
       };
       const feedback = await engines.feedbackCollector.collectFeedback(feedbackData);
       res.json({ success: true, data: { id: feedback.id } });

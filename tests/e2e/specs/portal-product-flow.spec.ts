@@ -24,7 +24,9 @@ test('portal -> product-catalog -> return-to-portal flow', async ({ page }) => {
   // 4. 产品目录底座页面
   await page.waitForURL(/:4016\/$/, { timeout: 10000 });
   await expect(page.locator('text=产品目录').first()).toBeVisible();
-  await expect(page.locator('text=瑞美变频风冷热泵').or(page.locator('text=瑞美空气能热水器')).first()).toBeVisible();
+  await expect(
+    page.locator('text=瑞美变频风冷热泵').or(page.locator('text=瑞美空气能热水器')).first()
+  ).toBeVisible();
 
   // 5. 返回门户按钮
   const returnBtn = page.locator('a:has-text("返回门户")');

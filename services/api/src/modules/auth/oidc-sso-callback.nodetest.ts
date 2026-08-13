@@ -102,7 +102,9 @@ function user(overrides: Partial<UserEntity> = {}): UserEntity {
   } as UserEntity;
 }
 
-function binding(overrides: Partial<ExternalIdentityBindingEntity> = {}): ExternalIdentityBindingEntity {
+function binding(
+  overrides: Partial<ExternalIdentityBindingEntity> = {}
+): ExternalIdentityBindingEntity {
   return {
     id: 'binding-001',
     provider: 'rhautt-ai-oidc',
@@ -125,7 +127,10 @@ function cookieHeader(state = STATE, redirect = '/cockpit') {
 }
 
 function withFetch(
-  handler: (input: string, init?: RequestInit) => Promise<Partial<Response> & { json?: () => Promise<unknown> }>
+  handler: (
+    input: string,
+    init?: RequestInit
+  ) => Promise<Partial<Response> & { json?: () => Promise<unknown> }>
 ) {
   const original = globalThis.fetch;
   const calls: Array<{ input: string; init?: RequestInit }> = [];
@@ -142,16 +147,18 @@ function withFetch(
   };
 }
 
-function fixture(options: {
-  users?: UserEntity[];
-  bindings?: ExternalIdentityBindingEntity[];
-  tokenStatus?: number;
-  idToken?: string;
-  userinfo?: Record<string, unknown>;
-  jwks?: JsonWebKey[];
-  config?: Record<string, string | undefined>;
-  auditEvents?: any[];
-} = {}) {
+function fixture(
+  options: {
+    users?: UserEntity[];
+    bindings?: ExternalIdentityBindingEntity[];
+    tokenStatus?: number;
+    idToken?: string;
+    userinfo?: Record<string, unknown>;
+    jwks?: JsonWebKey[];
+    config?: Record<string, string | undefined>;
+    auditEvents?: any[];
+  } = {}
+) {
   const users = new InMemoryRepository<UserEntity>().seed(...(options.users ?? [user()]));
   const bindings = new InMemoryRepository<ExternalIdentityBindingEntity>().seed(
     ...(options.bindings ?? [binding()])
@@ -180,7 +187,9 @@ function fixture(options: {
   );
   let issuedSessions = 0;
   const issueLoginForResolvedUser = auth.issueLoginForResolvedUser.bind(auth);
-  auth.issueLoginForResolvedUser = async (...args: Parameters<AuthService['issueLoginForResolvedUser']>) => {
+  auth.issueLoginForResolvedUser = async (
+    ...args: Parameters<AuthService['issueLoginForResolvedUser']>
+  ) => {
     issuedSessions += 1;
     return issueLoginForResolvedUser(...args);
   };
@@ -188,7 +197,13 @@ function fixture(options: {
   const identities = new SsoExternalIdentityService(ds as any, users as any, bindings as any);
   const auditEvents = options.auditEvents ?? [];
   const audit = new SsoAuditLogService({ write: (event) => auditEvents.push(event) });
-  const service = new OidcSsoCallbackService(config(options.config), login, identities, auth, audit);
+  const service = new OidcSsoCallbackService(
+    config(options.config),
+    login,
+    identities,
+    auth,
+    audit
+  );
 
   const fetchMock = withFetch(async (url, init) => {
     if (url.endsWith('/.well-known/openid-configuration')) {
@@ -257,7 +272,7 @@ async function expectCallbackFailure(
     cookieHeader: cookieHeader(),
     requestId: 'req-issue-05',
     traceId: 'trace-issue-05',
-  },
+  }
 ) {
   const f = fixture(options);
   try {
@@ -353,7 +368,12 @@ test('OIDC callback rejects mismatched state before token exchange', async () =>
   const f = fixture();
   try {
     await assert.rejects(
-      () => f.service.handleCallback({ code: CODE, state: 'other-state', cookieHeader: cookieHeader() }),
+      () =>
+        f.service.handleCallback({
+          code: CODE,
+          state: 'other-state',
+          cookieHeader: cookieHeader(),
+        }),
       /state mismatch/
     );
     assert.equal(f.fetchMock.calls.length, 0);
@@ -409,29 +429,33 @@ test('OIDC callback rejects invalid issuer, audience, expiry, and signature', as
 });
 
 test('Issue 05 callback failures emit reason codes, redact secrets, and never issue sessions', async () => {
-  await expectCallbackFailure(
-    {},
-    'missing_code',
-    { state: STATE, cookieHeader: cookieHeader(), requestId: 'req-issue-05', traceId: 'trace-issue-05' },
-  );
-  await expectCallbackFailure(
-    {},
-    'missing_state',
-    { code: CODE, cookieHeader: cookieHeader(), requestId: 'req-issue-05', traceId: 'trace-issue-05' },
-  );
-  await expectCallbackFailure(
-    {},
-    'state_mismatch',
-    { code: CODE, state: 'wrong-state', cookieHeader: cookieHeader(), requestId: 'req-issue-05', traceId: 'trace-issue-05' },
-  );
+  await expectCallbackFailure({}, 'missing_code', {
+    state: STATE,
+    cookieHeader: cookieHeader(),
+    requestId: 'req-issue-05',
+    traceId: 'trace-issue-05',
+  });
+  await expectCallbackFailure({}, 'missing_state', {
+    code: CODE,
+    cookieHeader: cookieHeader(),
+    requestId: 'req-issue-05',
+    traceId: 'trace-issue-05',
+  });
+  await expectCallbackFailure({}, 'state_mismatch', {
+    code: CODE,
+    state: 'wrong-state',
+    cookieHeader: cookieHeader(),
+    requestId: 'req-issue-05',
+    traceId: 'trace-issue-05',
+  });
   await expectCallbackFailure({ tokenStatus: 503 }, 'token_endpoint_error');
   await expectCallbackFailure(
     { idToken: signIdToken({}, { issuer: 'https://evil.example' }) },
-    'invalid_issuer',
+    'invalid_issuer'
   );
   await expectCallbackFailure(
     { idToken: signIdToken({}, { audience: 'other-client' }) },
-    'invalid_audience',
+    'invalid_audience'
   );
   await expectCallbackFailure({ idToken: signIdToken({}, { expiresIn: -120 }) }, 'expired_token');
   await expectCallbackFailure(
@@ -447,14 +471,14 @@ test('Issue 05 callback failures emit reason codes, redact secrets, and never is
         });
       })(),
     },
-    'bad_signature',
+    'bad_signature'
   );
   await expectCallbackFailure(
     {
       idToken: signIdToken({ sub: undefined }),
       config: { OIDC_USERINFO_ENABLED: 'false' },
     },
-    'missing_subject',
+    'missing_subject'
   );
   await expectCallbackFailure({ users: [user({ status: 'inactive' })] }, 'local_user_inactive');
   await expectCallbackFailure({ bindings: [binding({ status: 'disabled' })] }, 'binding_inactive');
@@ -537,7 +561,7 @@ test('AuthController exposes public GET SSO callback and redirects terminal fail
   assert.deepEqual(headers['Set-Cookie'], [
     'nx_sso_state=; Path=/api/v2/auth/sso; Max-Age=0; HttpOnly; SameSite=Lax',
   ]);
-    assert.equal(headers.Location, '/?returnUrl=%2Fcockpit&ssoError=sso_callback_failed');
+  assert.equal(headers.Location, '/?returnUrl=%2Fcockpit&ssoError=sso_callback_failed');
   assert.equal(result.body, undefined);
 });
 

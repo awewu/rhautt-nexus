@@ -18,11 +18,18 @@ const OUT_MD = path.join(OUT_DIR, 'capability-extract.md');
 
 function listJs(dir) {
   if (!fs.existsSync(dir)) return [];
-  return fs.readdirSync(dir).filter((f) => f.endsWith('.js')).map((f) => path.join(dir, f));
+  return fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith('.js'))
+    .map((f) => path.join(dir, f));
 }
 
 function read(file) {
-  try { return fs.readFileSync(file, 'utf8'); } catch (_) { return ''; }
+  try {
+    return fs.readFileSync(file, 'utf8');
+  } catch (_) {
+    return '';
+  }
 }
 
 // 提取类名
@@ -35,7 +42,20 @@ function extractClasses(src) {
 }
 
 // 提取方法名(类内方法/对象方法)，排除控制流关键字
-const STOP = new Set(['if', 'for', 'while', 'switch', 'catch', 'constructor', 'return', 'function', 'super', 'await', 'typeof', 'new']);
+const STOP = new Set([
+  'if',
+  'for',
+  'while',
+  'switch',
+  'catch',
+  'constructor',
+  'return',
+  'function',
+  'super',
+  'await',
+  'typeof',
+  'new',
+]);
 function extractMethods(src) {
   const out = new Set();
   // 形如:  methodName( 或 async methodName(
@@ -140,7 +160,9 @@ function main() {
   fs.writeFileSync(OUT_MD, lines.join('\n'));
 
   console.log('能力提取完成。');
-  console.log(`引擎 ${report.summary.engineFiles} 文件 / ${report.summary.totalEngineMethods} 方法；路由 ${report.summary.routeFiles} 文件 / ${report.summary.totalEndpoints} 端点`);
+  console.log(
+    `引擎 ${report.summary.engineFiles} 文件 / ${report.summary.totalEngineMethods} 方法；路由 ${report.summary.routeFiles} 文件 / ${report.summary.totalEndpoints} 端点`
+  );
   console.log(`报告：${path.relative(ROOT, OUT_JSON)} , ${path.relative(ROOT, OUT_MD)}`);
 }
 

@@ -1,10 +1,21 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { Permissions } from '../common/permissions.decorator';
 import { Public } from '../common/public.decorator';
 import { PublicRateLimitGuard } from '../common/public-rate-limit.guard';
 import { Roles } from '../common/roles.decorator';
 import {
-  BrandProductCategoryInput, BrandProductCategoryService,
+  BrandProductCategoryInput,
+  BrandProductCategoryService,
 } from './brand-product-category.service';
 
 @Controller('brand-product-categories')
@@ -13,7 +24,11 @@ export class BrandProductCategoryController {
 
   @Get()
   @Permissions('brand.library.read')
-  list(@Query('brandCode') brandCode: string, @Query('parentId') parentId?: string, @Query('metrics') metrics?: string) {
+  list(
+    @Query('brandCode') brandCode: string,
+    @Query('parentId') parentId?: string,
+    @Query('metrics') metrics?: string
+  ) {
     return this.service.list(brandCode, parentId, metrics);
   }
 

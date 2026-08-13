@@ -59,23 +59,28 @@ async function main() {
   await page.route('**/api/v2/brand-sites**', async (route) => {
     const path = new URL(route.request().url()).pathname;
     if (path.endsWith('/product-assignments')) {
-      await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: [], total: 0 }) });
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [], total: 0 }),
+      });
       return;
     }
     await route.fulfill({
       contentType: 'application/json',
       body: JSON.stringify({
-        items: [{
-          id: 'site-everhot',
-          code: 'everhot',
-          nameCn: '恒热',
-          nameEn: 'Everhot',
-          appKey: 'everhot-cn',
-          deliveryType: 'self_hosted',
-          status: 'active',
-          sortOrder: 30,
-          deletedAt: null,
-        }],
+        items: [
+          {
+            id: 'site-everhot',
+            code: 'everhot',
+            nameCn: '恒热',
+            nameEn: 'Everhot',
+            appKey: 'everhot-cn',
+            deliveryType: 'self_hosted',
+            status: 'active',
+            sortOrder: 30,
+            deletedAt: null,
+          },
+        ],
         total: 1,
       }),
     });
@@ -117,7 +122,10 @@ async function main() {
         page: 1,
         pageSize: 20,
         pages: 1,
-        facets: { categories: [{ value: 'water-heater', count: 1 }], statuses: [{ value: 'active', count: 1 }] },
+        facets: {
+          categories: [{ value: 'water-heater', count: 1 }],
+          statuses: [{ value: 'active', count: 1 }],
+        },
       }),
     });
   });
@@ -134,7 +142,11 @@ async function main() {
   await modal.getByRole('heading', { name: '官网货架', exact: true }).waitFor();
   await modal.getByRole('heading', { name: '规格、卖点 / FAQ', exact: true }).waitFor();
 
-  await modal.locator('.product-create-field').filter({ hasText: '名称' }).locator('input').fill('Cancel Should Not Persist');
+  await modal
+    .locator('.product-create-field')
+    .filter({ hasText: '名称' })
+    .locator('input')
+    .fill('Cancel Should Not Persist');
   await modal.getByRole('button', { name: /取消/ }).click();
   await modal.waitFor({ state: 'hidden' });
   await page.getByText('Everhot Matrix 200').waitFor();
@@ -145,11 +157,19 @@ async function main() {
   await page.getByTestId('brand-product-edit-EH-MODAL-200').click();
   modal = page.getByTestId('brand-product-edit-modal');
   await modal.waitFor();
-  await modal.locator('.product-create-field').filter({ hasText: '名称' }).locator('input').fill('');
+  await modal
+    .locator('.product-create-field')
+    .filter({ hasText: '名称' })
+    .locator('input')
+    .fill('');
   await modal.getByText('产品名称不能为空。').waitFor();
   const disabledForValidation = await page.getByTestId('brand-product-edit-save').isDisabled();
 
-  await modal.locator('.product-create-field').filter({ hasText: '名称' }).locator('input').fill('Everhot Matrix 300');
+  await modal
+    .locator('.product-create-field')
+    .filter({ hasText: '名称' })
+    .locator('input')
+    .fill('Everhot Matrix 300');
   await page.getByTestId('brand-product-edit-save').click();
   await page.getByTestId('brand-product-edit-save').filter({ hasText: '保存中...' }).waitFor();
   await modal.getByText('simulated product save failure').waitFor();
@@ -165,7 +185,9 @@ async function main() {
     throw new Error(JSON.stringify({ disabledForValidation, patchCount, patchPayload }));
   }
 
-  console.log('brand product edit modal smoke passed: open/cancel/validation/error/loading/save/refresh behavior verified');
+  console.log(
+    'brand product edit modal smoke passed: open/cancel/validation/error/loading/save/refresh behavior verified'
+  );
 }
 
 main().catch((error) => {

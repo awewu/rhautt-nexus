@@ -74,7 +74,9 @@ async function main() {
 
   console.log(`Server A media migration complete: ${uploaded + siteBundle.files.length} image(s).`);
   if (missing.length) {
-    console.error(`${missing.length} database image record(s) have no file on server B and must be re-uploaded.`);
+    console.error(
+      `${missing.length} database image record(s) have no file on server B and must be re-uploaded.`
+    );
     process.exitCode = 2;
   }
 }
@@ -109,7 +111,7 @@ async function loadPublicImageRows() {
           AND mime_type LIKE 'image/%'
           AND entity_type = ANY($1::text[])
         ORDER BY created_at ASC`,
-      [PUBLIC_SITE_IMAGE_TYPES],
+      [PUBLIC_SITE_IMAGE_TYPES]
     );
     return result.rows;
   } finally {
@@ -169,9 +171,12 @@ function safeStoragePath(root, key) {
 }
 
 function normalizeRelative(value) {
-  const normalized = String(value || '').replace(/\\/g, '/').replace(/^\/+/, '');
+  const normalized = String(value || '')
+    .replace(/\\/g, '/')
+    .replace(/^\/+/, '');
   const parts = normalized.split('/').filter(Boolean);
-  if (!parts.length || parts.some((part) => part === '.' || part === '..')) throw new Error('invalid storage key');
+  if (!parts.length || parts.some((part) => part === '.' || part === '..'))
+    throw new Error('invalid storage key');
   return parts.join('/');
 }
 

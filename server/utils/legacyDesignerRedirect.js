@@ -13,7 +13,7 @@ const LEGACY_DESIGNER_QUERY_KEYS = Object.freeze([
   'artifactId',
   'artifact_id',
   'artifact',
-  'id'
+  'id',
 ]);
 
 function requestProtocol(req) {
@@ -61,5 +61,5 @@ module.exports = {
   LEGACY_DESIGNER_QUERY_KEYS,
   buildLegacyDesignerRedirectTarget,
   preservedDesignerQuery,
-  redirectLegacyDesignerToViewer
+  redirectLegacyDesignerToViewer,
 };

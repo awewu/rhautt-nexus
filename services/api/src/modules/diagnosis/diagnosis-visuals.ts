@@ -22,8 +22,18 @@ const SYSTEM_ROLE: Record<string, string> = {
   smart_control: '各系统统一联动调度',
 };
 
-export interface DiagramNode { code: string; label: string; role: string; hub: boolean; x: number; y: number; }
-export interface DiagramEdge { from: string; to: string; }
+export interface DiagramNode {
+  code: string;
+  label: string;
+  role: string;
+  hub: boolean;
+  x: number;
+  y: number;
+}
+export interface DiagramEdge {
+  from: string;
+  to: string;
+}
 export interface PrincipleDiagram {
   systems: { code: string; label: string; role: string }[];
   nodes: DiagramNode[];
@@ -32,7 +42,8 @@ export interface PrincipleDiagram {
   note: string;
 }
 
-const NOTE = '原理示意图，说明各系统如何协同工作，非工程图纸；实际管路、点位与选型以现场勘测和设计阶段为准。';
+const NOTE =
+  '原理示意图，说明各系统如何协同工作，非工程图纸；实际管路、点位与选型以现场勘测和设计阶段为准。';
 
 function esc(s: string): string {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -44,7 +55,11 @@ function esc(s: string): string {
  */
 export function buildPrincipleDiagram(systemCodesRaw: string[] = []): PrincipleDiagram {
   const codes = [...new Set(systemCodesRaw.filter((c) => SYSTEM_LABELS[c]))];
-  const systems = codes.map((code) => ({ code, label: SYSTEM_LABELS[code], role: SYSTEM_ROLE[code] || '' }));
+  const systems = codes.map((code) => ({
+    code,
+    label: SYSTEM_LABELS[code],
+    role: SYSTEM_ROLE[code] || '',
+  }));
 
   const hasSmart = codes.includes('smart_control');
   const hubCode = hasSmart ? 'smart_control' : '__home__';
@@ -68,37 +83,56 @@ export function buildPrincipleDiagram(systemCodesRaw: string[] = []): PrincipleD
     const angle = (-90 + (360 / N) * i) * (Math.PI / 180);
     const x = Math.round(cx + R * Math.cos(angle));
     const y = Math.round(cy + R * Math.sin(angle));
-    nodes.push({ code, label: SYSTEM_LABELS[code], role: SYSTEM_ROLE[code] || '', hub: false, x, y });
+    nodes.push({
+      code,
+      label: SYSTEM_LABELS[code],
+      role: SYSTEM_ROLE[code] || '',
+      hub: false,
+      x,
+      y,
+    });
     edges.push({ from: hubCode, to: code });
   });
 
   return { systems, nodes, edges, svg: renderSvg(nodes, edges, W, H, hasSmart), note: NOTE };
 }
 
-function renderSvg(nodes: DiagramNode[], edges: DiagramEdge[], W: number, H: number, hasSmart: boolean): string {
+function renderSvg(
+  nodes: DiagramNode[],
+  edges: DiagramEdge[],
+  W: number,
+  H: number,
+  hasSmart: boolean
+): string {
   const byCode = new Map(nodes.map((n) => [n.code, n]));
   const NODE_W = 132;
   const NODE_H = 52;
 
-  const lines = edges.map((e) => {
-    const a = byCode.get(e.from)!; const b = byCode.get(e.to)!;
-    return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#c9d6e5" stroke-width="2" />`;
-  }).join('');
+  const lines = edges
+    .map((e) => {
+      const a = byCode.get(e.from)!;
+      const b = byCode.get(e.to)!;
+      return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#c9d6e5" stroke-width="2" />`;
+    })
+    .join('');
 
-  const boxes = nodes.map((n) => {
-    const x = n.x - NODE_W / 2; const y = n.y - NODE_H / 2;
-    const fill = n.hub ? '#1f5fa8' : '#ffffff';
-    const stroke = n.hub ? '#1f5fa8' : '#c9d6e5';
-    const nameColor = n.hub ? '#ffffff' : '#22303f';
-    const roleColor = n.hub ? '#dbe7f5' : '#6b7c8d';
-    return [
-      `<g>`,
-      `<rect x="${x}" y="${y}" width="${NODE_W}" height="${NODE_H}" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="1.5" />`,
-      `<text x="${n.x}" y="${n.y - 4}" text-anchor="middle" font-family="-apple-system,Segoe UI,Microsoft YaHei,sans-serif" font-size="14" font-weight="600" fill="${nameColor}">${esc(n.label)}</text>`,
-      `<text x="${n.x}" y="${n.y + 14}" text-anchor="middle" font-family="-apple-system,Segoe UI,Microsoft YaHei,sans-serif" font-size="10" fill="${roleColor}">${esc(n.role)}</text>`,
-      `</g>`,
-    ].join('');
-  }).join('');
+  const boxes = nodes
+    .map((n) => {
+      const x = n.x - NODE_W / 2;
+      const y = n.y - NODE_H / 2;
+      const fill = n.hub ? '#1f5fa8' : '#ffffff';
+      const stroke = n.hub ? '#1f5fa8' : '#c9d6e5';
+      const nameColor = n.hub ? '#ffffff' : '#22303f';
+      const roleColor = n.hub ? '#dbe7f5' : '#6b7c8d';
+      return [
+        `<g>`,
+        `<rect x="${x}" y="${y}" width="${NODE_W}" height="${NODE_H}" rx="10" fill="${fill}" stroke="${stroke}" stroke-width="1.5" />`,
+        `<text x="${n.x}" y="${n.y - 4}" text-anchor="middle" font-family="-apple-system,Segoe UI,Microsoft YaHei,sans-serif" font-size="14" font-weight="600" fill="${nameColor}">${esc(n.label)}</text>`,
+        `<text x="${n.x}" y="${n.y + 14}" text-anchor="middle" font-family="-apple-system,Segoe UI,Microsoft YaHei,sans-serif" font-size="10" fill="${roleColor}">${esc(n.role)}</text>`,
+        `</g>`,
+      ].join('');
+    })
+    .join('');
 
   const title = hasSmart ? '舒适系统原理示意（智能联动）' : '舒适系统原理示意';
   return [

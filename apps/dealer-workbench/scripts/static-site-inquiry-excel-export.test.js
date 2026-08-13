@@ -5,7 +5,16 @@ const test = require('node:test');
 
 const root = path.join(__dirname, '..', '..', '..');
 const shell = fs.readFileSync(
-  path.join(root, 'apps', 'dealer-workbench', 'src', 'app', 'comfort', '[[...section]]', 'BrandSiteConsoleShell.tsx'),
+  path.join(
+    root,
+    'apps',
+    'dealer-workbench',
+    'src',
+    'app',
+    'comfort',
+    '[[...section]]',
+    'BrandSiteConsoleShell.tsx'
+  ),
   'utf8'
 );
 
@@ -18,11 +27,20 @@ test('site inquiry export downloads a real Excel workbook', () => {
   assert.match(exportBlock, /XLSX\.utils\.aoa_to_sheet\(\[headers, \.\.\.rows\]\)/);
   assert.match(exportBlock, /XLSX\.utils\.book_new\(\)/);
   assert.match(exportBlock, /XLSX\.write\(workbook, \{ bookType: 'xlsx', type: 'array' \}\)/);
-  assert.match(exportBlock, /application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet/);
+  assert.match(
+    exportBlock,
+    /application\/vnd\.openxmlformats-officedocument\.spreadsheetml\.sheet/
+  );
   assert.match(exportBlock, /const exportTitle = kind === 'customer' \? '客户咨询' : '加盟咨询'/);
-  assert.match(exportBlock, /link\.download = `\$\{exportTitle\}_\$\{formatExportFilenameTime\(\)\}\.xlsx`/);
+  assert.match(
+    exportBlock,
+    /link\.download = `\$\{exportTitle\}_\$\{formatExportFilenameTime\(\)\}\.xlsx`/
+  );
   assert.match(exportBlock, /siteInquiries\.list\(siteCode, inquiryQuery\('1', '200'\)\)/);
-  assert.match(exportBlock, /siteInquiries\.list\(siteCode, inquiryQuery\(String\(nextPage\), '200'\)\)/);
+  assert.match(
+    exportBlock,
+    /siteInquiries\.list\(siteCode, inquiryQuery\(String\(nextPage\), '200'\)\)/
+  );
   assert.doesNotMatch(exportBlock, /text\/csv|inquiries\.csv|csvCell/);
 });
 

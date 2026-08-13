@@ -68,7 +68,7 @@ function errorHandler(err, req, res, next) {
       status: err.status,
       detail: err.detail,
       instance: req.originalUrl,
-      requestId: req.requestId
+      requestId: req.requestId,
     };
 
     // 添加字段级错误详情
@@ -97,7 +97,7 @@ function errorHandler(err, req, res, next) {
     detail: isDevelopment ? err.message : 'An unexpected error occurred',
     instance: req.originalUrl,
     requestId: req.requestId,
-    ...(isDevelopment && { stack: err.stack })
+    ...(isDevelopment && { stack: err.stack }),
   });
 }
 
@@ -125,5 +125,5 @@ module.exports = {
   InternalError,
   errorHandler,
   notFoundHandler,
-  asyncHandler
+  asyncHandler,
 };

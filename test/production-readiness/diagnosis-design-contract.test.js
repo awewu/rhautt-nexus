@@ -55,7 +55,9 @@ describe('套间一 · diagnosis 问诊模块 · 全端点契约收口', () => {
     const ctrl = read('services/api/src/modules/diagnosis/diagnosis.controller.ts');
     // 公开组关键端点确有 @Public()
     for (const p of ["'consult'", "'quote'", "'painpoints'", "'cases'", "'public/recommend'"]) {
-      expect(ctrl).toMatch(new RegExp(`@Public\\(\\)[\\s\\S]{0,120}${p.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}`));
+      expect(ctrl).toMatch(
+        new RegExp(`@Public\\(\\)[\\s\\S]{0,120}${p.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}`)
+      );
     }
     // 受保护组挂 AuthGuard
     expect(ctrl).toMatch(/UseGuards\(AuthGuard\)[\s\S]{0,80}'reports'/);

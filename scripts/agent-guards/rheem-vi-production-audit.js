@@ -4,20 +4,12 @@ const fs = require('fs');
 const path = require('path');
 
 const root = process.cwd();
-const scanRoots = ['public', 'src', 'apps', 'packages', 'frontend'].map((dir) => path.join(root, dir));
+const scanRoots = ['public', 'src', 'apps', 'packages', 'frontend'].map((dir) =>
+  path.join(root, dir)
+);
 const outputPath = path.join(root, 'audit', 'rheem-vi-production-audit.json');
 
-const extensions = new Set([
-  '.html',
-  '.css',
-  '.js',
-  '.jsx',
-  '.ts',
-  '.tsx',
-  '.json',
-  '.svg',
-  '.md',
-]);
+const extensions = new Set(['.html', '.css', '.js', '.jsx', '.ts', '.tsx', '.json', '.svg', '.md']);
 
 const checks = [
   {
@@ -36,7 +28,8 @@ const checks = [
     id: 'local-logo-production-risk',
     severity: 'critical',
     pattern: /\/images\/rheem-logo\.svg|public\/images\/rheem-logo\.svg/g,
-    message: 'Local Rheem logo path appears. Production use is gated until approved brand package asset is installed.',
+    message:
+      'Local Rheem logo path appears. Production use is gated until approved brand package asset is installed.',
   },
   {
     id: 'fake-logo-lockup-language',
@@ -48,7 +41,8 @@ const checks = [
     id: 'red-pink-gradient',
     severity: 'medium',
     pattern: /#ff6b6b|#E91E63|#e91e63|FF6B8A|ff6b8a/g,
-    message: 'Red-pink gradient/accent appears. Verify against Rheem official palette before production.',
+    message:
+      'Red-pink gradient/accent appears. Verify against Rheem official palette before production.',
   },
 ];
 
@@ -64,9 +58,12 @@ const contextualChecks = [
       // 引用完全合法，不构成伪造锁形——先前基于「附近出现 logo 字样」的判定把合法引用误判为
       // critical（实测 60 例全为误报）。真正风险是把伪造中文字标烘焙进 Rheem 官方 logo/wordmark
       // 资产本身，故仅在文件是 Rheem logo/wordmark 资产时判定为 fake lockup。
-      return /rheem-logo\.svg$/.test(relativePath) || /rheem[-_]?(logo|wordmark|lockup)/i.test(relativePath);
-    }
-  }
+      return (
+        /rheem-logo\.svg$/.test(relativePath) ||
+        /rheem[-_]?(logo|wordmark|lockup)/i.test(relativePath)
+      );
+    },
+  },
 ];
 
 function walk(dir, files = []) {
@@ -147,7 +144,7 @@ const counts = findings.reduce(
     acc.byRule[finding.id] = (acc.byRule[finding.id] || 0) + 1;
     return acc;
   },
-  { total: 0, bySeverity: {}, byRule: {} },
+  { total: 0, bySeverity: {}, byRule: {} }
 );
 
 const report = {
@@ -164,7 +161,7 @@ const report = {
     findings.reduce((acc, finding) => {
       acc[finding.file] = (acc[finding.file] || 0) + 1;
       return acc;
-    }, {}),
+    }, {})
   )
     .sort((a, b) => b[1] - a[1])
     .slice(0, 20)
@@ -182,7 +179,17 @@ const report = {
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
 
-console.log(JSON.stringify({ status: report.productionStatus, counts: report.counts, outputPath: path.relative(root, outputPath) }, null, 2));
+console.log(
+  JSON.stringify(
+    {
+      status: report.productionStatus,
+      counts: report.counts,
+      outputPath: path.relative(root, outputPath),
+    },
+    null,
+    2
+  )
+);
 
 if (process.argv.includes('--fail-on-blocked') && report.productionStatus === 'blocked') {
   process.exit(1);

@@ -63,7 +63,10 @@ const MIME_EXTENSIONS: Record<string, string> = {
 const DEFAULT_UPDATED_AT = '2026-07-31T00:00:00.000Z';
 
 const DEFAULT_MANIFEST: Partial<
-  Record<SiteMaterialKey, { src: string; filename: string; mimeType: string; size: number; updatedAt: string }> &
+  Record<
+    SiteMaterialKey,
+    { src: string; filename: string; mimeType: string; size: number; updatedAt: string }
+  > &
     Record<SiteHeroCarouselKey, SiteHeroCarouselItem[]> &
     Record<SiteAudienceCardsKey, SiteAudienceCardItem[]>
 > = {
@@ -134,7 +137,10 @@ const DEFAULT_MANIFEST: Partial<
 export async function GET(req: Request, context: RouteContext) {
   const params = await Promise.resolve(context.params);
   if (params.brandCode !== 'everhot') {
-    return NextResponse.json({ error: 'only everhot site materials are supported' }, { status: 404 });
+    return NextResponse.json(
+      { error: 'only everhot site materials are supported' },
+      { status: 404 }
+    );
   }
 
   const asset = new URL(req.url).searchParams.get('asset');
@@ -154,10 +160,12 @@ export async function GET(req: Request, context: RouteContext) {
             ? 'image/gif'
             : ext === 'ico'
               ? 'image/x-icon'
-            : 'image/png';
+              : 'image/png';
     try {
       const buffer = await readFile(localAssetPath);
-      return new Response(buffer, { headers: { 'Content-Type': mimeType, 'Cache-Control': 'no-store' } });
+      return new Response(buffer, {
+        headers: { 'Content-Type': mimeType, 'Cache-Control': 'no-store' },
+      });
     } catch {
       return NextResponse.json({ error: 'material asset not found' }, { status: 404 });
     }
@@ -169,7 +177,10 @@ export async function GET(req: Request, context: RouteContext) {
 export async function POST(req: Request, context: RouteContext) {
   const params = await Promise.resolve(context.params);
   if (params.brandCode !== 'everhot') {
-    return NextResponse.json({ error: 'only everhot site materials are supported' }, { status: 404 });
+    return NextResponse.json(
+      { error: 'only everhot site materials are supported' },
+      { status: 404 }
+    );
   }
 
   let body: {
@@ -193,7 +204,9 @@ export async function POST(req: Request, context: RouteContext) {
 
     await mkdir(MATERIAL_DIR, { recursive: true });
     const manifest = await readManifest();
-    const current = Array.isArray(manifest['home-hero-carousel']) ? manifest['home-hero-carousel'] : [];
+    const current = Array.isArray(manifest['home-hero-carousel'])
+      ? manifest['home-hero-carousel']
+      : [];
     const now = Date.now();
     const saved: SiteHeroCarouselItem[] = [];
 
@@ -229,7 +242,10 @@ export async function POST(req: Request, context: RouteContext) {
       });
     }
 
-    manifest['home-hero-carousel'] = [...current, ...saved].map((item, index) => ({ ...item, sortOrder: index }));
+    manifest['home-hero-carousel'] = [...current, ...saved].map((item, index) => ({
+      ...item,
+      sortOrder: index,
+    }));
     await writeFile(MANIFEST_PATH, JSON.stringify(manifest, null, 2), 'utf8');
     return NextResponse.json({ data: manifest['home-hero-carousel'] });
   }
@@ -276,10 +292,17 @@ export async function POST(req: Request, context: RouteContext) {
 export async function PUT(req: Request, context: RouteContext) {
   const params = await Promise.resolve(context.params);
   if (params.brandCode !== 'everhot') {
-    return NextResponse.json({ error: 'only everhot site materials are supported' }, { status: 404 });
+    return NextResponse.json(
+      { error: 'only everhot site materials are supported' },
+      { status: 404 }
+    );
   }
 
-  let body: { key?: string; items?: SiteHeroCarouselItem[] | SiteAudienceCardItem[]; resetDefault?: boolean };
+  let body: {
+    key?: string;
+    items?: SiteHeroCarouselItem[] | SiteAudienceCardItem[];
+    resetDefault?: boolean;
+  };
   try {
     body = await req.json();
   } catch {
@@ -326,7 +349,9 @@ export async function PUT(req: Request, context: RouteContext) {
 
   const carouselItems = body.items as SiteHeroCarouselItem[];
   const items = carouselItems
-    .filter((item) => typeof item?.src === 'string' && item.src.startsWith('/assets/img/site-materials/'))
+    .filter(
+      (item) => typeof item?.src === 'string' && item.src.startsWith('/assets/img/site-materials/')
+    )
     .map((item, index) => ({
       id: String(item.id || `hero-${Date.now()}-${index}`),
       src: String(item.src),
@@ -348,9 +373,12 @@ export async function PUT(req: Request, context: RouteContext) {
 
 async function readManifest(): Promise<
   Partial<
-    Record<SiteMaterialKey, { src: string; filename: string; mimeType: string; size: number; updatedAt: string }> &
-      Record<SiteHeroCarouselKey, SiteHeroCarouselItem[]>
-      & Record<SiteAudienceCardsKey, SiteAudienceCardItem[]>
+    Record<
+      SiteMaterialKey,
+      { src: string; filename: string; mimeType: string; size: number; updatedAt: string }
+    > &
+      Record<SiteHeroCarouselKey, SiteHeroCarouselItem[]> &
+      Record<SiteAudienceCardsKey, SiteAudienceCardItem[]>
   >
 > {
   try {
@@ -382,5 +410,7 @@ function resolvePreviewAssetPath(asset: string): string | null {
   const relative = normalized.replace(/^\/+/, '');
   const resolved = path.resolve(EVERHOT_PUBLIC_DIR, relative);
   const publicRoot = path.resolve(EVERHOT_PUBLIC_DIR);
-  return resolved === publicRoot || resolved.startsWith(`${publicRoot}${path.sep}`) ? resolved : null;
+  return resolved === publicRoot || resolved.startsWith(`${publicRoot}${path.sep}`)
+    ? resolved
+    : null;
 }

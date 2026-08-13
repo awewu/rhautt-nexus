@@ -47,9 +47,7 @@ export interface RoundTripResult {
 
 @Injectable()
 export class ObjectStorageEvidenceService {
-  constructor(
-    @InjectDataSource() private readonly ds: DataSource,
-  ) {}
+  constructor(@InjectDataSource() private readonly ds: DataSource) {}
 
   /** 计算 Buffer 的 SHA-256 */
   sha256(buffer: Buffer): string {
@@ -58,28 +56,34 @@ export class ObjectStorageEvidenceService {
 
   /** 记录一次对象存储操作证据（上传/下载/迁移） */
   async record(record: EvidenceRecord, scope: TenantScope) {
-    return withRlsTransaction(this.ds, async (em) => {
-      const repo = em.getRepository(ObjectStorageEvidenceEntity);
-      const row = await repo.save(repo.create({
-        tenantId: record.tenantId,
-        dealerId: record.dealerId ?? null,
-        actorId: record.actorId ?? null,
-        entityType: record.entityType,
-        entityId: record.entityId,
-        fileKey: record.fileKey,
-        originalName: record.originalName ?? null,
-        operation: record.operation,
-        sizeBytes: record.sizeBytes,
-        sourceHash: record.sourceHash ?? null,
-        destinationHash: record.destinationHash ?? null,
-        pulledHash: record.pulledHash ?? null,
-        storageProvider: record.storageProvider ?? null,
-        storageRegion: record.storageRegion ?? null,
-        storageUrl: record.storageUrl ?? null,
-        meta: record.meta ?? {},
-      }));
-      return row;
-    }, scope);
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        const repo = em.getRepository(ObjectStorageEvidenceEntity);
+        const row = await repo.save(
+          repo.create({
+            tenantId: record.tenantId,
+            dealerId: record.dealerId ?? null,
+            actorId: record.actorId ?? null,
+            entityType: record.entityType,
+            entityId: record.entityId,
+            fileKey: record.fileKey,
+            originalName: record.originalName ?? null,
+            operation: record.operation,
+            sizeBytes: record.sizeBytes,
+            sourceHash: record.sourceHash ?? null,
+            destinationHash: record.destinationHash ?? null,
+            pulledHash: record.pulledHash ?? null,
+            storageProvider: record.storageProvider ?? null,
+            storageRegion: record.storageRegion ?? null,
+            storageUrl: record.storageUrl ?? null,
+            meta: record.meta ?? {},
+          })
+        );
+        return row;
+      },
+      scope
+    );
   }
 
   /**
@@ -92,14 +96,17 @@ export class ObjectStorageEvidenceService {
    *
    * 未来接入 S3/OSS 时，第 2、3 步改为真实 SDK 调用，证据表结构不变。
    */
-  async verifyRoundTrip(params: {
-    tenantId: string;
-    dealerId?: string | null;
-    actorId?: string | null;
-    entityType: string;
-    entityId: string;
-    fileKey: string;
-  }, scope: TenantScope): Promise<RoundTripResult> {
+  async verifyRoundTrip(
+    params: {
+      tenantId: string;
+      dealerId?: string | null;
+      actorId?: string | null;
+      entityType: string;
+      entityId: string;
+      fileKey: string;
+    },
+    scope: TenantScope
+  ): Promise<RoundTripResult> {
     const { tenantId, dealerId, actorId, entityType, entityId, fileKey } = params;
     const src = path.join(STORAGE_ROOT, fileKey);
     if (!fs.existsSync(src)) {
@@ -115,22 +122,25 @@ export class ObjectStorageEvidenceService {
     const pulledBuffer = fs.readFileSync(src);
     const pulledHash = this.sha256(pulledBuffer);
 
-    const evidence = await this.record({
-      tenantId,
-      dealerId,
-      actorId,
-      entityType,
-      entityId,
-      fileKey,
-      operation: 'verify',
-      sizeBytes: sourceBuffer.length,
-      sourceHash,
-      destinationHash,
-      pulledHash,
-      storageProvider: 'local',
-      storageRegion: process.env.STORAGE_REGION ?? 'default',
-      meta: { roundTrip: true },
-    }, scope);
+    const evidence = await this.record(
+      {
+        tenantId,
+        dealerId,
+        actorId,
+        entityType,
+        entityId,
+        fileKey,
+        operation: 'verify',
+        sizeBytes: sourceBuffer.length,
+        sourceHash,
+        destinationHash,
+        pulledHash,
+        storageProvider: 'local',
+        storageRegion: process.env.STORAGE_REGION ?? 'default',
+        meta: { roundTrip: true },
+      },
+      scope
+    );
 
     return {
       ok: sourceHash === pulledHash,
@@ -144,12 +154,16 @@ export class ObjectStorageEvidenceService {
 
   /** 查询某实体的对象存储证据链 */
   async listForEntity(tenantId: string, entityType: string, entityId: string, scope: TenantScope) {
-    return withRlsTransaction(this.ds, async (em) => {
-      const rows = await em.getRepository(ObjectStorageEvidenceEntity).find({
-        where: { tenantId, entityType, entityId },
-        order: { createdAt: 'DESC' },
-      });
-      return { success: true, data: { items: rows } };
-    }, scope);
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        const rows = await em.getRepository(ObjectStorageEvidenceEntity).find({
+          where: { tenantId, entityType, entityId },
+          order: { createdAt: 'DESC' },
+        });
+        return { success: true, data: { items: rows } };
+      },
+      scope
+    );
   }
 }

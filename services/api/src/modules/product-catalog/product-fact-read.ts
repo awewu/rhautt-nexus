@@ -17,17 +17,21 @@ export const productFactEntity = ProductEntity;
 
 /** 产品事实是否已核实（可作为内容生产的 verified 事实源）。 */
 export function productFactReady(product: ProductFactView) {
-  return Boolean(product.factsVerifiedAt)
-    || product.dataReadinessStatus === 'fact_verified'
-    || product.dataReadinessStatus === 'ready';
+  return (
+    Boolean(product.factsVerifiedAt) ||
+    product.dataReadinessStatus === 'fact_verified' ||
+    product.dataReadinessStatus === 'ready'
+  );
 }
 
 /** 产品是否处于对下游可用状态（active + published + 未删除）。 */
 export function productEnabled(product: ProductFactView) {
-  return product.status === 'active'
-    && product.recordStatus === 'active'
-    && product.published === true
-    && !product.deletedAt;
+  return (
+    product.status === 'active' &&
+    product.recordStatus === 'active' &&
+    product.published === true &&
+    !product.deletedAt
+  );
 }
 
 /** 在既有 RLS 事务的 EntityManager 上取产品事实只读仓储。 */

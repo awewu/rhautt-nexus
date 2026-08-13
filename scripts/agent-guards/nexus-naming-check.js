@@ -39,7 +39,7 @@ const REQUIRED_FILES = [
   '.claude/agents/enterprise-ai-control-architect.md',
   '.claude/agents/quote-cost-governor.md',
   '.claude/agents/customer-project-lifecycle-director.md',
-  '.claude/agents/test-harness-builder.md'
+  '.claude/agents/test-harness-builder.md',
 ];
 
 const NEXUS_LOCKED_FILES = [
@@ -51,7 +51,7 @@ const NEXUS_LOCKED_FILES = [
   'docs/_archive/FULL-REWRITE-CHARTER-PRD-TECHNICAL-BLUEPRINT.md',
   'docs/_archive/FULL-REWRITE-DATA-API-CONTRACT-DRAFT.md',
   'docs/_archive/SOFTWARE-NAMING-CANDIDATES.md',
-  'platform-modules.json'
+  'platform-modules.json',
 ];
 
 const CURRENT_BOUNDARY_FILES = ['README.md', 'AGENTS.md', 'CLAUDE.md', 'platform-modules.json'];
@@ -61,7 +61,7 @@ const FORBIDDEN_SOFTWARE_NAME_PATTERNS = [
   /Rhautt Comfort Auto Evolution Report/,
   /Rhautt Comfort\s*=\s*数字化软件生产主干/,
   /Rhautt Comfort 完全重构/,
-  /Rhautt Comfort PRD/
+  /Rhautt Comfort PRD/,
 ];
 
 // docs/_archive/* 基线/命名文档 **git 历史 0 次、从未入库**（实测），把它们当硬性存在要求
@@ -98,13 +98,16 @@ for (const file of CURRENT_BOUNDARY_FILES) {
     !source.includes('不作为本软件系统的名称使用') &&
     !source.includes('客户/集团实例不替换软件平台名')
   ) {
-    failures.push(`${file}: Rhautt Comfort must be bounded as customer/group context, not software name`);
+    failures.push(
+      `${file}: Rhautt Comfort must be bounded as customer/group context, not software name`
+    );
   }
 }
 
 if (exists('package.json')) {
   const pkg = JSON.parse(read('package.json'));
-  if (pkg.name !== 'rhautt-nexus') failures.push(`package.json name must be rhautt-nexus, found ${pkg.name}`);
+  if (pkg.name !== 'rhautt-nexus')
+    failures.push(`package.json name must be rhautt-nexus, found ${pkg.name}`);
   if (!String(pkg.description || '').includes('Rhautt Nexus / 瑞合数智枢纽')) {
     failures.push('package.json description must identify Rhautt Nexus / 瑞合数智枢纽');
   }
@@ -118,7 +121,9 @@ if (exists('package.json')) {
     failures.push('package.json guard:all must include guard:nexus-naming');
   }
   if (pkg.build?.productName && pkg.build.productName !== 'Rhautt Nexus') {
-    failures.push(`electron build productName must be Rhautt Nexus, found ${pkg.build.productName}`);
+    failures.push(
+      `electron build productName must be Rhautt Nexus, found ${pkg.build.productName}`
+    );
   }
 }
 
@@ -128,7 +133,7 @@ if (exists('CLAUDE.md')) {
     'Software platform name: **Rhautt Nexus / 瑞合数智枢纽**',
     'Rhautt Comfort / 瑞合瑞德暖通科技集团 is the customer/group instance positioning',
     'Rysnova / 瑞诺瓦 is the independent dealer-enablement software vendor',
-    'Rheem / Ruud / Everhot are equipment brands'
+    'Rheem / Ruud / Everhot are equipment brands',
   ]) {
     if (!memory.includes(token)) failures.push(`CLAUDE.md missing Nexus identity token: ${token}`);
   }
@@ -138,7 +143,7 @@ if (exists('CLAUDE.md')) {
 }
 
 const agentFiles = exists('.claude/agents')
-  ? fs.readdirSync(path.join(ROOT, '.claude/agents')).filter(file => file.endsWith('.md'))
+  ? fs.readdirSync(path.join(ROOT, '.claude/agents')).filter((file) => file.endsWith('.md'))
   : [];
 
 for (const required of [
@@ -157,14 +162,19 @@ for (const required of [
   'iot-lifecycle-architect.md',
   'test-harness-builder.md',
   'sre-guardian.md',
-  'security-supply-chain.md'
+  'security-supply-chain.md',
 ]) {
-  if (!agentFiles.includes(required)) failures.push(`missing development-group agent: .claude/agents/${required}`);
+  if (!agentFiles.includes(required))
+    failures.push(`missing development-group agent: .claude/agents/${required}`);
 }
 
 for (const file of agentFiles) {
   const content = read(path.join('.claude/agents', file));
-  if (content.includes('You are') && content.includes('Rhautt Comfort') && !content.includes('not the software platform name')) {
+  if (
+    content.includes('You are') &&
+    content.includes('Rhautt Comfort') &&
+    !content.includes('not the software platform name')
+  ) {
     warnings.push(`${file}: references Rhautt Comfort without explicit group-expression guardrail`);
   }
   if (/\bRenova\b/.test(content)) {
@@ -184,7 +194,7 @@ if (exists('docs/_archive/RHAUTT-NEXUS-MULTI-AGENT-DEVELOPMENT-GROUP.md')) {
     'orchestrator-chief',
     'prd-charter-monitor',
     'ui-vi-director',
-    'test-harness-builder'
+    'test-harness-builder',
   ]) {
     if (!group.includes(token)) failures.push(`multi-agent group doc missing token: ${token}`);
   }
@@ -197,7 +207,7 @@ for (const file of [
   'docs/_archive/RHAUTT-NEXUS-ENTERPRISE-AI-CONTROL-ARCHITECTURE.md',
   'docs/_archive/RHAUTT-NEXUS-LEGACY-FUSION-LEDGER.md',
   'docs/_archive/RHAUTT-NEXUS-PRODUCTION-DELIVERY-GOAL.md',
-  'docs/_archive/RHAUTT-NEXUS-DEVELOPMENT-GROUP-LAUNCH-BOARD.md'
+  'docs/_archive/RHAUTT-NEXUS-DEVELOPMENT-GROUP-LAUNCH-BOARD.md',
 ]) {
   if (!exists(file)) continue;
   const source = read(file);
@@ -226,7 +236,9 @@ if (exists('evidence/release-evidence.json')) {
 // ── P2-3 · §0.1 技术来源署名白名单 ──────────────────────────────────────────
 // 赋能线（问诊 + BIM 工作台）统一署名「Powered by Rysnova」——指向真实技术子公司，
 // 区别于设备品牌站的「Powered by Rhautt Comfort」，也区别于"无署名"。
-console.log(`Nexus Naming Check: files = ${REQUIRED_FILES.length}, agents = ${agentFiles.length}, failures = ${failures.length}, warnings = ${warnings.length}`);
+console.log(
+  `Nexus Naming Check: files = ${REQUIRED_FILES.length}, agents = ${agentFiles.length}, failures = ${failures.length}, warnings = ${warnings.length}`
+);
 
 if (failures.length) {
   for (const failure of failures) console.error(`- ${failure}`);

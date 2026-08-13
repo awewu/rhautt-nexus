@@ -19,14 +19,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_couple",
-      "small_family"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["young_couple", "small_family"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-001.glb",
     "createdAt": "2026-04-22"
   },
@@ -50,15 +44,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_child",
-      "three_generation"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["family_with_child", "three_generation"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven", "air_quality"],
     "model3D": "/models/ht-002.glb",
     "createdAt": "2026-04-22"
   },
@@ -82,15 +69,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_child",
-      "middle_class"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven",
-      "water_quality"
-    ],
+    "targetDemographics": ["family_with_child", "middle_class"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven", "water_quality"],
     "model3D": "/models/ht-003.glb",
     "createdAt": "2026-04-22"
   },
@@ -114,16 +94,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "comfort_pursuit"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality",
-      "water_quality",
-      "noise"
-    ],
+    "targetDemographics": ["high_income", "comfort_pursuit"],
+    "commonPainPoints": ["cooling_uneven", "air_quality", "water_quality", "noise"],
     "model3D": "/models/ht-004.glb",
     "createdAt": "2026-04-22"
   },
@@ -147,16 +119,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "luxury_pursuit"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality",
-      "water_quality",
-      "comfort_comprehensive"
-    ],
+    "targetDemographics": ["high_income", "luxury_pursuit"],
+    "commonPainPoints": ["cooling_uneven", "air_quality", "water_quality", "comfort_comprehensive"],
     "model3D": "/models/ht-005.glb",
     "createdAt": "2026-04-22"
   },
@@ -180,15 +144,8 @@
       "hasLoft": true,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "young_professional",
-      "design_pursuit"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "hot_water_pressure",
-      "temperature_zoning"
-    ],
+    "targetDemographics": ["young_professional", "design_pursuit"],
+    "commonPainPoints": ["cooling_uneven", "hot_water_pressure", "temperature_zoning"],
     "model3D": "/models/ht-006.glb",
     "createdAt": "2026-04-22"
   },
@@ -213,10 +170,7 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "family_with_child"
-    ],
+    "targetDemographics": ["high_income", "family_with_child"],
     "commonPainPoints": [
       "cooling_uneven",
       "hot_water_insufficient",
@@ -247,10 +201,7 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "luxury_pursuit"
-    ],
+    "targetDemographics": ["high_income", "luxury_pursuit"],
     "commonPainPoints": [
       "cooling_uneven",
       "hot_water_insufficient",
@@ -282,14 +233,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "single",
-      "young_couple"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_efficiency"
-    ],
+    "targetDemographics": ["single", "young_couple"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_efficiency"],
     "model3D": "/models/ht-009.glb",
     "createdAt": "2026-04-22"
   },
@@ -313,14 +258,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_child",
-      "economy_pursuit"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["family_with_child", "economy_pursuit"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-010.glb",
     "createdAt": "2026-04-22"
   },
@@ -344,15 +283,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generation",
-      "family_with_child"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["three_generation", "family_with_child"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven", "air_quality"],
     "model3D": "/models/ht-011.glb",
     "createdAt": "2026-04-22"
   },
@@ -376,14 +308,8 @@
       "hasLoft": true,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_professional",
-      "single"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "hot_water_pressure"
-    ],
+    "targetDemographics": ["young_professional", "single"],
+    "commonPainPoints": ["cooling_uneven", "hot_water_pressure"],
     "model3D": "/models/ht-012.glb",
     "createdAt": "2026-04-22"
   },
@@ -408,10 +334,7 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "family_with_child"
-    ],
+    "targetDemographics": ["high_income", "family_with_child"],
     "commonPainPoints": [
       "cooling_uneven",
       "hot_water_insufficient",
@@ -441,15 +364,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "middle_class",
-      "family_with_child"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "hot_water_insufficient",
-      "temperature_zoning"
-    ],
+    "targetDemographics": ["middle_class", "family_with_child"],
+    "commonPainPoints": ["cooling_uneven", "hot_water_insufficient", "temperature_zoning"],
     "model3D": "/models/ht-014.glb",
     "createdAt": "2026-04-22"
   },
@@ -473,14 +389,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_couple",
-      "economy_pursuit"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_efficiency"
-    ],
+    "targetDemographics": ["young_couple", "economy_pursuit"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_efficiency"],
     "model3D": "/models/ht-015.glb",
     "createdAt": "2026-04-22"
   },
@@ -504,14 +414,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_child",
-      "middle_class"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["family_with_child", "middle_class"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-016.glb",
     "createdAt": "2026-04-22"
   },
@@ -535,15 +439,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generation",
-      "middle_class"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["three_generation", "middle_class"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven", "air_quality"],
     "model3D": "/models/ht-017.glb",
     "createdAt": "2026-04-22"
   },
@@ -567,10 +464,7 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generation",
-      "high_income"
-    ],
+    "targetDemographics": ["three_generation", "high_income"],
     "commonPainPoints": [
       "cooling_uneven",
       "hot_water_insufficient",
@@ -600,14 +494,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "single",
-      "economy_pursuit"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_efficiency"
-    ],
+    "targetDemographics": ["single", "economy_pursuit"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_efficiency"],
     "model3D": "/models/ht-019.glb",
     "createdAt": "2026-04-22"
   },
@@ -631,14 +519,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_couple",
-      "economy_pursuit"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_efficiency"
-    ],
+    "targetDemographics": ["young_couple", "economy_pursuit"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_efficiency"],
     "model3D": "/models/ht-020.glb",
     "createdAt": "2026-04-22"
   },
@@ -662,14 +544,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_child",
-      "middle_class"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["family_with_child", "middle_class"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-021.glb",
     "createdAt": "2026-04-22"
   },
@@ -693,14 +569,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_child",
-      "middle_class"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["family_with_child", "middle_class"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-022.glb",
     "createdAt": "2026-04-22"
   },
@@ -724,15 +594,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generation",
-      "high_income"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "hot_water_insufficient",
-      "air_quality"
-    ],
+    "targetDemographics": ["three_generation", "high_income"],
+    "commonPainPoints": ["cooling_uneven", "hot_water_insufficient", "air_quality"],
     "model3D": "/models/ht-023.glb",
     "createdAt": "2026-04-22"
   },
@@ -756,15 +619,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generation",
-      "high_income"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "hot_water_insufficient",
-      "air_quality"
-    ],
+    "targetDemographics": ["three_generation", "high_income"],
+    "commonPainPoints": ["cooling_uneven", "hot_water_insufficient", "air_quality"],
     "model3D": "/models/ht-024.glb",
     "createdAt": "2026-04-22"
   },
@@ -788,10 +644,7 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generation",
-      "high_income"
-    ],
+    "targetDemographics": ["three_generation", "high_income"],
     "commonPainPoints": [
       "cooling_uneven",
       "hot_water_insufficient",
@@ -821,14 +674,8 @@
       "hasLoft": true,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_professional",
-      "design_pursuit"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "hot_water_pressure"
-    ],
+    "targetDemographics": ["young_professional", "design_pursuit"],
+    "commonPainPoints": ["cooling_uneven", "hot_water_pressure"],
     "model3D": "/models/ht-026.glb",
     "createdAt": "2026-04-22"
   },
@@ -852,14 +699,8 @@
       "hasLoft": true,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_professional",
-      "design_pursuit"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "hot_water_pressure"
-    ],
+    "targetDemographics": ["young_professional", "design_pursuit"],
+    "commonPainPoints": ["cooling_uneven", "hot_water_pressure"],
     "model3D": "/models/ht-027.glb",
     "createdAt": "2026-04-22"
   },
@@ -884,10 +725,7 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "family_with_child"
-    ],
+    "targetDemographics": ["high_income", "family_with_child"],
     "commonPainPoints": [
       "cooling_uneven",
       "hot_water_insufficient",
@@ -918,10 +756,7 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "luxury_pursuit"
-    ],
+    "targetDemographics": ["high_income", "luxury_pursuit"],
     "commonPainPoints": [
       "cooling_uneven",
       "hot_water_insufficient",
@@ -954,10 +789,7 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "luxury_pursuit"
-    ],
+    "targetDemographics": ["high_income", "luxury_pursuit"],
     "commonPainPoints": [
       "cooling_uneven",
       "hot_water_insufficient",
@@ -989,14 +821,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_couple",
-      "middle_class"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["young_couple", "middle_class"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-031.glb",
     "createdAt": "2026-04-22"
   },
@@ -1020,14 +846,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_child",
-      "economy_pursuit"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["family_with_child", "economy_pursuit"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-032.glb",
     "createdAt": "2026-04-22"
   },
@@ -1051,14 +871,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_child",
-      "middle_class"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["family_with_child", "middle_class"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-033.glb",
     "createdAt": "2026-04-22"
   },
@@ -1082,15 +896,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generation",
-      "middle_class"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["three_generation", "middle_class"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven", "air_quality"],
     "model3D": "/models/ht-034.glb",
     "createdAt": "2026-04-22"
   },
@@ -1114,15 +921,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generation",
-      "high_income"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "hot_water_insufficient",
-      "air_quality"
-    ],
+    "targetDemographics": ["three_generation", "high_income"],
+    "commonPainPoints": ["cooling_uneven", "hot_water_insufficient", "air_quality"],
     "model3D": "/models/ht-035.glb",
     "createdAt": "2026-04-22"
   },
@@ -1146,15 +946,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "middle_class",
-      "family_with_child"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "hot_water_insufficient",
-      "temperature_zoning"
-    ],
+    "targetDemographics": ["middle_class", "family_with_child"],
+    "commonPainPoints": ["cooling_uneven", "hot_water_insufficient", "temperature_zoning"],
     "model3D": "/models/ht-036.glb",
     "createdAt": "2026-04-22"
   },
@@ -1178,10 +971,7 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "high_income",
-      "family_with_child"
-    ],
+    "targetDemographics": ["high_income", "family_with_child"],
     "commonPainPoints": [
       "cooling_uneven",
       "hot_water_insufficient",
@@ -1212,10 +1002,7 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "family_with_child"
-    ],
+    "targetDemographics": ["high_income", "family_with_child"],
     "commonPainPoints": [
       "cooling_uneven",
       "hot_water_insufficient",
@@ -1246,10 +1033,7 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "luxury_pursuit"
-    ],
+    "targetDemographics": ["high_income", "luxury_pursuit"],
     "commonPainPoints": [
       "cooling_uneven",
       "hot_water_insufficient",
@@ -1281,10 +1065,7 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "family_with_child"
-    ],
+    "targetDemographics": ["high_income", "family_with_child"],
     "commonPainPoints": [
       "cooling_uneven",
       "hot_water_insufficient",
@@ -1314,14 +1095,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "single",
-      "economy_pursuit"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_efficiency"
-    ],
+    "targetDemographics": ["single", "economy_pursuit"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_efficiency"],
     "model3D": "/models/ht-041.glb",
     "createdAt": "2026-04-22"
   },
@@ -1345,14 +1120,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_couple",
-      "economy_pursuit"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_efficiency"
-    ],
+    "targetDemographics": ["young_couple", "economy_pursuit"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_efficiency"],
     "model3D": "/models/ht-042.glb",
     "createdAt": "2026-04-22"
   },
@@ -1376,14 +1145,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_couple",
-      "middle_class"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["young_couple", "middle_class"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-043.glb",
     "createdAt": "2026-04-22"
   },
@@ -1407,14 +1170,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_child",
-      "economy_pursuit"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["family_with_child", "economy_pursuit"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-044.glb",
     "createdAt": "2026-04-22"
   },
@@ -1438,14 +1195,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_child",
-      "middle_class"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["family_with_child", "middle_class"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-045.glb",
     "createdAt": "2026-04-22"
   },
@@ -1469,15 +1220,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generation",
-      "middle_class"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["three_generation", "middle_class"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven", "air_quality"],
     "model3D": "/models/ht-046.glb",
     "createdAt": "2026-04-22"
   },
@@ -1501,15 +1245,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generation",
-      "high_income"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "hot_water_insufficient",
-      "air_quality"
-    ],
+    "targetDemographics": ["three_generation", "high_income"],
+    "commonPainPoints": ["cooling_uneven", "hot_water_insufficient", "air_quality"],
     "model3D": "/models/ht-047.glb",
     "createdAt": "2026-04-22"
   },
@@ -1533,16 +1270,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "comfort_pursuit"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality",
-      "water_quality",
-      "comfort_comprehensive"
-    ],
+    "targetDemographics": ["high_income", "comfort_pursuit"],
+    "commonPainPoints": ["cooling_uneven", "air_quality", "water_quality", "comfort_comprehensive"],
     "model3D": "/models/ht-048.glb",
     "createdAt": "2026-04-22"
   },
@@ -1566,16 +1295,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "luxury_pursuit"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality",
-      "water_quality",
-      "comfort_comprehensive"
-    ],
+    "targetDemographics": ["high_income", "luxury_pursuit"],
+    "commonPainPoints": ["cooling_uneven", "air_quality", "water_quality", "comfort_comprehensive"],
     "model3D": "/models/ht-049.glb",
     "createdAt": "2026-04-22"
   },
@@ -1599,16 +1320,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_income",
-      "luxury_pursuit"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality",
-      "water_quality",
-      "comfort_comprehensive"
-    ],
+    "targetDemographics": ["high_income", "luxury_pursuit"],
+    "commonPainPoints": ["cooling_uneven", "air_quality", "water_quality", "comfort_comprehensive"],
     "model3D": "/models/ht-050.glb",
     "createdAt": "2026-04-22"
   },
@@ -1632,13 +1345,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "single",
-      "student"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient"
-    ],
+    "targetDemographics": ["single", "student"],
+    "commonPainPoints": ["hot_water_insufficient"],
     "model3D": "/models/ht-051.glb",
     "createdAt": "2026-04-26"
   },
@@ -1662,13 +1370,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "single",
-      "young_couple"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["single", "young_couple"],
+    "commonPainPoints": ["cooling_uneven"],
     "model3D": "/models/ht-052.glb",
     "createdAt": "2026-04-26"
   },
@@ -1692,12 +1395,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "single"
-    ],
-    "commonPainPoints": [
-      "humidity"
-    ],
+    "targetDemographics": ["single"],
+    "commonPainPoints": ["humidity"],
     "model3D": "/models/ht-053.glb",
     "createdAt": "2026-04-26"
   },
@@ -1721,14 +1420,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "single",
-      "young_couple"
-    ],
-    "commonPainPoints": [
-      "noise",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["single", "young_couple"],
+    "commonPainPoints": ["noise", "cooling_uneven"],
     "model3D": "/models/ht-054.glb",
     "createdAt": "2026-04-26"
   },
@@ -1752,13 +1445,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_couple"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["young_couple"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-055.glb",
     "createdAt": "2026-04-26"
   },
@@ -1782,12 +1470,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "single"
-    ],
-    "commonPainPoints": [
-      "humidity"
-    ],
+    "targetDemographics": ["single"],
+    "commonPainPoints": ["humidity"],
     "model3D": "/models/ht-056.glb",
     "createdAt": "2026-04-26"
   },
@@ -1811,12 +1495,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_couple"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["young_couple"],
+    "commonPainPoints": ["cooling_uneven"],
     "model3D": "/models/ht-057.glb",
     "createdAt": "2026-04-26"
   },
@@ -1840,13 +1520,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_couple",
-      "small_family"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient"
-    ],
+    "targetDemographics": ["young_couple", "small_family"],
+    "commonPainPoints": ["hot_water_insufficient"],
     "model3D": "/models/ht-058.glb",
     "createdAt": "2026-04-26"
   },
@@ -1870,14 +1545,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_couple",
-      "small_family"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "humidity"
-    ],
+    "targetDemographics": ["young_couple", "small_family"],
+    "commonPainPoints": ["cooling_uneven", "humidity"],
     "model3D": "/models/ht-059.glb",
     "createdAt": "2026-04-26"
   },
@@ -1901,13 +1570,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "small_family"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["small_family"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-060.glb",
     "createdAt": "2026-04-26"
   },
@@ -1931,13 +1595,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "small_family"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["small_family"],
+    "commonPainPoints": ["cooling_uneven", "air_quality"],
     "model3D": "/models/ht-061.glb",
     "createdAt": "2026-04-26"
   },
@@ -1961,13 +1620,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_kids"
-    ],
-    "commonPainPoints": [
-      "noise",
-      "humidity"
-    ],
+    "targetDemographics": ["family_with_kids"],
+    "commonPainPoints": ["noise", "humidity"],
     "model3D": "/models/ht-062.glb",
     "createdAt": "2026-04-26"
   },
@@ -1991,13 +1645,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_kids"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["family_with_kids"],
+    "commonPainPoints": ["cooling_uneven", "air_quality"],
     "model3D": "/models/ht-063.glb",
     "createdAt": "2026-04-26"
   },
@@ -2021,12 +1670,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_kids"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["family_with_kids"],
+    "commonPainPoints": ["cooling_uneven"],
     "model3D": "/models/ht-064.glb",
     "createdAt": "2026-04-26"
   },
@@ -2050,14 +1695,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_kids",
-      "three_generations"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["family_with_kids", "three_generations"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-065.glb",
     "createdAt": "2026-04-26"
   },
@@ -2081,13 +1720,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generations"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "humidity"
-    ],
+    "targetDemographics": ["three_generations"],
+    "commonPainPoints": ["cooling_uneven", "humidity"],
     "model3D": "/models/ht-066.glb",
     "createdAt": "2026-04-26"
   },
@@ -2111,14 +1745,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generations",
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "noise"
-    ],
+    "targetDemographics": ["three_generations", "high_net_worth"],
+    "commonPainPoints": ["air_quality", "noise"],
     "model3D": "/models/ht-067.glb",
     "createdAt": "2026-04-26"
   },
@@ -2142,14 +1770,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generations",
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["three_generations", "high_net_worth"],
+    "commonPainPoints": ["cooling_uneven", "air_quality"],
     "model3D": "/models/ht-068.glb",
     "createdAt": "2026-04-26"
   },
@@ -2173,13 +1795,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["high_net_worth"],
+    "commonPainPoints": ["cooling_uneven", "air_quality"],
     "model3D": "/models/ht-069.glb",
     "createdAt": "2026-04-26"
   },
@@ -2203,13 +1820,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "humidity"
-    ],
+    "targetDemographics": ["high_net_worth"],
+    "commonPainPoints": ["cooling_uneven", "humidity"],
     "model3D": "/models/ht-070.glb",
     "createdAt": "2026-04-26"
   },
@@ -2233,14 +1845,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth",
-      "three_generations"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "air_quality"
-    ],
+    "targetDemographics": ["high_net_worth", "three_generations"],
+    "commonPainPoints": ["hot_water_insufficient", "air_quality"],
     "model3D": "/models/ht-071.glb",
     "createdAt": "2026-04-26"
   },
@@ -2264,13 +1870,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "noise"
-    ],
+    "targetDemographics": ["high_net_worth"],
+    "commonPainPoints": ["air_quality", "noise"],
     "model3D": "/models/ht-072.glb",
     "createdAt": "2026-04-26"
   },
@@ -2294,13 +1895,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["high_net_worth"],
+    "commonPainPoints": ["cooling_uneven", "air_quality"],
     "model3D": "/models/ht-073.glb",
     "createdAt": "2026-04-26"
   },
@@ -2324,15 +1920,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth",
-      "executive"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "noise",
-      "humidity"
-    ],
+    "targetDemographics": ["high_net_worth", "executive"],
+    "commonPainPoints": ["air_quality", "noise", "humidity"],
     "model3D": "/models/ht-074.glb",
     "createdAt": "2026-04-26"
   },
@@ -2356,14 +1945,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth",
-      "executive"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "humidity"
-    ],
+    "targetDemographics": ["high_net_worth", "executive"],
+    "commonPainPoints": ["air_quality", "humidity"],
     "model3D": "/models/ht-075.glb",
     "createdAt": "2026-04-26"
   },
@@ -2387,13 +1970,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["high_net_worth"],
+    "commonPainPoints": ["air_quality", "cooling_uneven"],
     "model3D": "/models/ht-076.glb",
     "createdAt": "2026-04-26"
   },
@@ -2417,13 +1995,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["high_net_worth"],
+    "commonPainPoints": ["cooling_uneven", "air_quality"],
     "model3D": "/models/ht-077.glb",
     "createdAt": "2026-04-26"
   },
@@ -2447,13 +2020,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "humidity"
-    ],
+    "targetDemographics": ["high_net_worth"],
+    "commonPainPoints": ["hot_water_insufficient", "humidity"],
     "model3D": "/models/ht-078.glb",
     "createdAt": "2026-04-26"
   },
@@ -2477,14 +2045,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "high_net_worth",
-      "three_generations"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["high_net_worth", "three_generations"],
+    "commonPainPoints": ["air_quality", "cooling_uneven"],
     "model3D": "/models/ht-079.glb",
     "createdAt": "2026-04-26"
   },
@@ -2508,15 +2070,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "high_net_worth",
-      "executive"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "noise",
-      "humidity"
-    ],
+    "targetDemographics": ["high_net_worth", "executive"],
+    "commonPainPoints": ["air_quality", "noise", "humidity"],
     "model3D": "/models/ht-080.glb",
     "createdAt": "2026-04-26"
   },
@@ -2540,14 +2095,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "high_net_worth",
-      "executive"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["high_net_worth", "executive"],
+    "commonPainPoints": ["air_quality", "cooling_uneven"],
     "model3D": "/models/ht-081.glb",
     "createdAt": "2026-04-26"
   },
@@ -2571,15 +2120,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "high_net_worth",
-      "executive"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "humidity",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["high_net_worth", "executive"],
+    "commonPainPoints": ["air_quality", "humidity", "cooling_uneven"],
     "model3D": "/models/ht-082.glb",
     "createdAt": "2026-04-26"
   },
@@ -2603,14 +2145,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "young_couple",
-      "small_family"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "humidity"
-    ],
+    "targetDemographics": ["young_couple", "small_family"],
+    "commonPainPoints": ["cooling_uneven", "humidity"],
     "model3D": "/models/ht-083.glb",
     "createdAt": "2026-04-26"
   },
@@ -2634,12 +2170,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "small_family"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient"
-    ],
+    "targetDemographics": ["small_family"],
+    "commonPainPoints": ["hot_water_insufficient"],
     "model3D": "/models/ht-084.glb",
     "createdAt": "2026-04-26"
   },
@@ -2663,13 +2195,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "family_with_kids"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "humidity"
-    ],
+    "targetDemographics": ["family_with_kids"],
+    "commonPainPoints": ["cooling_uneven", "humidity"],
     "model3D": "/models/ht-085.glb",
     "createdAt": "2026-04-26"
   },
@@ -2693,14 +2220,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "family_with_kids",
-      "three_generations"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["family_with_kids", "three_generations"],
+    "commonPainPoints": ["cooling_uneven", "air_quality"],
     "model3D": "/models/ht-086.glb",
     "createdAt": "2026-04-26"
   },
@@ -2724,13 +2245,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "three_generations"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["three_generations"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-087.glb",
     "createdAt": "2026-04-26"
   },
@@ -2754,14 +2270,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "three_generations",
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["three_generations", "high_net_worth"],
+    "commonPainPoints": ["cooling_uneven", "air_quality"],
     "model3D": "/models/ht-088.glb",
     "createdAt": "2026-04-26"
   },
@@ -2785,14 +2295,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "three_generations",
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "humidity"
-    ],
+    "targetDemographics": ["three_generations", "high_net_worth"],
+    "commonPainPoints": ["air_quality", "humidity"],
     "model3D": "/models/ht-089.glb",
     "createdAt": "2026-04-26"
   },
@@ -2816,13 +2320,8 @@
       "hasLoft": false,
       "hasDuplex": true
     },
-    "targetDemographics": [
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["high_net_worth"],
+    "commonPainPoints": ["air_quality", "cooling_uneven"],
     "model3D": "/models/ht-090.glb",
     "createdAt": "2026-04-26"
   },
@@ -2846,13 +2345,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_kids"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "humidity"
-    ],
+    "targetDemographics": ["family_with_kids"],
+    "commonPainPoints": ["cooling_uneven", "humidity"],
     "model3D": "/models/ht-091.glb",
     "createdAt": "2026-04-26"
   },
@@ -2876,14 +2370,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_kids",
-      "three_generations"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "humidity"
-    ],
+    "targetDemographics": ["family_with_kids", "three_generations"],
+    "commonPainPoints": ["cooling_uneven", "humidity"],
     "model3D": "/models/ht-092.glb",
     "createdAt": "2026-04-26"
   },
@@ -2907,15 +2395,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generations",
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "humidity",
-      "noise"
-    ],
+    "targetDemographics": ["three_generations", "high_net_worth"],
+    "commonPainPoints": ["air_quality", "humidity", "noise"],
     "model3D": "/models/ht-093.glb",
     "createdAt": "2026-04-26"
   },
@@ -2939,14 +2420,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generations",
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["three_generations", "high_net_worth"],
+    "commonPainPoints": ["cooling_uneven", "air_quality"],
     "model3D": "/models/ht-094.glb",
     "createdAt": "2026-04-26"
   },
@@ -2970,14 +2445,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth",
-      "executive"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "humidity"
-    ],
+    "targetDemographics": ["high_net_worth", "executive"],
+    "commonPainPoints": ["air_quality", "humidity"],
     "model3D": "/models/ht-095.glb",
     "createdAt": "2026-04-26"
   },
@@ -3001,13 +2470,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "humidity"
-    ],
+    "targetDemographics": ["high_net_worth"],
+    "commonPainPoints": ["cooling_uneven", "humidity"],
     "model3D": "/models/ht-096.glb",
     "createdAt": "2026-04-26"
   },
@@ -3031,14 +2495,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth",
-      "three_generations"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "humidity"
-    ],
+    "targetDemographics": ["high_net_worth", "three_generations"],
+    "commonPainPoints": ["air_quality", "humidity"],
     "model3D": "/models/ht-097.glb",
     "createdAt": "2026-04-26"
   },
@@ -3062,14 +2520,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "humidity",
-      "noise"
-    ],
+    "targetDemographics": ["high_net_worth"],
+    "commonPainPoints": ["air_quality", "humidity", "noise"],
     "model3D": "/models/ht-098.glb",
     "createdAt": "2026-04-26"
   },
@@ -3093,15 +2545,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth",
-      "executive"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "humidity",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["high_net_worth", "executive"],
+    "commonPainPoints": ["air_quality", "humidity", "cooling_uneven"],
     "model3D": "/models/ht-099.glb",
     "createdAt": "2026-04-26"
   },
@@ -3125,15 +2570,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth",
-      "executive"
-    ],
-    "commonPainPoints": [
-      "air_quality",
-      "humidity",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["high_net_worth", "executive"],
+    "commonPainPoints": ["air_quality", "humidity", "cooling_uneven"],
     "model3D": "/models/ht-100.glb",
     "createdAt": "2026-04-26"
   },
@@ -3157,14 +2595,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generations",
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "humidity",
-      "air_quality"
-    ],
+    "targetDemographics": ["three_generations", "high_net_worth"],
+    "commonPainPoints": ["humidity", "air_quality"],
     "model3D": "/models/ht-101.glb",
     "createdAt": "2026-04-26"
   },
@@ -3188,14 +2620,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "three_generations",
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "humidity",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["three_generations", "high_net_worth"],
+    "commonPainPoints": ["humidity", "cooling_uneven"],
     "model3D": "/models/ht-102.glb",
     "createdAt": "2026-04-26"
   },
@@ -3219,13 +2645,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth"
-    ],
-    "commonPainPoints": [
-      "humidity",
-      "air_quality"
-    ],
+    "targetDemographics": ["high_net_worth"],
+    "commonPainPoints": ["humidity", "air_quality"],
     "model3D": "/models/ht-103.glb",
     "createdAt": "2026-04-26"
   },
@@ -3249,15 +2670,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth",
-      "executive"
-    ],
-    "commonPainPoints": [
-      "humidity",
-      "air_quality",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["high_net_worth", "executive"],
+    "commonPainPoints": ["humidity", "air_quality", "cooling_uneven"],
     "model3D": "/models/ht-104.glb",
     "createdAt": "2026-04-26"
   },
@@ -3281,15 +2695,8 @@
       "hasLoft": false,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "high_net_worth",
-      "executive"
-    ],
-    "commonPainPoints": [
-      "humidity",
-      "air_quality",
-      "noise"
-    ],
+    "targetDemographics": ["high_net_worth", "executive"],
+    "commonPainPoints": ["humidity", "air_quality", "noise"],
     "model3D": "/models/ht-105.glb",
     "createdAt": "2026-04-26"
   },
@@ -3313,14 +2720,8 @@
       "hasLoft": true,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "single",
-      "creative"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["single", "creative"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-106.glb",
     "createdAt": "2026-04-26"
   },
@@ -3344,14 +2745,8 @@
       "hasLoft": true,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_couple",
-      "creative"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "humidity"
-    ],
+    "targetDemographics": ["young_couple", "creative"],
+    "commonPainPoints": ["cooling_uneven", "humidity"],
     "model3D": "/models/ht-107.glb",
     "createdAt": "2026-04-26"
   },
@@ -3375,14 +2770,8 @@
       "hasLoft": true,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_couple",
-      "creative"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["young_couple", "creative"],
+    "commonPainPoints": ["cooling_uneven", "air_quality"],
     "model3D": "/models/ht-108.glb",
     "createdAt": "2026-04-26"
   },
@@ -3406,13 +2795,8 @@
       "hasLoft": true,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "young_couple"
-    ],
-    "commonPainPoints": [
-      "hot_water_insufficient",
-      "cooling_uneven"
-    ],
+    "targetDemographics": ["young_couple"],
+    "commonPainPoints": ["hot_water_insufficient", "cooling_uneven"],
     "model3D": "/models/ht-109.glb",
     "createdAt": "2026-04-26"
   },
@@ -3436,14 +2820,8 @@
       "hasLoft": true,
       "hasDuplex": false
     },
-    "targetDemographics": [
-      "family_with_kids",
-      "creative"
-    ],
-    "commonPainPoints": [
-      "cooling_uneven",
-      "air_quality"
-    ],
+    "targetDemographics": ["family_with_kids", "creative"],
+    "commonPainPoints": ["cooling_uneven", "air_quality"],
     "model3D": "/models/ht-110.glb",
     "createdAt": "2026-04-26"
   }

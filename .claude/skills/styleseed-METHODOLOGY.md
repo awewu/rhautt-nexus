@@ -1,6 +1,6 @@
 # UI/UX Methodology — StyleSeed Companion
 
-> Philosophy companion to `DESIGN-LANGUAGE.md`. Where DESIGN-LANGUAGE prescribes the *rules* (font sizes, spacing, color tokens), this document explains the *reasoning patterns* behind them.
+> Philosophy companion to `DESIGN-LANGUAGE.md`. Where DESIGN-LANGUAGE prescribes the _rules_ (font sizes, spacing, color tokens), this document explains the _reasoning patterns_ behind them.
 >
 > Pull from this when you're scaffolding a new dashboard, deciding what to show first, or wondering why a layout feels off. Pair with `/ss-flow` or `/ss-page` slash skills for application.
 
@@ -11,18 +11,21 @@
 Reveal information in layers from high-level summary to drill-down. Respects the human working memory limit (~4–7 chunks).
 
 **Principles:**
+
 - Surface only what the current task requires
 - Hide advanced options until the user is ready
 - Lower cognitive load for new and infrequent users
 - Build confidence in complexity gradually
 
 **Reference pattern — Stripe Dashboard:**
+
 - Top level: revenue, volume, dispute rate only
 - Every additional detail layer requires intentional click
 - Partial previews ("6 of 25 failed") with link to the full page
 - Tooltips for extra context — never cluttering the main view
 
 **How to apply:**
+
 - Pick 4–6 KPIs for above-the-fold; everything else goes one click away
 - Replace inline detail blocks with summary cards that expand on tap
 - Use tabs and drilldown links instead of stacking sections vertically
@@ -36,12 +39,14 @@ Reveal information in layers from high-level summary to drill-down. Respects the
 Two-tier structure: high-level snapshot → low-level drill-down. Power users want data, but dumping everything at once is unusable.
 
 **Principles:**
+
 - 4–6 core metrics above-the-fold
 - Vertical, hierarchical density to optimize absorption
 - Logical sections/subsections to bound cognitive load
 - Consistent layout to lower the learning curve
 
 **Implementation patterns:**
+
 1. **Metric Strip**: 4–6 KPI cards at the top (revenue, health, alert count, etc.)
 2. **Summary Cards**: each widget shown as a single-line summary (number + caption)
 3. **Expandable Sections**: detailed chart/table appears on click of the area of interest
@@ -56,6 +61,7 @@ Two-tier structure: high-level snapshot → low-level drill-down. Power users wa
 Brad Frost's 5-tier UI component hierarchy. The most widely referenced model for structuring a design system.
 
 **Tiers:**
+
 1. **Atoms** — button, input, label, icon, color, typography (smallest units)
 2. **Molecules** — search bar (input + button), form field (label + input + error), menu item (icon + text)
 3. **Organisms** — navigation header, product card grid, data table (sort + pagination)
@@ -75,16 +81,19 @@ Brad Frost's 5-tier UI component hierarchy. The most widely referenced model for
 The three "quality multipliers" that separate amateur dashboards from shipped ones.
 
 ### Skeleton Screen
+
 - Preview the content layout with a lightweight placeholder
 - Improves perceived load speed, prevents interface reflow
 - **Full-screen loading**: skeletons beat spinners because they hint at page structure
 
 ### Empty State
+
 - Empty screens need a CTA and guidance
 - **One core message per screen** — don't dump text, button, link, tip, and illustration together
 - Demo data, templates, or at least a "Get started" CTA are mandatory
 
 ### Microinteraction
+
 - Hover states, chart tooltips, filter loading animations, icon transitions
 - Communicates system responsiveness
 - When consistent, raises UX quality without distracting from content
@@ -98,17 +107,20 @@ The three "quality multipliers" that separate amateur dashboards from shipped on
 New-user experience that respects the user's attention.
 
 **Three patterns:**
+
 1. **Guided Tour** — tooltips / modals / spotlights for core UI elements
 2. **Checklist** — structured list of key tasks (satisfaction on completion)
 3. **Contextual Tooltip** — small help bubble that appears on first use of a specific feature
 
 **Principles:**
+
 - Never show a raw empty dashboard
 - Minimize Time-to-Value (time until the user touches the core feature)
 - Right help at the right moment, only the info needed
 - Personalize via short upfront questions
 
 **Reference patterns:**
+
 - Notion seeds the first workspace with sample pages
 - Slack guides shortest-path to sending a message
 - HubSpot walks CRM setup via a step-by-step checklist
@@ -122,12 +134,14 @@ New-user experience that respects the user's attention.
 Minimal, clean, deliberately quiet. Today's dominant SaaS visual language.
 
 ### Linear principles
+
 - **8px spacing scale** — 8, 16, 32, 64 multiples for consistency
 - **Modular components** unconstrained by traditional grid layouts
 - **Keyboard-first navigation** for power-user efficiency
 - **Minimum visual noise** — hairline borders, flat surfaces, generous whitespace
 
 ### Toss principles
+
 - **One decision per screen** — minimize cognitive load
 - **Big typography** — core numbers large, ancillary info small
 - **Generous whitespace** — between cards, between sections
@@ -135,6 +149,7 @@ Minimal, clean, deliberately quiet. Today's dominant SaaS visual language.
 - **Transparent border + shadow separation** — cards separated by tone, not lines
 
 ### Common aesthetic
+
 - Flat surfaces (no gradient backgrounds)
 - Hairline 0.5px borders or shadow-based separation
 - Generous whitespace
@@ -150,30 +165,30 @@ A bounded palette where every color has a job. The "polished" feeling of Linear,
 
 ### The underlying theories
 
-| Theory | Origin | What it says |
-|---|---|---|
-| **60-30-10 rule** | Interior design, ported to UI | 60% dominant surface, 30% supporting, 10% accent. Keeps the eye anchored. |
-| **Single Accent Principle** | Linear / Stripe school | One brand color carries all "this is interactive / selected" weight. Everything else neutral. |
-| **Semantic Color Tokens** | Material 3, IBM Carbon | Colors are named by *role* (`brand`, `success`, `destructive`) not by value (`blue-500`). Same name, different value per skin. |
-| **Color Scarcity** | Refactoring UI (Wathan/Schoger) | Accent is impactful only when *rare*. Repeat it 3× per screen, not 30×. |
+| Theory                      | Origin                          | What it says                                                                                                                   |
+| --------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| **60-30-10 rule**           | Interior design, ported to UI   | 60% dominant surface, 30% supporting, 10% accent. Keeps the eye anchored.                                                      |
+| **Single Accent Principle** | Linear / Stripe school          | One brand color carries all "this is interactive / selected" weight. Everything else neutral.                                  |
+| **Semantic Color Tokens**   | Material 3, IBM Carbon          | Colors are named by _role_ (`brand`, `success`, `destructive`) not by value (`blue-500`). Same name, different value per skin. |
+| **Color Scarcity**          | Refactoring UI (Wathan/Schoger) | Accent is impactful only when _rare_. Repeat it 3× per screen, not 30×.                                                        |
 
 These say the same thing four ways: **a small, role-mapped palette beats an unbounded one.**
 
 ### Recommended palette structure (~13 roles, max)
 
-| Tier | Count | Roles |
-|---|---|---|
-| **Brand** | 1 | `--brand` — the one accent. Active, selected, primary CTA. |
-| **Grayscale text** | 5 | strong / primary / secondary / tertiary / disabled (no pure black) |
-| **Surfaces** | 4–5 | page / card / list-row / inactive / brand-tint |
-| **Status** | 4 | success / destructive / warning / info — used only at *dot + small text* scale |
+| Tier               | Count | Roles                                                                          |
+| ------------------ | ----- | ------------------------------------------------------------------------------ |
+| **Brand**          | 1     | `--brand` — the one accent. Active, selected, primary CTA.                     |
+| **Grayscale text** | 5     | strong / primary / secondary / tertiary / disabled (no pure black)             |
+| **Surfaces**       | 4–5   | page / card / list-row / inactive / brand-tint                                 |
+| **Status**         | 4     | success / destructive / warning / info — used only at _dot + small text_ scale |
 
 Total ~13 named colors. Every component pulls from this set. New designs do **not** introduce a new value.
 
 ### Common failure modes
 
 - **Status color sprawl** — painting an entire "danger" card red instead of a 6px dot + red text. Reads as alarm, not info.
-- **Multi-accent confusion** — using `--brand` *and* a second accent. The eye no longer knows where to land.
+- **Multi-accent confusion** — using `--brand` _and_ a second accent. The eye no longer knows where to land.
 - **Gradient background everywhere** — flat surface + restrained gradient on a single CTA is the convention. Gradients on cards and headers feel mid-2010s.
 - **Pure black on white** — too harsh; reduces perceived quality. Use ~`#2A2A2A` on `#FAFAFA` instead.
 - **No grayscale hierarchy** — when all text is the same `text-slate-900`, the eye has no path. Need at least 3 grayscale levels active per screen.
@@ -182,7 +197,7 @@ Total ~13 named colors. Every component pulls from this set. New designs do **no
 
 - **Linear** — almost monochrome. Single tint of purple/blue carries everything interactive; everything else is one of three grays.
 - **Stripe Dashboard** — black/white/purple base + a single semantic color per metric type. KPIs are uniformly grayscale numerals with a single colored trend indicator.
-- **Toss** — Glacier blue brand, transparent card borders, all status as tiny dots. The blue gradient appears *once* per screen (the primary CTA).
+- **Toss** — Glacier blue brand, transparent card borders, all status as tiny dots. The blue gradient appears _once_ per screen (the primary CTA).
 - **Notion** — pure grayscale base, color reserved for tags and icons. Even the brand red is rare.
 
 ### Cross-reference
@@ -197,7 +212,7 @@ Total ~13 named colors. Every component pulls from this set. New designs do **no
 
 ## 8. Motion Vibe Vocabulary
 
-Animation is where vibe coding breaks down hardest. Color has hex, spacing has px, but *feel* lives in five-parameter framer-motion configs that no one wants to think about. "Make it bouncy" should be one word, not seven sliders.
+Animation is where vibe coding breaks down hardest. Color has hex, spacing has px, but _feel_ lives in five-parameter framer-motion configs that no one wants to think about. "Make it bouncy" should be one word, not seven sliders.
 
 ### The vocabulary gap
 
@@ -207,13 +222,13 @@ StyleSeed solves this with five named seeds, each calibrated by hand for a disti
 
 ### The five seeds
 
-| Seed | Vibe | When to reach for it |
-|---|---|---|
-| **Spring** | bouncy, energetic, playful | CTAs that should feel alive; success states; anything Arc-/Toss-like |
-| **Silk** | smooth, elegant, continuous | editorial layouts, financial dashboards, modal panels |
-| **Snap** | instant, decisive, precise | command palettes, power-user tools, keyboard-driven UI |
-| **Float** | weightless, gentle, dreamy | marketing surfaces, hero sections, ambient experiences |
-| **Pulse** | rhythmic, alive, punchy | notifications, live indicators, status badges |
+| Seed       | Vibe                        | When to reach for it                                                 |
+| ---------- | --------------------------- | -------------------------------------------------------------------- |
+| **Spring** | bouncy, energetic, playful  | CTAs that should feel alive; success states; anything Arc-/Toss-like |
+| **Silk**   | smooth, elegant, continuous | editorial layouts, financial dashboards, modal panels                |
+| **Snap**   | instant, decisive, precise  | command palettes, power-user tools, keyboard-driven UI               |
+| **Float**  | weightless, gentle, dreamy  | marketing surfaces, hero sections, ambient experiences               |
+| **Pulse**  | rhythmic, alive, punchy     | notifications, live indicators, status badges                        |
 
 Five seeds × five contexts (entrance, exit, hover, press, layout) = 25 spreadable recipes. Each is one calibrated source of truth — never inline the params on the call site.
 
@@ -221,23 +236,23 @@ Five seeds × five contexts (entrance, exit, hover, press, layout) = 25 spreadab
 
 The dictionary below is what `/ss-motion` uses internally to map natural language to a seed. When you write "make this card bouncy," the skill resolves to Spring; when you write "make it feel like Linear," it resolves to Snap via the brand-default mapping.
 
-| Words the user might say | Seed |
-|---|---|
-| bouncy, springy, playful, energetic, alive | Spring |
-| smooth, silky, fluid, elegant, composed, continuous | Silk |
-| snappy, quick, instant, decisive, sharp, precise | Snap |
-| floaty, gentle, weightless, dreamy, ambient, drifting | Float |
-| rhythmic, punchy, pulsing, heartbeat, beat | Pulse |
+| Words the user might say                              | Seed   |
+| ----------------------------------------------------- | ------ |
+| bouncy, springy, playful, energetic, alive            | Spring |
+| smooth, silky, fluid, elegant, composed, continuous   | Silk   |
+| snappy, quick, instant, decisive, sharp, precise      | Snap   |
+| floaty, gentle, weightless, dreamy, ambient, drifting | Float  |
+| rhythmic, punchy, pulsing, heartbeat, beat            | Pulse  |
 
 ### Brand → seed defaults
 
 Every skin ships a recommended default seed. Override per page when the feel should diverge.
 
-| Skin | Default seed | Why |
-|---|---|---|
-| Toss, Arc | Spring | playful brands; CTA overshoot reads as friendly |
-| Stripe, Notion | Silk | editorial, calm, no surprises |
-| Linear, Raycast, Vercel | Snap | power-user products where the animation should be over before you notice it |
+| Skin                    | Default seed | Why                                                                         |
+| ----------------------- | ------------ | --------------------------------------------------------------------------- |
+| Toss, Arc               | Spring       | playful brands; CTA overshoot reads as friendly                             |
+| Stripe, Notion          | Silk         | editorial, calm, no surprises                                               |
+| Linear, Raycast, Vercel | Snap         | power-user products where the animation should be over before you notice it |
 
 ### When to deviate
 
@@ -263,18 +278,21 @@ Every skin ships a recommended default seed. Override per page when the feel sho
 When you're starting a new dashboard, work in this order:
 
 **Day 0–3 — get the bones right**
+
 - Activate a skin via `data-skin` (e.g., `toss` for clean/trust, `linear` for keyboard-power, `arc` for playful)
 - Lock in 14px base text and 8px spacing grid
 - Split the page into above-the-fold (KPI strip + briefing) and below (detail widgets)
 - Make every table row tappable to a detail view
 
 **Week 1–2 — quality lift**
+
 - Replace spinners with card-shaped skeletons that match the final layout
 - Rewrite empty states with one CTA each
 - Add an onboarding checklist for first-run users
 - Toggle widgets between summary and detail mode
 
 **Week 2–4 — polish**
+
 - Extract repeated UI into atomic components
 - Add contextual tooltips on first-use of each feature
 - Make widgets collapsible
@@ -297,4 +315,4 @@ When you're starting a new dashboard, work in this order:
 
 ---
 
-*Source research compiled 2026-05-21 from a B2B SaaS dashboard (price-monitoring) implementation. Project-specific application notes live in that project's own docs; this file keeps only the universal portions.*
+_Source research compiled 2026-05-21 from a B2B SaaS dashboard (price-monitoring) implementation. Project-specific application notes live in that project's own docs; this file keeps only the universal portions._

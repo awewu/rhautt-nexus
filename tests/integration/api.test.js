@@ -8,22 +8,22 @@ const path = require('path');
 
 describe('API集成测试', () => {
   const serverPath = path.join(__dirname, '../../server-production.js');
-  
+
   test('服务器文件存在', () => {
     expect(fs.existsSync(serverPath)).toBe(true);
   });
-  
+
   test('服务器文件不为空', () => {
     const content = fs.readFileSync(serverPath, 'utf8');
     expect(content.length).toBeGreaterThan(0);
   });
-  
+
   test('包含Express应用导出', () => {
     const content = fs.readFileSync(serverPath, 'utf8');
     expect(content).toContain('module.exports');
     expect(content).toContain('app');
   });
-  
+
   test('包含健康检查端点', () => {
     const content = fs.readFileSync(serverPath, 'utf8');
     // health 路由在 server/modules/health/ 模块中，server-production.js 通过 productionAppFactory 挂载

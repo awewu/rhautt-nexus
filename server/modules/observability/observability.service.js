@@ -4,7 +4,7 @@ const DEFAULT_SLOS = {
   availabilityTarget: 0.995,
   p95LatencyMsTarget: 1000,
   p99LatencyMsTarget: 3000,
-  sampleWindowRequests: 1000
+  sampleWindowRequests: 1000,
 };
 
 function evaluateSlo(metrics, slo = DEFAULT_SLOS) {
@@ -23,13 +23,15 @@ function evaluateSlo(metrics, slo = DEFAULT_SLOS) {
     checks: {
       availabilityOk,
       latencyP95Ok,
-      latencyP99Ok
+      latencyP99Ok,
     },
     errorBudget: {
       targetAvailability: slo.availabilityTarget,
       consumedBy5xxRate: metrics.requests.errorRate,
-      remaining: Number(Math.max(0, (1 - slo.availabilityTarget) - metrics.requests.errorRate).toFixed(4))
-    }
+      remaining: Number(
+        Math.max(0, 1 - slo.availabilityTarget - metrics.requests.errorRate).toFixed(4)
+      ),
+    },
   };
 }
 
@@ -45,7 +47,7 @@ class ObservabilityService {
   getSnapshot() {
     const metrics = this.metricsProvider({
       limit: this.slo.sampleWindowRequests,
-      recentLimit: 20
+      recentLimit: 20,
     });
     const slo = evaluateSlo(metrics, this.slo);
 
@@ -60,12 +62,14 @@ class ObservabilityService {
           logs: 'structured-http-events',
           traces: 'request-id-and-trace-id',
           metrics: 'in-process-http-window',
-          exporter: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ? 'otel-otlp-configured' : 'local-baseline'
+          exporter: process.env.OTEL_EXPORTER_OTLP_ENDPOINT
+            ? 'otel-otlp-configured'
+            : 'local-baseline',
         },
         slo,
         metrics,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     };
   }
 }

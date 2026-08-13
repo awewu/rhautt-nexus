@@ -132,9 +132,20 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [accountForm, setAccountForm] = useState({ displayName: '', brandId: 'rheem', appId: '', originalId: '', appSecret: '' });
+  const [accountForm, setAccountForm] = useState({
+    displayName: '',
+    brandId: 'rheem',
+    appId: '',
+    originalId: '',
+    appSecret: '',
+  });
   const [accountCreateOpen, setAccountCreateOpen] = useState(false);
-  const [accountFilters, setAccountFilters] = useState({ keyword: '', brandId: 'all', status: 'all', connectionStatus: 'all' });
+  const [accountFilters, setAccountFilters] = useState({
+    keyword: '',
+    brandId: 'all',
+    status: 'all',
+    connectionStatus: 'all',
+  });
   const [brandOptions, setBrandOptions] = useState<BrandOption[]>(BRANDS);
   const [secretAccount, setSecretAccount] = useState<WechatAccount | null>(null);
   const [secretValue, setSecretValue] = useState('');
@@ -169,32 +180,37 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
   }, [load]);
 
   useEffect(() => {
-    auth.me()
+    auth
+      .me()
       .then((me) => setCurrentUserId(String(me?.userId || me?.id || '')))
       .catch(() => setCurrentUserId(''));
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    brandSites.list()
+    brandSites
+      .list()
       .then((result) => {
         if (cancelled) return;
         const items = Array.isArray(result?.items) ? result.items : [];
         const next = items
           .filter((site: any) => String(site?.status || 'active') === 'active')
           .map((site: any) => {
-            const id = String(site?.code || '').trim().toLowerCase();
-            const label = `${site?.nameCn || site?.name_cn || site?.nameEn || site?.name_en || id} ${site?.nameEn || site?.name_en || ''}`.trim();
+            const id = String(site?.code || '')
+              .trim()
+              .toLowerCase();
+            const label =
+              `${site?.nameCn || site?.name_cn || site?.nameEn || site?.name_en || id} ${site?.nameEn || site?.name_en || ''}`.trim();
             return id ? { id, label } : null;
           })
           .filter(Boolean) as BrandOption[];
         if (next.length) {
           setBrandOptions(next);
-          setAccountForm((current) => (
+          setAccountForm((current) =>
             next.some((brand) => brand.id === current.brandId)
               ? current
               : { ...current, brandId: next[0].id }
-          ));
+          );
         }
       })
       .catch(() => {
@@ -236,7 +252,13 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
     setError('');
     try {
       await wechatPublishing.createAccount(accountForm);
-      setAccountForm({ displayName: '', brandId: firstBrandId(brandOptions), appId: '', originalId: '', appSecret: '' });
+      setAccountForm({
+        displayName: '',
+        brandId: firstBrandId(brandOptions),
+        appId: '',
+        originalId: '',
+        appSecret: '',
+      });
       setMessage('公众号配置已新增');
       await load();
     } catch (createError) {
@@ -286,7 +308,10 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
     const displayName = window.prompt('公众号显示名称', account.displayName);
     if (displayName === null) return;
     const brandList = brandOptions.map((brand) => `${brand.id} (${brand.label})`).join(', ');
-    const brandId = window.prompt(`品牌 ID：${brandList || '请先在品牌管理中新增品牌'}`, account.brandId);
+    const brandId = window.prompt(
+      `品牌 ID：${brandList || '请先在品牌管理中新增品牌'}`,
+      account.brandId
+    );
     if (brandId === null) return;
     const originalId = window.prompt('原始 ID，如 gh_xxx', account.originalId || '');
     if (originalId === null) return;
@@ -309,7 +334,8 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
 
   async function updateStatus(id: string, status: 'enabled' | 'disabled') {
     const verb = status === 'enabled' ? '启用' : '停用';
-    if (status === 'disabled' && !window.confirm('停用后不能用于新提交或新审核通过，确认停用？')) return;
+    if (status === 'disabled' && !window.confirm('停用后不能用于新提交或新审核通过，确认停用？'))
+      return;
     setBusy(true);
     setError('');
     try {
@@ -393,9 +419,14 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
     const keyword = accountFilters.keyword.trim().toLowerCase();
     const labelByBrand = new Map(brandOptions.map((brand) => [brand.id, brand.label]));
     return accounts.filter((account) => {
-      if (accountFilters.brandId !== 'all' && account.brandId !== accountFilters.brandId) return false;
+      if (accountFilters.brandId !== 'all' && account.brandId !== accountFilters.brandId)
+        return false;
       if (accountFilters.status !== 'all' && account.status !== accountFilters.status) return false;
-      if (accountFilters.connectionStatus !== 'all' && account.connectionStatus !== accountFilters.connectionStatus) return false;
+      if (
+        accountFilters.connectionStatus !== 'all' &&
+        account.connectionStatus !== accountFilters.connectionStatus
+      )
+        return false;
       if (!keyword) return true;
       return [
         account.displayName,
@@ -423,7 +454,12 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
   }, [reviews, reviewBrandFilter]);
 
   return (
-    <div style={{ background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)', minHeight: '100%' }}>
+    <div
+      style={{
+        background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)',
+        minHeight: '100%',
+      }}
+    >
       <div className="page-container growth-copywriter-page" style={{ display: 'grid', gap: 20 }}>
         <PageHeader
           title={header.title}
@@ -431,7 +467,7 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
           actions={<span className="badge badge-info">{header.icon}微信公众号草稿箱 MVP</span>}
         />
 
-        {(message || error) ? (
+        {message || error ? (
           <div className="toolbar" role={error ? 'alert' : 'status'}>
             {message ? <span className="badge badge-success">{message}</span> : null}
             {error ? <span className="badge badge-warning">{error}</span> : null}
@@ -441,39 +477,90 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
         {mode === 'accounts' ? (
           <>
             <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                }}
+              >
                 <div style={{ display: 'grid', gap: 4 }}>
                   <p className="t-label">公众号账号管理</p>
-                  <h2 className="t-headline" style={{ margin: 0 }}>账号列表</h2>
+                  <h2 className="t-headline" style={{ margin: 0 }}>
+                    账号列表
+                  </h2>
                 </div>
                 <div className="table-row-actions">
-                  <button className="btn btn-outline btn-sm" onClick={load} disabled={busy}><RefreshCw size={13} />刷新</button>
+                  <button className="btn btn-outline btn-sm" onClick={load} disabled={busy}>
+                    <RefreshCw size={13} />
+                    刷新
+                  </button>
                   <button
                     className="btn btn-brand btn-sm"
                     onClick={() => {
-                      setAccountForm((current) => brandOptions.some((brand) => brand.id === current.brandId)
-                        ? current
-                        : { ...current, brandId: firstBrandId(brandOptions) });
+                      setAccountForm((current) =>
+                        brandOptions.some((brand) => brand.id === current.brandId)
+                          ? current
+                          : { ...current, brandId: firstBrandId(brandOptions) }
+                      );
                       setAccountCreateOpen(true);
                     }}
                     disabled={busy}
                   >
-                    <Plus size={14} />新增公众号
+                    <Plus size={14} />
+                    新增公众号
                   </button>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 1.5fr) repeat(3, minmax(150px, 1fr))', gap: 10 }}>
-                <input className="input" placeholder="搜索公众号 / AppID / 原始 ID" value={accountFilters.keyword} onChange={(event) => setAccountFilters({ ...accountFilters, keyword: event.target.value })} />
-                <select className="input" value={accountFilters.brandId} onChange={(event) => setAccountFilters({ ...accountFilters, brandId: event.target.value })}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'minmax(220px, 1.5fr) repeat(3, minmax(150px, 1fr))',
+                  gap: 10,
+                }}
+              >
+                <input
+                  className="input"
+                  placeholder="搜索公众号 / AppID / 原始 ID"
+                  value={accountFilters.keyword}
+                  onChange={(event) =>
+                    setAccountFilters({ ...accountFilters, keyword: event.target.value })
+                  }
+                />
+                <select
+                  className="input"
+                  value={accountFilters.brandId}
+                  onChange={(event) =>
+                    setAccountFilters({ ...accountFilters, brandId: event.target.value })
+                  }
+                >
                   <option value="all">全部品牌</option>
-                  {brandOptions.map((brand) => <option key={brand.id} value={brand.id}>{brand.label}</option>)}
+                  {brandOptions.map((brand) => (
+                    <option key={brand.id} value={brand.id}>
+                      {brand.label}
+                    </option>
+                  ))}
                 </select>
-                <select className="input" value={accountFilters.status} onChange={(event) => setAccountFilters({ ...accountFilters, status: event.target.value })}>
+                <select
+                  className="input"
+                  value={accountFilters.status}
+                  onChange={(event) =>
+                    setAccountFilters({ ...accountFilters, status: event.target.value })
+                  }
+                >
                   <option value="all">全部启用状态</option>
                   <option value="enabled">已启用</option>
                   <option value="disabled">已停用</option>
                 </select>
-                <select className="input" value={accountFilters.connectionStatus} onChange={(event) => setAccountFilters({ ...accountFilters, connectionStatus: event.target.value })}>
+                <select
+                  className="input"
+                  value={accountFilters.connectionStatus}
+                  onChange={(event) =>
+                    setAccountFilters({ ...accountFilters, connectionStatus: event.target.value })
+                  }
+                >
                   <option value="all">全部连接状态</option>
                   <option value="normal">连接正常</option>
                   <option value="untested">未测试</option>
@@ -484,49 +571,128 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
                 </select>
               </div>
               <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
-                共 {accounts.length} 个账号，当前显示 {filteredAccounts.length} 个。新增账号会在弹窗中填写 AppID、AppSecret 和品牌绑定。
+                共 {accounts.length} 个账号，当前显示 {filteredAccounts.length}{' '}
+                个。新增账号会在弹窗中填写 AppID、AppSecret 和品牌绑定。
               </span>
             </section>
             <section className="card-elevated" style={{ padding: 18, display: 'none', gap: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  flexWrap: 'wrap',
+                }}
+              >
                 <div>
                   <p className="t-label">新增公众号</p>
-                  <h2 className="t-headline" style={{ marginTop: 4 }}>账号配置</h2>
+                  <h2 className="t-headline" style={{ marginTop: 4 }}>
+                    账号配置
+                  </h2>
                 </div>
-                <button className="btn btn-outline btn-sm" onClick={load} disabled={busy}><RefreshCw size={13} />刷新</button>
+                <button className="btn btn-outline btn-sm" onClick={load} disabled={busy}>
+                  <RefreshCw size={13} />
+                  刷新
+                </button>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 12, alignItems: 'end' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+                  gap: 12,
+                  alignItems: 'end',
+                }}
+              >
                 <label style={{ display: 'grid', gap: 6 }}>
                   <span className="t-label">公众号显示名称</span>
-                  <input className="input" placeholder="例如：cai先生的小宇宙" value={accountForm.displayName} onChange={(event) => setAccountForm({ ...accountForm, displayName: event.target.value })} />
-                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>用于系统内识别账号，提交审核时显示给运营选择。</span>
+                  <input
+                    className="input"
+                    placeholder="例如：cai先生的小宇宙"
+                    value={accountForm.displayName}
+                    onChange={(event) =>
+                      setAccountForm({ ...accountForm, displayName: event.target.value })
+                    }
+                  />
+                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+                    用于系统内识别账号，提交审核时显示给运营选择。
+                  </span>
                 </label>
                 <label style={{ display: 'grid', gap: 6 }}>
                   <span className="t-label">绑定品牌</span>
-                  <select className="input" value={accountForm.brandId} onChange={(event) => setAccountForm({ ...accountForm, brandId: event.target.value })}>
-                    {brandOptions.map((brand) => <option key={brand.id} value={brand.id}>{brand.label}</option>)}
+                  <select
+                    className="input"
+                    value={accountForm.brandId}
+                    onChange={(event) =>
+                      setAccountForm({ ...accountForm, brandId: event.target.value })
+                    }
+                  >
+                    {brandOptions.map((brand) => (
+                      <option key={brand.id} value={brand.id}>
+                        {brand.label}
+                      </option>
+                    ))}
                   </select>
-                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>决定哪些品牌文案可以提交到这个公众号。</span>
+                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+                    决定哪些品牌文案可以提交到这个公众号。
+                  </span>
                 </label>
                 <label style={{ display: 'grid', gap: 6 }}>
                   <span className="t-label">AppID</span>
-                  <input className="input" placeholder="微信开发者平台获取，wx 开头" value={accountForm.appId} onChange={(event) => setAccountForm({ ...accountForm, appId: event.target.value })} />
-                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>用于后端调用微信接口获取 access_token。</span>
+                  <input
+                    className="input"
+                    placeholder="微信开发者平台获取，wx 开头"
+                    value={accountForm.appId}
+                    onChange={(event) =>
+                      setAccountForm({ ...accountForm, appId: event.target.value })
+                    }
+                  />
+                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+                    用于后端调用微信接口获取 access_token。
+                  </span>
                 </label>
                 <label style={{ display: 'grid', gap: 6 }}>
                   <span className="t-label">原始 ID</span>
-                  <input className="input" placeholder="可选，例如 gh_xxx" value={accountForm.originalId} onChange={(event) => setAccountForm({ ...accountForm, originalId: event.target.value })} />
-                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>用于核对公众号身份；不参与接口鉴权。</span>
+                  <input
+                    className="input"
+                    placeholder="可选，例如 gh_xxx"
+                    value={accountForm.originalId}
+                    onChange={(event) =>
+                      setAccountForm({ ...accountForm, originalId: event.target.value })
+                    }
+                  />
+                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+                    用于核对公众号身份；不参与接口鉴权。
+                  </span>
                 </label>
                 <label style={{ display: 'grid', gap: 6 }}>
                   <span className="t-label">AppSecret</span>
-                  <input className="input" type="password" placeholder="只保存到后端，不明文展示" value={accountForm.appSecret} onChange={(event) => setAccountForm({ ...accountForm, appSecret: event.target.value })} />
-                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>用于连接测试和写入草稿箱，保存后列表只显示已配置。</span>
+                  <input
+                    className="input"
+                    type="password"
+                    placeholder="只保存到后端，不明文展示"
+                    value={accountForm.appSecret}
+                    onChange={(event) =>
+                      setAccountForm({ ...accountForm, appSecret: event.target.value })
+                    }
+                  />
+                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+                    用于连接测试和写入草稿箱，保存后列表只显示已配置。
+                  </span>
                 </label>
-                <button className="btn btn-brand" onClick={createAccount} disabled={busy} style={{ minHeight: 40 }}><Plus size={14} />保存账号配置</button>
+                <button
+                  className="btn btn-brand"
+                  onClick={createAccount}
+                  disabled={busy}
+                  style={{ minHeight: 40 }}
+                >
+                  <Plus size={14} />
+                  保存账号配置
+                </button>
               </div>
               <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
-                AppSecret 只在提交时发送给后端保存，列表不会明文展示。测试连接前请先在微信开发者平台配置当前后端公网 IP 到 API IP 白名单。
+                AppSecret
+                只在提交时发送给后端保存，列表不会明文展示。测试连接前请先在微信开发者平台配置当前后端公网
+                IP 到 API IP 白名单。
               </span>
             </section>
             <AccountsTable
@@ -587,10 +753,10 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
         ) : null}
 
         {mode === 'drafts' ? (
-            <DraftTasksTable
-              items={tasks}
-              busy={busy}
-              brandOptions={brandOptions}
+          <DraftTasksTable
+            items={tasks}
+            busy={busy}
+            brandOptions={brandOptions}
             noteByTask={noteByTask}
             setNoteByTask={setNoteByTask}
             onProcess={processQueued}
@@ -640,12 +806,16 @@ function AccountsTable({
         <tbody>
           {items.map((item) => (
             <tr key={item.id}>
-              <td><strong>{item.displayName}</strong></td>
+              <td>
+                <strong>{item.displayName}</strong>
+              </td>
               <td>{labelByBrand.get(item.brandId) || brandLabel(item.brandId)}</td>
               <td>{item.appIdMasked}</td>
               <td>{item.originalId || '-'}</td>
               <td>
-                <span className={item.secretConfigured ? 'badge badge-success' : 'badge badge-warning'}>
+                <span
+                  className={item.secretConfigured ? 'badge badge-success' : 'badge badge-warning'}
+                >
                   {item.secretConfigured ? '已配置' : '未配置'}
                 </span>
               </td>
@@ -653,13 +823,23 @@ function AccountsTable({
               <td>
                 <div style={{ display: 'grid', gap: 4 }}>
                   {statusBadge(item.connectionStatus)}
-                  {item.connectionErrorSummary ? <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>{item.connectionErrorSummary}</span> : null}
+                  {item.connectionErrorSummary ? (
+                    <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+                      {item.connectionErrorSummary}
+                    </span>
+                  ) : null}
                 </div>
               </td>
               <td>{formatDate(item.lastTestedAt)}</td>
               <td>
                 <div className="table-row-actions">
-                  <button className="btn btn-outline btn-sm" onClick={() => onEdit(item)} disabled={busy}>编辑</button>
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => onEdit(item)}
+                    disabled={busy}
+                  >
+                    编辑
+                  </button>
                   <button
                     className="btn btn-outline btn-sm icon-only"
                     onClick={() => onSecret(item)}
@@ -669,18 +849,48 @@ function AccountsTable({
                   >
                     <KeyRound size={14} />
                   </button>
-                  <button className="btn btn-outline btn-sm" onClick={() => onTest(item.id)} disabled={busy}>测试</button>
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => onTest(item.id)}
+                    disabled={busy}
+                  >
+                    测试
+                  </button>
                   {item.status === 'enabled' ? (
-                    <button className="btn btn-outline btn-sm" onClick={() => onStatus(item.id, 'disabled')} disabled={busy}>停用</button>
+                    <button
+                      className="btn btn-outline btn-sm"
+                      onClick={() => onStatus(item.id, 'disabled')}
+                      disabled={busy}
+                    >
+                      停用
+                    </button>
                   ) : (
-                    <button className="btn btn-brand btn-sm" onClick={() => onStatus(item.id, 'enabled')} disabled={busy || item.connectionStatus !== 'normal'}>启用</button>
+                    <button
+                      className="btn btn-brand btn-sm"
+                      onClick={() => onStatus(item.id, 'enabled')}
+                      disabled={busy || item.connectionStatus !== 'normal'}
+                    >
+                      启用
+                    </button>
                   )}
                 </div>
               </td>
             </tr>
           ))}
-          {busy ? <tr><td colSpan={9}><WorkbenchTableState type="loading" title="加载中" /></td></tr> : null}
-          {!busy && !items.length ? <tr><td colSpan={9}><WorkbenchTableState type="empty" title="暂无公众号配置" /></td></tr> : null}
+          {busy ? (
+            <tr>
+              <td colSpan={9}>
+                <WorkbenchTableState type="loading" title="加载中" />
+              </td>
+            </tr>
+          ) : null}
+          {!busy && !items.length ? (
+            <tr>
+              <td colSpan={9}>
+                <WorkbenchTableState type="empty" title="暂无公众号配置" />
+              </td>
+            </tr>
+          ) : null}
         </tbody>
       </table>
     </WorkbenchTableShell>
@@ -695,10 +905,22 @@ function AccountCreateDialog({
   onClose,
   onSubmit,
 }: {
-  form: { displayName: string; brandId: string; appId: string; originalId: string; appSecret: string };
+  form: {
+    displayName: string;
+    brandId: string;
+    appId: string;
+    originalId: string;
+    appSecret: string;
+  };
   busy: boolean;
   brandOptions: BrandOption[];
-  onChange: (value: { displayName: string; brandId: string; appId: string; originalId: string; appSecret: string }) => void;
+  onChange: (value: {
+    displayName: string;
+    brandId: string;
+    appId: string;
+    originalId: string;
+    appSecret: string;
+  }) => void;
   onClose: () => void;
   onSubmit: () => void;
 }) {
@@ -715,7 +937,15 @@ function AccountCreateDialog({
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !busy) onClose();
       }}
-      style={{ position: 'fixed', inset: 0, zIndex: 80, display: 'grid', placeItems: 'center', padding: 20, background: 'rgba(17,24,39,0.46)' }}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 80,
+        display: 'grid',
+        placeItems: 'center',
+        padding: 20,
+        background: 'rgba(17,24,39,0.46)',
+      }}
     >
       <form
         role="dialog"
@@ -726,54 +956,132 @@ function AccountCreateDialog({
           event.preventDefault();
           onSubmit();
         }}
-        style={{ width: 'min(100%, 880px)', padding: 20, display: 'grid', gap: 18, boxShadow: 'var(--sh-modal)' }}
+        style={{
+          width: 'min(100%, 880px)',
+          padding: 20,
+          display: 'grid',
+          gap: 18,
+          boxShadow: 'var(--sh-modal)',
+        }}
       >
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            gap: 16,
+          }}
+        >
           <div style={{ display: 'grid', gap: 5 }}>
             <span className="t-label">新增公众号</span>
-            <h2 id="wechat-account-dialog-title" className="t-headline">保存账号配置</h2>
+            <h2 id="wechat-account-dialog-title" className="t-headline">
+              保存账号配置
+            </h2>
             <span style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
               填写微信开发者平台中的 AppID、AppSecret，并绑定到业务品牌。
             </span>
           </div>
-          <button type="button" className="btn btn-ghost btn-sm icon-only" onClick={onClose} disabled={busy} aria-label="关闭新增公众号弹窗" title="关闭">
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm icon-only"
+            onClick={onClose}
+            disabled={busy}
+            aria-label="关闭新增公众号弹窗"
+            title="关闭"
+          >
             <X size={18} />
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(240px, 1fr))', gap: 14 }}>
+        <div
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(240px, 1fr))', gap: 14 }}
+        >
           <label style={{ display: 'grid', gap: 7 }}>
             <span className="t-label">公众号显示名称</span>
-            <input className="input" placeholder="例如：cai先生的小宇宙" value={form.displayName} onChange={(event) => onChange({ ...form, displayName: event.target.value })} disabled={busy} />
-            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>用于系统内识别账号，提交审核时显示给运营选择。</span>
+            <input
+              className="input"
+              placeholder="例如：cai先生的小宇宙"
+              value={form.displayName}
+              onChange={(event) => onChange({ ...form, displayName: event.target.value })}
+              disabled={busy}
+            />
+            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+              用于系统内识别账号，提交审核时显示给运营选择。
+            </span>
           </label>
           <label style={{ display: 'grid', gap: 7 }}>
             <span className="t-label">绑定品牌</span>
-            <select className="input" value={form.brandId} onChange={(event) => onChange({ ...form, brandId: event.target.value })} disabled={busy}>
-              {brandOptions.map((brand) => <option key={brand.id} value={brand.id}>{brand.label}</option>)}
+            <select
+              className="input"
+              value={form.brandId}
+              onChange={(event) => onChange({ ...form, brandId: event.target.value })}
+              disabled={busy}
+            >
+              {brandOptions.map((brand) => (
+                <option key={brand.id} value={brand.id}>
+                  {brand.label}
+                </option>
+              ))}
             </select>
-            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>决定哪些品牌文案可以提交到这个公众号。</span>
+            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+              决定哪些品牌文案可以提交到这个公众号。
+            </span>
           </label>
           <label style={{ display: 'grid', gap: 7 }}>
             <span className="t-label">AppID</span>
-            <input className="input" placeholder="微信开发者平台获取，wx 开头" value={form.appId} onChange={(event) => onChange({ ...form, appId: event.target.value })} disabled={busy} />
-            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>用于后端调用微信接口获取 access_token。</span>
+            <input
+              className="input"
+              placeholder="微信开发者平台获取，wx 开头"
+              value={form.appId}
+              onChange={(event) => onChange({ ...form, appId: event.target.value })}
+              disabled={busy}
+            />
+            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+              用于后端调用微信接口获取 access_token。
+            </span>
           </label>
           <label style={{ display: 'grid', gap: 7 }}>
             <span className="t-label">原始 ID</span>
-            <input className="input" placeholder="可选，例如 gh_xxx" value={form.originalId} onChange={(event) => onChange({ ...form, originalId: event.target.value })} disabled={busy} />
-            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>用于核对公众号身份；不参与接口鉴权。</span>
+            <input
+              className="input"
+              placeholder="可选，例如 gh_xxx"
+              value={form.originalId}
+              onChange={(event) => onChange({ ...form, originalId: event.target.value })}
+              disabled={busy}
+            />
+            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+              用于核对公众号身份；不参与接口鉴权。
+            </span>
           </label>
           <label style={{ display: 'grid', gap: 7, gridColumn: '1 / -1' }}>
             <span className="t-label">AppSecret</span>
-            <input className="input" type="password" autoComplete="new-password" placeholder="只保存到后端，不明文展示" value={form.appSecret} onChange={(event) => onChange({ ...form, appSecret: event.target.value })} disabled={busy} />
-            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>用于连接测试和写入草稿箱，保存后列表只显示已配置。测试连接前请先在微信开发者平台配置当前后端公网 IP 到 API IP 白名单。</span>
+            <input
+              className="input"
+              type="password"
+              autoComplete="new-password"
+              placeholder="只保存到后端，不明文展示"
+              value={form.appSecret}
+              onChange={(event) => onChange({ ...form, appSecret: event.target.value })}
+              disabled={busy}
+            />
+            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+              用于连接测试和写入草稿箱，保存后列表只显示已配置。测试连接前请先在微信开发者平台配置当前后端公网
+              IP 到 API IP 白名单。
+            </span>
           </label>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-          <button type="button" className="btn btn-outline" onClick={onClose} disabled={busy}>取消</button>
-          <button type="submit" className="btn btn-brand" disabled={busy || !form.displayName.trim() || !form.appId.trim() || !form.appSecret.trim()}>
+          <button type="button" className="btn btn-outline" onClick={onClose} disabled={busy}>
+            取消
+          </button>
+          <button
+            type="submit"
+            className="btn btn-brand"
+            disabled={
+              busy || !form.displayName.trim() || !form.appId.trim() || !form.appSecret.trim()
+            }
+          >
             {busy ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
             保存账号配置
           </button>
@@ -811,7 +1119,15 @@ function SecretUpdateDialog({
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !busy) onClose();
       }}
-      style={{ position: 'fixed', inset: 0, zIndex: 80, display: 'grid', placeItems: 'center', padding: 20, background: 'rgba(17,24,39,0.46)' }}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 80,
+        display: 'grid',
+        placeItems: 'center',
+        padding: 20,
+        background: 'rgba(17,24,39,0.46)',
+      }}
     >
       <form
         role="dialog"
@@ -822,23 +1138,47 @@ function SecretUpdateDialog({
           event.preventDefault();
           onSubmit();
         }}
-        style={{ width: 'min(100%, 480px)', padding: 20, display: 'grid', gap: 18, boxShadow: 'var(--sh-modal)' }}
+        style={{
+          width: 'min(100%, 480px)',
+          padding: 20,
+          display: 'grid',
+          gap: 18,
+          boxShadow: 'var(--sh-modal)',
+        }}
       >
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+            gap: 16,
+          }}
+        >
           <div style={{ display: 'grid', gap: 5 }}>
             <span className="t-label">敏感凭证</span>
-            <h2 id="wechat-secret-dialog-title" className="t-headline">更新 AppSecret</h2>
+            <h2 id="wechat-secret-dialog-title" className="t-headline">
+              更新 AppSecret
+            </h2>
             <span style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
               {account.displayName} · {account.appIdMasked}
             </span>
           </div>
-          <button type="button" className="btn btn-ghost btn-sm icon-only" onClick={onClose} disabled={busy} aria-label="关闭更新密钥弹窗" title="关闭">
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm icon-only"
+            onClick={onClose}
+            disabled={busy}
+            aria-label="关闭更新密钥弹窗"
+            title="关闭"
+          >
             <X size={18} />
           </button>
         </div>
 
         <label style={{ display: 'grid', gap: 7 }}>
-          <span style={{ color: 'var(--t-primary)', fontSize: 13, fontWeight: 700 }}>新的 AppSecret</span>
+          <span style={{ color: 'var(--t-primary)', fontSize: 13, fontWeight: 700 }}>
+            新的 AppSecret
+          </span>
           <input
             className="input"
             type="password"
@@ -856,7 +1196,9 @@ function SecretUpdateDialog({
         </p>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-          <button type="button" className="btn btn-outline" onClick={onClose} disabled={busy}>取消</button>
+          <button type="button" className="btn btn-outline" onClick={onClose} disabled={busy}>
+            取消
+          </button>
           <button type="submit" className="btn btn-brand" disabled={busy || !value.trim()}>
             {busy ? <Loader2 size={14} className="animate-spin" /> : <KeyRound size={14} />}
             更新密钥
@@ -896,13 +1238,30 @@ function ReviewTable({
     <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 14 }}>
       <div className="toolbar">
         <FileText size={16} style={{ color: 'var(--brand)' }} />
-        <select className="input" value={brandFilter} onChange={(event) => setBrandFilter(event.target.value)} style={{ width: 180 }}>
+        <select
+          className="input"
+          value={brandFilter}
+          onChange={(event) => setBrandFilter(event.target.value)}
+          style={{ width: 180 }}
+        >
           <option value="all">全部品牌</option>
-          {brandOptions.map((brand) => <option key={brand.id} value={brand.id}>{brand.label}</option>)}
+          {brandOptions.map((brand) => (
+            <option key={brand.id} value={brand.id}>
+              {brand.label}
+            </option>
+          ))}
         </select>
-        <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>显示 {items.length} / {totalCount}</span>
+        <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+          显示 {items.length} / {totalCount}
+        </span>
         <span className="t-label">租户共享待审核池</span>
-        <input className="input" placeholder="审核通过意见（可选）" value={reviewComment} onChange={(event) => setReviewComment(event.target.value)} style={{ minWidth: 260 }} />
+        <input
+          className="input"
+          placeholder="审核通过意见（可选）"
+          value={reviewComment}
+          onChange={(event) => setReviewComment(event.target.value)}
+          style={{ minWidth: 260 }}
+        />
       </div>
       <WorkbenchTableShell>
         <table className="table wechat-review-table">
@@ -933,11 +1292,17 @@ function ReviewTable({
               <tr key={item.id}>
                 <td>
                   <div className="wechat-review-table__content">
-                    <strong className="wechat-review-table__ellipsis">{item.wechatPayload?.title || '-'}</strong>
-                    <span className="wechat-review-table__digest">{item.wechatPayload?.digest || '-'}</span>
+                    <strong className="wechat-review-table__ellipsis">
+                      {item.wechatPayload?.title || '-'}
+                    </strong>
+                    <span className="wechat-review-table__digest">
+                      {item.wechatPayload?.digest || '-'}
+                    </span>
                   </div>
                 </td>
-                <td>{item.targetSnapshot?.brandName || brandLabel(item.targetSnapshot?.brandId)}</td>
+                <td>
+                  {item.targetSnapshot?.brandName || brandLabel(item.targetSnapshot?.brandId)}
+                </td>
                 <td>{item.targetSnapshot?.accountName || '-'}</td>
                 <td>v{item.versionNo}</td>
                 <td>{item.submitterId.slice(0, 8)}</td>
@@ -945,15 +1310,48 @@ function ReviewTable({
                 <td>{statusBadge(item.reviewStatus)}</td>
                 <td>
                   <div className="table-row-actions wechat-review-table__actions">
-                    <button className="btn btn-brand btn-sm" onClick={() => onApprove(item.id)} disabled={busy}><CheckCircle2 size={13} />通过</button>
-                    <button className="btn btn-outline btn-sm" onClick={() => onReject(item.id, 'request')} disabled={busy}><Clock3 size={13} />退回</button>
-                    <button className="btn btn-danger btn-sm" onClick={() => onReject(item.id, 'void')} disabled={busy}><XCircle size={13} />作废</button>
+                    <button
+                      className="btn btn-brand btn-sm"
+                      onClick={() => onApprove(item.id)}
+                      disabled={busy}
+                    >
+                      <CheckCircle2 size={13} />
+                      通过
+                    </button>
+                    <button
+                      className="btn btn-outline btn-sm"
+                      onClick={() => onReject(item.id, 'request')}
+                      disabled={busy}
+                    >
+                      <Clock3 size={13} />
+                      退回
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => onReject(item.id, 'void')}
+                      disabled={busy}
+                    >
+                      <XCircle size={13} />
+                      作废
+                    </button>
                   </div>
                 </td>
               </tr>
             ))}
-            {busy ? <tr><td colSpan={8}><WorkbenchTableState type="loading" title="加载中" /></td></tr> : null}
-            {!busy && !items.length ? <tr><td colSpan={8}><WorkbenchTableState type="empty" title="暂无待审核内容" /></td></tr> : null}
+            {busy ? (
+              <tr>
+                <td colSpan={8}>
+                  <WorkbenchTableState type="loading" title="加载中" />
+                </td>
+              </tr>
+            ) : null}
+            {!busy && !items.length ? (
+              <tr>
+                <td colSpan={8}>
+                  <WorkbenchTableState type="empty" title="暂无待审核内容" />
+                </td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
       </WorkbenchTableShell>
@@ -989,9 +1387,17 @@ function DraftTasksTable({
   return (
     <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 14 }}>
       <div className="toolbar">
-        <button className="btn btn-outline btn-sm" onClick={onRefresh} disabled={busy}><RefreshCw size={13} />刷新</button>
-        <button className="btn btn-brand btn-sm" onClick={onProcess} disabled={busy}><Loader2 size={13} />执行同步扫描</button>
-        <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>执行后会上传封面素材并创建微信公众平台草稿</span>
+        <button className="btn btn-outline btn-sm" onClick={onRefresh} disabled={busy}>
+          <RefreshCw size={13} />
+          刷新
+        </button>
+        <button className="btn btn-brand btn-sm" onClick={onProcess} disabled={busy}>
+          <Loader2 size={13} />
+          执行同步扫描
+        </button>
+        <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+          执行后会上传封面素材并创建微信公众平台草稿
+        </span>
       </div>
       <WorkbenchTableShell>
         <table className="table" style={{ tableLayout: 'fixed', width: '100%' }}>
@@ -1021,37 +1427,93 @@ function DraftTasksTable({
             {items.map((item) => (
               <tr key={item.id}>
                 <td title={`${item.title || item.reviewVersionId} v${item.versionNo || '-'}`}>
-                  <div style={oneLine}><strong>{item.title || item.reviewVersionId.slice(0, 8)}</strong></div>
-                  <span style={{ ...oneLine, display: 'block', color: 'var(--t-secondary)', fontSize: 12 }}>v{item.versionNo || '-'}</span>
+                  <div style={oneLine}>
+                    <strong>{item.title || item.reviewVersionId.slice(0, 8)}</strong>
+                  </div>
+                  <span
+                    style={{
+                      ...oneLine,
+                      display: 'block',
+                      color: 'var(--t-secondary)',
+                      fontSize: 12,
+                    }}
+                  >
+                    v{item.versionNo || '-'}
+                  </span>
                 </td>
-                <td title={`${item.targetSnapshot?.brandName || labelByBrand.get(String(item.targetSnapshot?.brandId || '')) || brandLabel(item.targetSnapshot?.brandId)} / ${item.targetSnapshot?.accountName || item.accountId}`}>
-                  <div style={oneLine}>{item.targetSnapshot?.brandName || labelByBrand.get(String(item.targetSnapshot?.brandId || '')) || brandLabel(item.targetSnapshot?.brandId)}</div>
-                  <span style={{ ...oneLine, display: 'block', color: 'var(--t-secondary)', fontSize: 12 }}>{item.targetSnapshot?.accountName || item.accountId.slice(0, 8)}</span>
+                <td
+                  title={`${item.targetSnapshot?.brandName || labelByBrand.get(String(item.targetSnapshot?.brandId || '')) || brandLabel(item.targetSnapshot?.brandId)} / ${item.targetSnapshot?.accountName || item.accountId}`}
+                >
+                  <div style={oneLine}>
+                    {item.targetSnapshot?.brandName ||
+                      labelByBrand.get(String(item.targetSnapshot?.brandId || '')) ||
+                      brandLabel(item.targetSnapshot?.brandId)}
+                  </div>
+                  <span
+                    style={{
+                      ...oneLine,
+                      display: 'block',
+                      color: 'var(--t-secondary)',
+                      fontSize: 12,
+                    }}
+                  >
+                    {item.targetSnapshot?.accountName || item.accountId.slice(0, 8)}
+                  </span>
                 </td>
                 <td style={{ whiteSpace: 'nowrap' }}>{statusBadge(item.syncStatus)}</td>
-                <td title={item.wechatDraftId || '-'} style={oneLine}>{item.wechatDraftId || '-'}</td>
-                <td title={item.errorSummary || '-'} style={oneLine}>{item.errorSummary || '-'}</td>
-                <td style={oneLine} title={formatDate(item.finishedAt || item.createdAt)}>{formatDate(item.finishedAt || item.createdAt)}</td>
+                <td title={item.wechatDraftId || '-'} style={oneLine}>
+                  {item.wechatDraftId || '-'}
+                </td>
+                <td title={item.errorSummary || '-'} style={oneLine}>
+                  {item.errorSummary || '-'}
+                </td>
+                <td style={oneLine} title={formatDate(item.finishedAt || item.createdAt)}>
+                  {formatDate(item.finishedAt || item.createdAt)}
+                </td>
                 <td style={{ whiteSpace: 'nowrap' }}>
                   {['failed', 'unconfirmed'].includes(item.syncStatus) ? (
                     <input
                       className="input"
                       placeholder={item.manualNote || '记录人工处理备注'}
                       value={noteByTask[item.id] || ''}
-                      onChange={(event) => setNoteByTask({ ...noteByTask, [item.id]: event.target.value })}
+                      onChange={(event) =>
+                        setNoteByTask({ ...noteByTask, [item.id]: event.target.value })
+                      }
                       style={{ width: '100%', minWidth: 0 }}
                     />
-                  ) : (item.manualNote || '-')}
+                  ) : (
+                    item.manualNote || '-'
+                  )}
                 </td>
                 <td style={{ whiteSpace: 'nowrap' }}>
                   {['failed', 'unconfirmed'].includes(item.syncStatus) ? (
-                    <button className="btn btn-outline btn-sm" onClick={() => onSaveNote(item.id)} disabled={busy}>保存备注</button>
-                  ) : <span style={{ color: 'var(--t-tertiary)' }}>-</span>}
+                    <button
+                      className="btn btn-outline btn-sm"
+                      onClick={() => onSaveNote(item.id)}
+                      disabled={busy}
+                    >
+                      保存备注
+                    </button>
+                  ) : (
+                    <span style={{ color: 'var(--t-tertiary)' }}>-</span>
+                  )}
                 </td>
               </tr>
             ))}
-            {busy ? <tr><td colSpan={8}><WorkbenchTableState type="loading" title="加载中" /></td></tr> : null}
-            {!busy && !items.length ? <tr><td colSpan={8}><WorkbenchTableState type="empty" title="暂无发布记录" /></td></tr> : null}
+            {busy ? (
+              <tr>
+                <td colSpan={8}>
+                  <WorkbenchTableState type="loading" title="加载中" />
+                </td>
+              </tr>
+            ) : null}
+            {!busy && !items.length ? (
+              <tr>
+                <td colSpan={8}>
+                  <WorkbenchTableState type="empty" title="暂无发布记录" />
+                </td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
       </WorkbenchTableShell>

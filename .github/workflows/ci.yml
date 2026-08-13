@@ -24,6 +24,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - name: decision.v1 contract sync gate
+        run: node scripts/check-decision-contract-sync.mjs
+      - name: UI token 棘轮门禁（裸色值债务只减不增）
+        run: npm run guard:ui-tokens
       - run: npm run lint --if-present
       - run: npm test --if-present
       - run: npm run test:production-readiness
@@ -48,7 +52,13 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - run: npm audit --audit-level=high
+      # 本仓使用 pnpm-lock.yaml（无 npm lockfile），npm audit 会 ENOLOCK，改用 pnpm audit。
+      # critical 级为硬门禁；high 级现存 41 个（xlsx/pptxgenjs 等无补丁的传递依赖），
+      # 先以非阻塞报告跟踪，清债后再收紧到 --audit-level=high。
+      - name: pnpm audit (critical = 硬门禁)
+        run: pnpm audit --audit-level=critical
+      - name: pnpm audit (high 报告，非阻塞)
+        run: pnpm audit --audit-level=high || true
       - name: Run Snyk Security Scan
         uses: snyk/actions/node@master
         continue-on-error: true

@@ -21,7 +21,9 @@ describe('runtime service retirement', () => {
   test('runtime startup source does not register retired services', () => {
     const source = fs.readFileSync(path.join(ROOT, 'server/modules/runtimeServices.js'), 'utf8');
 
-    expect(source).not.toMatch(/workflowOrchestrator|evolution|mqttBroker|yjsCollaboration|ragKnowledgeBase|dataBackup|heartbeat|selfCheckOrchestrator|drawingWebSocketServer|collaborationSync/);
+    expect(source).not.toMatch(
+      /workflowOrchestrator|evolution|mqttBroker|yjsCollaboration|ragKnowledgeBase|dataBackup|heartbeat|selfCheckOrchestrator|drawingWebSocketServer|collaborationSync/
+    );
     expect(fs.existsSync(path.join(ROOT, 'websocket-server.js'))).toBe(false);
   });
 

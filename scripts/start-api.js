@@ -5,8 +5,10 @@ const repoRoot = path.resolve(__dirname, '..');
 
 function configureRuntimeEnvironment(env = process.env) {
   const envPath = env.DOTENV_CONFIG_PATH || path.join(repoRoot, '.env.nestjs');
-  const tsProjectPath = env.TS_NODE_PROJECT || path.join(repoRoot, 'services', 'api', 'tsconfig.json');
-  const compiledEntry = env.API_COMPILED_ENTRY || path.join(repoRoot, 'dist', 'services', 'api', 'main.js');
+  const tsProjectPath =
+    env.TS_NODE_PROJECT || path.join(repoRoot, 'services', 'api', 'tsconfig.json');
+  const compiledEntry =
+    env.API_COMPILED_ENTRY || path.join(repoRoot, 'dist', 'services', 'api', 'main.js');
 
   env.DOTENV_CONFIG_PATH = envPath;
   env.TS_NODE_PROJECT = tsProjectPath;

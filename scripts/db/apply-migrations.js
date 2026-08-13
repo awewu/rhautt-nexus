@@ -77,7 +77,9 @@ async function ensureTrackingTable(client) {
 }
 
 async function getApplied(client) {
-  const { rows } = await client.query('SELECT filename, sha256, applied_at FROM public.schema_migrations');
+  const { rows } = await client.query(
+    'SELECT filename, sha256, applied_at FROM public.schema_migrations'
+  );
   const map = new Map();
   for (const row of rows) map.set(row.filename, row);
   return map;
@@ -97,7 +99,7 @@ async function main() {
       if (prev && prev.sha256 !== m.sha256) {
         throw new Error(
           `migration drift: ${m.filename} was applied with sha ${prev.sha256} but file now hashes ${m.sha256}. ` +
-            'Curated migrations are immutable once applied — add a new migration instead.',
+            'Curated migrations are immutable once applied — add a new migration instead.'
         );
       }
     }
@@ -108,7 +110,9 @@ async function main() {
       console.log('Applied migrations:');
       for (const m of migrations) {
         const prev = applied.get(m.filename);
-        console.log(`  ${prev ? '[x]' : '[ ]'} ${m.filename}${prev ? `  (${prev.applied_at.toISOString?.() ?? prev.applied_at})` : ''}`);
+        console.log(
+          `  ${prev ? '[x]' : '[ ]'} ${m.filename}${prev ? `  (${prev.applied_at.toISOString?.() ?? prev.applied_at})` : ''}`
+        );
       }
       console.log(`\n${applied.size} applied, ${pending.length} pending.`);
       return;
@@ -128,7 +132,10 @@ async function main() {
       try {
         await client.query('BEGIN');
         await client.query(m.sql);
-        await client.query('INSERT INTO public.schema_migrations (filename, sha256) VALUES ($1, $2)', [m.filename, m.sha256]);
+        await client.query(
+          'INSERT INTO public.schema_migrations (filename, sha256) VALUES ($1, $2)',
+          [m.filename, m.sha256]
+        );
         await client.query('COMMIT');
         console.log('ok');
       } catch (err) {

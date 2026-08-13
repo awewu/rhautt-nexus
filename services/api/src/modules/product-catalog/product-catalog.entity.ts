@@ -1,11 +1,25 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import type { ProductPositioning, AssetRef, ProductSeo, ProductMarketing } from './product-taxonomy';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import type {
+  ProductPositioning,
+  AssetRef,
+  ProductSeo,
+  ProductMarketing,
+} from './product-taxonomy';
 
 @Entity('products')
 @Index(['tenantId', 'sku'], { unique: true })
 @Index('products_brand_model_uidx', ['tenantId', 'brandCode', 'normalizedModel'], {
   unique: true,
-  where: "deleted_at IS NULL AND record_status <> 'archived' AND COALESCE(brand_code, '') <> '' AND COALESCE(normalized_model, '') <> ''",
+  where:
+    "deleted_at IS NULL AND record_status <> 'archived' AND COALESCE(brand_code, '') <> '' AND COALESCE(normalized_model, '') <> ''",
 })
 export class ProductEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
@@ -13,37 +27,49 @@ export class ProductEntity {
   @Column() sku: string;
   @Column() name: string;
   @Column({ type: 'varchar', nullable: true }) brand: string | null;
-  @Column({ name: 'brand_code', type: 'varchar', nullable: true }) @Index() brandCode: string | null;
+  @Column({ name: 'brand_code', type: 'varchar', nullable: true }) @Index() brandCode:
+    string | null;
   @Column({ type: 'varchar', nullable: true }) model: string | null;
-  @Column({ name: 'normalized_model', type: 'varchar', nullable: true }) @Index() normalizedModel: string | null;
+  @Column({ name: 'normalized_model', type: 'varchar', nullable: true }) @Index() normalizedModel:
+    string | null;
   @Column({ name: 'working_name', type: 'varchar', nullable: true }) workingName: string | null;
   @Column({ type: 'varchar', nullable: true }) category: string | null;
   @Column({ type: 'jsonb', default: {} }) spec: Record<string, unknown>;
   // D2 定位层（P1）：把产品「说清楚」——卖给谁/渠道/用户/市场/卖点。
   @Column({ type: 'jsonb', default: () => "'{}'::jsonb" }) positioning: ProductPositioning;
   // D2 素材引用（P2）：产品挂载的 DAM 制品引用（主图/参数表/认证/BIM族/说明书），只存引用。
-  @Column({ name: 'asset_refs', type: 'jsonb', default: () => "'[]'::jsonb" }) assetRefs: AssetRef[];
+  @Column({ name: 'asset_refs', type: 'jsonb', default: () => "'[]'::jsonb" })
+  assetRefs: AssetRef[];
   // MDM-lite 预留：跨品牌稳定产品身份（P4 去重用），P1 仅建列不启用去重逻辑。
-  @Column({ name: 'product_key', type: 'varchar', nullable: true }) @Index() productKey: string | null;
+  @Column({ name: 'product_key', type: 'varchar', nullable: true }) @Index() productKey:
+    string | null;
   @Column({ name: 'list_price', type: 'decimal', default: 0 }) listPrice: number;
   @Column({ name: 'cost_price', type: 'decimal', default: 0 }) costPrice: number;
   @Column({ name: 'length_mm', type: 'decimal', nullable: true }) lengthMm: number | null;
   @Column({ name: 'width_mm', type: 'decimal', nullable: true }) widthMm: number | null;
   @Column({ name: 'height_mm', type: 'decimal', nullable: true }) heightMm: number | null;
   @Column({ name: 'net_weight_kg', type: 'decimal', nullable: true }) netWeightKg: number | null;
-  @Column({ name: 'package_length_mm', type: 'decimal', nullable: true }) packageLengthMm: number | null;
-  @Column({ name: 'package_width_mm', type: 'decimal', nullable: true }) packageWidthMm: number | null;
-  @Column({ name: 'package_height_mm', type: 'decimal', nullable: true }) packageHeightMm: number | null;
-  @Column({ name: 'gross_weight_kg', type: 'decimal', nullable: true }) grossWeightKg: number | null;
+  @Column({ name: 'package_length_mm', type: 'decimal', nullable: true }) packageLengthMm:
+    number | null;
+  @Column({ name: 'package_width_mm', type: 'decimal', nullable: true }) packageWidthMm:
+    number | null;
+  @Column({ name: 'package_height_mm', type: 'decimal', nullable: true }) packageHeightMm:
+    number | null;
+  @Column({ name: 'gross_weight_kg', type: 'decimal', nullable: true }) grossWeightKg:
+    number | null;
   @Column({ type: 'varchar', default: 'CNY' }) currency: string;
   @Column({ default: 'active' }) @Index() status: string;
   @Column({ name: 'record_status', default: 'active' }) recordStatus: string;
   @Column({ name: 'data_readiness_status', default: 'imported_draft' }) dataReadinessStatus: string;
-  @Column({ name: 'readiness_checked_at', type: 'timestamptz', nullable: true }) readinessCheckedAt: Date | null;
-  @Column({ name: 'facts_verified_by', type: 'varchar', nullable: true }) factsVerifiedBy: string | null;
-  @Column({ name: 'facts_verified_at', type: 'timestamptz', nullable: true }) factsVerifiedAt: Date | null;
+  @Column({ name: 'readiness_checked_at', type: 'timestamptz', nullable: true })
+  readinessCheckedAt: Date | null;
+  @Column({ name: 'facts_verified_by', type: 'varchar', nullable: true }) factsVerifiedBy:
+    string | null;
+  @Column({ name: 'facts_verified_at', type: 'timestamptz', nullable: true })
+  factsVerifiedAt: Date | null;
   @Column({ name: 'source_system', type: 'varchar', nullable: true }) sourceSystem: string | null;
-  @Column({ name: 'source_record_key', type: 'varchar', nullable: true }) sourceRecordKey: string | null;
+  @Column({ name: 'source_record_key', type: 'varchar', nullable: true }) sourceRecordKey:
+    string | null;
   @Column({ name: 'row_version', default: 1 }) rowVersion: number;
   // 4.4 产品生命周期阶段：引入→成长→成熟→退市。
   @Column({ name: 'lifecycle_stage', default: 'intro' }) lifecycleStage: string;
@@ -68,7 +94,8 @@ export class ProductSkuEntity {
   @Column({ type: 'varchar', nullable: true }) mpn: string | null;
   @Column({ name: 'record_status', default: 'active' }) recordStatus: string;
   @Column({ name: 'source_system', type: 'varchar', nullable: true }) sourceSystem: string | null;
-  @Column({ name: 'source_record_key', type: 'varchar', nullable: true }) sourceRecordKey: string | null;
+  @Column({ name: 'source_record_key', type: 'varchar', nullable: true }) sourceRecordKey:
+    string | null;
   @Column({ name: 'created_by', type: 'varchar', nullable: true }) createdBy: string | null;
   @Column({ name: 'updated_by', type: 'varchar', nullable: true }) updatedBy: string | null;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
@@ -77,10 +104,14 @@ export class ProductSkuEntity {
 }
 
 @Entity('product_website_pricing')
-@Index('product_website_pricing_scope_uidx', ['tenantId', 'productId', 'brandCode', 'siteCode', 'locale'], {
-  unique: true,
-  where: 'deleted_at IS NULL',
-})
+@Index(
+  'product_website_pricing_scope_uidx',
+  ['tenantId', 'productId', 'brandCode', 'siteCode', 'locale'],
+  {
+    unique: true,
+    where: 'deleted_at IS NULL',
+  }
+)
 export class ProductWebsitePricingEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
@@ -90,8 +121,10 @@ export class ProductWebsitePricingEntity {
   @Column({ default: 'zh-CN' }) locale: string;
   @Column({ name: 'price_display_mode', default: 'not_shown' }) priceDisplayMode: string;
   @Column({ name: 'website_price', type: 'decimal', nullable: true }) websitePrice: number | null;
-  @Column({ name: 'website_price_min', type: 'decimal', nullable: true }) websitePriceMin: number | null;
-  @Column({ name: 'website_price_max', type: 'decimal', nullable: true }) websitePriceMax: number | null;
+  @Column({ name: 'website_price_min', type: 'decimal', nullable: true }) websitePriceMin:
+    number | null;
+  @Column({ name: 'website_price_max', type: 'decimal', nullable: true }) websitePriceMax:
+    number | null;
   @Column({ name: 'promo_price', type: 'decimal', nullable: true }) promoPrice: number | null;
   @Column({ default: 'CNY' }) currency: string;
   @Column({ name: 'price_unit', type: 'varchar', nullable: true }) priceUnit: string | null;
@@ -120,7 +153,8 @@ export class ProductBrandBindingEntity {
   @Column({ name: 'brand_code' }) brandCode: string;
   @Column({ name: 'brand_model' }) brandModel: string;
   @Column({ name: 'normalized_model' }) normalizedModel: string;
-  @Column({ name: 'brand_display_name', type: 'varchar', nullable: true }) brandDisplayName: string | null;
+  @Column({ name: 'brand_display_name', type: 'varchar', nullable: true }) brandDisplayName:
+    string | null;
   @Column({ default: 'active' }) status: string;
   @Column({ name: 'created_by', type: 'varchar', nullable: true }) createdBy: string | null;
   @Column({ name: 'updated_by', type: 'varchar', nullable: true }) updatedBy: string | null;
@@ -160,7 +194,7 @@ export class ProductContentEntity {
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
   @Column({ name: 'product_id' }) @Index() productId: string;
   // L7a i18n
-  @Column() locale: string;                          // BCP-47, e.g. zh-CN / en-US
+  @Column() locale: string; // BCP-47, e.g. zh-CN / en-US
   @Column({ type: 'varchar', nullable: true }) name: string | null;
   @Column({ name: 'display_currency', default: 'CNY' }) displayCurrency: string;
   // L7b SEO/GEO
@@ -169,7 +203,8 @@ export class ProductContentEntity {
   @Column({ type: 'varchar', nullable: true }) mpn: string | null;
   // L7c 富营销内容
   @Column({ type: 'jsonb', default: () => "'{}'::jsonb" }) marketing: ProductMarketing;
-  @Column({ name: 'official_detail_html', type: 'text', nullable: true }) officialDetailHtml: string | null;
+  @Column({ name: 'official_detail_html', type: 'text', nullable: true }) officialDetailHtml:
+    string | null;
   // 发布工作流：draft→review→scheduled→published（只有 published 且 publishedAt<=now 进公开供给）
   @Column({ default: 'draft' }) @Index() status: string;
   @Column({ name: 'published_at', type: 'timestamptz', nullable: true }) publishedAt: Date | null;

@@ -25,31 +25,32 @@
 
 ## 2. 用户与受众
 
-| 受众 | 入口应用 | 核心诉求 |
-|---|---|---|
-| 终端业主（C 端） | 瑞诺瓦 AI 问诊、集团官网 | 痛点诊断、系统方案、预算/月供/ROI |
-| 已签约客户 | 客户门户 | 方案/报价/订单/施工/验收/保修/IoT 状态 |
-| 暖通设计师/销售 | 设计师工作台 | 2D 设计、选型、BOM、报价、促销、分享 |
-| 技术支持/经销商技术 | Rysnova 工作台 | BIM 深化、系统图、施工图、Revit/CAD |
-| 经销商/门店/总部 | 经销商台、业务控制台 | 多租户 CRM、报价、产品、促销、施工、总部汇总 |
-| 各品牌 C 端/行业 | Rheem/Ruud/Everhot 品牌站 | 品牌展示、产品矩阵、留资回流问诊 |
+| 受众                | 入口应用                  | 核心诉求                                     |
+| ------------------- | ------------------------- | -------------------------------------------- |
+| 终端业主（C 端）    | 瑞诺瓦 AI 问诊、集团官网  | 痛点诊断、系统方案、预算/月供/ROI            |
+| 已签约客户          | 客户门户                  | 方案/报价/订单/施工/验收/保修/IoT 状态       |
+| 暖通设计师/销售     | 设计师工作台              | 2D 设计、选型、BOM、报价、促销、分享         |
+| 技术支持/经销商技术 | Rysnova 工作台            | BIM 深化、系统图、施工图、Revit/CAD          |
+| 经销商/门店/总部    | 经销商台、业务控制台      | 多租户 CRM、报价、产品、促销、施工、总部汇总 |
+| 各品牌 C 端/行业    | Rheem/Ruud/Everhot 品牌站 | 品牌展示、产品矩阵、留资回流问诊             |
 
 ### 2.1 角色 × 数据可见范围（RBAC + 租户作用域）
 
 受众映射到角色，角色叠加租户作用域决定可见数据。这是 auth + tenant 模块的需求基线，直接支撑第 6 章的 RLS 隔离。
 
-| 角色 | 作用域 | 可见数据范围 | 写权限 |
-|---|---|---|---|
-| 业主/访客（C 端） | 无租户 | 自己的问诊、方案、留资 | 仅本人提交 |
-| 已签约客户 | customer 自身 | 自己的方案/订单/施工/工单/保修 | 仅本人发起的服务请求 |
-| 设计师/销售 | store 内 | 本门店客户、商机、报价、设计 | 本门店业务对象 |
-| 门店管理者 | store | 本门店全量经营数据 | 本门店配置与人员 |
-| 经销商管理者 | dealer（含旗下 store） | 本经销商所有门店汇总 | 本经销商范围 |
-| 总部运营 | tenant 全域 | 跨经销商汇总分析（聚合/脱敏） | 平台级配置、品牌注册 |
-| 技术支持（Rysnova） | 按授权项目 | 被指派项目的 BIM/图纸/交付物 | 被指派项目交付物 |
-| 平台管理员 | 平台 | 治理/审计/演进/质量（不含明文业务隐私） | 平台治理对象 |
+| 角色                | 作用域                 | 可见数据范围                            | 写权限               |
+| ------------------- | ---------------------- | --------------------------------------- | -------------------- |
+| 业主/访客（C 端）   | 无租户                 | 自己的问诊、方案、留资                  | 仅本人提交           |
+| 已签约客户          | customer 自身          | 自己的方案/订单/施工/工单/保修          | 仅本人发起的服务请求 |
+| 设计师/销售         | store 内               | 本门店客户、商机、报价、设计            | 本门店业务对象       |
+| 门店管理者          | store                  | 本门店全量经营数据                      | 本门店配置与人员     |
+| 经销商管理者        | dealer（含旗下 store） | 本经销商所有门店汇总                    | 本经销商范围         |
+| 总部运营            | tenant 全域            | 跨经销商汇总分析（聚合/脱敏）           | 平台级配置、品牌注册 |
+| 技术支持（Rysnova） | 按授权项目             | 被指派项目的 BIM/图纸/交付物            | 被指派项目交付物     |
+| 平台管理员          | 平台                   | 治理/审计/演进/质量（不含明文业务隐私） | 平台治理对象         |
 
 铁律：除总部聚合视图外，任何角色都不得跨 dealer/store 边界读取明细；总部跨经销商视图必须走聚合/脱敏，且由 RLS + 审计双重保证。
+
 ## 3. 核心业务闭环（需求级）
 
 产品价值由闭环衡量，不由页面数量衡量。四条主闭环（详见宪章第 4 章）：
@@ -65,32 +66,32 @@
 
 功能需求以宪章 15 个 NestJS 模块为骨架，能力归属与多代收敛见 docs/CAPABILITY-DECOMPOSITION-AND-RECOMPOSITION.md 第 2-4 节。每个模块的需求要点：
 
-| 模块 | 需求要点 | 计算内核(B) | 多代收敛 |
-|---|---|---|---|
-| auth | 登录、角色、权限、加密 | DataEncryption | RoleSystem→V2 |
-| tenant | 租户/经销商/门店 scope、隔离 | - | 从各路由抽离统一 |
-| crm | 客户 360、商机漏斗、活动、优惠券、裂变、渠道 | CRMSalesManager/Fission/Channel | business-domain CRM 段并入 |
-| diagnosis | 痛点采集、AI 诊断、方案匹配、语音 | PainPointV3/LLM/SmartBrain/AIMatching/Voice | PainPoint V1→V3，AI 端点回收 |
-| product-catalog | 产品/材料/户型/标准/气候数据 | DeviceSelection/HouseType/ChinaCities/ChinaClimate/Standards | products 4 文件统一 |
-| quote | 报价、价值定价、促销、税费、币种 | QuotationEngine-v2/ValueBased/Promotion/Tax/Currency | 4 套报价收敛为 1 主+策略 |
-| design | 负荷/水力/五大系统+控制/3D/图纸/CAD | 见蓝图第 3 节 | design 3 文件统一，3D 多代收敛 |
-| rysnova-bim | BIM 深化、CAD/Revit、CFD、技术交付、协同 | RysnovaBIMCore/CAD/Revit/CFD/Delivery | rysnova-bim-bim 2 文件统一 |
-| delivery | 施工、工单、现场、验收、结算、材料流转 | ConstructionManager | business-domain 施工段并入 |
-| lifecycle | IoT 交接、Econet、数字孪生、设备定位 | IoT/Econet/Twin/DevicePositioning | supreme-api iot/twin 段回收 |
-| analytics | 分析、报表、看板、能耗碳、三能源 | Industry/Report/TriEnergy | dashboard/stats/energy 统一 |
-| governance | 自检、演进、反馈、审计、QA | SelfCheck/Evolution/Feedback | 从 ops/platform runtime 抽离 |
-| file-artifact | 导出、模板、分享、产物生成 | Export/PPT/Template/SVG | export 7 文件、generate 5 文件统一 |
-| notification | webhook、通知 | WebhookEngine | 从 inline 收敛 |
-| workflow | 工作流、闭环、编排、智能路由 | Workflow/ClosedLoop/SmartRouting/Coordinator | enterprise-loop 与 closed-loop 合并 |
+| 模块            | 需求要点                                     | 计算内核(B)                                                  | 多代收敛                            |
+| --------------- | -------------------------------------------- | ------------------------------------------------------------ | ----------------------------------- |
+| auth            | 登录、角色、权限、加密                       | DataEncryption                                               | RoleSystem→V2                       |
+| tenant          | 租户/经销商/门店 scope、隔离                 | -                                                            | 从各路由抽离统一                    |
+| crm             | 客户 360、商机漏斗、活动、优惠券、裂变、渠道 | CRMSalesManager/Fission/Channel                              | business-domain CRM 段并入          |
+| diagnosis       | 痛点采集、AI 诊断、方案匹配、语音            | PainPointV3/LLM/SmartBrain/AIMatching/Voice                  | PainPoint V1→V3，AI 端点回收        |
+| product-catalog | 产品/材料/户型/标准/气候数据                 | DeviceSelection/HouseType/ChinaCities/ChinaClimate/Standards | products 4 文件统一                 |
+| quote           | 报价、价值定价、促销、税费、币种             | QuotationEngine-v2/ValueBased/Promotion/Tax/Currency         | 4 套报价收敛为 1 主+策略            |
+| design          | 负荷/水力/五大系统+控制/3D/图纸/CAD          | 见蓝图第 3 节                                                | design 3 文件统一，3D 多代收敛      |
+| rysnova-bim     | BIM 深化、CAD/Revit、CFD、技术交付、协同     | RysnovaBIMCore/CAD/Revit/CFD/Delivery                        | rysnova-bim-bim 2 文件统一          |
+| delivery        | 施工、工单、现场、验收、结算、材料流转       | ConstructionManager                                          | business-domain 施工段并入          |
+| lifecycle       | IoT 交接、Econet、数字孪生、设备定位         | IoT/Econet/Twin/DevicePositioning                            | supreme-api iot/twin 段回收         |
+| analytics       | 分析、报表、看板、能耗碳、三能源             | Industry/Report/TriEnergy                                    | dashboard/stats/energy 统一         |
+| governance      | 自检、演进、反馈、审计、QA                   | SelfCheck/Evolution/Feedback                                 | 从 ops/platform runtime 抽离        |
+| file-artifact   | 导出、模板、分享、产物生成                   | Export/PPT/Template/SVG                                      | export 7 文件、generate 5 文件统一  |
+| notification    | webhook、通知                                | WebhookEngine                                                | 从 inline 收敛                      |
+| workflow        | 工作流、闭环、编排、智能路由                 | Workflow/ClosedLoop/SmartRouting/Coordinator                 | enterprise-loop 与 closed-loop 合并 |
 
 ### 4.1 双栖模块边界（瑞诺瓦 / Rysnova）
 
 diagnosis 与 rysnova-bim 不是普通领域模块：它们是可被集团官网/品牌站导流嵌入、又保留独立产品/数据/API owner/独立上线能力的双栖模块（宪章 3.1，机器可读边界见 contracts/product-modules/）。
 
-| 模块 | dataNamespace | apiNamespace | standalone alias | 独立上线要求 |
-|---|---|---|---|---|
-| 瑞诺瓦 AI 问诊 | rysnova | /api/v2/diagnosis | /rysnova、/rysnova-ai、/rysnova-diagnosis | 独立 app shell、独立 logo 策略、外部域名部署证明 |
-| Rysnova 技术支持/BIM | rysnova-bim | /api/v2/rysnova-bim | /rysnova-bim、/rysnova-bim-bim、/rysnova-bim-workbench | 同上 |
+| 模块                 | dataNamespace | apiNamespace        | standalone alias                                       | 独立上线要求                                     |
+| -------------------- | ------------- | ------------------- | ------------------------------------------------------ | ------------------------------------------------ |
+| 瑞诺瓦 AI 问诊       | rysnova       | /api/v2/diagnosis   | /rysnova、/rysnova-ai、/rysnova-diagnosis              | 独立 app shell、独立 logo 策略、外部域名部署证明 |
+| Rysnova 技术支持/BIM | rysnova-bim   | /api/v2/rysnova-bim | /rysnova-bim、/rysnova-bim-bim、/rysnova-bim-workbench | 同上                                             |
 
 约束：共享 tenant/dealer/store/user/audit/outbox/对象存储/工作流/CRM/报价/生命周期底座允许，但必须保留 moduleNamespace/dataNamespace/productNamespace，为未来独立拆库与单独部署留路径。历史英文 slug（如 rysnova）仅作迁移债务，不得成为新增对外文案或新模块命名依据。
 
@@ -132,19 +133,19 @@ design 模块不是泛化的"设计功能"，而是五大暖通系统的一键�
 
 建模纠偏：历史文档把 DOAS 误列为与"制冷/全空气"平级的第六大系统。实际上 DOAS（专用室外空气系统）是空气系统中新风的一种高级设计标准/产品档次（温湿度独立控制，ASHRAE 62.1/90.1），归属新风域，不单列为系统。空气侧统一为一个"空气系统"域，内含制冷/全空气与新风两类负荷，新风再分常规新风与 DOAS 两档。
 
-| 系统 | 计算代号 | 核心计算 | 标准依据 |
-|---|---|---|---|
-| 热水系统 | CALC-HS | 中央热水负荷、循环、管径选型 | GB 50736 / 行业热水规范 |
-| 净水/水系统 | CALC-WT | 软水/前置/中央净水/末端直饮 三级架构 | 水质标准 |
-| 空气系统 | CALC-AIR | 制冷/全空气：冷负荷、风量、室内机选型、五恒；新风：新风量、热回收（常规新风 / DOAS 两档） | GB 50736 附录A 气象参数 / ASHRAE 62.1·90.1 |
-| 供暖系统 | CALC-HEAT | 地暖/水系统/分区、再热模块 | 采暖设计规范 |
-| 控制系统（横切） | CALC-CTRL | 各系统智能控制、联动、五恒协调 | 默认附带于成套方案 |
+| 系统             | 计算代号  | 核心计算                                                                                  | 标准依据                                   |
+| ---------------- | --------- | ----------------------------------------------------------------------------------------- | ------------------------------------------ |
+| 热水系统         | CALC-HS   | 中央热水负荷、循环、管径选型                                                              | GB 50736 / 行业热水规范                    |
+| 净水/水系统      | CALC-WT   | 软水/前置/中央净水/末端直饮 三级架构                                                      | 水质标准                                   |
+| 空气系统         | CALC-AIR  | 制冷/全空气：冷负荷、风量、室内机选型、五恒；新风：新风量、热回收（常规新风 / DOAS 两档） | GB 50736 附录A 气象参数 / ASHRAE 62.1·90.1 |
+| 供暖系统         | CALC-HEAT | 地暖/水系统/分区、再热模块                                                                | 采暖设计规范                               |
+| 控制系统（横切） | CALC-CTRL | 各系统智能控制、联动、五恒协调                                                            | 默认附带于成套方案                         |
 
 空气系统两档新风（吸收自 DOAS-Design-Standard、PRODUCT-DIFFERENTIATION-DOAS）：
 
-| 档次 | 送风温度(夏) | 负荷承担 | 热回收 | 与辐射配合 | 适用 |
-|---|---|---|---|---|---|
-| 常规高效新风 | 16-18℃ | 混合承担 | 60-85% | 良好 | 中高端住宅 |
+| 档次              | 送风温度(夏)    | 负荷承担                   | 热回收            | 与辐射配合                | 适用          |
+| ----------------- | --------------- | -------------------------- | ----------------- | ------------------------- | ------------- |
+| 常规高效新风      | 16-18℃          | 混合承担                   | 60-85%            | 良好                      | 中高端住宅    |
 | DOAS 专用室外空气 | 22℃（接近室温） | 仅新风负荷（温湿独立控制） | SRE≥75% / LRE≥60% | 完美（最佳配合五恒+辐射） | 高端住宅/别墅 |
 
 领域需求要点：
@@ -170,15 +171,16 @@ design 模块不是泛化的"设计功能"，而是五大暖通系统的一键�
 - 经销商物料同源：UI/VI/SI 与市场物料从设计系统同源生成，竞品无此能力。
 
 护城河可持续性（防御论述）：「全链路闭环」「多品牌中枢」是窗口期优势、竞品可复制；真正难复制的结构性壁垒是「标准级计算（工程内核 + 国标/ASHRAE 精度基线 + 可回归）」「物料同源（设计系统驱动）」与「产品/价格情报网（5.5 产品主数据汇聚 + 4.6 调用量采集沉淀的跨租户行业情报）」，差异化重心显式压到这三项。对「竞品也开放第三方录入/也做免费工具」的回应是：本平台的留客不靠功能阉割，靠真实价值差（自动精算、整包质保、物料同源、交付速度），这一价值差正是阳谋成立的前提（宪章 1.1）。
+
 ### 4.5 三层产品目录与数据可信度（product-catalog 模块核心）
 
 product-catalog 不只是产品/材料库，而是承载赋能线渠道战略（宪章 1.1）的核心数据结构。产品分三层来源，每层有不同的可信度、定价与能力授权：
 
-| 层级 | 来源 | 定价模型 | 数据可信度 | 享受能力 | 可见范围 |
-|---|---|---|---|---|---|
-| 我方认证产品 | 各品牌产品库为权威源（SKU/参数/价格/上新），product-catalog 只读同步（见 5.4/宪章 5.5.2） | 品牌库基准价 + 租户零售价 | 已验证（参数权威） | 全自动精算 + 整包质保 + 物料同源 + 一键成套包 | 全租户可见 |
-| 共享库 | 总部统一维护的第三方常见品类（带基准价） | 总部基准价 + 租户零售价 | 参数已校准（非我方背书） | 进 BOM/报价/导出；不驱动精算 | 全租户可调用 |
-| 租户私有 | 经销商自录第三方/自有产品 | 租户自定价 | 标「参数未验证」 | 仅进 BOM/报价；不驱动精算 | 默认仅本租户 |
+| 层级         | 来源                                                                                      | 定价模型                  | 数据可信度               | 享受能力                                      | 可见范围     |
+| ------------ | ----------------------------------------------------------------------------------------- | ------------------------- | ------------------------ | --------------------------------------------- | ------------ |
+| 我方认证产品 | 各品牌产品库为权威源（SKU/参数/价格/上新），product-catalog 只读同步（见 5.4/宪章 5.5.2） | 品牌库基准价 + 租户零售价 | 已验证（参数权威）       | 全自动精算 + 整包质保 + 物料同源 + 一键成套包 | 全租户可见   |
+| 共享库       | 总部统一维护的第三方常见品类（带基准价）                                                  | 总部基准价 + 租户零售价   | 参数已校准（非我方背书） | 进 BOM/报价/导出；不驱动精算                  | 全租户可调用 |
+| 租户私有     | 经销商自录第三方/自有产品                                                                 | 租户自定价                | 标「参数未验证」         | 仅进 BOM/报价；不驱动精算                     | 默认仅本租户 |
 
 数据可信度标记（红线落点）：
 
@@ -251,15 +253,15 @@ product-catalog 不只是产品/材料库，而是承载赋能线渠道战略（
 
 下列引擎均确认需要、已裁定 KEEP（宪章 8.3），但成熟度不同，重构时区别对待，避免把占位当成品：
 
-| 引擎 | 模块 | 已实现 | 占位/待补 |
-|---|---|---|---|
-| IoTPlatform | lifecycle | 设备注册/上报/指令/订阅/规则引擎/统计，6 个 supreme-api 端点已挂；业务编排可用（约 50-60%） | broker(MQTT)、设备发现、指令下发为模拟；状态在内存未落库。按 lifecycle_handoff_only 补外部 IoT 平台交接契约 + 落库 |
-| DigitalTwinEngine | lifecycle | 场景/BIM→场景解析、实时同步、管路计算、能耗模拟、视图组装（约 40-50%） | load3DEngine 占位（未接 Three.js）；analyzeCameraImage 摄像头 AI 为随机数 mock；未落库。补真三维引擎 + 真实/外包摄像头 AI |
-| LLM/SmartBrain/Voice | diagnosis | 问诊 AI 编排（Voice 为浏览器端） | AI 端点随 diagnosis 收口；真实模型接入按落地确认 |
-| TriEnergySystem | analytics | 三能源/能耗碳分析 | 数据准确性需背书（对外报送合规） |
-| CFD/TechnicalDelivery | rysnova-bim | CFD 仿真、技术交付生成 | 与 BIM 深化协同 |
-| ChinaClimateDB/ChinaCities | product-catalog | GB 50736 气象/城市数据资产（精算权威输入） | — |
-| Fission/Channel | crm | 裂变追踪、渠道管理 | — |
+| 引擎                       | 模块            | 已实现                                                                                      | 占位/待补                                                                                                                 |
+| -------------------------- | --------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| IoTPlatform                | lifecycle       | 设备注册/上报/指令/订阅/规则引擎/统计，6 个 supreme-api 端点已挂；业务编排可用（约 50-60%） | broker(MQTT)、设备发现、指令下发为模拟；状态在内存未落库。按 lifecycle_handoff_only 补外部 IoT 平台交接契约 + 落库        |
+| DigitalTwinEngine          | lifecycle       | 场景/BIM→场景解析、实时同步、管路计算、能耗模拟、视图组装（约 40-50%）                      | load3DEngine 占位（未接 Three.js）；analyzeCameraImage 摄像头 AI 为随机数 mock；未落库。补真三维引擎 + 真实/外包摄像头 AI |
+| LLM/SmartBrain/Voice       | diagnosis       | 问诊 AI 编排（Voice 为浏览器端）                                                            | AI 端点随 diagnosis 收口；真实模型接入按落地确认                                                                          |
+| TriEnergySystem            | analytics       | 三能源/能耗碳分析                                                                           | 数据准确性需背书（对外报送合规）                                                                                          |
+| CFD/TechnicalDelivery      | rysnova-bim     | CFD 仿真、技术交付生成                                                                      | 与 BIM 深化协同                                                                                                           |
+| ChinaClimateDB/ChinaCities | product-catalog | GB 50736 气象/城市数据资产（精算权威输入）                                                  | —                                                                                                                         |
+| Fission/Channel            | crm             | 裂变追踪、渠道管理                                                                          | —                                                                                                                         |
 
 迁移铁律：标「占位/mock」的部分（IoT broker、3D 引擎、摄像头 AI 随机数）迁入时必须替换为真实数据源或显式标注 demo，不得当成品上线。
 
@@ -305,6 +307,7 @@ product-catalog 不只是产品/材料库，而是承载赋能线渠道战略（
 - 错误预算：按 SLO 计错误预算，超预算冻结非紧急发布。
 - 统一可观测性：结构化日志（带 tenant_id/trace_id）、指标、分布式追踪三件套；缓存/监控/备份从业务代码剥离到 infra 层（见第 7 章）。
 - 告警：SLO 违约、RLS 拒绝异常、outbox 积压、退役矩阵失败均接告警。
+
 ### 5.3 中国合规（上线法律前置，必补专章）
 
 业务涉及真实业主 PII + 经销商经营 + 金融/发票数据，合规是上线前置，非可选项：
@@ -327,6 +330,7 @@ product-catalog 不只是产品/材料库，而是承载赋能线渠道战略（
 MDM 一致性边界（强一致 vs 最终一致）：主数据「只读副本」默认最终一致；但强一致敏感操作必须实时读底座主库，不得依赖副本——包括租户停用/冻结、授信与额度、品牌产品下架、价格生效状态。其余读路径接受副本最终一致 + 水位/对账兜底。
 
 三条标准数据流：
+
 - 主数据下行（MDM）：身份/租户/品牌主数据底座唯一写，板块只读订阅，禁止多处写。
 - 产品主数据汇聚：各品牌产品库为权威源 → product-catalog 按 API/CDC 同步为可选用目录 → 瑞诺瓦选用即 4.5 第①层 verified；品牌库改价/上新刷新目录（影响新报价），已发出/待签报价按 4.9 价格快照锁定不自动跟涨，杜绝一物两价；瑞诺瓦只读不写品牌产品。同步前按 4.5 精算参数契约校验字段完整性，缺字段降级 calibrated。
 - 分析上行：各库 CDC/ELT 单向入分析数仓 → 总部跨板块聚合分析（4.6 情报），只见聚合/脱敏，不见单一经销商明文。
@@ -347,14 +351,14 @@ MDM 一致性边界（强一致 vs 最终一致）：主数据「只读副本」
 
 后端 193 资产裁定终态（audit/asset-ledger.md，经接线一致性 + 治理一致性双重校正后，REVIEW 已清零）：
 
-| 处置 | 数量 | 含义 |
-|---|---:|---|
-| KEEP | 158 | 活跃能力，按领域迁入 A/B/C 三层 |
-| MIGRATE | 14 | 平台基础设施(10) + 仍活跃登记的旧版引擎(4，先切引用再退役) |
-| LEGACY-COMPAT | 13 | 过渡兼容路由（含 3 个上帝路由的承接面） |
-| GOVERNED-RETIRE | 3 | 已纳入 legacy-fusion-registry 退役矩阵的旧版引擎 |
-| SPLIT | 3 | 上帝路由 business-domain/core-api/supreme-api |
-| ARCHIVE | 2 | 真孤儿（已移入 legacy/） |
+| 处置            | 数量 | 含义                                                       |
+| --------------- | ---: | ---------------------------------------------------------- |
+| KEEP            |  158 | 活跃能力，按领域迁入 A/B/C 三层                            |
+| MIGRATE         |   14 | 平台基础设施(10) + 仍活跃登记的旧版引擎(4，先切引用再退役) |
+| LEGACY-COMPAT   |   13 | 过渡兼容路由（含 3 个上帝路由的承接面）                    |
+| GOVERNED-RETIRE |    3 | 已纳入 legacy-fusion-registry 退役矩阵的旧版引擎           |
+| SPLIT           |    3 | 上帝路由 business-domain/core-api/supreme-api              |
+| ARCHIVE         |    2 | 真孤儿（已移入 legacy/）                                   |
 
 重构铁律：
 
@@ -381,16 +385,16 @@ MDM 一致性边界（强一致 vs 最终一致）：主数据「只读副本」
 
 按重组蓝图第 6 节落地顺序排阶段，每阶段给可量化出口标准（吸收自 migration-roadmap、PRODUCTION-TRUNK-REWRITE-PLAN、PHASE-1-REWRITE-EXECUTION-CHECKLIST 等历史计划）。
 
-| 阶段 | 目标 | 关键动作 | 出口标准 |
-|---|---|---|---|
-| P0 冻结基线 | 事实锁定 | 资产台账 + 能力蓝图 + 反向审计三报告冻结 | 已完成：REVIEW=0，guard/harness 全绿 |
-| P1 计算内核 B | 抽暖通内核为纯函数 | 五大系统+控制内核抽到 packages/domain 或 services/api kernels，加单测 | 内核脱离 HTTP/租户上下文，单测覆盖关键路径 |
-| P2 领域模块 A | NestJS 逐模块落地 | 按 quote→diagnosis→crm→design→rysnova-bim→delivery→lifecycle→analytics 迁端点 | 每模块端点 OpenAPI 覆盖 100%，旧路由转 legacy-compat |
-| P3 剥离基础设施 C | 统一 infra | 缓存/监控/持久化/部署/备份剥离，业务不再直接 new | guard:redis-cache-boundary 等全绿 |
-| P4 收敛多代 | 旧版退役 | 按 legacy-fusion-registry + 12 门退役矩阵逐个退役 | 退役矩阵 failures=0，旧版零运行引用 |
-| P5 契约对齐收口 | 契约覆盖率 100% | 剩余端点全部进 OpenAPI，前端 unmatched=0 | guard:frontend-api-contract unmatched=0 |
-| P6 生产化 | 上线就绪 | 真实 Postgres/Mongo staging 压测、RLS 测试、视觉验收 | guard:all + test:production-readiness 全绿 |
-| P7 实景能力落地 | mock→真实 | IoTPlatform 接外部 IoT 平台交接 + 状态落库；DigitalTwin 接真三维引擎(Three.js) + 摄像头 AI 真实/外包替换 | 4.11 标 mock 项全部替换为真实数据源或显式 demo 标注，无随机数冒充 |
+| 阶段              | 目标               | 关键动作                                                                                                 | 出口标准                                                          |
+| ----------------- | ------------------ | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| P0 冻结基线       | 事实锁定           | 资产台账 + 能力蓝图 + 反向审计三报告冻结                                                                 | 已完成：REVIEW=0，guard/harness 全绿                              |
+| P1 计算内核 B     | 抽暖通内核为纯函数 | 五大系统+控制内核抽到 packages/domain 或 services/api kernels，加单测                                    | 内核脱离 HTTP/租户上下文，单测覆盖关键路径                        |
+| P2 领域模块 A     | NestJS 逐模块落地  | 按 quote→diagnosis→crm→design→rysnova-bim→delivery→lifecycle→analytics 迁端点                            | 每模块端点 OpenAPI 覆盖 100%，旧路由转 legacy-compat              |
+| P3 剥离基础设施 C | 统一 infra         | 缓存/监控/持久化/部署/备份剥离，业务不再直接 new                                                         | guard:redis-cache-boundary 等全绿                                 |
+| P4 收敛多代       | 旧版退役           | 按 legacy-fusion-registry + 12 门退役矩阵逐个退役                                                        | 退役矩阵 failures=0，旧版零运行引用                               |
+| P5 契约对齐收口   | 契约覆盖率 100%    | 剩余端点全部进 OpenAPI，前端 unmatched=0                                                                 | guard:frontend-api-contract unmatched=0                           |
+| P6 生产化         | 上线就绪           | 真实 Postgres/Mongo staging 压测、RLS 测试、视觉验收                                                     | guard:all + test:production-readiness 全绿                        |
+| P7 实景能力落地   | mock→真实          | IoTPlatform 接外部 IoT 平台交接 + 状态落库；DigitalTwin 接真三维引擎(Three.js) + 摄像头 AI 真实/外包替换 | 4.11 标 mock 项全部替换为真实数据源或显式 demo 标注，无随机数冒充 |
 
 每阶段都要求 guard/harness/test 全绿，且 routeOwnership 注册表与重组蓝图保持一致。
 
@@ -398,23 +402,23 @@ MDM 一致性边界（强一致 vs 最终一致）：主数据「只读副本」
 
 ## 10. 已知风险与外部依赖
 
-| 风险/依赖 | 影响 | 当前状态 | 缓解 |
-|---|---|---|---|
-| 契约覆盖率仅 17% | 前后端漂移、契约优先落空 | 599 端点中 104 进契约 | 随 P2/P5 同步补契约 |
-| 7 个 Rysnova 交付门需真实外部 staging | 阻塞生产验收 | 被外部环境阻塞 | 需用户提供真实 staging 环境 |
-| 多租户 RLS 需真实 Postgres 压测 | 隔离验收无法离线完成 | 需真实库 | P6 阶段在 staging 执行 |
-| 旧版引擎仍活跃登记 | 直接删会破坏运行时 | 已识别，纳入退役矩阵 | 先切引用再退役 |
-| 中国合规未落地（等保/数据安全法/PIPL） | 上线法律风险 | 红队 2026-06-25 发现缺口，已补 5.3 | 上线前完成定级/同意链路，进 CI |
-| 财务闭环缺金融方/专票/对公结算 | 经销商无法真实成交 | 已补 4.9，金融方待商务确定 | 可插拔金融适配层，商务定方后配置 |
-| 共享库竞品商标/授权责任 | 阳谋合法性风险 | 已补 4.5 责任归属 | 总部统一承担 + 授权/声明留痕 |
-| 全屋同时系数缺失致过度选型 | 报价虚高、打脸工程级计算 | 已补 4.3 系统级协调 | P1 内核实现 diversity factor |
-| design↔Rysnova 双源打架 | 落地数据不一致 | 已补 4.10 单一真相源 | 变更双向同步 + 版本冻结 |
-| 事件总线选型未定致迁移期断档 | 跨板块通信悬空 | 已补 5.4 过渡走底座 API | P3/P5 定总线，过渡同步调用 |
-| MDM 副本延迟致业务错误 | 停用租户仍下单等 | 已补 5.4 强一致边界 | 敏感操作实时读底座主库 |
-| V1→V2 实体迁移丢数 | 核心成交链数据风险 | 已补第 9 章双写专项 | expand-contract 双写双读回填回滚 |
-| 模块/板块/数据平面归属漂移 | 架构腐化 | 已补宪章 1.3 映射表 | 映射唯一 + 1.4 仲裁规则 |
-| 外链旧站（rheem.com.cn/ruud.com.cn）过渡 | 新站上线前空窗风险 | 临时占位 | 深度托管新站上线即下线旧站 |
-| 沙箱 localhost 受限 | 本地 UI 验证受限 | 已知环境约束 | 用 Codex in-app browser 验证 |
+| 风险/依赖                                | 影响                     | 当前状态                           | 缓解                             |
+| ---------------------------------------- | ------------------------ | ---------------------------------- | -------------------------------- |
+| 契约覆盖率仅 17%                         | 前后端漂移、契约优先落空 | 599 端点中 104 进契约              | 随 P2/P5 同步补契约              |
+| 7 个 Rysnova 交付门需真实外部 staging    | 阻塞生产验收             | 被外部环境阻塞                     | 需用户提供真实 staging 环境      |
+| 多租户 RLS 需真实 Postgres 压测          | 隔离验收无法离线完成     | 需真实库                           | P6 阶段在 staging 执行           |
+| 旧版引擎仍活跃登记                       | 直接删会破坏运行时       | 已识别，纳入退役矩阵               | 先切引用再退役                   |
+| 中国合规未落地（等保/数据安全法/PIPL）   | 上线法律风险             | 红队 2026-06-25 发现缺口，已补 5.3 | 上线前完成定级/同意链路，进 CI   |
+| 财务闭环缺金融方/专票/对公结算           | 经销商无法真实成交       | 已补 4.9，金融方待商务确定         | 可插拔金融适配层，商务定方后配置 |
+| 共享库竞品商标/授权责任                  | 阳谋合法性风险           | 已补 4.5 责任归属                  | 总部统一承担 + 授权/声明留痕     |
+| 全屋同时系数缺失致过度选型               | 报价虚高、打脸工程级计算 | 已补 4.3 系统级协调                | P1 内核实现 diversity factor     |
+| design↔Rysnova 双源打架                  | 落地数据不一致           | 已补 4.10 单一真相源               | 变更双向同步 + 版本冻结          |
+| 事件总线选型未定致迁移期断档             | 跨板块通信悬空           | 已补 5.4 过渡走底座 API            | P3/P5 定总线，过渡同步调用       |
+| MDM 副本延迟致业务错误                   | 停用租户仍下单等         | 已补 5.4 强一致边界                | 敏感操作实时读底座主库           |
+| V1→V2 实体迁移丢数                       | 核心成交链数据风险       | 已补第 9 章双写专项                | expand-contract 双写双读回填回滚 |
+| 模块/板块/数据平面归属漂移               | 架构腐化                 | 已补宪章 1.3 映射表                | 映射唯一 + 1.4 仲裁规则          |
+| 外链旧站（rheem.com.cn/ruud.com.cn）过渡 | 新站上线前空窗风险       | 临时占位                           | 深度托管新站上线即下线旧站       |
+| 沙箱 localhost 受限                      | 本地 UI 验证受限         | 已知环境约束                       | 用 Codex in-app browser 验证     |
 
 ## 11. 文档收敛映射（全量 116 docs + 根级）
 
@@ -422,36 +426,35 @@ MDM 一致性边界（强一致 vs 最终一致）：主数据「只读副本」
 
 保持权威（不动，本 PRD 引用）：
 
-| 文档 | 角色 |
-|---|---|
-| PROJECT-CHARTER.md | 单一事实源，本 PRD 上级 |
-| docs/CAPABILITY-DECOMPOSITION-AND-RECOMPOSITION.md | 能力重组蓝图 |
-| audit/asset-ledger.md、docs/STRUCTURE-ASSET-LEDGER.md | 资产处置台账 |
-| docs/PUBLIC-SURFACE-FUNCTION-PRD-INVENTORY.md | public 页面逐页台账 |
+| 文档                                                                                       | 角色                         |
+| ------------------------------------------------------------------------------------------ | ---------------------------- |
+| PROJECT-CHARTER.md                                                                         | 单一事实源，本 PRD 上级      |
+| docs/CAPABILITY-DECOMPOSITION-AND-RECOMPOSITION.md                                         | 能力重组蓝图                 |
+| audit/asset-ledger.md、docs/STRUCTURE-ASSET-LEDGER.md                                      | 资产处置台账                 |
+| docs/PUBLIC-SURFACE-FUNCTION-PRD-INVENTORY.md                                              | public 页面逐页台账          |
 | docs/DATABASE-BACKEND-ARCHITECTURE.md、docs/RHAUTT-NEXUS-CUSTOMER-LIFECYCLE-STATE-MODEL.md | 数据/ERD 专题（第 4.2 引用） |
-| brand-registry.json、contracts/ | 机器可读契约 |
+| brand-registry.json、contracts/                                                            | 机器可读契约                 |
 
 已吸收进本 PRD（共识后删除）：
 
-| 类别（数量） | 吸收章节 |
-|---|---|
-| 历史 PRD/规格：PRD-CURRENT、PRODUCT-SCOPE、INTEGRATED-PRD-v5.0、PRD-INTEGRATED-FEATURES-v6.0、PRD-UPDATE-v5.0、DETAILED-DEVELOPMENT-GUIDE-v5.0、FULL-REWRITE-CHARTER-PRD-*、PROJECT-CHARTER-AND-PRD 等 | 第 1/3/4 章 |
-| 暖通领域规格（11）：五大系统计算、DOAS（新风标准档）、水系统矩阵、即插即用包、设备定位 | 第 4.3 |
-| 竞品研究（4）：海尔/A.O.史密斯、行业调研 | 第 4.4 |
-| 双栖/IoT/契约：LIFECYCLE-IOT-BRIDGE、THREE-TIER-CONTRACT、RYSNOVA-ARTIFACT、WORKFLOW-OUTBOX | 第 4.1/数据/契约约束 |
-| VI 专题（8）：RUUD-VI、RYSNOVA-UI-VI、UI-VI-ARCHITECTURE 等 | 宪章第 6 章（实测为准） |
+| 类别（数量）                                                                                                                                                                                           | 吸收章节                |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------- |
+| 历史 PRD/规格：PRD-CURRENT、PRODUCT-SCOPE、INTEGRATED-PRD-v5.0、PRD-INTEGRATED-FEATURES-v6.0、PRD-UPDATE-v5.0、DETAILED-DEVELOPMENT-GUIDE-v5.0、FULL-REWRITE-CHARTER-PRD-*、PROJECT-CHARTER-AND-PRD 等 | 第 1/3/4 章             |
+| 暖通领域规格（11）：五大系统计算、DOAS（新风标准档）、水系统矩阵、即插即用包、设备定位                                                                                                                 | 第 4.3                  |
+| 竞品研究（4）：海尔/A.O.史密斯、行业调研                                                                                                                                                               | 第 4.4                  |
+| 双栖/IoT/契约：LIFECYCLE-IOT-BRIDGE、THREE-TIER-CONTRACT、RYSNOVA-ARTIFACT、WORKFLOW-OUTBOX                                                                                                            | 第 4.1/数据/契约约束    |
+| VI 专题（8）：RUUD-VI、RYSNOVA-UI-VI、UI-VI-ARCHITECTURE 等                                                                                                                                            | 宪章第 6 章（实测为准） |
 
 历史归档（可删，无前瞻需求）：
 
-| 类别（数量） | 说明 |
-|---|---|
-| 完成/修复/验收报告（21） | 过程记录，价值已落入代码与台账 |
-| 历史开发计划/冲刺（11） | 被第 9 章里程碑取代 |
+| 类别（数量）                  | 说明                           |
+| ----------------------------- | ------------------------------ |
+| 完成/修复/验收报告（21）      | 过程记录，价值已落入代码与台账 |
+| 历史开发计划/冲刺（11）       | 被第 9 章里程碑取代            |
 | 手写 API 参考（25，API-*.md） | 被 OpenAPI 契约 + 自动生成取代 |
-| 命名候选/审计（2） | 命名已锁定（宪章第 1 章） |
+| 命名候选/审计（2）            | 命名已锁定（宪章第 1 章）      |
 
 删除动作在共识后由 docs/DOC-CONSOLIDATION-LEDGER.md 逐条执行，避免文件紊乱。
-
 
 ---
 
@@ -463,21 +466,22 @@ MDM 一致性边界（强一致 vs 最终一致）：主数据「只读副本」
 **用途**：CI/CD 门禁 + 人工 sprint 结束时跑一次，确保 PRD 模块有对应代码落地。  
 **当前基线**（2026-06-25）：
 
-| 状态 | 数量 | 模块 |
-|---|---|---|
-| Full（双锚点均在） | 7 | M04/M06/M07/M08/M09/M10/M13 |
-| Partial（前端有、路由缺） | 5 | M01/M02/M03/M05/M11 |
-| Miss（代码无任何对应） | 3 | M12/M14/M15 |
+| 状态                      | 数量 | 模块                        |
+| ------------------------- | ---- | --------------------------- |
+| Full（双锚点均在）        | 7    | M04/M06/M07/M08/M09/M10/M13 |
+| Partial（前端有、路由缺） | 5    | M01/M02/M03/M05/M11         |
+| Miss（代码无任何对应）    | 3    | M12/M14/M15                 |
 
 **三个 MISS 的补全优先级**：
 
-| 模块 | 缺失内容 | 优先级 | 目标 Sprint |
-|---|---|---|---|
-| M12 design↔Rysnova 单一真相源 | `server` 里无 `design_id`/`rysnova-bim_sync` 任何标识符 | P1 | V1.1 |
-| M14 中国合规(等保/PIPL) | `server` 里无 `consent`/`pipl`/`dataRetention` | P0（上线法律前置） | V1.0 发布闸 |
-| M15 跨板块数据总线/MDM | `server` 里无 `MDM`/`eventBus`/`global_product_id` | P1 | V1.1 |
+| 模块                          | 缺失内容                                                | 优先级             | 目标 Sprint |
+| ----------------------------- | ------------------------------------------------------- | ------------------ | ----------- |
+| M12 design↔Rysnova 单一真相源 | `server` 里无 `design_id`/`rysnova-bim_sync` 任何标识符 | P1                 | V1.1        |
+| M14 中国合规(等保/PIPL)       | `server` 里无 `consent`/`pipl`/`dataRetention`          | P0（上线法律前置） | V1.0 发布闸 |
+| M15 跨板块数据总线/MDM        | `server` 里无 `MDM`/`eventBus`/`global_product_id`      | P1                 | V1.1        |
 
 **运行方式**：
+
 ```bash
 node scripts/agent-guards/prd-code-crosswalk-check.js
 # 输出写入 evidence/crosswalk/prd-code-crosswalk-report.json
@@ -493,13 +497,14 @@ node scripts/agent-guards/prd-code-crosswalk-check.js
 **文档**：`docs/COLD-START-PLAYBOOK.md`  
 **三阶段摘要**：
 
-| 阶段 | 时间 | 核心动作 | 关键指标 |
-|---|---|---|---|
-| 种子期 | D0–D30 | 3–5 家种子经销商邀请制，数据库从零到有，P0 Bug 清零 | 活跃租户 ≥ 3，完整问诊→报价 ≥ 10 次 |
-| 扩散期 | D31–D60 | 10–20 家经销商区域推广，C 端问诊接微信/小红书公测 | 注册经销商 ≥ 10，C 端问诊 ≥ 100，转留资率 ≥ 20% |
-| 验收期 | D61–D90 | 完整闭环第一单（问诊→报价→签单→施工→验收），V2 需求清单确认 | ≥ 1 个有收款闭环，MAU ≥ 50 |
+| 阶段   | 时间    | 核心动作                                                    | 关键指标                                        |
+| ------ | ------- | ----------------------------------------------------------- | ----------------------------------------------- |
+| 种子期 | D0–D30  | 3–5 家种子经销商邀请制，数据库从零到有，P0 Bug 清零         | 活跃租户 ≥ 3，完整问诊→报价 ≥ 10 次             |
+| 扩散期 | D31–D60 | 10–20 家经销商区域推广，C 端问诊接微信/小红书公测           | 注册经销商 ≥ 10，C 端问诊 ≥ 100，转留资率 ≥ 20% |
+| 验收期 | D61–D90 | 完整闭环第一单（问诊→报价→签单→施工→验收），V2 需求清单确认 | ≥ 1 个有收款闭环，MAU ≥ 50                      |
 
 **上线前置门禁（不达不开放）**：
+
 1. Crosswalk MISS 模块清零
 2. 产品目录 ≥ 20 SKU（Rheem + Everhot）
 3. 2 个租户完成端到端演练

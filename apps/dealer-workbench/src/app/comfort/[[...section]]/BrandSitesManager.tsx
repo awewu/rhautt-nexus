@@ -13,14 +13,7 @@ import {
   Upload,
   X,
 } from 'lucide-react';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type FormEvent,
-  type ReactNode,
-} from 'react';
+import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { auth, brandSites } from '../../../lib/api';
 import {
   StatusPill,
@@ -176,15 +169,16 @@ export default function BrandSitesManager({ brandCode }: { brandCode: string }) 
   const canDeleteSites = can(session, 'brand.library.delete');
 
   const filteredSites = useMemo(() => {
-    const selectedSites = activeBrand === 'all'
-      ? sites
-      : sites.filter((site) => site.code === activeBrand);
+    const selectedSites =
+      activeBrand === 'all' ? sites : sites.filter((site) => site.code === activeBrand);
     return [...selectedSites].sort((left, right) => {
       const archivedOrder = Number(Boolean(left.deletedAt)) - Number(Boolean(right.deletedAt));
       if (archivedOrder) return archivedOrder;
       const sortOrder = Number(left.sortOrder || 0) - Number(right.sortOrder || 0);
       if (sortOrder) return sortOrder;
-      return (left.nameCn || left.nameEn || left.code).localeCompare(right.nameCn || right.nameEn || right.code);
+      return (left.nameCn || left.nameEn || left.code).localeCompare(
+        right.nameCn || right.nameEn || right.code
+      );
     });
   }, [activeBrand, sites]);
 
@@ -224,7 +218,9 @@ export default function BrandSitesManager({ brandCode }: { brandCode: string }) 
       setSites(items);
       setLogos((current) => {
         const visibleIds = new Set(items.filter((site) => !site.deletedAt).map((site) => site.id));
-        return Object.fromEntries(Object.entries(current).filter(([siteId]) => visibleIds.has(siteId)));
+        return Object.fromEntries(
+          Object.entries(current).filter(([siteId]) => visibleIds.has(siteId))
+        );
       });
       window.dispatchEvent(new CustomEvent('rhautt-brand-sites-updated'));
       setLoading(false);
@@ -262,7 +258,8 @@ export default function BrandSitesManager({ brandCode }: { brandCode: string }) 
 
   useEffect(() => {
     let cancelled = false;
-    auth.me()
+    auth
+      .me()
       .then((me) => {
         if (!cancelled) setSession(me as Session);
       })
@@ -345,7 +342,8 @@ export default function BrandSitesManager({ brandCode }: { brandCode: string }) 
     }
     setDeleteTarget(site);
     return;
-    if (!window.confirm(`永久删除 ${site.nameCn || site.nameEn} 官网配置？该操作不可恢复。`)) return;
+    if (!window.confirm(`永久删除 ${site.nameCn || site.nameEn} 官网配置？该操作不可恢复。`))
+      return;
     setBusyId(site.id);
     setError('');
     try {
@@ -422,7 +420,9 @@ export default function BrandSitesManager({ brandCode }: { brandCode: string }) 
               </button>
             ))}
           </div>
-          <span className="workbench-filter-toolbar__meta">当前显示 {filteredSites.length} 个站点</span>
+          <span className="workbench-filter-toolbar__meta">
+            当前显示 {filteredSites.length} 个站点
+          </span>
         </WorkbenchFilterToolbar>
 
         {error && <Notice tone="error">{error}</Notice>}
@@ -438,171 +438,182 @@ export default function BrandSitesManager({ brandCode }: { brandCode: string }) 
           </div>
 
           <WorkbenchTableShell>
-          <div className="site-table-wrap">
-            <table className="table site-table">
-              <thead>
-                <tr>
-                  <th>品牌</th>
-                  <th>Logo</th>
-                  <th>URL</th>
-                  <th>交付</th>
-                  <th>发布状态</th>
-                  <th>排序</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
+            <div className="site-table-wrap">
+              <table className="table site-table">
+                <thead>
                   <tr>
-                    <td colSpan={7} className="table-empty">
-                      <WorkbenchTableState
-                        type="loading"
-                        title="正在加载官网站点"
-                        description="正在同步品牌站点、发布状态和 Logo 素材。"
-                      />
-                    </td>
+                    <th>品牌</th>
+                    <th>Logo</th>
+                    <th>URL</th>
+                    <th>交付</th>
+                    <th>发布状态</th>
+                    <th>排序</th>
+                    <th>操作</th>
                   </tr>
-                ) : filteredSites.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="table-empty">
-                      <WorkbenchTableState
-                        type="empty"
-                        title="暂无官网站点"
-                        description="可以新建 Rheem、Ruud、Everhot 或集团品牌站点配置。"
-                      />
-                    </td>
-                  </tr>
-                ) : (
-                  filteredSites.map((site) => {
-                    const meta = statusMeta(site);
-                    const url = displayUrl(site);
-                    return (
-                      <tr
-                        key={site.id}
-                        className={`${site.deletedAt ? 'is-archived' : ''}${isGroupSite(site) ? ' is-group-site' : ''}`}
-                      >
-                        <td>
-                          <div className="site-brand-cell">
-                            <strong>{site.nameCn}</strong>
-                            <span>
-                              {site.nameEn} · {site.code}
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} className="table-empty">
+                        <WorkbenchTableState
+                          type="loading"
+                          title="正在加载官网站点"
+                          description="正在同步品牌站点、发布状态和 Logo 素材。"
+                        />
+                      </td>
+                    </tr>
+                  ) : filteredSites.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="table-empty">
+                        <WorkbenchTableState
+                          type="empty"
+                          title="暂无官网站点"
+                          description="可以新建 Rheem、Ruud、Everhot 或集团品牌站点配置。"
+                        />
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredSites.map((site) => {
+                      const meta = statusMeta(site);
+                      const url = displayUrl(site);
+                      return (
+                        <tr
+                          key={site.id}
+                          className={`${site.deletedAt ? 'is-archived' : ''}${isGroupSite(site) ? ' is-group-site' : ''}`}
+                        >
+                          <td>
+                            <div className="site-brand-cell">
+                              <strong>{site.nameCn}</strong>
+                              <span>
+                                {site.nameEn} · {site.code}
+                              </span>
+                              {isGroupSite(site) && <em className="group-site-chip">集团官网</em>}
+                            </div>
+                          </td>
+                          <td>
+                            <LogoPreview site={site} src={logos[site.id]} />
+                          </td>
+                          <td>
+                            <div className="site-url-cell">
+                              {url ? (
+                                <a href={url} target="_blank" rel="noopener noreferrer">
+                                  <span>{url}</span>
+                                  <ExternalLink size={13} />
+                                </a>
+                              ) : (
+                                <span>未配置</span>
+                              )}
+                              <small>
+                                生产环境 {site.productionUrl ? '已配置' : '未配置'} · 测试环境{' '}
+                                {site.developmentUrl ? '已配置' : '未配置'}
+                              </small>
+                            </div>
+                          </td>
+                          <td>
+                            <span className="pill-neutral">
+                              {site.deliveryType === 'self_hosted' ? '自建站' : '外部站'}
                             </span>
-                            {isGroupSite(site) && <em className="group-site-chip">集团官网</em>}
-                          </div>
-                        </td>
-                        <td>
-                          <LogoPreview site={site} src={logos[site.id]} />
-                        </td>
-                        <td>
-                          <div className="site-url-cell">
-                            {url ? (
-                              <a href={url} target="_blank" rel="noopener noreferrer">
-                                <span>{url}</span>
-                                <ExternalLink size={13} />
-                              </a>
-                            ) : (
-                              <span>未配置</span>
-                            )}
-                            <small>
-                              生产环境 {site.productionUrl ? '已配置' : '未配置'} · 测试环境{' '}
-                              {site.developmentUrl ? '已配置' : '未配置'}
-                            </small>
-                          </div>
-                        </td>
-                        <td>
-                          <span className="pill-neutral">
-                            {site.deliveryType === 'self_hosted' ? '自建站' : '外部站'}
-                          </span>
-                        </td>
-                        <td>
-                          <StatusPill tone={meta.className === 'badge-success' ? 'success' : meta.className === 'badge-warning' ? 'warning' : 'neutral'}>
-                            {meta.label}
-                          </StatusPill>
-                        </td>
-                        <td className="mono-cell">{site.sortOrder}</td>
-                        <td>
-                          <div className="row-actions">
-                            {site.deletedAt ? (
-                              <>
-                                {canUpdateSites && (
-                                  <button
-                                    type="button"
-                                    title="恢复"
-                                    aria-label={`恢复 ${site.nameCn} 官网配置`}
-                                    onClick={() => restoreSite(site)}
-                                    disabled={busyId === site.id}
-                                  >
-                                    <RotateCcw size={15} />
-                                  </button>
-                                )}
-                                {canDeleteSites && (
-                                  <button
-                                    type="button"
-                                    title="删除"
-                                    aria-label={`删除 ${site.nameCn} 官网配置`}
-                                    className="danger-action"
-                                    onClick={() => deleteArchivedSite(site)}
-                                    disabled={busyId === site.id}
-                                  >
-                                    <Trash2 size={15} />
-                                  </button>
-                                )}
-                              </>
-                            ) : (
-                              <>
-                                {canUpdateSites && (
-                                  <>
+                          </td>
+                          <td>
+                            <StatusPill
+                              tone={
+                                meta.className === 'badge-success'
+                                  ? 'success'
+                                  : meta.className === 'badge-warning'
+                                    ? 'warning'
+                                    : 'neutral'
+                              }
+                            >
+                              {meta.label}
+                            </StatusPill>
+                          </td>
+                          <td className="mono-cell">{site.sortOrder}</td>
+                          <td>
+                            <div className="row-actions">
+                              {site.deletedAt ? (
+                                <>
+                                  {canUpdateSites && (
                                     <button
                                       type="button"
-                                      title="编辑"
-                                      aria-label={`编辑 ${site.nameCn} 官网配置`}
-                                      onClick={() => setEditing(site)}
+                                      title="恢复"
+                                      aria-label={`恢复 ${site.nameCn} 官网配置`}
+                                      onClick={() => restoreSite(site)}
                                       disabled={busyId === site.id}
                                     >
-                                      <Edit3 size={15} />
+                                      <RotateCcw size={15} />
                                     </button>
+                                  )}
+                                  {canDeleteSites && (
                                     <button
                                       type="button"
-                                      title={site.status === 'active' ? '停用' : '启用'}
-                                      aria-label={`${site.status === 'active' ? '停用' : '启用'} ${
-                                        site.nameCn
-                                      } 官网`}
-                                      onClick={() =>
-                                        updateSite(
-                                          site,
-                                          { status: site.status === 'active' ? 'inactive' : 'active' },
-                                          site.status === 'active' ? '官网已停用' : '官网已启用'
-                                        )
-                                      }
+                                      title="删除"
+                                      aria-label={`删除 ${site.nameCn} 官网配置`}
+                                      className="danger-action"
+                                      onClick={() => deleteArchivedSite(site)}
                                       disabled={busyId === site.id}
                                     >
-                                      <Power size={15} />
+                                      <Trash2 size={15} />
                                     </button>
-                                  </>
-                                )}
-                                {canDeleteSites && (
-                                  <button
-                                    type="button"
-                                    title="归档"
-                                    aria-label={`归档 ${site.nameCn} 官网配置`}
-                                    className="danger-action"
-                                    onClick={() => archiveSite(site)}
-                                    disabled={busyId === site.id}
-                                  >
-                                    <Trash2 size={15} />
-                                  </button>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                                  )}
+                                </>
+                              ) : (
+                                <>
+                                  {canUpdateSites && (
+                                    <>
+                                      <button
+                                        type="button"
+                                        title="编辑"
+                                        aria-label={`编辑 ${site.nameCn} 官网配置`}
+                                        onClick={() => setEditing(site)}
+                                        disabled={busyId === site.id}
+                                      >
+                                        <Edit3 size={15} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        title={site.status === 'active' ? '停用' : '启用'}
+                                        aria-label={`${site.status === 'active' ? '停用' : '启用'} ${
+                                          site.nameCn
+                                        } 官网`}
+                                        onClick={() =>
+                                          updateSite(
+                                            site,
+                                            {
+                                              status:
+                                                site.status === 'active' ? 'inactive' : 'active',
+                                            },
+                                            site.status === 'active' ? '官网已停用' : '官网已启用'
+                                          )
+                                        }
+                                        disabled={busyId === site.id}
+                                      >
+                                        <Power size={15} />
+                                      </button>
+                                    </>
+                                  )}
+                                  {canDeleteSites && (
+                                    <button
+                                      type="button"
+                                      title="归档"
+                                      aria-label={`归档 ${site.nameCn} 官网配置`}
+                                      className="danger-action"
+                                      onClick={() => archiveSite(site)}
+                                      disabled={busyId === site.id}
+                                    >
+                                      <Trash2 size={15} />
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
           </WorkbenchTableShell>
         </section>
 
@@ -1131,7 +1142,9 @@ function DeleteSiteDialog({
           <div>
             <p className="t-label">Platform admin only</p>
             <h2 id="delete-site-dialog-title">永久删除官网站点</h2>
-            <p>{site.nameCn || site.nameEn} / {site.code}</p>
+            <p>
+              {site.nameCn || site.nameEn} / {site.code}
+            </p>
           </div>
           <button type="button" className="dialog-close" onClick={onClose} aria-label="关闭">
             <X size={16} />
@@ -1142,7 +1155,10 @@ function DeleteSiteDialog({
             <ShieldAlert size={20} />
             <div>
               <strong>该操作不可恢复</strong>
-              <span>删除后将移除官网入口、站点配置、Logo 绑定和集团子品牌绑定关系；子品牌站点与产品主数据不会被删除。</span>
+              <span>
+                删除后将移除官网入口、站点配置、Logo
+                绑定和集团子品牌绑定关系；子品牌站点与产品主数据不会被删除。
+              </span>
             </div>
           </div>
           <label className="site-field">
@@ -1159,7 +1175,12 @@ function DeleteSiteDialog({
             <button type="button" className="btn btn-outline" onClick={onClose} disabled={busy}>
               取消
             </button>
-            <button type="button" className="btn btn-danger" onClick={onConfirm} disabled={!matched || busy}>
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={onConfirm}
+              disabled={!matched || busy}
+            >
               <Trash2 size={15} />
               {busy ? '删除中' : '永久删除'}
             </button>
@@ -1349,15 +1370,7 @@ function SiteDialog({
   );
 }
 
-function Field({
-  label,
-  children,
-  full,
-}: {
-  label: string;
-  children: ReactNode;
-  full?: boolean;
-}) {
+function Field({ label, children, full }: { label: string; children: ReactNode; full?: boolean }) {
   return (
     <div className={full ? 'site-field full' : 'site-field'}>
       <label>{label}</label>

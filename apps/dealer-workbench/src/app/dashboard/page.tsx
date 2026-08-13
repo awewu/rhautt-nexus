@@ -1,5 +1,14 @@
 'use client';
-import { ArrowRight, Boxes, FileText, Globe2, Megaphone, Rocket, ShieldCheck, UsersRound } from 'lucide-react';
+import {
+  ArrowRight,
+  Boxes,
+  FileText,
+  Globe2,
+  Megaphone,
+  Rocket,
+  ShieldCheck,
+  UsersRound,
+} from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 type ConsoleCard = {
@@ -57,10 +66,20 @@ const QUICK_LINKS = [
 
 function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, marginBottom: 12 }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'space-between',
+        gap: 16,
+        marginBottom: 12,
+      }}
+    >
       <div>
         <h2 className="t-title-3">{title}</h2>
-        {subtitle && <p style={{ marginTop: 2, fontSize: 13, color: 'var(--t-secondary)' }}>{subtitle}</p>}
+        {subtitle && (
+          <p style={{ marginTop: 2, fontSize: 13, color: 'var(--t-secondary)' }}>{subtitle}</p>
+        )}
       </div>
     </div>
   );
@@ -76,47 +95,102 @@ function ConsoleCard({ card }: { card: ConsoleCard }) {
   };
 
   return (
-    <a href={card.href} className="card-elevated surface-interactive" style={{ display: 'block', padding: 20 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+    <a
+      href={card.href}
+      className="card-elevated surface-interactive"
+      style={{ display: 'block', padding: 20 }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          gap: 12,
+        }}
+      >
         <span style={{ fontSize: 13, color: 'var(--t-secondary)' }}>{card.label}</span>
-        <span style={{ ...toneStyle[card.tone], borderRadius: 8, padding: 6, display: 'flex' }}><Icon size={14} /></span>
+        <span style={{ ...toneStyle[card.tone], borderRadius: 8, padding: 6, display: 'flex' }}>
+          <Icon size={14} />
+        </span>
       </div>
       <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 4 }}>
-        <span style={{ fontSize: 34, fontWeight: 700, color: 'var(--t-strong)', fontVariantNumeric: 'tabular-nums', lineHeight: 1.1 }}>{card.value}</span>
+        <span
+          style={{
+            fontSize: 34,
+            fontWeight: 700,
+            color: 'var(--t-strong)',
+            fontVariantNumeric: 'tabular-nums',
+            lineHeight: 1.1,
+          }}
+        >
+          {card.value}
+        </span>
       </div>
-      <p style={{ marginTop: 6, fontSize: 12, color: 'var(--t-tertiary)', lineHeight: 1.5 }}>{card.hint}</p>
+      <p style={{ marginTop: 6, fontSize: 12, color: 'var(--t-tertiary)', lineHeight: 1.5 }}>
+        {card.hint}
+      </p>
     </a>
   );
 }
 
 export default function Dashboard() {
   const now = new Date();
-  const dateStr = now.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
+  const dateStr = now.toLocaleDateString('zh-CN', {
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long',
+  });
 
   return (
-    <div style={{ background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)', minHeight: '100%' }}>
+    <div
+      style={{
+        background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)',
+        minHeight: '100%',
+      }}
+    >
       <div className="page-container" style={{ display: 'grid', gap: 28 }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 12,
-          borderRadius: 10, border: '1px solid var(--border)',
-          background: 'var(--surface-1)', padding: '10px 16px',
-        }}>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--brand)',
-            color: '#fff', borderRadius: 9999, padding: '2px 8px',
-            fontSize: 10, fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.05em', flexShrink: 0,
-          }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            borderRadius: 10,
+            border: '1px solid var(--border)',
+            background: 'var(--surface-1)',
+            padding: '10px 16px',
+          }}
+        >
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              background: 'var(--brand)',
+              color: '#fff',
+              borderRadius: 9999,
+              padding: '2px 8px',
+              fontSize: 10,
+              fontWeight: 700,
+              textTransform: 'uppercase' as const,
+              letterSpacing: '0.05em',
+              flexShrink: 0,
+            }}
+          >
             <Megaphone size={10} /> 营销系统
           </span>
           <span style={{ fontSize: 13, color: 'var(--t-primary)', flex: 1 }}>{dateStr}</span>
-          <span style={{ fontSize: 12, color: 'var(--t-tertiary)', flexShrink: 0 }}>瑞合瑞德 · 品牌官网与市场增长控制台</span>
+          <span style={{ fontSize: 12, color: 'var(--t-tertiary)', flexShrink: 0 }}>
+            瑞合瑞德 · 品牌官网与市场增长控制台
+          </span>
         </div>
 
         <div className="split-main">
           <section>
             <SectionHeader title="营销控制台" subtitle="品牌官网 · 市场增长 · 产品 · 账号权限" />
             <div className="g4" style={{ gap: 12 }}>
-              {CONSOLE_CARDS.map((card) => <ConsoleCard key={card.href} card={card} />)}
+              {CONSOLE_CARDS.map((card) => (
+                <ConsoleCard key={card.href} card={card} />
+              ))}
             </div>
           </section>
 
@@ -126,14 +200,28 @@ export default function Dashboard() {
               {QUICK_LINKS.map((link) => {
                 const Icon = link.icon;
                 return (
-                  <a key={link.href} href={link.href} className="surface-interactive" style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    gap: 6, minHeight: 72, padding: '14px 8px', borderRadius: 8,
-                    background: link.primary ? 'var(--brand)' : 'var(--surface-2)',
-                    border: link.primary ? '1px solid var(--brand)' : '1px solid var(--border)',
-                    color: link.primary ? '#fff' : 'var(--t-primary)',
-                    fontSize: 12, fontWeight: 600, textAlign: 'center' as const, lineHeight: 1.3,
-                  }}>
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="surface-interactive"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 6,
+                      minHeight: 72,
+                      padding: '14px 8px',
+                      borderRadius: 8,
+                      background: link.primary ? 'var(--brand)' : 'var(--surface-2)',
+                      border: link.primary ? '1px solid var(--brand)' : '1px solid var(--border)',
+                      color: link.primary ? '#fff' : 'var(--t-primary)',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      textAlign: 'center' as const,
+                      lineHeight: 1.3,
+                    }}
+                  >
                     <Icon size={14} style={{ opacity: link.primary ? 0.9 : 0.45 }} />
                     {link.label}
                   </a>
@@ -144,18 +232,49 @@ export default function Dashboard() {
         </div>
 
         <section>
-          <SectionHeader title="运营路径" subtitle="从品牌官网内容到增长动作，再到产品资料和营销账号权限。" />
+          <SectionHeader
+            title="运营路径"
+            subtitle="从品牌官网内容到增长动作，再到产品资料和营销账号权限。"
+          />
           <div className="card-elevated" style={{ padding: 20 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12 }}>
+            <div
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12 }}
+            >
               {CONSOLE_CARDS.map((card, index) => (
-                <a key={card.href} href={card.href} className="surface-interactive" style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-                  padding: '14px 16px', border: '1px solid var(--border)', borderRadius: 8,
-                  background: 'var(--surface-1)', color: 'var(--t-primary)', textDecoration: 'none',
-                }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                    <span style={{ color: 'var(--brand)', fontWeight: 700, fontSize: 12 }}>{String(index + 1).padStart(2, '0')}</span>
-                    <span style={{ fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{card.label}</span>
+                <a
+                  key={card.href}
+                  href={card.href}
+                  className="surface-interactive"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    padding: '14px 16px',
+                    border: '1px solid var(--border)',
+                    borderRadius: 8,
+                    background: 'var(--surface-1)',
+                    color: 'var(--t-primary)',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <span
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 10, minWidth: 0 }}
+                  >
+                    <span style={{ color: 'var(--brand)', fontWeight: 700, fontSize: 12 }}>
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 700,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {card.label}
+                    </span>
                   </span>
                   <ArrowRight size={14} style={{ color: 'var(--brand)', flexShrink: 0 }} />
                 </a>

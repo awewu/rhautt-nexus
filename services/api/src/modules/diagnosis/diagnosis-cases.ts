@@ -33,7 +33,8 @@ export interface CaseQuery {
 }
 
 /** 策展内容文件位置（运营维护；缺失则视为暂无案例，返回空）。 */
-const CASES_FILE = process.env.RYSNOVA_CASES_FILE || path.join(process.cwd(), 'content', 'rysnova-cases.json');
+const CASES_FILE =
+  process.env.RYSNOVA_CASES_FILE || path.join(process.cwd(), 'content', 'rysnova-cases.json');
 
 /** 读取策展案例（容错）：文件缺失/解析失败 → 空数组（不抛错、不编造）。 */
 export function loadCases(file: string = CASES_FILE): CaseStudy[] {
@@ -66,7 +67,11 @@ export function filterCases(cases: CaseStudy[], query: CaseQuery = {}): CaseStud
     }
     return { c, score };
   });
-  return scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score).slice(0, limit).map((s) => s.c);
+  return scored
+    .filter((s) => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((s) => s.c);
 }
 
 /** 装配：读取 + 筛选（服务层调用）。 */

@@ -22,7 +22,8 @@ export class MetricChannelAttributionEntity {
   @Column() period: string;
   @Column() model: string;
   @Column() channel: string;
-  @Column({ name: 'credited_conversions', type: 'numeric', default: 0 }) creditedConversions: number;
+  @Column({ name: 'credited_conversions', type: 'numeric', default: 0 })
+  creditedConversions: number;
   @Column({ type: 'int', default: 0 }) touches: number;
   @Column({ name: 'updated_at', type: 'timestamptz', default: () => 'now()' }) updatedAt: Date;
 }

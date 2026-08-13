@@ -17,7 +17,7 @@ class SolutionTemplateEngine {
   // 初始化模板引擎
   async initialize() {
     console.log('📋 初始化方案模板引擎...');
-    
+
     // 创建模板目录
     if (!fs.existsSync(this.templateDir)) {
       fs.mkdirSync(this.templateDir, { recursive: true });
@@ -25,10 +25,10 @@ class SolutionTemplateEngine {
 
     // 加载内置模板
     await this.loadBuiltInTemplates();
-    
+
     // 加载用户模板
     await this.loadUserTemplates();
-    
+
     this.initialized = true;
     console.log(`✅ 方案模板引擎初始化完成，共${this.templates.size}个模板`);
     return true;
@@ -47,19 +47,19 @@ class SolutionTemplateEngine {
           { type: 'ac', count: 5, area: '客厅/主卧/次卧/书房/娱乐室' },
           { type: 'heating', count: 3, area: '主卧/次卧/儿童房' },
           { type: 'water_heater', count: 2, area: '主卫/次卫' },
-          { type: 'ventilation', count: 2, area: '地下室/储藏室' }
+          { type: 'ventilation', count: 2, area: '地下室/储藏室' },
         ],
         layout: {
           type: 'villa',
           floors: 3,
-          totalArea: 350
+          totalArea: 350,
         },
         price: {
           base: 158000,
-          premium: 185000
+          premium: 185000,
         },
         createdBy: 'system',
-        isBuiltIn: true
+        isBuiltIn: true,
       },
       {
         id: 'tpl_apartment_001',
@@ -70,19 +70,19 @@ class SolutionTemplateEngine {
         devices: [
           { type: 'ac', count: 3, area: '客厅/主卧/次卧' },
           { type: 'water_heater', count: 1, area: '卫生间' },
-          { type: 'ventilation', count: 1, area: '厨房' }
+          { type: 'ventilation', count: 1, area: '厨房' },
         ],
         layout: {
           type: 'apartment',
           floors: 1,
-          totalArea: 100
+          totalArea: 100,
         },
         price: {
           base: 68000,
-          premium: 85000
+          premium: 85000,
         },
         createdBy: 'system',
-        isBuiltIn: true
+        isBuiltIn: true,
       },
       {
         id: 'tpl_office_001',
@@ -92,25 +92,25 @@ class SolutionTemplateEngine {
         description: '适用于100-300㎡办公空间的中央空调方案',
         devices: [
           { type: 'ac_vrf', count: 1, area: '整体办公区' },
-          { type: 'ventilation', count: 2, area: '会议室/休息区' }
+          { type: 'ventilation', count: 2, area: '会议室/休息区' },
         ],
         layout: {
           type: 'office',
           floors: 1,
-          totalArea: 200
+          totalArea: 200,
         },
         price: {
           base: 120000,
-          premium: 145000
+          premium: 145000,
         },
         createdBy: 'system',
-        isBuiltIn: true
-      }
+        isBuiltIn: true,
+      },
     ];
 
     for (const template of builtInTemplates) {
       this.templates.set(template.id, template);
-      
+
       // 按分类存储
       if (!this.categories.has(template.category)) {
         this.categories.set(template.category, []);
@@ -127,7 +127,7 @@ class SolutionTemplateEngine {
         if (file.endsWith('.json')) {
           const template = JSON.parse(fs.readFileSync(path.join(this.templateDir, file), 'utf8'));
           this.templates.set(template.id, template);
-          
+
           if (!this.categories.has(template.category)) {
             this.categories.set(template.category, []);
           }
@@ -155,7 +155,7 @@ class SolutionTemplateEngine {
       createdBy: templateData.createdBy,
       createdAt: new Date().toISOString(),
       isBuiltIn: false,
-      usageCount: 0
+      usageCount: 0,
     };
 
     // 保存到文件
@@ -164,7 +164,7 @@ class SolutionTemplateEngine {
 
     // 加载到内存
     this.templates.set(template.id, template);
-    
+
     if (!this.categories.has(template.category)) {
       this.categories.set(template.category, []);
     }
@@ -189,7 +189,7 @@ class SolutionTemplateEngine {
       createdAt: new Date().toISOString(),
       sourceSolutionId: solutionId,
       isBuiltIn: false,
-      usageCount: 0
+      usageCount: 0,
     };
 
     await this.createTemplate(template);
@@ -209,19 +209,19 @@ class SolutionTemplateEngine {
   generateTags(solutionData) {
     const tags = [];
     const layout = solutionData.layout || {};
-    
+
     if (layout.totalArea > 200) tags.push('大户型');
     else if (layout.totalArea < 80) tags.push('小户型');
     else tags.push('中户型');
-    
+
     if (solutionData.devices) {
-      const hasAC = solutionData.devices.some(d => d.type === 'ac' || d.type === 'ac_vrf');
-      const hasHeating = solutionData.devices.some(d => d.type === 'heating');
-      
+      const hasAC = solutionData.devices.some((d) => d.type === 'ac' || d.type === 'ac_vrf');
+      const hasHeating = solutionData.devices.some((d) => d.type === 'heating');
+
       if (hasAC) tags.push('空调');
       if (hasHeating) tags.push('采暖');
     }
-    
+
     return tags;
   }
 
@@ -229,20 +229,18 @@ class SolutionTemplateEngine {
   async searchTemplates(query) {
     const results = [];
     const searchTerms = query.toLowerCase().split(' ');
-    
+
     for (const template of this.templates.values()) {
-      const searchable = [
-        template.name,
-        template.description,
-        ...template.tags
-      ].join(' ').toLowerCase();
-      
-      const matches = searchTerms.every(term => searchable.includes(term));
+      const searchable = [template.name, template.description, ...template.tags]
+        .join(' ')
+        .toLowerCase();
+
+      const matches = searchTerms.every((term) => searchable.includes(term));
       if (matches) {
         results.push(template);
       }
     }
-    
+
     // 按使用次数排序
     return results.sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0));
   }
@@ -250,7 +248,7 @@ class SolutionTemplateEngine {
   // 获取分类模板
   async getTemplatesByCategory(category) {
     const templateIds = this.categories.get(category) || [];
-    return templateIds.map(id => this.templates.get(id)).filter(Boolean);
+    return templateIds.map((id) => this.templates.get(id)).filter(Boolean);
   }
 
   // 应用模板创建新方案
@@ -279,7 +277,7 @@ class SolutionTemplateEngine {
       price: { ...template.price },
       status: 'draft',
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     console.log(`✅ 应用模板创建方案: ${solution.name}`);
@@ -316,7 +314,7 @@ class SolutionTemplateEngine {
 
     // 从内存移除
     this.templates.delete(templateId);
-    
+
     // 从分类移除
     const category = this.categories.get(template.category);
     if (category) {
@@ -332,9 +330,9 @@ class SolutionTemplateEngine {
 
   // 获取统计信息
   getStats() {
-    const builtInCount = Array.from(this.templates.values()).filter(t => t.isBuiltIn).length;
+    const builtInCount = Array.from(this.templates.values()).filter((t) => t.isBuiltIn).length;
     const customCount = this.templates.size - builtInCount;
-    
+
     return {
       totalTemplates: this.templates.size,
       builtInTemplates: builtInCount,
@@ -342,8 +340,8 @@ class SolutionTemplateEngine {
       categories: this.categories.size,
       categoryBreakdown: Array.from(this.categories.entries()).map(([cat, ids]) => ({
         category: cat,
-        count: ids.length
-      }))
+        count: ids.length,
+      })),
     };
   }
 }

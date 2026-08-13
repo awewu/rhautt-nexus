@@ -57,11 +57,31 @@ type MaterialForm = {
   versionLabel: string;
 };
 
-type SortBy = 'title' | 'materialType' | 'brandSlug' | 'fileFormat' | 'versionLabel' | 'updatedAt' | 'downloadCount';
+type SortBy =
+  | 'title'
+  | 'materialType'
+  | 'brandSlug'
+  | 'fileFormat'
+  | 'versionLabel'
+  | 'updatedAt'
+  | 'downloadCount';
 type SortOrder = 'ASC' | 'DESC';
 
 const DEFAULT_CATEGORIES = ['品牌物料', '产品物料', '活动物料', '销售话术', '案例素材', '培训合规'];
-const FILE_FORMAT_OPTIONS = ['PDF', 'PNG', 'JPG', 'JPEG', 'WEBP', 'SVG', 'PPTX', 'DOCX', 'XLSX', 'MP4', 'ZIP', '其他'];
+const FILE_FORMAT_OPTIONS = [
+  'PDF',
+  'PNG',
+  'JPG',
+  'JPEG',
+  'WEBP',
+  'SVG',
+  'PPTX',
+  'DOCX',
+  'XLSX',
+  'MP4',
+  'ZIP',
+  '其他',
+];
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 const SORTABLE_COLUMNS: { key: SortBy; label: string }[] = [
@@ -115,7 +135,10 @@ function toForm(item: MarketingMaterial): MaterialForm {
 function toPayload(form: MaterialForm) {
   return {
     ...form,
-    tags: form.tags.split(',').map((item) => item.trim()).filter(Boolean),
+    tags: form.tags
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean),
   };
 }
 
@@ -146,7 +169,11 @@ function base64ToBlobUrl(dataBase64: string, mimeType: string): string {
   return URL.createObjectURL(blob);
 }
 
-function downloadBase64File(filename: string, mimeType: string | null | undefined, dataBase64: string) {
+function downloadBase64File(
+  filename: string,
+  mimeType: string | null | undefined,
+  dataBase64: string
+) {
   const url = base64ToBlobUrl(dataBase64, mimeType || 'application/octet-stream');
   const link = document.createElement('a');
   link.href = url;
@@ -244,7 +271,8 @@ export default function GrowthMaterialsTable() {
 
   // 派生批量选择状态
   const visibleIds = useMemo(() => items.map((item) => item.id), [items]);
-  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.includes(id));
+  const allVisibleSelected =
+    visibleIds.length > 0 && visibleIds.every((id) => selectedIds.includes(id));
   const someVisibleSelected = visibleIds.some((id) => selectedIds.includes(id));
 
   useEffect(() => {
@@ -414,7 +442,10 @@ export default function GrowthMaterialsTable() {
     setError('');
     try {
       const artifact = await fileArtifacts.getBase64(item.fileArtifactId);
-      const ext = getExtension(artifact?.originalName) || getExtension(item.fileUrl) || (item.fileFormat || '').toLowerCase();
+      const ext =
+        getExtension(artifact?.originalName) ||
+        getExtension(item.fileUrl) ||
+        (item.fileFormat || '').toLowerCase();
       const mime = artifact?.mimeType || '';
       const data = String(artifact?.dataBase64 || '');
       if (IMAGE_EXT.includes(ext) || mime.startsWith('image/')) {
@@ -460,7 +491,9 @@ export default function GrowthMaterialsTable() {
 
   // 批量下载
   async function bulkDownload() {
-    const downloadable = items.filter((item) => selectedIds.includes(item.id) && item.fileArtifactId);
+    const downloadable = items.filter(
+      (item) => selectedIds.includes(item.id) && item.fileArtifactId
+    );
     if (!downloadable.length) {
       setError('选中的物料中没有可下载的文件');
       return;
@@ -489,7 +522,10 @@ export default function GrowthMaterialsTable() {
 
   // 批量打标签
   async function bulkTag() {
-    const newTags = bulkTagInput.split(',').map((t) => t.trim()).filter(Boolean);
+    const newTags = bulkTagInput
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
     if (!newTags.length || !selectedIds.length) return;
     setBulkBusy(true);
     setError('');
@@ -513,14 +549,20 @@ export default function GrowthMaterialsTable() {
   }
 
   const sortIcon = (column: SortBy) => {
-    if (sortBy !== column) return <ChevronsUpDown size={12} style={{ color: 'var(--t-tertiary)' }} />;
-    return sortOrder === 'ASC'
-      ? <ChevronUp size={12} style={{ color: 'var(--brand)' }} />
-      : <ChevronDown size={12} style={{ color: 'var(--brand)' }} />;
+    if (sortBy !== column)
+      return <ChevronsUpDown size={12} style={{ color: 'var(--t-tertiary)' }} />;
+    return sortOrder === 'ASC' ? (
+      <ChevronUp size={12} style={{ color: 'var(--brand)' }} />
+    ) : (
+      <ChevronDown size={12} style={{ color: 'var(--brand)' }} />
+    );
   };
 
   async function handleGenerateImage() {
-    if (!aiPrompt.trim()) { setError('请输入图片描述'); return; }
+    if (!aiPrompt.trim()) {
+      setError('请输入图片描述');
+      return;
+    }
     setAiBusy(true);
     setError('');
     setAiPreview(null);
@@ -545,23 +587,40 @@ export default function GrowthMaterialsTable() {
   return (
     <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
       {/* 标题区 */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          gap: 14,
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+        }}
+      >
         <div>
           <p className="t-label">营销物料管理</p>
-          <h2 className="t-headline" style={{ marginTop: 4 }}>基础物料库</h2>
+          <h2 className="t-headline" style={{ marginTop: 4 }}>
+            基础物料库
+          </h2>
           <p style={{ marginTop: 4, color: 'var(--t-secondary)', fontSize: 13 }}>
             维护物料名称、分类、品牌、适用场景、格式、版本和标签。支持分页、排序、批量操作与文件预览。
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <button className="btn btn-brand btn-sm" onClick={openCreateForm} disabled={busy}>
-            <Plus size={13} />新增物料
+            <Plus size={13} />
+            新增物料
           </button>
-          <button className="btn btn-outline btn-sm" onClick={() => setAiOpen((v) => !v)} disabled={busy}>
-            <Sparkles size={13} />AI 生成图
+          <button
+            className="btn btn-outline btn-sm"
+            onClick={() => setAiOpen((v) => !v)}
+            disabled={busy}
+          >
+            <Sparkles size={13} />
+            AI 生成图
           </button>
           <button className="btn btn-outline btn-sm" onClick={load} disabled={busy}>
-            <RefreshCw size={13} />刷新
+            <RefreshCw size={13} />
+            刷新
           </button>
         </div>
       </div>
@@ -575,13 +634,25 @@ export default function GrowthMaterialsTable() {
 
       {/* 多模态生成：AI 文生图 */}
       {aiOpen ? (
-        <div className="inset" style={{ display: 'grid', gap: 12, padding: 16, borderLeft: '3px solid var(--brand)' }}>
+        <div
+          className="inset"
+          style={{ display: 'grid', gap: 12, padding: 16, borderLeft: '3px solid var(--brand)' }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Sparkles size={16} style={{ color: 'var(--brand)' }} />
             <strong style={{ fontSize: 14, color: 'var(--t-strong)' }}>AI 生成营销图</strong>
-            <span style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>经 Tandem 图像网关，生成图自动入库为物料</span>
+            <span style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>
+              经 Tandem 图像网关，生成图自动入库为物料
+            </span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px auto', gap: 10, alignItems: 'end' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 140px auto',
+              gap: 10,
+              alignItems: 'end',
+            }}
+          >
             <label style={{ display: 'grid', gap: 6 }}>
               <span className="t-label">图片描述（prompt）</span>
               <input
@@ -589,20 +660,41 @@ export default function GrowthMaterialsTable() {
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
                 placeholder="例：瑞美空气源热泵热水器 产品海报 简洁科技风 红白配色"
-                onKeyDown={(e) => { if (e.key === 'Enter' && !aiBusy) handleGenerateImage(); }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !aiBusy) handleGenerateImage();
+                }}
               />
             </label>
             <label style={{ display: 'grid', gap: 6 }}>
               <span className="t-label">品牌</span>
-              <input className="input" value={aiBrand} onChange={(e) => setAiBrand(e.target.value)} placeholder="rheem" />
+              <input
+                className="input"
+                value={aiBrand}
+                onChange={(e) => setAiBrand(e.target.value)}
+                placeholder="rheem"
+              />
             </label>
-            <button className="btn btn-brand" onClick={handleGenerateImage} disabled={aiBusy || !aiPrompt.trim()}>
+            <button
+              className="btn btn-brand"
+              onClick={handleGenerateImage}
+              disabled={aiBusy || !aiPrompt.trim()}
+            >
               {aiBusy ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}生成
             </button>
           </div>
           {aiPreview ? (
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <img src={aiPreview} alt="AI 生成预览" style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--surface-3)' }} />
+              <img
+                src={aiPreview}
+                alt="AI 生成预览"
+                style={{
+                  width: 120,
+                  height: 120,
+                  objectFit: 'cover',
+                  borderRadius: 8,
+                  border: '1px solid var(--surface-3)',
+                }}
+              />
               <div style={{ fontSize: 13, color: 'var(--success)' }}>
                 已生成并入库，可在下方物料列表查看。
               </div>
@@ -614,16 +706,46 @@ export default function GrowthMaterialsTable() {
       {/* 筛选与搜索 */}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         <Search size={16} style={{ color: 'var(--t-tertiary)' }} />
-        <input className="input" value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="搜索物料名称或备注" style={{ width: 240 }} />
-        <select className="input" value={categoryFilter} onChange={(event) => { setCategoryFilter(event.target.value); setPage(1); }} style={{ width: 180 }}>
+        <input
+          className="input"
+          value={keyword}
+          onChange={(event) => setKeyword(event.target.value)}
+          placeholder="搜索物料名称或备注"
+          style={{ width: 240 }}
+        />
+        <select
+          className="input"
+          value={categoryFilter}
+          onChange={(event) => {
+            setCategoryFilter(event.target.value);
+            setPage(1);
+          }}
+          style={{ width: 180 }}
+        >
           <option value="all">全部分类</option>
-          {categories.map((item) => <option key={item} value={item}>{item}</option>)}
+          {categories.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
         </select>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--t-secondary)', cursor: 'pointer' }}>
+        <label
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 13,
+            color: 'var(--t-secondary)',
+            cursor: 'pointer',
+          }}
+        >
           <input
             type="checkbox"
             checked={includeArchived}
-            onChange={(event) => { setIncludeArchived(event.target.checked); setPage(1); }}
+            onChange={(event) => {
+              setIncludeArchived(event.target.checked);
+              setPage(1);
+            }}
             style={{ accentColor: 'var(--brand)', width: 16, height: 16, cursor: 'pointer' }}
           />
           <ArchiveRestore size={14} />
@@ -633,14 +755,37 @@ export default function GrowthMaterialsTable() {
 
       {/* 批量操作栏 */}
       {selectedIds.length > 0 && (
-        <div role="status" style={{ padding: '10px 18px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', background: 'color-mix(in srgb, var(--brand-50) 42%, var(--surface-1) 58%)', borderRadius: 'var(--r-lg)' }}>
-          <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--t-primary)' }}>已选 {selectedIds.length} 个物料</span>
+        <div
+          role="status"
+          style={{
+            padding: '10px 18px',
+            borderBottom: '1px solid var(--border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+            flexWrap: 'wrap',
+            background: 'color-mix(in srgb, var(--brand-50) 42%, var(--surface-1) 58%)',
+            borderRadius: 'var(--r-lg)',
+          }}
+        >
+          <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--t-primary)' }}>
+            已选 {selectedIds.length} 个物料
+          </span>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <button className="btn btn-outline btn-sm" onClick={bulkArchive} disabled={bulkBusy || busy}>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={bulkArchive}
+              disabled={bulkBusy || busy}
+            >
               <Archive size={13} />
               {bulkBusy ? '批量归档中' : '批量归档'}
             </button>
-            <button className="btn btn-outline btn-sm" onClick={bulkDownload} disabled={bulkBusy || busy}>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={bulkDownload}
+              disabled={bulkBusy || busy}
+            >
               <Download size={13} />
               {bulkBusy ? '批量下载中' : '批量下载'}
             </button>
@@ -651,11 +796,19 @@ export default function GrowthMaterialsTable() {
               onChange={(event) => setBulkTagInput(event.target.value)}
               placeholder="输入标签，逗号分隔"
             />
-            <button className="btn btn-brand btn-sm" onClick={bulkTag} disabled={bulkBusy || busy || !bulkTagInput.trim()}>
+            <button
+              className="btn btn-brand btn-sm"
+              onClick={bulkTag}
+              disabled={bulkBusy || busy || !bulkTagInput.trim()}
+            >
               <Tag size={13} />
               {bulkBusy ? '批量打标中' : '批量打标'}
             </button>
-            <button className="btn btn-ghost btn-sm" onClick={() => setSelectedIds([])} disabled={bulkBusy || busy}>
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => setSelectedIds([])}
+              disabled={bulkBusy || busy}
+            >
               取消选择
             </button>
           </div>
@@ -682,7 +835,19 @@ export default function GrowthMaterialsTable() {
                 <th key={col.key}>
                   <button
                     onClick={() => toggleSort(col.key)}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', color: sortBy === col.key ? 'var(--brand)' : 'var(--t-tertiary)', padding: 0, textTransform: 'inherit', letterSpacing: 'inherit' }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      font: 'inherit',
+                      color: sortBy === col.key ? 'var(--brand)' : 'var(--t-tertiary)',
+                      padding: 0,
+                      textTransform: 'inherit',
+                      letterSpacing: 'inherit',
+                    }}
                   >
                     {col.label}
                     {sortIcon(col.key)}
@@ -709,22 +874,41 @@ export default function GrowthMaterialsTable() {
                       checked={isRowSelected}
                       disabled={busy}
                       onChange={(event) => toggleRowSelection(item.id, event.target.checked)}
-                      style={{ accentColor: 'var(--brand)', width: 16, height: 16, cursor: 'pointer' }}
+                      style={{
+                        accentColor: 'var(--brand)',
+                        width: 16,
+                        height: 16,
+                        cursor: 'pointer',
+                      }}
                       aria-label={`选择${item.title}`}
                     />
                   </td>
                   <td>
                     <div style={{ display: 'grid', gap: 3 }}>
                       <strong style={{ color: 'var(--t-primary)' }}>{item.title}</strong>
-                      {item.summary && <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>{item.summary}</span>}
+                      {item.summary && (
+                        <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+                          {item.summary}
+                        </span>
+                      )}
                     </div>
                   </td>
-                  <td><span className="badge badge-info">{item.materialType}</span></td>
+                  <td>
+                    <span className="badge badge-info">{item.materialType}</span>
+                  </td>
                   <td>{item.brandSlug || '-'}</td>
                   <td>{item.fileFormat || '-'}</td>
                   <td>{item.versionLabel || 'v1'}</td>
                   <td>{formatDate(item.updatedAt)}</td>
-                  <td style={{ fontWeight: 700, color: 'var(--brand)', fontVariantNumeric: 'tabular-nums' }}>{item.downloadCount || 0}</td>
+                  <td
+                    style={{
+                      fontWeight: 700,
+                      color: 'var(--brand)',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}
+                  >
+                    {item.downloadCount || 0}
+                  </td>
                   <td>{(item.tags || []).length ? item.tags.join(' / ') : '-'}</td>
                   <td>
                     {item.archivedAt ? (
@@ -734,12 +918,47 @@ export default function GrowthMaterialsTable() {
                     )}
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
-                      <button className="btn btn-outline btn-sm" onClick={() => edit(item)} disabled={busy}><Edit3 size={13} />编辑</button>
-                      <button className="btn btn-outline btn-sm" onClick={() => openPreview(item)} disabled={busy || !hasFile}><Eye size={13} />预览</button>
-                      <button className="btn btn-outline btn-sm" onClick={() => download(item)} disabled={busy || !hasFile}><Download size={13} />下载</button>
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: 6,
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => edit(item)}
+                        disabled={busy}
+                      >
+                        <Edit3 size={13} />
+                        编辑
+                      </button>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => openPreview(item)}
+                        disabled={busy || !hasFile}
+                      >
+                        <Eye size={13} />
+                        预览
+                      </button>
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => download(item)}
+                        disabled={busy || !hasFile}
+                      >
+                        <Download size={13} />
+                        下载
+                      </button>
                       {!item.archivedAt && (
-                        <button className="btn btn-outline btn-sm" onClick={() => archive(item.id)} disabled={busy}><Archive size={13} />归档</button>
+                        <button
+                          className="btn btn-outline btn-sm"
+                          onClick={() => archive(item.id)}
+                          disabled={busy}
+                        >
+                          <Archive size={13} />
+                          归档
+                        </button>
                       )}
                     </div>
                   </td>
@@ -748,17 +967,31 @@ export default function GrowthMaterialsTable() {
             })}
             {!busy && !items.length && (
               <tr>
-                <td colSpan={11} style={{ textAlign: 'center', color: 'var(--t-secondary)', padding: 28 }}>
-                  <FolderOpen size={20} style={{ color: 'var(--brand)', verticalAlign: 'middle', marginRight: 8 }} />
-                  {includeArchived ? '暂无物料（含已归档）' : '暂无物料，先新增一条基础物料，或开启「查看已归档」'}
+                <td
+                  colSpan={11}
+                  style={{ textAlign: 'center', color: 'var(--t-secondary)', padding: 28 }}
+                >
+                  <FolderOpen
+                    size={20}
+                    style={{ color: 'var(--brand)', verticalAlign: 'middle', marginRight: 8 }}
+                  />
+                  {includeArchived
+                    ? '暂无物料（含已归档）'
+                    : '暂无物料，先新增一条基础物料，或开启「查看已归档」'}
                 </td>
               </tr>
             )}
             {busy && (
               <tr>
                 <td colSpan={11} style={{ textAlign: 'center', padding: 28 }}>
-                  <Loader2 size={18} className="animate-spin" style={{ color: 'var(--brand)', verticalAlign: 'middle' }} />
-                  <span style={{ marginLeft: 8, color: 'var(--t-secondary)', fontSize: 13 }}>加载中</span>
+                  <Loader2
+                    size={18}
+                    className="animate-spin"
+                    style={{ color: 'var(--brand)', verticalAlign: 'middle' }}
+                  />
+                  <span style={{ marginLeft: 8, color: 'var(--t-secondary)', fontSize: 13 }}>
+                    加载中
+                  </span>
                 </td>
               </tr>
             )}
@@ -773,7 +1006,10 @@ export default function GrowthMaterialsTable() {
         totalItems={total}
         pageSize={pageSize}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
-        onPageSizeChange={(size) => { setPageSize(size); setPage(1); }}
+        onPageSizeChange={(size) => {
+          setPageSize(size);
+          setPage(1);
+        }}
         onPageChange={busy ? undefined : setPage}
         onPrevious={busy || page <= 1 ? undefined : () => setPage(Math.max(page - 1, 1))}
         onNext={busy || page >= totalPages ? undefined : () => setPage(page + 1)}
@@ -783,7 +1019,16 @@ export default function GrowthMaterialsTable() {
       {formOpen && (
         <div
           onClick={requestCloseForm}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.42)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', zIndex: 50, padding: '8vh 24px 24px' }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15,23,42,0.42)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            zIndex: 50,
+            padding: '8vh 24px 24px',
+          }}
         >
           <div
             onClick={(event) => event.stopPropagation()}
@@ -803,10 +1048,28 @@ export default function GrowthMaterialsTable() {
               overflow: 'hidden',
             }}
           >
-            <div style={{ padding: '20px 24px 18px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, background: 'var(--surface-1)' }}>
+            <div
+              style={{
+                padding: '20px 24px 18px',
+                borderBottom: '1px solid var(--border)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                gap: 16,
+                background: 'var(--surface-1)',
+              }}
+            >
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <span style={{ width: 4, height: 16, borderRadius: 999, background: 'var(--brand)', display: 'inline-block' }} />
+                  <span
+                    style={{
+                      width: 4,
+                      height: 16,
+                      borderRadius: 999,
+                      background: 'var(--brand)',
+                      display: 'inline-block',
+                    }}
+                  />
                   <p className="t-label">{editingId ? '编辑物料' : '新增物料'}</p>
                 </div>
                 <h3 id="growth-material-form-title" className="t-headline" style={{ marginTop: 0 }}>
@@ -816,43 +1079,110 @@ export default function GrowthMaterialsTable() {
                   维护物料分类、品牌归属、适用场景、版本与文件附件。
                 </p>
               </div>
-              <button className="btn btn-ghost btn-sm icon-only" onClick={requestCloseForm} aria-label="关闭表单" disabled={busy}>
+              <button
+                className="btn btn-ghost btn-sm icon-only"
+                onClick={requestCloseForm}
+                aria-label="关闭表单"
+                disabled={busy}
+              >
                 <X size={18} />
               </button>
             </div>
 
-            <div style={{ overflow: 'auto', padding: 24, display: 'grid', gap: 18, alignContent: 'start', background: 'var(--surface-2)' }}>
-              <section style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', padding: 18, display: 'grid', gap: 14 }}>
+            <div
+              style={{
+                overflow: 'auto',
+                padding: 24,
+                display: 'grid',
+                gap: 18,
+                alignContent: 'start',
+                background: 'var(--surface-2)',
+              }}
+            >
+              <section
+                style={{
+                  background: 'var(--surface-1)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--r-lg)',
+                  padding: 18,
+                  display: 'grid',
+                  gap: 14,
+                }}
+              >
                 <div>
                   <h4 style={{ margin: 0, color: 'var(--t-strong)', fontSize: 14 }}>基础信息</h4>
-                  <p style={{ margin: '4px 0 0', color: 'var(--t-tertiary)', fontSize: 12 }}>用于列表检索、分类筛选和后台归档。</p>
+                  <p style={{ margin: '4px 0 0', color: 'var(--t-tertiary)', fontSize: 12 }}>
+                    用于列表检索、分类筛选和后台归档。
+                  </p>
                 </div>
                 <label style={{ display: 'grid', gap: 6 }}>
-                  <span className="t-label">物料名称 <span style={{ color: 'var(--brand)' }}>*</span></span>
-                  <input className="input" value={form.title} onChange={(event) => patchForm({ title: event.target.value })} placeholder="例如：夏季活动海报" />
+                  <span className="t-label">
+                    物料名称 <span style={{ color: 'var(--brand)' }}>*</span>
+                  </span>
+                  <input
+                    className="input"
+                    value={form.title}
+                    onChange={(event) => patchForm({ title: event.target.value })}
+                    placeholder="例如：夏季活动海报"
+                  />
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                    gap: 12,
+                  }}
+                >
                   <label style={{ display: 'grid', gap: 6 }}>
-                    <span className="t-label">分类 <span style={{ color: 'var(--brand)' }}>*</span></span>
-                    <select className="input" value={form.materialType} onChange={(event) => patchForm({ materialType: event.target.value })}>
-                      {categories.map((item) => <option key={item} value={item} />)}
+                    <span className="t-label">
+                      分类 <span style={{ color: 'var(--brand)' }}>*</span>
+                    </span>
+                    <select
+                      className="input"
+                      value={form.materialType}
+                      onChange={(event) => patchForm({ materialType: event.target.value })}
+                    >
+                      {categories.map((item) => (
+                        <option key={item} value={item} />
+                      ))}
                     </select>
                   </label>
                   <label style={{ display: 'grid', gap: 6 }}>
                     <span className="t-label">品牌</span>
-                    <input className="input" value={form.brandSlug} onChange={(event) => patchForm({ brandSlug: event.target.value })} placeholder="Rheem / Ruud / Everhot" />
+                    <input
+                      className="input"
+                      value={form.brandSlug}
+                      onChange={(event) => patchForm({ brandSlug: event.target.value })}
+                      placeholder="Rheem / Ruud / Everhot"
+                    />
                   </label>
                 </div>
                 <label style={{ display: 'grid', gap: 6 }}>
                   <span className="t-label">适用场景</span>
-                  <input className="input" value={form.channel} onChange={(event) => patchForm({ channel: event.target.value })} placeholder="官网 / 门店 / 朋友圈 / 培训" />
+                  <input
+                    className="input"
+                    value={form.channel}
+                    onChange={(event) => patchForm({ channel: event.target.value })}
+                    placeholder="官网 / 门店 / 朋友圈 / 培训"
+                  />
                 </label>
               </section>
 
-              <section style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', padding: 18, display: 'grid', gap: 14 }}>
+              <section
+                style={{
+                  background: 'var(--surface-1)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--r-lg)',
+                  padding: 18,
+                  display: 'grid',
+                  gap: 14,
+                }}
+              >
                 <div>
                   <h4 style={{ margin: 0, color: 'var(--t-strong)', fontSize: 14 }}>文件与版本</h4>
-                  <p style={{ margin: '4px 0 0', color: 'var(--t-tertiary)', fontSize: 12 }}>支持上传 PDF、图片、PPT 等营销物料文件。</p>
+                  <p style={{ margin: '4px 0 0', color: 'var(--t-tertiary)', fontSize: 12 }}>
+                    支持上传 PDF、图片、PPT 等营销物料文件。
+                  </p>
                 </div>
                 <label
                   style={{
@@ -877,52 +1207,149 @@ export default function GrowthMaterialsTable() {
                     }}
                     style={{ display: 'none' }}
                   />
-                  <span style={{ width: 44, height: 44, borderRadius: 'var(--r-lg)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-1)', border: '1px solid var(--border)', color: 'var(--brand)' }}>
+                  <span
+                    style={{
+                      width: 44,
+                      height: 44,
+                      borderRadius: 'var(--r-lg)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      background: 'var(--surface-1)',
+                      border: '1px solid var(--border)',
+                      color: 'var(--brand)',
+                    }}
+                  >
                     <Upload size={20} />
                   </span>
                   <span style={{ minWidth: 0 }}>
-                    <strong style={{ display: 'block', color: 'var(--t-primary)', fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {selectedFile?.name || (form.fileArtifactId ? '已上传文件，可重新选择' : '点击选择上传文件')}
+                    <strong
+                      style={{
+                        display: 'block',
+                        color: 'var(--t-primary)',
+                        fontSize: 14,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {selectedFile?.name ||
+                        (form.fileArtifactId ? '已上传文件，可重新选择' : '点击选择上传文件')}
                     </strong>
-                    <span style={{ display: 'block', color: 'var(--t-tertiary)', fontSize: 12, marginTop: 4 }}>
+                    <span
+                      style={{
+                        display: 'block',
+                        color: 'var(--t-tertiary)',
+                        fontSize: 12,
+                        marginTop: 4,
+                      }}
+                    >
                       文件会作为该物料的下载与预览附件保存。
                     </span>
                   </span>
-                  <span className="btn btn-outline btn-sm" aria-hidden="true">选择文件</span>
+                  <span className="btn btn-outline btn-sm" aria-hidden="true">
+                    选择文件
+                  </span>
                 </label>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                    gap: 12,
+                  }}
+                >
                   <label style={{ display: 'grid', gap: 6 }}>
                     <span className="t-label">格式</span>
-                    <select className="input" value={FILE_FORMAT_OPTIONS.includes(form.fileFormat) ? form.fileFormat : '其他'} onChange={(event) => patchForm({ fileFormat: event.target.value })}>
-                      {FILE_FORMAT_OPTIONS.map((item) => <option key={item} value={item}>{item}</option>)}
+                    <select
+                      className="input"
+                      value={
+                        FILE_FORMAT_OPTIONS.includes(form.fileFormat) ? form.fileFormat : '其他'
+                      }
+                      onChange={(event) => patchForm({ fileFormat: event.target.value })}
+                    >
+                      {FILE_FORMAT_OPTIONS.map((item) => (
+                        <option key={item} value={item}>
+                          {item}
+                        </option>
+                      ))}
                     </select>
                   </label>
                   <label style={{ display: 'grid', gap: 6 }}>
                     <span className="t-label">版本</span>
-                    <input className="input" value={form.versionLabel} onChange={(event) => patchForm({ versionLabel: event.target.value })} placeholder="v1" />
+                    <input
+                      className="input"
+                      value={form.versionLabel}
+                      onChange={(event) => patchForm({ versionLabel: event.target.value })}
+                      placeholder="v1"
+                    />
                   </label>
                   <label style={{ display: 'grid', gap: 6 }}>
                     <span className="t-label">标签</span>
-                    <input className="input" value={form.tags} onChange={(event) => patchForm({ tags: event.target.value })} placeholder="逗号分隔" />
+                    <input
+                      className="input"
+                      value={form.tags}
+                      onChange={(event) => patchForm({ tags: event.target.value })}
+                      placeholder="逗号分隔"
+                    />
                   </label>
                 </div>
               </section>
 
-              <section style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', padding: 18, display: 'grid', gap: 10 }}>
+              <section
+                style={{
+                  background: 'var(--surface-1)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--r-lg)',
+                  padding: 18,
+                  display: 'grid',
+                  gap: 10,
+                }}
+              >
                 <div>
                   <h4 style={{ margin: 0, color: 'var(--t-strong)', fontSize: 14 }}>备注说明</h4>
-                  <p style={{ margin: '4px 0 0', color: 'var(--t-tertiary)', fontSize: 12 }}>记录使用说明、适配渠道或版本变更信息。</p>
+                  <p style={{ margin: '4px 0 0', color: 'var(--t-tertiary)', fontSize: 12 }}>
+                    记录使用说明、适配渠道或版本变更信息。
+                  </p>
                 </div>
-                <textarea className="input" rows={4} value={form.summary} onChange={(event) => patchForm({ summary: event.target.value })} placeholder="备注说明" style={{ resize: 'vertical' }} />
+                <textarea
+                  className="input"
+                  rows={4}
+                  value={form.summary}
+                  onChange={(event) => patchForm({ summary: event.target.value })}
+                  placeholder="备注说明"
+                  style={{ resize: 'vertical' }}
+                />
               </section>
 
-              {error && <span className="badge badge-warning" style={{ justifySelf: 'start' }}>{error}</span>}
+              {error && (
+                <span className="badge badge-warning" style={{ justifySelf: 'start' }}>
+                  {error}
+                </span>
+              )}
             </div>
 
-            <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', background: 'var(--surface-1)', display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'flex-end' }}>
-              <button className="btn btn-outline btn-sm" onClick={requestCloseForm} disabled={busy}>取消</button>
+            <div
+              style={{
+                padding: '14px 24px',
+                borderTop: '1px solid var(--border)',
+                background: 'var(--surface-1)',
+                display: 'flex',
+                gap: 10,
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+              }}
+            >
+              <button className="btn btn-outline btn-sm" onClick={requestCloseForm} disabled={busy}>
+                取消
+              </button>
               <button className="btn btn-brand btn-sm" onClick={save} disabled={busy}>
-                {busy ? <Loader2 size={14} className="animate-spin" /> : editingId ? <Edit3 size={14} /> : <Plus size={14} />}
+                {busy ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : editingId ? (
+                  <Edit3 size={14} />
+                ) : (
+                  <Plus size={14} />
+                )}
                 {editingId ? '保存修改' : '新增物料'}
               </button>
             </div>
@@ -934,38 +1361,114 @@ export default function GrowthMaterialsTable() {
       {previewItem && (
         <div
           onClick={closePreview}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.46)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(17,24,39,0.46)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 50,
+            padding: 20,
+          }}
         >
           <div
             onClick={(event) => event.stopPropagation()}
             className="card-elevated"
-            style={{ padding: 16, width: 'min(100%, 960px)', maxHeight: 'min(92vh, 820px)', overflow: 'auto', display: 'grid', gap: 12, boxShadow: 'var(--sh-modal)' }}
+            style={{
+              padding: 16,
+              width: 'min(100%, 960px)',
+              maxHeight: 'min(92vh, 820px)',
+              overflow: 'auto',
+              display: 'grid',
+              gap: 12,
+              boxShadow: 'var(--sh-modal)',
+            }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 12,
+              }}
+            >
               <div>
                 <p className="t-label">文件预览</p>
-                <h3 className="t-headline" style={{ marginTop: 4 }}>{previewItem.title}</h3>
+                <h3 className="t-headline" style={{ marginTop: 4 }}>
+                  {previewItem.title}
+                </h3>
                 <p style={{ fontSize: 12, color: 'var(--t-tertiary)', marginTop: 4 }}>
-                  {previewItem.fileFormat || '-'} · {previewItem.brandSlug || '-'} · v{previewItem.versionLabel}
+                  {previewItem.fileFormat || '-'} · {previewItem.brandSlug || '-'} · v
+                  {previewItem.versionLabel}
                 </p>
               </div>
-              <button className="btn btn-ghost btn-sm icon-only" onClick={closePreview} aria-label="关闭预览">
+              <button
+                className="btn btn-ghost btn-sm icon-only"
+                onClick={closePreview}
+                aria-label="关闭预览"
+              >
                 <X size={18} />
               </button>
             </div>
 
-            <div style={{ display: 'grid', placeItems: 'center', minHeight: 240, maxHeight: 'calc(88vh - 120px)', overflow: 'auto', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', background: 'var(--surface-2)' }}>
+            <div
+              style={{
+                display: 'grid',
+                placeItems: 'center',
+                minHeight: 240,
+                maxHeight: 'calc(88vh - 120px)',
+                overflow: 'auto',
+                borderRadius: 'var(--r-lg)',
+                border: '1px solid var(--border)',
+                background: 'var(--surface-2)',
+              }}
+            >
               {previewBusy ? (
                 <Loader2 size={24} className="animate-spin" style={{ color: 'var(--brand)' }} />
               ) : previewKind === 'image' && previewUrl ? (
-                <img src={previewUrl} alt={previewItem.title} style={{ maxWidth: '100%', maxHeight: 'calc(88vh - 120px)', objectFit: 'contain' }} />
+                <img
+                  src={previewUrl}
+                  alt={previewItem.title}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: 'calc(88vh - 120px)',
+                    objectFit: 'contain',
+                  }}
+                />
               ) : previewKind === 'pdf' && previewUrl ? (
-                <iframe src={previewUrl} title={previewItem.title} style={{ width: '100%', height: 'calc(88vh - 120px)', border: 'none', borderRadius: 'var(--r-lg)' }} />
+                <iframe
+                  src={previewUrl}
+                  title={previewItem.title}
+                  style={{
+                    width: '100%',
+                    height: 'calc(88vh - 120px)',
+                    border: 'none',
+                    borderRadius: 'var(--r-lg)',
+                  }}
+                />
               ) : (
-                <div style={{ textAlign: 'center', padding: 32, display: 'grid', gap: 10, placeContent: 'center' }}>
-                  <FileText size={32} style={{ color: 'var(--t-tertiary)', justifySelf: 'center' }} />
-                  <p style={{ color: 'var(--t-secondary)', fontSize: 13 }}>该格式暂不支持在线预览</p>
-                  <button className="btn btn-outline btn-sm" onClick={() => download(previewItem)} disabled={busy}>
+                <div
+                  style={{
+                    textAlign: 'center',
+                    padding: 32,
+                    display: 'grid',
+                    gap: 10,
+                    placeContent: 'center',
+                  }}
+                >
+                  <FileText
+                    size={32}
+                    style={{ color: 'var(--t-tertiary)', justifySelf: 'center' }}
+                  />
+                  <p style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
+                    该格式暂不支持在线预览
+                  </p>
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => download(previewItem)}
+                    disabled={busy}
+                  >
                     <Download size={13} />
                     下载文件
                   </button>

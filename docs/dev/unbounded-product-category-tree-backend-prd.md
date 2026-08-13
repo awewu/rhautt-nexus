@@ -60,37 +60,37 @@ The first backend version must preserve current public site compatibility by con
 
 Recommended category entity shape:
 
-| Field | Purpose |
-| --- | --- |
-| `id` | Stable category id |
-| `tenantId` | Tenant isolation |
-| `brandCode` | Brand/catalog scope, such as `everhot`, `rheem`, `ruud` |
-| `parentId` | Parent category id; null for root nodes |
-| `code` | Stable operator-facing code within the parent scope |
-| `slug` | Public/path-safe identifier, optional in first phase |
-| `nameCn` | Chinese display name |
-| `nameEn` | English display name, optional |
-| `description` | Operator note |
-| `sortOrder` | Sibling ordering |
-| `status` | `active` / `inactive` |
-| `createdAt` | Creation timestamp |
-| `updatedAt` | Update timestamp |
-| `deletedAt` | Soft delete timestamp |
+| Field         | Purpose                                                 |
+| ------------- | ------------------------------------------------------- |
+| `id`          | Stable category id                                      |
+| `tenantId`    | Tenant isolation                                        |
+| `brandCode`   | Brand/catalog scope, such as `everhot`, `rheem`, `ruud` |
+| `parentId`    | Parent category id; null for root nodes                 |
+| `code`        | Stable operator-facing code within the parent scope     |
+| `slug`        | Public/path-safe identifier, optional in first phase    |
+| `nameCn`      | Chinese display name                                    |
+| `nameEn`      | English display name, optional                          |
+| `description` | Operator note                                           |
+| `sortOrder`   | Sibling ordering                                        |
+| `status`      | `active` / `inactive`                                   |
+| `createdAt`   | Creation timestamp                                      |
+| `updatedAt`   | Update timestamp                                        |
+| `deletedAt`   | Soft delete timestamp                                   |
 
 Recommended product-category binding shape:
 
-| Field | Purpose |
-| --- | --- |
-| `id` | Stable binding id |
-| `tenantId` | Tenant isolation |
-| `productId` | Product catalog record id |
-| `brandCode` | Product brand/catalog scope |
-| `categoryId` | Bound category node id |
-| `role` | `primary` for first phase; leaves room for `secondary`, `featured`, etc. |
-| `sortOrder` | Optional ordering of products within a category |
-| `createdAt` | Creation timestamp |
-| `updatedAt` | Update timestamp |
-| `deletedAt` | Soft delete timestamp |
+| Field        | Purpose                                                                  |
+| ------------ | ------------------------------------------------------------------------ |
+| `id`         | Stable binding id                                                        |
+| `tenantId`   | Tenant isolation                                                         |
+| `productId`  | Product catalog record id                                                |
+| `brandCode`  | Product brand/catalog scope                                              |
+| `categoryId` | Bound category node id                                                   |
+| `role`       | `primary` for first phase; leaves room for `secondary`, `featured`, etc. |
+| `sortOrder`  | Optional ordering of products within a category                          |
+| `createdAt`  | Creation timestamp                                                       |
+| `updatedAt`  | Update timestamp                                                         |
+| `deletedAt`  | Soft delete timestamp                                                    |
 
 The backend may store a denormalized `categoryPath` for compatibility and display, but the source of truth should be the category tree plus binding.
 

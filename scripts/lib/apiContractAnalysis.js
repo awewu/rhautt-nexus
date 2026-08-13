@@ -47,8 +47,15 @@ function detectAxiosBasePath(content, apiName = 'api') {
 function findSiblingServiceBasePath(file, importPath) {
   if (!importPath || !importPath.startsWith('.')) return '';
   const base = path.resolve(path.dirname(file), importPath);
-  const candidates = [base, base + '.js', base + '.jsx', base + '.ts', base + '.tsx', path.join(base, 'index.js')];
-  const target = candidates.find(candidate => fs.existsSync(candidate));
+  const candidates = [
+    base,
+    base + '.js',
+    base + '.jsx',
+    base + '.ts',
+    base + '.tsx',
+    path.join(base, 'index.js'),
+  ];
+  const target = candidates.find((candidate) => fs.existsSync(candidate));
   return target ? detectAxiosBasePath(read(target)) : '';
 }
 
@@ -69,14 +76,16 @@ function extractApiCalls(file, options = {}) {
   const patterns = [
     { kind: 'fetch', regex: /fetch\s*\(\s*['"`]([^'"`]+)['"`]/g },
     { kind: 'axios', regex: /axios\.(get|post|put|patch|delete)\s*\(\s*['"`]([^'"`]+)['"`]/g },
-    { kind: 'api', regex: /\bapi\.(get|post|put|patch|delete)\s*\(\s*['"`]([^'"`]+)['"`]/g }
+    { kind: 'api', regex: /\bapi\.(get|post|put|patch|delete)\s*\(\s*['"`]([^'"`]+)['"`]/g },
   ];
 
   for (const pattern of patterns) {
     let match;
     while ((match = pattern.regex.exec(content))) {
       const raw = match[2] || match[1];
-      const pathValue = normalizeApiPath(raw, { basePath: pattern.kind === 'api' ? apiClientBasePath : '' });
+      const pathValue = normalizeApiPath(raw, {
+        basePath: pattern.kind === 'api' ? apiClientBasePath : '',
+      });
       if (!pathValue) continue;
       calls.push({
         file: options.relativeFile ? options.relativeFile(file) : file,
@@ -86,7 +95,7 @@ function extractApiCalls(file, options = {}) {
         path: pathValue,
         apiClientBasePath,
         dynamicPrefix: /\/$/.test(raw) || /\$\{/.test(raw),
-        line: lineForIndex(content, match.index)
+        line: lineForIndex(content, match.index),
       });
     }
   }

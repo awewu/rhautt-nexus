@@ -7,34 +7,146 @@
   <meta name="description" content="生活热水管、采暖供回水管与干管的推荐流速范围（m/s）。流速过高产生噪声与冲蚀，过低导致管径浪费与滞流。">
   <link rel="stylesheet" href="/packages/tokens/ruud-cn.css">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: var(--brand-font); color: var(--brand-ink); background: var(--brand-surface); line-height: 1.6; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-    header { background: #fff; border-bottom: 1px solid var(--brand-border); position: sticky; top: 0; z-index: 100; }
-    .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
-    .logo { font-size: 24px; font-weight: 800; color: var(--brand-primary); letter-spacing: -0.02em; }
-    .nav-links { display: flex; gap: 24px; align-items: center; }
-    .nav-links a { color: #333; text-decoration: none; font-size: 14px; font-weight: 500; }
-    .nav-links a:hover { color: var(--brand-primary); }
-    .btn { display: inline-flex; align-items: center; padding: 8px 16px; border-radius: var(--brand-radius); font-size: 14px; font-weight: 600; text-decoration: none; }
-    .btn-brand { background: var(--brand-primary); color: #fff; }
-    .btn-brand:hover { background: var(--brand-primary-dk); }
-    .hero { background: #1a1a1a; color: #fff; padding: 96px 0; }
-    .hero h1 { font-size: 48px; font-weight: 800; line-height: 1.15; margin-bottom: 24px; }
-    .hero p { font-size: 18px; opacity: 0.85; max-width: 640px; margin-bottom: 32px; }
-    .section { padding: 80px 0; }
-    .section h2 { font-size: 32px; font-weight: 700; margin-bottom: 16px; }
-    .section p { color: #475569; max-width: 720px; }
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 40px; }
-    .card { background: #fff; border: 1px solid var(--brand-border); border-radius: var(--brand-radius); padding: 24px; }
-    .card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
-    .card p { font-size: 14px; color: #64748b; }
-    .accent-bar { height: 4px; width: 48px; background: var(--brand-accent); margin-bottom: 16px; }
-    footer { background: #1a1a1a; color: #a3a3a3; padding: 48px 0; font-size: 13px; }
-    footer a { color: #d4d4d4; text-decoration: none; }
-    footer a:hover { color: #fff; }
-    .footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px; }
-  
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: var(--brand-font);
+        color: var(--brand-ink);
+        background: var(--brand-surface);
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+      header {
+        background: #fff;
+        border-bottom: 1px solid var(--brand-border);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 64px;
+      }
+      .logo {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--brand-primary);
+        letter-spacing: -0.02em;
+      }
+      .nav-links {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+      }
+      .nav-links a {
+        color: #333;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .nav-links a:hover {
+        color: var(--brand-primary);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 16px;
+        border-radius: var(--brand-radius);
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .btn-brand {
+        background: var(--brand-primary);
+        color: #fff;
+      }
+      .btn-brand:hover {
+        background: var(--brand-primary-dk);
+      }
+      .hero {
+        background: #1a1a1a;
+        color: #fff;
+        padding: 96px 0;
+      }
+      .hero h1 {
+        font-size: 48px;
+        font-weight: 800;
+        line-height: 1.15;
+        margin-bottom: 24px;
+      }
+      .hero p {
+        font-size: 18px;
+        opacity: 0.85;
+        max-width: 640px;
+        margin-bottom: 32px;
+      }
+      .section {
+        padding: 80px 0;
+      }
+      .section h2 {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 16px;
+      }
+      .section p {
+        color: #475569;
+        max-width: 720px;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-top: 40px;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid var(--brand-border);
+        border-radius: var(--brand-radius);
+        padding: 24px;
+      }
+      .card h3 {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .card p {
+        font-size: 14px;
+        color: #64748b;
+      }
+      .accent-bar {
+        height: 4px;
+        width: 48px;
+        background: var(--brand-accent);
+        margin-bottom: 16px;
+      }
+      footer {
+        background: #1a1a1a;
+        color: #a3a3a3;
+        padding: 48px 0;
+        font-size: 13px;
+      }
+      footer a {
+        color: #d4d4d4;
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: #fff;
+      }
+      .footer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 32px;
+      }
+    
     .tech-main { padding: 40px 0 72px; }
     .tech-body { max-width: 860px; }
     .crumb { font-size: 13px; color: #888; margin-bottom: 20px; }
@@ -76,20 +188,20 @@
 </head>
 <body>
 <header>
-    <div class="container nav">
-      <div class="logo">Ruud</div>
-      <nav class="nav-links">
-        <a href="/ruud-cn/products">产品中心</a>
-        <a href="/ruud-cn/solutions">解决方案</a>
-        <a href="/ruud-cn/support">服务支持</a>
-        <a href="/pain-diagnosis.html">瑞诺瓦 AI 问诊</a>
-        <a href="/index-ready.html">瑞合瑞德官网</a>
-        <a href="/rheem-cn/index.html">Rheem</a>
-        <a href="/everhot-cn/index.html">Everhot</a>
-        <a href="/pain-diagnosis.html" class="btn btn-brand">舒适家方案</a>
-      </nav>
-    </div>
-  </header>
+      <div class="container nav">
+        <div class="logo">Ruud</div>
+        <nav class="nav-links">
+          <a href="/ruud-cn/products">产品中心</a>
+          <a href="/ruud-cn/solutions">解决方案</a>
+          <a href="/ruud-cn/support">服务支持</a>
+          <a href="/pain-diagnosis.html">瑞诺瓦 AI 问诊</a>
+          <a href="/index-ready.html">瑞合瑞德官网</a>
+          <a href="/rheem-cn/index.html">Rheem</a>
+          <a href="/everhot-cn/index.html">Everhot</a>
+          <a href="/pain-diagnosis.html" class="btn btn-brand">舒适家方案</a>
+        </nav>
+      </div>
+    </header>
   <section class="hero">
     <div class="container">
       <nav class="crumb"><a href="/">首页</a> / <a href="/tech/">技术标准</a> / <span>管道推荐流速速查（GB 50015 / GB 50736）</span></nav>

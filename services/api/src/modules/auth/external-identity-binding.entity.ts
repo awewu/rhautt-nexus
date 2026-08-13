@@ -8,10 +8,7 @@ import {
 } from 'typeorm';
 
 export type ExternalIdentityBindingStatus =
-  | 'active'
-  | 'inactive'
-  | 'disabled'
-  | 'pending_authorization';
+  'active' | 'inactive' | 'disabled' | 'pending_authorization';
 
 @Entity('auth_external_identity_bindings')
 @Index(['provider', 'issuer', 'subject'], { unique: true })

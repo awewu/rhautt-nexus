@@ -15,7 +15,7 @@ import { Roles } from '../common/roles.decorator';
 export class MdmController {
   constructor(
     private readonly mdm: MdmService,
-    private readonly bus: EventBusService,
+    private readonly bus: EventBusService
   ) {}
 
   /** 注册/更新全局产品主数据（单写收口） */

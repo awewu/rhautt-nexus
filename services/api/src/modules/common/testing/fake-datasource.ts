@@ -22,7 +22,8 @@ function matchesOne(row: Row, where: Record<string, any>): boolean {
   return Object.entries(where).every(([k, v]) => {
     if (v === undefined) return true; // 忽略 undefined（等价于未约束）
     if (v === null) return row[k] === null || row[k] === undefined;
-    if (v && typeof v === 'object' && v._type === 'isNull') return row[k] === null || row[k] === undefined;
+    if (v && typeof v === 'object' && v._type === 'isNull')
+      return row[k] === null || row[k] === undefined;
     return row[k] === v;
   });
 }
@@ -55,13 +56,16 @@ export class InMemoryRepository<T extends Row = Row> {
     return obj;
   }
 
-  async find(opts: { where?: WhereClause; order?: Record<string, 'ASC' | 'DESC'> } = {}): Promise<T[]> {
+  async find(
+    opts: { where?: WhereClause; order?: Record<string, 'ASC' | 'DESC'> } = {}
+  ): Promise<T[]> {
     let out = this.rows.filter((r) => matches(r, opts.where));
     const order = opts.order;
     if (order) {
       const [key, dir] = Object.entries(order)[0];
       out = [...out].sort((a, b) => {
-        const av = a[key]; const bv = b[key];
+        const av = a[key];
+        const bv = b[key];
         if (av === bv) return 0;
         const cmp = av > bv ? 1 : -1;
         return dir === 'DESC' ? -cmp : cmp;
@@ -96,12 +100,24 @@ export class InMemoryRepository<T extends Row = Row> {
 
   createQueryBuilder(): any {
     return {
-      where() { return this; },
-      andWhere() { return this; },
-      orderBy() { return this; },
-      addOrderBy() { return this; },
-      skip() { return this; },
-      take() { return this; },
+      where() {
+        return this;
+      },
+      andWhere() {
+        return this;
+      },
+      orderBy() {
+        return this;
+      },
+      addOrderBy() {
+        return this;
+      },
+      skip() {
+        return this;
+      },
+      take() {
+        return this;
+      },
       getOne: async () => null,
       getManyAndCount: async () => [[], 0],
     };
@@ -126,11 +142,16 @@ export class FakeEntityManager {
   }
   getRepository<T extends Row = Row>(entity: unknown): InMemoryRepository<T> {
     let repo = this.repos.get(entity);
-    if (!repo) { repo = new InMemoryRepository(); this.repos.set(entity, repo); }
+    if (!repo) {
+      repo = new InMemoryRepository();
+      this.repos.set(entity, repo);
+    }
     (repo as any).manager = this;
     return repo as InMemoryRepository<T>;
   }
-  async query(): Promise<any[]> { return []; } // set_config no-op
+  async query(): Promise<any[]> {
+    return [];
+  } // set_config no-op
 }
 
 /**

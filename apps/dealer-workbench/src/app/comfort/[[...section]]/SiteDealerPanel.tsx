@@ -123,7 +123,9 @@ function sameRegionName(source: string, target: string) {
   const cleanSource = trimRegionName(source);
   const cleanTarget = trimRegionName(target);
   if (!cleanSource || !cleanTarget) return false;
-  return cleanSource === cleanTarget || stripRegionSuffix(cleanSource) === stripRegionSuffix(cleanTarget);
+  return (
+    cleanSource === cleanTarget || stripRegionSuffix(cleanSource) === stripRegionSuffix(cleanTarget)
+  );
 }
 
 function uniqueOptions(values: Array<string | undefined | null>) {
@@ -151,7 +153,11 @@ function normalizeCityName(provinceName: string, cityName: string | undefined) {
   return provinceOption?.cities.find((item) => sameRegionName(item.name, clean))?.name || clean;
 }
 
-function normalizeDistrictName(provinceName: string, cityName: string, districtName: string | undefined) {
+function normalizeDistrictName(
+  provinceName: string,
+  cityName: string,
+  districtName: string | undefined
+) {
   const clean = trimRegionName(districtName);
   if (!clean) return '';
   const cityOption = findCityOption(provinceName, cityName);
@@ -226,7 +232,10 @@ export default function SiteDealerPanel({
       .filter((item) => {
         const itemProvince = normalizeProvinceName(item.province);
         const itemCity = normalizeCityName(itemProvince, item.city);
-        return (!draft.province || itemProvince === draft.province) && (!draft.city || itemCity === draft.city);
+        return (
+          (!draft.province || itemProvince === draft.province) &&
+          (!draft.city || itemCity === draft.city)
+        );
       })
       .map((item) => normalizeDistrictName(draft.province, draft.city, item.district));
     return uniqueOptions([...preset, ...existing, draft.district]);

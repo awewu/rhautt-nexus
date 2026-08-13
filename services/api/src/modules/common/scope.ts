@@ -22,7 +22,7 @@ export interface OwnershipScopeUser {
 
 export function ownershipScope(
   user: OwnershipScopeUser,
-  opts: { hasStore?: boolean } = {},
+  opts: { hasStore?: boolean } = {}
 ): { dealerId?: string; storeId?: string } {
   if (opts.hasStore && user.storeId) return { storeId: user.storeId };
   if (user.dealerId) return { dealerId: user.dealerId };

@@ -19,37 +19,45 @@ class NoopRuntimeService {
   getStats() {
     return {
       status: 'not_started',
-      runtimeProfile: 'safe'
+      runtimeProfile: 'safe',
     };
   }
 
   healthCheck() {
     return {
       status: 'not_started',
-      runtimeProfile: 'safe'
+      runtimeProfile: 'safe',
     };
   }
 }
 
 function createSafeRuntimeStubs() {
   return {
-    monitoring: new NoopRuntimeService('monitoring')
+    monitoring: new NoopRuntimeService('monitoring'),
   };
 }
 
 function lazyClassEngine(name, modulePath, options = {}) {
-  return createLazyEngine(name, () => {
-    const EngineClass = require(modulePath);
-    return new EngineClass();
-  }, options);
+  return createLazyEngine(
+    name,
+    () => {
+      const EngineClass = require(modulePath);
+      return new EngineClass();
+    },
+    options
+  );
 }
 
 function lazyNamedClassEngine(name, modulePath, exportName, options = {}) {
-  return createLazyEngine(name, () => {
-    const moduleExports = require(modulePath);
-    const EngineClass = moduleExports[exportName];
-    return new EngineClass();
-  }, options);
+  return createLazyEngine(
+    name,
+    () => {
+      const moduleExports = require(modulePath);
+      const EngineClass = moduleExports[exportName];
+      return new EngineClass();
+    },
+    options
+  );
 }
 
 function lazySingletonEngine(name, modulePath, options = {}) {
@@ -64,9 +72,15 @@ function createBaseProductionEngines() {
     quotation: lazyClassEngine('quotation', '../core/QuotationEngine'),
     quotationV2: lazyClassEngine('quotationV2', '../core/QuotationEngine-v2'),
     calculation: lazyClassEngine('calculation', '../core/CalculationEngine'),
-    oneClickCalculation: lazyClassEngine('oneClickCalculation', '../core/OneClickCalculationEngine'),
+    oneClickCalculation: lazyClassEngine(
+      'oneClickCalculation',
+      '../core/OneClickCalculationEngine'
+    ),
     calculationCache: lazyClassEngine('calculationCache', '../core/CalculationCache'),
-    calculationPerformanceMonitor: lazyClassEngine('calculationPerformanceMonitor', '../core/PerformanceMonitor'),
+    calculationPerformanceMonitor: lazyClassEngine(
+      'calculationPerformanceMonitor',
+      '../core/PerformanceMonitor'
+    ),
     reportGenerator: lazyClassEngine('reportGenerator', '../core/ReportGenerator'),
     threeTier: lazyClassEngine('threeTier', '../core/ThreeTierEngine'),
     exportEngine: lazyClassEngine('exportEngine', '../core/ExportEngine'),
@@ -90,7 +104,10 @@ function createBaseProductionEngines() {
     aiValidation: lazySingletonEngine('aiValidation', '../engines/AIValidationEngine'),
     versionControl: lazyClassEngine('versionControl', '../core/VersionControlEngine'),
     templateEngine: lazyClassEngine('templateEngine', '../engines/TemplateEngine'),
-    aiValidationEngineNew: lazyClassEngine('aiValidationEngineNew', '../engines/AIValidationEngine'),
+    aiValidationEngineNew: lazyClassEngine(
+      'aiValidationEngineNew',
+      '../engines/AIValidationEngine'
+    ),
     econetPricing: lazyClassEngine('econetPricing', '../engines/EconetPricingEngine'),
     feedbackCollector: lazyClassEngine('feedbackCollector', '../core/FeedbackCollector'),
     monitoring: safeRuntime.monitoring,
@@ -104,13 +121,36 @@ function createBaseProductionEngines() {
     marketing: lazyClassEngine('marketing', '../core/MarketingEngine'),
     templateLibrary: lazyClassEngine('templateLibrary', '../core/TemplateLibrary'),
     templateLibraryEngine: lazyClassEngine('templateLibraryEngine', '../core/TemplateLibrary'),
-    aiAccuracyValidator: lazySingletonEngine('aiAccuracyValidator', '../engines/AIValidationEngine'),
+    aiAccuracyValidator: lazySingletonEngine(
+      'aiAccuracyValidator',
+      '../engines/AIValidationEngine'
+    ),
     aiConsultant: lazyClassEngine('aiConsultant', '../core/AIConsultantEngine'),
-    waterSystem: lazyNamedClassEngine('waterSystem', '../core/WaterSystemEngine', 'WaterSystemEngine'),
-    heatingSystem: lazyNamedClassEngine('heatingSystem', '../core/HeatingSystemEngine', 'HeatingSystemEngine'),
-    airConditioning: lazyNamedClassEngine('airConditioning', '../core/AirConditioningEngine', 'AirConditioningEngine'),
-    fiveConstant: lazyNamedClassEngine('fiveConstant', '../core/FiveConstantEngine', 'FiveConstantEngine'),
-    freshAirPro: lazyNamedClassEngine('freshAirPro', '../core/FreshAirProEngine', 'FreshAirProEngine'),
+    waterSystem: lazyNamedClassEngine(
+      'waterSystem',
+      '../core/WaterSystemEngine',
+      'WaterSystemEngine'
+    ),
+    heatingSystem: lazyNamedClassEngine(
+      'heatingSystem',
+      '../core/HeatingSystemEngine',
+      'HeatingSystemEngine'
+    ),
+    airConditioning: lazyNamedClassEngine(
+      'airConditioning',
+      '../core/AirConditioningEngine',
+      'AirConditioningEngine'
+    ),
+    fiveConstant: lazyNamedClassEngine(
+      'fiveConstant',
+      '../core/FiveConstantEngine',
+      'FiveConstantEngine'
+    ),
+    freshAirPro: lazyNamedClassEngine(
+      'freshAirPro',
+      '../core/FreshAirProEngine',
+      'FreshAirProEngine'
+    ),
     pptExport: lazyClassEngine('pptExport', '../engines/PPTExportEngine'),
     standardsLibrary: lazyClassEngine('standardsLibrary', '../core/ProfessionalStandardsLibrary'),
     location: lazyClassEngine('location', '../core/LocationService'),
@@ -120,7 +160,7 @@ function createBaseProductionEngines() {
     houseTypeLibrary: lazyClassEngine('houseTypeLibrary', '../core/HouseTypeLibrary'),
     econetSystem: lazyClassEngine('econetSystem', '../engines/EconetEngine'),
     solutionTemplate: lazySingletonEngine('solutionTemplate', '../engines/SolutionTemplateEngine'),
-    runtimeProfile: 'safe'
+    runtimeProfile: 'safe',
   };
 
   return attachLazyRuntime(engines);
@@ -128,7 +168,9 @@ function createBaseProductionEngines() {
 
 function createFullProductionEngines() {
   const engines = createBaseProductionEngines();
-  engines.monitoring = lazyClassEngine('monitoring', '../core/MonitoringSystem', { runtimeProfile: 'full' });
+  engines.monitoring = lazyClassEngine('monitoring', '../core/MonitoringSystem', {
+    runtimeProfile: 'full',
+  });
   engines.runtimeProfile = 'full';
   return engines;
 }
@@ -141,5 +183,5 @@ function createProductionEngines(options = {}) {
 
 module.exports = {
   createProductionEngines,
-  createFullProductionEngines
+  createFullProductionEngines,
 };

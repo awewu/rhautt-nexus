@@ -13,7 +13,7 @@ const requiredFiles = [
   'server/routes/products.js',
   'services/api/src/modules/auth/auth.controller.ts',
   'services/api/src/modules/module-boundary.ts',
-  'contracts/openapi/rhautt-nexus-v2.openapi.json'
+  'contracts/openapi/rhautt-nexus-v2.openapi.json',
 ];
 const retiredFiles = [
   'server/routes/supreme-api.js',
@@ -28,19 +28,33 @@ const retiredFiles = [
 
 const failures = [];
 for (const relativePath of requiredFiles) {
-  if (!fs.existsSync(path.join(ROOT, relativePath))) failures.push(`missing required file: ${relativePath}`);
+  if (!fs.existsSync(path.join(ROOT, relativePath)))
+    failures.push(`missing required file: ${relativePath}`);
 }
 for (const relativePath of retiredFiles) {
-  if (fs.existsSync(path.join(ROOT, relativePath))) failures.push(`retired file still exists: ${relativePath}`);
+  if (fs.existsSync(path.join(ROOT, relativePath)))
+    failures.push(`retired file still exists: ${relativePath}`);
 }
 
-const catalog = fs.readFileSync(path.join(ROOT, 'server/modules/productionRouteCatalog.js'), 'utf8');
-for (const retiredToken of ['supreme-api', 'revit-integration', '../routes/workflows', '../routes/hotwater', 'econet.routes']) {
-  if (catalog.includes(retiredToken)) failures.push(`production catalog still references: ${retiredToken}`);
+const catalog = fs.readFileSync(
+  path.join(ROOT, 'server/modules/productionRouteCatalog.js'),
+  'utf8'
+);
+for (const retiredToken of [
+  'supreme-api',
+  'revit-integration',
+  '../routes/workflows',
+  '../routes/hotwater',
+  'econet.routes',
+]) {
+  if (catalog.includes(retiredToken))
+    failures.push(`production catalog still references: ${retiredToken}`);
 }
 
-console.log(`System audit: required=${requiredFiles.length}, retired=${retiredFiles.length}, failures=${failures.length}`);
+console.log(
+  `System audit: required=${requiredFiles.length}, retired=${retiredFiles.length}, failures=${failures.length}`
+);
 if (failures.length > 0) {
-  failures.forEach(failure => console.error(`- ${failure}`));
+  failures.forEach((failure) => console.error(`- ${failure}`));
   process.exit(1);
 }

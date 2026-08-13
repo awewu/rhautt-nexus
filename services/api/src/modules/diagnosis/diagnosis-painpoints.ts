@@ -19,12 +19,7 @@ export type PainSeverity = 'high' | 'medium' | 'low';
 
 /** 六大痛点维度 code。 */
 export type PainDimensionKey =
-  | 'temperature'
-  | 'hot_water'
-  | 'air'
-  | 'water'
-  | 'heating_cooling'
-  | 'hassle_free';
+  'temperature' | 'hot_water' | 'air' | 'water' | 'heating_cooling' | 'hassle_free';
 
 export interface PainPoint {
   /** 稳定 id（沿用 Legacy 前缀便于历史数据对齐）。 */
@@ -55,84 +50,430 @@ export const PAIN_DIMENSIONS: PainDimension[] = [
     key: 'temperature',
     name: '温度体感',
     points: [
-      { id: 't_01', name: '上下楼层温差大', systems: ['heating', 'air'], severity: 'high', primary: true, description: '热空气上升导致楼上偏热、楼下偏冷，冬夏体感温差明显。', autoCheck: 'floors >= 2' },
-      { id: 't_02', name: '西晒/落地窗夏热冬冷', systems: ['air', 'heating'], severity: 'high', description: '大面积玻璃或西晒导致夏季午后室温急剧上升、冬季散热快。', autoCheck: 'features.includes("大面积落地窗") || features.includes("西晒")' },
-      { id: 't_03', name: '老人怕空调直吹', systems: ['air'], severity: 'high', primary: true, description: '传统分体空调冷风直吹易引起头痛、关节不适，老人更敏感。', autoCheck: 'hasElderly == true' },
-      { id: 't_04', name: '采暖升温慢/不均', systems: ['heating'], severity: 'medium', description: '暖气片辐射采暖靠近处过热、远离处偏冷，升温慢。', autoCheck: 'hasFloorHeating == false' },
-      { id: 't_05', name: '回南天室内闷热潮湿', systems: ['fresh_air', 'air'], severity: 'medium', description: '梅雨/回南季室内湿度偏高，体感黏腻不适。', autoCheck: 'region in ["华东","华南"]' },
-      { id: 't_06', name: '顶楼/阁楼夏天过热', systems: ['air'], severity: 'high', description: '顶层受日晒影响温度偏高，普通空调降温吃力。', autoCheck: 'propertyType == "顶楼" || propertyType == "阁楼"' },
-      { id: 't_07', name: '空调噪音影响睡眠', systems: ['air'], severity: 'medium', description: '分体空调内外机运行噪音影响夜间休息质量。', autoCheck: 'bedrooms >= 2' },
-      { id: 't_08', name: '温度调节不精准', systems: ['smart_control', 'air'], severity: 'low', description: '传统空调温度波动大，体感忽冷忽热。', autoCheck: 'smartHome == false' },
+      {
+        id: 't_01',
+        name: '上下楼层温差大',
+        systems: ['heating', 'air'],
+        severity: 'high',
+        primary: true,
+        description: '热空气上升导致楼上偏热、楼下偏冷，冬夏体感温差明显。',
+        autoCheck: 'floors >= 2',
+      },
+      {
+        id: 't_02',
+        name: '西晒/落地窗夏热冬冷',
+        systems: ['air', 'heating'],
+        severity: 'high',
+        description: '大面积玻璃或西晒导致夏季午后室温急剧上升、冬季散热快。',
+        autoCheck: 'features.includes("大面积落地窗") || features.includes("西晒")',
+      },
+      {
+        id: 't_03',
+        name: '老人怕空调直吹',
+        systems: ['air'],
+        severity: 'high',
+        primary: true,
+        description: '传统分体空调冷风直吹易引起头痛、关节不适，老人更敏感。',
+        autoCheck: 'hasElderly == true',
+      },
+      {
+        id: 't_04',
+        name: '采暖升温慢/不均',
+        systems: ['heating'],
+        severity: 'medium',
+        description: '暖气片辐射采暖靠近处过热、远离处偏冷，升温慢。',
+        autoCheck: 'hasFloorHeating == false',
+      },
+      {
+        id: 't_05',
+        name: '回南天室内闷热潮湿',
+        systems: ['fresh_air', 'air'],
+        severity: 'medium',
+        description: '梅雨/回南季室内湿度偏高，体感黏腻不适。',
+        autoCheck: 'region in ["华东","华南"]',
+      },
+      {
+        id: 't_06',
+        name: '顶楼/阁楼夏天过热',
+        systems: ['air'],
+        severity: 'high',
+        description: '顶层受日晒影响温度偏高，普通空调降温吃力。',
+        autoCheck: 'propertyType == "顶楼" || propertyType == "阁楼"',
+      },
+      {
+        id: 't_07',
+        name: '空调噪音影响睡眠',
+        systems: ['air'],
+        severity: 'medium',
+        description: '分体空调内外机运行噪音影响夜间休息质量。',
+        autoCheck: 'bedrooms >= 2',
+      },
+      {
+        id: 't_08',
+        name: '温度调节不精准',
+        systems: ['smart_control', 'air'],
+        severity: 'low',
+        description: '传统空调温度波动大，体感忽冷忽热。',
+        autoCheck: 'smartHome == false',
+      },
     ],
   },
   {
     key: 'hot_water',
     name: '热水用水',
     points: [
-      { id: 'h_01', name: '远端龙头放冷水久', systems: ['hot_water'], severity: 'high', primary: true, description: '卫生间距离热水器较远，开水后需排放一段冷水才出热水。', autoCheck: 'bathrooms >= 2' },
-      { id: 'h_02', name: '多点同时用水水温波动', systems: ['hot_water'], severity: 'high', primary: true, description: '两处同时用热水时水温、水压容易波动。', autoCheck: 'bathrooms >= 2 || bathtubs >= 1' },
-      { id: 'h_03', name: '用水高峰水流变小', systems: ['hot_water'], severity: 'medium', description: '早晚高峰多点用水导致水压下降。', autoCheck: 'occupants >= 4' },
-      { id: 'h_04', name: '浴缸放不满就凉了', systems: ['hot_water'], severity: 'high', description: '大浴缸需要持续热水供应，储水式热水器容量吃紧。', autoCheck: 'bathtubs >= 1' },
-      { id: 'h_05', name: '电热水器不够用', systems: ['hot_water'], severity: 'medium', description: '储水式热水器连续多人使用后需等待再加热。', autoCheck: 'occupants >= 4' },
-      { id: 'h_06', name: '热水器占空间', systems: ['hot_water'], severity: 'low', description: '传统储水式热水器体积大，占用阳台/卫生间空间。', autoCheck: 'area < 100' },
-      { id: 'h_07', name: '等热水浪费水', systems: ['hot_water'], severity: 'medium', description: '每次等待热水会排放掉一部分冷水，长期造成浪费。', autoCheck: 'bathrooms >= 2' },
-      { id: 'h_08', name: '热水能耗/费用高', systems: ['hot_water'], severity: 'medium', description: '传统热水方式的能源费用是家庭关注点。' },
+      {
+        id: 'h_01',
+        name: '远端龙头放冷水久',
+        systems: ['hot_water'],
+        severity: 'high',
+        primary: true,
+        description: '卫生间距离热水器较远，开水后需排放一段冷水才出热水。',
+        autoCheck: 'bathrooms >= 2',
+      },
+      {
+        id: 'h_02',
+        name: '多点同时用水水温波动',
+        systems: ['hot_water'],
+        severity: 'high',
+        primary: true,
+        description: '两处同时用热水时水温、水压容易波动。',
+        autoCheck: 'bathrooms >= 2 || bathtubs >= 1',
+      },
+      {
+        id: 'h_03',
+        name: '用水高峰水流变小',
+        systems: ['hot_water'],
+        severity: 'medium',
+        description: '早晚高峰多点用水导致水压下降。',
+        autoCheck: 'occupants >= 4',
+      },
+      {
+        id: 'h_04',
+        name: '浴缸放不满就凉了',
+        systems: ['hot_water'],
+        severity: 'high',
+        description: '大浴缸需要持续热水供应，储水式热水器容量吃紧。',
+        autoCheck: 'bathtubs >= 1',
+      },
+      {
+        id: 'h_05',
+        name: '电热水器不够用',
+        systems: ['hot_water'],
+        severity: 'medium',
+        description: '储水式热水器连续多人使用后需等待再加热。',
+        autoCheck: 'occupants >= 4',
+      },
+      {
+        id: 'h_06',
+        name: '热水器占空间',
+        systems: ['hot_water'],
+        severity: 'low',
+        description: '传统储水式热水器体积大，占用阳台/卫生间空间。',
+        autoCheck: 'area < 100',
+      },
+      {
+        id: 'h_07',
+        name: '等热水浪费水',
+        systems: ['hot_water'],
+        severity: 'medium',
+        description: '每次等待热水会排放掉一部分冷水，长期造成浪费。',
+        autoCheck: 'bathrooms >= 2',
+      },
+      {
+        id: 'h_08',
+        name: '热水能耗/费用高',
+        systems: ['hot_water'],
+        severity: 'medium',
+        description: '传统热水方式的能源费用是家庭关注点。',
+      },
     ],
   },
   {
     key: 'air',
     name: '潮湿/空气',
     points: [
-      { id: 'a_01', name: '地下空间常年潮湿发霉', systems: ['fresh_air'], severity: 'high', description: '地下室因湿气渗透，墙面家具易受潮发霉。', autoCheck: 'basement != "无"' },
-      { id: 'a_02', name: '换季家人易过敏/哮喘', systems: ['fresh_air'], severity: 'high', description: '花粉、尘螨等过敏原引起打喷嚏、呼吸不适。', autoCheck: 'hasAllergy == true' },
-      { id: 'a_03', name: '通风差、闷、易犯困', systems: ['fresh_air'], severity: 'medium', description: '密闭空间空气不流通，久待易头昏乏力。', autoCheck: 'ventilation == "poor"' },
-      { id: 'a_04', name: '宠物/烹饪/装修异味难散', systems: ['fresh_air'], severity: 'medium', description: '异味与有害气体长期滞留室内。', autoCheck: 'hasPet == true || cookingStyle == "重油"' },
-      { id: 'a_05', name: '灰尘大、滤网频繁清洗', systems: ['fresh_air'], severity: 'low', primary: true, description: '灰尘、颗粒物堆积，清洁负担重。', autoCheck: 'airQuality == "poor"' },
-      { id: 'a_06', name: '梅雨季发霉', systems: ['fresh_air'], severity: 'high', primary: true, description: '梅雨季湿度持续偏高，墙面、衣柜、家具易发霉。', autoCheck: 'region in ["华东","华南"]' },
-      { id: 'a_07', name: '冬天过于干燥', systems: ['fresh_air'], severity: 'medium', description: '采暖季室内湿度偏低，皮肤与呼吸道干燥不适。', autoCheck: 'region in ["华北","东北"]' },
-      { id: 'a_08', name: '临街噪音大无法开窗', systems: ['fresh_air'], severity: 'medium', description: '交通噪音导致不便开窗通风，空气质量受影响。', autoCheck: 'nearRoad == true' },
-      { id: 'a_09', name: '装修后担心甲醛', systems: ['fresh_air'], severity: 'high', primary: true, description: '新装修阶段家庭普遍担心甲醛等有害气体。', autoCheck: 'isNewDecoration == true' },
+      {
+        id: 'a_01',
+        name: '地下空间常年潮湿发霉',
+        systems: ['fresh_air'],
+        severity: 'high',
+        description: '地下室因湿气渗透，墙面家具易受潮发霉。',
+        autoCheck: 'basement != "无"',
+      },
+      {
+        id: 'a_02',
+        name: '换季家人易过敏/哮喘',
+        systems: ['fresh_air'],
+        severity: 'high',
+        description: '花粉、尘螨等过敏原引起打喷嚏、呼吸不适。',
+        autoCheck: 'hasAllergy == true',
+      },
+      {
+        id: 'a_03',
+        name: '通风差、闷、易犯困',
+        systems: ['fresh_air'],
+        severity: 'medium',
+        description: '密闭空间空气不流通，久待易头昏乏力。',
+        autoCheck: 'ventilation == "poor"',
+      },
+      {
+        id: 'a_04',
+        name: '宠物/烹饪/装修异味难散',
+        systems: ['fresh_air'],
+        severity: 'medium',
+        description: '异味与有害气体长期滞留室内。',
+        autoCheck: 'hasPet == true || cookingStyle == "重油"',
+      },
+      {
+        id: 'a_05',
+        name: '灰尘大、滤网频繁清洗',
+        systems: ['fresh_air'],
+        severity: 'low',
+        primary: true,
+        description: '灰尘、颗粒物堆积，清洁负担重。',
+        autoCheck: 'airQuality == "poor"',
+      },
+      {
+        id: 'a_06',
+        name: '梅雨季发霉',
+        systems: ['fresh_air'],
+        severity: 'high',
+        primary: true,
+        description: '梅雨季湿度持续偏高，墙面、衣柜、家具易发霉。',
+        autoCheck: 'region in ["华东","华南"]',
+      },
+      {
+        id: 'a_07',
+        name: '冬天过于干燥',
+        systems: ['fresh_air'],
+        severity: 'medium',
+        description: '采暖季室内湿度偏低，皮肤与呼吸道干燥不适。',
+        autoCheck: 'region in ["华北","东北"]',
+      },
+      {
+        id: 'a_08',
+        name: '临街噪音大无法开窗',
+        systems: ['fresh_air'],
+        severity: 'medium',
+        description: '交通噪音导致不便开窗通风，空气质量受影响。',
+        autoCheck: 'nearRoad == true',
+      },
+      {
+        id: 'a_09',
+        name: '装修后担心甲醛',
+        systems: ['fresh_air'],
+        severity: 'high',
+        primary: true,
+        description: '新装修阶段家庭普遍担心甲醛等有害气体。',
+        autoCheck: 'isNewDecoration == true',
+      },
     ],
   },
   {
     key: 'water',
     name: '水质健康',
     points: [
-      { id: 'w_01', name: '水垢多、清洗耗时', systems: ['water_treatment'], severity: 'medium', primary: true, description: '水质偏硬，水壶、龙头、花洒易结垢。', autoCheck: 'waterHardness == "high"' },
-      { id: 'w_02', name: '自来水有余氯/异味', systems: ['water_treatment'], severity: 'medium', description: '自来水存在余氯味，影响饮用与口感。', autoCheck: 'waterTaste == "chlorine"' },
-      { id: 'w_03', name: '母婴用水更想洁净', systems: ['water_treatment'], severity: 'high', description: '家有婴幼儿，对饮用与冲调用水洁净度要求更高。', autoCheck: 'hasInfant == true' },
-      { id: 'w_04', name: '花洒喷头易堵塞', systems: ['water_treatment'], severity: 'medium', description: '水垢堵塞花洒喷孔，出水不均。', autoCheck: 'waterHardness == "high"' },
-      { id: 'w_05', name: '桶装水换水麻烦占地', systems: ['water_treatment'], severity: 'low', description: '频繁换水费力，水桶占空间。', autoCheck: 'waterSource == "barrel"' },
-      { id: 'w_06', name: '洗漱后皮肤干燥', systems: ['water_treatment'], severity: 'low', description: '硬水洗后皮肤紧绷、起泡少。', autoCheck: 'waterHardness == "high"' },
-      { id: 'w_07', name: '衣物洗后发黄变硬', systems: ['water_treatment'], severity: 'low', description: '硬水洗涤易使衣物发黄、纤维变硬。', autoCheck: 'waterHardness == "high"' },
-      { id: 'w_08', name: '厨房用水安全担忧', systems: ['water_treatment'], severity: 'medium', description: '洗菜做饭用水安全是家庭关注点。', autoCheck: 'hasInfant == true || hasElderly == true' },
+      {
+        id: 'w_01',
+        name: '水垢多、清洗耗时',
+        systems: ['water_treatment'],
+        severity: 'medium',
+        primary: true,
+        description: '水质偏硬，水壶、龙头、花洒易结垢。',
+        autoCheck: 'waterHardness == "high"',
+      },
+      {
+        id: 'w_02',
+        name: '自来水有余氯/异味',
+        systems: ['water_treatment'],
+        severity: 'medium',
+        description: '自来水存在余氯味，影响饮用与口感。',
+        autoCheck: 'waterTaste == "chlorine"',
+      },
+      {
+        id: 'w_03',
+        name: '母婴用水更想洁净',
+        systems: ['water_treatment'],
+        severity: 'high',
+        description: '家有婴幼儿，对饮用与冲调用水洁净度要求更高。',
+        autoCheck: 'hasInfant == true',
+      },
+      {
+        id: 'w_04',
+        name: '花洒喷头易堵塞',
+        systems: ['water_treatment'],
+        severity: 'medium',
+        description: '水垢堵塞花洒喷孔，出水不均。',
+        autoCheck: 'waterHardness == "high"',
+      },
+      {
+        id: 'w_05',
+        name: '桶装水换水麻烦占地',
+        systems: ['water_treatment'],
+        severity: 'low',
+        description: '频繁换水费力，水桶占空间。',
+        autoCheck: 'waterSource == "barrel"',
+      },
+      {
+        id: 'w_06',
+        name: '洗漱后皮肤干燥',
+        systems: ['water_treatment'],
+        severity: 'low',
+        description: '硬水洗后皮肤紧绷、起泡少。',
+        autoCheck: 'waterHardness == "high"',
+      },
+      {
+        id: 'w_07',
+        name: '衣物洗后发黄变硬',
+        systems: ['water_treatment'],
+        severity: 'low',
+        description: '硬水洗涤易使衣物发黄、纤维变硬。',
+        autoCheck: 'waterHardness == "high"',
+      },
+      {
+        id: 'w_08',
+        name: '厨房用水安全担忧',
+        systems: ['water_treatment'],
+        severity: 'medium',
+        description: '洗菜做饭用水安全是家庭关注点。',
+        autoCheck: 'hasInfant == true || hasElderly == true',
+      },
     ],
   },
   {
     key: 'heating_cooling',
     name: '采暖/空调',
     points: [
-      { id: 'c_01', name: '暖气片占空间不美观', systems: ['heating'], severity: 'medium', description: '暖气片占用墙面，影响家具摆放与美观。', autoCheck: 'heatingType == "radiator"' },
-      { id: 'c_02', name: '空调外机位不够', systems: ['air'], severity: 'high', description: '外机位有限，难以安装多台分体空调。', autoCheck: 'propertyType == "公寓"' },
-      { id: 'c_03', name: '中央空调噪音', systems: ['air'], severity: 'medium', description: '部分中央空调运行噪音影响休息。', autoCheck: 'hasCentralAC == true' },
-      { id: 'c_04', name: '地暖维修困难', systems: ['heating'], severity: 'medium', description: '地暖管道问题可能需破坏地面，维修成本高。', autoCheck: 'hasFloorHeating == true' },
-      { id: 'c_05', name: '长期吹空调不适', systems: ['air', 'fresh_air'], severity: 'medium', description: '长期直吹空调易引起干燥、头痛等不适。', autoCheck: 'acUsage == "high"' },
-      { id: 'c_06', name: '冬季制热效果差', systems: ['heating'], severity: 'high', primary: true, description: '低温环境下普通空调制热能力下降。', autoCheck: 'region in ["华北","东北"]' },
-      { id: 'c_07', name: '空调吹出灰尘/异味', systems: ['air', 'fresh_air'], severity: 'medium', description: '空调内部积灰后出风有异味。', autoCheck: 'acAge > 3' },
-      { id: 'c_08', name: '外机滴水影响邻居', systems: ['air'], severity: 'low', description: '多台外机冷凝水滴落，影响楼下。', autoCheck: 'propertyType == "公寓"' },
+      {
+        id: 'c_01',
+        name: '暖气片占空间不美观',
+        systems: ['heating'],
+        severity: 'medium',
+        description: '暖气片占用墙面，影响家具摆放与美观。',
+        autoCheck: 'heatingType == "radiator"',
+      },
+      {
+        id: 'c_02',
+        name: '空调外机位不够',
+        systems: ['air'],
+        severity: 'high',
+        description: '外机位有限，难以安装多台分体空调。',
+        autoCheck: 'propertyType == "公寓"',
+      },
+      {
+        id: 'c_03',
+        name: '中央空调噪音',
+        systems: ['air'],
+        severity: 'medium',
+        description: '部分中央空调运行噪音影响休息。',
+        autoCheck: 'hasCentralAC == true',
+      },
+      {
+        id: 'c_04',
+        name: '地暖维修困难',
+        systems: ['heating'],
+        severity: 'medium',
+        description: '地暖管道问题可能需破坏地面，维修成本高。',
+        autoCheck: 'hasFloorHeating == true',
+      },
+      {
+        id: 'c_05',
+        name: '长期吹空调不适',
+        systems: ['air', 'fresh_air'],
+        severity: 'medium',
+        description: '长期直吹空调易引起干燥、头痛等不适。',
+        autoCheck: 'acUsage == "high"',
+      },
+      {
+        id: 'c_06',
+        name: '冬季制热效果差',
+        systems: ['heating'],
+        severity: 'high',
+        primary: true,
+        description: '低温环境下普通空调制热能力下降。',
+        autoCheck: 'region in ["华北","东北"]',
+      },
+      {
+        id: 'c_07',
+        name: '空调吹出灰尘/异味',
+        systems: ['air', 'fresh_air'],
+        severity: 'medium',
+        description: '空调内部积灰后出风有异味。',
+        autoCheck: 'acAge > 3',
+      },
+      {
+        id: 'c_08',
+        name: '外机滴水影响邻居',
+        systems: ['air'],
+        severity: 'low',
+        description: '多台外机冷凝水滴落，影响楼下。',
+        autoCheck: 'propertyType == "公寓"',
+      },
     ],
   },
   {
     key: 'hassle_free',
     name: '省心/智能/总包',
     points: [
-      { id: 's_01', name: '多品牌售后互相推诿', systems: ['smart_control'], severity: 'high', primary: true, description: '多家供应商协调困难、责任不清。', autoCheck: 'multiBrand == true' },
-      { id: 's_02', name: '隐蔽工程漏水/结露', systems: ['smart_control'], severity: 'high', description: '管路设计不当，后期维修需破坏装修。', autoCheck: 'hasLeakHistory == true' },
-      { id: 's_03', name: '设备无智能联动', systems: ['smart_control'], severity: 'medium', description: '各系统独立运行，需手动逐个操作。', autoCheck: 'smartHome == false' },
-      { id: 's_04', name: '担心能耗高', systems: ['smart_control'], severity: 'high', primary: true, description: '能源费用是长期使用的关注点。', autoCheck: 'energyCostConcern == true' },
-      { id: 's_05', name: '怕施工增项超预算', systems: ['smart_control'], severity: 'medium', description: '担心施工过程不断增项、最终超预算。', autoCheck: 'budgetStrict == true' },
-      { id: 's_06', name: '怕管路设计出错', systems: ['smart_control'], severity: 'medium', description: '担心隐蔽工程设计不合理，影响后期使用。', autoCheck: 'firstTimeOwner == true' },
-      { id: 's_07', name: '后期维护麻烦', systems: ['smart_control'], severity: 'medium', description: '多品牌设备维护需联系不同厂家，响应慢。', autoCheck: 'busyOwner == true' },
+      {
+        id: 's_01',
+        name: '多品牌售后互相推诿',
+        systems: ['smart_control'],
+        severity: 'high',
+        primary: true,
+        description: '多家供应商协调困难、责任不清。',
+        autoCheck: 'multiBrand == true',
+      },
+      {
+        id: 's_02',
+        name: '隐蔽工程漏水/结露',
+        systems: ['smart_control'],
+        severity: 'high',
+        description: '管路设计不当，后期维修需破坏装修。',
+        autoCheck: 'hasLeakHistory == true',
+      },
+      {
+        id: 's_03',
+        name: '设备无智能联动',
+        systems: ['smart_control'],
+        severity: 'medium',
+        description: '各系统独立运行，需手动逐个操作。',
+        autoCheck: 'smartHome == false',
+      },
+      {
+        id: 's_04',
+        name: '担心能耗高',
+        systems: ['smart_control'],
+        severity: 'high',
+        primary: true,
+        description: '能源费用是长期使用的关注点。',
+        autoCheck: 'energyCostConcern == true',
+      },
+      {
+        id: 's_05',
+        name: '怕施工增项超预算',
+        systems: ['smart_control'],
+        severity: 'medium',
+        description: '担心施工过程不断增项、最终超预算。',
+        autoCheck: 'budgetStrict == true',
+      },
+      {
+        id: 's_06',
+        name: '怕管路设计出错',
+        systems: ['smart_control'],
+        severity: 'medium',
+        description: '担心隐蔽工程设计不合理，影响后期使用。',
+        autoCheck: 'firstTimeOwner == true',
+      },
+      {
+        id: 's_07',
+        name: '后期维护麻烦',
+        systems: ['smart_control'],
+        severity: 'medium',
+        description: '多品牌设备维护需联系不同厂家，响应慢。',
+        autoCheck: 'busyOwner == true',
+      },
     ],
   },
 ];
@@ -146,26 +487,92 @@ export interface ImplicitRule {
 }
 
 export const IMPLICIT_RULES: ImplicitRule[] = [
-  { pattern: { propertyType: ['独栋', '叠拼', '联排'] }, recommend: ['t_01', 't_02'], strength: 'high', reason: '多层户型常见楼层温差与采光问题' },
-  { pattern: { features: ['西晒'] }, recommend: ['t_02'], strength: 'high', reason: '西晒易致夏季过热' },
-  { pattern: { features: ['大面积落地窗'] }, recommend: ['t_02', 't_06'], strength: 'high', reason: '大面积玻璃易致夏热冬冷' },
-  { pattern: { hasElderly: true }, recommend: ['t_03', 'h_04', 'w_03'], strength: 'high', reason: '老人对温度、热水与用水洁净更敏感' },
-  { pattern: { hasInfant: true }, recommend: ['t_03', 'w_03', 'a_02'], strength: 'high', reason: '婴幼儿需要舒适温度、洁净用水与空气' },
-  { pattern: { bathrooms: 3 }, recommend: ['h_01', 'h_02', 'h_04'], strength: 'high', reason: '多卫生间需要稳定热水供应' },
-  { pattern: { bathtubs: 1 }, recommend: ['h_04'], strength: 'medium', reason: '浴缸需要大流量持续热水' },
-  { pattern: { occupants: 5 }, recommend: ['h_02', 'h_05'], strength: 'medium', reason: '多人口家庭热水需求大' },
-  { pattern: { basement: ['1层', '2层'] }, recommend: ['a_01', 'a_06'], strength: 'high', reason: '地下空间常见潮湿问题' },
-  { pattern: { region: '华东' }, recommend: ['a_06', 't_05'], strength: 'medium', reason: '华东梅雨季潮湿闷热' },
-  { pattern: { isNewDecoration: true }, recommend: ['a_09', 'w_03'], strength: 'high', reason: '新装修阶段关注除醛与净水' },
-  { pattern: { multiBrand: true }, recommend: ['s_01', 's_07'], strength: 'high', reason: '多品牌设备售后复杂' },
-  { pattern: { budgetStrict: true }, recommend: ['s_04', 's_05'], strength: 'medium', reason: '预算敏感，关注能耗与增项' },
+  {
+    pattern: { propertyType: ['独栋', '叠拼', '联排'] },
+    recommend: ['t_01', 't_02'],
+    strength: 'high',
+    reason: '多层户型常见楼层温差与采光问题',
+  },
+  {
+    pattern: { features: ['西晒'] },
+    recommend: ['t_02'],
+    strength: 'high',
+    reason: '西晒易致夏季过热',
+  },
+  {
+    pattern: { features: ['大面积落地窗'] },
+    recommend: ['t_02', 't_06'],
+    strength: 'high',
+    reason: '大面积玻璃易致夏热冬冷',
+  },
+  {
+    pattern: { hasElderly: true },
+    recommend: ['t_03', 'h_04', 'w_03'],
+    strength: 'high',
+    reason: '老人对温度、热水与用水洁净更敏感',
+  },
+  {
+    pattern: { hasInfant: true },
+    recommend: ['t_03', 'w_03', 'a_02'],
+    strength: 'high',
+    reason: '婴幼儿需要舒适温度、洁净用水与空气',
+  },
+  {
+    pattern: { bathrooms: 3 },
+    recommend: ['h_01', 'h_02', 'h_04'],
+    strength: 'high',
+    reason: '多卫生间需要稳定热水供应',
+  },
+  {
+    pattern: { bathtubs: 1 },
+    recommend: ['h_04'],
+    strength: 'medium',
+    reason: '浴缸需要大流量持续热水',
+  },
+  {
+    pattern: { occupants: 5 },
+    recommend: ['h_02', 'h_05'],
+    strength: 'medium',
+    reason: '多人口家庭热水需求大',
+  },
+  {
+    pattern: { basement: ['1层', '2层'] },
+    recommend: ['a_01', 'a_06'],
+    strength: 'high',
+    reason: '地下空间常见潮湿问题',
+  },
+  {
+    pattern: { region: '华东' },
+    recommend: ['a_06', 't_05'],
+    strength: 'medium',
+    reason: '华东梅雨季潮湿闷热',
+  },
+  {
+    pattern: { isNewDecoration: true },
+    recommend: ['a_09', 'w_03'],
+    strength: 'high',
+    reason: '新装修阶段关注除醛与净水',
+  },
+  {
+    pattern: { multiBrand: true },
+    recommend: ['s_01', 's_07'],
+    strength: 'high',
+    reason: '多品牌设备售后复杂',
+  },
+  {
+    pattern: { budgetStrict: true },
+    recommend: ['s_04', 's_05'],
+    strength: 'medium',
+    reason: '预算敏感，关注能耗与增项',
+  },
 ];
 
 // ── 索引与工具 ──────────────────────────────────────────────────────────
 
 const POINT_INDEX: Map<string, { point: PainPoint; dimension: PainDimension }> = (() => {
   const m = new Map<string, { point: PainPoint; dimension: PainDimension }>();
-  for (const dim of PAIN_DIMENSIONS) for (const p of dim.points) m.set(p.id, { point: p, dimension: dim });
+  for (const dim of PAIN_DIMENSIONS)
+    for (const p of dim.points) m.set(p.id, { point: p, dimension: dim });
   return m;
 })();
 
@@ -187,7 +594,10 @@ export function listPainPoints(): PainPoint[] {
  * 支持：字段 ==/!= "字符串" 或 数字、>/</>=/<=、features.includes("x")、region in ["a","b"]、|| 组合。
  * 无法解析或缺字段一律返回 false（不抛错），保证渐进问诊稳健。
  */
-export function evaluatePainCondition(condition: string | undefined, profile: Record<string, any> = {}): boolean {
+export function evaluatePainCondition(
+  condition: string | undefined,
+  profile: Record<string, any> = {}
+): boolean {
   if (!condition) return false;
   // 支持顶层 || 组合（V3 里出现的唯一逻辑连接）。
   if (condition.includes('||')) {
@@ -201,7 +611,10 @@ export function evaluatePainCondition(condition: string | undefined, profile: Re
     }
     const inMatch = condition.match(/(\w+)\s+in\s+\[(.+?)\]/);
     if (inMatch) {
-      const opts = inMatch[2].replace(/"/g, '').split(',').map((s) => s.trim());
+      const opts = inMatch[2]
+        .replace(/"/g, '')
+        .split(',')
+        .map((s) => s.trim());
       return opts.includes(String(profile[inMatch[1]]));
     }
     const ops: { re: RegExp; fn: (a: any, b: string) => boolean }[] = [
@@ -234,7 +647,11 @@ export function primaryPainPoints(): PainPoint[] {
 }
 
 /** 「继续补充细节」折叠区的次级痛点，按维度分组。 */
-export function secondaryPainPointsByDimension(): { key: PainDimensionKey; name: string; points: PainPoint[] }[] {
+export function secondaryPainPointsByDimension(): {
+  key: PainDimensionKey;
+  name: string;
+  points: PainPoint[];
+}[] {
   return PAIN_DIMENSIONS.map((d) => ({
     key: d.key,
     name: d.name,
@@ -243,7 +660,9 @@ export function secondaryPainPointsByDimension(): { key: PainDimensionKey; name:
 }
 
 /** 户型自动勾选：命中 autoCheck 条件的痛点 id + 说明（像医生按体检数据提示）。 */
-export function autoDetectPainPoints(profile: Record<string, any> = {}): { id: string; name: string; reason: string }[] {
+export function autoDetectPainPoints(
+  profile: Record<string, any> = {}
+): { id: string; name: string; reason: string }[] {
   const out: { id: string; name: string; reason: string }[] = [];
   for (const p of listPainPoints()) {
     if (p.autoCheck && evaluatePainCondition(p.autoCheck, profile)) {
@@ -258,7 +677,9 @@ function matchPattern(profile: Record<string, any>, pattern: Record<string, unkn
     const expected = pattern[key];
     const actual = profile[key];
     if (Array.isArray(expected)) {
-      return Array.isArray(actual) ? actual.some((v) => (expected as unknown[]).includes(v)) : (expected as unknown[]).includes(actual);
+      return Array.isArray(actual)
+        ? actual.some((v) => (expected as unknown[]).includes(v))
+        : (expected as unknown[]).includes(actual);
     }
     return actual === expected;
   });
@@ -270,11 +691,17 @@ function matchPattern(profile: Record<string, any>, pattern: Record<string, unkn
  */
 export function inferImplicitPainPoints(
   profile: Record<string, any> = {},
-  selectedIds: string[] = [],
+  selectedIds: string[] = []
 ): { id: string; name: string; systems: SystemCode[]; reason: string; strength: PainSeverity }[] {
   const selected = new Set(selectedIds);
   const seen = new Set<string>();
-  const out: { id: string; name: string; systems: SystemCode[]; reason: string; strength: PainSeverity }[] = [];
+  const out: {
+    id: string;
+    name: string;
+    systems: SystemCode[];
+    reason: string;
+    strength: PainSeverity;
+  }[] = [];
   for (const rule of IMPLICIT_RULES) {
     if (!matchPattern(profile, rule.pattern)) continue;
     for (const id of rule.recommend) {
@@ -282,7 +709,13 @@ export function inferImplicitPainPoints(
       const p = findPainPoint(id);
       if (!p) continue;
       seen.add(id);
-      out.push({ id, name: p.name, systems: p.systems, reason: rule.reason, strength: rule.strength });
+      out.push({
+        id,
+        name: p.name,
+        systems: p.systems,
+        reason: rule.reason,
+        strength: rule.strength,
+      });
     }
   }
   const order: Record<PainSeverity, number> = { high: 0, medium: 1, low: 2 };
@@ -303,7 +736,9 @@ const DIMENSION_QUESTIONS: Record<PainDimensionKey, string> = {
  * 渐进式下一问：给出「尚未覆盖」的第一个维度的引导问题。
  * 已覆盖 = 该维度已有痛点被选中/命中。全覆盖返回 null（可进入归纳）。
  */
-export function progressiveNextQuestion(coveredPainIds: string[] = []): { dimension: PainDimensionKey; question: string } | null {
+export function progressiveNextQuestion(
+  coveredPainIds: string[] = []
+): { dimension: PainDimensionKey; question: string } | null {
   const covered = new Set(coveredPainIds);
   for (const dim of PAIN_DIMENSIONS) {
     const touched = dim.points.some((p) => covered.has(p.id));
@@ -332,8 +767,18 @@ export function painPointsToGeoQuestions(ids: string[] = []): GeoQuestionSeed[] 
     const p = findPainPoint(key) ?? NAME_INDEX.get(key) ?? null;
     if (!p || seen.has(p.id)) continue;
     seen.add(p.id);
-    out.push({ stage: 'pre', painId: p.id, systems: p.systems, question: `${p.name}怎么解决？有哪些舒适系统方案值得推荐？` });
-    out.push({ stage: 'mid', painId: p.id, systems: p.systems, question: `解决${p.name}，主流品牌怎么选、如何对比更靠谱？` });
+    out.push({
+      stage: 'pre',
+      painId: p.id,
+      systems: p.systems,
+      question: `${p.name}怎么解决？有哪些舒适系统方案值得推荐？`,
+    });
+    out.push({
+      stage: 'mid',
+      painId: p.id,
+      systems: p.systems,
+      question: `解决${p.name}，主流品牌怎么选、如何对比更靠谱？`,
+    });
   }
   return out;
 }

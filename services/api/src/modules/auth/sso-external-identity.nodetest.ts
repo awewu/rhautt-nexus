@@ -37,7 +37,9 @@ function user(overrides: Partial<UserEntity> = {}): UserEntity {
   } as UserEntity;
 }
 
-function binding(overrides: Partial<ExternalIdentityBindingEntity> = {}): ExternalIdentityBindingEntity {
+function binding(
+  overrides: Partial<ExternalIdentityBindingEntity> = {}
+): ExternalIdentityBindingEntity {
   return {
     id: 'binding-001',
     provider: IDENTITY.provider,
@@ -59,11 +61,11 @@ function fixture(
   options: {
     users?: UserEntity[];
     bindings?: ExternalIdentityBindingEntity[];
-  } = {},
+  } = {}
 ) {
   const users = new InMemoryRepository<UserEntity>().seed(...(options.users ?? [user()]));
   const bindings = new InMemoryRepository<ExternalIdentityBindingEntity>().seed(
-    ...(options.bindings ?? [binding()]),
+    ...(options.bindings ?? [binding()])
   );
   const { ds } = makeFakeDataSource([
     [UserEntity, users],
@@ -148,7 +150,8 @@ test('SSO auto-provision does not use a role label as display name', async () =>
     if (previous.OIDC_DEV_AUTO_PROVISION_TENANT_CODE === undefined) {
       delete process.env.OIDC_DEV_AUTO_PROVISION_TENANT_CODE;
     } else {
-      process.env.OIDC_DEV_AUTO_PROVISION_TENANT_CODE = previous.OIDC_DEV_AUTO_PROVISION_TENANT_CODE;
+      process.env.OIDC_DEV_AUTO_PROVISION_TENANT_CODE =
+        previous.OIDC_DEV_AUTO_PROVISION_TENANT_CODE;
     }
   }
 });
@@ -217,7 +220,8 @@ test('local dev auto-provision creates an active platform admin binding when exp
     if (previous.OIDC_DEV_AUTO_PROVISION_TENANT_CODE === undefined) {
       delete process.env.OIDC_DEV_AUTO_PROVISION_TENANT_CODE;
     } else {
-      process.env.OIDC_DEV_AUTO_PROVISION_TENANT_CODE = previous.OIDC_DEV_AUTO_PROVISION_TENANT_CODE;
+      process.env.OIDC_DEV_AUTO_PROVISION_TENANT_CODE =
+        previous.OIDC_DEV_AUTO_PROVISION_TENANT_CODE;
     }
   }
 });
@@ -226,7 +230,8 @@ test('production auto-provision creates an active user only for allowed email do
   const previous = {
     NODE_ENV: process.env.NODE_ENV,
     OIDC_AUTO_PROVISION_ENABLED: process.env.OIDC_AUTO_PROVISION_ENABLED,
-    OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS: process.env.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS,
+    OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS:
+      process.env.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS,
     OIDC_AUTO_PROVISION_TENANT_CODE: process.env.OIDC_AUTO_PROVISION_TENANT_CODE,
     OIDC_AUTO_PROVISION_ROLE_MAP: process.env.OIDC_AUTO_PROVISION_ROLE_MAP,
     PII_ENCRYPTION_KEY: process.env.PII_ENCRYPTION_KEY,
@@ -235,8 +240,10 @@ test('production auto-provision creates an active user only for allowed email do
   process.env.OIDC_AUTO_PROVISION_ENABLED = 'true';
   process.env.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS = 'rhenext.com';
   process.env.OIDC_AUTO_PROVISION_TENANT_CODE = 'DEFAULT';
-  process.env.OIDC_AUTO_PROVISION_ROLE_MAP = 'owner:platform_admin,admin:platform_admin,employee:hq_admin';
-  process.env.PII_ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+  process.env.OIDC_AUTO_PROVISION_ROLE_MAP =
+    'owner:platform_admin,admin:platform_admin,employee:hq_admin';
+  process.env.PII_ENCRYPTION_KEY =
+    '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
   try {
     const f = fixture({ users: [], bindings: [] });
@@ -259,7 +266,8 @@ test('production auto-provision creates an active user only for allowed email do
   } finally {
     if (previous.NODE_ENV === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = previous.NODE_ENV;
-    if (previous.OIDC_AUTO_PROVISION_ENABLED === undefined) delete process.env.OIDC_AUTO_PROVISION_ENABLED;
+    if (previous.OIDC_AUTO_PROVISION_ENABLED === undefined)
+      delete process.env.OIDC_AUTO_PROVISION_ENABLED;
     else process.env.OIDC_AUTO_PROVISION_ENABLED = previous.OIDC_AUTO_PROVISION_ENABLED;
     if (previous.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS === undefined) {
       delete process.env.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS;
@@ -289,7 +297,8 @@ test('production auto-provision leaves untrusted email domains pending', async (
   const previous = {
     NODE_ENV: process.env.NODE_ENV,
     OIDC_AUTO_PROVISION_ENABLED: process.env.OIDC_AUTO_PROVISION_ENABLED,
-    OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS: process.env.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS,
+    OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS:
+      process.env.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS,
     OIDC_AUTO_PROVISION_TENANT_CODE: process.env.OIDC_AUTO_PROVISION_TENANT_CODE,
   };
   process.env.NODE_ENV = 'production';
@@ -315,7 +324,8 @@ test('production auto-provision leaves untrusted email domains pending', async (
   } finally {
     if (previous.NODE_ENV === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = previous.NODE_ENV;
-    if (previous.OIDC_AUTO_PROVISION_ENABLED === undefined) delete process.env.OIDC_AUTO_PROVISION_ENABLED;
+    if (previous.OIDC_AUTO_PROVISION_ENABLED === undefined)
+      delete process.env.OIDC_AUTO_PROVISION_ENABLED;
     else process.env.OIDC_AUTO_PROVISION_ENABLED = previous.OIDC_AUTO_PROVISION_ENABLED;
     if (previous.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS === undefined) {
       delete process.env.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS;
@@ -335,7 +345,8 @@ test('production auto-provision activates an existing pending binding', async ()
   const previous = {
     NODE_ENV: process.env.NODE_ENV,
     OIDC_AUTO_PROVISION_ENABLED: process.env.OIDC_AUTO_PROVISION_ENABLED,
-    OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS: process.env.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS,
+    OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS:
+      process.env.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS,
     OIDC_AUTO_PROVISION_TENANT_CODE: process.env.OIDC_AUTO_PROVISION_TENANT_CODE,
     PII_ENCRYPTION_KEY: process.env.PII_ENCRYPTION_KEY,
   };
@@ -343,7 +354,8 @@ test('production auto-provision activates an existing pending binding', async ()
   process.env.OIDC_AUTO_PROVISION_ENABLED = 'true';
   process.env.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS = 'rhenext.com';
   process.env.OIDC_AUTO_PROVISION_TENANT_CODE = 'DEFAULT';
-  process.env.PII_ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+  process.env.PII_ENCRYPTION_KEY =
+    '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 
   try {
     const f = fixture({
@@ -366,7 +378,8 @@ test('production auto-provision activates an existing pending binding', async ()
   } finally {
     if (previous.NODE_ENV === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = previous.NODE_ENV;
-    if (previous.OIDC_AUTO_PROVISION_ENABLED === undefined) delete process.env.OIDC_AUTO_PROVISION_ENABLED;
+    if (previous.OIDC_AUTO_PROVISION_ENABLED === undefined)
+      delete process.env.OIDC_AUTO_PROVISION_ENABLED;
     else process.env.OIDC_AUTO_PROVISION_ENABLED = previous.OIDC_AUTO_PROVISION_ENABLED;
     if (previous.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS === undefined) {
       delete process.env.OIDC_AUTO_PROVISION_ALLOWED_EMAIL_DOMAINS;
@@ -391,13 +404,13 @@ test('inactive or disabled bindings fail closed', async () => {
   const inactive = fixture({ bindings: [binding({ status: 'inactive' })] });
   await assert.rejects(
     () => inactive.service.resolveVerifiedIdentity(IDENTITY),
-    /SSO external identity binding is not active/,
+    /SSO external identity binding is not active/
   );
 
   const disabled = fixture({ bindings: [binding({ status: 'disabled' })] });
   await assert.rejects(
     () => disabled.service.resolveVerifiedIdentity(IDENTITY),
-    /SSO external identity binding is not active/,
+    /SSO external identity binding is not active/
   );
 });
 

@@ -24,7 +24,11 @@ export class GtmOkrEntity {
   @Column({ type: 'varchar', nullable: true }) owner: string | null;
   @Column({ name: 'bu_ref', type: 'varchar', nullable: true }) buRef: string | null;
   @Column() objective: string;
-  @Column({ name: 'key_results', type: 'jsonb', default: () => "'[]'::jsonb" }) keyResults: Array<{ kr: string; target?: number; current?: number }>;
+  @Column({ name: 'key_results', type: 'jsonb', default: () => "'[]'::jsonb" }) keyResults: Array<{
+    kr: string;
+    target?: number;
+    current?: number;
+  }>;
   @Column({ type: 'numeric', default: 0 }) progress: number;
   @Column({ type: 'varchar', nullable: true }) period: string | null;
   @Column({ name: 'created_at', type: 'timestamptz', default: () => 'now()' }) createdAt: Date;

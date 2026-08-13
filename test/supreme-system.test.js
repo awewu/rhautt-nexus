@@ -18,7 +18,7 @@ const testStats = {
   total: 30,
   passed: 0,
   failed: 0,
-  details: []
+  details: [],
 };
 
 // 辅助函数
@@ -55,7 +55,7 @@ function assertNotNull(value, message) {
 
 // ==================== 测试开始 ====================
 console.log('\n🧪 瑞美极致系统 - 闭环数据测试 (30组)\n');
-console.log('=' .repeat(50));
+console.log('='.repeat(50));
 
 // 初始化引擎
 const smartBrain = new SmartBrainEngine();
@@ -74,7 +74,7 @@ test('T01: 能源调度-白天太阳能优先', () => {
     gasPrice: 3.0,
     outdoorTemp: 20,
     loadDemand: 15,
-    timeOfDay: 'day'
+    timeOfDay: 'day',
   };
   const result = smartBrain.optimizeEnergySchedule(input);
   assertTrue(result.schedule.length > 0, '应有调度方案');
@@ -88,7 +88,7 @@ test('T02: 能源调度-夜间谷电模式', () => {
     gasPrice: 3.0,
     outdoorTemp: 5,
     loadDemand: 12,
-    timeOfDay: 'night'
+    timeOfDay: 'night',
   };
   const result = smartBrain.optimizeEnergySchedule(input);
   assertTrue(parseFloat(result.totalCost) > 0, '应有成本计算');
@@ -101,10 +101,13 @@ test('T03: 能源调度-极寒天气(-10℃)', () => {
     gasPrice: 3.0,
     outdoorTemp: -10,
     loadDemand: 20,
-    timeOfDay: 'day'
+    timeOfDay: 'day',
   };
   const result = smartBrain.optimizeEnergySchedule(input);
-  assertTrue(result.schedule.some(s => s.source === 'gas'), '极寒应使用燃气');
+  assertTrue(
+    result.schedule.some((s) => s.source === 'gas'),
+    '极寒应使用燃气'
+  );
 });
 
 // 测试4: 预测维护 - 正常设备
@@ -114,7 +117,7 @@ test('T04: 预测维护-正常设备', () => {
     runtime: 1000,
     temperature: 45,
     vibration: 2,
-    energyConsumption: 800
+    energyConsumption: 800,
   };
   const result = smartBrain.predictMaintenance(deviceData);
   assertEqual(result.riskLevel, 'low', '正常设备应为低风险');
@@ -128,7 +131,7 @@ test('T05: 预测维护-高风险设备', () => {
     runtime: 9000,
     temperature: 85,
     vibration: 6,
-    energyConsumption: 1200
+    energyConsumption: 1200,
   };
   const result = smartBrain.predictMaintenance(deviceData);
   assertEqual(result.riskLevel, 'high', '异常设备应为高风险');
@@ -141,7 +144,7 @@ test('T06: 场景自动切换-居家模式', () => {
     occupancy: true,
     timeOfDay: 'day',
     outdoorTemp: 25,
-    userPreference: { tempOffset: 1 }
+    userPreference: { tempOffset: 1 },
   };
   const result = smartBrain.autoSwitchScenario(context);
   assertEqual(result.scenario, 'home', '白天有人应为居家模式');
@@ -157,7 +160,7 @@ test('T07: 设备注册-智能温控器', () => {
     deviceId: 'THERMO-001',
     deviceType: 'thermostat',
     capabilities: ['temperature', 'humidity', 'onoff'],
-    metadata: { location: 'living_room' }
+    metadata: { location: 'living_room' },
   };
   const result = ioTPlatform.registerDevice(deviceInfo);
   assertTrue(result.success, '注册应成功');
@@ -170,7 +173,7 @@ test('T08: 设备注册-热水器', () => {
     deviceId: 'WH-001',
     deviceType: 'water_heater',
     capabilities: ['temperature', 'onoff', 'mode'],
-    metadata: { capacity: '60L' }
+    metadata: { capacity: '60L' },
   };
   const result = ioTPlatform.registerDevice(deviceInfo);
   assertTrue(result.success, '注册应成功');
@@ -181,7 +184,7 @@ test('T09: 设备上线', () => {
   ioTPlatform.registerDevice({
     deviceId: 'AC-001',
     deviceType: 'air_conditioner',
-    capabilities: ['onoff', 'temperature', 'mode']
+    capabilities: ['onoff', 'temperature', 'mode'],
   });
   const result = ioTPlatform.deviceConnect('AC-001', { ip: '192.168.1.100' });
   assertTrue(result.success, '上线应成功');
@@ -193,12 +196,12 @@ test('T10: 设备数据上报', () => {
   ioTPlatform.registerDevice({
     deviceId: 'SENSOR-001',
     deviceType: 'sensor',
-    capabilities: ['temperature', 'humidity']
+    capabilities: ['temperature', 'humidity'],
   });
   ioTPlatform.deviceConnect('SENSOR-001', {});
   const result = ioTPlatform.publishData('SENSOR-001', {
     temperature: 24.5,
-    humidity: 60
+    humidity: 60,
   });
   assertTrue(result.success, '上报应成功');
   assertNotNull(result.messageId, '应有消息ID');
@@ -209,7 +212,7 @@ test('T11: 控制指令下发', () => {
   ioTPlatform.registerDevice({
     deviceId: 'LIGHT-001',
     deviceType: 'light',
-    capabilities: ['onoff', 'brightness']
+    capabilities: ['onoff', 'brightness'],
   });
   ioTPlatform.deviceConnect('LIGHT-001', {});
   const result = ioTPlatform.sendCommand('LIGHT-001', { action: 'turn_on', brightness: 80 });
@@ -218,11 +221,13 @@ test('T11: 控制指令下发', () => {
 
 // 测试12: 批量控制
 test('T12: 批量设备控制', () => {
-  ['DEVICE-001', 'DEVICE-002', 'DEVICE-003'].forEach(id => {
+  ['DEVICE-001', 'DEVICE-002', 'DEVICE-003'].forEach((id) => {
     ioTPlatform.registerDevice({ deviceId: id, deviceType: 'switch', capabilities: ['onoff'] });
     ioTPlatform.deviceConnect(id, {});
   });
-  const result = ioTPlatform.batchControl(['DEVICE-001', 'DEVICE-002', 'DEVICE-003'], { action: 'turn_off' });
+  const result = ioTPlatform.batchControl(['DEVICE-001', 'DEVICE-002', 'DEVICE-003'], {
+    action: 'turn_off',
+  });
   assertEqual(result.total, 3, '应控制3个设备');
   assertEqual(result.successCount, 3, '应全部成功');
 });
@@ -237,10 +242,14 @@ test('T13: 创建3D场景-三室两厅', () => {
     houseType: '住宅',
     area: 120,
     layout: { rooms: 5 },
-    systems: [{
-      type: 'hvac',
-      devices: [{ id: 'ODU-001', type: 'outdoor_unit', name: '外机', position: { x: 0, y: 0, z: 0 } }]
-    }]
+    systems: [
+      {
+        type: 'hvac',
+        devices: [
+          { id: 'ODU-001', type: 'outdoor_unit', name: '外机', position: { x: 0, y: 0, z: 0 } },
+        ],
+      },
+    ],
   };
   const result = digitalTwin.createScene(projectData);
   assertTrue(result.success, '创建应成功');
@@ -254,12 +263,12 @@ test('T14: 实时数据同步', () => {
     houseType: '公寓',
     area: 90,
     layout: { rooms: 3 },
-    systems: []
+    systems: [],
   });
   const result = digitalTwin.syncRealTimeData('PRJ-002', {
     deviceId: 'TEMP-001',
     temperature: 24,
-    status: 'normal'
+    status: 'normal',
   });
   assertTrue(result.success, '同步应成功');
 });
@@ -271,7 +280,7 @@ test('T15: 获取场景视图', () => {
     houseType: '别墅',
     area: 300,
     layout: { rooms: 8 },
-    systems: []
+    systems: [],
   });
   const result = digitalTwin.getSceneView('PRJ-003');
   assertNotNull(result.projectId, '应有项目ID');
@@ -283,7 +292,7 @@ test('T16: 摄像头接入-工地直播', () => {
   const result = digitalTwin.connectCamera('PRJ-001', {
     cameraId: 'CAM-001',
     streamUrl: 'rtsp://192.168.1.10/live',
-    position: { x: 10, y: 5, z: 0 }
+    position: { x: 10, y: 5, z: 0 },
   });
   assertTrue(result.success, '接入应成功');
   assertNotNull(result.liveUrl, '应有直播地址');
@@ -296,10 +305,12 @@ test('T17: 远程操控设备', () => {
     houseType: '住宅',
     area: 100,
     layout: { rooms: 4 },
-    systems: [{
-      type: 'air_conditioner',
-      devices: [{ id: 'AC-001', name: '主卧空调', model: 'VRV-18' }]
-    }]
+    systems: [
+      {
+        type: 'air_conditioner',
+        devices: [{ id: 'AC-001', name: '主卧空调', model: 'VRV-18' }],
+      },
+    ],
   });
   const result = digitalTwin.remoteControl('PRJ-004', 'AC-001', { action: 'turn_on', temp: 24 });
   assertTrue(result.success, '操控应成功');
@@ -309,7 +320,7 @@ test('T17: 远程操控设备', () => {
 test('T18: BIM模型转换', () => {
   const result = digitalTwin.convertBIMToScene({
     ifcData: { walls: 10, windows: 6 },
-    projectInfo: { name: 'BIM项目' }
+    projectInfo: { name: 'BIM项目' },
   });
   assertTrue(result.success, '转换应成功');
   assertTrue(result.elementCount > 0, '应有元素');
@@ -328,10 +339,13 @@ test('T19: 三能源调度-白天光照充足', () => {
     heatLoad: 10,
     electricityPrice: 0.6,
     gasPrice: 3.0,
-    timeOfDay: 'day'
+    timeOfDay: 'day',
   };
   const result = triEnergy.calculateOptimalMix(input);
-  assertTrue(result.schedule.some(s => s.source === 'solar'), '白天应使用太阳能');
+  assertTrue(
+    result.schedule.some((s) => s.source === 'solar'),
+    '白天应使用太阳能'
+  );
   assertTrue(result.savingsPercent.includes('%'), '应有节能率');
 });
 
@@ -345,7 +359,7 @@ test('T20: 三能源调度-夜间谷电时段', () => {
     heatLoad: 12,
     electricityPrice: 0.3,
     gasPrice: 3.0,
-    timeOfDay: 'night'
+    timeOfDay: 'night',
   };
   const result = triEnergy.calculateOptimalMix(input);
   assertTrue(result.schedule.length > 0, '应有调度方案');
@@ -361,10 +375,13 @@ test('T21: 三能源调度-极寒天气', () => {
     heatLoad: 20,
     electricityPrice: 0.6,
     gasPrice: 3.0,
-    timeOfDay: 'day'
+    timeOfDay: 'day',
   };
   const result = triEnergy.calculateOptimalMix(input);
-  assertTrue(result.schedule.some(s => s.source === 'gas'), '极寒应使用燃气');
+  assertTrue(
+    result.schedule.some((s) => s.source === 'gas'),
+    '极寒应使用燃气'
+  );
 });
 
 // 测试22: 快速制热
@@ -379,12 +396,14 @@ test('T22: 快速制热-30秒速热', () => {
 test('T23: 谷电蓄热模式', () => {
   // 模拟夜间时间
   const originalGetHours = Date.prototype.getHours;
-  Date.prototype.getHours = function() { return 23; };
-  
+  Date.prototype.getHours = function () {
+    return 23;
+  };
+
   const result = triEnergy.valleyHeatStorage(80);
-  
+
   Date.prototype.getHours = originalGetHours;
-  
+
   assertTrue(result.success, '应成功启动蓄热');
   assertEqual(result.mode, 'valley_storage', '应为谷电蓄热模式');
 });
@@ -409,8 +428,13 @@ test('T25: AI理解-简单户型需求', () => {
 
 // 测试26: 自然语言理解-完整需求
 test('T26: AI理解-完整装修需求', () => {
-  const result = aiScene.understandIntent('三室两厅120平，两个老人住，预算10万，想要中央空调和地暖');
-  assertTrue(result.intent.requirements.includes('制冷') || result.intent.requirements.length > 0, '应识别需求');
+  const result = aiScene.understandIntent(
+    '三室两厅120平，两个老人住，预算10万，想要中央空调和地暖'
+  );
+  assertTrue(
+    result.intent.requirements.includes('制冷') || result.intent.requirements.length > 0,
+    '应识别需求'
+  );
   assertEqual(result.entities.people, 2, '应识别人口');
 });
 
@@ -422,9 +446,9 @@ test('T27: AI生成-设计方案', () => {
       area: 100,
       rooms: { bedrooms: 3, living: 1, bathrooms: 2 },
       requirements: ['制冷', '制热', '热水'],
-      budget: 'medium'
+      budget: 'medium',
     },
-    entities: { people: 3 }
+    entities: { people: 3 },
   };
   const result = aiScene.generateDesign(intentData);
   assertNotNull(result.id, '应有设计ID');
@@ -437,7 +461,7 @@ test('T28: AI推荐-场景方案', () => {
     familyType: '三口之家',
     budget: 'medium',
     priorities: ['节能', '舒适'],
-    climate: ' temperate'
+    climate: ' temperate',
   };
   const result = aiScene.recommendScenarios(userProfile);
   assertNotNull(result.recommended, '应有推荐方案');
@@ -457,40 +481,40 @@ test('T30: 闭环测试-完整用户旅程', () => {
   const userInput = '三室两厅120平，预算15万，想要中央空调和新风系统';
   const intent = aiScene.understandIntent(userInput);
   assertTrue(intent.confidence > 0.7, '意图理解置信度应>0.7');
-  
+
   // 步骤2: 生成设计
   const design = aiScene.generateDesign(intent);
   assertNotNull(design.id, '应生成设计方案');
-  
+
   // 步骤3: 创建数字孪生
   const twinResult = digitalTwin.createScene({
     projectId: design.id,
     houseType: design.project.houseType,
     area: design.project.area,
     layout: { rooms: 5 },
-    systems: []
+    systems: [],
   });
   assertTrue(twinResult.success, '应创建数字孪生');
-  
+
   // 步骤4: 注册IoT设备
   const iotResult = ioTPlatform.registerDevice({
     deviceId: 'AC-' + design.id,
     deviceType: 'air_conditioner',
-    capabilities: ['onoff', 'temperature']
+    capabilities: ['onoff', 'temperature'],
   });
   assertTrue(iotResult.success, '应注册IoT设备');
-  
+
   // 步骤5: 计算能源方案
   const energyInput = {
     electricityPrice: 0.6,
     gasPrice: 3.0,
     outdoorTemp: 22,
     loadDemand: 8,
-    timeOfDay: 'day'
+    timeOfDay: 'day',
   };
   const energyResult = smartBrain.optimizeEnergySchedule(energyInput);
   assertTrue(energyResult.schedule.length > 0, '应生成能源方案');
-  
+
   console.log('   └─ 完整闭环流程验证通过 ✅');
 });
 
@@ -500,15 +524,17 @@ console.log('\n📊 测试报告\n');
 console.log(`总计测试: ${testStats.total} 组`);
 console.log(`✅ 通过: ${testStats.passed} 组`);
 console.log(`❌ 失败: ${testStats.failed} 组`);
-console.log(`通过率: ${(testStats.passed / testStats.total * 100).toFixed(1)}%\n`);
+console.log(`通过率: ${((testStats.passed / testStats.total) * 100).toFixed(1)}%\n`);
 
 // 失败详情
 if (testStats.failed > 0) {
   console.log('❌ 失败详情:\n');
-  testStats.details.filter(t => t.status === '❌ FAIL').forEach(t => {
-    console.log(`  - ${t.name}`);
-    console.log(`    错误: ${t.error}\n`);
-  });
+  testStats.details
+    .filter((t) => t.status === '❌ FAIL')
+    .forEach((t) => {
+      console.log(`  - ${t.name}`);
+      console.log(`    错误: ${t.error}\n`);
+    });
 }
 
 // 最终结论

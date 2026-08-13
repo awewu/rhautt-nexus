@@ -8,14 +8,15 @@ const { createAuthRuntime, resolveJwtSecret } = require('./authRuntime');
 const { maskSensitiveData } = require('./dataMasking');
 const {
   registerProductionErrorHandlers,
-  registerProductionMiddleware
+  registerProductionMiddleware,
 } = require('./productionMiddleware');
 const { registerProductionRoutes } = require('./productionRouteRegistrar');
 
 function createProductionApp(options = {}) {
   const env = options.env || process.env;
   const app = options.app || express();
-  const publicDir = options.publicDir || path.join(__dirname, '..', '..', 'archive', 'legacy-ui', 'public');
+  const publicDir =
+    options.publicDir || path.join(__dirname, '..', '..', 'archive', 'legacy-ui', 'public');
   const db = options.db || createProductionDemoDb(bcrypt);
   const runtimeProfile = options.runtimeProfile || options.engineProfile || 'safe';
   const engines = options.engines || createProductionEngines({ runtimeProfile });
@@ -26,7 +27,7 @@ function createProductionApp(options = {}) {
   registerProductionMiddleware(app, {
     engines,
     env,
-    publicDir
+    publicDir,
   });
 
   app.get('/', (req, res) => {
@@ -41,7 +42,7 @@ function createProductionApp(options = {}) {
     checkRole: authRuntime.checkRole,
     maskSensitiveData,
     publicDir,
-    logger
+    logger,
   });
 
   registerProductionErrorHandlers(app, { env });
@@ -54,10 +55,10 @@ function createProductionApp(options = {}) {
     authenticateToken: authRuntime.authenticateToken,
     checkRole: authRuntime.checkRole,
     publicDir,
-    runtimeProfile: engines.runtimeProfile || runtimeProfile
+    runtimeProfile: engines.runtimeProfile || runtimeProfile,
   };
 }
 
 module.exports = {
-  createProductionApp
+  createProductionApp,
 };

@@ -29,5 +29,5 @@ module.exports = {
   calculateResidentialHotWater,
   calculateCommercialHotWater,
   // 保留原类导出给需要直接用的地方
-  HotWaterEngine
+  HotWaterEngine,
 };

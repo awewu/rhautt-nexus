@@ -12,10 +12,20 @@ export class IngressController {
   constructor(private readonly svc: IngressService) {}
 
   @Post('lead')
-  captureLead(@Req() req: { ip?: string; headers?: Record<string, string> }, @Body() body: {
-    phone?: string; name?: string; audience?: string; source?: string; city?: string; campaign?: string;
-    consent?: boolean; consentMeta?: { purpose?: string; policyVersion?: string; surface?: string };
-  }) {
+  captureLead(
+    @Req() req: { ip?: string; headers?: Record<string, string> },
+    @Body()
+    body: {
+      phone?: string;
+      name?: string;
+      audience?: string;
+      source?: string;
+      city?: string;
+      campaign?: string;
+      consent?: boolean;
+      consentMeta?: { purpose?: string; policyVersion?: string; surface?: string };
+    }
+  ) {
     return this.svc.captureLead(req?.ip || 'unknown', body, req?.headers?.['user-agent']);
   }
 }

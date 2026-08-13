@@ -23,12 +23,20 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CN_MOBILE_RE = /^1[3-9]\d{9}$/;
 
 const BRAND_STAFF_ROLES: ReadonlySet<UserRole> = new Set<UserRole>([
-  'platform_admin', 'hq_admin', 'brand_admin', 'regional_manager',
+  'platform_admin',
+  'hq_admin',
+  'brand_admin',
+  'regional_manager',
 ]);
 
 const CUSTOMER_ROLES: ReadonlySet<UserRole> = new Set<UserRole>(['customer']);
 const DEALER_SIDE_ROLES: ReadonlySet<UserRole> = new Set<UserRole>([
-  'dealer_admin', 'store_manager', 'designer', 'sales', 'engineer', 'installer',
+  'dealer_admin',
+  'store_manager',
+  'designer',
+  'sales',
+  'engineer',
+  'installer',
 ]);
 
 /** 经销商侧角色：自助注册默认落到 dealer_admin，其余由管理员后续调整。 */
@@ -46,7 +54,10 @@ export function classifyIdentifier(raw: string): IdentifierKind {
 /** 企业邮箱白名单域名（小写、去空格）。env 覆盖，默认 rhautt.com + dev 的 rhautt.local。 */
 export function brandStaffEmailDomains(): string[] {
   const raw = process.env.BRAND_STAFF_EMAIL_DOMAINS || 'rhautt.com,rhautt.local';
-  return raw.split(',').map((d) => d.trim().toLowerCase()).filter(Boolean);
+  return raw
+    .split(',')
+    .map((d) => d.trim().toLowerCase())
+    .filter(Boolean);
 }
 
 function emailDomain(email: string): string {
@@ -76,7 +87,9 @@ export function assertIdentifierForRole(role: UserRole, identifier: string): Ide
   if (BRAND_STAFF_ROLES.has(role)) {
     if (kind !== 'email') throw new ForbiddenException('品牌方员工账号必须使用公司邮箱');
     if (!isBrandStaffEmail(identifier)) {
-      throw new ForbiddenException(`品牌方员工邮箱域名须为企业域名（${brandStaffEmailDomains().join(' / ')}）`);
+      throw new ForbiddenException(
+        `品牌方员工邮箱域名须为企业域名（${brandStaffEmailDomains().join(' / ')}）`
+      );
     }
     return kind;
   }

@@ -4,36 +4,27 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..');
-const ACTIVE_PAGES = new Set([
-  'index.html',
-  'index-ready.html',
-  'privacy.html',
-  'consent.html'
-]);
-const ACTIVE_PAGE_PATHS = [...ACTIVE_PAGES].map(page => `archive/legacy-ui/public/${page}`);
+const ACTIVE_PAGES = new Set(['index.html', 'index-ready.html', 'privacy.html', 'consent.html']);
+const ACTIVE_PAGE_PATHS = [...ACTIVE_PAGES].map((page) => `archive/legacy-ui/public/${page}`);
 // Navigable production surfaces: real pages the工作入口 (D1 品牌管理 / D2 产品 /
 // D4 客户与赋能) links to. They are allowed as link targets but are NOT held to
 // the full active-page static-acceptance spec, so they are not added to
 // FILES_TO_SCAN (no cascade). Registering them here clears workbench navigation
 // while keeping each brand/product site an independent surface.
 const NAVIGABLE_SURFACES = new Set([
-  'login.html',            // legacy auth compatibility target
-  'staff-portal.html',     // legacy staff portal compatibility target
-  'index-ready.html',        // 集团官网 (D1)
-  'rheem-platform-v3.html',  // Rheem 中国站 (D1)
-  'four-brand-demo.html',    // Ruud 中国站 / 品牌矩阵 (D1)
-  'products.html'            // 产品中心 (D2)
+  'login.html', // legacy auth compatibility target
+  'staff-portal.html', // legacy staff portal compatibility target
+  'index-ready.html', // 集团官网 (D1)
+  'rheem-platform-v3.html', // Rheem 中国站 (D1)
+  'four-brand-demo.html', // Ruud 中国站 / 品牌矩阵 (D1)
+  'products.html', // 产品中心 (D2)
 ]);
 const PRODUCTION_SHARED_FILES = [];
 const FILES_TO_SCAN = [...ACTIVE_PAGE_PATHS, ...PRODUCTION_SHARED_FILES];
 const REACT_NAVIGATION_FILES = {
-  dealerNav: 'apps/dealer-workbench/src/lib/workbench-navigation.ts'
+  dealerNav: 'apps/dealer-workbench/src/lib/workbench-navigation.ts',
 };
-const REQUIRED_DEALER_NAV_HREFS = [
-  '/products',
-  '/brand',
-  '/accounts'
-];
+const REQUIRED_DEALER_NAV_HREFS = ['/products', '/brand', '/accounts'];
 const HIDDEN_DEALER_NAV_HREFS = [
   '/dashboard',
   '/crm',
@@ -46,19 +37,19 @@ const HIDDEN_DEALER_NAV_HREFS = [
   '/finance',
   '/aftersales',
   '/team',
-  '/mobile'
+  '/mobile',
 ];
 const ALLOWED_STATIC_PREFIXES = [
   '/css/',
   '/images/',
   '/js/',
   '/shared/',
-  '/everhot/',   // Everhot 恒热官网 (D1) — 完整子站目录
+  '/everhot/', // Everhot 恒热官网 (D1) — 完整子站目录
   '/favicon.ico',
   '/manifest.json',
   '/icon-192.png',
   '/inline-styles-refactored.css',
-  '/dual-brand.css'
+  '/dual-brand.css',
 ];
 const failures = [];
 
@@ -75,7 +66,7 @@ function isAllowedRef(ref) {
   if (/^(https?:|mailto:|tel:|data:|#|javascript:)/i.test(ref)) return true;
   if (ref.startsWith('${')) return true;
   if (ref === '/') return true;
-  if (ALLOWED_STATIC_PREFIXES.some(prefix => ref.startsWith(prefix))) return true;
+  if (ALLOWED_STATIC_PREFIXES.some((prefix) => ref.startsWith(prefix))) return true;
 
   const pathOnly = ref.split('#')[0].split('?')[0].replace(/^\//, '');
   if (!pathOnly) return true;
@@ -92,7 +83,8 @@ for (const page of FILES_TO_SCAN) {
   let match;
   while ((match = regex.exec(html))) {
     const ref = match[1];
-    if (!isAllowedRef(ref)) failures.push(`${page}: active navigation references non-active surface ${ref}`);
+    if (!isAllowedRef(ref))
+      failures.push(`${page}: active navigation references non-active surface ${ref}`);
   }
 }
 
@@ -100,17 +92,23 @@ const dealerNavSource = read(REACT_NAVIGATION_FILES.dealerNav);
 
 for (const href of REQUIRED_DEALER_NAV_HREFS) {
   if (!dealerNavSource.includes(`href: '${href}'`)) {
-    failures.push(`${REACT_NAVIGATION_FILES.dealerNav}: retained workbench nav href is missing: ${href}`);
+    failures.push(
+      `${REACT_NAVIGATION_FILES.dealerNav}: retained workbench nav href is missing: ${href}`
+    );
   }
 }
 
 for (const href of HIDDEN_DEALER_NAV_HREFS) {
   if (dealerNavSource.includes(`href: '${href}'`)) {
-    failures.push(`${REACT_NAVIGATION_FILES.dealerNav}: hidden Phase 1 nav href is still visible: ${href}`);
+    failures.push(
+      `${REACT_NAVIGATION_FILES.dealerNav}: hidden Phase 1 nav href is still visible: ${href}`
+    );
   }
 }
 
-console.log(`Active Navigation Check: files = ${FILES_TO_SCAN.length}, failures = ${failures.length}`);
+console.log(
+  `Active Navigation Check: files = ${FILES_TO_SCAN.length}, failures = ${failures.length}`
+);
 
 if (failures.length) {
   for (const failure of failures) console.error(`- ${failure}`);

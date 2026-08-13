@@ -60,12 +60,15 @@ class ReportGenerator {
 
     // 稳定 ID：优先用 customer.phone + 时间戳哈希；否则随机
     const seed = (customer.phone || customer.name || '') + Date.now() + Math.random();
-    const id = (kind === 'proposal' ? 'PRP' : 'RPT') + '-' +
+    const id =
+      (kind === 'proposal' ? 'PRP' : 'RPT') +
+      '-' +
       crypto.createHash('sha1').update(seed).digest('hex').slice(0, 10).toUpperCase();
 
-    const html = kind === 'proposal'
-      ? this._renderProposal({ id, result, customer, salesperson, brand })
-      : this._renderConsultation({ id, result, customer, salesperson, brand });
+    const html =
+      kind === 'proposal'
+        ? this._renderProposal({ id, result, customer, salesperson, brand })
+        : this._renderConsultation({ id, result, customer, salesperson, brand });
 
     const htmlPath = path.join(this.root, id + '.html');
     fs.writeFileSync(htmlPath, html, 'utf8');
@@ -73,9 +76,10 @@ class ReportGenerator {
     const meta = {
       id,
       kind, // consultation | proposal
-      title: kind === 'proposal'
-        ? `${customer.name || '客户'} · 暖通方案建议书`
-        : `${customer.name || '客户'} · AI暖通问诊报告`,
+      title:
+        kind === 'proposal'
+          ? `${customer.name || '客户'} · 暖通方案建议书`
+          : `${customer.name || '客户'} · AI暖通问诊报告`,
       summary: this._summarize(result),
       brand,
       customer,
@@ -86,7 +90,7 @@ class ReportGenerator {
       generatedAt: new Date().toISOString(),
       url: `/exports/reports/${id}.html`,
       shareUrl: `/report-view.html?id=${id}`,
-      sizeKB: Math.round(Buffer.byteLength(html, 'utf8') / 1024)
+      sizeKB: Math.round(Buffer.byteLength(html, 'utf8') / 1024),
     };
     fs.writeFileSync(path.join(this.root, id + '.json'), JSON.stringify(meta, null, 2), 'utf8');
 
@@ -95,7 +99,7 @@ class ReportGenerator {
       url: meta.url,
       shareUrl: meta.shareUrl,
       htmlPath,
-      meta
+      meta,
     };
   }
 
@@ -108,7 +112,7 @@ class ReportGenerator {
       tierName: t?.name || rec,
       detailPrice: t?.totalPrice || 0,
       packagePrice: pkg?.subtotal || 0,
-      systemsCount: (t?.systems || []).length
+      systemsCount: (t?.systems || []).length,
     };
   }
 
@@ -202,16 +206,22 @@ function copyShare() {
     const rec = result.recommendation?.recommendedTier || 'comfort';
     const tiers = ['basic', 'comfort', 'premium'];
 
-    const painChips = (input.painPoints || []).map(p => `<span class="pain-chip">${esc(p)}</span>`).join('')
-      || '<span class="pain-chip" style="background:#f3f4f6;color:#6b7280;">未特别指定</span>';
+    const painChips =
+      (input.painPoints || []).map((p) => `<span class="pain-chip">${esc(p)}</span>`).join('') ||
+      '<span class="pain-chip" style="background:#f3f4f6;color:#6b7280;">未特别指定</span>';
 
-    const tierCards = tiers.map(k => {
-      const t = result.tiers?.[k]; if (!t) return '';
-      const pkg = result.packagePricing?.[k];
-      const isRec = k === rec;
-      const systems = (t.systems || []).map(s => `<li>${esc(s.name || s)}</li>`).join('');
-      const values = (t.valueProposition || []).slice(0, 4).map(v => `<li>${esc(v)}</li>`).join('');
-      return `
+    const tierCards = tiers
+      .map((k) => {
+        const t = result.tiers?.[k];
+        if (!t) return '';
+        const pkg = result.packagePricing?.[k];
+        const isRec = k === rec;
+        const systems = (t.systems || []).map((s) => `<li>${esc(s.name || s)}</li>`).join('');
+        const values = (t.valueProposition || [])
+          .slice(0, 4)
+          .map((v) => `<li>${esc(v)}</li>`)
+          .join('');
+        return `
         <div class="tier ${isRec ? 'recommended' : ''}">
           ${isRec ? '<span class="badge">AI推荐</span>' : ''}
           <h3>${esc(t.icon || '')} ${esc(t.name)}</h3>
@@ -224,16 +234,25 @@ function copyShare() {
           <ul>${values || '<li>—</li>'}</ul>
           ${t.roi?.energySavingsPercent ? `<div style="margin-top:8px;font-size:11px;color:#065f46;background:#ecfdf5;padding:6px 10px;border-radius:6px;">年节能 ${t.roi.energySavingsPercent}% · 回本周期 ${t.roi.paybackYears || 'N/A'}</div>` : ''}
         </div>`;
-    }).join('');
+      })
+      .join('');
 
     // 对比矩阵
     const matrix = result.comparison?.featureMatrix || {};
-    const matrixRows = Object.keys(matrix).map(f => `
+    const matrixRows = Object.keys(matrix)
+      .map(
+        (f) => `
       <tr><td>${esc(f)}</td><td>${esc(matrix[f].basic)}</td><td>${esc(matrix[f].comfort)}</td><td>${esc(matrix[f].premium)}</td></tr>
-    `).join('');
+    `
+      )
+      .join('');
 
-    const recReasons = (result.recommendation?.reasons || []).map(r => `<li>${esc(r)}</li>`).join('');
-    const nextSteps = (result.recommendation?.nextSteps || []).map(r => `<li>${esc(r)}</li>`).join('');
+    const recReasons = (result.recommendation?.reasons || [])
+      .map((r) => `<li>${esc(r)}</li>`)
+      .join('');
+    const nextSteps = (result.recommendation?.nextSteps || [])
+      .map((r) => `<li>${esc(r)}</li>`)
+      .join('');
 
     const body = `
 <div class="cover">
@@ -264,12 +283,16 @@ function copyShare() {
 <h2>二、三档方案推荐</h2>
 <div class="tier-grid">${tierCards}</div>
 
-${matrixRows ? `
+${
+  matrixRows
+    ? `
 <h2>三、方案对比矩阵</h2>
 <table>
   <thead><tr><th>对比维度</th><th>基础</th><th>舒适</th><th>旗舰</th></tr></thead>
   <tbody>${matrixRows}</tbody>
-</table>` : ''}
+</table>`
+    : ''
+}
 
 <h2>${matrixRows ? '四' : '三'}、AI 推荐说明</h2>
 <div class="highlight">
@@ -301,41 +324,51 @@ ${nextSteps ? `<h3>建议下一步</h3><ol style="padding-left:20px;">${nextStep
     const recTier = result.tiers?.[rec];
     const recPkg = result.packagePricing?.[rec];
 
-    const allTiersHtml = ['basic', 'comfort', 'premium'].map(k => {
-      const t = result.tiers?.[k]; if (!t) return '';
-      const pkg = result.packagePricing?.[k];
-      const isRec = k === rec;
-      return `
+    const allTiersHtml = ['basic', 'comfort', 'premium']
+      .map((k) => {
+        const t = result.tiers?.[k];
+        if (!t) return '';
+        const pkg = result.packagePricing?.[k];
+        const isRec = k === rec;
+        return `
         <div class="tier ${isRec ? 'recommended' : ''}">
           ${isRec ? '<span class="badge">推荐</span>' : ''}
           <h3>${esc(t.icon || '')} ${esc(t.name)}</h3>
           <div class="price">¥${(t.totalPrice || 0).toLocaleString()}</div>
           <div class="hint">${pkg ? '套餐 ¥' + pkg.perSqm + '/㎡ × ' + pkg.area + '㎡' : '明细价'}</div>
           <ul style="margin-top:10px;">
-            ${(t.systems || []).slice(0, 5).map(s => `<li>${esc(s.name || s)}</li>`).join('')}
+            ${(t.systems || [])
+              .slice(0, 5)
+              .map((s) => `<li>${esc(s.name || s)}</li>`)
+              .join('')}
           </ul>
           ${t.roi?.energySavingsPercent ? `<div style="margin-top:8px;font-size:11px;color:#065f46;background:#ecfdf5;padding:6px 10px;border-radius:6px;">节能 ${t.roi.energySavingsPercent}% · 回本 ${t.roi.paybackYears || '—'}</div>` : ''}
         </div>`;
-    }).join('');
+      })
+      .join('');
 
     // 系统亮点（推荐档）
-    const systemDetails = (recTier?.systems || []).map(s => {
-      const cfg = s.config || {};
-      const parts = [];
-      Object.entries(cfg).forEach(([k, v]) => {
-        if (v && typeof v === 'object') {
-          parts.push(`${k}: ${v.model || v.type || ''} ${v.capacity || v.power || v.airflow || ''}`.trim());
-        }
-      });
-      return `
+    const systemDetails = (recTier?.systems || [])
+      .map((s) => {
+        const cfg = s.config || {};
+        const parts = [];
+        Object.entries(cfg).forEach(([k, v]) => {
+          if (v && typeof v === 'object') {
+            parts.push(
+              `${k}: ${v.model || v.type || ''} ${v.capacity || v.power || v.airflow || ''}`.trim()
+            );
+          }
+        });
+        return `
         <tr>
           <td><strong>${esc(s.name)}</strong></td>
           <td>${esc(parts.join(' / ') || '—')}</td>
           <td style="text-align:right;">¥${(s.price || 0).toLocaleString()}</td>
         </tr>`;
-    }).join('');
+      })
+      .join('');
 
-    const valueProps = (recTier?.valueProposition || []).map(v => `<li>${esc(v)}</li>`).join('');
+    const valueProps = (recTier?.valueProposition || []).map((v) => `<li>${esc(v)}</li>`).join('');
 
     const body = `
 <div class="cover">
@@ -366,7 +399,7 @@ ${nextSteps ? `<h3>建议下一步</h3><ol style="padding-left:20px;">${nextStep
 <h2>三、推荐方案详述（${esc(recTier?.name || '')}）</h2>
 <div class="highlight">
   <strong>为什么推荐这一档：</strong>
-  <ul style="margin-top:6px;padding-left:20px;">${(result.recommendation?.reasons || []).map(r => `<li>${esc(r)}</li>`).join('') || '<li>综合性价比最高</li>'}</ul>
+  <ul style="margin-top:6px;padding-left:20px;">${(result.recommendation?.reasons || []).map((r) => `<li>${esc(r)}</li>`).join('') || '<li>综合性价比最高</li>'}</ul>
 </div>
 
 <h3>3.1 系统配置与价格</h3>
@@ -380,14 +413,18 @@ ${recPkg ? `<div class="highlight" style="background:linear-gradient(135deg,#ecf
 <h3>3.2 价值主张</h3>
 <ul style="padding-left:20px;">${valueProps || '<li>—</li>'}</ul>
 
-${recTier?.roi ? `
+${
+  recTier?.roi
+    ? `
 <h3>3.3 投资回报</h3>
 <div class="kv-grid">
   <div class="k">年节能率</div><div class="v">${recTier.roi.energySavingsPercent || '—'}%</div>
   <div class="k">年省电费估算</div><div class="v">¥${(recTier.roi.annualSavings || 0).toLocaleString()}</div>
   <div class="k">回本周期</div><div class="v">${recTier.roi.paybackYears || '—'}</div>
   <div class="k">10年累计收益</div><div class="v">¥${((recTier.roi.annualSavings || 0) * 10).toLocaleString()}</div>
-</div>` : ''}
+</div>`
+    : ''
+}
 
 <h2>四、成交方式</h2>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px;">
@@ -406,7 +443,7 @@ ${recTier?.roi ? `
   <li>✅ 全套施工图纸（平面/系统/电气/节点）</li>
   <li>✅ 设备与材料清单（品牌/型号/参数可追溯）</li>
   <li>✅ 施工工艺规范与验收标准</li>
-  <li>✅ ${({basic:2, comfort:3, premium:5}[rec]) || 3} 年整机质保 + 6 年核心部件</li>
+  <li>✅ ${{ basic: 2, comfort: 3, premium: 5 }[rec] || 3} 年整机质保 + 6 年核心部件</li>
   <li>✅ 年度免费保养（舒适/旗舰档含多次）</li>
 </ol>
 
@@ -428,8 +465,11 @@ ${recTier?.roi ? `
 
 function esc(s) {
   return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 module.exports = ReportGenerator;

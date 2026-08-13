@@ -41,7 +41,15 @@ function listFiles() {
   try {
     const output = execFileSync(
       'git',
-      ['-c', 'core.quotePath=false', 'ls-files', '-z', '--cached', '--others', '--exclude-standard'],
+      [
+        '-c',
+        'core.quotePath=false',
+        'ls-files',
+        '-z',
+        '--cached',
+        '--others',
+        '--exclude-standard',
+      ],
       { cwd: ROOT, stdio: ['ignore', 'pipe', 'ignore'] }
     );
     return output
@@ -92,12 +100,16 @@ function inspectSecretAssignments(relativePath, source) {
   lines.forEach((line, index) => {
     const envMatch = line.match(/^\s*OIDC_CLIENT_SECRET\s*=\s*(.*?)\s*$/);
     if (envMatch && !PLACEHOLDER_SECRET_PATTERN.test(envMatch[1])) {
-      failures.push(`${relativePath}:${index + 1}: OIDC_CLIENT_SECRET must not contain a committed value`);
+      failures.push(
+        `${relativePath}:${index + 1}: OIDC_CLIENT_SECRET must not contain a committed value`
+      );
     }
 
     const jsMatch = line.match(/\bOIDC_CLIENT_SECRET\b\s*[:=]\s*['"`]([^'"`]+)['"`]/);
     if (jsMatch && !PLACEHOLDER_SECRET_PATTERN.test(jsMatch[1])) {
-      failures.push(`${relativePath}:${index + 1}: OIDC_CLIENT_SECRET literal must not be committed`);
+      failures.push(
+        `${relativePath}:${index + 1}: OIDC_CLIENT_SECRET literal must not be committed`
+      );
     }
   });
 }
@@ -105,7 +117,9 @@ function inspectSecretAssignments(relativePath, source) {
 function inspectBrowserSurface(relativePath, source) {
   if (!BROWSER_SURFACE_PATTERN.test(normalize(relativePath))) return;
   if (/\bOIDC_CLIENT_SECRET\b|\bNEXT_PUBLIC_[A-Z0-9_]*CLIENT_SECRET\b/.test(source)) {
-    failures.push(`${relativePath}: browser-facing code must not reference Nexus OIDC client secrets`);
+    failures.push(
+      `${relativePath}: browser-facing code must not reference Nexus OIDC client secrets`
+    );
   }
 }
 

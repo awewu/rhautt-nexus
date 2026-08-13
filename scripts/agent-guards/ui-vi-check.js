@@ -3,17 +3,39 @@
 const fs = require('fs');
 const path = require('path');
 require('./_artifact-gate').requireArtifactOrSkip('archive/legacy-ui/public/index-ready.html', {
-  guard: 'guard:ui-vi', reason: '遗留 UI 已归档移除，archive/ 在 .gitignore；现役界面 VI 由 guard:rheem-vi-production 守护',
+  guard: 'guard:ui-vi',
+  reason:
+    '遗留 UI 已归档移除，archive/ 在 .gitignore；现役界面 VI 由 guard:rheem-vi-production 守护',
 });
 
 const ROOT = path.join(__dirname, '..', '..');
 
 const SURFACES = [
-  { file: 'archive/legacy-ui/public/index-ready.html', type: 'consumer', required: ['瑞合瑞德', '瑞诺瓦', 'Rheem', 'Ruud', 'Everhot'] },
-  { file: 'archive/legacy-ui/public/pain-diagnosis.html', type: 'consumer', required: ['瑞诺瓦 AI 问诊', '舒适家系统方案'] },
-  { file: 'archive/legacy-ui/public/customer-view.html', type: 'customer-portal', required: ['客户服务门户'] },
-  { file: 'archive/legacy-ui/public/business-console.html', type: 'enterprise', required: ['业务工作台'] },
-  { file: 'archive/legacy-ui/public/index.html', type: 'legacy-compat', required: ['登录系统', '/pain-diagnosis.html'] }
+  {
+    file: 'archive/legacy-ui/public/index-ready.html',
+    type: 'consumer',
+    required: ['瑞合瑞德', '瑞诺瓦', 'Rheem', 'Ruud', 'Everhot'],
+  },
+  {
+    file: 'archive/legacy-ui/public/pain-diagnosis.html',
+    type: 'consumer',
+    required: ['瑞诺瓦 AI 问诊', '舒适家系统方案'],
+  },
+  {
+    file: 'archive/legacy-ui/public/customer-view.html',
+    type: 'customer-portal',
+    required: ['客户服务门户'],
+  },
+  {
+    file: 'archive/legacy-ui/public/business-console.html',
+    type: 'enterprise',
+    required: ['业务工作台'],
+  },
+  {
+    file: 'archive/legacy-ui/public/index.html',
+    type: 'legacy-compat',
+    required: ['登录系统', '/pain-diagnosis.html'],
+  },
 ];
 
 const PRODUCTION_SHARED_FILES = [];
@@ -23,9 +45,12 @@ const warnings = [];
 const EMOJI_PATTERN = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu;
 const UNSUPPORTED_BRAND_PATTERN = /data-brand=["'](?!rheem|ruud|rysnova|hengRe)[^"']+["']/;
 const AI_FLAVOR_PATTERN = /(超PRD|全网|最强|顶级|魔法|AI智能|智能匹配|Demo Accounts)/i;
-const ENTERPRISE_BLOCK_PATTERN = /(默认演示|测试账号|进入体验|立即体验|AI智能|智能问诊|AI\s*推荐|机器人|🤖|魔法|神器|锁客|拉满|老破小逆袭)/i;
-const LEGACY_INTERNAL_SHELL_PATTERN = /(Comfort Home Operating System|售前、设计、报价与交付指挥台|Production Surface|Front Office|AI HVAC Design Platform)/i;
-const LEGACY_SURFACE_LINK_PATTERN = /href=["']\/(?:quick-lock|solution-matching|quotation-pro|technical-drawings|solution-view|admin-dashboard|store-admin|hq-admin|sales|technical-support)\.html/;
+const ENTERPRISE_BLOCK_PATTERN =
+  /(默认演示|测试账号|进入体验|立即体验|AI智能|智能问诊|AI\s*推荐|机器人|🤖|魔法|神器|锁客|拉满|老破小逆袭)/i;
+const LEGACY_INTERNAL_SHELL_PATTERN =
+  /(Comfort Home Operating System|售前、设计、报价与交付指挥台|Production Surface|Front Office|AI HVAC Design Platform)/i;
+const LEGACY_SURFACE_LINK_PATTERN =
+  /href=["']\/(?:quick-lock|solution-matching|quotation-pro|technical-drawings|solution-view|admin-dashboard|store-admin|hq-admin|sales|technical-support)\.html/;
 const LEGACY_CONSUMER_NAME_PATTERN = /(瑞德宜居家|瑞美五恒|瑞诺瓦舒适家居设计平台)/;
 
 function read(file) {
@@ -57,7 +82,10 @@ function ensureBaseSurface(surface, html) {
   if (!/class=["'][^"']*\brc-scope\b/.test(body)) {
     failures.push(`${surface.file}: body missing rc-scope class`);
   }
-  if (!/data-brand=["'](rheem|ruud|rysnova|hengRe)["']/.test(body) || UNSUPPORTED_BRAND_PATTERN.test(body)) {
+  if (
+    !/data-brand=["'](rheem|ruud|rysnova|hengRe)["']/.test(body) ||
+    UNSUPPORTED_BRAND_PATTERN.test(body)
+  ) {
     failures.push(`${surface.file}: body missing supported data-brand`);
   }
 }
@@ -89,7 +117,8 @@ function ensureEnterpriseSurface(surface, html, visibleText) {
     }
   }
 
-  const hasOperationalStyles = html.includes('/css/rhautt-operational-surfaces.css') ||
+  const hasOperationalStyles =
+    html.includes('/css/rhautt-operational-surfaces.css') ||
     html.includes('/css/rhautt-production-workbench.css');
   if (!hasOperationalStyles) {
     failures.push(`${surface.file}: enterprise surface missing operational surface stylesheet`);
@@ -107,7 +136,9 @@ function ensureLegacyCompat(surface, html, visibleText) {
     failures.push(`${surface.file}: legacy compat page links to non-active production surfaces`);
   }
   if (LEGACY_INTERNAL_SHELL_PATTERN.test(visibleText)) {
-    warnings.push(`${surface.file}: legacy compat page still carries old shell language; keep out of default navigation`);
+    warnings.push(
+      `${surface.file}: legacy compat page still carries old shell language; keep out of default navigation`
+    );
   }
 }
 
@@ -139,7 +170,9 @@ for (const file of PRODUCTION_SHARED_FILES) {
   }
 }
 
-console.log(`UI/VI Check: surfaces = ${SURFACES.length}, shared files = ${PRODUCTION_SHARED_FILES.length}, failures = ${failures.length}, warnings = ${warnings.length}`);
+console.log(
+  `UI/VI Check: surfaces = ${SURFACES.length}, shared files = ${PRODUCTION_SHARED_FILES.length}, failures = ${failures.length}, warnings = ${warnings.length}`
+);
 
 if (failures.length) {
   for (const failure of failures) console.error(`- ${failure}`);

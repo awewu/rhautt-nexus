@@ -18,31 +18,115 @@ const OUT_MD = path.join(OUT_DIR, 'reverse-capability-audit-report.md');
 
 // 宪章/契约里声明的后端领域模块 (PROJECT-CHARTER.md 第 5.2 节)
 const CHARTER_MODULES = [
-  'auth', 'tenant', 'crm', 'diagnosis', 'product-catalog', 'quote',
-  'delivery', 'lifecycle', 'analytics', 'governance',
-  'file-artifact', 'notification', 'workflow',
+  'auth',
+  'tenant',
+  'crm',
+  'diagnosis',
+  'product-catalog',
+  'quote',
+  'delivery',
+  'lifecycle',
+  'analytics',
+  'governance',
+  'file-artifact',
+  'notification',
+  'workflow',
 ];
 
 // 把引擎/路由名归类到宪章模块的启发式关键词映射
 const DOMAIN_KEYWORDS = {
   auth: ['auth', 'role', 'login', 'session', 'security', 'encryption', 'mask'],
   tenant: ['tenant', 'dealer', 'store'],
-  crm: ['crm', 'customer', 'opportunity', 'lead', 'sales', 'interaction', 'journey', 'fission', 'channel', 'marketing'],
-  diagnosis: ['diagnosis', 'painpoint', 'pain', 'consultant', 'llm', 'rag', 'aimatching', 'matching', 'smartbrain', 'voice'],
-  'product-catalog': ['product', 'material', 'device', 'selection', 'housetype', 'library', 'standards', 'climate', 'cities'],
-  quote: ['quote', 'quotation', 'price', 'pricing', 'tax', 'currency', 'promotion', 'value', 'package', 'commercial'],
+  crm: [
+    'crm',
+    'customer',
+    'opportunity',
+    'lead',
+    'sales',
+    'interaction',
+    'journey',
+    'fission',
+    'channel',
+    'marketing',
+  ],
+  diagnosis: [
+    'diagnosis',
+    'painpoint',
+    'pain',
+    'consultant',
+    'llm',
+    'rag',
+    'aimatching',
+    'matching',
+    'smartbrain',
+    'voice',
+  ],
+  'product-catalog': [
+    'product',
+    'material',
+    'device',
+    'selection',
+    'housetype',
+    'library',
+    'standards',
+    'climate',
+    'cities',
+  ],
+  quote: [
+    'quote',
+    'quotation',
+    'price',
+    'pricing',
+    'tax',
+    'currency',
+    'promotion',
+    'value',
+    'package',
+    'commercial',
+  ],
   delivery: ['construction', 'workorder', 'fieldservice', 'delivery', 'site', 'task'],
-  lifecycle: ['lifecycle', 'iot', 'econet', 'digitaltwin', 'mqtt', 'device', 'monitoring', 'heartbeat', 'predictive'],
+  lifecycle: [
+    'lifecycle',
+    'iot',
+    'econet',
+    'digitaltwin',
+    'mqtt',
+    'device',
+    'monitoring',
+    'heartbeat',
+    'predictive',
+  ],
   analytics: ['analytics', 'report', 'industryplatform', 'performance', 'energy', 'carbon'],
-  governance: ['governance', 'audit', 'selfcheck', 'evolution', 'feedback', 'deployment', 'backup', 'cache', 'observability'],
+  governance: [
+    'governance',
+    'audit',
+    'selfcheck',
+    'evolution',
+    'feedback',
+    'deployment',
+    'backup',
+    'cache',
+    'observability',
+  ],
   'file-artifact': ['export', 'ppt', 'template', 'pdf', 'artifact', 'storage'],
   notification: ['notification', 'webhook', 'notify'],
-  workflow: ['workflow', 'orchestrat', 'outbox', 'closedloop', 'enterpriseloop', 'coordination', 'agent', 'smartrouting', 'routing'],
+  workflow: [
+    'workflow',
+    'orchestrat',
+    'outbox',
+    'closedloop',
+    'enterpriseloop',
+    'coordination',
+    'agent',
+    'smartrouting',
+    'routing',
+  ],
 };
 
 function listFiles(dir, ext = '.js') {
   if (!fs.existsSync(dir)) return [];
-  return fs.readdirSync(dir)
+  return fs
+    .readdirSync(dir)
     .filter((f) => f.endsWith(ext))
     .map((f) => path.join(dir, f));
 }
@@ -72,7 +156,9 @@ function buildReferenceIndex() {
         stack.push(path.join(cur, e));
       }
     } else if (cur.endsWith('.js') || cur.endsWith('.ts')) {
-      try { text.push(fs.readFileSync(cur, 'utf8')); } catch (_) {}
+      try {
+        text.push(fs.readFileSync(cur, 'utf8'));
+      } catch (_) {}
     }
   }
   const blob = text.join('\n');
@@ -104,13 +190,16 @@ function main() {
       const domains = classify(base);
       const refCount = isReferenced(base, refIndex, file);
       let size = 0;
-      try { size = fs.statSync(file).size; } catch (_) {}
+      try {
+        size = fs.statSync(file).size;
+      } catch (_) {}
       items.push({
         group: src.group,
         file: path.relative(ROOT, file),
         name: base,
         mappedDomains: domains,
-        ownerStatus: domains.length === 0 ? 'UNMAPPED' : (domains.length > 1 ? 'AMBIGUOUS' : 'MAPPED'),
+        ownerStatus:
+          domains.length === 0 ? 'UNMAPPED' : domains.length > 1 ? 'AMBIGUOUS' : 'MAPPED',
         referencedCount: refCount,
         likelyDead: refCount <= 1, // 只出现在自身定义处
         sizeBytes: size,
@@ -150,7 +239,9 @@ function main() {
   lines.push('# 反向能力审计报告');
   lines.push('');
   lines.push(`> 生成时间：${report.generatedAt}`);
-  lines.push('> 目的：以代码为真相，反查 PRD/宪章未记录或无 owner 归属的后端能力，重构前防止误删。');
+  lines.push(
+    '> 目的：以代码为真相，反查 PRD/宪章未记录或无 owner 归属的后端能力，重构前防止误删。'
+  );
   lines.push('');
   lines.push('## 概览');
   lines.push('');
@@ -168,7 +259,9 @@ function main() {
     lines.push('| 文件 | 组 | 引用数 | 疑似死代码 |');
     lines.push('|---|---|---:|---|');
     for (const i of summary.unmapped) {
-      lines.push(`| ${i.file} | ${i.group} | ${i.referencedCount} | ${i.likelyDead ? 'YES' : ''} |`);
+      lines.push(
+        `| ${i.file} | ${i.group} | ${i.referencedCount} | ${i.likelyDead ? 'YES' : ''} |`
+      );
     }
   }
   lines.push('');
@@ -180,7 +273,9 @@ function main() {
     lines.push('| 文件 | 组 | 映射域 | 引用数 |');
     lines.push('|---|---|---|---:|');
     for (const i of summary.likelyDead) {
-      lines.push(`| ${i.file} | ${i.group} | ${i.mappedDomains.join(', ') || '-'} | ${i.referencedCount} |`);
+      lines.push(
+        `| ${i.file} | ${i.group} | ${i.mappedDomains.join(', ') || '-'} | ${i.referencedCount} |`
+      );
     }
   }
   lines.push('');
@@ -188,15 +283,21 @@ function main() {
   lines.push('');
   lines.push('| 文件 | 组 | 映射宪章模块 | 状态 | 引用数 |');
   lines.push('|---|---|---|---|---:|');
-  for (const i of items.sort((a, b) => a.group.localeCompare(b.group) || a.name.localeCompare(b.name))) {
-    lines.push(`| ${i.file} | ${i.group} | ${i.mappedDomains.join(', ') || '(无)'} | ${i.ownerStatus} | ${i.referencedCount} |`);
+  for (const i of items.sort(
+    (a, b) => a.group.localeCompare(b.group) || a.name.localeCompare(b.name)
+  )) {
+    lines.push(
+      `| ${i.file} | ${i.group} | ${i.mappedDomains.join(', ') || '(无)'} | ${i.ownerStatus} | ${i.referencedCount} |`
+    );
   }
   lines.push('');
   fs.writeFileSync(OUT_MD, lines.join('\n'));
 
   console.log('反向能力审计完成。');
   console.log(`总资产 ${summary.total}：`, summary.byGroup);
-  console.log(`UNMAPPED ${summary.unmapped.length} | AMBIGUOUS ${summary.ambiguous.length} | likelyDead ${summary.likelyDead.length}`);
+  console.log(
+    `UNMAPPED ${summary.unmapped.length} | AMBIGUOUS ${summary.ambiguous.length} | likelyDead ${summary.likelyDead.length}`
+  );
   console.log(`报告：${path.relative(ROOT, OUT_JSON)} , ${path.relative(ROOT, OUT_MD)}`);
 }
 

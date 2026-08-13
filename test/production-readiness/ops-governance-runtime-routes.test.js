@@ -15,20 +15,22 @@ describe('ops runtime route module', () => {
       templateLibraryEngine: {
         searchTemplates: jest.fn().mockReturnValue([{ id: 'tpl-1' }]),
         createProjectFromTemplate: jest.fn().mockReturnValue({ id: 'project-1' }),
-        recommendTemplates: jest.fn().mockReturnValue([{ id: 'tpl-2' }])
+        recommendTemplates: jest.fn().mockReturnValue([{ id: 'tpl-2' }]),
       },
       aiAccuracyValidator: {
         validateSolution: jest.fn().mockReturnValue({ accuracy: 0.93 }),
-        getValidationHistory: jest.fn().mockReturnValue([{ accuracy: '93.0%' }])
-      }
+        getValidationHistory: jest.fn().mockReturnValue([{ accuracy: '93.0%' }]),
+      },
     };
     const app = express();
     app.use(express.json());
-    app.use(createOpsRuntimeRouter({
-      engines,
-      authenticateToken: passthroughAuth,
-      checkRole: () => (req, res, next) => next()
-    }));
+    app.use(
+      createOpsRuntimeRouter({
+        engines,
+        authenticateToken: passthroughAuth,
+        checkRole: () => (req, res, next) => next(),
+      })
+    );
 
     const health = await request(app).get('/api/health').expect(200);
     expect(health.body.status).toBe('healthy');

@@ -760,7 +760,9 @@ function productModelExistsMessage(error: unknown): string {
     existing.model ? `已有型号：${existing.model}` : '',
     proposed.skuCode ? `本次 SKU/物料编码：${proposed.skuCode}` : '',
     '确认后会更新该产品资料，并追加/更新本次 SKU；取消则不写入。',
-  ].filter(Boolean).join('\n');
+  ]
+    .filter(Boolean)
+    .join('\n');
 }
 
 function productAudienceCategoryLabel(product: BrandProductRow) {

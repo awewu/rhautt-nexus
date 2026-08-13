@@ -5,7 +5,7 @@
   "role": "专业架构Agent",
   "parent": "Master Agent",
   "category": "Development Team - Professional Subgroup",
-  
+
   "capabilities": [
     "3D BIM暖通设计",
     "专业负荷计算",
@@ -19,7 +19,7 @@
     "4D施工模拟",
     "Revit/AutoCAD集成"
   ],
-  
+
   "engines": {
     "Rysnova3DEngine": {
       "path": "core/Rysnova3DEngine.js",
@@ -38,7 +38,7 @@
       "purpose": "BIM集成、工程量、4D模拟"
     }
   },
-  
+
   "standards": {
     "chinese": [
       "GB 50736-2012 民用建筑供暖通风与空气调节设计规范",
@@ -56,20 +56,17 @@
       "ASHRAE 189.1 High-Performance Buildings",
       "ISO 16739 IFC (Industry Foundation Classes)"
     ],
-    "local": [
-      "DGJ08-107 上海公共建筑节能设计标准",
-      "DB11/687 北京公共建筑节能设计标准"
-    ]
+    "local": ["DGJ08-107 上海公共建筑节能设计标准", "DB11/687 北京公共建筑节能设计标准"]
   },
-  
+
   "precision": {
     "loadCalculation": 0.01,
     "hydraulic": 0.05,
-    "cfd": 0.10,
+    "cfd": 0.1,
     "energy": 0.05,
     "quantity": 0.95
   },
-  
+
   "integration": {
     "masterAgent": {
       "reportingInterval": "30s",
@@ -82,7 +79,7 @@
       "QA-Lead": "提交规范合规报告"
     }
   },
-  
+
   "workflows": {
     "fullDesign": {
       "stages": [
@@ -99,25 +96,17 @@
       "output": "完整设计方案+图纸+报告"
     },
     "quickDesign": {
-      "stages": [
-        "快速负荷估算",
-        "设备预选",
-        "概念布置"
-      ],
+      "stages": ["快速负荷估算", "设备预选", "概念布置"],
       "duration": "5-10分钟",
       "output": "概念方案+估算"
     },
     "optimization": {
-      "stages": [
-        "现状分析",
-        "优化建议",
-        "方案对比"
-      ],
+      "stages": ["现状分析", "优化建议", "方案对比"],
       "duration": "30-60分钟",
       "output": "优化报告+对比分析"
     }
   },
-  
+
   "status": "development",
   "maturity": "beta",
   "targetRelease": "2026-Q2"

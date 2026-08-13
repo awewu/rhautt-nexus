@@ -72,7 +72,7 @@ class ExportEngine {
 
   // 适配层（B方案）：现库单版本报价 {items, costBreakdown} → 忠实的归一化导出模型。
   adaptModernQuotation(dto) {
-    const project = (dto.project && typeof dto.project === 'object') ? dto.project : {};
+    const project = dto.project && typeof dto.project === 'object' ? dto.project : {};
     const rawItems = Array.isArray(dto.items) ? dto.items : [];
     const items = rawItems.map((it, index) => {
       const quantity = Number(it.quantity ?? 1) || 0;
@@ -90,7 +90,7 @@ class ExportEngine {
     });
     const itemsSubtotal = items.reduce((s, it) => s + it.amount, 0);
 
-    const cb = (dto.costBreakdown && typeof dto.costBreakdown === 'object') ? dto.costBreakdown : {};
+    const cb = dto.costBreakdown && typeof dto.costBreakdown === 'object' ? dto.costBreakdown : {};
     const TOTAL_KEYS = ['total', 'grandTotal', 'totalAmount', 'grand_total', 'total_amount'];
     const costRows = Object.entries(cb)
       .filter(([k, v]) => !TOTAL_KEYS.includes(k) && typeof v === 'number')
@@ -98,9 +98,12 @@ class ExportEngine {
     const explicitTotalEntry = Object.entries(cb).find(([k]) => TOTAL_KEYS.includes(k));
     const explicitTotal = explicitTotalEntry ? Number(explicitTotalEntry[1]) : null;
     const costSubtotal = costRows.reduce((s, r) => s + r.amount, 0);
-    const grandTotal = explicitTotal != null && !Number.isNaN(explicitTotal)
-      ? explicitTotal
-      : (costRows.length ? costSubtotal : itemsSubtotal);
+    const grandTotal =
+      explicitTotal != null && !Number.isNaN(explicitTotal)
+        ? explicitTotal
+        : costRows.length
+          ? costSubtotal
+          : itemsSubtotal;
 
     return {
       quoteId: dto.quotationNo ?? dto.quoteId ?? dto.quotationId ?? `QT${Date.now()}`,
@@ -139,14 +142,22 @@ class ExportEngine {
 
   generateModernQuotationHTML(model) {
     const RED = '#E4002B';
-    const rows = model.items.map((it) => `
+    const rows = model.items
+      .map(
+        (it) => `
       <tr>
         <td>${it.index}</td><td>${it.name}</td><td>${it.spec || '-'}</td>
         <td>${it.unit}</td><td>${it.quantity}</td>
         <td>¥${it.unitPrice.toLocaleString()}</td><td>¥${it.amount.toLocaleString()}</td>
-      </tr>`).join('');
-    const costRows = model.costRows.map((r) => `
-      <tr><td>${r.label}</td><td>¥${r.amount.toLocaleString()}</td></tr>`).join('');
+      </tr>`
+      )
+      .join('');
+    const costRows = model.costRows
+      .map(
+        (r) => `
+      <tr><td>${r.label}</td><td>¥${r.amount.toLocaleString()}</td></tr>`
+      )
+      .join('');
     const html = `
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -183,29 +194,35 @@ class ExportEngine {
 </body>
 </html>`;
     const saved = this.saveExport('quotation', `${model.quoteId}_报价单`, 'html', html);
-    return { ...saved, format: 'PDF', content: html, note: '使用 puppeteer 或 wkhtmltopdf 转换为 PDF', previewUrl: saved.downloadUrl };
+    return {
+      ...saved,
+      format: 'PDF',
+      content: html,
+      note: '使用 puppeteer 或 wkhtmltopdf 转换为 PDF',
+      previewUrl: saved.downloadUrl,
+    };
   }
 
   generateQuotationExcel(data) {
     const { quoteId, projectName, versions } = data;
-    
+
     // 生成CSV格式（可用xlsx库转换为真正Excel）
     let csv = '瑞美舒适家居 - 智能报价单\n\n';
     csv += `报价单号,${quoteId}\n`;
     csv += `项目名称,${projectName}\n`;
     csv += `生成日期,${new Date().toLocaleString()}\n\n`;
-    
+
     // 三版本对比
     csv += '版本对比,经济版,标准版,尊享版\n';
     csv += `总价,${versions.economy.amount},${versions.standard.amount},${versions.premium.amount}\n`;
     csv += `每平米单价,${versions.economy.perSqm},${versions.standard.perSqm},${versions.premium.perSqm}\n\n`;
-    
+
     // 明细清单
     csv += '序号,项目,规格,单位,数量,单价,金额,备注\n';
     data.details?.forEach((item, index) => {
       csv += `${index + 1},${item.name},${item.spec || '-'},${item.unit || '-'},${item.quantity || 1},${item.unitPrice || item.amount},${item.amount},${item.notes || ''}\n`;
     });
-    
+
     return this.saveExport('quotation', `${quoteId}_报价单`, 'csv', csv);
   }
 
@@ -216,13 +233,13 @@ class ExportEngine {
       format: 'PDF',
       content: html,
       note: '使用puppeteer或wkhtmltopdf转换为PDF',
-      previewUrl: `/exports/${data.quoteId}_报价单.html`
+      previewUrl: `/exports/${data.quoteId}_报价单.html`,
     };
   }
 
   generateQuotationHTML(data) {
     const { projectName, versions, dimensions } = data;
-    
+
     return `
 <!DOCTYPE html>
 <html>
@@ -277,15 +294,23 @@ class ExportEngine {
   <h3>📊 成本维度分析</h3>
   <table>
     <tr><th>费用项目</th><th>金额</th><th>占比</th></tr>
-    ${Object.entries(dimensions || {}).filter(([k,v]) => v.amount).map(([k,v]) => `
-    <tr><td>${v.name || k}</td><td>¥${v.amount.toLocaleString()}</td><td>${((v.amount/data.summary.totalAmount)*100).toFixed(1)}%</td></tr>
-    `).join('')}
+    ${Object.entries(dimensions || {})
+      .filter(([k, v]) => v.amount)
+      .map(
+        ([k, v]) => `
+    <tr><td>${v.name || k}</td><td>¥${v.amount.toLocaleString()}</td><td>${((v.amount / data.summary.totalAmount) * 100).toFixed(1)}%</td></tr>
+    `
+      )
+      .join('')}
   </table>
   
   <h3>📋 详细清单</h3>
   <table>
     <tr><th>序号</th><th>类别</th><th>项目名称</th><th>规格</th><th>单位</th><th>数量</th><th>单价</th><th>金额</th></tr>
-    ${data.details?.map((item, index) => `
+    ${
+      data.details
+        ?.map(
+          (item, index) => `
     <tr>
       <td>${index + 1}</td>
       <td>${item.category}</td>
@@ -296,7 +321,10 @@ class ExportEngine {
       <td>¥${(item.unitPrice || item.amount).toLocaleString()}</td>
       <td>¥${item.amount.toLocaleString()}</td>
     </tr>
-    `).join('') || ''}
+    `
+        )
+        .join('') || ''
+    }
   </table>
   
   <div class="total">
@@ -318,9 +346,9 @@ class ExportEngine {
    */
   exportDiagnosis(diagnosisData, format = 'pdf') {
     const { symptoms, possibleCauses, checks, solutions, urgency } = diagnosisData;
-    
+
     console.log(`[ExportEngine] 导出问诊方案`);
-    
+
     const html = `
 <!DOCTYPE html>
 <html>
@@ -357,35 +385,53 @@ class ExportEngine {
   
   <div class="section">
     <h3>🔍 可能原因分析</h3>
-    ${possibleCauses?.map((cause, i) => `
+    ${
+      possibleCauses
+        ?.map(
+          (cause, i) => `
     <div class="cause-item">
       <strong>${i + 1}. ${cause.type}</strong>
       <p>原因: ${cause.reason}</p>
       <p>概率: ${cause.probability}%</p>
     </div>
-    `).join('') || ''}
+    `
+        )
+        .join('') || ''
+    }
   </div>
   
   <div class="section">
     <h3>✅ 建议检查项目</h3>
     <table>
       <tr><th>序号</th><th>检查项目</th><th>方法</th><th>正常状态</th></tr>
-      ${checks?.map((check, i) => `
+      ${
+        checks
+          ?.map(
+            (check, i) => `
       <tr><td>${i + 1}</td><td>${check.item}</td><td>${check.method}</td><td>${check.normal}</td></tr>
-      `).join('') || ''}
+      `
+          )
+          .join('') || ''
+      }
     </table>
   </div>
   
   <div class="section">
     <h3>💡 解决方案</h3>
-    ${solutions?.map((sol, i) => `
+    ${
+      solutions
+        ?.map(
+          (sol, i) => `
     <div class="solution-item">
       <strong>方案${i + 1}: ${sol.title}</strong>
       <p>${sol.description}</p>
       <p>💰 预估费用: ¥${sol.estimatedCost || '待定'}</p>
       <p>⏱️ 处理时间: ${sol.duration || '待定'}</p>
     </div>
-    `).join('') || ''}
+    `
+        )
+        .join('') || ''
+    }
   </div>
   
   <div style="text-align: center; margin-top: 40px; color: #666;">
@@ -395,7 +441,7 @@ class ExportEngine {
   </div>
 </body>
 </html>`;
-    
+
     return this.saveExport('diagnosis', `诊断报告_${Date.now()}`, 'html', html);
   }
 
@@ -405,9 +451,9 @@ class ExportEngine {
    */
   exportContract(contractData, format = 'pdf') {
     const { customer, project, quotation, terms, paymentPlan } = contractData;
-    
+
     console.log(`[ExportEngine] 导出合同文档`);
-    
+
     const documents = {
       // 意向书
       intentLetter: this.generateIntentLetter(contractData),
@@ -416,14 +462,14 @@ class ExportEngine {
       // 收款计划
       paymentSchedule: this.generatePaymentSchedule(paymentPlan),
       // 补充协议
-      supplementary: this.generateSupplementaryTerms(terms)
+      supplementary: this.generateSupplementaryTerms(terms),
     };
-    
+
     return {
       format: 'contract-package',
       documents,
       downloadUrl: `/exports/${project.id}_合同文档包.zip`,
-      note: '正式合同需法务审核后签署'
+      note: '正式合同需法务审核后签署',
     };
   }
 
@@ -448,11 +494,11 @@ class ExportEngine {
 意向金: ¥${data.quotation?.deposit || 0} (签署正式合同时抵扣)
 
 三、有效期
-本意向书有效期至 ${new Date(Date.now() + 30*24*60*60*1000).toLocaleDateString()}
+本意向书有效期至 ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}
 
 四、双方签字
       `,
-      validityDays: 30
+      validityDays: 30,
     };
   }
 
@@ -470,8 +516,8 @@ class ExportEngine {
         '第七条 售后服务',
         '第八条 违约责任',
         '第九条 争议解决',
-        '第十条 其他约定'
-      ]
+        '第十条 其他约定',
+      ],
     };
   }
 
@@ -482,8 +528,8 @@ class ExportEngine {
         { name: '签约付款', percentage: 30, amount: 0, trigger: '合同签订后3日内' },
         { name: '设备到场', percentage: 40, amount: 0, trigger: '主要设备进场验收' },
         { name: '安装完成', percentage: 25, amount: 0, trigger: '系统安装调试完成' },
-        { name: '验收结算', percentage: 5, amount: 0, trigger: '竣工验收合格后' }
-      ]
+        { name: '验收结算', percentage: 5, amount: 0, trigger: '竣工验收合格后' },
+      ],
     };
   }
 
@@ -492,31 +538,31 @@ class ExportEngine {
    */
   exportMaterialList(designData, format = 'excel') {
     const { devices = [], pipes = [], fittings = [], accessories = [] } = designData;
-    
+
     console.log(`[ExportEngine] 导出材料清单`);
-    
+
     const allMaterials = [
-      ...devices.map(d => ({ category: '设备', ...d })),
-      ...pipes.map(p => ({ category: '管材', ...p })),
-      ...fittings.map(f => ({ category: '管件', ...f })),
-      ...accessories.map(a => ({ category: '辅料', ...a }))
+      ...devices.map((d) => ({ category: '设备', ...d })),
+      ...pipes.map((p) => ({ category: '管材', ...p })),
+      ...fittings.map((f) => ({ category: '管件', ...f })),
+      ...accessories.map((a) => ({ category: '辅料', ...a })),
     ];
-    
+
     // 生成CSV
     let csv = '瑞美舒适家居 - 材料清单\n\n';
     csv += `项目编号,${designData.projectId}\n`;
     csv += `生成时间,${new Date().toLocaleString()}\n\n`;
     csv += '序号,类别,名称,品牌,型号,规格,单位,数量,单价,金额,备注\n';
-    
+
     let totalAmount = 0;
     allMaterials.forEach((item, index) => {
       const amount = (item.price || 0) * (item.quantity || 1);
       totalAmount += amount;
       csv += `${index + 1},${item.category},${item.name},${item.brand || '瑞美'},${item.model || '-'},${item.spec || '-'},${item.unit || '个'},${item.quantity || 1},${item.price || 0},${amount},${item.notes || ''}\n`;
     });
-    
+
     csv += `\n合计,,,,,,,,,${totalAmount},\n`;
-    
+
     return this.saveExport('materials', `${designData.projectId}_材料清单`, 'csv', csv);
   }
 
@@ -525,28 +571,40 @@ class ExportEngine {
    */
   exportSalesProposal(proposalData, format = 'pptx') {
     const { project, solution, benefits, cases, quotation } = proposalData;
-    
+
     console.log(`[ExportEngine] 导出销售方案书`);
-    
+
     // 生成PPT大纲（可用pptxgenjs生成真正PPT）
     const pptStructure = {
       slides: [
         { type: 'title', content: `瑞美舒适家居\n${project.name}项目方案书` },
-        { type: 'content', title: '项目概况', content: `建筑面积: ${project.area}㎡\n系统需求: ${project.requirements}\n预算范围: ${project.budget}` },
+        {
+          type: 'content',
+          title: '项目概况',
+          content: `建筑面积: ${project.area}㎡\n系统需求: ${project.requirements}\n预算范围: ${project.budget}`,
+        },
         { type: 'content', title: '方案设计', content: solution?.description || '待补充' },
         { type: 'list', title: '核心优势', items: benefits || ['节能', '舒适', '智能'] },
         { type: 'comparison', title: '方案对比', data: quotation?.versions },
         { type: 'cases', title: '成功案例', items: cases || [] },
-        { type: 'quote', title: '投资报价', content: `推荐方案: ${quotation?.recommended?.name}\n总价: ¥${quotation?.recommended?.amount?.toLocaleString()}` },
-        { type: 'contact', title: '联系我们', content: '瑞美舒适家居\n热线: 400-XXX-XXXX\n官网: www.rheem-home.com' }
-      ]
+        {
+          type: 'quote',
+          title: '投资报价',
+          content: `推荐方案: ${quotation?.recommended?.name}\n总价: ¥${quotation?.recommended?.amount?.toLocaleString()}`,
+        },
+        {
+          type: 'contact',
+          title: '联系我们',
+          content: '瑞美舒适家居\n热线: 400-XXX-XXXX\n官网: www.rheem-home.com',
+        },
+      ],
     };
-    
+
     return {
       format: 'PPT',
       structure: pptStructure,
       note: '使用pptxgenjs库生成真正PPT文件',
-      htmlVersion: this.generateProposalHTML(proposalData)
+      htmlVersion: this.generateProposalHTML(proposalData),
     };
   }
 
@@ -629,24 +687,29 @@ class ExportEngine {
    */
   exportAnalyticsReport(reportData, format = 'excel') {
     const { period, metrics, charts, insights } = reportData;
-    
+
     console.log(`[ExportEngine] 导出分析报表 ${period}`);
-    
+
     // 生成多sheet Excel报告
     const report = {
       sheets: {
-        '概览': this.generateOverviewSheet(metrics),
-        '业务数据': this.generateBusinessSheet(metrics),
-        '财务数据': this.generateFinanceSheet(metrics),
-        '客户分析': this.generateCustomerSheet(metrics),
-        '趋势分析': this.generateTrendSheet(metrics)
+        概览: this.generateOverviewSheet(metrics),
+        业务数据: this.generateBusinessSheet(metrics),
+        财务数据: this.generateFinanceSheet(metrics),
+        客户分析: this.generateCustomerSheet(metrics),
+        趋势分析: this.generateTrendSheet(metrics),
       },
       charts: charts,
       insights: insights,
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     };
-    
-    return this.saveExport('analytics', `运营分析报表_${period}`, 'json', JSON.stringify(report, null, 2));
+
+    return this.saveExport(
+      'analytics',
+      `运营分析报表_${period}`,
+      'json',
+      JSON.stringify(report, null, 2)
+    );
   }
 
   generateOverviewSheet(metrics) {
@@ -656,7 +719,7 @@ class ExportEngine {
       ['签约项目数', metrics?.contractCount || 0, '+8%', '+25%', 150, '92%'],
       ['合同金额', metrics?.contractAmount || 0, '+12%', '+40%', 5000000, '88%'],
       ['客户满意度', metrics?.satisfaction || 0, '+2%', '+5%', 95, '96%'],
-      ['平均交付周期', metrics?.avgDeliveryDays || 0, '-3天', '-5天', 30, '优秀']
+      ['平均交付周期', metrics?.avgDeliveryDays || 0, '-3天', '-5天', 30, '优秀'],
     ];
   }
 
@@ -664,14 +727,14 @@ class ExportEngine {
   saveExport(type, filename, ext, content) {
     const fullPath = path.join(this.exportPath, `${filename}.${ext}`);
     fs.writeFileSync(fullPath, content);
-    
+
     return {
       type,
       filename: `${filename}.${ext}`,
       filepath: fullPath,
       downloadUrl: `/exports/${filename}.${ext}`,
       size: content.length,
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     };
   }
 

@@ -13,6 +13,7 @@ Product identity guardrail: Rhautt Comfort / 瑞合瑞德暖通科技集团 is t
 Evaluate whether the product is becoming an industry-leading comfort home operating system, not just a generic CRM or design demo.
 
 Focus on:
+
 - Closed-loop workflow: lead, diagnosis, design, quote, contract, construction, acceptance, and after-sales.
 - Professional credibility: comfort metrics, load calculation, equipment selection, BIM/openBIM deliverables, and pricing governance.
 - Role-specific UX for sales, designers, store managers, headquarters, and homeowners.

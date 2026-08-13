@@ -41,13 +41,18 @@ export default function LoginPage() {
 
   async function handleSendSms() {
     setError('');
-    try { await auth.sendSms(phone); setSmsSent(true); }
-    catch (err: unknown) { setError((err as Error).message || '验证码发送失败'); }
+    try {
+      await auth.sendSms(phone);
+      setSmsSent(true);
+    } catch (err: unknown) {
+      setError((err as Error).message || '验证码发送失败');
+    }
   }
 
   async function handleCustomerLogin(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
       const res = await auth.loginSms(phone, smsCode);
       localStorage.setItem('token', res.token);
@@ -56,12 +61,15 @@ export default function LoginPage() {
       window.location.href = '/cockpit';
     } catch (err: unknown) {
       setError((err as Error).message || '登录失败');
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true); setError('');
+    setLoading(true);
+    setError('');
     try {
       const res = await auth.login(phone, password);
       localStorage.setItem('token', res.token);
@@ -74,13 +82,16 @@ export default function LoginPage() {
         body: JSON.stringify({ token: res.token }),
       }).catch(() => {});
       // returnUrl 在提交时从 URL 读取，避免 useSearchParams 需 Suspense 边界导致的客户端水合中断。
-      const returnUrl = (typeof window !== 'undefined'
-        ? new URLSearchParams(window.location.search).get('returnUrl')
-        : null) || '/cockpit';
+      const returnUrl =
+        (typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.search).get('returnUrl')
+          : null) || '/cockpit';
       window.location.href = decodeURIComponent(returnUrl);
     } catch (err: unknown) {
       setError((err as Error).message || '登录失败');
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }
 
   function handleSsoLogin() {
@@ -112,54 +123,160 @@ export default function LoginPage() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'var(--font)' }}>
-
       {/* ── 左栏：品牌可持续底板（Mission / Vision · 水与空气 · 低碳）──── */}
-      <div className="login-brand-panel" style={{
-        flex: '0 0 48%', position: 'relative', overflow: 'hidden',
-        display: 'flex', flexDirection: 'column', padding: 48,
-        background: 'var(--sidebar, #111827)', color: '#fff',
-      }}>
+      <div
+        className="login-brand-panel"
+        style={{
+          flex: '0 0 48%',
+          position: 'relative',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: 48,
+          background: 'var(--sidebar, #111827)',
+          color: '#fff',
+        }}
+      >
         {/* DESIGN.md：禁渐变主色块 / 禁装饰过度 —— 纯深色底 + 一条品牌红顶栏点缀 */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: 'var(--brand, #C8102E)' }} />
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 3,
+            background: 'var(--brand, #C8102E)',
+          }}
+        />
 
         {/* Logo：Rhautt 红字标 + 生态徽章 */}
-        <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 56 }}>
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 56,
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.01em' }}>
-              <span style={{ color: 'var(--brand, #C8102E)' }}>Rh</span><span style={{ color: '#fff' }}>autt.</span>
+              <span style={{ color: 'var(--brand, #C8102E)' }}>Rh</span>
+              <span style={{ color: '#fff' }}>autt.</span>
             </span>
-            <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 8px', borderRadius: 999, background: 'rgba(255,255,255,0.10)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.18)' }}>{PLATFORM_TAG}</span>
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                padding: '3px 8px',
+                borderRadius: 999,
+                background: 'rgba(255,255,255,0.10)',
+                color: 'rgba(255,255,255,0.7)',
+                border: '1px solid rgba(255,255,255,0.18)',
+              }}
+            >
+              {PLATFORM_TAG}
+            </span>
           </div>
-          <span style={{ width: 46, height: 46, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.4)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontSize: 7.5, fontWeight: 700, color: 'rgba(255,255,255,0.75)', lineHeight: 1.3, textAlign: 'center', letterSpacing: 0.3 }}>EARTH<br />COMFORT</span>
+          <span
+            style={{
+              width: 46,
+              height: 46,
+              borderRadius: '50%',
+              border: '1px solid rgba(255,255,255,0.4)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 7.5,
+              fontWeight: 700,
+              color: 'rgba(255,255,255,0.75)',
+              lineHeight: 1.3,
+              textAlign: 'center',
+              letterSpacing: 0.3,
+            }}
+          >
+            EARTH
+            <br />
+            COMFORT
+          </span>
         </div>
 
         {/* MISSION */}
         <div style={{ position: 'relative', zIndex: 1, marginBottom: 30 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--brand, #C8102E)', letterSpacing: '0.08em' }}>MISSION</span>
+            <span
+              style={{
+                fontSize: 15,
+                fontWeight: 800,
+                color: 'var(--brand, #C8102E)',
+                letterSpacing: '0.08em',
+              }}
+            >
+              MISSION
+            </span>
             <span style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>我们的使命</span>
           </div>
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.82)', lineHeight: 1.7, margin: 0 }}>
-            以创新高效低碳技术与数字化服务为核心，<br />为每一个空间赋予更舒适、高效、可持续的生活环境。
+            以创新高效低碳技术与数字化服务为核心，
+            <br />
+            为每一个空间赋予更舒适、高效、可持续的生活环境。
           </p>
         </div>
 
         {/* VISION */}
         <div style={{ position: 'relative', zIndex: 1, marginBottom: 34 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--brand, #C8102E)', letterSpacing: '0.08em' }}>VISION</span>
+            <span
+              style={{
+                fontSize: 15,
+                fontWeight: 800,
+                color: 'var(--brand, #C8102E)',
+                letterSpacing: '0.08em',
+              }}
+            >
+              VISION
+            </span>
             <span style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>我们的愿景</span>
           </div>
           <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.82)', lineHeight: 1.7, margin: 0 }}>
-            成为受人尊重的水和空气产品及解决方案、<br />可持续发展的引领者。
+            成为受人尊重的水和空气产品及解决方案、
+            <br />
+            可持续发展的引领者。
           </p>
         </div>
 
         {/* 价值支柱 */}
-        <div style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, maxWidth: 420 }}>
-          {PILLARS.map(f => (
-            <div key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', backdropFilter: 'blur(2px)' }}>
-              <f.Icon size={18} strokeWidth={1.75} style={{ flexShrink: 0, color: 'rgba(255,255,255,0.85)' }} />
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: 12,
+            maxWidth: 420,
+          }}
+        >
+          {PILLARS.map((f) => (
+            <div
+              key={f.label}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 11,
+                padding: '10px 12px',
+                borderRadius: 10,
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.10)',
+                backdropFilter: 'blur(2px)',
+              }}
+            >
+              <f.Icon
+                size={18}
+                strokeWidth={1.75}
+                style={{ flexShrink: 0, color: 'rgba(255,255,255,0.85)' }}
+              />
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{f.label}</div>
                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{f.desc}</div>
@@ -177,21 +294,47 @@ export default function LoginPage() {
       </div>
 
       {/* ── 右栏：登录表单 ──────────────────────────────────── */}
-      <div style={{
-        flex: 1, background: 'var(--surface-2)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px 40px',
-      }}>
+      <div
+        style={{
+          flex: 1,
+          background: 'var(--surface-2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '48px 40px',
+        }}
+      >
         <div style={{ width: '100%', maxWidth: 380 }} className="animate-fade-in">
-
           <div style={{ marginBottom: 28 }}>
-            <h2 style={{ fontSize: 24, fontWeight: 700, color: 'var(--t-strong)', letterSpacing: '-0.015em', marginBottom: 6 }}>
+            <h2
+              style={{
+                fontSize: 24,
+                fontWeight: 700,
+                color: 'var(--t-strong)',
+                letterSpacing: '-0.015em',
+                marginBottom: 6,
+              }}
+            >
               {mode === 'customer' ? '客户入口' : mode === 'staff' ? '员工入口' : '选择入口'}
             </h2>
-            <p style={{ fontSize: 14, color: 'var(--t-tertiary)' }}>AI GTM Nexus · 瑞合数智枢纽营销中枢</p>
+            <p style={{ fontSize: 14, color: 'var(--t-tertiary)' }}>
+              AI GTM Nexus · 瑞合数智枢纽营销中枢
+            </p>
           </div>
 
           {error && (
-            <div role="alert" style={{ background: 'var(--danger-bg)', border: '1px solid #FCA5A5', borderRadius: 'var(--r-sm)', padding: '10px 14px', fontSize: 13, color: 'var(--danger)', marginBottom: 20 }}>
+            <div
+              role="alert"
+              style={{
+                background: 'var(--danger-bg)',
+                border: '1px solid #FCA5A5',
+                borderRadius: 'var(--r-sm)',
+                padding: '10px 14px',
+                fontSize: 13,
+                color: 'var(--danger)',
+                marginBottom: 20,
+              }}
+            >
               {error}
             </div>
           )}
@@ -199,25 +342,73 @@ export default function LoginPage() {
           {/* 两道门：员工 / 客户 */}
           {mode === 'choose' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <button type="button" onClick={() => { setError(''); setMode('staff'); }}
-                className="btn" style={{ width: '100%', justifyContent: 'flex-start', gap: 14, padding: '18px', borderRadius: 'var(--r)', background: 'var(--sidebar, #111827)', color: '#fff', textAlign: 'left' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setError('');
+                  setMode('staff');
+                }}
+                className="btn"
+                style={{
+                  width: '100%',
+                  justifyContent: 'flex-start',
+                  gap: 14,
+                  padding: '18px',
+                  borderRadius: 'var(--r)',
+                  background: 'var(--sidebar, #111827)',
+                  color: '#fff',
+                  textAlign: 'left',
+                }}
+              >
                 <Briefcase size={22} strokeWidth={1.75} style={{ flexShrink: 0 }} />
                 <span style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontSize: 16, fontWeight: 700 }}>员工入口</span>
                   <span style={{ fontSize: 12, opacity: 0.7 }}>从 Tandem 账户单点登录</span>
                 </span>
               </button>
-              <button type="button" onClick={() => { setError(''); setSmsSent(false); setMode('customer'); }}
-                className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', gap: 14, padding: '18px', borderRadius: 'var(--r)', textAlign: 'left' }}>
-                <UserRound size={22} strokeWidth={1.75} style={{ flexShrink: 0, color: 'var(--t-secondary)' }} />
+              <button
+                type="button"
+                onClick={() => {
+                  setError('');
+                  setSmsSent(false);
+                  setMode('customer');
+                }}
+                className="btn btn-outline"
+                style={{
+                  width: '100%',
+                  justifyContent: 'flex-start',
+                  gap: 14,
+                  padding: '18px',
+                  borderRadius: 'var(--r)',
+                  textAlign: 'left',
+                }}
+              >
+                <UserRound
+                  size={22}
+                  strokeWidth={1.75}
+                  style={{ flexShrink: 0, color: 'var(--t-secondary)' }}
+                />
                 <span style={{ display: 'flex', flexDirection: 'column' }}>
                   <span style={{ fontSize: 16, fontWeight: 700 }}>客户入口</span>
                   <span style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>手机号验证码登录</span>
                 </span>
               </button>
               {process.env.NODE_ENV !== 'production' && (
-                <button type="button" onClick={handleDevGuest}
-                  className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', gap: 8, padding: '12px', borderRadius: 'var(--r)', fontSize: 13, borderStyle: 'dashed', color: 'var(--t-tertiary)' }}>
+                <button
+                  type="button"
+                  onClick={handleDevGuest}
+                  className="btn btn-outline"
+                  style={{
+                    width: '100%',
+                    justifyContent: 'center',
+                    gap: 8,
+                    padding: '12px',
+                    borderRadius: 'var(--r)',
+                    fontSize: 13,
+                    borderStyle: 'dashed',
+                    color: 'var(--t-tertiary)',
+                  }}
+                >
                   开发直进（自动登录 · 进入驾驶舱）
                 </button>
               )}
@@ -227,41 +418,170 @@ export default function LoginPage() {
           {/* 员工入口：Tandem SSO 直通（+ 内部账号密码备用） */}
           {mode === 'staff' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <button type="button" onClick={handleSsoLogin}
-                className="btn" style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: 15, borderRadius: 'var(--r)', background: 'var(--sidebar, #111827)', color: '#fff' }}>
+              <button
+                type="button"
+                onClick={handleSsoLogin}
+                className="btn"
+                style={{
+                  width: '100%',
+                  justifyContent: 'center',
+                  padding: '13px',
+                  fontSize: 15,
+                  borderRadius: 'var(--r)',
+                  background: 'var(--sidebar, #111827)',
+                  color: '#fff',
+                }}
+              >
                 从 Tandem 单点登录
               </button>
-              <p style={{ fontSize: 12, color: 'var(--t-tertiary)', textAlign: 'center', margin: 0 }}>已登录 Tandem？一键进入，无需重新登录。</p>
+              <p
+                style={{ fontSize: 12, color: 'var(--t-tertiary)', textAlign: 'center', margin: 0 }}
+              >
+                已登录 Tandem？一键进入，无需重新登录。
+              </p>
 
               {!showStaffPassword ? (
-                <button type="button" onClick={() => setShowStaffPassword(true)}
-                  style={{ background: 'none', border: 'none', color: 'var(--t-tertiary)', fontSize: 12, cursor: 'pointer', textDecoration: 'underline' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowStaffPassword(true)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--t-tertiary)',
+                    fontSize: 12,
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                  }}
+                >
                   内部账号密码登录（备用）
                 </button>
               ) : (
-                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 6 }}>
-                  <input className="input" value={phone} onChange={e => setPhone(e.target.value)} placeholder="邮箱 / 手机号" type="text" required autoFocus style={{ fontSize: 15, padding: '11px 14px' }} />
-                  <input className="input" value={password} onChange={e => setPassword(e.target.value)} placeholder="请输入密码" type="password" required style={{ fontSize: 15, padding: '11px 14px' }} />
-                  <button type="submit" disabled={loading} className="btn btn-brand" style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: 15, borderRadius: 'var(--r)' }}>{loading ? '登录中…' : '登录'}</button>
+                <form
+                  onSubmit={handleLogin}
+                  style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 6 }}
+                >
+                  <input
+                    className="input"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="邮箱 / 手机号"
+                    type="text"
+                    required
+                    autoFocus
+                    style={{ fontSize: 15, padding: '11px 14px' }}
+                  />
+                  <input
+                    className="input"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="请输入密码"
+                    type="password"
+                    required
+                    style={{ fontSize: 15, padding: '11px 14px' }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn btn-brand"
+                    style={{
+                      width: '100%',
+                      justifyContent: 'center',
+                      padding: '13px',
+                      fontSize: 15,
+                      borderRadius: 'var(--r)',
+                    }}
+                  >
+                    {loading ? '登录中…' : '登录'}
+                  </button>
                 </form>
               )}
-              <button type="button" onClick={() => { setError(''); setMode('choose'); }} style={{ background: 'none', border: 'none', color: 'var(--t-tertiary)', fontSize: 13, cursor: 'pointer' }}>← 返回选择入口</button>
+              <button
+                type="button"
+                onClick={() => {
+                  setError('');
+                  setMode('choose');
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--t-tertiary)',
+                  fontSize: 13,
+                  cursor: 'pointer',
+                }}
+              >
+                ← 返回选择入口
+              </button>
             </div>
           )}
 
           {/* 客户入口：手机验证码 */}
           {mode === 'customer' && (
-            <form onSubmit={handleCustomerLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <input className="input" value={phone} onChange={e => setPhone(e.target.value)} placeholder="手机号" type="tel" required autoFocus style={{ fontSize: 15, padding: '11px 14px' }} />
+            <form
+              onSubmit={handleCustomerLogin}
+              style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
+            >
+              <input
+                className="input"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="手机号"
+                type="tel"
+                required
+                autoFocus
+                style={{ fontSize: 15, padding: '11px 14px' }}
+              />
               <div style={{ display: 'flex', gap: 10 }}>
-                <input className="input" value={smsCode} onChange={e => setSmsCode(e.target.value)} placeholder="验证码" type="text" required style={{ flex: 1, fontSize: 15, padding: '11px 14px' }} />
-                <button type="button" onClick={handleSendSms} disabled={!phone} className="btn btn-outline" style={{ whiteSpace: 'nowrap', padding: '11px 14px' }}>{smsSent ? '重新发送' : '获取验证码'}</button>
+                <input
+                  className="input"
+                  value={smsCode}
+                  onChange={(e) => setSmsCode(e.target.value)}
+                  placeholder="验证码"
+                  type="text"
+                  required
+                  style={{ flex: 1, fontSize: 15, padding: '11px 14px' }}
+                />
+                <button
+                  type="button"
+                  onClick={handleSendSms}
+                  disabled={!phone}
+                  className="btn btn-outline"
+                  style={{ whiteSpace: 'nowrap', padding: '11px 14px' }}
+                >
+                  {smsSent ? '重新发送' : '获取验证码'}
+                </button>
               </div>
-              <button type="submit" disabled={loading} className="btn btn-brand" style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: 15, borderRadius: 'var(--r)' }}>{loading ? '登录中…' : '登录'}</button>
-              <button type="button" onClick={() => { setError(''); setMode('choose'); }} style={{ background: 'none', border: 'none', color: 'var(--t-tertiary)', fontSize: 13, cursor: 'pointer' }}>← 返回选择入口</button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn btn-brand"
+                style={{
+                  width: '100%',
+                  justifyContent: 'center',
+                  padding: '13px',
+                  fontSize: 15,
+                  borderRadius: 'var(--r)',
+                }}
+              >
+                {loading ? '登录中…' : '登录'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setError('');
+                  setMode('choose');
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--t-tertiary)',
+                  fontSize: 13,
+                  cursor: 'pointer',
+                }}
+              >
+                ← 返回选择入口
+              </button>
             </form>
           )}
-
         </div>
       </div>
 

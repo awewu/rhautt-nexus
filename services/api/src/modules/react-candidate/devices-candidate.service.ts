@@ -1,9 +1,19 @@
 import { Injectable } from '@nestjs/common';
 
 const FALLBACK_DEVICES = [
-  { id: 'rheem-dhw-300', system: 'central-hot-water', brand: 'Rheem', name: 'Rheem central hot water pack' },
+  {
+    id: 'rheem-dhw-300',
+    system: 'central-hot-water',
+    brand: 'Rheem',
+    name: 'Rheem central hot water pack',
+  },
   { id: 'ruud-air-doas', system: 'whole-air', brand: 'Ruud', name: 'Ruud whole-air and DOAS pack' },
-  { id: 'rysnova-water-quality', system: 'water-quality', brand: '瑞诺瓦', name: '瑞诺瓦水质系统包' },
+  {
+    id: 'rysnova-water-quality',
+    system: 'water-quality',
+    brand: '瑞诺瓦',
+    name: '瑞诺瓦水质系统包',
+  },
 ];
 
 @Injectable()
@@ -14,9 +24,10 @@ export class DevicesCandidateService {
 
   async search(query?: string) {
     if (!query) return FALLBACK_DEVICES;
-    return FALLBACK_DEVICES.filter((d) =>
-      d.name.toLowerCase().includes(query.toLowerCase()) ||
-      d.id.toLowerCase().includes(query.toLowerCase()),
+    return FALLBACK_DEVICES.filter(
+      (d) =>
+        d.name.toLowerCase().includes(query.toLowerCase()) ||
+        d.id.toLowerCase().includes(query.toLowerCase())
     );
   }
 

@@ -21,11 +21,18 @@ function collect(dir, acc) {
 }
 
 const files = collect(testDir, []);
-if (!files.length) { console.error('no *.nodetest.ts found'); process.exit(1); }
+if (!files.length) {
+  console.error('no *.nodetest.ts found');
+  process.exit(1);
+}
 
-const r = spawnSync(process.execPath, ['-r', 'ts-node/register/transpile-only', '--test', ...files], {
-  cwd: root,
-  stdio: 'inherit',
-  env: { ...process.env, TS_NODE_PROJECT: path.join('services', 'api', 'tsconfig.json') },
-});
+const r = spawnSync(
+  process.execPath,
+  ['-r', 'ts-node/register/transpile-only', '--test', ...files],
+  {
+    cwd: root,
+    stdio: 'inherit',
+    env: { ...process.env, TS_NODE_PROJECT: path.join('services', 'api', 'tsconfig.json') },
+  }
+);
 process.exit(r.status == null ? 1 : r.status);

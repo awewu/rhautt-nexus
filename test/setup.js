@@ -16,9 +16,9 @@ global.testUtils = {
     query: {},
     headers: {},
     user: null,
-    ...overrides
+    ...overrides,
   }),
-  
+
   // 创建模拟响应对象
   createMockRes: () => {
     const res = {};
@@ -29,9 +29,9 @@ global.testUtils = {
     res.clearCookie = jest.fn().mockReturnValue(res);
     return res;
   },
-  
+
   // 等待指定时间
-  sleep: (ms) => new Promise(resolve => setTimeout(resolve, ms))
+  sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
 };
 
 // 全局前置

@@ -14,26 +14,26 @@ const RATE_LIMIT_CONFIG = {
   standard: {
     windowMs: 15 * 60 * 1000, // 15分钟
     maxRequests: 100,
-    burstSize: 10 // 突发流量缓冲
+    burstSize: 10, // 突发流量缓冲
   },
   // 管理员: 200请求/15分钟
   admin: {
     windowMs: 15 * 60 * 1000,
     maxRequests: 200,
-    burstSize: 20
+    burstSize: 20,
   },
   // 销售/设计师: 150请求/15分钟
   staff: {
     windowMs: 15 * 60 * 1000,
     maxRequests: 150,
-    burstSize: 15
+    burstSize: 15,
   },
   // 未认证用户: 30请求/15分钟
   anonymous: {
     windowMs: 15 * 60 * 1000,
     maxRequests: 30,
-    burstSize: 5
-  }
+    burstSize: 5,
+  },
 };
 
 /**
@@ -79,7 +79,7 @@ function checkRateLimit(key, config) {
     userData = {
       tokens: config.maxRequests,
       lastRefill: now,
-      requests: []
+      requests: [],
     };
     rateLimitStore.set(key, userData);
   }
@@ -87,7 +87,7 @@ function checkRateLimit(key, config) {
   // 计算token补充
   const timePassed = now - userData.lastRefill;
   const refillRate = config.maxRequests / (config.windowMs / 1000); // tokens per second
-  const tokensToAdd = Math.floor(timePassed / 1000 * refillRate);
+  const tokensToAdd = Math.floor((timePassed / 1000) * refillRate);
 
   if (tokensToAdd > 0) {
     userData.tokens = Math.min(config.maxRequests, userData.tokens + tokensToAdd);
@@ -95,7 +95,7 @@ function checkRateLimit(key, config) {
   }
 
   // 清理过期请求记录
-  userData.requests = userData.requests.filter(time => time > windowStart);
+  userData.requests = userData.requests.filter((time) => time > windowStart);
 
   // 检查是否有限流令牌
   if (userData.tokens > 0) {
@@ -110,7 +110,7 @@ function checkRateLimit(key, config) {
       allowed: true,
       limit: config.maxRequests,
       remaining: userData.tokens,
-      resetTime: Math.max(0, resetTime)
+      resetTime: Math.max(0, resetTime),
     };
   }
 
@@ -123,7 +123,7 @@ function checkRateLimit(key, config) {
     limit: config.maxRequests,
     remaining: 0,
     resetTime: retryAfter,
-    retryAfter
+    retryAfter,
   };
 }
 
@@ -163,8 +163,8 @@ const strictLimiter = rateLimitMiddleware({
   config: {
     windowMs: 5 * 60 * 1000, // 5分钟
     maxRequests: 10,
-    burstSize: 2
-  }
+    burstSize: 2,
+  },
 });
 
 /**
@@ -174,9 +174,9 @@ const loginLimiter = rateLimitMiddleware({
   config: {
     windowMs: 15 * 60 * 1000, // 15分钟
     maxRequests: 5, // 5次登录尝试
-    burstSize: 1
+    burstSize: 1,
   },
-  keyGenerator: (req) => `login:${req.ip}`
+  keyGenerator: (req) => `login:${req.ip}`,
 });
 
 /**
@@ -202,5 +202,5 @@ module.exports = {
   strictLimiter,
   loginLimiter,
   checkRateLimit,
-  cleanupRateLimitStore
+  cleanupRateLimitStore,
 };

@@ -1,14 +1,15 @@
 import { ObjectStorageEvidenceService } from './object-storage-evidence.service';
 
-const mockDs = () => ({
-  manager: {
-    getRepository: jest.fn().mockReturnValue({
-      save: jest.fn().mockImplementation(async (row) => ({ id: 'evidence-1', ...row })),
-      create: jest.fn().mockImplementation((row) => row),
-      find: jest.fn().mockResolvedValue([]),
-    }),
-  },
-} as any);
+const mockDs = () =>
+  ({
+    manager: {
+      getRepository: jest.fn().mockReturnValue({
+        save: jest.fn().mockImplementation(async (row) => ({ id: 'evidence-1', ...row })),
+        create: jest.fn().mockImplementation((row) => row),
+        find: jest.fn().mockResolvedValue([]),
+      }),
+    },
+  }) as any;
 
 const scope = { tenantId: 't1', actorId: 'system:test' };
 
@@ -22,16 +23,19 @@ describe('ObjectStorageEvidenceService', () => {
   it('records evidence row', async () => {
     const ds = mockDs();
     const svc = new ObjectStorageEvidenceService(ds);
-    const row = await svc.record({
-      tenantId: 't1',
-      entityType: 'floor_plan',
-      entityId: 'fp-1',
-      fileKey: 't1/floor_plan/test.txt',
-      operation: 'upload',
-      sizeBytes: 5,
-      sourceHash: 'abc',
-      destinationHash: 'abc',
-    }, scope);
+    const row = await svc.record(
+      {
+        tenantId: 't1',
+        entityType: 'floor_plan',
+        entityId: 'fp-1',
+        fileKey: 't1/floor_plan/test.txt',
+        operation: 'upload',
+        sizeBytes: 5,
+        sourceHash: 'abc',
+        destinationHash: 'abc',
+      },
+      scope
+    );
     expect(row.id).toBe('evidence-1');
     expect(row.operation).toBe('upload');
   });

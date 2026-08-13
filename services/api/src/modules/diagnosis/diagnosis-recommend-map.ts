@@ -10,12 +10,43 @@ const BRAND_TENANT_IDS: Record<string, string> = {
 
 const TIER1_CITIES = ['北京', '上海', '广州', '深圳'];
 const SOUTH_HUMID_CITIES = [
-  '上海', '杭州', '南京', '苏州', '宁波', '无锡', '广州', '深圳', '珠海', '东莞',
-  '武汉', '长沙', '南昌', '福州', '厦门', '成都', '重庆', '南宁', '合肥',
+  '上海',
+  '杭州',
+  '南京',
+  '苏州',
+  '宁波',
+  '无锡',
+  '广州',
+  '深圳',
+  '珠海',
+  '东莞',
+  '武汉',
+  '长沙',
+  '南昌',
+  '福州',
+  '厦门',
+  '成都',
+  '重庆',
+  '南宁',
+  '合肥',
 ];
 const NORTH_HEATING_CITIES = [
-  '北京', '天津', '济南', '青岛', '石家庄', '太原', '郑州', '西安', '兰州',
-  '沈阳', '大连', '长春', '哈尔滨', '呼和浩特', '银川', '乌鲁木齐',
+  '北京',
+  '天津',
+  '济南',
+  '青岛',
+  '石家庄',
+  '太原',
+  '郑州',
+  '西安',
+  '兰州',
+  '沈阳',
+  '大连',
+  '长春',
+  '哈尔滨',
+  '呼和浩特',
+  '银川',
+  '乌鲁木齐',
 ];
 const EAST_VILLA_CITIES = ['上海', '杭州', '苏州', '南京', '宁波', '无锡', '嘉兴'];
 
@@ -74,15 +105,22 @@ export function buildRecommendCriteria(payload: any = {}, result: any = {}): Rec
   const tierId = String(result?.recommendedTierId || 'balanced');
 
   const isVilla = type.includes('villa') || type.includes('别墅') || area >= VILLA_AREA_MIN;
-  const isCommercial = type.includes('commercial') || type.includes('商用') || type.includes('office');
+  const isCommercial =
+    type.includes('commercial') || type.includes('商用') || type.includes('office');
 
   const segments = isCommercial ? ['commercial'] : isVilla ? ['villa'] : ['home'];
   const personas = tierToPersonas(tierId);
   const markets = cityToMarkets(city);
-  const painPoints = Array.isArray(result?.diagnosis?.painPoints) ? result.diagnosis.painPoints
-    : Array.isArray(payload?.painPoints) ? payload.painPoints : [];
-  const systems = Array.isArray(result?.diagnosis?.systems) ? result.diagnosis.systems
-    : Array.isArray(payload?.systems) ? payload.systems : [];
+  const painPoints = Array.isArray(result?.diagnosis?.painPoints)
+    ? result.diagnosis.painPoints
+    : Array.isArray(payload?.painPoints)
+      ? payload.painPoints
+      : [];
+  const systems = Array.isArray(result?.diagnosis?.systems)
+    ? result.diagnosis.systems
+    : Array.isArray(payload?.systems)
+      ? payload.systems
+      : [];
 
   return {
     channels: ['dealer'],

@@ -7,7 +7,7 @@ const OutboxService = require('../outbox/outbox.service');
 const DEFAULT_PAYMENT_PLAN = [
   { key: 'deposit', label: '签约首付款', ratio: 0.3, dueStage: 'contract_signed' },
   { key: 'mobilization', label: '进场/设备到场款', ratio: 0.5, dueStage: 'construction_planning' },
-  { key: 'acceptance', label: '验收尾款', ratio: 0.2, dueStage: 'acceptance' }
+  { key: 'acceptance', label: '验收尾款', ratio: 0.2, dueStage: 'acceptance' },
 ];
 
 class ContractsService {
@@ -56,14 +56,19 @@ class ContractsService {
       if (found) return found;
     }
 
-    const err = new Error('quotationId, quotationNo or quote payload is required for contract creation');
+    const err = new Error(
+      'quotationId, quotationNo or quote payload is required for contract creation'
+    );
     err.status = 400;
     throw err;
   }
 
   createContractNo(scope, quote = {}) {
     const tenantPart = String(scope.tenantId).slice(-6).toUpperCase();
-    const timePart = this.now().toISOString().replace(/[-:TZ.]/g, '').slice(0, 14);
+    const timePart = this.now()
+      .toISOString()
+      .replace(/[-:TZ.]/g, '')
+      .slice(0, 14);
     const quotePart = String(quote.quotationNo || quote.quoteId || this.getRecordId(quote) || '')
       .replace(/\W/g, '')
       .slice(-6)
@@ -79,7 +84,9 @@ class ContractsService {
       revision: Number(quote.revision || 1),
       source: quote.source || 'quotation-v2',
       currency: quote.currency || 'CNY',
-      customerTotal: Number(cost.customerTotal || cost.finalTotal || cost.total || cost.totalAmount || 0),
+      customerTotal: Number(
+        cost.customerTotal || cost.finalTotal || cost.total || cost.totalAmount || 0
+      ),
       directCost: Number(cost.directCost || 0),
       dealerMargin: Number(cost.dealerMargin || 0),
       monthlyPayment: Number(cost.monthlyPayment || 0),
@@ -88,8 +95,8 @@ class ContractsService {
         minMarginRate: Number(quote.marginGuard?.minMarginRate || 0),
         targetMarginRate: Number(quote.marginGuard?.targetMarginRate || 0),
         quoteFloor: Number(quote.marginGuard?.quoteFloor || 0),
-        adjustment: Number(quote.marginGuard?.adjustment || 0)
-      }
+        adjustment: Number(quote.marginGuard?.adjustment || 0),
+      },
     };
   }
 
@@ -113,11 +120,13 @@ class ContractsService {
         paidAt: item.paidAt ? new Date(item.paidAt) : null,
         method: item.method,
         receiptNo: item.receiptNo,
-        note: item.note
+        note: item.note,
       };
     });
 
-    const diff = Math.round(Number(total || 0) - normalized.reduce((sum, item) => sum + item.amount, 0));
+    const diff = Math.round(
+      Number(total || 0) - normalized.reduce((sum, item) => sum + item.amount, 0)
+    );
     if (normalized.length && diff !== 0) {
       normalized[normalized.length - 1].amount += diff;
     }
@@ -130,7 +139,9 @@ class ContractsService {
     return {
       required,
       status: required ? 'pending' : 'not_required',
-      reason: payload.approval?.reason || (guardStatus === 'blocked' ? '报价毛利护栏阻断，需要总部审批' : null)
+      reason:
+        payload.approval?.reason ||
+        (guardStatus === 'blocked' ? '报价毛利护栏阻断，需要总部审批' : null),
     };
   }
 
@@ -145,56 +156,65 @@ class ContractsService {
     const pricingSnapshot = this.pricingSnapshotFromQuote(quote);
     const approval = this.approvalFromQuote(quote, payload);
     const contractNo = payload.contractNo || this.createContractNo(scope, quote);
-    const record = await this.contractRepo.create(scope, {
-      tenantId: scope.tenantId,
-      dealerId: payload.dealerId || quote.dealerId || scope.dealerId,
-      storeId: payload.storeId || quote.storeId || scope.storeId,
-      customerId,
-      opportunityId: payload.opportunityId || quote.opportunityId,
-      quotationId: String(payload.quotationId || this.getRecordId(quote) || quote.quoteId || ''),
-      contractNo,
-      source: 'quotation-v2',
-      status: payload.status || this.initialStatusForApproval(approval),
-      paymentStatus: 'not_started',
-      project: payload.project || quote.project || {},
-      systemFamilies: payload.systemFamilies || quote.systemFamilies || [],
-      pricingSnapshot,
-      paymentSchedule: this.normalizePaymentSchedule(
-        pricingSnapshot.customerTotal,
-        payload.paymentSchedule || payload.paymentPlan
-      ),
-      approval,
-      signature: {
-        method: 'none',
-        status: approval.required ? 'not_started' : 'pending',
-        termsVersion: payload.terms?.version || payload.termsVersion || 'rhautt-nexus-contract-v1'
+    const record = await this.contractRepo.create(
+      scope,
+      {
+        tenantId: scope.tenantId,
+        dealerId: payload.dealerId || quote.dealerId || scope.dealerId,
+        storeId: payload.storeId || quote.storeId || scope.storeId,
+        customerId,
+        opportunityId: payload.opportunityId || quote.opportunityId,
+        quotationId: String(payload.quotationId || this.getRecordId(quote) || quote.quoteId || ''),
+        contractNo,
+        source: 'quotation-v2',
+        status: payload.status || this.initialStatusForApproval(approval),
+        paymentStatus: 'not_started',
+        project: payload.project || quote.project || {},
+        systemFamilies: payload.systemFamilies || quote.systemFamilies || [],
+        pricingSnapshot,
+        paymentSchedule: this.normalizePaymentSchedule(
+          pricingSnapshot.customerTotal,
+          payload.paymentSchedule || payload.paymentPlan
+        ),
+        approval,
+        signature: {
+          method: 'none',
+          status: approval.required ? 'not_started' : 'pending',
+          termsVersion:
+            payload.terms?.version || payload.termsVersion || 'rhautt-nexus-contract-v1',
+        },
+        lifecycleHandoff: {
+          required: payload.lifecycleHandoff?.required !== false,
+          status: 'not_started',
+          iotBridgeKey:
+            payload.lifecycleHandoff?.iotBridgeKey || quote.lifecycleHandoff?.iotBridgeKey,
+          servicePlanCode:
+            payload.lifecycleHandoff?.servicePlanCode || quote.lifecycleHandoff?.servicePlanCode,
+          handoffBoundary: 'lifecycle_handoff_only',
+        },
+        deliverables: payload.deliverables || {
+          quotePdfUrl: quote.deliverables?.quotePdfUrl,
+        },
+        terms: {
+          version: payload.terms?.version || payload.termsVersion || 'rhautt-nexus-contract-v1',
+          paymentTerms:
+            payload.terms?.paymentTerms || '30%签约首付款 / 50%进场或设备到场款 / 20%验收尾款',
+          warrantyTerms:
+            payload.terms?.warrantyTerms || '设备质保与施工质保按合同附件及品牌政策执行',
+          changeOrderPolicy: payload.terms?.changeOrderPolicy || '现场变更需形成变更单并经客户确认',
+          cancellationPolicy: payload.terms?.cancellationPolicy || '未履行部分按合同约定结算',
+        },
+        createdBy: scope.userId,
+        updatedBy: scope.userId,
       },
-      lifecycleHandoff: {
-        required: payload.lifecycleHandoff?.required !== false,
-        status: 'not_started',
-        iotBridgeKey: payload.lifecycleHandoff?.iotBridgeKey || quote.lifecycleHandoff?.iotBridgeKey,
-        servicePlanCode: payload.lifecycleHandoff?.servicePlanCode || quote.lifecycleHandoff?.servicePlanCode,
-        handoffBoundary: 'lifecycle_handoff_only'
-      },
-      deliverables: payload.deliverables || {
-        quotePdfUrl: quote.deliverables?.quotePdfUrl
-      },
-      terms: {
-        version: payload.terms?.version || payload.termsVersion || 'rhautt-nexus-contract-v1',
-        paymentTerms: payload.terms?.paymentTerms || '30%签约首付款 / 50%进场或设备到场款 / 20%验收尾款',
-        warrantyTerms: payload.terms?.warrantyTerms || '设备质保与施工质保按合同附件及品牌政策执行',
-        changeOrderPolicy: payload.terms?.changeOrderPolicy || '现场变更需形成变更单并经客户确认',
-        cancellationPolicy: payload.terms?.cancellationPolicy || '未履行部分按合同约定结算'
-      },
-      createdBy: scope.userId,
-      updatedBy: scope.userId
-    }, options);
+      options
+    );
 
     await this.recordAudit(scope, {
       action: 'contract.created_from_quotation',
       resourceType: 'ContractV2',
       resourceId: record.contractNo || contractNo,
-      after: this.auditSnapshot(record)
+      after: this.auditSnapshot(record),
     });
     await this.publishOutbox(scope, this.contractOutboxEvent('contract.created', record));
 
@@ -241,36 +261,49 @@ class ContractsService {
         customerSigner: data.customerSigner || before.signature?.customerSigner,
         companySigner: data.companySigner || before.signature?.companySigner || scope.userId,
         signedAt,
-        evidenceUrl: data.evidenceUrl || data.eSignatureEvidenceUrl || before.signature?.evidenceUrl,
+        evidenceUrl:
+          data.evidenceUrl || data.eSignatureEvidenceUrl || before.signature?.evidenceUrl,
         termsVersion: data.termsVersion || before.signature?.termsVersion || before.terms?.version,
-        customerIp: data.customerIp || before.signature?.customerIp
+        customerIp: data.customerIp || before.signature?.customerIp,
       },
       lifecycleHandoff: {
         ...(before.lifecycleHandoff || {}),
         status: before.lifecycleHandoff?.required === false ? 'not_started' : 'ready',
-        handoffBoundary: 'lifecycle_handoff_only'
+        handoffBoundary: 'lifecycle_handoff_only',
       },
       deliverables: {
         ...(before.deliverables || {}),
         eSignatureEvidenceUrl: data.evidenceUrl || before.deliverables?.eSignatureEvidenceUrl,
-        contractPdfUrl: data.contractPdfUrl || before.deliverables?.contractPdfUrl
+        contractPdfUrl: data.contractPdfUrl || before.deliverables?.contractPdfUrl,
       },
-      updatedBy: scope.userId
+      updatedBy: scope.userId,
     };
 
-    const updated = await this.contractRepo.updateById(scope, this.getRecordId(before), update, options);
+    const updated = await this.contractRepo.updateById(
+      scope,
+      this.getRecordId(before),
+      update,
+      options
+    );
     if (before.quotationId && this.quotationRepo.updateById) {
-      await this.quotationRepo.updateById(scope, before.quotationId, {
-        status: 'contracted',
-        updatedBy: scope.userId
-      }, options).catch(() => null);
+      await this.quotationRepo
+        .updateById(
+          scope,
+          before.quotationId,
+          {
+            status: 'contracted',
+            updatedBy: scope.userId,
+          },
+          options
+        )
+        .catch(() => null);
     }
     await this.recordAudit(scope, {
       action: 'contract.signature.marked',
       resourceType: 'ContractV2',
       resourceId: contractId,
       before: this.auditSnapshot(before),
-      after: this.auditSnapshot(updated)
+      after: this.auditSnapshot(updated),
     });
     await this.publishOutbox(scope, this.contractOutboxEvent('contract.signed', updated));
 
@@ -291,7 +324,8 @@ class ContractsService {
       throw err;
     }
 
-    const decision = data.decision || data.status || (data.approved === false ? 'rejected' : 'approved');
+    const decision =
+      data.decision || data.status || (data.approved === false ? 'rejected' : 'approved');
     if (!['approved', 'rejected'].includes(decision)) {
       const err = new Error('approval decision must be approved or rejected');
       err.status = 400;
@@ -303,30 +337,40 @@ class ContractsService {
       ...(before.approval || {}),
       status: decision,
       reason: data.reason || before.approval?.reason,
-      approvedBy: decision === 'approved' ? (data.approvedBy || scope.userId) : before.approval?.approvedBy,
+      approvedBy:
+        decision === 'approved' ? data.approvedBy || scope.userId : before.approval?.approvedBy,
       approvedAt: decision === 'approved' ? decidedAt : before.approval?.approvedAt,
-      rejectedBy: decision === 'rejected' ? (data.rejectedBy || scope.userId) : before.approval?.rejectedBy,
-      rejectedAt: decision === 'rejected' ? decidedAt : before.approval?.rejectedAt
+      rejectedBy:
+        decision === 'rejected' ? data.rejectedBy || scope.userId : before.approval?.rejectedBy,
+      rejectedAt: decision === 'rejected' ? decidedAt : before.approval?.rejectedAt,
     };
     const update = {
       approval,
       status: decision === 'approved' ? 'pending_signature' : 'voided',
-      updatedBy: scope.userId
+      updatedBy: scope.userId,
     };
 
-    const updated = await this.contractRepo.updateById(scope, this.getRecordId(before), update, options);
+    const updated = await this.contractRepo.updateById(
+      scope,
+      this.getRecordId(before),
+      update,
+      options
+    );
     await this.recordAudit(scope, {
       action: `contract.approval.${decision}`,
       resourceType: 'ContractV2',
       resourceId: contractId,
       before: this.auditSnapshot(before),
-      after: this.auditSnapshot(updated)
+      after: this.auditSnapshot(updated),
     });
-    await this.publishOutbox(scope, this.contractOutboxEvent(`contract.approval.${decision}`, updated, {
-      approvalStatus: approval.status,
-      approvalReason: approval.reason,
-      decidedAt
-    }));
+    await this.publishOutbox(
+      scope,
+      this.contractOutboxEvent(`contract.approval.${decision}`, updated, {
+        approvalStatus: approval.status,
+        approvalReason: approval.reason,
+        decidedAt,
+      })
+    );
 
     return updated;
   }
@@ -362,7 +406,7 @@ class ContractsService {
         status: paidAmount >= Number(item.amount || 0) ? 'paid' : 'invoiced',
         method: data.method || item.method,
         receiptNo: data.receiptNo || item.receiptNo,
-        note: data.note || item.note
+        note: data.note || item.note,
       };
     });
     if (!matched) {
@@ -371,26 +415,34 @@ class ContractsService {
       throw err;
     }
 
-    const paidItems = paymentSchedule.filter(item => item.status === 'paid').length;
+    const paidItems = paymentSchedule.filter((item) => item.status === 'paid').length;
     const paymentStatus = paidItems === paymentSchedule.length ? 'paid' : 'partial';
-    const updated = await this.contractRepo.updateById(scope, this.getRecordId(before), {
-      paymentSchedule,
-      paymentStatus,
-      updatedBy: scope.userId
-    }, options);
+    const updated = await this.contractRepo.updateById(
+      scope,
+      this.getRecordId(before),
+      {
+        paymentSchedule,
+        paymentStatus,
+        updatedBy: scope.userId,
+      },
+      options
+    );
 
     await this.recordAudit(scope, {
       action: 'contract.payment.recorded',
       resourceType: 'ContractV2',
       resourceId: contractId,
       before: this.auditSnapshot(before),
-      after: this.auditSnapshot(updated)
+      after: this.auditSnapshot(updated),
     });
-    await this.publishOutbox(scope, this.contractOutboxEvent('contract.payment.recorded', updated, {
-      paymentKey: key || paymentSchedule[index]?.key,
-      amount,
-      paymentStatus
-    }));
+    await this.publishOutbox(
+      scope,
+      this.contractOutboxEvent('contract.payment.recorded', updated, {
+        paymentKey: key || paymentSchedule[index]?.key,
+        amount,
+        paymentStatus,
+      })
+    );
 
     return updated;
   }
@@ -416,44 +468,62 @@ class ContractsService {
       iot: {
         platform: data.iot?.platform || 'rhautt-iot',
         accountId: data.iot?.accountId,
-        handoffBoundary: 'lifecycle_handoff_only'
+        handoffBoundary: 'lifecycle_handoff_only',
       },
       servicePlan: {
         code: before.lifecycleHandoff?.servicePlanCode,
-        ...(data.servicePlan || {})
+        ...(data.servicePlan || {}),
       },
       devices: data.devices || [],
-      installedAssets: data.installedAssets || []
+      installedAssets: data.installedAssets || [],
     };
-    if (!this.lifecycleService || typeof this.lifecycleService.createOrUpdateHandover !== 'function') {
-      const err = new Error('lifecycle handover is unavailable; only the future API contract is retained');
+    if (
+      !this.lifecycleService ||
+      typeof this.lifecycleService.createOrUpdateHandover !== 'function'
+    ) {
+      const err = new Error(
+        'lifecycle handover is unavailable; only the future API contract is retained'
+      );
       err.status = 503;
       throw err;
     }
-    const lifecycleLink = await this.lifecycleService.createOrUpdateHandover(scope, handoverPayload);
-    const updated = await this.contractRepo.updateById(scope, this.getRecordId(before), {
-      status: 'delivery_started',
-      deliveryStartedAt: this.now(),
-      lifecycleLinkId: String(lifecycleLink._id || lifecycleLink.id || lifecycleLink.contractId || ''),
-      lifecycleHandoff: {
-        ...(before.lifecycleHandoff || {}),
-        status: 'linked',
-        handoffBoundary: 'lifecycle_handoff_only'
+    const lifecycleLink = await this.lifecycleService.createOrUpdateHandover(
+      scope,
+      handoverPayload
+    );
+    const updated = await this.contractRepo.updateById(
+      scope,
+      this.getRecordId(before),
+      {
+        status: 'delivery_started',
+        deliveryStartedAt: this.now(),
+        lifecycleLinkId: String(
+          lifecycleLink._id || lifecycleLink.id || lifecycleLink.contractId || ''
+        ),
+        lifecycleHandoff: {
+          ...(before.lifecycleHandoff || {}),
+          status: 'linked',
+          handoffBoundary: 'lifecycle_handoff_only',
+        },
+        updatedBy: scope.userId,
       },
-      updatedBy: scope.userId
-    }, options);
+      options
+    );
 
     await this.recordAudit(scope, {
       action: 'contract.delivery.started',
       resourceType: 'ContractV2',
       resourceId: contractId,
       before: this.auditSnapshot(before),
-      after: this.auditSnapshot(updated)
+      after: this.auditSnapshot(updated),
     });
-    await this.publishOutbox(scope, this.contractOutboxEvent('contract.delivery.started', updated, {
-      lifecycleLinkId: updated.lifecycleLinkId,
-      handoffBoundary: 'lifecycle_handoff_only'
-    }));
+    await this.publishOutbox(
+      scope,
+      this.contractOutboxEvent('contract.delivery.started', updated, {
+        lifecycleLinkId: updated.lifecycleLinkId,
+        handoffBoundary: 'lifecycle_handoff_only',
+      })
+    );
 
     return { contract: updated, lifecycleLink };
   }
@@ -469,7 +539,7 @@ class ContractsService {
     return this.contractRepo.list(scope, filters, {
       page: options.page || query.page,
       limit: options.limit || query.limit,
-      sort: { updatedAt: -1 }
+      sort: { updatedAt: -1 },
     });
   }
 
@@ -495,7 +565,7 @@ class ContractsService {
       approvalStatus: contract.approval?.status,
       customerTotal: contract.pricingSnapshot?.customerTotal,
       lifecycleHandoffStatus: contract.lifecycleHandoff?.status,
-      handoffBoundary: contract.lifecycleHandoff?.handoffBoundary || 'lifecycle_handoff_only'
+      handoffBoundary: contract.lifecycleHandoff?.handoffBoundary || 'lifecycle_handoff_only',
     };
   }
 
@@ -516,8 +586,8 @@ class ContractsService {
         customerTotal: contract.pricingSnapshot?.customerTotal,
         lifecycleHandoff: contract.lifecycleHandoff,
         handoffBoundary: 'lifecycle_handoff_only',
-        ...extraPayload
-      }
+        ...extraPayload,
+      },
     };
   }
 }

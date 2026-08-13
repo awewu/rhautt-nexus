@@ -1,12 +1,12 @@
 const DEPLOYMENT_MODES = Object.freeze({
   RHAUTT_PORTAL_EMBEDDED: 'rhautt-portal-embedded',
   STANDALONE: 'standalone',
-  SHARED_PLATFORM: 'shared-platform'
+  SHARED_PLATFORM: 'shared-platform',
 });
 
 const MODULE_IDS = Object.freeze({
   RYSNOVA_CONSUMER_SYSTEM: 'rysnova-consumer-system',
-  RHAUTT_SHARED_PLATFORM: 'rhautt-shared-platform'
+  RHAUTT_SHARED_PLATFORM: 'rhautt-shared-platform',
 });
 
 const PRODUCT_DATABASE_STRATEGY = 'namespace-extractable-shared-ledger';
@@ -25,7 +25,7 @@ const SHARED_FOUNDATION_TABLES = Object.freeze([
   'audit_logs',
   'outbox_events',
   'workflow_instances',
-  'workflow_steps'
+  'workflow_steps',
 ]);
 const PRODUCT_EXTRACTION_KEYS = Object.freeze([
   'tenantId',
@@ -38,7 +38,7 @@ const PRODUCT_EXTRACTION_KEYS = Object.freeze([
   'moduleNamespace',
   'dataNamespace',
   'objectStoragePrefix',
-  'apiNamespace'
+  'apiNamespace',
 ]);
 
 const MODULES = Object.freeze({
@@ -51,7 +51,10 @@ const MODULES = Object.freeze({
     kind: 'consumer-comfort-system-brand',
     ownershipModel: PRODUCT_BOUNDARY,
     defaultDeploymentMode: DEPLOYMENT_MODES.RHAUTT_PORTAL_EMBEDDED,
-    supportedDeploymentModes: [DEPLOYMENT_MODES.RHAUTT_PORTAL_EMBEDDED, DEPLOYMENT_MODES.STANDALONE],
+    supportedDeploymentModes: [
+      DEPLOYMENT_MODES.RHAUTT_PORTAL_EMBEDDED,
+      DEPLOYMENT_MODES.STANDALONE,
+    ],
     standaloneAliases: ['/rysnova', '/rysnova-ai', '/rysnova-diagnosis'],
     embeddedEntry: '/pain-diagnosis.html',
     customerEntry: '/customer-share.html',
@@ -80,12 +83,13 @@ const MODULES = Object.freeze({
       standaloneDatabaseTarget: 'rysnova-owned-postgres-schema-plus-mongodb-namespace',
       extractionProofRequired: true,
       futureStandaloneProductReady: true,
-      extractionPlan: 'extract-by-product_data_namespace-moduleNamespace-dataNamespace-objectStoragePrefix'
+      extractionPlan:
+        'extract-by-product_data_namespace-moduleNamespace-dataNamespace-objectStoragePrefix',
     }),
     portalIntegration: Object.freeze({
       embeddedInRhauttPortal: true,
       embeddedEntry: '/pain-diagnosis.html',
-      customerEntry: '/customer-share.html'
+      customerEntry: '/customer-share.html',
     }),
     standaloneProductization: Object.freeze({
       launchable: true,
@@ -95,7 +99,7 @@ const MODULES = Object.freeze({
       domainStrategy: STANDALONE_DOMAIN_STRATEGY,
       standaloneDomainTargets: ['pending-dedicated-rysnova-domain-or-subdomain'],
       externalDomainProofRequired: true,
-      databaseExtractionReady: true
+      databaseExtractionReady: true,
     }),
     dataBoundary: Object.freeze({
       postgresRegistry: 'rhautt_nexus.product_modules',
@@ -126,14 +130,15 @@ const MODULES = Object.freeze({
       postgresPartitionKey: 'product_data_namespace',
       mongodbNamespace: 'DiagnosisReport.moduleNamespace=rysnova',
       independentDatabaseReady: true,
-      extractionPlan: 'extract-by-product_data_namespace-moduleNamespace-dataNamespace-objectStoragePrefix'
+      extractionPlan:
+        'extract-by-product_data_namespace-moduleNamespace-dataNamespace-objectStoragePrefix',
     }),
     source: 'rysnova-ai-diagnosis',
     legacySources: ['rysnova-ai-diagnosis'],
     channel: 'rysnova-public-diagnosis',
     legacyChannels: ['rysnova-public-diagnosis'],
     reportType: 'rysnova-ai-diagnosis-report',
-    legacyReportTypes: ['rysnova-ai-diagnosis-report']
+    legacyReportTypes: ['rysnova-ai-diagnosis-report'],
   }),
   sharedPlatform: Object.freeze({
     id: MODULE_IDS.RHAUTT_SHARED_PLATFORM,
@@ -142,8 +147,8 @@ const MODULES = Object.freeze({
     apiNamespace: '/api/v2',
     displayName: 'Rhautt shared platform',
     kind: 'shared-foundation',
-    defaultDeploymentMode: DEPLOYMENT_MODES.SHARED_PLATFORM
-  })
+    defaultDeploymentMode: DEPLOYMENT_MODES.SHARED_PLATFORM,
+  }),
 });
 
 function resolveDeploymentMode(value, fallback = DEPLOYMENT_MODES.RHAUTT_PORTAL_EMBEDDED) {
@@ -155,11 +160,14 @@ function resolveModuleId(value, fallback = MODULE_IDS.RHAUTT_SHARED_PLATFORM) {
 }
 
 function getModuleById(moduleId) {
-  return Object.values(MODULES).find(module => module.id === moduleId) || MODULES.sharedPlatform;
+  return Object.values(MODULES).find((module) => module.id === moduleId) || MODULES.sharedPlatform;
 }
 
 function productModuleContext(input = {}) {
-  const productModuleId = resolveModuleId(input.productModuleId || input.moduleId, MODULE_IDS.RHAUTT_SHARED_PLATFORM);
+  const productModuleId = resolveModuleId(
+    input.productModuleId || input.moduleId,
+    MODULE_IDS.RHAUTT_SHARED_PLATFORM
+  );
   const module = getModuleById(productModuleId);
   return {
     productModuleId,
@@ -168,16 +176,19 @@ function productModuleContext(input = {}) {
       module.defaultDeploymentMode || DEPLOYMENT_MODES.SHARED_PLATFORM
     ),
     productNamespace: module.namespace,
-    productDataNamespace: module.dataNamespace
+    productDataNamespace: module.dataNamespace,
   };
 }
 
 function rysnovaModuleContext(input = {}) {
   return {
     moduleId: resolveModuleId(input.moduleId, MODULES.rysnova.id),
-    moduleDeploymentMode: resolveDeploymentMode(input.moduleDeploymentMode, MODULES.rysnova.defaultDeploymentMode),
+    moduleDeploymentMode: resolveDeploymentMode(
+      input.moduleDeploymentMode,
+      MODULES.rysnova.defaultDeploymentMode
+    ),
     moduleNamespace: MODULES.rysnova.namespace,
-    dataNamespace: MODULES.rysnova.dataNamespace
+    dataNamespace: MODULES.rysnova.dataNamespace,
   };
 }
 
@@ -199,5 +210,5 @@ module.exports = {
   resolveModuleId,
   getModuleById,
   productModuleContext,
-  rysnovaModuleContext
+  rysnovaModuleContext,
 };

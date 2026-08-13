@@ -24,7 +24,11 @@ function arg(name, fallback) {
 const PORT = Number(process.env.PORT || arg('--port', '4011'));
 const BASE = normalizeBase(arg('--base', process.env.EVERHOT_BASE_PATH || ''));
 const PUBLIC = path.join(__dirname, '..', 'public');
-const API_TARGET = (process.env.EVERHOT_API_TARGET || process.env.NEXUS_API_ORIGIN || 'http://localhost:5500').replace(/\/+$/, '');
+const API_TARGET = (
+  process.env.EVERHOT_API_TARGET ||
+  process.env.NEXUS_API_ORIGIN ||
+  'http://localhost:5500'
+).replace(/\/+$/, '');
 const mediaOrigin = createMediaOrigin({ publicDir: PUBLIC });
 
 function normalizeBase(value) {
@@ -80,7 +84,9 @@ function proxyApi(req, res) {
   });
   upstream.on('error', (err) => {
     if (!res.headersSent) {
-      send(res, 502, `API proxy error: ${err.message}`, { 'Content-Type': 'text/plain; charset=utf-8' });
+      send(res, 502, `API proxy error: ${err.message}`, {
+        'Content-Type': 'text/plain; charset=utf-8',
+      });
     } else {
       res.destroy(err);
     }
@@ -94,8 +100,11 @@ const server = http.createServer((req, res) => {
     // Split query manually so raw (non-encoded) bytes in the query string
     // never break path resolution (browsers always encode, but be resilient).
     const rawPath = req.url.split('?')[0].split('#')[0];
-    try { urlPath = decodeURIComponent(rawPath); }
-    catch { urlPath = rawPath; }
+    try {
+      urlPath = decodeURIComponent(rawPath);
+    } catch {
+      urlPath = rawPath;
+    }
   } catch {
     return send(res, 400, 'Bad Request');
   }
@@ -132,13 +141,20 @@ const server = http.createServer((req, res) => {
         if (!detailTemplate) return send(res, 403, 'Forbidden');
         return fs.readFile(detailTemplate, (templateErr, templateData) => {
           if (templateErr) {
-            return send(res, 404, `404 Not Found: ${urlPath}`, { 'Content-Type': 'text/plain; charset=utf-8' });
+            return send(res, 404, `404 Not Found: ${urlPath}`, {
+              'Content-Type': 'text/plain; charset=utf-8',
+            });
           }
-          send(res, 200, templateData, { 'Content-Type': TYPES['.html'], 'Cache-Control': 'no-store' });
+          send(res, 200, templateData, {
+            'Content-Type': TYPES['.html'],
+            'Cache-Control': 'no-store',
+          });
         });
       }
       if (readErr) {
-        return send(res, 404, `404 Not Found: ${urlPath}`, { 'Content-Type': 'text/plain; charset=utf-8' });
+        return send(res, 404, `404 Not Found: ${urlPath}`, {
+          'Content-Type': 'text/plain; charset=utf-8',
+        });
       }
       const ext = path.extname(filePath).toLowerCase();
       const headers = { 'Content-Type': TYPES[ext] || 'application/octet-stream' };

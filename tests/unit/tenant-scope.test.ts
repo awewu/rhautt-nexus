@@ -14,23 +14,27 @@ describe('Tenant scope validation (isValidScope)', () => {
   });
 
   it('accepts UUID-format ids', () => {
-    expect(isValidScope({
-      userId: '550e8400-e29b-41d4-a716-446655440000',
-      tenantId: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
-      dealerId: null,
-      storeId: null,
-      customerId: null,
-    })).toBe(true);
+    expect(
+      isValidScope({
+        userId: '550e8400-e29b-41d4-a716-446655440000',
+        tenantId: '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+        dealerId: null,
+        storeId: null,
+        customerId: null,
+      })
+    ).toBe(true);
   });
 
   it('accepts Mongo ObjectId-format ids', () => {
-    expect(isValidScope({
-      userId: '507f1f77bcf86cd799439011',
-      tenantId: '507f1f77bcf86cd799439012',
-      dealerId: null,
-      storeId: null,
-      customerId: null,
-    })).toBe(true);
+    expect(
+      isValidScope({
+        userId: '507f1f77bcf86cd799439011',
+        tenantId: '507f1f77bcf86cd799439012',
+        dealerId: null,
+        storeId: null,
+        customerId: null,
+      })
+    ).toBe(true);
   });
 
   it('rejects missing tenantId', () => {
@@ -58,20 +62,24 @@ describe('Tenant scope validation (isValidScope)', () => {
   });
 
   it('accepts null for optional scope fields (dealerId, storeId, customerId)', () => {
-    expect(isValidScope({
-      userId: 'user-001',
-      tenantId: 'tenant-001',
-      dealerId: null,
-      storeId: null,
-      customerId: null,
-    })).toBe(true);
+    expect(
+      isValidScope({
+        userId: 'user-001',
+        tenantId: 'tenant-001',
+        dealerId: null,
+        storeId: null,
+        customerId: null,
+      })
+    ).toBe(true);
   });
 
   it('accepts undefined for optional scope fields', () => {
-    expect(isValidScope({
-      userId: 'user-001',
-      tenantId: 'tenant-001',
-    })).toBe(true);
+    expect(
+      isValidScope({
+        userId: 'user-001',
+        tenantId: 'tenant-001',
+      })
+    ).toBe(true);
   });
 
   it('rejects empty-string for optional dealerId', () => {

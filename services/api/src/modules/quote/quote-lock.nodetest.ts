@@ -25,7 +25,9 @@ function svcWith(quote: Partial<QuotationEntity>, guardrail: any = PASS) {
 
 test('lockQuotation: draft → locked，冻结价格快照并置 lockedVersion=1', async () => {
   const { svc } = svcWith({
-    id: 'q1', tenantId: T, status: 'draft',
+    id: 'q1',
+    tenantId: T,
+    status: 'draft',
     items: [{ sku: 'HW-1', name: '热水器', price: 8000, quantity: 1 }],
   });
   const saved = await svc.lockQuotation(USER, 'q1');
@@ -38,7 +40,9 @@ test('lockQuotation: draft → locked，冻结价格快照并置 lockedVersion=1
 
 test('lockQuotation: 已锁 → 幂等返回，不再自增 lockedVersion', async () => {
   const { svc } = svcWith({
-    id: 'q1', tenantId: T, status: 'locked',
+    id: 'q1',
+    tenantId: T,
+    status: 'locked',
     items: [{ sku: 'HW-1', price: 8000, quantity: 1 }],
     quotationLock: { locked: true, lockedVersion: 1 },
   });
@@ -49,7 +53,7 @@ test('lockQuotation: 已锁 → 幂等返回，不再自增 lockedVersion', asyn
 test('lockQuotation: 护栏 block → 抛错且不落锁', async () => {
   const { svc, repo } = svcWith(
     { id: 'q1', tenantId: T, status: 'draft', items: [{ sku: 'X', price: 1, quantity: 1 }] },
-    { blocked: true, passed: false, violations: [{ code: 'below_cost' }], facts: {} },
+    { blocked: true, passed: false, violations: [{ code: 'below_cost' }], facts: {} }
   );
   await assert.rejects(() => svc.lockQuotation(USER, 'q1'), /价格护栏/);
   assert.notEqual(repo.rows[0].status, 'locked', 'block 时不得落锁');
@@ -63,7 +67,9 @@ test('lockQuotation: 报价不存在 → 抛错', async () => {
 
 test('快照不可变：锁后改动源报价项价格，不影响已冻结快照', async () => {
   const { svc, repo } = svcWith({
-    id: 'q1', tenantId: T, status: 'draft',
+    id: 'q1',
+    tenantId: T,
+    status: 'draft',
     items: [{ sku: 'HW-1', price: 8000, quantity: 1 }],
   });
   const saved = await svc.lockQuotation(USER, 'q1');

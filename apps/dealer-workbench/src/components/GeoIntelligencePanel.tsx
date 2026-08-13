@@ -14,13 +14,25 @@ import { growthGeo } from '../lib/api';
 
 // 策略库画像直接来自后端 getStrategyWeights（geo-strategies.ts 单一真相源 + 实验 lift 学到的权重）
 interface StrategyRow {
-  key: string; label: string; evidence: string; kinds: string[];
-  alwaysOn: boolean; base: number; learnedDelta: number; effective: number; experiments: number;
+  key: string;
+  label: string;
+  evidence: string;
+  kinds: string[];
+  alwaysOn: boolean;
+  base: number;
+  learnedDelta: number;
+  effective: number;
+  experiments: number;
   /** 三层收缩来源：brand=学自本品牌 / category=继承品类经验 / none=尚无数据 */
   source?: 'brand' | 'category' | 'none';
-  brandExperiments?: number; categoryExperiments?: number;
+  brandExperiments?: number;
+  categoryExperiments?: number;
 }
-interface EvoSummary { scoredExperiments: number; learnedStrategies: number; inheritedFromCategory?: number }
+interface EvoSummary {
+  scoredExperiments: number;
+  learnedStrategies: number;
+  inheritedFromCategory?: number;
+}
 
 const SOURCE_META: Record<string, { label: string; tone: string }> = {
   brand: { label: '学自本品牌', tone: 'var(--success)' },
@@ -34,27 +46,41 @@ const ZONE_META: Record<string, { label: string; tone: string }> = {
   red: { label: '永不自动', tone: 'var(--danger)' },
 };
 
-interface ActionDef { id: string; label: string; objectType: string; zone: string }
+interface ActionDef {
+  id: string;
+  label: string;
+  objectType: string;
+  zone: string;
+}
 
 export function GeoIntelligencePanel({ brandSlug = 'rheem' }: { brandSlug?: string }) {
   const [strategies, setStrategies] = useState<StrategyRow[]>([]);
-  const [summary, setSummary] = useState<EvoSummary>({ scoredExperiments: 0, learnedStrategies: 0 });
+  const [summary, setSummary] = useState<EvoSummary>({
+    scoredExperiments: 0,
+    learnedStrategies: 0,
+  });
   const [actions, setActions] = useState<ActionDef[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
       const [w, a] = await Promise.all([growthGeo.strategyWeights(brandSlug), growthGeo.actions()]);
       const d = w?.data || w || {};
       setStrategies((d.strategies || []) as StrategyRow[]);
       setSummary((d.summary || { scoredExperiments: 0, learnedStrategies: 0 }) as EvoSummary);
       setActions((a?.actions || a?.data?.actions || []) as ActionDef[]);
-    } catch (e) { setError(e instanceof Error ? e.message : '加载失败'); }
-    finally { setLoading(false); }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '加载失败');
+    } finally {
+      setLoading(false);
+    }
   }, [brandSlug]);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
     <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
@@ -70,54 +96,143 @@ export function GeoIntelligencePanel({ brandSlug = 'rheem' }: { brandSlug?: stri
           {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}刷新
         </button>
       </div>
-      {error ? <div className="inset" style={{ color: 'var(--danger)', fontSize: 13 }}>{error}</div> : null}
+      {error ? (
+        <div className="inset" style={{ color: 'var(--danger)', fontSize: 13 }}>
+          {error}
+        </div>
+      ) : null}
 
       {/* ① 策略库 + 自进化权重 */}
       <div className="inset" style={{ display: 'grid', gap: 10, padding: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Layers size={16} style={{ color: 'var(--brand)' }} />
-          <strong style={{ fontSize: 14, color: 'var(--t-strong)' }}>研究支撑策略库 · 自进化权重</strong>
-          <span className="badge" style={{ marginLeft: 'auto', fontSize: 10, color: summary.scoredExperiments ? 'var(--success)' : 'var(--t-tertiary)', borderColor: summary.scoredExperiments ? 'var(--success)' : 'var(--border)' }}>
+          <strong style={{ fontSize: 14, color: 'var(--t-strong)' }}>
+            研究支撑策略库 · 自进化权重
+          </strong>
+          <span
+            className="badge"
+            style={{
+              marginLeft: 'auto',
+              fontSize: 10,
+              color: summary.scoredExperiments ? 'var(--success)' : 'var(--t-tertiary)',
+              borderColor: summary.scoredExperiments ? 'var(--success)' : 'var(--border)',
+            }}
+          >
             {summary.scoredExperiments
               ? `已从 ${summary.scoredExperiments} 个已验证实验学习 · ${summary.learnedStrategies} 策略被调权${summary.inheritedFromCategory ? ` · ${summary.inheritedFromCategory} 项继承品类经验` : ''}`
               : '尚未学习（无已验证 lift 实验）'}
           </span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: 8 }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))',
+            gap: 8,
+          }}
+        >
           {strategies.map((s) => {
             const d = s.learnedDelta;
             return (
-              <div key={s.key} style={{ border: '1px solid var(--surface-3)', borderRadius: 8, padding: '10px 12px', display: 'grid', gap: 4 }}>
+              <div
+                key={s.key}
+                style={{
+                  border: '1px solid var(--surface-3)',
+                  borderRadius: 8,
+                  padding: '10px 12px',
+                  display: 'grid',
+                  gap: 4,
+                }}
+              >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--t-strong)' }}>{s.label}</span>
-                  {s.alwaysOn ? <span className="badge" style={{ fontSize: 10, color: 'var(--success)', borderColor: 'var(--success)' }}>保底</span> : null}
+                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--t-strong)' }}>
+                    {s.label}
+                  </span>
+                  {s.alwaysOn ? (
+                    <span
+                      className="badge"
+                      style={{
+                        fontSize: 10,
+                        color: 'var(--success)',
+                        borderColor: 'var(--success)',
+                      }}
+                    >
+                      保底
+                    </span>
+                  ) : null}
                   {d !== 0 ? (
-                    <span className="badge" style={{ fontSize: 10, marginLeft: 'auto', color: d > 0 ? 'var(--success)' : 'var(--danger)' }}>
-                      <TrendingUp size={10} /> {d > 0 ? '+' : ''}{d}
+                    <span
+                      className="badge"
+                      style={{
+                        fontSize: 10,
+                        marginLeft: 'auto',
+                        color: d > 0 ? 'var(--success)' : 'var(--danger)',
+                      }}
+                    >
+                      <TrendingUp size={10} /> {d > 0 ? '+' : ''}
+                      {d}
                     </span>
                   ) : null}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, fontVariantNumeric: 'tabular-nums' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    gap: 6,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
                   <span style={{ fontSize: 11, color: 'var(--t-tertiary)' }}>权重</span>
-                  <span style={{ fontSize: 12, color: 'var(--t-tertiary)', textDecoration: d !== 0 ? 'line-through' : 'none' }}>{s.base}</span>
-                  {d !== 0 ? <><span style={{ fontSize: 11, color: 'var(--t-tertiary)' }}>→</span><strong style={{ fontSize: 14, color: 'var(--brand)' }}>{s.effective}</strong></> : null}
+                  <span
+                    style={{
+                      fontSize: 12,
+                      color: 'var(--t-tertiary)',
+                      textDecoration: d !== 0 ? 'line-through' : 'none',
+                    }}
+                  >
+                    {s.base}
+                  </span>
+                  {d !== 0 ? (
+                    <>
+                      <span style={{ fontSize: 11, color: 'var(--t-tertiary)' }}>→</span>
+                      <strong style={{ fontSize: 14, color: 'var(--brand)' }}>{s.effective}</strong>
+                    </>
+                  ) : null}
                   {s.source && s.source !== 'none' ? (
-                    <span style={{ fontSize: 10.5, color: SOURCE_META[s.source].tone, marginLeft: 'auto' }}>
+                    <span
+                      style={{
+                        fontSize: 10.5,
+                        color: SOURCE_META[s.source].tone,
+                        marginLeft: 'auto',
+                      }}
+                    >
                       {SOURCE_META[s.source].label}
-                      {s.source === 'brand' && s.brandExperiments ? `(${s.brandExperiments})` : null}
-                      {s.source === 'category' && s.categoryExperiments ? `(${s.categoryExperiments})` : null}
+                      {s.source === 'brand' && s.brandExperiments
+                        ? `(${s.brandExperiments})`
+                        : null}
+                      {s.source === 'category' && s.categoryExperiments
+                        ? `(${s.categoryExperiments})`
+                        : null}
                     </span>
-                  ) : (s.experiments ? <span style={{ fontSize: 11, color: 'var(--t-tertiary)', marginLeft: 'auto' }}>{s.experiments} 实验</span> : null)}
+                  ) : s.experiments ? (
+                    <span style={{ fontSize: 11, color: 'var(--t-tertiary)', marginLeft: 'auto' }}>
+                      {s.experiments} 实验
+                    </span>
+                  ) : null}
                 </div>
                 <span style={{ fontSize: 11.5, color: 'var(--t-tertiary)' }}>{s.evidence}</span>
               </div>
             );
           })}
-          {!strategies.length ? <p style={{ fontSize: 13, color: 'var(--t-tertiary)' }}>{loading ? '加载中…' : '无策略数据'}</p> : null}
+          {!strategies.length ? (
+            <p style={{ fontSize: 13, color: 'var(--t-tertiary)' }}>
+              {loading ? '加载中…' : '无策略数据'}
+            </p>
+          ) : null}
         </div>
         <p style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>
-          有效权重 = 基础权重 + 三层收缩（研究基线 → 品类 → 品牌）学到的增减。
-          新品牌开局<strong style={{ color: 'var(--brand)' }}>继承品类经验</strong>而非从零；小样本由先验主导，避免单次实验噪声冒充经验。
+          有效权重 = 基础权重 + 三层收缩（研究基线 → 品类 → 品牌）学到的增减。 新品牌开局
+          <strong style={{ color: 'var(--brand)' }}>继承品类经验</strong>
+          而非从零；小样本由先验主导，避免单次实验噪声冒充经验。
         </p>
       </div>
 
@@ -125,22 +240,47 @@ export function GeoIntelligencePanel({ brandSlug = 'rheem' }: { brandSlug?: stri
       <div className="inset" style={{ display: 'grid', gap: 10, padding: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <ShieldCheck size={16} style={{ color: 'var(--brand)' }} />
-          <strong style={{ fontSize: 14, color: 'var(--t-strong)' }}>受治理动作引擎（Foundry 式）</strong>
-          <span style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>人与 AI Agent 走同一套治理闸</span>
+          <strong style={{ fontSize: 14, color: 'var(--t-strong)' }}>
+            受治理动作引擎（Foundry 式）
+          </strong>
+          <span style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>
+            人与 AI Agent 走同一套治理闸
+          </span>
         </div>
         <div style={{ display: 'grid', gap: 8 }}>
           {actions.map((a) => {
             const zm = ZONE_META[a.zone] || { label: a.zone, tone: 'var(--t-secondary)' };
             return (
-              <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid var(--surface-3)', borderRadius: 8, padding: '10px 12px' }}>
+              <div
+                key={a.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  border: '1px solid var(--surface-3)',
+                  borderRadius: 8,
+                  padding: '10px 12px',
+                }}
+              >
                 <Cpu size={14} style={{ color: 'var(--t-tertiary)' }} />
-                <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--t-strong)' }}>{a.label}</span>
+                <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--t-strong)' }}>
+                  {a.label}
+                </span>
                 <code style={{ fontSize: 11, color: 'var(--t-tertiary)' }}>{a.id}</code>
-                <span className="badge" style={{ marginLeft: 'auto', color: zm.tone, borderColor: zm.tone }}>{zm.label}</span>
+                <span
+                  className="badge"
+                  style={{ marginLeft: 'auto', color: zm.tone, borderColor: zm.tone }}
+                >
+                  {zm.label}
+                </span>
               </div>
             );
           })}
-          {!actions.length ? <p style={{ fontSize: 13, color: 'var(--t-tertiary)' }}>{loading ? '加载中…' : '无已注册动作'}</p> : null}
+          {!actions.length ? (
+            <p style={{ fontSize: 13, color: 'var(--t-tertiary)' }}>
+              {loading ? '加载中…' : '无已注册动作'}
+            </p>
+          ) : null}
         </div>
       </div>
     </section>

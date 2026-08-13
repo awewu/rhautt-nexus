@@ -5,32 +5,36 @@
 > 每项标注【真环境门槛】= 需生产/网关/密钥才能真正生效(本机无法验证实现)。
 
 ## P0 · 让"执行侧"卖点立得住(补最短板)
-| # | 能力 | 现状 | 补齐动作 | 代码接缝 / 门槛 |
-|---|---|---|---|---|
-| P0-1 | **自动多引擎探测** | 🟡 网关支持 `teamProvider` 多模型,但探测把它写死 env 默认,UI 选的引擎未透传 | 把引擎参数从探测 DTO 透传到 `callHermesCenterAi` 的 `teamProvider`;`byEngine` 记真实引擎 | 接缝:`ai-gateway.service.ts::callHermesCenterAi`(teamProvider 现取 `HERMES_CENTER_AI_PROVIDER` env)+ `growth.service.ts::runHermesCenterAiProbe`。**门槛**:Tandem 网关须真配 doubao/deepseek/gemini/chatgpt 等模型 + 鉴权 |
-| P0-2 | **真 AI provider(内容生成)** | 🟡 有 Anthropic + Hermes 网关路径,未配 Key 走确定性兜底 | 生产注入 `ANTHROPIC_API_KEY` 或 `HERMES_CENTER_AI_*`;`model` 如实标注 | 接缝已就位(`generateDraft`);**门槛**:密钥(见 NEXUS-REAL-ENV-CHECKLIST) |
-| P0-3 | **来源级引用情报**(Profound 强项) | 🟡 有 citations 字段,未做来源聚合 | 聚合"哪些 URL/来源被 AI 引用"→ 排行 + 我方 vs 竞品来源 | 需探测返回 citations(网关透传)→ 新 read model |
+
+| #    | 能力                              | 现状                                                                        | 补齐动作                                                                                 | 代码接缝 / 门槛                                                                                                                                                                                                           |
+| ---- | --------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P0-1 | **自动多引擎探测**                | 🟡 网关支持 `teamProvider` 多模型,但探测把它写死 env 默认,UI 选的引擎未透传 | 把引擎参数从探测 DTO 透传到 `callHermesCenterAi` 的 `teamProvider`;`byEngine` 记真实引擎 | 接缝:`ai-gateway.service.ts::callHermesCenterAi`(teamProvider 现取 `HERMES_CENTER_AI_PROVIDER` env)+ `growth.service.ts::runHermesCenterAiProbe`。**门槛**:Tandem 网关须真配 doubao/deepseek/gemini/chatgpt 等模型 + 鉴权 |
+| P0-2 | **真 AI provider(内容生成)**      | 🟡 有 Anthropic + Hermes 网关路径,未配 Key 走确定性兜底                     | 生产注入 `ANTHROPIC_API_KEY` 或 `HERMES_CENTER_AI_*`;`model` 如实标注                    | 接缝已就位(`generateDraft`);**门槛**:密钥(见 NEXUS-REAL-ENV-CHECKLIST)                                                                                                                                                    |
+| P0-3 | **来源级引用情报**(Profound 强项) | 🟡 有 citations 字段,未做来源聚合                                           | 聚合"哪些 URL/来源被 AI 引用"→ 排行 + 我方 vs 竞品来源                                   | 需探测返回 citations(网关透传)→ 新 read model                                                                                                                                                                             |
 
 ## P1 · 竞争力对位
-| # | 能力 | 现状 | 补齐动作 |
-|---|---|---|---|
-| P1-1 | 引擎覆盖广度(6+) | 🟡 覆盖窄 | 随 P0-1 扩到 ChatGPT/Gemini/Perplexity/Claude/Copilot/AI Overview |
-| P1-2 | 情感/准确性监测 | 🟡 有 sentiment/hallucination 雏形 | 补品牌事实准确性核对(对齐产品事实基座) |
-| P1-3 | **闭环 lift 实验** ⚠️ **更正 2026-08-13：非独有,且统计严谨度落后** | 🟡 仅前后对比 | 升级为 test/control 主题分组 + 中断时间序列 + 95% CI + 最小样本下限(对标 Siftly/TopSlot/LLM Pulse,见 COMPETITIVE-ANALYSIS §2.1d) |
-| P1-4 | **自进化策略库** ⚠️ **更正 2026-08-13：非独有**(Viali 已把获胜模式回流内容简报) | ✅ 可观测(evolution-B) | 喂真实数据;并按**引擎维度**分化权重(Eastbound 实测三引擎来源结构 Jaccard 仅 0.20–0.30) |
-| P1-5 | AI 引荐流量归因 | ❌ | 接 UTM/referrer → 归因读模型,证明 GEO→线索 |
-| P1-6 | **规格侧(specifier)场景词表** | ❌ | ASHRAE 90.1 / AHRI 340-360 / SEER2 / COP / ISO 16890 + MEP 工程师/设计院角色;9 域内核唯一能碾压通用工具的战场 |
-| P1-7 | **MCP 出口** | ❌ | 事实基座只读 + 受治理动作写(走同一治理闸)经 MCP 暴露;Profound/Yext 均已 MCP 化 |
+
+| #    | 能力                                                                            | 现状                               | 补齐动作                                                                                                                         |
+| ---- | ------------------------------------------------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| P1-1 | 引擎覆盖广度(6+)                                                                | 🟡 覆盖窄                          | 随 P0-1 扩到 ChatGPT/Gemini/Perplexity/Claude/Copilot/AI Overview                                                                |
+| P1-2 | 情感/准确性监测                                                                 | 🟡 有 sentiment/hallucination 雏形 | 补品牌事实准确性核对(对齐产品事实基座)                                                                                           |
+| P1-3 | **闭环 lift 实验** ⚠️ **更正 2026-08-13：非独有,且统计严谨度落后**              | 🟡 仅前后对比                      | 升级为 test/control 主题分组 + 中断时间序列 + 95% CI + 最小样本下限(对标 Siftly/TopSlot/LLM Pulse,见 COMPETITIVE-ANALYSIS §2.1d) |
+| P1-4 | **自进化策略库** ⚠️ **更正 2026-08-13：非独有**(Viali 已把获胜模式回流内容简报) | ✅ 可观测(evolution-B)             | 喂真实数据;并按**引擎维度**分化权重(Eastbound 实测三引擎来源结构 Jaccard 仅 0.20–0.30)                                           |
+| P1-5 | AI 引荐流量归因                                                                 | ❌                                 | 接 UTM/referrer → 归因读模型,证明 GEO→线索                                                                                       |
+| P1-6 | **规格侧(specifier)场景词表**                                                   | ❌                                 | ASHRAE 90.1 / AHRI 340-360 / SEER2 / COP / ISO 16890 + MEP 工程师/设计院角色;9 域内核唯一能碾压通用工具的战场                    |
+| P1-7 | **MCP 出口**                                                                    | ❌                                 | 事实基座只读 + 受治理动作写(走同一治理闸)经 MCP 暴露;Profound/Yext 均已 MCP 化                                                   |
 
 ## P2 · 规模化 / 企业级
-| # | 能力 | 现状 | 补齐动作 |
-|---|---|---|---|
-| P2-1 | 跨租户匿名基准 ⚠️ **规模已不可比**(Profound Index 15 亿 prompt / Yext 每月 100 亿信号) | ❌ | **不追规模**;仅在暖通垂直做窄基准 |
-| P2-4 | **产品事实 → Agentic Commerce feed** | ❌ | D2 产出 OpenAI ACP 兼容 feed(GTIN/MPN/价格/可得性),进入 AI 导购供给侧;我方资产结构优于纯营销工具 |
-| P2-2 | 合规认证(Profound SOC2) | 🟡 有 RLS/审计 | 走 SOC2/等保流程 |
-| P2-3 | 定时探测调度 + 告警 | 🟡 手动/排队 | 定时任务 + 出现率下滑告警 |
+
+| #    | 能力                                                                                   | 现状           | 补齐动作                                                                                         |
+| ---- | -------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------ |
+| P2-1 | 跨租户匿名基准 ⚠️ **规模已不可比**(Profound Index 15 亿 prompt / Yext 每月 100 亿信号) | ❌             | **不追规模**;仅在暖通垂直做窄基准                                                                |
+| P2-4 | **产品事实 → Agentic Commerce feed**                                                   | ❌             | D2 产出 OpenAI ACP 兼容 feed(GTIN/MPN/价格/可得性),进入 AI 导购供给侧;我方资产结构优于纯营销工具 |
+| P2-2 | 合规认证(Profound SOC2)                                                                | 🟡 有 RLS/审计 | 走 SOC2/等保流程                                                                                 |
+| P2-3 | 定时探测调度 + 告警                                                                    | 🟡 手动/排队   | 定时任务 + 出现率下滑告警                                                                        |
 
 ## 排期建议（2026-08-13 依 §2.1c–f 五条更正重排）
+
 1. **先 P0-1 + P0-2**(真探测数据):否则 lift/竞品时序/自进化/SWOT 全是"机制在、数据无"。
    **新增可选路径**:中文引擎 API 供给方(GEO Insights 8 平台、Citany)可直接作探测后端,**不必等自建爬虫**。
 2. **P1-3 统计严谨度**(投入产出比最高):我方已有"小样本不出结论"的诚实设计,**补对照组 + 置信区间即可从落后转为反超**。

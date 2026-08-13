@@ -7,6 +7,7 @@
 请执行 `docs/dev/official-site-product-detail-issues/01-data-model-and-api-contract.md`。
 
 要求：
+
 - 先从产品/官网产品相关路径入手，不要全仓库无差别搜索。
 - 找出现有产品模型、DTO、保存接口、详情读取接口和官网产品详情接口。
 - 增加官网产品详情富文本字段，字段优先命名为 `officialDetailHtml`，如果现有命名体系明显不同，请沿用现有体系并在总结中说明。
@@ -19,6 +20,7 @@
 请执行 `docs/dev/official-site-product-detail-issues/02-admin-rich-text-editor.md`，可以先做 UI 骨架并预留 `officialDetailHtml` 字段接入点。
 
 要求：
+
 - 先定位当前产品新增/编辑页和现有富文本/上传组件。
 - 在产品表单中增加“官网产品详情”富文本区域。
 - 文案明确：推荐上传宽度 750px 的详情图片，高度不限。
@@ -32,6 +34,7 @@
 请执行 `docs/dev/official-site-product-detail-issues/05-official-site-detail-page-rendering.md`，可以先用现有产品详情接口或 mock 字段做前台骨架。
 
 要求：
+
 - 先定位官网产品列表、点击跳转逻辑、产品详情页或可新增的详情页位置。
 - 实现产品点击进入官网产品详情页的路径。
 - 详情页预留读取 `officialDetailHtml` 的渲染区域。

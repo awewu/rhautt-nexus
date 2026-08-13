@@ -17,7 +17,12 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const args = process.argv.slice(2);
-const PORT = Number((() => { const i = args.indexOf('--port'); return i > -1 ? args[i + 1] : 4180; })());
+const PORT = Number(
+  (() => {
+    const i = args.indexOf('--port');
+    return i > -1 ? args[i + 1] : 4180;
+  })()
+);
 
 const registry = JSON.parse(readFileSync(join(ROOT, 'brand-registry.json'), 'utf8'));
 const SITES = (registry.brands || [])
@@ -26,10 +31,18 @@ const SITES = (registry.brands || [])
   .filter((s) => existsSync(s.dir));
 
 const MIME = {
-  '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8',
-  '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
-  '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8',
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
+  '.woff2': 'font/woff2',
+  '.txt': 'text/plain; charset=utf-8',
   '.xml': 'application/xml; charset=utf-8',
 };
 
@@ -48,9 +61,11 @@ function tryFile(base, rel) {
 function indexHtml() {
   const cards = SITES.map((s) => {
     const tech = existsSync(join(s.dir, 'tech', 'index.html'));
-    return `<li><a href="/${s.slug}/">${s.name}</a> <code>${s.slug}</code>`
-      + (tech ? ` — <a href="/${s.slug}/tech/">技术标准速查</a>` : '')
-      + `<br><small>${['/', '/products/', '/tech/'].filter((p) => tryFile(s.dir, p)).join('　')}</small></li>`;
+    return (
+      `<li><a href="/${s.slug}/">${s.name}</a> <code>${s.slug}</code>` +
+      (tech ? ` — <a href="/${s.slug}/tech/">技术标准速查</a>` : '') +
+      `<br><small>${['/', '/products/', '/tech/'].filter((p) => tryFile(s.dir, p)).join('　')}</small></li>`
+    );
   }).join('\n');
   // 走品牌 token，不写死 hex（宪章 §5.5.6-A）——开发工具也不例外。
   return `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">
@@ -89,7 +104,12 @@ createServer((req, res) => {
   if (!site) return send(res, 404, `未知站点。<a href="/">返回列表</a>`);
   const rest = '/' + seg.slice(1).join('/');
   const f = tryFile(site.dir, rest === '/' ? '/index.html' : rest);
-  if (!f) return send(res, 404, `404: ${rest} <a href="/${site.slug}/">站点首页</a> · <a href="/">列表</a>`);
+  if (!f)
+    return send(
+      res,
+      404,
+      `404: ${rest} <a href="/${site.slug}/">站点首页</a> · <a href="/">列表</a>`
+    );
   send(res, 200, readFileSync(f), MIME[extname(f)] || 'application/octet-stream');
 }).listen(PORT, () => {
   console.log(`品牌站预览: http://localhost:${PORT}/  （${SITES.length} 站）`);

@@ -1,6 +1,6 @@
 /**
  * 严格进化机制系统 (Evolution Mechanism System)
- * 
+ *
  * 核心原则：
  * 1. 全量自检机制 - 严格完整所有需求
  * 2. 闭环改进机制 - 发现问题→修复→验证
@@ -16,7 +16,7 @@ class EvolutionMechanism {
     this.evolutionLogPath = path.join(__dirname, '../../EVOLUTION-LOG.json');
     this.taskStatePath = path.join(__dirname, '../../TASK-STATE.json');
     this.prdPath = path.join(__dirname, '../../PRD-v2.0-Final.js');
-    
+
     // 进化状态
     this.evolutionState = {
       currentRound: 0,
@@ -25,17 +25,17 @@ class EvolutionMechanism {
       issues: [],
       fixes: [],
       verifications: [],
-      evolutionHistory: []
+      evolutionHistory: [],
     };
-    
+
     // 任务状态
     this.taskState = {
       pendingTasks: [],
       inProgressTasks: [],
       completedTasks: [],
-      interruptedTasks: []
+      interruptedTasks: [],
     };
-    
+
     this.initialize();
   }
 
@@ -53,7 +53,7 @@ class EvolutionMechanism {
         console.error('❌ 进化日志加载失败，重新初始化');
       }
     }
-    
+
     // 加载任务状态
     if (fs.existsSync(this.taskStatePath)) {
       try {
@@ -64,7 +64,7 @@ class EvolutionMechanism {
         console.error('❌ 任务状态加载失败，重新初始化');
       }
     }
-    
+
     // 恢复中断的任务
     this.recoverInterruptedTasks();
   }
@@ -75,7 +75,7 @@ class EvolutionMechanism {
   recoverInterruptedTasks() {
     if (this.taskState.interruptedTasks.length > 0) {
       console.log('🔄 恢复中断的任务...');
-      this.taskState.interruptedTasks.forEach(task => {
+      this.taskState.interruptedTasks.forEach((task) => {
         console.log(`  - 恢复任务: ${task.id} - ${task.description}`);
         this.taskState.inProgressTasks.push(task);
       });
@@ -89,7 +89,7 @@ class EvolutionMechanism {
    */
   runFullSelfCheck() {
     console.log('\n🔍 开始全量自检...');
-    
+
     const checkResult = {
       timestamp: new Date().toISOString(),
       round: this.evolutionState.currentRound + 1,
@@ -107,17 +107,17 @@ class EvolutionMechanism {
         multiTerminal: this.checkMultiTerminal(),
         frontendManagement: this.checkFrontendManagement(),
         adminBackend: this.checkAdminBackend(),
-        logManagement: this.checkLogManagement()
+        logManagement: this.checkLogManagement(),
       },
       issues: [],
-      score: 0
+      score: 0,
     };
-    
+
     // 计算总分
     const totalChecks = Object.keys(checkResult.checks).length;
-    const passedChecks = Object.values(checkResult.checks).filter(check => check.passed).length;
+    const passedChecks = Object.values(checkResult.checks).filter((check) => check.passed).length;
     checkResult.score = (passedChecks / totalChecks) * 100;
-    
+
     // 收集所有问题
     Object.entries(checkResult.checks).forEach(([key, check]) => {
       if (!check.passed) {
@@ -125,14 +125,14 @@ class EvolutionMechanism {
           category: key,
           severity: check.severity,
           description: check.description,
-          recommendations: check.recommendations
+          recommendations: check.recommendations,
         });
       }
     });
-    
+
     console.log(`✅ 全量自检完成，评分: ${checkResult.score.toFixed(2)}%`);
     console.log(`   发现问题: ${checkResult.issues.length}个`);
-    
+
     return checkResult;
   }
 
@@ -146,42 +146,50 @@ class EvolutionMechanism {
           passed: false,
           severity: 'critical',
           description: 'PRD文件不存在',
-          recommendations: ['创建PRD-v2.0-Final.js文件']
+          recommendations: ['创建PRD-v2.0-Final.js文件'],
         };
       }
-      
+
       // 清除require缓存，确保重新加载PRD文件
       delete require.cache[require.resolve(this.prdPath)];
-      
+
       const prd = require(this.prdPath);
-      
+
       // 检查PRD关键模块（PRD使用module1, module2等结构，不是modules对象）
       const requiredModules = [
-        'module1', 'module2', 'module3', 'module4', 'module5',
-        'module6', 'module7', 'module8', 'module9', 'module10'
+        'module1',
+        'module2',
+        'module3',
+        'module4',
+        'module5',
+        'module6',
+        'module7',
+        'module8',
+        'module9',
+        'module10',
       ];
-      
-      const missingModules = requiredModules.filter(module => !prd[module]);
-      
+
+      const missingModules = requiredModules.filter((module) => !prd[module]);
+
       if (missingModules.length > 0) {
         return {
           passed: false,
           severity: 'critical',
           description: `PRD缺少模块: ${missingModules.join(', ')}`,
-          recommendations: missingModules.map(m => `实现${m}模块`)
+          recommendations: missingModules.map((m) => `实现${m}模块`),
         };
       }
-      
+
       return {
         passed: true,
-        description: 'PRD符合度检查通过'
+        description: 'PRD符合度检查通过',
       };
     } catch (error) {
       return {
         passed: false,
         severity: 'critical',
         description: `PRD检查失败: ${error.message}`,
-        recommendations: ['修复PRD文件格式']
+        recommendations: ['修复PRD文件格式'],
       };
     }
   }
@@ -202,30 +210,30 @@ class EvolutionMechanism {
       { name: 'econet', file: 'EconetPricingEngine.js' },
       { name: 'voiceInteraction', file: 'VoiceInteractionEngine.js' },
       { name: 'agentCoordinator', file: 'AgentCoordinator.js' },
-      { name: 'databasePersistence', file: 'DatabasePersistenceEngine.js' }
+      { name: 'databasePersistence', file: 'DatabasePersistenceEngine.js' },
     ];
-    
+
     const missingFeatures = [];
-    
-    requiredFeatures.forEach(feature => {
+
+    requiredFeatures.forEach((feature) => {
       const enginePath = path.join(__dirname, feature.file);
       if (!fs.existsSync(enginePath)) {
         missingFeatures.push(feature.name);
       }
     });
-    
+
     if (missingFeatures.length > 0) {
       return {
         passed: false,
         severity: 'critical',
         description: `缺少功能引擎: ${missingFeatures.join(', ')}`,
-        recommendations: missingFeatures.map(f => `实现${f}引擎`)
+        recommendations: missingFeatures.map((f) => `实现${f}引擎`),
       };
     }
-    
+
     return {
       passed: true,
-      description: '功能完整性检查通过'
+      description: '功能完整性检查通过',
     };
   }
 
@@ -246,9 +254,9 @@ class EvolutionMechanism {
       '/api/econet',
       '/api/voice-interaction',
       '/api/admin/products',
-      '/api/admin/logs'
+      '/api/admin/logs',
     ];
-    
+
     // 检查server-production.js中的API定义
     const serverPath = path.join(__dirname, '../../server-production.js');
     if (!fs.existsSync(serverPath)) {
@@ -256,25 +264,25 @@ class EvolutionMechanism {
         passed: false,
         severity: 'critical',
         description: 'server-production.js不存在',
-        recommendations: ['创建server-production.js']
+        recommendations: ['创建server-production.js'],
       };
     }
-    
+
     const serverContent = fs.readFileSync(serverPath, 'utf8');
-    const missingAPIs = requiredAPIs.filter(api => !serverContent.includes(api));
-    
+    const missingAPIs = requiredAPIs.filter((api) => !serverContent.includes(api));
+
     if (missingAPIs.length > 0) {
       return {
         passed: false,
         severity: 'high',
         description: `缺少API端点: ${missingAPIs.join(', ')}`,
-        recommendations: missingAPIs.map(api => `实现${api}端点`)
+        recommendations: missingAPIs.map((api) => `实现${api}端点`),
       };
     }
-    
+
     return {
       passed: true,
-      description: 'API完整性检查通过'
+      description: 'API完整性检查通过',
     };
   }
 
@@ -291,24 +299,26 @@ class EvolutionMechanism {
       'ai-accuracy-test.html',
       'voice-interaction.html',
       'admin-dashboard.html',
-      'mobile.html'
+      'mobile.html',
     ];
-    
+
     const publicPath = path.join(__dirname, '../../public');
-    const missingPages = requiredPages.filter(page => !fs.existsSync(path.join(publicPath, page)));
-    
+    const missingPages = requiredPages.filter(
+      (page) => !fs.existsSync(path.join(publicPath, page))
+    );
+
     if (missingPages.length > 0) {
       return {
         passed: false,
         severity: 'high',
         description: `缺少前端页面: ${missingPages.join(', ')}`,
-        recommendations: missingPages.map(p => `创建${p}`)
+        recommendations: missingPages.map((p) => `创建${p}`),
       };
     }
-    
+
     return {
       passed: true,
-      description: '前端完整性检查通过'
+      description: '前端完整性检查通过',
     };
   }
 
@@ -322,13 +332,13 @@ class EvolutionMechanism {
       'ai-matching → load-calculation',
       'load-calculation → device-selection',
       'device-selection → quotation',
-      'quotation → solution-summary'
+      'quotation → solution-summary',
     ];
-    
+
     // 这里需要更详细的检查逻辑
     return {
       passed: true,
-      description: '数据流转检查通过'
+      description: '数据流转检查通过',
     };
   }
 
@@ -339,7 +349,7 @@ class EvolutionMechanism {
     // 检查工作流程的完整性
     return {
       passed: true,
-      description: '工作流程检查通过'
+      description: '工作流程检查通过',
     };
   }
 
@@ -348,11 +358,11 @@ class EvolutionMechanism {
    */
   checkUserRoles() {
     const requiredRoles = ['store_admin', 'designer', 'sales', 'hq_admin', 'rheem_official'];
-    
+
     // 检查角色权限定义
     return {
       passed: true,
-      description: '用户角色检查通过'
+      description: '用户角色检查通过',
     };
   }
 
@@ -361,31 +371,31 @@ class EvolutionMechanism {
    */
   checkPersistence() {
     const dbPath = path.join(__dirname, '../../database');
-    
+
     if (!fs.existsSync(dbPath)) {
       return {
         passed: false,
         severity: 'critical',
         description: '数据库目录不存在',
-        recommendations: ['创建数据库目录']
+        recommendations: ['创建数据库目录'],
       };
     }
-    
+
     const requiredDBFiles = ['users.json', 'solutions.json', 'products.json', 'config.json'];
-    const missingFiles = requiredDBFiles.filter(file => !fs.existsSync(path.join(dbPath, file)));
-    
+    const missingFiles = requiredDBFiles.filter((file) => !fs.existsSync(path.join(dbPath, file)));
+
     if (missingFiles.length > 0) {
       return {
         passed: false,
         severity: 'high',
         description: `缺少数据库文件: ${missingFiles.join(', ')}`,
-        recommendations: missingFiles.map(f => `创建${f}`)
+        recommendations: missingFiles.map((f) => `创建${f}`),
       };
     }
-    
+
     return {
       passed: true,
-      description: '数据持久化检查通过'
+      description: '数据持久化检查通过',
     };
   }
 
@@ -396,7 +406,7 @@ class EvolutionMechanism {
     // 检查错误处理机制
     return {
       passed: true,
-      description: '错误处理检查通过'
+      description: '错误处理检查通过',
     };
   }
 
@@ -406,19 +416,19 @@ class EvolutionMechanism {
   checkUIVICompliance() {
     const publicPath = path.join(__dirname, '../../public');
     const dualBrandPath = path.join(publicPath, 'dual-brand.css');
-    
+
     if (!fs.existsSync(dualBrandPath)) {
       return {
         passed: false,
         severity: 'high',
         description: '双品牌样式文件不存在',
-        recommendations: ['创建dual-brand.css']
+        recommendations: ['创建dual-brand.css'],
       };
     }
-    
+
     return {
       passed: true,
-      description: 'UI/VI规范检查通过'
+      description: 'UI/VI规范检查通过',
     };
   }
 
@@ -429,7 +439,7 @@ class EvolutionMechanism {
     // 检查响应式设计
     return {
       passed: true,
-      description: '多终端适配检查通过'
+      description: '多终端适配检查通过',
     };
   }
 
@@ -438,19 +448,19 @@ class EvolutionMechanism {
    */
   checkFrontendManagement() {
     const adminDashboardPath = path.join(__dirname, '../../public/admin-dashboard.html');
-    
+
     if (!fs.existsSync(adminDashboardPath)) {
       return {
         passed: false,
         severity: 'high',
         description: '管理员后台页面不存在',
-        recommendations: ['创建admin-dashboard.html']
+        recommendations: ['创建admin-dashboard.html'],
       };
     }
-    
+
     return {
       passed: true,
-      description: '前端管理功能检查通过'
+      description: '前端管理功能检查通过',
     };
   }
 
@@ -461,29 +471,29 @@ class EvolutionMechanism {
     // 检查管理员后台API
     const serverPath = path.join(__dirname, '../../server-production.js');
     const serverContent = fs.readFileSync(serverPath, 'utf8');
-    
+
     const requiredAdminAPIs = [
       '/api/admin/products',
       '/api/admin/pricing',
       '/api/admin/system-config',
       '/api/admin/users',
-      '/api/admin/backups'
+      '/api/admin/backups',
     ];
-    
-    const missingAPIs = requiredAdminAPIs.filter(api => !serverContent.includes(api));
-    
+
+    const missingAPIs = requiredAdminAPIs.filter((api) => !serverContent.includes(api));
+
     if (missingAPIs.length > 0) {
       return {
         passed: false,
         severity: 'high',
         description: `缺少管理员API: ${missingAPIs.join(', ')}`,
-        recommendations: missingAPIs.map(api => `实现${api}端点`)
+        recommendations: missingAPIs.map((api) => `实现${api}端点`),
       };
     }
-    
+
     return {
       passed: true,
-      description: '管理员后台检查通过'
+      description: '管理员后台检查通过',
     };
   }
 
@@ -494,28 +504,28 @@ class EvolutionMechanism {
     // 检查日志管理API
     const serverPath = path.join(__dirname, '../../server-production.js');
     const serverContent = fs.readFileSync(serverPath, 'utf8');
-    
+
     const requiredLogAPIs = [
       '/api/admin/logs/login',
       '/api/admin/logs/operations',
       '/api/admin/logs/errors',
-      '/api/admin/logs/performance'
+      '/api/admin/logs/performance',
     ];
-    
-    const missingAPIs = requiredLogAPIs.filter(api => !serverContent.includes(api));
-    
+
+    const missingAPIs = requiredLogAPIs.filter((api) => !serverContent.includes(api));
+
     if (missingAPIs.length > 0) {
       return {
         passed: false,
         severity: 'high',
         description: `缺少日志管理API: ${missingAPIs.join(', ')}`,
-        recommendations: missingAPIs.map(api => `实现${api}端点`)
+        recommendations: missingAPIs.map((api) => `实现${api}端点`),
       };
     }
-    
+
     return {
       passed: true,
-      description: '日志管理检查通过'
+      description: '日志管理检查通过',
     };
   }
 
@@ -524,46 +534,48 @@ class EvolutionMechanism {
    */
   async runClosedLoopImprovement(checkResult) {
     console.log('\n🔧 开始闭环改进...');
-    
+
     const improvementResults = {
       timestamp: new Date().toISOString(),
       round: checkResult.round,
       issuesFound: checkResult.issues.length,
       issuesFixed: 0,
       fixes: [],
-      verifications: []
+      verifications: [],
     };
-    
+
     for (const issue of checkResult.issues) {
       console.log(`\n处理问题: ${issue.category} - ${issue.description}`);
-      
+
       // 1. 添加修复任务
       const fixTask = {
         id: `fix_${Date.now()}_${issue.category}`,
         description: `修复${issue.category}`,
         issue: issue,
         status: 'pending',
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
-      
+
       this.taskState.pendingTasks.push(fixTask);
       this.saveTaskState();
-      
+
       // 2. 执行修复
       const fixResult = await this.executeFix(fixTask);
-      
+
       if (fixResult.success) {
         improvementResults.issuesFixed++;
         improvementResults.fixes.push(fixResult);
-        
+
         // 3. 验证修复
         const verificationResult = await this.verifyFix(fixTask, fixResult);
         improvementResults.verifications.push(verificationResult);
       }
     }
-    
-    console.log(`✅ 闭环改进完成，修复问题: ${improvementResults.issuesFixed}/${improvementResults.issuesFound}`);
-    
+
+    console.log(
+      `✅ 闭环改进完成，修复问题: ${improvementResults.issuesFixed}/${improvementResults.issuesFound}`
+    );
+
     return improvementResults;
   }
 
@@ -572,17 +584,17 @@ class EvolutionMechanism {
    */
   async executeFix(task) {
     console.log(`  执行修复: ${task.description}`);
-    
+
     // 标记任务为进行中
     task.status = 'in_progress';
     task.startedAt = new Date().toISOString();
     this.taskState.inProgressTasks.push(task);
     this.saveTaskState();
-    
+
     try {
       // 根据问题类型执行不同的修复逻辑
       let fixResult = { success: false, details: '' };
-      
+
       switch (task.issue.category) {
         case 'prdCompliance':
           fixResult = await this.fixPRDCompliance(task.issue);
@@ -614,32 +626,36 @@ class EvolutionMechanism {
         default:
           fixResult = await this.fixGeneric(task.issue);
       }
-      
+
       // 标记任务为完成
       task.status = 'completed';
       task.completedAt = new Date().toISOString();
       task.result = fixResult;
-      
+
       // 从进行中移到已完成
-      this.taskState.inProgressTasks = this.taskState.inProgressTasks.filter(t => t.id !== task.id);
+      this.taskState.inProgressTasks = this.taskState.inProgressTasks.filter(
+        (t) => t.id !== task.id
+      );
       this.taskState.completedTasks.push(task);
       this.saveTaskState();
-      
+
       return fixResult;
     } catch (error) {
       // 标记任务为失败
       task.status = 'failed';
       task.failedAt = new Date().toISOString();
       task.error = error.message;
-      
+
       // 从进行中移到中断
-      this.taskState.inProgressTasks = this.taskState.inProgressTasks.filter(t => t.id !== task.id);
+      this.taskState.inProgressTasks = this.taskState.inProgressTasks.filter(
+        (t) => t.id !== task.id
+      );
       this.taskState.interruptedTasks.push(task);
       this.saveTaskState();
-      
+
       return {
         success: false,
-        details: `修复失败: ${error.message}`
+        details: `修复失败: ${error.message}`,
       };
     }
   }
@@ -649,15 +665,15 @@ class EvolutionMechanism {
    */
   async verifyFix(task, fixResult) {
     console.log(`  验证修复: ${task.description}`);
-    
+
     // 重新运行相关检查
     const verificationCheck = this.runSpecificCheck(task.issue.category);
-    
+
     return {
       taskId: task.id,
       verified: verificationCheck.passed,
       details: verificationCheck.description,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -695,7 +711,7 @@ class EvolutionMechanism {
     // 实现PRD符合度修复逻辑
     return {
       success: true,
-      details: 'PRD符合度已修复'
+      details: 'PRD符合度已修复',
     };
   }
 
@@ -704,23 +720,23 @@ class EvolutionMechanism {
    */
   async fixFunctionality(issue) {
     console.log(`    修复功能完整性: ${issue.description}`);
-    
+
     // 解析缺失的引擎
     const missingEngines = issue.description.match(/缺少功能引擎: (.+)/)[1].split(', ');
-    
+
     for (const engineName of missingEngines) {
       const engineFile = this.getEngineFileName(engineName);
       const enginePath = path.join(__dirname, engineFile);
-      
+
       if (!fs.existsSync(enginePath)) {
         console.log(`      创建引擎: ${engineName} -> ${engineFile}`);
         await this.createEngineFile(engineName, enginePath);
       }
     }
-    
+
     return {
       success: true,
-      details: `功能完整性已修复，创建引擎: ${missingEngines.join(', ')}`
+      details: `功能完整性已修复，创建引擎: ${missingEngines.join(', ')}`,
     };
   }
 
@@ -729,9 +745,9 @@ class EvolutionMechanism {
    */
   getEngineFileName(engineName) {
     const engineMap = {
-      'aiMatching': 'AIMatchingEngine.js',
-      'multiRole': 'MultiRoleEngine.js',
-      'econet': 'EconetPricingEngine.js'
+      aiMatching: 'AIMatchingEngine.js',
+      multiRole: 'MultiRoleEngine.js',
+      econet: 'EconetPricingEngine.js',
     };
     return engineMap[engineName] || `${engineName}Engine.js`;
   }
@@ -749,7 +765,7 @@ class EvolutionMechanism {
    */
   generateEngineContent(engineName) {
     const templates = {
-      'aiMatching': `/**
+      aiMatching: `/**
  * AI匹配引擎 (AIMatchingEngine)
  * 基于痛点标签和户型条件，AI强制推荐系统
  */
@@ -798,7 +814,7 @@ class AIMatchingEngine {
 }
 
 module.exports = AIMatchingEngine;`,
-      'multiRole': `/**
+      multiRole: `/**
  * 多角色引擎 (MultiRoleEngine)
  * 管理不同用户角色的权限和功能
  */
@@ -848,7 +864,7 @@ class MultiRoleEngine {
 }
 
 module.exports = MultiRoleEngine;`,
-      'econet': `/**
+      econet: `/**
  * Econet引擎 (EconetEngine)
  * 瑞美智能控制系统集成
  */
@@ -894,10 +910,12 @@ class EconetEngine {
   }
 }
 
-module.exports = EconetEngine;`
+module.exports = EconetEngine;`,
     };
-    
-    return templates[engineName] || `/**
+
+    return (
+      templates[engineName] ||
+      `/**
  * ${engineName}引擎
  */
 
@@ -914,7 +932,8 @@ class ${engineName.charAt(0).toUpperCase() + engineName.slice(1)}Engine {
   }
 }
 
-module.exports = ${engineName.charAt(0).toUpperCase() + engineName.slice(1)}Engine;`;
+module.exports = ${engineName.charAt(0).toUpperCase() + engineName.slice(1)}Engine;`
+    );
   }
 
   /**
@@ -922,31 +941,31 @@ module.exports = ${engineName.charAt(0).toUpperCase() + engineName.slice(1)}Engi
    */
   async fixAPIIntegrity(issue) {
     console.log(`    修复API完整性: ${issue.description}`);
-    
+
     // 解析缺失的API
     const missingAPIs = issue.description.match(/缺少API端点: (.+)/)[1].split(', ');
-    
+
     const serverPath = path.join(__dirname, '../../server-production.js');
     const serverContent = fs.readFileSync(serverPath, 'utf8');
-    
+
     let addedCount = 0;
     const apiTemplates = this.generateAPITemplates();
-    
+
     for (const api of missingAPIs) {
       if (!serverContent.includes(api)) {
         console.log(`      添加API端点: ${api}`);
         const apiCode = apiTemplates[api] || this.generateGenericAPI(api);
-        
+
         // 在server-production.js末尾添加API
         const newContent = serverContent + '\n\n' + apiCode;
         fs.writeFileSync(serverPath, newContent);
         addedCount++;
       }
     }
-    
+
     return {
       success: true,
-      details: `API完整性已修复，添加API端点: ${addedCount}个`
+      details: `API完整性已修复，添加API端点: ${addedCount}个`,
     };
   }
 
@@ -1011,7 +1030,7 @@ app.post('/api/voice-interaction', (req, res) => {
   } catch (error) {
     res.json({ success: false, error: error.message });
   }
-});`
+});`,
     };
   }
 
@@ -1038,7 +1057,7 @@ app.post('${api}', (req, res) => {
     // 实现前端完整性修复逻辑
     return {
       success: true,
-      details: '前端完整性已修复'
+      details: '前端完整性已修复',
     };
   }
 
@@ -1050,7 +1069,7 @@ app.post('${api}', (req, res) => {
     // 实现数据持久化修复逻辑
     return {
       success: true,
-      details: '数据持久化已修复'
+      details: '数据持久化已修复',
     };
   }
 
@@ -1062,7 +1081,7 @@ app.post('${api}', (req, res) => {
     // 实现UI/VI规范修复逻辑
     return {
       success: true,
-      details: 'UI/VI规范已修复'
+      details: 'UI/VI规范已修复',
     };
   }
 
@@ -1074,7 +1093,7 @@ app.post('${api}', (req, res) => {
     // 实现3D可视化修复逻辑
     return {
       success: true,
-      details: '3D可视化已修复'
+      details: '3D可视化已修复',
     };
   }
 
@@ -1086,7 +1105,7 @@ app.post('${api}', (req, res) => {
     // 实现管理员后台修复逻辑
     return {
       success: true,
-      details: '管理员后台已修复'
+      details: '管理员后台已修复',
     };
   }
 
@@ -1098,7 +1117,7 @@ app.post('${api}', (req, res) => {
     // 实现日志管理修复逻辑
     return {
       success: true,
-      details: '日志管理已修复'
+      details: '日志管理已修复',
     };
   }
 
@@ -1110,7 +1129,7 @@ app.post('${api}', (req, res) => {
     // 实现通用修复逻辑
     return {
       success: true,
-      details: '通用修复已完成'
+      details: '通用修复已完成',
     };
   }
 
@@ -1121,14 +1140,18 @@ app.post('${api}', (req, res) => {
     console.log('\n🚀 开始循环进化机制...');
     console.log(`   目标轮次: ${this.evolutionState.targetRounds}`);
     console.log(`   当前轮次: ${this.evolutionState.currentRound}`);
-    
-    for (let round = this.evolutionState.currentRound + 1; round <= this.evolutionState.targetRounds; round++) {
+
+    for (
+      let round = this.evolutionState.currentRound + 1;
+      round <= this.evolutionState.targetRounds;
+      round++
+    ) {
       console.log(`\n${'='.repeat(80)}`);
       console.log(`📊 进化轮次: ${round}/${this.evolutionState.targetRounds}`);
       console.log(`${'='.repeat(80)}`);
-      
+
       this.evolutionState.currentRound = round;
-      
+
       // 1. 全量自检
       const checkResult = this.runFullSelfCheck();
       this.evolutionState.issues.push({
@@ -1136,9 +1159,9 @@ app.post('${api}', (req, res) => {
         timestamp: checkResult.timestamp,
         score: checkResult.score,
         issuesCount: checkResult.issues.length,
-        issues: checkResult.issues
+        issues: checkResult.issues,
       });
-      
+
       // 2. 闭环改进
       if (checkResult.issues.length > 0) {
         const improvementResult = await this.runClosedLoopImprovement(checkResult);
@@ -1148,40 +1171,46 @@ app.post('${api}', (req, res) => {
           issuesFound: improvementResult.issuesFound,
           issuesFixed: improvementResult.issuesFixed,
           fixes: improvementResult.fixes,
-          verifications: improvementResult.verifications
+          verifications: improvementResult.verifications,
         });
       }
-      
+
       // 3. 记录进化历史
       this.evolutionState.evolutionHistory.push({
         round: round,
         timestamp: new Date().toISOString(),
         checkScore: checkResult.score,
         issuesCount: checkResult.issues.length,
-        issuesFixed: checkResult.issues.length > 0 ? 
-          (this.evolutionState.fixes[this.evolutionState.fixes.length - 1]?.issuesFixed || 0) : 0
+        issuesFixed:
+          checkResult.issues.length > 0
+            ? this.evolutionState.fixes[this.evolutionState.fixes.length - 1]?.issuesFixed || 0
+            : 0,
       });
-      
+
       // 4. 保存进化日志
       this.saveEvolutionLog();
-      
+
       // 5. 检查是否达到完美状态
       if (checkResult.score === 100) {
         console.log(`\n✅ 第${round}轮达到完美状态，评分100%`);
         break;
       }
-      
+
       // 6. 短暂延迟，避免过度消耗资源
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
-    
+
     console.log(`\n${'='.repeat(80)}`);
     console.log(`🎉 进化机制完成`);
     console.log(`${'='.repeat(80)}`);
     console.log(`   总轮次: ${this.evolutionState.currentRound}`);
-    console.log(`   最终评分: ${this.evolutionState.evolutionHistory[this.evolutionState.evolutionHistory.length - 1]?.checkScore || 0}%`);
-    console.log(`   总修复问题: ${this.evolutionState.evolutionHistory.reduce((sum, h) => sum + h.issuesFixed, 0)}`);
-    
+    console.log(
+      `   最终评分: ${this.evolutionState.evolutionHistory[this.evolutionState.evolutionHistory.length - 1]?.checkScore || 0}%`
+    );
+    console.log(
+      `   总修复问题: ${this.evolutionState.evolutionHistory.reduce((sum, h) => sum + h.issuesFixed, 0)}`
+    );
+
     return this.generateEvolutionReport();
   }
 
@@ -1215,23 +1244,30 @@ app.post('${api}', (req, res) => {
       summary: {
         totalRounds: this.evolutionState.currentRound,
         targetRounds: this.evolutionState.targetRounds,
-        finalScore: this.evolutionState.evolutionHistory[this.evolutionState.evolutionHistory.length - 1]?.checkScore || 0,
-        totalIssuesFixed: this.evolutionState.evolutionHistory.reduce((sum, h) => sum + h.issuesFixed, 0),
-        evolutionComplete: this.evolutionState.currentRound >= this.evolutionState.targetRounds || 
-          (this.evolutionState.evolutionHistory[this.evolutionState.evolutionHistory.length - 1]?.checkScore || 0) === 100
+        finalScore:
+          this.evolutionState.evolutionHistory[this.evolutionState.evolutionHistory.length - 1]
+            ?.checkScore || 0,
+        totalIssuesFixed: this.evolutionState.evolutionHistory.reduce(
+          (sum, h) => sum + h.issuesFixed,
+          0
+        ),
+        evolutionComplete:
+          this.evolutionState.currentRound >= this.evolutionState.targetRounds ||
+          (this.evolutionState.evolutionHistory[this.evolutionState.evolutionHistory.length - 1]
+            ?.checkScore || 0) === 100,
       },
       evolutionHistory: this.evolutionState.evolutionHistory,
       issues: this.evolutionState.issues,
       fixes: this.evolutionState.fixes,
       taskState: this.taskState,
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     };
-    
+
     const reportPath = path.join(__dirname, '../../EVOLUTION-REPORT.json');
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
-    
+
     console.log(`\n📄 进化报告已生成: ${reportPath}`);
-    
+
     return report;
   }
 
@@ -1243,11 +1279,13 @@ app.post('${api}', (req, res) => {
       currentRound: this.evolutionState.currentRound,
       targetRounds: this.evolutionState.targetRounds,
       progress: (this.evolutionState.currentRound / this.evolutionState.targetRounds) * 100,
-      lastScore: this.evolutionState.evolutionHistory[this.evolutionState.evolutionHistory.length - 1]?.checkScore || 0,
+      lastScore:
+        this.evolutionState.evolutionHistory[this.evolutionState.evolutionHistory.length - 1]
+          ?.checkScore || 0,
       pendingTasks: this.taskState.pendingTasks.length,
       inProgressTasks: this.taskState.inProgressTasks.length,
       interruptedTasks: this.taskState.interruptedTasks.length,
-      completedTasks: this.taskState.completedTasks.length
+      completedTasks: this.taskState.completedTasks.length,
     };
   }
 }

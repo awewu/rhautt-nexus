@@ -14,18 +14,30 @@ const MATRIX = resolve(__dirname, '../../docs/architecture/NEXUS-ABC-DOMAIN-MATR
 
 const IGNORE = new Set(['common']); // 基础设施，非业务域
 let matrix;
-try { matrix = readFileSync(MATRIX, 'utf8'); }
-catch { console.error('❌ 缺 A/B/C 域映射矩阵:', MATRIX); process.exit(1); }
+try {
+  matrix = readFileSync(MATRIX, 'utf8');
+} catch {
+  console.error('❌ 缺 A/B/C 域映射矩阵:', MATRIX);
+  process.exit(1);
+}
 
 const domains = readdirSync(MODULES_DIR).filter((d) => {
-  try { return statSync(join(MODULES_DIR, d)).isDirectory() && !IGNORE.has(d); } catch { return false; }
+  try {
+    return statSync(join(MODULES_DIR, d)).isDirectory() && !IGNORE.has(d);
+  } catch {
+    return false;
+  }
 });
 
 const orphans = domains.filter((d) => !matrix.includes(d));
 if (orphans.length) {
-  console.error(`❌ guard:abc-boundary 失败：${orphans.length} 个域未在 A/B/C 矩阵归位（阉割风险）:`);
+  console.error(
+    `❌ guard:abc-boundary 失败：${orphans.length} 个域未在 A/B/C 矩阵归位（阉割风险）:`
+  );
   for (const o of orphans) console.error('  - ' + o);
   console.error('  → 请在 docs/architecture/NEXUS-ABC-DOMAIN-MATRIX.md 归位。');
   process.exit(1);
 }
-console.log(`✅ guard:abc-boundary 通过：${domains.length} 个域全部在 A/B/C 矩阵归位（无孤儿/无阉割）。`);
+console.log(
+  `✅ guard:abc-boundary 通过：${domains.length} 个域全部在 A/B/C 矩阵归位（无孤儿/无阉割）。`
+);

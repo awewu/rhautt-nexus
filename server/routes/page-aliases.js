@@ -25,10 +25,12 @@ const aliases = [
   ['/messages', { redirectTo: '/login.html' }],
   ['/help', { redirectTo: '/index.html' }],
   ['/login', { redirectTo: '/index.html' }],
-  ['/mobile', { redirectTo: '/index-ready.html' }]
+  ['/mobile', { redirectTo: '/index-ready.html' }],
 ];
 
-function createPageAliasesRouter(publicDir = path.join(__dirname, '..', '..', 'archive', 'legacy-ui', 'public')) {
+function createPageAliasesRouter(
+  publicDir = path.join(__dirname, '..', '..', 'archive', 'legacy-ui', 'public')
+) {
   const router = express.Router();
 
   for (const [routePath, target] of aliases) {

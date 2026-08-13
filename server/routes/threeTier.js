@@ -57,8 +57,8 @@ router.get('/pricing-matrix', (req, res) => {
     success: true,
     data: {
       packagePricing: engine.PACKAGE_PRICING,
-      cityFactors: engine.CITY_FACTORS
-    }
+      cityFactors: engine.CITY_FACTORS,
+    },
   });
 });
 

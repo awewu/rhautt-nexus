@@ -12,22 +12,22 @@
 
 ## 2. 主状态
 
-| State | 客户可见 | 内部动作 | 下一状态 |
-|---|---|---|---|
-| `lead-created` | 已收到需求。 | CRM 建档、tenant scope、销售分配。 | `diagnosis-in-progress` |
-| `diagnosis-in-progress` | 正在生成舒适家需求画像。 | 瑞诺瓦 AI 问诊、六大系统采集。 | `solution-drafted` |
-| `solution-drafted` | 方案初稿已生成。 | 三档方案、系统包、设备配置、预算。 | `design-in-progress` |
-| `design-in-progress` | 设计师正在深化方案。 | 平面、设备点位、管路、BOM。 | `quote-drafted` |
-| `quote-drafted` | 报价草案已生成。 | 成本、税费、毛利、促销、风险预留。 | `quote-approved` |
-| `quote-approved` | 报价已审核，可确认。 | 审批、客户价、付款计划。 | `contract-pending` |
-| `contract-pending` | 合同待确认。 | 合同生成、签署、收款节点。 | `construction-planning` |
-| `construction-planning` | 施工计划制定中。 | 排期、材料、技术支持、Rysnova 深化。 | `construction-in-progress` |
-| `construction-in-progress` | 正在施工。 | 里程碑、材料、现场记录、质量安全。 | `acceptance-pending` |
-| `acceptance-pending` | 待验收。 | 验收报告、整改、客户确认。 | `accepted` |
-| `accepted` | 项目已验收。 | installed asset、保修、服务计划、IoT handoff。 | `lifecycle-handoff-ready` |
-| `lifecycle-handoff-ready` | 正在准备全生命周期服务。 | home/device/capability/service plan 交接。 | `lifecycle-active` |
-| `lifecycle-active` | 已进入舒适家服务周期。 | IoT 控制平台接管、维保、工单、提醒。 | `service-event-open` |
-| `service-event-open` | 服务处理中。 | 工单、派工、备件、回访。 | `lifecycle-active` |
+| State                      | 客户可见                 | 内部动作                                       | 下一状态                   |
+| -------------------------- | ------------------------ | ---------------------------------------------- | -------------------------- |
+| `lead-created`             | 已收到需求。             | CRM 建档、tenant scope、销售分配。             | `diagnosis-in-progress`    |
+| `diagnosis-in-progress`    | 正在生成舒适家需求画像。 | 瑞诺瓦 AI 问诊、六大系统采集。                 | `solution-drafted`         |
+| `solution-drafted`         | 方案初稿已生成。         | 三档方案、系统包、设备配置、预算。             | `design-in-progress`       |
+| `design-in-progress`       | 设计师正在深化方案。     | 平面、设备点位、管路、BOM。                    | `quote-drafted`            |
+| `quote-drafted`            | 报价草案已生成。         | 成本、税费、毛利、促销、风险预留。             | `quote-approved`           |
+| `quote-approved`           | 报价已审核，可确认。     | 审批、客户价、付款计划。                       | `contract-pending`         |
+| `contract-pending`         | 合同待确认。             | 合同生成、签署、收款节点。                     | `construction-planning`    |
+| `construction-planning`    | 施工计划制定中。         | 排期、材料、技术支持、Rysnova 深化。           | `construction-in-progress` |
+| `construction-in-progress` | 正在施工。               | 里程碑、材料、现场记录、质量安全。             | `acceptance-pending`       |
+| `acceptance-pending`       | 待验收。                 | 验收报告、整改、客户确认。                     | `accepted`                 |
+| `accepted`                 | 项目已验收。             | installed asset、保修、服务计划、IoT handoff。 | `lifecycle-handoff-ready`  |
+| `lifecycle-handoff-ready`  | 正在准备全生命周期服务。 | home/device/capability/service plan 交接。     | `lifecycle-active`         |
+| `lifecycle-active`         | 已进入舒适家服务周期。   | IoT 控制平台接管、维保、工单、提醒。           | `service-event-open`       |
+| `service-event-open`       | 服务处理中。             | 工单、派工、备件、回访。                       | `lifecycle-active`         |
 
 ## 3. 最小数据合同
 
@@ -119,15 +119,15 @@
 
 系统能力推断规则：
 
-| Category | 典型能力 |
-|---|---|
-| `central-hot-water` | `onoff`, `temperature`, `energy`, `maintenance_reminder` |
-| `heating` | `temperature`, `zone_control`, `energy`, `anti_freeze` |
-| `whole-air` | `temperature`, `humidity`, `fresh_air_ratio`, `mode`, `energy` |
-| `fresh-air` | `onoff`, `fan_speed`, `co2`, `pm25`, `filter_life` |
-| `air-conditioning` | `temperature`, `humidity`, `mode`, `energy` |
-| `water-treatment` | `filter_life`, `flow`, `tds`, `maintenance_reminder` |
-| `smart-control` | `remote_control`, `scene`, `energy`, `alert` |
+| Category            | 典型能力                                                       |
+| ------------------- | -------------------------------------------------------------- |
+| `central-hot-water` | `onoff`, `temperature`, `energy`, `maintenance_reminder`       |
+| `heating`           | `temperature`, `zone_control`, `energy`, `anti_freeze`         |
+| `whole-air`         | `temperature`, `humidity`, `fresh_air_ratio`, `mode`, `energy` |
+| `fresh-air`         | `onoff`, `fan_speed`, `co2`, `pm25`, `filter_life`             |
+| `air-conditioning`  | `temperature`, `humidity`, `mode`, `energy`                    |
+| `water-treatment`   | `filter_life`, `flow`, `tds`, `maintenance_reminder`           |
+| `smart-control`     | `remote_control`, `scene`, `energy`, `alert`                   |
 
 ## 5. 客户门户展示边界
 
@@ -159,16 +159,16 @@
 
 ## 7. 第一批迁移对象
 
-| Legacy Asset | 迁移方向 | 下一步 |
-|---|---|---|
-| `customer-view.html` | 客户项目主视图 | 接状态机和客户可见 artifact。 |
-| `customer-share.html` | 方案/报价分享 | 接 quote/design artifact。 |
-| `construction-management.html` | 内部施工管理 | 抽里程碑和质量字段。 |
-| `construction-dashboard.html` | 施工进度 | 接 project state rollup。 |
-| `delivery-center.html` | 交付中心 | 归入 delivery facade。 |
-| `service-tickets.html` | 服务事件 | 接 lifecycle service event。 |
-| `workorders.html` | 工单 | 接服务计划和派工。 |
-| `econet-dashboard.html` | IoT 概念参考 | 只作为 handoff 参考，不作为实时控制平台。 |
+| Legacy Asset                   | 迁移方向       | 下一步                                    |
+| ------------------------------ | -------------- | ----------------------------------------- |
+| `customer-view.html`           | 客户项目主视图 | 接状态机和客户可见 artifact。             |
+| `customer-share.html`          | 方案/报价分享  | 接 quote/design artifact。                |
+| `construction-management.html` | 内部施工管理   | 抽里程碑和质量字段。                      |
+| `construction-dashboard.html`  | 施工进度       | 接 project state rollup。                 |
+| `delivery-center.html`         | 交付中心       | 归入 delivery facade。                    |
+| `service-tickets.html`         | 服务事件       | 接 lifecycle service event。              |
+| `workorders.html`              | 工单           | 接服务计划和派工。                        |
+| `econet-dashboard.html`        | IoT 概念参考   | 只作为 handoff 参考，不作为实时控制平台。 |
 
 ## 8. 证据门禁
 

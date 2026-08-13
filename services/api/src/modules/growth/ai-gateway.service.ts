@@ -45,25 +45,65 @@ interface HermesSseResult {
 
 // 《广告法》第九条等：绝对化用语与虚假承诺（最小基线词库；生产由 compliance 域集中维护）。
 const FORBIDDEN_TERMS = [
-  '国家级', '最高级', '最佳', '第一', '独家', '唯一', '全网最低',
-  '100%', '绝对', '永久', '万能', '包治', '根治', '最便宜', '顶级', '史无前例',
+  '国家级',
+  '最高级',
+  '最佳',
+  '第一',
+  '独家',
+  '唯一',
+  '全网最低',
+  '100%',
+  '绝对',
+  '永久',
+  '万能',
+  '包治',
+  '根治',
+  '最便宜',
+  '顶级',
+  '史无前例',
 ];
 
 const CHANNEL_COPY_GUIDANCE: Record<string, { label: string; guidance: string; length: string }> = {
-  xiaohongshu: { label: '小红书', guidance: '输出种草笔记，包含标题、正文、卖点展开、行动引导。', length: '400-700 字' },
-  douyin: { label: '抖音', guidance: '输出 45-75 秒镜头脚本，按镜头分段，包含画面、文字或旁白。', length: '45-75 秒脚本' },
-  wechat: { label: '微信公众号', guidance: '输出公众号推文，包含标题、导语、正文段落、卖点展开、行动引导。', length: '600-900 字' },
-  zhihu: { label: '知乎', guidance: '输出知乎问答，包含标题、问题描述、回答、论证和总结。', length: '600-900 字' },
-  seo: { label: 'SEO', guidance: '输出搜索友好的官网/落地页文案，包含标题、摘要、正文和 FAQ。', length: '300-600 字' },
-  ad: { label: '广告投放', guidance: '输出广告投放文案，包含主标题、副标题、短正文和 CTA。', length: '300-600 字' },
+  xiaohongshu: {
+    label: '小红书',
+    guidance: '输出种草笔记，包含标题、正文、卖点展开、行动引导。',
+    length: '400-700 字',
+  },
+  douyin: {
+    label: '抖音',
+    guidance: '输出 45-75 秒镜头脚本，按镜头分段，包含画面、文字或旁白。',
+    length: '45-75 秒脚本',
+  },
+  wechat: {
+    label: '微信公众号',
+    guidance: '输出公众号推文，包含标题、导语、正文段落、卖点展开、行动引导。',
+    length: '600-900 字',
+  },
+  zhihu: {
+    label: '知乎',
+    guidance: '输出知乎问答，包含标题、问题描述、回答、论证和总结。',
+    length: '600-900 字',
+  },
+  seo: {
+    label: 'SEO',
+    guidance: '输出搜索友好的官网/落地页文案，包含标题、摘要、正文和 FAQ。',
+    length: '300-600 字',
+  },
+  ad: {
+    label: '广告投放',
+    guidance: '输出广告投放文案，包含主标题、副标题、短正文和 CTA。',
+    length: '300-600 字',
+  },
 };
 
 function channelCopyGuidance(channel?: string) {
-  return CHANNEL_COPY_GUIDANCE[String(channel || '').trim()] || {
-    label: channel || '通用渠道',
-    guidance: '输出当前渠道可直接审核的单份文案，包含标题、正文、卖点展开、行动引导。',
-    length: '300-600 字',
-  };
+  return (
+    CHANNEL_COPY_GUIDANCE[String(channel || '').trim()] || {
+      label: channel || '通用渠道',
+      guidance: '输出当前渠道可直接审核的单份文案，包含标题、正文、卖点展开、行动引导。',
+      length: '300-600 字',
+    }
+  );
 }
 
 @Injectable()
@@ -108,7 +148,9 @@ export class AiGatewayService {
           messages: [{ role: 'user', content: req.prompt }],
         });
         draft = (resp?.content || [])
-          .map((block: { type: string; text?: string }) => (block.type === 'text' ? block.text || '' : ''))
+          .map((block: { type: string; text?: string }) =>
+            block.type === 'text' ? block.text || '' : ''
+          )
           .join('\n')
           .trim();
         const usage = resp?.usage || {};
@@ -118,9 +160,13 @@ export class AiGatewayService {
         model = this.model;
       } catch (err: unknown) {
         if (req.requireRealProvider) {
-          throw new ServiceUnavailableException(`AI provider call failed: ${this.errorMessage(err)}`);
+          throw new ServiceUnavailableException(
+            `AI provider call failed: ${this.errorMessage(err)}`
+          );
         }
-        this.logger.warn(`AI provider call failed, falling back to deterministic draft: ${String(err)}`);
+        this.logger.warn(
+          `AI provider call failed, falling back to deterministic draft: ${String(err)}`
+        );
         draft = this.deterministicDraft(req);
         model = 'stub:deterministic(ai-fallback)';
       }
@@ -132,7 +178,13 @@ export class AiGatewayService {
     }
 
     const complianceFlags = this.scanCompliance(draft, req.bannedTerms ?? []);
-    return { draft, model, tokensCost, complianceFlags, provider: model.startsWith('stub:') ? 'stub' : 'anthropic' };
+    return {
+      draft,
+      model,
+      tokensCost,
+      complianceFlags,
+      provider: model.startsWith('stub:') ? 'stub' : 'anthropic',
+    };
   }
 
   private async generateHermesDraft(req: AiDraftRequest): Promise<AiDraftResult> {
@@ -148,9 +200,13 @@ export class AiGatewayService {
       };
     } catch (err: unknown) {
       if (req.requireRealProvider !== false) {
-        throw new ServiceUnavailableException(`Hermes center AI copy generation failed: ${this.errorMessage(err)}`);
+        throw new ServiceUnavailableException(
+          `Hermes center AI copy generation failed: ${this.errorMessage(err)}`
+        );
       }
-      this.logger.warn(`Hermes center AI failed, falling back to deterministic draft: ${String(err)}`);
+      this.logger.warn(
+        `Hermes center AI failed, falling back to deterministic draft: ${String(err)}`
+      );
       const draft = this.deterministicDraft(req);
       return {
         draft,
@@ -163,7 +219,9 @@ export class AiGatewayService {
   }
 
   private async callHermesCenterAi(req: AiDraftRequest): Promise<HermesSseResult> {
-    const baseUrl = String(process.env.HERMES_CENTER_AI_BASE_URL || '').trim().replace(/\/+$/, '');
+    const baseUrl = String(process.env.HERMES_CENTER_AI_BASE_URL || '')
+      .trim()
+      .replace(/\/+$/, '');
     if (!baseUrl) throw new Error('HERMES_CENTER_AI_BASE_URL is not configured');
 
     const headers: Record<string, string> = {
@@ -174,9 +232,16 @@ export class AiGatewayService {
     const authToken = String(process.env.HERMES_CENTER_AI_AUTH_TOKEN || '').trim();
     if (authHeader && authToken) headers[authHeader] = authToken;
 
-    const provider = String(process.env.HERMES_CENTER_AI_PROVIDER || 'qwen-max').trim() || 'qwen-max';
-    const firstByteTimeoutMs = Math.max(Number(process.env.HERMES_CENTER_AI_FIRST_BYTE_TIMEOUT_MS) || 30000, 5000);
-    const timeoutMs = Math.max(Number(process.env.HERMES_CENTER_AI_TIMEOUT_MS) || 120000, firstByteTimeoutMs);
+    const provider =
+      String(process.env.HERMES_CENTER_AI_PROVIDER || 'qwen-max').trim() || 'qwen-max';
+    const firstByteTimeoutMs = Math.max(
+      Number(process.env.HERMES_CENTER_AI_FIRST_BYTE_TIMEOUT_MS) || 30000,
+      5000
+    );
+    const timeoutMs = Math.max(
+      Number(process.env.HERMES_CENTER_AI_TIMEOUT_MS) || 120000,
+      firstByteTimeoutMs
+    );
     const response = await this.withTimeout(
       fetch(`${baseUrl}/api/llm-stream`, {
         method: 'POST',
@@ -191,18 +256,20 @@ export class AiGatewayService {
         }),
       }),
       firstByteTimeoutMs,
-      'Hermes center AI request timed out',
+      'Hermes center AI request timed out'
     );
 
     if (!response.ok || !response.body) {
       const body = await response.text().catch(() => '');
-      throw new Error(`Hermes returned HTTP ${response.status}: ${body.slice(0, 500) || response.statusText}`);
+      throw new Error(
+        `Hermes returned HTTP ${response.status}: ${body.slice(0, 500) || response.statusText}`
+      );
     }
 
     const answer = await this.withTimeout(
       this.readHermesSse(response),
       timeoutMs,
-      'Hermes center AI stream timed out',
+      'Hermes center AI stream timed out'
     );
     const draft = answer.text.trim();
     if (!draft) throw new Error('Hermes returned empty answer');
@@ -212,8 +279,13 @@ export class AiGatewayService {
   private hermesCopySystemPrompt(req: AiDraftRequest): string {
     const brand = req.brand;
     const channel = channelCopyGuidance(req.channel);
-    const facts = (brand?.facts || []).slice(0, 8).map((fact) => `- ${fact}`).join('\n');
-    const banned = (req.bannedTerms || []).filter(Boolean).join('、') || '广告法绝对化用语、无法核实的承诺、贬低竞品';
+    const facts = (brand?.facts || [])
+      .slice(0, 8)
+      .map((fact) => `- ${fact}`)
+      .join('\n');
+    const banned =
+      (req.bannedTerms || []).filter(Boolean).join('、') ||
+      '广告法绝对化用语、无法核实的承诺、贬低竞品';
     return [
       '你是 Rhautt Nexus 的营销文案撰写助手，当前通过 Hermes 中心 AI 调用。',
       '任务是生成可供人工审核的完整营销文案草稿，不是摘要，不是占位模板。',
@@ -228,7 +300,9 @@ export class AiGatewayService {
       `禁止内容：${banned}`,
       '不要编造产品参数、价格、补贴、疗效、保修承诺或官方背书。',
       `输出结构必须符合当前渠道，不要输出“渠道：小红书/抖音/公众号/知乎”的多渠道清单。`,
-    ].filter(Boolean).join('\n');
+    ]
+      .filter(Boolean)
+      .join('\n');
   }
 
   private hermesCopyUserPrompt(req: AiDraftRequest): string {
@@ -289,8 +363,9 @@ export class AiGatewayService {
         const usage = parsed?.usage;
         if (usage) {
           const total = Number(usage.totalTokens ?? usage.total_tokens ?? 0);
-          const split = Number(usage.promptTokens ?? usage.prompt_tokens ?? 0)
-            + Number(usage.completionTokens ?? usage.completion_tokens ?? 0);
+          const split =
+            Number(usage.promptTokens ?? usage.prompt_tokens ?? 0) +
+            Number(usage.completionTokens ?? usage.completion_tokens ?? 0);
           const resolved = total > 0 ? total : split;
           if (resolved > 0) tokensCost = resolved;
         }
@@ -315,7 +390,11 @@ export class AiGatewayService {
     return '';
   }
 
-  private async withTimeout<T>(promise: Promise<T>, timeoutMs: number, message: string): Promise<T> {
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    message: string
+  ): Promise<T> {
     let timer: NodeJS.Timeout | undefined;
     const timeout = new Promise<never>((_, reject) => {
       timer = setTimeout(() => reject(new Error(message)), timeoutMs);
@@ -342,7 +421,10 @@ export class AiGatewayService {
     const name = brand.name || '瑞合瑞德';
     const theme = (req.prompt || '').trim();
     const banned = new Set([...(req.bannedTerms || [])]);
-    const facts = (brand.facts || []).filter(Boolean).filter((f) => !this.violates(f, banned)).slice(0, 4);
+    const facts = (brand.facts || [])
+      .filter(Boolean)
+      .filter((f) => !this.violates(f, banned))
+      .slice(0, 4);
     const audience = (brand.audiences || [])[0] || '';
     const positioning = brand.positioning || '';
     const style = CHANNEL_STYLES[channel] || CHANNEL_STYLES.generic;

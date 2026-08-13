@@ -40,15 +40,15 @@ This table is the product identity anchor. It should not drive official website 
 
 Use existing fields as follows:
 
-| Field | Responsibility |
-|---|---|
+| Field               | Responsibility                                                                 |
+| ------------------- | ------------------------------------------------------------------------------ |
 | `global_product_id` | Stable cross-module product identifier for quotation, design, BOM, and dedupe. |
-| `source_tier` | Distinguishes owned, shared, and tenant-private product sources. |
-| `brand_slug` | Canonical brand ownership when known. |
-| `sku` | Source SKU or model code. |
-| `name` | Canonical product name. |
-| `data_trust_level` | Whether the product is verified enough for design calculation and quotation. |
-| `canonical_params` | Engineering-grade parameters used by design, sizing, BOM, and selection flows. |
+| `source_tier`       | Distinguishes owned, shared, and tenant-private product sources.               |
+| `brand_slug`        | Canonical brand ownership when known.                                          |
+| `sku`               | Source SKU or model code.                                                      |
+| `name`              | Canonical product name.                                                        |
+| `data_trust_level`  | Whether the product is verified enough for design calculation and quotation.   |
+| `canonical_params`  | Engineering-grade parameters used by design, sizing, BOM, and selection flows. |
 
 ### `products`
 
@@ -56,22 +56,22 @@ This table remains the product operation master table. It answers: what is this 
 
 Use existing fields as follows:
 
-| Field | Responsibility |
-|---|---|
-| `tenant_id` | Group or brand operation tenant boundary. |
-| `sku` | Product code, unique inside the tenant. |
-| `name` | Standard product name. |
-| `brand` | Product ownership brand, such as `rheem`, `ruud`, `everhot`. |
-| `category` | Product category, such as residential hot water, commercial hot water, HVAC, water treatment. |
-| `spec` | Technical facts: capacity, power, efficiency, dimensions, certifications, supported standards. |
-| `positioning` | Structured business positioning: target segments, channels, personas, markets, application scenarios, pain points. |
-| `asset_refs` | DAM references: main image, card image, detail images, specs, certificates, BIM files, manuals. |
-| `product_key` | MDM-lite dedupe key for cross-source product matching. |
-| `list_price` | Public or list price where applicable. |
-| `cost_price` | Internal cost. Must not be exposed through public website APIs. |
-| `currency` | Price currency. |
-| `status` | Product lifecycle state, such as `active` or `archived`. |
-| `meta` | Compatibility bucket for brand-specific legacy website fields. New durable website visibility data should move to `site_product_assignments`. |
+| Field         | Responsibility                                                                                                                                |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tenant_id`   | Group or brand operation tenant boundary.                                                                                                     |
+| `sku`         | Product code, unique inside the tenant.                                                                                                       |
+| `name`        | Standard product name.                                                                                                                        |
+| `brand`       | Product ownership brand, such as `rheem`, `ruud`, `everhot`.                                                                                  |
+| `category`    | Product category, such as residential hot water, commercial hot water, HVAC, water treatment.                                                 |
+| `spec`        | Technical facts: capacity, power, efficiency, dimensions, certifications, supported standards.                                                |
+| `positioning` | Structured business positioning: target segments, channels, personas, markets, application scenarios, pain points.                            |
+| `asset_refs`  | DAM references: main image, card image, detail images, specs, certificates, BIM files, manuals.                                               |
+| `product_key` | MDM-lite dedupe key for cross-source product matching.                                                                                        |
+| `list_price`  | Public or list price where applicable.                                                                                                        |
+| `cost_price`  | Internal cost. Must not be exposed through public website APIs.                                                                               |
+| `currency`    | Price currency.                                                                                                                               |
+| `status`      | Product lifecycle state, such as `active` or `archived`.                                                                                      |
+| `meta`        | Compatibility bucket for brand-specific legacy website fields. New durable website visibility data should move to `site_product_assignments`. |
 
 ### `product_content`
 
@@ -79,17 +79,17 @@ This table stores localized content and publish workflow. It answers: how should
 
 Use existing fields as follows:
 
-| Field | Responsibility |
-|---|---|
-| `product_id` | Product being described. |
-| `locale` | Locale such as `zh-CN` or `en-US`. |
-| `name` | Localized display name. |
-| `display_currency` | Display currency for public content. |
-| `seo` | SEO/GEO fields: title, description, canonical, OG image, keywords. |
-| `gtin` / `mpn` | Structured product identifiers for public schema data. |
-| `marketing` | Public marketing content: headline, subhead, feature benefits, highlights, FAQ. |
-| `status` | Content workflow state: `draft`, `review`, `scheduled`, `published`. |
-| `published_at` / `scheduled_at` | Public release timing. |
+| Field                           | Responsibility                                                                  |
+| ------------------------------- | ------------------------------------------------------------------------------- |
+| `product_id`                    | Product being described.                                                        |
+| `locale`                        | Locale such as `zh-CN` or `en-US`.                                              |
+| `name`                          | Localized display name.                                                         |
+| `display_currency`              | Display currency for public content.                                            |
+| `seo`                           | SEO/GEO fields: title, description, canonical, OG image, keywords.              |
+| `gtin` / `mpn`                  | Structured product identifiers for public schema data.                          |
+| `marketing`                     | Public marketing content: headline, subhead, feature benefits, highlights, FAQ. |
+| `status`                        | Content workflow state: `draft`, `review`, `scheduled`, `published`.            |
+| `published_at` / `scheduled_at` | Public release timing.                                                          |
 
 ### `tenant_brand_sites`
 
@@ -97,17 +97,17 @@ This table stores official websites and brand site configuration. It answers: wh
 
 Use existing fields as follows:
 
-| Field | Responsibility |
-|---|---|
-| `tenant_id` | Group or tenant boundary. |
-| `code` | Website code, such as `rheem`, `ruud`, `everhot`, `rhautt-group`. |
-| `name_cn` / `name_en` | Website display name. |
-| `app_key` | Owning frontend app or delivery target. |
-| `delivery_type` | Self-hosted or external site. |
-| `development_url` / `production_url` | Site URLs. |
-| `logo_artifact_id` | Site logo asset. |
-| `sort_order` | Console navigation order. |
-| `status` | Whether the website is active. |
+| Field                                | Responsibility                                                    |
+| ------------------------------------ | ----------------------------------------------------------------- |
+| `tenant_id`                          | Group or tenant boundary.                                         |
+| `code`                               | Website code, such as `rheem`, `ruud`, `everhot`, `rhautt-group`. |
+| `name_cn` / `name_en`                | Website display name.                                             |
+| `app_key`                            | Owning frontend app or delivery target.                           |
+| `delivery_type`                      | Self-hosted or external site.                                     |
+| `development_url` / `production_url` | Site URLs.                                                        |
+| `logo_artifact_id`                   | Site logo asset.                                                  |
+| `sort_order`                         | Console navigation order.                                         |
+| `status`                             | Whether the website is active.                                    |
 
 ## New Table: `site_product_assignments`
 
@@ -126,7 +126,8 @@ export class SiteProductAssignmentEntity {
   @Column({ name: 'product_id' }) @Index() productId: string;
   @Column({ type: 'varchar', nullable: true }) brand: string | null;
   @Column({ name: 'public_slug' }) publicSlug: string;
-  @Column({ name: 'website_category', type: 'varchar', nullable: true }) websiteCategory: string | null;
+  @Column({ name: 'website_category', type: 'varchar', nullable: true }) websiteCategory:
+    string | null;
   @Column({ name: 'menu_group', type: 'varchar', nullable: true }) menuGroup: string | null;
   @Column({ name: 'display_order', default: 0 }) displayOrder: number;
   @Column({ name: 'is_visible', default: true }) isVisible: boolean;
@@ -134,7 +135,10 @@ export class SiteProductAssignmentEntity {
   @Column({ default: 'draft' }) @Index() status: 'draft' | 'published' | 'hidden';
   @Column({ name: 'site_title', type: 'varchar', nullable: true }) siteTitle: string | null;
   @Column({ name: 'site_summary', type: 'text', nullable: true }) siteSummary: string | null;
-  @Column({ name: 'site_meta', type: 'jsonb', default: () => "'{}'::jsonb" }) siteMeta: Record<string, unknown>;
+  @Column({ name: 'site_meta', type: 'jsonb', default: () => "'{}'::jsonb" }) siteMeta: Record<
+    string,
+    unknown
+  >;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
 }
@@ -142,34 +146,34 @@ export class SiteProductAssignmentEntity {
 
 ### Field Responsibilities
 
-| Field | Responsibility |
-|---|---|
-| `site_id` | The website that owns this shelf row. |
-| `product_id` | The product shown by this website. |
-| `brand` | Redundant brand snapshot for query speed and guard checks. |
-| `public_slug` | URL slug for this website. Same product can have different slugs on different sites. |
-| `website_category` | Website-facing category or menu filter. It does not replace `products.category`. |
-| `menu_group` | Optional navigation group, such as residential, commercial, solutions, featured. |
-| `display_order` | Website product list order. |
-| `is_visible` | Fast visibility flag for website catalog queries. |
-| `is_featured` | Homepage or featured area flag. |
-| `status` | Website shelf workflow state. |
-| `site_title` | Optional site-specific card or page title. |
-| `site_summary` | Optional site-specific listing summary. |
-| `site_meta` | Small website-specific extension bucket. Must not duplicate product facts. |
+| Field              | Responsibility                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| `site_id`          | The website that owns this shelf row.                                                |
+| `product_id`       | The product shown by this website.                                                   |
+| `brand`            | Redundant brand snapshot for query speed and guard checks.                           |
+| `public_slug`      | URL slug for this website. Same product can have different slugs on different sites. |
+| `website_category` | Website-facing category or menu filter. It does not replace `products.category`.     |
+| `menu_group`       | Optional navigation group, such as residential, commercial, solutions, featured.     |
+| `display_order`    | Website product list order.                                                          |
+| `is_visible`       | Fast visibility flag for website catalog queries.                                    |
+| `is_featured`      | Homepage or featured area flag.                                                      |
+| `status`           | Website shelf workflow state.                                                        |
+| `site_title`       | Optional site-specific card or page title.                                           |
+| `site_summary`     | Optional site-specific listing summary.                                              |
+| `site_meta`        | Small website-specific extension bucket. Must not duplicate product facts.           |
 
 ## Taxonomy Mapping
 
 The website filter model should consume existing product fields instead of creating a separate website-only taxonomy.
 
-| UI Filter | Source Field |
-|---|---|
-| Product type, such as residential or commercial | `products.category` and `products.positioning.targetSegments` |
-| Product series | Prefer `products.meta.series` for the current phase; later promote to a durable `series` column or dictionary if it becomes a governed dimension. |
-| Application scenario | `products.positioning.applicationScenarios` |
-| Product features | `product_content.marketing.highlights`, `products.meta.highlights`, or governed feature terms if added later. |
-| Search | `products.sku`, `products.name`, `products.category`, `products.meta.series`, `product_content.name`, `product_content.marketing`, `site_product_assignments.publicSlug`. |
-| Website menu category | `site_product_assignments.websiteCategory`. |
+| UI Filter                                       | Source Field                                                                                                                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Product type, such as residential or commercial | `products.category` and `products.positioning.targetSegments`                                                                                                             |
+| Product series                                  | Prefer `products.meta.series` for the current phase; later promote to a durable `series` column or dictionary if it becomes a governed dimension.                         |
+| Application scenario                            | `products.positioning.applicationScenarios`                                                                                                                               |
+| Product features                                | `product_content.marketing.highlights`, `products.meta.highlights`, or governed feature terms if added later.                                                             |
+| Search                                          | `products.sku`, `products.name`, `products.category`, `products.meta.series`, `product_content.name`, `product_content.marketing`, `site_product_assignments.publicSlug`. |
+| Website menu category                           | `site_product_assignments.websiteCategory`.                                                                                                                               |
 
 ## Website Behavior
 

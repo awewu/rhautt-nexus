@@ -62,14 +62,14 @@ for (const m of ontologySrc.matchAll(blockRe)) {
     backing: pick('backing'),
     hasNullBacking: /backing:\s*null/.test(body),
     factGraphNode: /factGraphNode:\s*true/.test(body),
-    aliases: aliasesRaw
-      ? [...aliasesRaw[1].matchAll(/'([^']+)'/g)].map((a) => a[1])
-      : [],
+    aliases: aliasesRaw ? [...aliasesRaw[1].matchAll(/'([^']+)'/g)].map((a) => a[1]) : [],
   });
 }
 
 if (!entries.length) {
-  failures.push(`${ONTOLOGY} 未解析出任何对象类型定义（注册表被清空或格式变更 → 门禁失效，必须修）`);
+  failures.push(
+    `${ONTOLOGY} 未解析出任何对象类型定义（注册表被清空或格式变更 → 门禁失效，必须修）`
+  );
 }
 
 // 3) 注册表自洽
@@ -81,10 +81,14 @@ for (const e of entries) {
     failures.push(`${ONTOLOGY}: ${e.key} 缺少 persistence（必须如实标注落地程度，不得含糊）`);
   }
   if (e.persistence === 'planned' && !e.hasNullBacking) {
-    failures.push(`${ONTOLOGY}: ${e.key} 标为 planned 却给了 backing（planned 意为尚无实现，不得假装已落地）`);
+    failures.push(
+      `${ONTOLOGY}: ${e.key} 标为 planned 却给了 backing（planned 意为尚无实现，不得假装已落地）`
+    );
   }
   if (e.persistence && e.persistence !== 'planned' && !e.backing) {
-    failures.push(`${ONTOLOGY}: ${e.key} persistence='${e.persistence}' 但缺少 backing（须指明实体/文件出处）`);
+    failures.push(
+      `${ONTOLOGY}: ${e.key} persistence='${e.persistence}' 但缺少 backing（须指明实体/文件出处）`
+    );
   }
 }
 
@@ -96,7 +100,9 @@ if (!doc) {
   const section2 = /##\s*2\.[^\n]*\n([\s\S]*?)(?=\n##\s)/.exec(doc);
   const scope = section2 ? section2[1] : '';
   if (!scope) {
-    failures.push(`${FACT_GRAPH_DOC} 未找到「## 2.」目标实体模型小节（节点模型是注册表对照基准，不得删除）`);
+    failures.push(
+      `${FACT_GRAPH_DOC} 未找到「## 2.」目标实体模型小节（节点模型是注册表对照基准，不得删除）`
+    );
   }
   // 首列可能一格写多个节点（如 `ClimateZone` / `Audience`），须全部取出
   const docNodes = new Set();
@@ -110,15 +116,15 @@ if (!doc) {
   const missingInRegistry = [...docNodes].filter((n) => !entries.some((e) => e.id === n));
   if (missingInRegistry.length) {
     failures.push(
-      `${FACT_GRAPH_DOC} 出现未登记的节点类型：${missingInRegistry.join(' / ')}。`
-      + ` 处置：在 ${ONTOLOGY} 登记（含归属模块与 persistence），否则动作层无法锚定它。`,
+      `${FACT_GRAPH_DOC} 出现未登记的节点类型：${missingInRegistry.join(' / ')}。` +
+        ` 处置：在 ${ONTOLOGY} 登记（含归属模块与 persistence），否则动作层无法锚定它。`
     );
   }
   const missingInDoc = registryNodes.filter((n) => !docNodes.has(n));
   if (missingInDoc.length) {
     failures.push(
-      `注册表标记为 factGraphNode 但 ${FACT_GRAPH_DOC} 未描述：${missingInDoc.join(' / ')}。`
-      + ` 处置：补进设计文档 §2/§3（节点须有语义与边关系），或改 factGraphNode: false。`,
+      `注册表标记为 factGraphNode 但 ${FACT_GRAPH_DOC} 未描述：${missingInDoc.join(' / ')}。` +
+        ` 处置：补进设计文档 §2/§3（节点须有语义与边关系），或改 factGraphNode: false。`
     );
   }
   if (!missingInRegistry.length && !missingInDoc.length) {
@@ -131,7 +137,7 @@ if (!actionsSrc) {
   failures.push(`missing ${ACTIONS_SRC}`);
 } else if (!/objectType:\s*ObjectTypeId/.test(actionsSrc)) {
   failures.push(
-    `${ACTIONS_SRC} 的 objectType 未使用 ObjectTypeId 类型约束（退回自由字符串 = 名词分叉可再次发生）`,
+    `${ACTIONS_SRC} 的 objectType 未使用 ObjectTypeId 类型约束（退回自由字符串 = 名词分叉可再次发生）`
   );
 } else {
   notes.push('动作 objectType 受编译期类型约束');
@@ -149,14 +155,18 @@ if (aliasMap.size) {
     for (const name of fs.readdirSync(abs)) {
       const rel = path.join(dir, name);
       const stat = fs.statSync(path.join(ROOT, rel));
-      if (stat.isDirectory()) { walk(rel); continue; }
+      if (stat.isDirectory()) {
+        walk(rel);
+        continue;
+      }
       if (!/\.ts$/.test(name)) continue;
       if (rel.replace(/\\/g, '/') === ONTOLOGY) continue; // 注册表本身声明别名，属合法
       const src = fs.readFileSync(path.join(ROOT, rel), 'utf8');
       for (const [alias, canonical] of aliasMap) {
         // 只查作为 objectType 值出现的别名（避免误伤实体名如 GrowthCopyAssetEntity）
         const re = new RegExp(`objectType:\\s*['"]${alias}['"]`);
-        if (re.test(src)) offenders.push(`${rel.replace(/\\/g, '/')} 使用别名 '${alias}'（应为 '${canonical}'）`);
+        if (re.test(src))
+          offenders.push(`${rel.replace(/\\/g, '/')} 使用别名 '${alias}'（应为 '${canonical}'）`);
       }
     }
   };
@@ -175,5 +185,7 @@ if (failures.length) {
 }
 
 console.log('本体对象类型对齐 —— PASS');
-notes.push(`已登记对象类型 ${entries.length} 个（事实图谱节点 ${entries.filter((e) => e.factGraphNode).length} 个）`);
+notes.push(
+  `已登记对象类型 ${entries.length} 个（事实图谱节点 ${entries.filter((e) => e.factGraphNode).length} 个）`
+);
 for (const n of notes) console.log(`- ${n}`);

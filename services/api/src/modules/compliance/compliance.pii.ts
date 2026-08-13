@@ -12,7 +12,9 @@ const ALGO = 'aes-256-gcm';
 function resolveKey(): Buffer {
   const raw = process.env.PII_ENCRYPTION_KEY;
   if (raw) {
-    const buf = /^[0-9a-fA-F]{64}$/.test(raw) ? Buffer.from(raw, 'hex') : Buffer.from(raw, 'base64');
+    const buf = /^[0-9a-fA-F]{64}$/.test(raw)
+      ? Buffer.from(raw, 'hex')
+      : Buffer.from(raw, 'base64');
     if (buf.length === 32) return buf;
   }
   if (process.env.NODE_ENV === 'production') {

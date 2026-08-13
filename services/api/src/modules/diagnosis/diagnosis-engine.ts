@@ -43,14 +43,17 @@ export interface NormalizedCustomer {
 /** 真实客户校验：name/phone 必填，且拒绝历史占位值（不信任前端兜底）。 */
 export function normalizeCustomer(payload: any = {}): NormalizedCustomer {
   const customer = payload.customer || {};
-  if (!customer.name) throw new BadRequestException('customer.name is required for diagnosis completion');
-  if (!customer.phone) throw new BadRequestException('customer.phone is required for diagnosis completion');
+  if (!customer.name)
+    throw new BadRequestException('customer.name is required for diagnosis completion');
+  if (!customer.phone)
+    throw new BadRequestException('customer.phone is required for diagnosis completion');
   const name = String(customer.name).trim();
   const phone = String(customer.phone).trim();
   if (PLACEHOLDER_CUSTOMER_NAMES.has(name)) throw new BadRequestException('请填写真实客户姓名');
   if (PLACEHOLDER_CUSTOMER_PHONES.has(phone)) throw new BadRequestException('请填写真实联系电话');
   return {
-    name, phone,
+    name,
+    phone,
     city: customer.city || payload.home?.city || payload.city,
     address: customer.address || payload.home?.address,
   };
@@ -59,7 +62,9 @@ export function normalizeCustomer(payload: any = {}): NormalizedCustomer {
 export function normalizePainPoints(payload: any = {}): string[] {
   const source = payload.painPoints || payload.diagnosis?.painPoints || [];
   return source
-    .map((item: any) => (typeof item === 'string' ? item : item?.name || item?.label || item?.title || item?.id))
+    .map((item: any) =>
+      typeof item === 'string' ? item : item?.name || item?.label || item?.title || item?.id
+    )
     .filter(Boolean);
 }
 
@@ -85,18 +90,25 @@ export function inferSystems(payload: any = {}): string[] {
 }
 
 const SHARE_SECRET =
-  process.env.DIAGNOSIS_SHARE_TOKEN_SECRET || process.env.JWT_SECRET || 'rhautt-diagnosis-share-dev-secret';
+  process.env.DIAGNOSIS_SHARE_TOKEN_SECRET ||
+  process.env.JWT_SECRET ||
+  'rhautt-diagnosis-share-dev-secret';
 
 export function issueShareToken(reportId: string, customerId?: string): string {
   return crypto
     .createHmac('sha256', SHARE_SECRET)
-    .update(`${reportId}:${customerId || 'anonymous'}:${Date.now()}:${crypto.randomBytes(12).toString('hex')}`)
+    .update(
+      `${reportId}:${customerId || 'anonymous'}:${Date.now()}:${crypto.randomBytes(12).toString('hex')}`
+    )
     .digest('hex')
     .slice(0, 32);
 }
 
 export function hashShareToken(token: string): string {
-  return crypto.createHmac('sha256', SHARE_SECRET).update(String(token || '')).digest('hex');
+  return crypto
+    .createHmac('sha256', SHARE_SECRET)
+    .update(String(token || ''))
+    .digest('hex');
 }
 
 export function newReportId(): string {

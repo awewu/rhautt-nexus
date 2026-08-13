@@ -1,4 +1,12 @@
-import { Injectable, UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException, HttpException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ForbiddenException,
+  NotFoundException,
+  BadRequestException,
+  HttpException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -14,9 +22,13 @@ import { OtpService } from './otp.service';
 import { RbacService, type RbacAccess, type RbacScope } from './rbac.service';
 
 export interface JwtPayload {
-  userId: string; tenantId: string;
-  dealerId: string | null; storeId: string | null; customerId: string | null;
-  role: string; permissions: string[];
+  userId: string;
+  tenantId: string;
+  dealerId: string | null;
+  storeId: string | null;
+  customerId: string | null;
+  role: string;
+  permissions: string[];
   roles?: string[];
   modules?: string[];
   scopes?: RbacScope[];
@@ -41,7 +53,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly entitlement: EntitlementService,
     private readonly otp: OtpService,
-    private readonly rbac: RbacService,
+    private readonly rbac: RbacService
   ) {}
 
   // PIPL：登录标识规范化后取检索哈希（与用户开通时写入的 phone_hash 同源，compliance.pii.hashPII）。
@@ -59,11 +71,19 @@ export class AuthService {
   // SECURITY DEFINER 函数返回的 snake_case 原始行 → 实体实例（启用 isLocked 等 getter）。
   private hydrate(r: Record<string, any>): UserEntity {
     return this.users.create({
-      id: r.id, tenantId: r.tenant_id,
-      dealerId: r.dealer_id ?? null, storeId: r.store_id ?? null, customerId: r.customer_id ?? null,
-      phoneHash: r.phone_hash, phoneEncrypted: r.phone_encrypted, passwordHash: r.password_hash,
-      name: r.display_name, role: r.role, permissions: r.permissions ?? [],
-      status: r.status, loginAttempts: r.login_attempts ?? 0,
+      id: r.id,
+      tenantId: r.tenant_id,
+      dealerId: r.dealer_id ?? null,
+      storeId: r.store_id ?? null,
+      customerId: r.customer_id ?? null,
+      phoneHash: r.phone_hash,
+      phoneEncrypted: r.phone_encrypted,
+      passwordHash: r.password_hash,
+      name: r.display_name,
+      role: r.role,
+      permissions: r.permissions ?? [],
+      status: r.status,
+      loginAttempts: r.login_attempts ?? 0,
       lockUntil: r.lock_until ? new Date(r.lock_until) : null,
       lastLoginAt: r.last_login_at ? new Date(r.last_login_at) : null,
     });
@@ -77,7 +97,7 @@ export class AuthService {
     //     多租户同号的登录消歧（按品牌/租户提示）为已知 V1 限制。TODO(P1)。
     const rows: Record<string, any>[] = await this.ds.query(
       'SELECT * FROM rhautt_nexus.auth_lookup_user_by_phone_hash($1)',
-      [this.phoneHash(phone)],
+      [this.phoneHash(phone)]
     );
     const row = rows.find((r) => r.status === 'active') ?? rows[0];
     if (!row) throw new UnauthorizedException('手机号或密码错误');
@@ -86,16 +106,26 @@ export class AuthService {
     if (user.isLocked) throw new HttpException('账号已锁定', 423);
 
     const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) { await this.recordFail(user); throw new UnauthorizedException('手机号或密码错误'); }
+    if (!ok) {
+      await this.recordFail(user);
+      throw new UnauthorizedException('手机号或密码错误');
+    }
 
     // 命中后已知 tenantId：登录态写回走租户绑定事务（满足 FORCE RLS WITH CHECK）。
-    user.loginAttempts = 0; user.lockUntil = null; user.lastLoginAt = new Date();
-    await withRlsTransaction(this.ds, (em) =>
-      em.getRepository(UserEntity).update(
-        { id: user.id },
-        { loginAttempts: 0, lockUntil: null, lastLoginAt: user.lastLoginAt },
-      ),
-    { tenantId: user.tenantId });
+    user.loginAttempts = 0;
+    user.lockUntil = null;
+    user.lastLoginAt = new Date();
+    await withRlsTransaction(
+      this.ds,
+      (em) =>
+        em
+          .getRepository(UserEntity)
+          .update(
+            { id: user.id },
+            { loginAttempts: 0, lockUntil: null, lastLoginAt: user.lastLoginAt }
+          ),
+      { tenantId: user.tenantId }
+    );
     const modules = await this.resolveModules(user.tenantId);
     const access = await this.rbac.resolveUserAccess(user);
     return { token: this.sign(user, modules, access), user: this.toPublic(user, access) };
@@ -110,7 +140,7 @@ export class AuthService {
     if (!phone || !smsCode) throw new BadRequestException('手机号和验证码必填');
     const rows: Record<string, any>[] = await this.ds.query(
       'SELECT * FROM rhautt_nexus.auth_lookup_user_by_phone_hash($1)',
-      [this.phoneHash(phone)],
+      [this.phoneHash(phone)]
     );
     const row = rows.find((r) => r.status === 'active') ?? rows[0];
     if (!row) throw new UnauthorizedException('手机号或验证码错误');
@@ -119,15 +149,25 @@ export class AuthService {
     if (user.isLocked) throw new HttpException('账号已锁定', 423);
 
     const ok = await this.otp.verifyCode(phone, smsCode);
-    if (!ok) { await this.recordFail(user); throw new UnauthorizedException('手机号或验证码错误'); }
+    if (!ok) {
+      await this.recordFail(user);
+      throw new UnauthorizedException('手机号或验证码错误');
+    }
 
-    user.loginAttempts = 0; user.lockUntil = null; user.lastLoginAt = new Date();
-    await withRlsTransaction(this.ds, (em) =>
-      em.getRepository(UserEntity).update(
-        { id: user.id },
-        { loginAttempts: 0, lockUntil: null, lastLoginAt: user.lastLoginAt },
-      ),
-    { tenantId: user.tenantId });
+    user.loginAttempts = 0;
+    user.lockUntil = null;
+    user.lastLoginAt = new Date();
+    await withRlsTransaction(
+      this.ds,
+      (em) =>
+        em
+          .getRepository(UserEntity)
+          .update(
+            { id: user.id },
+            { loginAttempts: 0, lockUntil: null, lastLoginAt: user.lastLoginAt }
+          ),
+      { tenantId: user.tenantId }
+    );
     const modules = await this.resolveModules(user.tenantId);
     const access = await this.rbac.resolveUserAccess(user);
     return { token: this.sign(user, modules, access), user: this.toPublic(user, access) };
@@ -140,9 +180,10 @@ export class AuthService {
     // 已认证请求：复用环境租户上下文（拦截器自 JWT 注入）做租户绑定事务。
     return withRlsTransaction(this.ds, async (em) => {
       const repo = em.getRepository(UserEntity);
-      const user = await repo.findOne({ where: { id: userId }, select: ['id','passwordHash'] });
+      const user = await repo.findOne({ where: { id: userId }, select: ['id', 'passwordHash'] });
       if (!user) throw new NotFoundException('用户不存在');
-      if (!await bcrypt.compare(oldPwd, user.passwordHash)) throw new UnauthorizedException('旧密码错误');
+      if (!(await bcrypt.compare(oldPwd, user.passwordHash)))
+        throw new UnauthorizedException('旧密码错误');
       await repo.update({ id: userId }, { passwordHash: await bcrypt.hash(newPwd, 10) });
       return { changed: true };
     });
@@ -150,9 +191,11 @@ export class AuthService {
 
   async refreshToken(payload: JwtPayload) {
     // payload 携带 tenantId：以其作 scopeOverride 绑定租户事务。
-    const user = await withRlsTransaction(this.ds, (em) =>
-      em.getRepository(UserEntity).findOne({ where: { id: payload.userId } }),
-    { tenantId: payload.tenantId });
+    const user = await withRlsTransaction(
+      this.ds,
+      (em) => em.getRepository(UserEntity).findOne({ where: { id: payload.userId } }),
+      { tenantId: payload.tenantId }
+    );
     if (!user || user.status !== 'active') throw new UnauthorizedException('账号不可用');
     const modules = await this.resolveModules(user.tenantId);
     const access = await this.rbac.resolveUserAccess(user);
@@ -160,15 +203,19 @@ export class AuthService {
   }
 
   async getMe(payload: JwtPayload) {
-    const user = await withRlsTransaction(this.ds, (em) =>
-      em.getRepository(UserEntity).findOne({ where: { id: payload.userId } }),
-    { tenantId: payload.tenantId });
+    const user = await withRlsTransaction(
+      this.ds,
+      (em) => em.getRepository(UserEntity).findOne({ where: { id: payload.userId } }),
+      { tenantId: payload.tenantId }
+    );
     if (!user || user.status !== 'active') throw new UnauthorizedException('账号不可用');
     const access = await this.rbac.resolveUserAccess(user);
     return this.toPublic(user, access);
   }
 
-  logout() { return { revoked: false, tokenMode: 'stateless-jwt' }; }
+  logout() {
+    return { revoked: false, tokenMode: 'stateless-jwt' };
+  }
 
   /**
    * 本地开发 SSO 直通桩（仅 NEXUS_DEV_SSO=1 且非生产启用）：模拟"已登录牛马搭子直通"，
@@ -178,14 +225,20 @@ export class AuthService {
     const id = identifier || process.env.NEXUS_DEV_SSO_USER || 'hq@rhautt.local';
     const rows: Record<string, any>[] = await this.ds.query(
       'SELECT * FROM rhautt_nexus.auth_lookup_user_by_phone_hash($1)',
-      [this.phoneHash(id)],
+      [this.phoneHash(id)]
     );
     const row = rows.find((r) => r.status === 'active') ?? rows[0];
     if (!row) throw new UnauthorizedException(`dev SSO user not found: ${id}`);
     const user = this.hydrate(row);
     return this.issueLoginForResolvedUser({
-      id: user.id, tenantId: user.tenantId, dealerId: user.dealerId ?? null, storeId: user.storeId ?? null,
-      customerId: user.customerId ?? null, name: user.name, role: user.role, permissions: user.permissions ?? [],
+      id: user.id,
+      tenantId: user.tenantId,
+      dealerId: user.dealerId ?? null,
+      storeId: user.storeId ?? null,
+      customerId: user.customerId ?? null,
+      name: user.name,
+      role: user.role,
+      permissions: user.permissions ?? [],
     });
   }
 
@@ -215,8 +268,12 @@ export class AuthService {
    * - 品牌员工账号仍不可自助注册，须走后台开户流程。
    */
   async register(dto: {
-    identifier?: string; phone?: string; email?: string;
-    password: string; name?: string; companyName?: string;
+    identifier?: string;
+    phone?: string;
+    email?: string;
+    password: string;
+    name?: string;
+    companyName?: string;
   }) {
     const identifier = String(dto?.identifier || dto?.email || dto?.phone || '').trim();
     const password = dto?.password;
@@ -232,7 +289,7 @@ export class AuthService {
     // 全局唯一性：跨租户按 phone_hash 命中（SECURITY DEFINER 绕 RLS）。
     const existing: Record<string, any>[] = await this.ds.query(
       'SELECT id FROM rhautt_nexus.auth_lookup_user_by_phone_hash($1)',
-      [phoneHash],
+      [phoneHash]
     );
     if (existing.length) throw new ConflictException('该手机号/邮箱已注册');
 
@@ -240,31 +297,42 @@ export class AuthService {
     const displayName = String(dto?.name || '').trim() || normalized;
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = await withRlsTransaction(this.ds, async (em) => {
-      // tenants 表无 RLS：直接创建独立租户注册记录。
-      const tenantRepo = em.getRepository(TenantEntity);
-      await tenantRepo.save(tenantRepo.create({
-        id: tenantId,
-        code: 'self-' + tenantId.slice(0, 8),
-        name: String(dto?.companyName || displayName) + ' · 经销商',
-        type: 'dealer_group',
-        status: 'active',
-        settings: { source: 'self-register', provisioned: false },
-      }));
-      // users 表 FORCE RLS：本事务已绑定 tenantId，WITH CHECK 通过。
-      const repo = em.getRepository(UserEntity);
-      return repo.save(repo.create({
-        tenantId,
-        dealerId: null, storeId: null, customerId: null,
-        phoneHash, phoneEncrypted: encryptPII(normalized),
-        passwordHash,
-        name: displayName,
-        role: SELF_REGISTER_ROLE,
-        permissions: [],       // 事后限权：初始无附加权限点
-        status: 'active',      // 注册即用
-        loginAttempts: 0,
-      }));
-    }, { tenantId });
+    const user = await withRlsTransaction(
+      this.ds,
+      async (em) => {
+        // tenants 表无 RLS：直接创建独立租户注册记录。
+        const tenantRepo = em.getRepository(TenantEntity);
+        await tenantRepo.save(
+          tenantRepo.create({
+            id: tenantId,
+            code: 'self-' + tenantId.slice(0, 8),
+            name: String(dto?.companyName || displayName) + ' · 经销商',
+            type: 'dealer_group',
+            status: 'active',
+            settings: { source: 'self-register', provisioned: false },
+          })
+        );
+        // users 表 FORCE RLS：本事务已绑定 tenantId，WITH CHECK 通过。
+        const repo = em.getRepository(UserEntity);
+        return repo.save(
+          repo.create({
+            tenantId,
+            dealerId: null,
+            storeId: null,
+            customerId: null,
+            phoneHash,
+            phoneEncrypted: encryptPII(normalized),
+            passwordHash,
+            name: displayName,
+            role: SELF_REGISTER_ROLE,
+            permissions: [], // 事后限权：初始无附加权限点
+            status: 'active', // 注册即用
+            loginAttempts: 0,
+          })
+        );
+      },
+      { tenantId }
+    );
 
     const modules = await this.resolveModules(tenantId); // 新租户无订阅 → []
     const access = await this.rbac.resolveUserAccess(user);
@@ -287,9 +355,17 @@ export class AuthService {
   // 管理员账号管理（租户内）。所有操作绑定 actor.tenantId 的 RLS 事务，
   // 天然隔离到管理员所属租户；dealer_admin 进一步限制到本经销商与非管理员角色。
   // ─────────────────────────────────────────────────────────────
-  private static readonly BRAND_ADMIN: ReadonlySet<string> = new Set(['platform_admin', 'hq_admin', 'brand_admin']);
+  private static readonly BRAND_ADMIN: ReadonlySet<string> = new Set([
+    'platform_admin',
+    'hq_admin',
+    'brand_admin',
+  ]);
   private static readonly DEALER_MANAGEABLE: ReadonlySet<UserRole> = new Set<UserRole>([
-    'store_manager', 'sales', 'designer', 'engineer', 'installer',
+    'store_manager',
+    'sales',
+    'designer',
+    'engineer',
+    'installer',
   ]);
 
   /** actor 是否有权把某人设/建为指定角色。 */
@@ -332,37 +408,63 @@ export class AuthService {
         identifierKind = 'phone';
         identifierMasked = raw;
       }
-    } catch { identifierMasked = '***'; }
+    } catch {
+      identifierMasked = '***';
+    }
     return {
-      id: u.id, name: u.name, role: u.role, status: u.status,
-      dealerId: u.dealerId, storeId: u.storeId,
-      identifierMasked, identifierKind, isLocked: u.isLocked,
-      lastLoginAt: u.lastLoginAt ?? null, createdAt: u.createdAt ?? null,
+      id: u.id,
+      name: u.name,
+      role: u.role,
+      status: u.status,
+      dealerId: u.dealerId,
+      storeId: u.storeId,
+      identifierMasked,
+      identifierKind,
+      isLocked: u.isLocked,
+      lastLoginAt: u.lastLoginAt ?? null,
+      createdAt: u.createdAt ?? null,
     };
   }
 
   async adminListUsers(actor: JwtPayload, q: { search?: string; role?: string; status?: string }) {
-    return withRlsTransaction(this.ds, async (em) => {
-      const qb = em.getRepository(UserEntity).createQueryBuilder('u')
-        .where('u.tenantId = :t', { t: actor.tenantId });
-      if (q.role) qb.andWhere('u.role = :r', { r: q.role });
-      if (q.status) qb.andWhere('u.status = :s', { s: q.status });
-      if (actor.role === 'dealer_admin' && actor.dealerId) {
-        qb.andWhere('u.dealerId = :d', { d: actor.dealerId });
-      }
-      const rows = await qb.orderBy('u.createdAt', 'DESC').limit(300).getMany();
-      let list = rows.map((u) => this.toAdminView(u));
-      const s = (q.search || '').trim().toLowerCase();
-      if (s) list = list.filter((x) => x.name.toLowerCase().includes(s) || x.identifierMasked.includes(s));
-      return { users: list, total: list.length };
-    }, { tenantId: actor.tenantId });
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        const qb = em
+          .getRepository(UserEntity)
+          .createQueryBuilder('u')
+          .where('u.tenantId = :t', { t: actor.tenantId });
+        if (q.role) qb.andWhere('u.role = :r', { r: q.role });
+        if (q.status) qb.andWhere('u.status = :s', { s: q.status });
+        if (actor.role === 'dealer_admin' && actor.dealerId) {
+          qb.andWhere('u.dealerId = :d', { d: actor.dealerId });
+        }
+        const rows = await qb.orderBy('u.createdAt', 'DESC').limit(300).getMany();
+        let list = rows.map((u) => this.toAdminView(u));
+        const s = (q.search || '').trim().toLowerCase();
+        if (s)
+          list = list.filter(
+            (x) => x.name.toLowerCase().includes(s) || x.identifierMasked.includes(s)
+          );
+        return { users: list, total: list.length };
+      },
+      { tenantId: actor.tenantId }
+    );
   }
 
-  async adminCreateUser(actor: JwtPayload, dto: {
-    identifier: string; password: string; name?: string; role: UserRole;
-    dealerId?: string | null; storeId?: string | null;
-  }) {
-    if (!dto?.identifier || !dto?.password || !dto?.role) throw new BadRequestException('账号、密码、角色必填');
+  async adminCreateUser(
+    actor: JwtPayload,
+    dto: {
+      identifier: string;
+      password: string;
+      name?: string;
+      role: UserRole;
+      dealerId?: string | null;
+      storeId?: string | null;
+    }
+  ) {
+    if (!dto?.identifier || !dto?.password || !dto?.role)
+      throw new BadRequestException('账号、密码、角色必填');
     if (dto.password.length < 8) throw new BadRequestException('密码至少8位');
     this.assertCanManageRole(actor, dto.role);
     assertIdentifierForRole(dto.role, dto.identifier);
@@ -370,69 +472,113 @@ export class AuthService {
     const normalized = AuthService.normalizeIdentifier(dto.identifier);
     const phoneHash = hashPII(normalized);
     const existing: Record<string, any>[] = await this.ds.query(
-      'SELECT id FROM rhautt_nexus.auth_lookup_user_by_phone_hash($1)', [phoneHash],
+      'SELECT id FROM rhautt_nexus.auth_lookup_user_by_phone_hash($1)',
+      [phoneHash]
     );
     if (existing.length) throw new ConflictException('该手机号/邮箱已注册');
 
-    const dealerId = dto.dealerId ?? (actor.role === 'dealer_admin' ? actor.dealerId : null) ?? null;
-    const user = await withRlsTransaction(this.ds, async (em) => {
-      const repo = em.getRepository(UserEntity);
-      return repo.save(repo.create({
-        tenantId: actor.tenantId,
-        dealerId, storeId: dto.storeId ?? null, customerId: null,
-        phoneHash, phoneEncrypted: encryptPII(normalized),
-        passwordHash: await bcrypt.hash(dto.password, 10),
-        name: (dto.name || '').trim() || normalized,
-        role: dto.role, permissions: [], status: 'active', loginAttempts: 0,
-      }));
-    }, { tenantId: actor.tenantId });
+    const dealerId =
+      dto.dealerId ?? (actor.role === 'dealer_admin' ? actor.dealerId : null) ?? null;
+    const user = await withRlsTransaction(
+      this.ds,
+      async (em) => {
+        const repo = em.getRepository(UserEntity);
+        return repo.save(
+          repo.create({
+            tenantId: actor.tenantId,
+            dealerId,
+            storeId: dto.storeId ?? null,
+            customerId: null,
+            phoneHash,
+            phoneEncrypted: encryptPII(normalized),
+            passwordHash: await bcrypt.hash(dto.password, 10),
+            name: (dto.name || '').trim() || normalized,
+            role: dto.role,
+            permissions: [],
+            status: 'active',
+            loginAttempts: 0,
+          })
+        );
+      },
+      { tenantId: actor.tenantId }
+    );
     return { user: this.toAdminView(user) };
   }
 
-  async adminUpdateUser(actor: JwtPayload, targetId: string, patch: {
-    role?: UserRole; status?: 'active' | 'inactive' | 'suspended'; name?: string;
-    dealerId?: string | null; storeId?: string | null;
-  }) {
-    return withRlsTransaction(this.ds, async (em) => {
-      const repo = em.getRepository(UserEntity);
-      const user = await repo.findOne({ where: { id: targetId } });
-      if (!user) throw new NotFoundException('用户不存在');
-      this.assertActorOverTarget(actor, user);
-      if (patch.role) { this.assertCanManageRole(actor, patch.role); user.role = patch.role; }
-      if (patch.status) user.status = patch.status;
-      if (patch.name !== undefined) user.name = patch.name;
-      if (patch.dealerId !== undefined) user.dealerId = patch.dealerId;
-      if (patch.storeId !== undefined) user.storeId = patch.storeId;
-      if (patch.status === 'active') { user.loginAttempts = 0; user.lockUntil = null; }
-      await repo.save(user);
-      return { user: this.toAdminView(user) };
-    }, { tenantId: actor.tenantId });
+  async adminUpdateUser(
+    actor: JwtPayload,
+    targetId: string,
+    patch: {
+      role?: UserRole;
+      status?: 'active' | 'inactive' | 'suspended';
+      name?: string;
+      dealerId?: string | null;
+      storeId?: string | null;
+    }
+  ) {
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        const repo = em.getRepository(UserEntity);
+        const user = await repo.findOne({ where: { id: targetId } });
+        if (!user) throw new NotFoundException('用户不存在');
+        this.assertActorOverTarget(actor, user);
+        if (patch.role) {
+          this.assertCanManageRole(actor, patch.role);
+          user.role = patch.role;
+        }
+        if (patch.status) user.status = patch.status;
+        if (patch.name !== undefined) user.name = patch.name;
+        if (patch.dealerId !== undefined) user.dealerId = patch.dealerId;
+        if (patch.storeId !== undefined) user.storeId = patch.storeId;
+        if (patch.status === 'active') {
+          user.loginAttempts = 0;
+          user.lockUntil = null;
+        }
+        await repo.save(user);
+        return { user: this.toAdminView(user) };
+      },
+      { tenantId: actor.tenantId }
+    );
   }
 
   async adminResetPassword(actor: JwtPayload, targetId: string, newPwd: string) {
     if (!newPwd || newPwd.length < 8) throw new BadRequestException('新密码至少8位');
-    return withRlsTransaction(this.ds, async (em) => {
-      const repo = em.getRepository(UserEntity);
-      const user = await repo.findOne({ where: { id: targetId } });
-      if (!user) throw new NotFoundException('用户不存在');
-      this.assertActorOverTarget(actor, user);
-      await repo.update({ id: targetId }, {
-        passwordHash: await bcrypt.hash(newPwd, 10), loginAttempts: 0, lockUntil: null,
-      });
-      return { reset: true };
-    }, { tenantId: actor.tenantId });
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        const repo = em.getRepository(UserEntity);
+        const user = await repo.findOne({ where: { id: targetId } });
+        if (!user) throw new NotFoundException('用户不存在');
+        this.assertActorOverTarget(actor, user);
+        await repo.update(
+          { id: targetId },
+          {
+            passwordHash: await bcrypt.hash(newPwd, 10),
+            loginAttempts: 0,
+            lockUntil: null,
+          }
+        );
+        return { reset: true };
+      },
+      { tenantId: actor.tenantId }
+    );
   }
 
   async adminDeleteUser(actor: JwtPayload, targetId: string) {
     if (actor.userId === targetId) throw new BadRequestException('不能删除当前登录账号');
-    return withRlsTransaction(this.ds, async (em) => {
-      const repo = em.getRepository(UserEntity);
-      const user = await repo.findOne({ where: { id: targetId } });
-      if (!user) throw new NotFoundException('用户不存在');
-      this.assertActorOverTarget(actor, user);
-      await repo.delete({ id: targetId });
-      return { deleted: true };
-    }, { tenantId: actor.tenantId });
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        const repo = em.getRepository(UserEntity);
+        const user = await repo.findOne({ where: { id: targetId } });
+        if (!user) throw new NotFoundException('用户不存在');
+        this.assertActorOverTarget(actor, user);
+        await repo.delete({ id: targetId });
+        return { deleted: true };
+      },
+      { tenantId: actor.tenantId }
+    );
   }
 
   adminListPermissions(actor: JwtPayload) {
@@ -443,11 +589,18 @@ export class AuthService {
     return this.rbac.listRoles(actor);
   }
 
-  adminCreateRole(actor: JwtPayload, body: { code?: string; name?: string; description?: string; permissions?: string[] }) {
+  adminCreateRole(
+    actor: JwtPayload,
+    body: { code?: string; name?: string; description?: string; permissions?: string[] }
+  ) {
     return this.rbac.createRole(actor, body);
   }
 
-  adminUpdateRole(actor: JwtPayload, id: string, body: { name?: string; description?: string; status?: 'active' | 'inactive' }) {
+  adminUpdateRole(
+    actor: JwtPayload,
+    id: string,
+    body: { name?: string; description?: string; status?: 'active' | 'inactive' }
+  ) {
     return this.rbac.updateRole(actor, id, body);
   }
 
@@ -455,7 +608,15 @@ export class AuthService {
     return this.rbac.setRolePermissions(actor, id, body.permissions ?? []);
   }
 
-  adminSetUserRoles(actor: JwtPayload, id: string, body: { roleIds?: string[]; primaryRoleId?: string; scope?: { scopeType?: string; scopeDimension?: string | null; scopeRef?: string | null } }) {
+  adminSetUserRoles(
+    actor: JwtPayload,
+    id: string,
+    body: {
+      roleIds?: string[];
+      primaryRoleId?: string;
+      scope?: { scopeType?: string; scopeDimension?: string | null; scopeRef?: string | null };
+    }
+  ) {
     return this.rbac.setUserRoles(actor, id, body);
   }
 
@@ -468,12 +629,21 @@ export class AuthService {
   }
 
   private sign(user: UserEntity, modules: string[] = [], access?: RbacAccess): string {
-    const resolved = access ?? { role: user.role, roles: [user.role], permissions: user.permissions ?? [], scopes: [] };
+    const resolved = access ?? {
+      role: user.role,
+      roles: [user.role],
+      permissions: user.permissions ?? [],
+      scopes: [],
+    };
     const payload: JwtPayload = {
-      userId: user.id, tenantId: user.tenantId,
-      dealerId: user.dealerId ?? null, storeId: user.storeId ?? null,
+      userId: user.id,
+      tenantId: user.tenantId,
+      dealerId: user.dealerId ?? null,
+      storeId: user.storeId ?? null,
       customerId: user.customerId ?? null,
-      role: resolved.role, roles: resolved.roles, permissions: resolved.permissions,
+      role: resolved.role,
+      roles: resolved.roles,
+      permissions: resolved.permissions,
       modules,
       scopes: resolved.scopes,
     };
@@ -483,14 +653,19 @@ export class AuthService {
   // 解析租户有效订阅模块写入 JWT，仅供前端渲染能力开关；访问控制由 EntitlementGuard 实时查库（不信任 token）。
   private async resolveModules(tenantId: string): Promise<string[]> {
     try {
-      return [...await this.entitlement.activeModuleIds(tenantId)];
+      return [...(await this.entitlement.activeModuleIds(tenantId))];
     } catch {
       return [];
     }
   }
 
   private toPublic(u: UserEntity, access?: RbacAccess) {
-    const resolved = access ?? { role: u.role, roles: [u.role], permissions: u.permissions ?? [], scopes: [] };
+    const resolved = access ?? {
+      role: u.role,
+      roles: [u.role],
+      permissions: u.permissions ?? [],
+      scopes: [],
+    };
     let identifierMasked = '';
     let identifierKind: 'email' | 'phone' | 'unknown' = 'unknown';
     try {
@@ -506,21 +681,34 @@ export class AuthService {
       identifierMasked = '';
     }
     return {
-      id: u.id, userId: u.id, tenantId: u.tenantId, dealerId: u.dealerId, storeId: u.storeId, name: u.name,
-      role: resolved.role, roles: resolved.roles, permissions: resolved.permissions,
+      id: u.id,
+      userId: u.id,
+      tenantId: u.tenantId,
+      dealerId: u.dealerId,
+      storeId: u.storeId,
+      name: u.name,
+      role: resolved.role,
+      roles: resolved.roles,
+      permissions: resolved.permissions,
       scopes: resolved.scopes,
-      identifierMasked, identifierKind,
+      identifierMasked,
+      identifierKind,
     };
   }
 
   private async recordFail(user: UserEntity) {
     user.loginAttempts = (user.loginAttempts ?? 0) + 1;
     if (user.loginAttempts >= 5) user.lockUntil = new Date(Date.now() + 30 * 60 * 1000);
-    await withRlsTransaction(this.ds, (em) =>
-      em.getRepository(UserEntity).update(
-        { id: user.id },
-        { loginAttempts: user.loginAttempts, lockUntil: user.lockUntil },
-      ),
-    { tenantId: user.tenantId });
+    await withRlsTransaction(
+      this.ds,
+      (em) =>
+        em
+          .getRepository(UserEntity)
+          .update(
+            { id: user.id },
+            { loginAttempts: user.loginAttempts, lockUntil: user.lockUntil }
+          ),
+      { tenantId: user.tenantId }
+    );
   }
 }

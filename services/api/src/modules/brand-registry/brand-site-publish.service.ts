@@ -41,13 +41,15 @@ export type BrandPublishPlan = {
 export type BrandPublishRunner = (
   file: string,
   args: string[],
-  options: ExecFileOptions,
+  options: ExecFileOptions
 ) => Promise<{ stdout: string; stderr: string }>;
 
 const WRITE_ROLES = new Set(['platform_admin', 'hq_admin', 'brand_admin']);
 const EVERHOT_APP_KEY = 'everhot-cn';
 
-export function requireBrandPublishWrite(user: Pick<JwtPayload, 'role'> & { permissions?: string[] }): void {
+export function requireBrandPublishWrite(
+  user: Pick<JwtPayload, 'role'> & { permissions?: string[] }
+): void {
   if (WRITE_ROLES.has(user?.role)) return;
   const permissions = new Set(user?.permissions ?? []);
   if (permissions.has('*') || permissions.has('brand.library.publish')) return;
@@ -72,7 +74,7 @@ export function resolveBrandPublishCapability(site: BrandPublishTarget): BrandPu
 export function createBrandPublishPlan(
   site: BrandPublishTarget,
   user: Pick<JwtPayload, 'tenantId'>,
-  options: { workspaceRoot?: string; apiBase?: string; productTenantId?: string } = {},
+  options: { workspaceRoot?: string; apiBase?: string; productTenantId?: string } = {}
 ): BrandPublishPlan {
   const capability = resolveBrandPublishCapability(site);
   if (!capability.supported) throw new ConflictException(capability.reason);
@@ -80,10 +82,11 @@ export function createBrandPublishPlan(
   const workspaceRoot = options.workspaceRoot || resolveWorkspaceRoot();
   const cwd = resolve(workspaceRoot, 'apps', EVERHOT_APP_KEY);
   const apiBase = options.apiBase || resolveApiBase();
-  const productTenantId = options.productTenantId
-    || process.env.BRAND_PUBLISH_EVERHOT_TENANT_ID
-    || process.env.EVERHOT_TENANT_ID
-    || user.tenantId;
+  const productTenantId =
+    options.productTenantId ||
+    process.env.BRAND_PUBLISH_EVERHOT_TENANT_ID ||
+    process.env.EVERHOT_TENANT_ID ||
+    user.tenantId;
 
   return {
     brandCode: site.code,
@@ -107,7 +110,7 @@ export function createBrandPublishPlan(
 
 export async function executeBrandPublishPlan(
   plan: BrandPublishPlan,
-  runner: BrandPublishRunner = runExecFile,
+  runner: BrandPublishRunner = runExecFile
 ) {
   const startedAt = new Date();
   const logs = [
@@ -176,7 +179,10 @@ export class BrandSitePublishService {
 }
 
 export class BrandPublishExecutionError extends Error {
-  constructor(message: string, readonly log: string) {
+  constructor(
+    message: string,
+    readonly log: string
+  ) {
     super(message);
     this.name = 'BrandPublishExecutionError';
   }
@@ -195,7 +201,9 @@ function resolveWorkspaceRoot(): string {
 
 function resolveApiBase(): string {
   const origin = String(process.env.NEXUS_API_URL || 'http://127.0.0.1:5500').replace(/\/+$/, '');
-  const prefix = String(process.env.NEXUS_API_PREFIX ?? '/api/v2').replace(/^\/*/, '/').replace(/\/+$/, '');
+  const prefix = String(process.env.NEXUS_API_PREFIX ?? '/api/v2')
+    .replace(/^\/*/, '/')
+    .replace(/\/+$/, '');
   return origin.endsWith(prefix) ? origin : `${origin}${prefix}`;
 }
 

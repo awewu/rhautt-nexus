@@ -60,7 +60,7 @@ class HouseTypeLibrary {
   }
 
   getById(id) {
-    return this.houseTypes.find(h => h.id === id);
+    return this.houseTypes.find((h) => h.id === id);
   }
 
   getByType(type) {
@@ -68,7 +68,7 @@ class HouseTypeLibrary {
   }
 
   getByAreaRange(minArea, maxArea) {
-    return this.houseTypes.filter(h => h.area >= minArea && h.area <= maxArea);
+    return this.houseTypes.filter((h) => h.area >= minArea && h.area <= maxArea);
   }
 
   /**
@@ -79,28 +79,27 @@ class HouseTypeLibrary {
     let results = [...this.houseTypes];
 
     if (query.type) {
-      results = results.filter(h => h.type === query.type);
+      results = results.filter((h) => h.type === query.type);
     }
     if (query.areaMin != null) {
-      results = results.filter(h => h.area >= query.areaMin);
+      results = results.filter((h) => h.area >= query.areaMin);
     }
     if (query.areaMax != null) {
-      results = results.filter(h => h.area <= query.areaMax);
+      results = results.filter((h) => h.area <= query.areaMax);
     }
     if (query.bedrooms != null) {
-      results = results.filter(h => h.rooms.bedrooms === query.bedrooms);
+      results = results.filter((h) => h.rooms.bedrooms === query.bedrooms);
     }
     if (query.bathrooms != null) {
-      results = results.filter(h => h.rooms.bathrooms >= query.bathrooms);
+      results = results.filter((h) => h.rooms.bathrooms >= query.bathrooms);
     }
     if (query.floors != null) {
-      results = results.filter(h => h.floors === query.floors);
+      results = results.filter((h) => h.floors === query.floors);
     }
     if (query.keywords) {
       const kw = query.keywords.toLowerCase();
-      results = results.filter(h =>
-        h.name.toLowerCase().includes(kw) ||
-        h.layout.toLowerCase().includes(kw)
+      results = results.filter(
+        (h) => h.name.toLowerCase().includes(kw) || h.layout.toLowerCase().includes(kw)
       );
     }
     return results;
@@ -111,12 +110,12 @@ class HouseTypeLibrary {
    */
   recommend(profile = {}) {
     const { area, bedrooms, demographic, painPoints = [] } = profile;
-    const scored = this.houseTypes.map(ht => {
+    const scored = this.houseTypes.map((ht) => {
       let score = 0;
       if (area && Math.abs(ht.area - area) < 20) score += 30;
       if (bedrooms && ht.rooms.bedrooms === bedrooms) score += 25;
       if (demographic && ht.targetDemographics.includes(demographic)) score += 20;
-      const overlap = painPoints.filter(p => ht.commonPainPoints.includes(p)).length;
+      const overlap = painPoints.filter((p) => ht.commonPainPoints.includes(p)).length;
       score += overlap * 10;
       return { houseType: ht, score };
     });
@@ -132,7 +131,7 @@ class HouseTypeLibrary {
       byType: {},
       byAreaBucket: {},
       avgArea: 0,
-      areaRange: { min: Infinity, max: 0 }
+      areaRange: { min: Infinity, max: 0 },
     };
     let sumArea = 0;
     for (const ht of this.houseTypes) {
@@ -151,16 +150,16 @@ class HouseTypeLibrary {
    * 户型对比
    */
   compare(ids = []) {
-    const items = ids.map(id => this.getById(id)).filter(Boolean);
+    const items = ids.map((id) => this.getById(id)).filter(Boolean);
     if (items.length < 2) return null;
     return {
       items,
       comparison: {
-        areas: items.map(h => h.area),
-        bedrooms: items.map(h => h.rooms.bedrooms),
-        bathrooms: items.map(h => h.rooms.bathrooms),
-        types: items.map(h => h.type)
-      }
+        areas: items.map((h) => h.area),
+        bedrooms: items.map((h) => h.rooms.bedrooms),
+        bathrooms: items.map((h) => h.rooms.bathrooms),
+        types: items.map((h) => h.type),
+      },
     };
   }
 
@@ -172,25 +171,35 @@ class HouseTypeLibrary {
     const list = this.houseTypes || [];
     const total = list.length;
     if (total === 0) {
-      return { total: 0, avgArea: 0, areaRange: { min: 0, max: 0 }, byType: {}, byBedrooms: {}, byFloors: {} };
+      return {
+        total: 0,
+        avgArea: 0,
+        areaRange: { min: 0, max: 0 },
+        byType: {},
+        byBedrooms: {},
+        byFloors: {},
+      };
     }
-    const areas = list.map(h => Number(h.area) || 0);
+    const areas = list.map((h) => Number(h.area) || 0);
     const sumArea = areas.reduce((s, v) => s + v, 0);
     const avgArea = Math.round(sumArea / total);
     const areaRange = { min: Math.min(...areas), max: Math.max(...areas) };
 
-    const tally = (arr, fn) => arr.reduce((acc, h) => {
-      const k = fn(h); if (k == null) return acc;
-      acc[k] = (acc[k] || 0) + 1; return acc;
-    }, {});
+    const tally = (arr, fn) =>
+      arr.reduce((acc, h) => {
+        const k = fn(h);
+        if (k == null) return acc;
+        acc[k] = (acc[k] || 0) + 1;
+        return acc;
+      }, {});
 
     return {
       total,
       avgArea,
       areaRange,
-      byType:     tally(list, h => h.type),
-      byBedrooms: tally(list, h => h.rooms && h.rooms.bedrooms),
-      byFloors:   tally(list, h => h.floors)
+      byType: tally(list, (h) => h.type),
+      byBedrooms: tally(list, (h) => h.rooms && h.rooms.bedrooms),
+      byFloors: tally(list, (h) => h.floors),
     };
   }
 }

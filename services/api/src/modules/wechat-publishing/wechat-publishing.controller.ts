@@ -3,7 +3,9 @@ import { Permissions } from '../common/permissions.decorator';
 import { JwtPayload } from '../auth/auth.service';
 import { WechatPublishingService } from './wechat-publishing.service';
 
-interface AuthRequest { user: JwtPayload; }
+interface AuthRequest {
+  user: JwtPayload;
+}
 
 @Controller('marketing')
 export class WechatPublishingController {
@@ -77,7 +79,11 @@ export class WechatPublishingController {
 
   @Post('content-review-versions/:versionId/request-changes')
   @Permissions('marketing.content.review')
-  requestChanges(@Req() req: AuthRequest, @Param('versionId') versionId: string, @Body() body: any) {
+  requestChanges(
+    @Req() req: AuthRequest,
+    @Param('versionId') versionId: string,
+    @Body() body: any
+  ) {
     return this.service.requestChanges(req.user, versionId, body);
   }
 

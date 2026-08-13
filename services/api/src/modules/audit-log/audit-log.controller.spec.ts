@@ -3,9 +3,10 @@ import { AuditLogService } from './audit-log.service';
 
 const mockUser = { userId: 'u1', tenantId: 't1', role: 'platform_admin' } as any;
 
-const mockService = () => ({
-  list: jest.fn(async () => ({ logs: [], total: 0, page: 1, limit: 100 })),
-}) as any;
+const mockService = () =>
+  ({
+    list: jest.fn(async () => ({ logs: [], total: 0, page: 1, limit: 100 })),
+  }) as any;
 
 describe('AuditLogController', () => {
   it('delegates list to service', async () => {
@@ -21,7 +22,10 @@ describe('AuditEventsController', () => {
   it('delegates events to service.list (alias)', async () => {
     const svc = mockService();
     const ctrl = new AuditEventsController(svc);
-    const result = await ctrl.events({ user: mockUser }, { action: 'contract.created_from_quotation' });
+    const result = await ctrl.events(
+      { user: mockUser },
+      { action: 'contract.created_from_quotation' }
+    );
     expect(svc.list).toHaveBeenCalledWith(mockUser, { action: 'contract.created_from_quotation' });
     expect(result.logs).toEqual([]);
   });

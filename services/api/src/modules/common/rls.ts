@@ -16,7 +16,7 @@ import { getTenantScope, TenantScope } from './tenant-context';
 export async function withRlsTransaction<T>(
   dataSource: DataSource,
   work: (manager: EntityManager) => Promise<T>,
-  scopeOverride?: TenantScope,
+  scopeOverride?: TenantScope
 ): Promise<T> {
   const scope = scopeOverride ?? getTenantScope();
   if (!scope?.tenantId) {

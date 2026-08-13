@@ -20,31 +20,37 @@ secret-management channel before production launch.
 ## 命令
 
 启动所有进程：
+
 ```
 pm2 start production-config/ecosystem.config.js
 ```
 
 停止所有进程：
+
 ```
 pm2 stop all
 ```
 
 查看日志：
+
 ```
 pm2 logs
 ```
 
 重载 Nginx 配置：
+
 ```
 nginx -s reload
 ```
 
 初始化管理员账号：
+
 ```
 node scripts/seed-admin.js
 ```
 
 初始化演示账号：
+
 ```
 node scripts/seed-demo-accounts.js
 ```

@@ -14,7 +14,7 @@ export class HealthController {
       httpAdapter: 'Fastify',
       architecture: 'DDD modular monolith',
       moduleBoundary: apiModuleBoundary,
-      iotBoundary: 'lifecycle_handoff_only'
+      iotBoundary: 'lifecycle_handoff_only',
     };
   }
 }

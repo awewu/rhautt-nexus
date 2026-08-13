@@ -33,19 +33,19 @@ class TemplateLibrary {
           floors: 1,
           rooms: 3,
           livingRooms: 1,
-          bathrooms: 2
+          bathrooms: 2,
         },
         deviceSelection: {
           airConditioning: { model: 'RHEEM-120', indoorUnits: 4 },
           floorHeating: { model: 'FH-100-STD', coverage: 100 },
           wallBoiler: { model: 'RWB-28-PLUS' },
           freshAir: { model: 'W4-250' },
-          waterSystem: { model: 'W3-800' }
+          waterSystem: { model: 'W3-800' },
         },
         totalPrice: 85000,
         createdAt: '2024-01-15',
         usageCount: 156,
-        rating: 4.8
+        rating: 4.8,
       },
       {
         id: 'tpl_002',
@@ -60,18 +60,18 @@ class TemplateLibrary {
           rooms: 5,
           livingRooms: 2,
           bathrooms: 4,
-          basement: true
+          basement: true,
         },
         deviceSelection: {
           fiveConstant: { model: 'RHPD-300-ODIN', capillary: 'CPS-200-PRO' },
           freshAir: { model: 'W4-500' },
           wallBoiler: { model: 'RWB-35-PLUS' },
-          waterSystem: { model: 'W3-1200' }
+          waterSystem: { model: 'W3-1200' },
         },
         totalPrice: 280000,
         createdAt: '2024-01-20',
         usageCount: 89,
-        rating: 4.9
+        rating: 4.9,
       },
       {
         id: 'tpl_003',
@@ -86,18 +86,18 @@ class TemplateLibrary {
           rooms: 2,
           livingRooms: 1,
           bathrooms: 1,
-          special: '母婴'
+          special: '母婴',
         },
         deviceSelection: {
           airConditioning: { model: 'RHEEM-080', indoorUnits: 3, silent: true },
           floorHeating: { model: 'FH-100-STD', coverage: 80 },
           freshAir: { model: 'W4-150', pm25: 99.95 },
-          waterSystem: { model: 'W3-800', uv: true }
+          waterSystem: { model: 'W3-800', uv: true },
         },
         totalPrice: 68000,
         createdAt: '2024-02-01',
         usageCount: 234,
-        rating: 4.9
+        rating: 4.9,
       },
       {
         id: 'tpl_004',
@@ -111,17 +111,17 @@ class TemplateLibrary {
           floors: 1,
           rooms: 2,
           livingRooms: 1,
-          bathrooms: 1
+          bathrooms: 1,
         },
         deviceSelection: {
           airConditioning: { model: 'RHEEM-080', indoorUnits: 2 },
           hotWater: { model: 'HOT-150L' },
-          freshAir: { model: 'W4-150' }
+          freshAir: { model: 'W4-150' },
         },
         totalPrice: 45000,
         createdAt: '2024-02-10',
         usageCount: 312,
-        rating: 4.7
+        rating: 4.7,
       },
       {
         id: 'tpl_005',
@@ -134,22 +134,22 @@ class TemplateLibrary {
           area: 300,
           floors: 1,
           rooms: 8,
-          openArea: true
+          openArea: true,
         },
         deviceSelection: {
           airConditioning: { model: 'RHEEM-200', indoorUnits: 8 },
           freshAir: { model: 'W4-500' },
-          waterSystem: { model: 'W3-1200' }
+          waterSystem: { model: 'W3-1200' },
         },
         totalPrice: 120000,
         createdAt: '2024-02-15',
         usageCount: 67,
-        rating: 4.6
-      }
+        rating: 4.6,
+      },
     ];
 
     // 加载到内存
-    defaultTemplates.forEach(template => {
+    defaultTemplates.forEach((template) => {
       this.templates.set(template.id, template);
     });
   }
@@ -160,24 +160,20 @@ class TemplateLibrary {
 
     // 应用筛选
     if (filters.category) {
-      templates = templates.filter(t => t.category === filters.category);
+      templates = templates.filter((t) => t.category === filters.category);
     }
     if (filters.tags) {
       const tagList = filters.tags.split(',');
-      templates = templates.filter(t => 
-        tagList.some(tag => t.tags.includes(tag))
-      );
+      templates = templates.filter((t) => tagList.some((tag) => t.tags.includes(tag)));
     }
     if (filters.minPrice) {
-      templates = templates.filter(t => t.totalPrice >= filters.minPrice);
+      templates = templates.filter((t) => t.totalPrice >= filters.minPrice);
     }
     if (filters.maxPrice) {
-      templates = templates.filter(t => t.totalPrice <= filters.maxPrice);
+      templates = templates.filter((t) => t.totalPrice <= filters.maxPrice);
     }
     if (filters.area) {
-      templates = templates.filter(t => 
-        Math.abs(t.roomProfile.area - filters.area) <= 20
-      );
+      templates = templates.filter((t) => Math.abs(t.roomProfile.area - filters.area) <= 20);
     }
 
     // 排序
@@ -191,7 +187,7 @@ class TemplateLibrary {
 
     return {
       total: templates.length,
-      templates: templates
+      templates: templates,
     };
   }
 
@@ -208,9 +204,9 @@ class TemplateLibrary {
       ...templateData,
       usageCount: 0,
       rating: 0,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
-    
+
     this.templates.set(id, template);
     console.log(`[Template] 创建新模板: ${id}`);
     return template;
@@ -247,12 +243,12 @@ class TemplateLibrary {
       deviceSelection: { ...template.deviceSelection, ...projectData.deviceSelection },
       totalPrice: this.calculatePrice(template, projectData),
       createdAt: new Date().toISOString(),
-      status: 'draft'
+      status: 'draft',
     };
 
     // 增加模板使用次数
     template.usageCount++;
-    
+
     console.log(`[Template] 使用模板 ${templateId} 创建方案 ${project.id}`);
     return project;
   }
@@ -260,7 +256,7 @@ class TemplateLibrary {
   // 计算价格（考虑调整）
   calculatePrice(template, projectData) {
     let basePrice = template.totalPrice;
-    
+
     // 面积调整
     if (projectData.roomProfile?.area) {
       const areaRatio = projectData.roomProfile.area / template.roomProfile.area;
@@ -278,27 +274,27 @@ class TemplateLibrary {
   // 获取推荐模板
   getRecommendedTemplates(roomProfile) {
     const templates = Array.from(this.templates.values());
-    
+
     // 计算匹配度
-    const scored = templates.map(template => {
+    const scored = templates.map((template) => {
       let score = 0;
-      
+
       // 户型匹配
       if (template.roomProfile.houseType === roomProfile.houseType) {
         score += 30;
       }
-      
+
       // 面积匹配
       const areaDiff = Math.abs(template.roomProfile.area - roomProfile.area);
       score += Math.max(0, 25 - areaDiff / 2);
-      
+
       // 房间数匹配
       const roomDiff = Math.abs(template.roomProfile.rooms - roomProfile.rooms);
       score += Math.max(0, 20 - roomDiff * 5);
-      
+
       // 评分加成
       score += template.rating * 2;
-      
+
       // 使用次数加成（热门模板）
       score += Math.min(10, template.usageCount / 50);
 
@@ -307,7 +303,7 @@ class TemplateLibrary {
 
     // 按匹配度排序
     scored.sort((a, b) => b.matchScore - a.matchScore);
-    
+
     return scored.slice(0, 5); // 返回前5个推荐
   }
 
@@ -317,11 +313,13 @@ class TemplateLibrary {
     return {
       totalTemplates: templates.length,
       totalUsage: templates.reduce((sum, t) => sum + t.usageCount, 0),
-      averageRating: (templates.reduce((sum, t) => sum + t.rating, 0) / templates.length).toFixed(2),
-      categoryDistribution: this.categories.map(cat => ({
+      averageRating: (templates.reduce((sum, t) => sum + t.rating, 0) / templates.length).toFixed(
+        2
+      ),
+      categoryDistribution: this.categories.map((cat) => ({
         category: cat,
-        count: templates.filter(t => t.category === cat).length
-      }))
+        count: templates.filter((t) => t.category === cat).length,
+      })),
     };
   }
 
@@ -329,11 +327,11 @@ class TemplateLibrary {
   async exportTemplate(id) {
     const template = this.templates.get(id);
     if (!template) return null;
-    
+
     return {
       exportVersion: '1.0',
       exportDate: new Date().toISOString(),
-      template
+      template,
     };
   }
 
@@ -348,7 +346,7 @@ class TemplateLibrary {
       id: `tpl_${Date.now()}`,
       usageCount: 0,
       rating: 0,
-      importedAt: new Date().toISOString()
+      importedAt: new Date().toISOString(),
     };
 
     this.templates.set(imported.id, imported);

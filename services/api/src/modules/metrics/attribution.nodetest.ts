@@ -22,7 +22,9 @@ test('位置(U型):n=3 → 40/20/40', () => {
 });
 
 test('时间衰减:越近转化权重越高,和为1', () => {
-  const w = touchWeights([t('old', 0), t('recent', 7)], 'time_decay', { halfLifeMs: 7 * 24 * 3600 * 1000 });
+  const w = touchWeights([t('old', 0), t('recent', 7)], 'time_decay', {
+    halfLifeMs: 7 * 24 * 3600 * 1000,
+  });
   assert.ok(w[1] > w[0], '近触点权重更高');
   assert.ok(Math.abs(sum(w) - 1) < 1e-9);
 });
@@ -35,5 +37,5 @@ test('按渠道聚合:同渠道多触点累加', () => {
   const credit = attributeConversion([t('geo', 0), t('geo', 1), t('paid', 2)], 'linear');
   assert.ok(Math.abs(credit.geo - 2 / 3) < 1e-9);
   assert.ok(Math.abs(credit.paid - 1 / 3) < 1e-9);
-  assert.ok(Math.abs((credit.geo + credit.paid) - 1) < 1e-9);
+  assert.ok(Math.abs(credit.geo + credit.paid - 1) < 1e-9);
 });

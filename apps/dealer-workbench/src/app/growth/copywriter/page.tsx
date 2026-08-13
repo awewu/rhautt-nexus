@@ -4,7 +4,12 @@ import GrowthCopyTable from '../../../components/GrowthCopyTable';
 
 export default function GrowthCopywriterPage() {
   return (
-    <div style={{ background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)', minHeight: '100%' }}>
+    <div
+      style={{
+        background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)',
+        minHeight: '100%',
+      }}
+    >
       <div className="page-container growth-copywriter-page" style={{ display: 'grid', gap: 12 }}>
         <PageHeader
           title="文案 Copilot"

@@ -35,10 +35,26 @@ test('does not keep image URLs from official product details', () => {
 
 test('parses Everhot public API records and price ranges', () => {
   const products = parseEverhotList(
-    { code: '0000', list: [{ id: 10008, name: '恒热大水量冷凝炉', model: 'L1GBQ-EBS', price: '13999-18999', img: '/p.png' }] },
+    {
+      code: '0000',
+      list: [
+        {
+          id: 10008,
+          name: '恒热大水量冷凝炉',
+          model: 'L1GBQ-EBS',
+          price: '13999-18999',
+          img: '/p.png',
+        },
+      ],
+    },
     'https://everhot.com.cn/index/products'
   );
   assert.equal(products[0].sourceId, '10008');
-  assert.deepEqual(products[0].price, { raw: '13999-18999', min: 13999, max: 18999, currency: 'CNY' });
+  assert.deepEqual(products[0].price, {
+    raw: '13999-18999',
+    min: 13999,
+    max: 18999,
+    currency: 'CNY',
+  });
   assert.deepEqual(parsePrice('暂无'), { raw: '暂无', min: null, max: null, currency: 'CNY' });
 });

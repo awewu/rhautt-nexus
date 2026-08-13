@@ -9,9 +9,15 @@ export class ContentAssetEntity {
   @Column({ default: 'article' }) kind: string;
   @Column() title: string;
   @Column({ type: 'text', nullable: true }) body: string | null;
-  @Column({ name: 'fact_refs', type: 'jsonb', default: () => "'[]'::jsonb" }) factRefs: Array<{ type: string; id: string; label?: string; verified?: boolean }>;
+  @Column({ name: 'fact_refs', type: 'jsonb', default: () => "'[]'::jsonb" }) factRefs: Array<{
+    type: string;
+    id: string;
+    label?: string;
+    verified?: boolean;
+  }>;
   @Column({ type: 'varchar', nullable: true }) channel: string | null;
-  @Column({ name: 'compliance_flags', type: 'jsonb', default: () => "'[]'::jsonb" }) complianceFlags: string[];
+  @Column({ name: 'compliance_flags', type: 'jsonb', default: () => "'[]'::jsonb" })
+  complianceFlags: string[];
   @Column({ default: 'draft' }) status: string;
   @Column({ type: 'varchar', nullable: true }) author: string | null;
   @Column({ type: 'varchar', nullable: true }) reviewer: string | null;
@@ -19,8 +25,16 @@ export class ContentAssetEntity {
   @Column({ name: 'source_ref', type: 'varchar', nullable: true }) sourceRef: string | null;
   @Column({ name: 'source_label', type: 'varchar', nullable: true }) sourceLabel: string | null;
   @Column({ name: 'review_note', type: 'text', nullable: true }) reviewNote: string | null;
-  @Column({ name: 'rejection_reason', type: 'varchar', nullable: true }) rejectionReason: string | null;
-  @Column({ name: 'review_history', type: 'jsonb', default: () => "'[]'::jsonb" }) reviewHistory: Array<{ decision: string; reason?: string; note?: string; reviewer?: string; at?: string }>;
+  @Column({ name: 'rejection_reason', type: 'varchar', nullable: true }) rejectionReason:
+    string | null;
+  @Column({ name: 'review_history', type: 'jsonb', default: () => "'[]'::jsonb" })
+  reviewHistory: Array<{
+    decision: string;
+    reason?: string;
+    note?: string;
+    reviewer?: string;
+    at?: string;
+  }>;
   @Column({ name: 'created_at', type: 'timestamptz', default: () => 'now()' }) createdAt: Date;
   @Column({ name: 'updated_at', type: 'timestamptz', default: () => 'now()' }) updatedAt: Date;
 }

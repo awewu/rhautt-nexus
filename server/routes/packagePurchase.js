@@ -44,10 +44,22 @@ router.post('/order', async (req, res) => {
     // 自动生成交付文档（签单前即可预览，付款后正式启用）
     let delivered = null;
     try {
-      const pre = getTechnicalDeliveryGenerator().generate({ ...order, signedAt: new Date().toISOString().slice(0, 10) });
-      delivered = { manifestUrl: `/api/delivery/${order.orderNo}/docs`, docCount: pre.documents.length };
-    } catch (_) { /* 不阻塞下单 */ }
-    res.json({ success: true, data: { ...order, delivery: delivered }, message: '订单已生成（待付款），技术交付文档已预置' });
+      const pre = getTechnicalDeliveryGenerator().generate({
+        ...order,
+        signedAt: new Date().toISOString().slice(0, 10),
+      });
+      delivered = {
+        manifestUrl: `/api/delivery/${order.orderNo}/docs`,
+        docCount: pre.documents.length,
+      };
+    } catch (_) {
+      /* 不阻塞下单 */
+    }
+    res.json({
+      success: true,
+      data: { ...order, delivery: delivered },
+      message: '订单已生成（待付款），技术交付文档已预置',
+    });
   } catch (error) {
     if (/必填|必须/.test(error.message)) {
       return res.status(400).json({ success: false, message: error.message });

@@ -8,7 +8,10 @@ describe('production app factory boundary', () => {
     const source = fs.readFileSync(path.join(ROOT, 'server-production.js'), 'utf8');
     const startIndex = source.indexOf('async function startProductionServer');
     const preListenIndex = source.indexOf('startPreListenServices({ engines })', startIndex);
-    const resolvedRuntimeIndex = source.indexOf('const runtimeProfile = resolveRuntimeProfile(options);', startIndex);
+    const resolvedRuntimeIndex = source.indexOf(
+      'const runtimeProfile = resolveRuntimeProfile(options);',
+      startIndex
+    );
     const runtimeUseIndex = source.indexOf('getRuntime({ runtimeProfile })', startIndex);
     const listenPromiseIndex = source.indexOf('httpServer = await new Promise', startIndex);
     const listenErrorIndex = source.indexOf("server.once('error', onError)", startIndex);
@@ -26,11 +29,19 @@ describe('production app factory boundary', () => {
   });
 
   test('production app composition remains route-catalog governed and root portal owned by factory', () => {
-    const factorySource = fs.readFileSync(path.join(ROOT, 'server', 'modules', 'productionAppFactory.js'), 'utf8');
-    const registrySource = fs.readFileSync(path.join(ROOT, 'server', 'modules', 'engineRegistry.js'), 'utf8');
+    const factorySource = fs.readFileSync(
+      path.join(ROOT, 'server', 'modules', 'productionAppFactory.js'),
+      'utf8'
+    );
+    const registrySource = fs.readFileSync(
+      path.join(ROOT, 'server', 'modules', 'engineRegistry.js'),
+      'utf8'
+    );
 
     expect(factorySource).toContain('function createProductionApp');
-    expect(factorySource).toContain("runtimeProfile = options.runtimeProfile || options.engineProfile || 'safe'");
+    expect(factorySource).toContain(
+      "runtimeProfile = options.runtimeProfile || options.engineProfile || 'safe'"
+    );
     expect(registrySource).toContain('function createProductionEngines(options = {})');
     expect(registrySource).toContain("runtimeProfile === 'full'");
     expect(registrySource).toContain('createBaseProductionEngines');
@@ -48,7 +59,9 @@ describe('production app factory boundary', () => {
     expect(beforeStart).toContain('let runtime;');
     expect(beforeStart).toContain('function getRuntime(options = {})');
     expect(beforeStart).not.toMatch(/const\s+runtime\s*=\s*createProductionApp/);
-    expect(beforeStart).not.toMatch(/const\s+\{\s*app,\s*db,\s*engines,\s*heartbeat\s*\}\s*=\s*runtime/);
+    expect(beforeStart).not.toMatch(
+      /const\s+\{\s*app,\s*db,\s*engines,\s*heartbeat\s*\}\s*=\s*runtime/
+    );
   });
 
   test('server-production honors explicit runtime profile and loopback bind host for visual checks', () => {
@@ -65,7 +78,9 @@ describe('production app factory boundary', () => {
       expect(server.resolveRuntimeProfile()).toBe('safe');
       expect(server.resolveRuntimeProfile({ runtimeProfile: 'full' })).toBe('full');
       expect(server.resolveListenHost()).toBe('127.0.0.1');
-      expect(server.getRuntime({ runtimeProfile: 'safe', reset: true }).runtimeProfile).toBe('safe');
+      expect(server.getRuntime({ runtimeProfile: 'safe', reset: true }).runtimeProfile).toBe(
+        'safe'
+      );
       expect(server.getRuntime({ runtimeProfile: 'full' }).runtimeProfile).toBe('full');
 
       delete process.env.HOST;
@@ -85,26 +100,27 @@ describe('production app factory boundary', () => {
     const { createProductionEngines } = require('../../server/modules/engineRegistry');
     const engines = createProductionEngines({ runtimeProfile: 'safe' });
 
-    expect(engines.__lazyRuntime.getLazyEngineNames()).toEqual(expect.arrayContaining([
-      'freshAirPro',
-      'waterSystem',
-      'standardsLibrary',
-      'econetSystem'
-    ]));
+    expect(engines.__lazyRuntime.getLazyEngineNames()).toEqual(
+      expect.arrayContaining(['freshAirPro', 'waterSystem', 'standardsLibrary', 'econetSystem'])
+    );
     expect(engines.__lazyRuntime.getLoadedEngineNames()).toEqual([]);
 
-    expect(engines.waterSystem.healthCheck()).toEqual(expect.objectContaining({
-      status: 'lazy',
-      loaded: false,
-      name: 'waterSystem'
-    }));
+    expect(engines.waterSystem.healthCheck()).toEqual(
+      expect.objectContaining({
+        status: 'lazy',
+        loaded: false,
+        name: 'waterSystem',
+      })
+    );
     expect(engines.__lazyRuntime.getLoadedEngineNames()).toEqual([]);
 
     const design = engines.waterSystem.generateDesign({ area: 120, residents: 3, bathrooms: 2 });
-    expect(design).toEqual(expect.objectContaining({
-      systems: expect.any(Object),
-      summary: expect.any(Object)
-    }));
+    expect(design).toEqual(
+      expect.objectContaining({
+        systems: expect.any(Object),
+        summary: expect.any(Object),
+      })
+    );
     expect(engines.__lazyRuntime.getLoadedEngineNames()).toEqual(['waterSystem']);
   });
 
@@ -112,9 +128,9 @@ describe('production app factory boundary', () => {
     const { createProductionEngines } = require('../../server/modules/engineRegistry');
     const engines = createProductionEngines({ runtimeProfile: 'full' });
 
-    expect(engines.__lazyRuntime.getLazyEngineNames()).toEqual(expect.arrayContaining([
-      'monitoring'
-    ]));
+    expect(engines.__lazyRuntime.getLazyEngineNames()).toEqual(
+      expect.arrayContaining(['monitoring'])
+    );
     expect(engines.__lazyRuntime.getLoadedEngineNames()).toEqual([]);
 
     expect(engines).not.toHaveProperty('dataBackup');

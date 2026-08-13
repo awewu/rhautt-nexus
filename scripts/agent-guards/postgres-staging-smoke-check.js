@@ -38,7 +38,14 @@ function fail(message) {
   failures.push(message);
 }
 
-for (const file of [RELEASE_EVIDENCE, REPORT_JSON, REPORT_MD, MIGRATION_PATH, SCRIPT_PATH, 'package.json']) {
+for (const file of [
+  RELEASE_EVIDENCE,
+  REPORT_JSON,
+  REPORT_MD,
+  MIGRATION_PATH,
+  SCRIPT_PATH,
+  'package.json',
+]) {
   if (!exists(file)) fail(`missing PostgreSQL staging smoke file: ${file}`);
 }
 
@@ -49,19 +56,29 @@ if (!failures.length) {
   const script = read(SCRIPT_PATH);
   const record = release.requiredEvidence?.postgresStagingSmoke;
 
-  if (packageJson.scripts?.['release:postgres-staging:smoke'] !== 'node scripts/release/postgres-staging-smoke.js') {
-    fail('package.json release:postgres-staging:smoke must run node scripts/release/postgres-staging-smoke.js');
+  if (
+    packageJson.scripts?.['release:postgres-staging:smoke'] !==
+    'node scripts/release/postgres-staging-smoke.js'
+  ) {
+    fail(
+      'package.json release:postgres-staging:smoke must run node scripts/release/postgres-staging-smoke.js'
+    );
   }
 
   if (!record) {
     fail('release evidence missing postgresStagingSmoke');
   } else {
-    if (record.command !== 'POSTGRES_STAGING_URL=<staging-postgres-url> npm run release:postgres-staging:smoke') {
+    if (
+      record.command !==
+      'POSTGRES_STAGING_URL=<staging-postgres-url> npm run release:postgres-staging:smoke'
+    ) {
       fail('postgresStagingSmoke command must document POSTGRES_STAGING_URL launch gate');
     }
     if (record.path !== REPORT_JSON) fail(`postgresStagingSmoke path must be ${REPORT_JSON}`);
-    if (record.summaryPath !== REPORT_MD) fail(`postgresStagingSmoke summaryPath must be ${REPORT_MD}`);
-    if (record.migrationPath !== MIGRATION_PATH) fail(`postgresStagingSmoke migrationPath must be ${MIGRATION_PATH}`);
+    if (record.summaryPath !== REPORT_MD)
+      fail(`postgresStagingSmoke summaryPath must be ${REPORT_MD}`);
+    if (record.migrationPath !== MIGRATION_PATH)
+      fail(`postgresStagingSmoke migrationPath must be ${MIGRATION_PATH}`);
   }
 
   if (report.platform !== 'Rhautt Nexus / 瑞合数智枢纽') {
@@ -74,7 +91,11 @@ if (!failures.length) {
     fail('PostgreSQL staging smoke report is stale; rerun npm run release:postgres-staging:smoke');
   }
 
-  const acceptedStatuses = ['missing-staging-run', 'passed-staging-current-run', 'failed-staging-current-run'];
+  const acceptedStatuses = [
+    'missing-staging-run',
+    'passed-staging-current-run',
+    'failed-staging-current-run',
+  ];
   if (!acceptedStatuses.includes(report.status)) {
     fail(`PostgreSQL staging smoke status is invalid: ${report.status}`);
   }
@@ -87,7 +108,9 @@ if (!failures.length) {
       fail('release evidence postgresStagingSmoke status must match passed-staging-current-run');
     }
     if (record?.finalLaunchDatabaseProof !== true) {
-      fail('release evidence postgresStagingSmoke must set finalLaunchDatabaseProof true only after staging pass');
+      fail(
+        'release evidence postgresStagingSmoke must set finalLaunchDatabaseProof true only after staging pass'
+      );
     }
     for (const check of report.checks || []) {
       if (check.passed !== true) fail(`PostgreSQL staging smoke failed check: ${check.name}`);
@@ -102,10 +125,17 @@ if (!failures.length) {
       fail('release evidence postgresStagingSmoke status must remain missing-staging-run');
     }
     if (record?.finalLaunchDatabaseProof !== false) {
-      fail('release evidence postgresStagingSmoke must not claim final launch proof while missing staging run');
+      fail(
+        'release evidence postgresStagingSmoke must not claim final launch proof while missing staging run'
+      );
     }
-    if (!String(report.reason || '').includes('POSTGRES_STAGING_URL') && !String(report.reason || '').includes('psql')) {
-      fail('missing PostgreSQL staging smoke report must explain POSTGRES_STAGING_URL or psql blocker');
+    if (
+      !String(report.reason || '').includes('POSTGRES_STAGING_URL') &&
+      !String(report.reason || '').includes('psql')
+    ) {
+      fail(
+        'missing PostgreSQL staging smoke report must explain POSTGRES_STAGING_URL or psql blocker'
+      );
     }
     warnings.push(`PostgreSQL staging smoke is missing: ${report.reason}`);
   }
@@ -127,13 +157,15 @@ if (!failures.length) {
     'cross-tenant write was not rejected',
     'lifecycle_handoff_only',
     'FORCE RLS',
-    'finalLaunchDatabaseProof'
+    'finalLaunchDatabaseProof',
   ]) {
     if (!script.includes(token)) fail(`postgres staging smoke script missing token: ${token}`);
   }
 }
 
-console.log(`PostgreSQL Staging Smoke Check: failures = ${failures.length}, warnings = ${warnings.length}`);
+console.log(
+  `PostgreSQL Staging Smoke Check: failures = ${failures.length}, warnings = ${warnings.length}`
+);
 
 if (failures.length) {
   for (const failure of failures) console.error(`- ${failure}`);

@@ -12,9 +12,7 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
  * EntitlementGuard 由 AppModule 注册为全局守卫（AuthGuard → RolesGuard → EntitlementGuard）。
  */
 @Module({
-  imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([SubscriptionEntity])]),
-  ],
+  imports: [...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([SubscriptionEntity])])],
   controllers: [EntitlementController],
   providers: [
     EntitlementService,

@@ -53,23 +53,23 @@ Date: 2026-07-25
 
 Tree table row response:
 
-| Field | Purpose |
-| --- | --- |
-| `id` | Category id |
-| `brandCode` | Brand scope |
-| `parentId` | Parent category id, null for root |
-| `nameCn` | Chinese category name |
-| `nameEn` | Optional English name |
-| `code` | Category code |
-| `slug` | Optional public slug |
-| `sortOrder` | Sibling order |
-| `status` | `active` / `inactive` |
-| `description` | Optional note |
-| `hasChildren` | Whether the row can be expanded |
-| `directProductCount` | Products directly bound to this node |
-| `descendantProductCount` | Products bound below this node |
-| `createdAt` | Creation time |
-| `updatedAt` | Update time |
+| Field                    | Purpose                              |
+| ------------------------ | ------------------------------------ |
+| `id`                     | Category id                          |
+| `brandCode`              | Brand scope                          |
+| `parentId`               | Parent category id, null for root    |
+| `nameCn`                 | Chinese category name                |
+| `nameEn`                 | Optional English name                |
+| `code`                   | Category code                        |
+| `slug`                   | Optional public slug                 |
+| `sortOrder`              | Sibling order                        |
+| `status`                 | `active` / `inactive`                |
+| `description`            | Optional note                        |
+| `hasChildren`            | Whether the row can be expanded      |
+| `directProductCount`     | Products directly bound to this node |
+| `descendantProductCount` | Products bound below this node       |
+| `createdAt`              | Creation time                        |
+| `updatedAt`              | Update time                          |
 
 The frontend tree table should treat `children` as absent until a row is expanded. The lazy-loaded child response can then be attached to that row.
 

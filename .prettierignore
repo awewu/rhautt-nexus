@@ -1,0 +1,21 @@
+﻿# \u751f\u6210\u4ea7\u7269\uff1a\u683c\u5f0f\u5316\u4f1a\u7834\u574f OpenAPI hash \u4e0e\u751f\u6210\u5ba2\u6237\u7aef\u540c\u6b65\u95e8\u7981
+contracts/openapi/
+packages/generated-client/
+evidence/
+archive/
+_archive/
+backups/
+coverage/
+dist/
+build/
+.next/
+pnpm-lock.yaml
+package-lock.json
+# 生成页面/同步产物：由 scripts/geo 生成，格式化会造成同源校验漂移
+apps/*/public/tech/
+apps/*/public/packages/tokens/
+# 站点 public/ 为生成器/GEO 注入产物：prettier 改写会触发 everhot-static-gates 的无漂移门禁
+apps/*/public/
+
+# decision.v1 vendored 契约：必须与 hermes-tandem 权威副本逐字节一致，禁止格式化器改写
+services/api/src/contracts/decision/decision.v1.contract.ts

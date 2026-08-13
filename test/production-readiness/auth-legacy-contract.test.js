@@ -28,14 +28,18 @@ function extractNestRoutes(controllerSource) {
   const controllerMatch = controllerSource.match(/@Controller\(\s*['"`]([^'"`]*)['"`]\s*\)/);
   if (!controllerMatch) return [];
   const prefix = controllerMatch[1].replace(/^\/|\/$/g, '');
-  const classPublic = /@Public\(\)\s*(?:@\w+(\([^)]*\))?\s*)*export class/.test(controllerSource.replace(/\n/g, ' '));
+  const classPublic = /@Public\(\)\s*(?:@\w+(\([^)]*\))?\s*)*export class/.test(
+    controllerSource.replace(/\n/g, ' ')
+  );
 
   const routes = [];
   const methodRegex = /((?:@\w+\((?:[^()]|\([^()]*\))*\)\s*)+)(?:async\s+)?\w+\s*\(/g;
   let m;
   while ((m = methodRegex.exec(controllerSource))) {
     const decorators = m[1];
-    const httpMatch = decorators.match(/@(Get|Post|Put|Patch|Delete)\(\s*(?:['"`]([^'"`]*)['"`])?\s*\)/);
+    const httpMatch = decorators.match(
+      /@(Get|Post|Put|Patch|Delete)\(\s*(?:['"`]([^'"`]*)['"`])?\s*\)/
+    );
     if (!httpMatch) continue;
     const sub = (httpMatch[2] || '').replace(/^\/|\/$/g, '');
     const fullPath = '/api/v2/' + [prefix, sub].filter(Boolean).join('/');
@@ -99,7 +103,10 @@ describe('Auth M1 · Legacy auth 行为契约冻结', () => {
       if (lr.public) {
         expect({ path: v2, isPublic: route.isPublic }).toEqual({ path: v2, isPublic: true });
       } else {
-        expect({ path: v2, hasAuthGuard: route.hasAuthGuard }).toEqual({ path: v2, hasAuthGuard: true });
+        expect({ path: v2, hasAuthGuard: route.hasAuthGuard }).toEqual({
+          path: v2,
+          hasAuthGuard: true,
+        });
       }
     }
   });
@@ -126,7 +133,9 @@ describe('Auth M1 · Legacy auth 行为契约冻结', () => {
 
   test('管理员账号接口全部受 AuthGuard + Roles 保护', () => {
     for (const route of nestOnlyRouteSet) {
-      const found = nestRoutes.find((item) => item.path === route.path && item.method === route.method);
+      const found = nestRoutes.find(
+        (item) => item.path === route.path && item.method === route.method
+      );
       expect(found).toBeDefined();
       expect(found.hasAuthGuard).toBe(true);
     }
@@ -153,14 +162,25 @@ describe('Auth M1 · Legacy auth 行为契约冻结', () => {
   });
 
   test('JWT 载荷包含完整租户范围字段（与 legacy 签名一致）', () => {
-    const requiredFields = ['userId', 'tenantId', 'dealerId', 'storeId', 'customerId', 'role', 'roles', 'permissions'];
+    const requiredFields = [
+      'userId',
+      'tenantId',
+      'dealerId',
+      'storeId',
+      'customerId',
+      'role',
+      'roles',
+      'permissions',
+    ];
     for (const field of requiredFields) {
       expect(service).toMatch(new RegExp(`${field}:`));
     }
   });
 
   test('登录后返回 token + user 对象，且 toPublic 不含明文手机号（PIPL）', () => {
-    expect(service).toMatch(/return \{ token: this\.sign\(user, modules, access\), user: this\.toPublic\(user, access\) \}/);
+    expect(service).toMatch(
+      /return \{ token: this\.sign\(user, modules, access\), user: this\.toPublic\(user, access\) \}/
+    );
     const toPublicBlock = service.slice(service.indexOf('private toPublic'));
     expect(toPublicBlock).toMatch(/id:\s*u\.id/);
     expect(toPublicBlock).toMatch(/tenantId:\s*u\.tenantId/);
@@ -174,7 +194,9 @@ describe('Auth M1 · Legacy auth 行为契约冻结', () => {
   });
 
   test('AuthGuard deny-by-default 且校验租户范围（H2）', () => {
-    expect(guard).toMatch(/const isPublic\s*=\s*this\.reflector\.getAllAndOverride<boolean>\(IS_PUBLIC_KEY/);
+    expect(guard).toMatch(
+      /const isPublic\s*=\s*this\.reflector\.getAllAndOverride<boolean>\(IS_PUBLIC_KEY/
+    );
     expect(guard).toMatch(/if \(isPublic\) return true;/);
     expect(guard).toMatch(/function isValidScope/);
     expect(guard).toMatch(/tenantId/);
@@ -191,7 +213,10 @@ describe('Auth M1 · Legacy auth 行为契约冻结', () => {
   test('M4 已退役 Express auth 实现，生产身份真相源只剩 NestJS', () => {
     expect(fs.existsSync(path.join(ROOT, 'server/modules/auth/auth.routes.js'))).toBe(false);
     expect(fs.existsSync(path.join(ROOT, 'server/modules/auth/auth.service.js'))).toBe(false);
-    expect(read('server/modules/v2.router.js')).not.toContain("router.use('/auth'");
-    expect(read('server/routes/core-api.js')).not.toMatch(/router\.(post|get|put|patch|delete)\('\/api\/auth/);
+    // Express v2 router 已整体退役删除，auth 不可能再被本地挂载
+    expect(fs.existsSync(path.join(ROOT, 'server/modules/v2.router.js'))).toBe(false);
+    expect(read('server/routes/core-api.js')).not.toMatch(
+      /router\.(post|get|put|patch|delete)\('\/api\/auth/
+    );
   });
 });

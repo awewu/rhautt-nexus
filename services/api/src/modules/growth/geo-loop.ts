@@ -32,16 +32,17 @@ export function normalizePublicationUrl(value: unknown): string {
     const url = new URL(raw);
     if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) return '';
     const hostname = url.hostname.toLowerCase().replace(/^\[|\]$/g, '');
-    const privateHost = hostname === 'localhost'
-      || hostname.endsWith('.localhost')
-      || hostname.endsWith('.local')
-      || hostname === '0.0.0.0'
-      || hostname === '::1'
-      || hostname.startsWith('127.')
-      || hostname.startsWith('10.')
-      || hostname.startsWith('192.168.')
-      || /^172\.(1[6-9]|2\d|3[01])\./.test(hostname)
-      || /^169\.254\./.test(hostname);
+    const privateHost =
+      hostname === 'localhost' ||
+      hostname.endsWith('.localhost') ||
+      hostname.endsWith('.local') ||
+      hostname === '0.0.0.0' ||
+      hostname === '::1' ||
+      hostname.startsWith('127.') ||
+      hostname.startsWith('10.') ||
+      hostname.startsWith('192.168.') ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(hostname) ||
+      /^169\.254\./.test(hostname);
     return privateHost ? '' : url.toString();
   } catch {
     return '';
@@ -50,7 +51,7 @@ export function normalizePublicationUrl(value: unknown): string {
 
 export function buildGeoLoopState(
   experiment: GeoLoopExperimentView,
-  copyAsset?: GeoLoopCopyView | null,
+  copyAsset?: GeoLoopCopyView | null
 ): { phase: GeoLoopPhase; nextAction: string; terminal: boolean } {
   if (['improved', 'no-change', 'regressed', 'killed'].includes(experiment.status)) {
     return { phase: 'completed', nextAction: 'review-result', terminal: true };
@@ -70,5 +71,9 @@ export function buildGeoLoopState(
   if (copyAsset?.status !== 'approved' && copyAsset?.status !== 'published') {
     return { phase: 'content-review', nextAction: 'approve-draft', terminal: false };
   }
-  return { phase: 'publication-needed', nextAction: 'record-publication-evidence', terminal: false };
+  return {
+    phase: 'publication-needed',
+    nextAction: 'record-publication-evidence',
+    terminal: false,
+  };
 }

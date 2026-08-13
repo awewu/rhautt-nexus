@@ -151,7 +151,7 @@
 
 ```html
 <figure data-size="large" data-align="center">
-  <img src="/api/v2/file-artifact/{id}/content" alt="图片说明" loading="lazy">
+  <img src="/api/v2/file-artifact/{id}/content" alt="图片说明" loading="lazy" />
   <figcaption>图片图注</figcaption>
 </figure>
 ```
@@ -411,4 +411,3 @@
 - 保存稳定。
 - 预览一致。
 - 官网默认视觉不崩。
-

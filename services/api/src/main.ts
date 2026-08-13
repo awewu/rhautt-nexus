@@ -10,7 +10,7 @@ export const apiBootstrapTarget = {
   httpAdapter: 'Fastify',
   architecture: 'DDD modular monolith',
   status: 'source-contract-ready',
-  runtimeTruth: 'Install target dependencies before treating this as boot proof.'
+  runtimeTruth: 'Install target dependencies before treating this as boot proof.',
 } as const;
 
 export async function createApiApplication() {
@@ -45,7 +45,7 @@ export async function bootstrap() {
 }
 
 if (require.main === module) {
-  bootstrap().catch(error => {
+  bootstrap().catch((error) => {
     console.error(error);
     process.exit(1);
   });

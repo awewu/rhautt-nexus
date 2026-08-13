@@ -28,10 +28,10 @@ This is a local development proof only. It does not publish to the production Ev
 
 Run these two local surfaces for the closed-loop proof.
 
-| Surface | Port | Purpose | Command |
-| --- | --- | --- | --- |
+| Surface                                        | Port   | Purpose                                                                                                         | Command                              |
+| ---------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
 | Dealer workbench / brand website control panel | `5000` | Backend/admin surface for `/comfort/sites/everhot`, product rows, website shelf controls, and environment links | `pnpm --filter dealer-workbench dev` |
-| Everhot local website | `5011` | Public Everhot website runtime target | `pnpm --dir apps/everhot-cn run dev` |
+| Everhot local website                          | `5011` | Public Everhot website runtime target                                                                           | `pnpm --dir apps/everhot-cn run dev` |
 
 Open:
 

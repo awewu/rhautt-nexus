@@ -55,14 +55,23 @@ function checkRef(sourceFile, ref) {
   if (!ref) return;
   if (/^(https?:|mailto:|tel:|data:|javascript:|#)/i.test(ref)) return;
   if (ref === '/everhot' || ref.startsWith('/everhot/')) {
-    problems.push({ source: path.relative(PUBLIC, sourceFile), ref, reason: 'legacy /everhot base path' });
+    problems.push({
+      source: path.relative(PUBLIC, sourceFile),
+      ref,
+      reason: 'legacy /everhot base path',
+    });
   } else if (ref.startsWith('/')) {
     const target = resolveRoot(ref);
     if (!fs.existsSync(target)) {
       if (PENDING_ASSETS.some((re) => re.test(ref))) {
         pending.push(path.relative(PUBLIC, target));
       } else {
-        problems.push({ source: path.relative(PUBLIC, sourceFile), ref, reason: 'missing target', expected: path.relative(PUBLIC, target) });
+        problems.push({
+          source: path.relative(PUBLIC, sourceFile),
+          ref,
+          reason: 'missing target',
+          expected: path.relative(PUBLIC, target),
+        });
       }
     }
     seenRefs.add(ref);
@@ -73,19 +82,25 @@ function checkRef(sourceFile, ref) {
     if (rel.endsWith('/')) target = path.join(target, 'index.html');
     if (!fs.existsSync(target) && fs.existsSync(target + '.html')) return;
     if (!fs.existsSync(target)) {
-      problems.push({ source: path.relative(PUBLIC, sourceFile), ref, reason: 'missing relative target' });
+      problems.push({
+        source: path.relative(PUBLIC, sourceFile),
+        ref,
+        reason: 'missing relative target',
+      });
     }
   }
 }
 
-const ATTR_RE = /(?:href|src|poster|data-desktop-src|data-mobile-src|content)\s*=\s*["']([^"']+)["']/gi;
+const ATTR_RE =
+  /(?:href|src|poster|data-desktop-src|data-mobile-src|content)\s*=\s*["']([^"']+)["']/gi;
 for (const file of htmlFiles) {
   const html = fs.readFileSync(file, 'utf8');
   let m;
   while ((m = ATTR_RE.exec(html))) {
     const ref = m[1];
     // skip og:image absolute urls handled by http filter; skip meta content that isn't a path
-    if (m[0].toLowerCase().startsWith('content=') && !ref.startsWith('/') && !ref.startsWith('.')) continue;
+    if (m[0].toLowerCase().startsWith('content=') && !ref.startsWith('/') && !ref.startsWith('.'))
+      continue;
     checkRef(file, ref);
   }
 }
@@ -100,7 +115,9 @@ for (const file of cssFiles) {
 console.log(`Everhot link audit: ${htmlFiles.length} HTML, ${cssFiles.length} CSS scanned.`);
 if (pending.length) {
   const uniq = [...new Set(pending)];
-  console.log(`\n${uniq.length} pending asset(s) (intentional drop-in, not broken — see assets/fonts/README.md):`);
+  console.log(
+    `\n${uniq.length} pending asset(s) (intentional drop-in, not broken — see assets/fonts/README.md):`
+  );
   for (const p of uniq) console.log(`  [pending] ${p}`);
 }
 if (!problems.length) {
@@ -109,6 +126,8 @@ if (!problems.length) {
 }
 console.log(`\n${problems.length} problem(s):`);
 for (const p of problems) {
-  console.log(`  [${p.reason}] ${p.source}  ->  ${p.ref}${p.expected ? `  (expected ${p.expected})` : ''}`);
+  console.log(
+    `  [${p.reason}] ${p.source}  ->  ${p.ref}${p.expected ? `  (expected ${p.expected})` : ''}`
+  );
 }
 process.exit(1);

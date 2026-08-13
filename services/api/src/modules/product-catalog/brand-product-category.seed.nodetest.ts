@@ -27,8 +27,14 @@ test('default seeds provide active level-1 and level-2 categories for every supp
 
     assert.ok(level1.length >= 1, `${brandCode} should have default level-1 categories`);
     assert.ok(level2.length >= 1, `${brandCode} should have default level-2 categories`);
-    assert.equal(brandRows.every((row) => row.status === 'active'), true);
-    assert.equal(level2.every((row) => Boolean(row.parentCode)), true);
+    assert.equal(
+      brandRows.every((row) => row.status === 'active'),
+      true
+    );
+    assert.equal(
+      level2.every((row) => Boolean(row.parentCode)),
+      true
+    );
   }
 });
 
@@ -40,8 +46,29 @@ test('brand product category model allows unbounded positive levels', () => {
   assert.throws(() => assertBrandProductCategoryLevel(0), /positive integer/);
   assert.doesNotThrow(() =>
     flattenBrandProductCategorySeeds({
-      test: [{ code: 'a', nameCn: 'A', sortOrder: 1, children: [{ code: 'b', nameCn: 'B', sortOrder: 1, children: [{ code: 'c', nameCn: 'C', sortOrder: 1, children: [{ code: 'd', nameCn: 'D', sortOrder: 1 }] }] }] }],
-    }),
+      test: [
+        {
+          code: 'a',
+          nameCn: 'A',
+          sortOrder: 1,
+          children: [
+            {
+              code: 'b',
+              nameCn: 'B',
+              sortOrder: 1,
+              children: [
+                {
+                  code: 'c',
+                  nameCn: 'C',
+                  sortOrder: 1,
+                  children: [{ code: 'd', nameCn: 'D', sortOrder: 1 }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    })
   );
 });
 
@@ -50,7 +77,10 @@ test('default Everhot seeds include current website example categories', () => {
   const everhot = rows.filter((row) => row.brandCode === 'everhot');
   const byParent = new Map<string, string[]>();
   for (const row of everhot) {
-    byParent.set(row.parentCode ?? 'root', [...(byParent.get(row.parentCode ?? 'root') ?? []), row.nameCn]);
+    byParent.set(row.parentCode ?? 'root', [
+      ...(byParent.get(row.parentCode ?? 'root') ?? []),
+      row.nameCn,
+    ]);
   }
 
   assert.deepEqual(byParent.get('root'), ['家用', '商用']);
@@ -73,8 +103,18 @@ test('default seed planning is idempotent for brand-parent-code and brand-parent
 
   const planned = planIdempotentBrandProductCategorySeeds(
     [{ brandCode: 'everhot', parentCode: null, code: 'different-code', nameCn: '家用' }],
-    seeds,
+    seeds
   );
-  assert.equal(planned.some((row) => row.brandCode === 'everhot' && row.parentCode === null && row.nameCn === '家用'), false);
-  assert.equal(planned.some((row) => row.brandCode === 'rheem' && row.parentCode === null && row.nameCn === '家用'), true);
+  assert.equal(
+    planned.some(
+      (row) => row.brandCode === 'everhot' && row.parentCode === null && row.nameCn === '家用'
+    ),
+    false
+  );
+  assert.equal(
+    planned.some(
+      (row) => row.brandCode === 'rheem' && row.parentCode === null && row.nameCn === '家用'
+    ),
+    true
+  );
 });

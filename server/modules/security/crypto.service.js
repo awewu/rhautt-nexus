@@ -9,7 +9,9 @@ function normalizeSecret(secret) {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('PII_ENCRYPTION_KEY or ENCRYPTION_KEY is required in production');
     }
-    console.warn('[CryptoService] ⚠️  PII_ENCRYPTION_KEY 未配置，使用不安全的开发默认密钥。生产上线前必须设置。');
+    console.warn(
+      '[CryptoService] ⚠️  PII_ENCRYPTION_KEY 未配置，使用不安全的开发默认密钥。生产上线前必须设置。'
+    );
     return 'rhautt-nexus-dev-pii-encryption-key';
   }
   return value;
@@ -19,7 +21,11 @@ class CryptoService {
   constructor(options = {}) {
     this.algorithm = options.algorithm || DEFAULT_ALGORITHM;
     this.version = options.version || DEFAULT_VERSION;
-    this.key = crypto.scryptSync(normalizeSecret(options.secret), options.salt || 'rhautt-nexus-pii', 32);
+    this.key = crypto.scryptSync(
+      normalizeSecret(options.secret),
+      options.salt || 'rhautt-nexus-pii',
+      32
+    );
     this.randomBytes = options.randomBytes || crypto.randomBytes;
   }
 
@@ -35,7 +41,7 @@ class CryptoService {
       this.algorithm,
       iv.toString('hex'),
       authTag.toString('hex'),
-      encrypted
+      encrypted,
     ].join(':');
   }
 

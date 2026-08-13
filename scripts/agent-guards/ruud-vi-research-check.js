@@ -3,7 +3,9 @@
 const fs = require('fs');
 const path = require('path');
 require('./_artifact-gate').requireArtifactOrSkip('docs/_archive/RUUD-VI-RESEARCH.md', {
-  guard: 'guard:ruud-vi', reason: 'docs/_archive VI 研究文档 git 历史 0 次、从未入库；Ruud 站 VI 由 guard:rheem-vi-production 体系覆盖',
+  guard: 'guard:ruud-vi',
+  reason:
+    'docs/_archive VI 研究文档 git 历史 0 次、从未入库；Ruud 站 VI 由 guard:rheem-vi-production 体系覆盖',
 });
 const crypto = require('crypto');
 
@@ -20,7 +22,7 @@ function exists(relativePath) {
 const REQUIRED_FILES = [
   'docs/_archive/RUUD-COM-FULLSITE-VI-AUDIT.md',
   'docs/_archive/RUUD-VI-RESEARCH.md',
-  'docs/_archive/UI-VI-ARCHITECTURE-RHAUTT-COMFORT.md'
+  'docs/_archive/UI-VI-ARCHITECTURE-RHAUTT-COMFORT.md',
 ];
 
 // ============================================================
@@ -29,7 +31,8 @@ const REQUIRED_FILES = [
 // Locked archive: docs/brand-standards/assets/RUUD-Brand-Toolkit-RHM5839A-2024-R3b.pdf
 // ============================================================
 const OFFICIAL_STANDARD_MD = 'docs/brand-standards/RUUD-OFFICIAL-VI-SI-STANDARD.md';
-const OFFICIAL_STANDARD_PDF = 'docs/brand-standards/assets/RUUD-Brand-Toolkit-RHM5839A-2024-R3b.pdf';
+const OFFICIAL_STANDARD_PDF =
+  'docs/brand-standards/assets/RUUD-Brand-Toolkit-RHM5839A-2024-R3b.pdf';
 const OFFICIAL_PDF_SHA256 = '3af01cf0db845c9275cfe910d3ad0eee48802cedabe16cc6ec155dea9181c87a';
 
 // Official hex values that MUST appear in the standard doc.
@@ -41,7 +44,7 @@ const RUUD_IMPL_FILES = [
   'packages/tokens/ruud-cn.css',
   'public/ruud-brand.css',
   'public/dual-brand.css',
-  'public/images/ruud-logo.svg'
+  'public/images/ruud-logo.svg',
 ];
 const FORBIDDEN_DARK_RED = ['#A50016', '#B80023', '#9A001C'];
 const OFFICIAL_DARK_RED = '#76232F';
@@ -64,7 +67,7 @@ const REQUIRED_URLS = [
   'https://www.ruud.com/verify/',
   'https://www.ruud.com/homeowners/',
   'https://www.ruud.com/mobile/',
-  'https://www.ruud.com/sustainability/'
+  'https://www.ruud.com/sustainability/',
 ];
 
 const REQUIRED_TAXONOMY = [
@@ -85,7 +88,7 @@ const REQUIRED_TAXONOMY = [
   '48-Hour Delivery',
   'Product Documents',
   'Parts',
-  'Register Your Product'
+  'Register Your Product',
 ];
 
 const REQUIRED_RHAUTT_TRANSLATIONS = [
@@ -103,7 +106,7 @@ const REQUIRED_RHAUTT_TRANSLATIONS = [
   'remote control',
   'dealer',
   'designer',
-  'business console'
+  'business console',
 ];
 
 const failures = [];
@@ -144,7 +147,11 @@ if (exists('docs/_archive/UI-VI-ARCHITECTURE-RHAUTT-COMFORT.md')) {
   if (!vi.includes('docs/_archive/RUUD-COM-FULLSITE-VI-AUDIT.md')) {
     failures.push('UI/VI architecture must reference the Ruud full-site audit');
   }
-  for (const token of ['Product-family first', 'Professional resource first', 'Owner lifecycle first']) {
+  for (const token of [
+    'Product-family first',
+    'Professional resource first',
+    'Owner lifecycle first',
+  ]) {
     if (!vi.includes(token)) failures.push(`UI/VI architecture missing derived rule: ${token}`);
   }
 }
@@ -173,7 +180,9 @@ if (!exists(OFFICIAL_STANDARD_PDF)) {
   const buf = fs.readFileSync(path.join(ROOT, OFFICIAL_STANDARD_PDF));
   const sha = crypto.createHash('sha256').update(buf).digest('hex');
   if (sha !== OFFICIAL_PDF_SHA256) {
-    failures.push(`Ruud brand toolkit PDF SHA256 mismatch (locked). expected ${OFFICIAL_PDF_SHA256}, got ${sha}`);
+    failures.push(
+      `Ruud brand toolkit PDF SHA256 mismatch (locked). expected ${OFFICIAL_PDF_SHA256}, got ${sha}`
+    );
   }
 }
 
@@ -186,7 +195,9 @@ for (const file of RUUD_IMPL_FILES) {
   const content = read(file).toUpperCase();
   for (const bad of FORBIDDEN_DARK_RED) {
     if (content.includes(bad)) {
-      failures.push(`${file} uses forbidden non-official Ruud dark red ${bad}; official is ${OFFICIAL_DARK_RED} (PMS 188 C)`);
+      failures.push(
+        `${file} uses forbidden non-official Ruud dark red ${bad}; official is ${OFFICIAL_DARK_RED} (PMS 188 C)`
+      );
     }
   }
   if (!content.includes(OFFICIAL_DARK_RED)) {
@@ -194,7 +205,9 @@ for (const file of RUUD_IMPL_FILES) {
   }
 }
 
-console.log(`Ruud VI Research Check: files = ${REQUIRED_FILES.length}, URLs = ${REQUIRED_URLS.length}, failures = ${failures.length}`);
+console.log(
+  `Ruud VI Research Check: files = ${REQUIRED_FILES.length}, URLs = ${REQUIRED_URLS.length}, failures = ${failures.length}`
+);
 
 if (failures.length) {
   for (const failure of failures) console.error(`- ${failure}`);

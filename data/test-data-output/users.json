@@ -12,9 +12,7 @@
     "profile": {
       "expertise": "技术方案",
       "experience": "6年",
-      "certifications": [
-        "Rheem认证"
-      ]
+      "certifications": ["Rheem认证"]
     },
     "stats": {
       "projects": 20,
@@ -36,9 +34,7 @@
     "profile": {
       "expertise": "客户服务",
       "experience": "9年",
-      "certifications": [
-        "Rheem认证"
-      ]
+      "certifications": ["Rheem认证"]
     },
     "stats": {
       "projects": 19,
@@ -60,10 +56,7 @@
     "profile": {
       "expertise": "暖通设计",
       "experience": "7年",
-      "certifications": [
-        "Rheem认证",
-        "Ruud认证"
-      ]
+      "certifications": ["Rheem认证", "Ruud认证"]
     },
     "stats": {
       "projects": 35,
@@ -85,9 +78,7 @@
     "profile": {
       "expertise": "客户服务",
       "experience": "10年",
-      "certifications": [
-        "Rheem认证"
-      ]
+      "certifications": ["Rheem认证"]
     },
     "stats": {
       "projects": 37,
@@ -109,10 +100,7 @@
     "profile": {
       "expertise": "暖通设计",
       "experience": "2年",
-      "certifications": [
-        "Rheem认证",
-        "Ruud认证"
-      ]
+      "certifications": ["Rheem认证", "Ruud认证"]
     },
     "stats": {
       "projects": 22,
@@ -134,10 +122,7 @@
     "profile": {
       "expertise": "施工管理",
       "experience": "10年",
-      "certifications": [
-        "Rheem认证",
-        "Ruud认证"
-      ]
+      "certifications": ["Rheem认证", "Ruud认证"]
     },
     "stats": {
       "projects": 42,
@@ -159,9 +144,7 @@
     "profile": {
       "expertise": "暖通设计",
       "experience": "8年",
-      "certifications": [
-        "Rheem认证"
-      ]
+      "certifications": ["Rheem认证"]
     },
     "stats": {
       "projects": 1,
@@ -183,9 +166,7 @@
     "profile": {
       "expertise": "暖通设计",
       "experience": "8年",
-      "certifications": [
-        "Rheem认证"
-      ]
+      "certifications": ["Rheem认证"]
     },
     "stats": {
       "projects": 48,
@@ -207,10 +188,7 @@
     "profile": {
       "expertise": "暖通设计",
       "experience": "6年",
-      "certifications": [
-        "Rheem认证",
-        "Ruud认证"
-      ]
+      "certifications": ["Rheem认证", "Ruud认证"]
     },
     "stats": {
       "projects": 2,
@@ -226,18 +204,13 @@
     "role": "store_admin",
     "name": "朱静",
     "title": "门店管理员",
-    "storeIds": [
-      1,
-      2
-    ],
+    "storeIds": [1, 2],
     "status": "active",
     "avatar": "/avatars/store_admin_1.png",
     "profile": {
       "expertise": "施工管理",
       "experience": "2年",
-      "certifications": [
-        "Rheem认证"
-      ]
+      "certifications": ["Rheem认证"]
     },
     "stats": {
       "projects": 29,
@@ -253,18 +226,13 @@
     "role": "store_admin",
     "name": "何军",
     "title": "门店管理员",
-    "storeIds": [
-      3,
-      4
-    ],
+    "storeIds": [3, 4],
     "status": "active",
     "avatar": "/avatars/store_admin_2.png",
     "profile": {
       "expertise": "施工管理",
       "experience": "10年",
-      "certifications": [
-        "Rheem认证"
-      ]
+      "certifications": ["Rheem认证"]
     },
     "stats": {
       "projects": 34,
@@ -280,19 +248,13 @@
     "role": "store_admin",
     "name": "张欣",
     "title": "门店管理员",
-    "storeIds": [
-      5,
-      6
-    ],
+    "storeIds": [5, 6],
     "status": "active",
     "avatar": "/avatars/store_admin_3.png",
     "profile": {
       "expertise": "销售管理",
       "experience": "4年",
-      "certifications": [
-        "Rheem认证",
-        "Ruud认证"
-      ]
+      "certifications": ["Rheem认证", "Ruud认证"]
     },
     "stats": {
       "projects": 45,
@@ -308,19 +270,13 @@
     "role": "designer",
     "name": "赵雨",
     "title": "设计师",
-    "storeIds": [
-      1,
-      2
-    ],
+    "storeIds": [1, 2],
     "status": "active",
     "avatar": "/avatars/designer_1.png",
     "profile": {
       "expertise": "技术方案",
       "experience": "7年",
-      "certifications": [
-        "Rheem认证",
-        "Ruud认证"
-      ]
+      "certifications": ["Rheem认证", "Ruud认证"]
     },
     "stats": {
       "projects": 43,
@@ -336,19 +292,13 @@
     "role": "designer",
     "name": "何晨",
     "title": "设计师",
-    "storeIds": [
-      3,
-      4
-    ],
+    "storeIds": [3, 4],
     "status": "active",
     "avatar": "/avatars/designer_2.png",
     "profile": {
       "expertise": "技术方案",
       "experience": "10年",
-      "certifications": [
-        "Rheem认证",
-        "Ruud认证"
-      ]
+      "certifications": ["Rheem认证", "Ruud认证"]
     },
     "stats": {
       "projects": 9,
@@ -364,19 +314,13 @@
     "role": "designer",
     "name": "赵鹏",
     "title": "设计师",
-    "storeIds": [
-      5,
-      6
-    ],
+    "storeIds": [5, 6],
     "status": "active",
     "avatar": "/avatars/designer_3.png",
     "profile": {
       "expertise": "客户服务",
       "experience": "4年",
-      "certifications": [
-        "Rheem认证",
-        "Ruud认证"
-      ]
+      "certifications": ["Rheem认证", "Ruud认证"]
     },
     "stats": {
       "projects": 44,
@@ -392,18 +336,13 @@
     "role": "sales",
     "name": "何强",
     "title": "销售顾问",
-    "storeIds": [
-      1,
-      2
-    ],
+    "storeIds": [1, 2],
     "status": "active",
     "avatar": "/avatars/sales_1.png",
     "profile": {
       "expertise": "暖通设计",
       "experience": "10年",
-      "certifications": [
-        "Rheem认证"
-      ]
+      "certifications": ["Rheem认证"]
     },
     "stats": {
       "projects": 43,
@@ -419,19 +358,13 @@
     "role": "sales",
     "name": "黄杰",
     "title": "销售顾问",
-    "storeIds": [
-      3,
-      4
-    ],
+    "storeIds": [3, 4],
     "status": "active",
     "avatar": "/avatars/sales_2.png",
     "profile": {
       "expertise": "技术方案",
       "experience": "7年",
-      "certifications": [
-        "Rheem认证",
-        "Ruud认证"
-      ]
+      "certifications": ["Rheem认证", "Ruud认证"]
     },
     "stats": {
       "projects": 26,
@@ -447,18 +380,13 @@
     "role": "sales",
     "name": "高丽",
     "title": "销售顾问",
-    "storeIds": [
-      5,
-      6
-    ],
+    "storeIds": [5, 6],
     "status": "active",
     "avatar": "/avatars/sales_3.png",
     "profile": {
       "expertise": "暖通设计",
       "experience": "6年",
-      "certifications": [
-        "Rheem认证"
-      ]
+      "certifications": ["Rheem认证"]
     },
     "stats": {
       "projects": 12,
@@ -474,18 +402,13 @@
     "role": "tech_support",
     "name": "林磊",
     "title": "技术支持",
-    "storeIds": [
-      1,
-      2
-    ],
+    "storeIds": [1, 2],
     "status": "active",
     "avatar": "/avatars/tech_support_1.png",
     "profile": {
       "expertise": "技术方案",
       "experience": "6年",
-      "certifications": [
-        "Rheem认证"
-      ]
+      "certifications": ["Rheem认证"]
     },
     "stats": {
       "projects": 13,
@@ -501,19 +424,13 @@
     "role": "tech_support",
     "name": "朱欣",
     "title": "技术支持",
-    "storeIds": [
-      3,
-      4
-    ],
+    "storeIds": [3, 4],
     "status": "active",
     "avatar": "/avatars/tech_support_2.png",
     "profile": {
       "expertise": "销售管理",
       "experience": "6年",
-      "certifications": [
-        "Rheem认证",
-        "Ruud认证"
-      ]
+      "certifications": ["Rheem认证", "Ruud认证"]
     },
     "stats": {
       "projects": 39,
@@ -529,18 +446,13 @@
     "role": "tech_support",
     "name": "李华",
     "title": "技术支持",
-    "storeIds": [
-      5,
-      6
-    ],
+    "storeIds": [5, 6],
     "status": "active",
     "avatar": "/avatars/tech_support_3.png",
     "profile": {
       "expertise": "暖通设计",
       "experience": "5年",
-      "certifications": [
-        "Rheem认证"
-      ]
+      "certifications": ["Rheem认证"]
     },
     "stats": {
       "projects": 8,
@@ -556,18 +468,13 @@
     "role": "construction_mgr",
     "name": "周欣",
     "title": "施工管理",
-    "storeIds": [
-      1,
-      2
-    ],
+    "storeIds": [1, 2],
     "status": "active",
     "avatar": "/avatars/construction_mgr_1.png",
     "profile": {
       "expertise": "销售管理",
       "experience": "3年",
-      "certifications": [
-        "Rheem认证"
-      ]
+      "certifications": ["Rheem认证"]
     },
     "stats": {
       "projects": 32,
@@ -583,19 +490,13 @@
     "role": "construction_mgr",
     "name": "陈杰",
     "title": "施工管理",
-    "storeIds": [
-      3,
-      4
-    ],
+    "storeIds": [3, 4],
     "status": "active",
     "avatar": "/avatars/construction_mgr_2.png",
     "profile": {
       "expertise": "客户服务",
       "experience": "2年",
-      "certifications": [
-        "Rheem认证",
-        "Ruud认证"
-      ]
+      "certifications": ["Rheem认证", "Ruud认证"]
     },
     "stats": {
       "projects": 50,
@@ -611,18 +512,13 @@
     "role": "construction_mgr",
     "name": "王洋",
     "title": "施工管理",
-    "storeIds": [
-      5,
-      6
-    ],
+    "storeIds": [5, 6],
     "status": "active",
     "avatar": "/avatars/construction_mgr_3.png",
     "profile": {
       "expertise": "暖通设计",
       "experience": "5年",
-      "certifications": [
-        "Rheem认证"
-      ]
+      "certifications": ["Rheem认证"]
     },
     "stats": {
       "projects": 36,

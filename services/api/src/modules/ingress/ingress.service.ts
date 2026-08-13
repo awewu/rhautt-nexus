@@ -8,7 +8,11 @@ import { ConsentPurpose } from '../compliance/consent.entity';
 import { withRlsTransaction } from '../common/rls';
 
 const VALID_CONSENT_PURPOSES: ConsentPurpose[] = [
-  'diagnosis_intake', 'lead_to_dealer', 'marketing', 'service_followup', 'data_cross_border',
+  'diagnosis_intake',
+  'lead_to_dealer',
+  'marketing',
+  'service_followup',
+  'data_cross_border',
 ];
 
 /**
@@ -25,7 +29,8 @@ const VALID_CONSENT_PURPOSES: ConsentPurpose[] = [
 export class IngressService {
   private readonly logger = new Logger('Ingress');
   private static readonly CAPTURE_ACTOR = 'system:public-ingress';
-  private readonly captureTenant = process.env.INGRESS_CAPTURE_TENANT_ID || 'rhautt-acquisition-pool';
+  private readonly captureTenant =
+    process.env.INGRESS_CAPTURE_TENANT_ID || 'rhautt-acquisition-pool';
 
   // 极简内存限流（滑动窗口）——切片1 基线；生产由边缘层/Redis 承担。
   private readonly hits = new Map<string, number[]>();
@@ -36,7 +41,7 @@ export class IngressService {
     @InjectDataSource() private readonly ds: DataSource,
     private readonly eventBus: EventBusService,
     private readonly crm: CrmService,
-    private readonly compliance: ComplianceService,
+    private readonly compliance: ComplianceService
   ) {}
 
   private rateLimit(ip: string): void {
@@ -55,11 +60,16 @@ export class IngressService {
   async captureLead(
     ip: string,
     dto: {
-      phone?: string; name?: string; audience?: string; source?: string; city?: string; campaign?: string;
+      phone?: string;
+      name?: string;
+      audience?: string;
+      source?: string;
+      city?: string;
+      campaign?: string;
       consent?: boolean;
       consentMeta?: { purpose?: string; policyVersion?: string; surface?: string };
     },
-    userAgent?: string,
+    userAgent?: string
   ): Promise<{ captured: true; duplicate: boolean }> {
     this.rateLimit(ip || 'unknown');
     if (!dto?.phone || !dto?.name) throw new BadRequestException('phone and name required');
@@ -68,7 +78,9 @@ export class IngressService {
     const audience = String(dto.audience || 'homeowners');
     const source = dto.source || `web:${audience}`;
     // PIPL 同意用途：以前端上报为准，仅接受合法枚举，默认「问诊需求采集」
-    const purpose: ConsentPurpose = VALID_CONSENT_PURPOSES.includes(dto.consentMeta?.purpose as ConsentPurpose)
+    const purpose: ConsentPurpose = VALID_CONSENT_PURPOSES.includes(
+      dto.consentMeta?.purpose as ConsentPurpose
+    )
       ? (dto.consentMeta!.purpose as ConsentPurpose)
       : 'diagnosis_intake';
     const policyVersion = dto.consentMeta?.policyVersion || 'rysnova-privacy-v1';
@@ -78,7 +90,10 @@ export class IngressService {
         // 领域写：PII 只落 customers（唯一可治理副本），并串联 lifecycle + 发 lead.created
         const res = await this.crm.createLeadInTx(em, {
           tenantId: this.captureTenant,
-          phone: dto.phone!, name: dto.name!, source, city: dto.city ?? null,
+          phone: dto.phone!,
+          name: dto.name!,
+          source,
+          city: dto.city ?? null,
           profile: { audience, campaign: dto.campaign ?? null, origin: 'public-ingress' },
         });
         // PIPL 存证：同事务写 pipl_consents（subjectId=customerId，不含明文 PII；
@@ -101,13 +116,21 @@ export class IngressService {
           eventType: 'lead.captured',
           aggregateType: 'customer',
           aggregateId: res.customer.id,
-          payload: { customerId: res.customer.id, audience, source, campaign: dto.campaign ?? null, duplicate: res.duplicate },
+          payload: {
+            customerId: res.customer.id,
+            audience,
+            source,
+            campaign: dto.campaign ?? null,
+            duplicate: res.duplicate,
+          },
         });
         return res.duplicate;
       },
-      { tenantId: this.captureTenant, actorId: IngressService.CAPTURE_ACTOR },
+      { tenantId: this.captureTenant, actorId: IngressService.CAPTURE_ACTOR }
     );
-    this.logger.log(`lead.captured audience=${audience} duplicate=${duplicate} tenant=${this.captureTenant}`);
+    this.logger.log(
+      `lead.captured audience=${audience} duplicate=${duplicate} tenant=${this.captureTenant}`
+    );
     return { captured: true, duplicate };
   }
 }

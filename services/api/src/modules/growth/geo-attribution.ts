@@ -14,16 +14,22 @@
  */
 
 export type LeadChannel =
-  | 'geo'          // AI 引擎/生成式检索推荐而来（GEO 直接成效）
+  | 'geo' // AI 引擎/生成式检索推荐而来（GEO 直接成效）
   | 'ai-diagnosis' // 品牌站 AI 问诊留资（GEO 品牌站表面的转化口，宪章定位的 C 端获客入口）
-  | 'referral'     // 转介绍
-  | 'paid'         // 付费投放/信息流/SEM
-  | 'organic'      // 自然搜索/SEO
-  | 'manual'       // 人工录入/导入
-  | 'other';       // 无法归因（诚实兜底，不算 GEO）
+  | 'referral' // 转介绍
+  | 'paid' // 付费投放/信息流/SEM
+  | 'organic' // 自然搜索/SEO
+  | 'manual' // 人工录入/导入
+  | 'other'; // 无法归因（诚实兜底，不算 GEO）
 
 export const LEAD_CHANNELS: LeadChannel[] = [
-  'geo', 'ai-diagnosis', 'referral', 'paid', 'organic', 'manual', 'other',
+  'geo',
+  'ai-diagnosis',
+  'referral',
+  'paid',
+  'organic',
+  'manual',
+  'other',
 ];
 
 export const LEAD_CHANNEL_LABELS: Record<LeadChannel, string> = {
@@ -50,7 +56,8 @@ export interface LeadAttributionSignal {
   medium?: string | null;
 }
 
-const GEO_RE = /(geo|chatgpt|gpt|perplexity|copilot|gemini|claude|kimi|doubao|豆包|文心|wenxin|通义|tongyi|deepseek|ai[-_ ]?engine|ai[-_ ]?search|ai[-_ ]?referral|生成式|大模型)/i;
+const GEO_RE =
+  /(geo|chatgpt|gpt|perplexity|copilot|gemini|claude|kimi|doubao|豆包|文心|wenxin|通义|tongyi|deepseek|ai[-_ ]?engine|ai[-_ ]?search|ai[-_ ]?referral|生成式|大模型)/i;
 const DIAGNOSIS_RE = /(diagnosis|问诊|rysnova-diagnosis)/i;
 const REFERRAL_RE = /(referral|转介绍|推荐)/i;
 const PAID_RE = /(^ad$|[-_ ]ad$|\bads?\b|sem|paid|竞价|投放|信息流|feed[-_ ]?ad)/i;
@@ -61,7 +68,9 @@ const MANUAL_RE = /(manual|import|crm|录入|导入)/i;
  * 归一化线索获客渠道。优先级：GEO 引擎 > AI 问诊 > 转介绍 > 付费 > 自然 > 人工 > 未归因。
  * 有 campaign 但源未命中付费关键字时视为 'paid'（战役带来的线索默认付费获客）。
  */
-export function normalizeLeadChannel(signal: LeadAttributionSignal | null | undefined): LeadChannel {
+export function normalizeLeadChannel(
+  signal: LeadAttributionSignal | null | undefined
+): LeadChannel {
   const s = `${signal?.source ?? ''} ${signal?.medium ?? ''}`.trim();
   if (GEO_RE.test(s)) return 'geo';
   if (DIAGNOSIS_RE.test(s)) return 'ai-diagnosis';

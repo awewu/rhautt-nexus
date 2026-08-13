@@ -9,7 +9,9 @@ export const metadata: Metadata = { title: '瑞诺瓦 AI 舒适家' };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-CN">
-      <head><meta name="viewport" content="width=device-width,initial-scale=1" /></head>
+      <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+      </head>
       <body>
         <ToastProvider>
           <div className="layout">

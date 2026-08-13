@@ -30,15 +30,15 @@ export class EventConsumersService implements OnModuleInit, OnModuleDestroy {
   private redisTimer: ReturnType<typeof setInterval> | null = null;
   private redisClient: any = null;
   private streamDispatcher: OutboxStreamDispatcher | null = null;
-  private readonly relayed = new Set<string>();          // 已中继 outboxId（进程内去重，界限 cap）
-  private readonly consumerName = `api-${process.pid}`;   // 消费者名（实例区分）
+  private readonly relayed = new Set<string>(); // 已中继 outboxId（进程内去重，界限 cap）
+  private readonly consumerName = `api-${process.pid}`; // 消费者名（实例区分）
 
   constructor(
     @InjectDataSource() private readonly ds: DataSource,
     private readonly eventBus: EventBusService,
     private readonly notifications: NotificationService,
     private readonly dispatch: DispatchService,
-    private readonly insight: InsightService,
+    private readonly insight: InsightService
   ) {}
 
   /**
@@ -95,9 +95,22 @@ export class EventConsumersService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleDestroy(): void {
-    if (this.sweepTimer) { clearInterval(this.sweepTimer); this.sweepTimer = null; }
-    if (this.redisTimer) { clearInterval(this.redisTimer); this.redisTimer = null; }
-    if (this.redisClient) { try { if (this.redisClient.isOpen) this.redisClient.quit(); } catch { /* noop */ } this.redisClient = null; }
+    if (this.sweepTimer) {
+      clearInterval(this.sweepTimer);
+      this.sweepTimer = null;
+    }
+    if (this.redisTimer) {
+      clearInterval(this.redisTimer);
+      this.redisTimer = null;
+    }
+    if (this.redisClient) {
+      try {
+        if (this.redisClient.isOpen) this.redisClient.quit();
+      } catch {
+        /* noop */
+      }
+      this.redisClient = null;
+    }
   }
 
   // ── outbox 投递调度器（进程内） ──────────────────────────────────────────
@@ -109,7 +122,10 @@ export class EventConsumersService implements OnModuleInit, OnModuleDestroy {
   private startDispatchSweeper(): void {
     if (TARGET_API_BOOT_SMOKE || process.env.NODE_ENV === 'test') return;
     const raw = process.env.EVENT_DISPATCH_SWEEP_MS;
-    if (raw === '0') { this.logger.log('outbox 投递调度器已禁用（EVENT_DISPATCH_SWEEP_MS=0）'); return; }
+    if (raw === '0') {
+      this.logger.log('outbox 投递调度器已禁用（EVENT_DISPATCH_SWEEP_MS=0）');
+      return;
+    }
     const ms = Math.max(Number(raw) || 5_000, 1_000);
     this.sweepTimer = setInterval(() => {
       this.runDispatchSweep().catch((e) => this.logger.warn(`outbox 投递轮次异常: ${String(e)}`));
@@ -157,16 +173,20 @@ export class EventConsumersService implements OnModuleInit, OnModuleDestroy {
     const { createClient } = require('redis');
     const client = createClient({
       url: url || undefined,
-      socket: url ? undefined : {
-        host: process.env.REDIS_HOST || '127.0.0.1',
-        port: Number(process.env.REDIS_PORT || 6379),
-        connectTimeout: Number(process.env.REDIS_CONNECT_TIMEOUT_MS || 2000),
-        reconnectStrategy: false,
-      },
+      socket: url
+        ? undefined
+        : {
+            host: process.env.REDIS_HOST || '127.0.0.1',
+            port: Number(process.env.REDIS_PORT || 6379),
+            connectTimeout: Number(process.env.REDIS_CONNECT_TIMEOUT_MS || 2000),
+            reconnectStrategy: false,
+          },
       username: process.env.REDIS_USERNAME || undefined,
       password: process.env.REDIS_PASSWORD || undefined,
     });
-    client.on('error', (e: unknown) => this.logger.warn(`Redis 客户端错误: ${String((e as any)?.message || e)}`));
+    client.on('error', (e: unknown) =>
+      this.logger.warn(`Redis 客户端错误: ${String((e as any)?.message || e)}`)
+    );
     await client.connect(); // 失败则抛出 → 上层回退进程内调度器
     this.redisClient = client;
     this.streamDispatcher = new OutboxStreamDispatcher(new RedisStreamClient(client));
@@ -176,11 +196,18 @@ export class EventConsumersService implements OnModuleInit, OnModuleDestroy {
       this.runRedisCycle().catch((e) => this.logger.warn(`Redis 投递轮次异常: ${String(e)}`));
     }, ms);
     this.redisTimer.unref?.();
-    this.logger.log(`Redis Stream 事件驱动已启动（consumer=${this.consumerName}，每 ${ms}ms 一轮）`);
+    this.logger.log(
+      `Redis Stream 事件驱动已启动（consumer=${this.consumerName}，每 ${ms}ms 一轮）`
+    );
   }
 
   /** 单轮：中继 foundation + 逐租户 pending → 流；再消费一批。 */
-  async runRedisCycle(): Promise<{ relayed: number; delivered: number; skipped: number; failed: number }> {
+  async runRedisCycle(): Promise<{
+    relayed: number;
+    delivered: number;
+    skipped: number;
+    failed: number;
+  }> {
     const dispatcher = this.streamDispatcher;
     if (!dispatcher) return { relayed: 0, delivered: 0, skipped: 0, failed: 0 };
 
@@ -209,12 +236,16 @@ export class EventConsumersService implements OnModuleInit, OnModuleDestroy {
         if (res === 'failed') return 'failed';
         return 'skipped'; // skipped / dead 均 ack（不重试）
       } catch (e) {
-        this.logger.warn(`deliverEventById 抛错 outboxId=${outboxId} tenant=${tenantId}: ${String((e as any)?.message || e)}`);
+        this.logger.warn(
+          `deliverEventById 抛错 outboxId=${outboxId} tenant=${tenantId}: ${String((e as any)?.message || e)}`
+        );
         return 'failed';
       }
     });
     if (r.delivered || r.failed) {
-      this.logger.log(`Redis 投递一轮：relayed=${relayed} read=${r.read} delivered=${r.delivered} skipped=${r.skipped} failed=${r.failed}`);
+      this.logger.log(
+        `Redis 投递一轮：relayed=${relayed} read=${r.read} delivered=${r.delivered} skipped=${r.skipped} failed=${r.failed}`
+      );
     }
     return { relayed, delivered: r.delivered, skipped: r.skipped, failed: r.failed };
   }
@@ -229,12 +260,20 @@ export class EventConsumersService implements OnModuleInit, OnModuleDestroy {
 
     await withRlsTransaction(
       this.ds,
-      (em) => this.notifications.createInTx(em, {
-        tenantId, userId: ownerUserId, type: 'opportunity.signed',
-        title: '签单成功', body: '商机已完成签单。',
-        payload: { opportunityId, quotationId: (payload.quotationId as string) ?? null, customerId: (payload.customerId as string) ?? null },
-      }),
-      { tenantId, actorId: EventConsumersService.SYSTEM_ACTOR },
+      (em) =>
+        this.notifications.createInTx(em, {
+          tenantId,
+          userId: ownerUserId,
+          type: 'opportunity.signed',
+          title: '签单成功',
+          body: '商机已完成签单。',
+          payload: {
+            opportunityId,
+            quotationId: (payload.quotationId as string) ?? null,
+            customerId: (payload.customerId as string) ?? null,
+          },
+        }),
+      { tenantId, actorId: EventConsumersService.SYSTEM_ACTOR }
     );
     this.logger.log(`opportunity.signed → notification owner=${ownerUserId} tenant=${tenantId}`);
   }
@@ -250,7 +289,7 @@ export class EventConsumersService implements OnModuleInit, OnModuleDestroy {
     await withRlsTransaction(
       this.ds,
       (em) => this.dispatch.routeCapturedLeadInTx(em, { tenantId, customerId }),
-      { tenantId, actorId: EventConsumersService.SYSTEM_ACTOR },
+      { tenantId, actorId: EventConsumersService.SYSTEM_ACTOR }
     );
     this.logger.log(`lead.captured → dispatch.route customer=${customerId} tenant=${tenantId}`);
   }

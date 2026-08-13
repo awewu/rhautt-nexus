@@ -7,7 +7,11 @@ export interface MarginResult {
 }
 
 /** 毛利 = 拟定价 - 成本；毛利率 = 毛利/拟定价；低于 floor 则不过闸。 */
-export function computeMargin(proposedPrice: number, costPrice: number, floor: number): MarginResult {
+export function computeMargin(
+  proposedPrice: number,
+  costPrice: number,
+  floor: number
+): MarginResult {
   const price = Number(proposedPrice) || 0;
   const cost = Number(costPrice) || 0;
   const marginAmt = price - cost;

@@ -14,7 +14,7 @@ const ACTIVE_PAGES = [
   'public/rysnova-bim-designer.html',
   'public/staff-portal.html',
   'public/business-console.html',
-  'public/login.html'
+  'public/login.html',
 ];
 
 function extractAssetReferences(html) {
@@ -33,15 +33,15 @@ function isReactCandidateReference(ref) {
     /^\/?node_modules\//,
     /^\/?(dist|build)\/assets\/.*\.(js|css)$/i,
     /^\/?(index|app)\.[jt]sx?$/i,
-    /^\/?src\/main\.[jt]sx?$/i
-  ].some(pattern => pattern.test(ref));
+    /^\/?src\/main\.[jt]sx?$/i,
+  ].some((pattern) => pattern.test(ref));
 }
 
 describe('React candidate production navigation guard', () => {
   test('architecture harness keeps React candidate surface out of active production navigation', () => {
     execSync('node audit/architecture-harness.js', {
       cwd: ROOT,
-      stdio: 'pipe'
+      stdio: 'pipe',
     });
 
     const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));

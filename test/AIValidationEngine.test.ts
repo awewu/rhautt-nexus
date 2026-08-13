@@ -49,7 +49,7 @@ describe('AIValidationEngine', () => {
 
     test('样本应该包含必要字段', async () => {
       const firstSample = engine.testSamples.values().next().value;
-      
+
       expect(firstSample).toHaveProperty('id');
       expect(firstSample).toHaveProperty('index');
       expect(firstSample).toHaveProperty('houseType');
@@ -88,7 +88,7 @@ describe('AIValidationEngine', () => {
       const groundTruth = ['pain1', 'pain2', 'pain3'];
       const aiPrediction = ['pain1', 'pain2', 'pain4'];
       const matchRate = (engine as any).calculateMatchRate(groundTruth, aiPrediction);
-      
+
       expect(matchRate).toBeGreaterThanOrEqual(0);
       expect(matchRate).toBeLessThanOrEqual(1);
     });
@@ -97,7 +97,7 @@ describe('AIValidationEngine', () => {
       const groundTruth = ['pain1', 'pain2', 'pain3'];
       const aiPrediction = ['pain1', 'pain2', 'pain3'];
       const matchRate = (engine as any).calculateMatchRate(groundTruth, aiPrediction);
-      
+
       expect(matchRate).toBe(1);
     });
 
@@ -105,7 +105,7 @@ describe('AIValidationEngine', () => {
       const groundTruth = ['pain1', 'pain2', 'pain3'];
       const aiPrediction = ['pain4', 'pain5', 'pain6'];
       const matchRate = (engine as any).calculateMatchRate(groundTruth, aiPrediction);
-      
+
       expect(matchRate).toBe(0);
     });
   });
@@ -115,9 +115,9 @@ describe('AIValidationEngine', () => {
       const results = [
         { matchRate: 0.8, confidence: 0.9 },
         { matchRate: 0.7, confidence: 0.85 },
-        { matchRate: 0.9, confidence: 0.95 }
+        { matchRate: 0.9, confidence: 0.95 },
       ];
-      
+
       const accuracy = (engine as any).calculateOverallAccuracy(results);
       expect(accuracy).toBeGreaterThanOrEqual(0);
       expect(accuracy).toBeLessThanOrEqual(1);
@@ -127,9 +127,9 @@ describe('AIValidationEngine', () => {
       const results = [
         { matchRate: 0.8, confidence: 0.9 },
         { matchRate: 0.7, confidence: 0.85 },
-        { matchRate: 0.9, confidence: 0.95 }
+        { matchRate: 0.9, confidence: 0.95 },
       ];
-      
+
       const avgConfidence = (engine as any).calculateAverageConfidence(results);
       expect(avgConfidence).toBeCloseTo(0.9, 2);
     });
@@ -142,9 +142,9 @@ describe('AIValidationEngine', () => {
         averageConfidence: 0.9,
         sampleCount: 100,
         passedSamples: 85,
-        failedSamples: 15
+        failedSamples: 15,
       });
-      
+
       expect(report).toHaveProperty('overallAccuracy');
       expect(report).toHaveProperty('averageConfidence');
       expect(report).toHaveProperty('sampleCount');
@@ -159,9 +159,9 @@ describe('AIValidationEngine', () => {
         averageConfidence: 0.9,
         sampleCount: 100,
         passedSamples: 85,
-        failedSamples: 15
+        failedSamples: 15,
       });
-      
+
       expect(report.timestamp).toBeDefined();
       expect(new Date(report.timestamp)).toBeInstanceOf(Date);
     });
@@ -170,7 +170,7 @@ describe('AIValidationEngine', () => {
   describe('系统状态', () => {
     test('应该返回系统状态', () => {
       const status = (engine as any).getSystemStatus();
-      
+
       expect(status).toHaveProperty('initialized');
       expect(status).toHaveProperty('sampleCount');
       expect(status).toHaveProperty('resultCount');
@@ -185,9 +185,9 @@ describe('AIValidationEngine', () => {
         sampleId: 'sample-001',
         matchRate: 0.85,
         confidence: 0.9,
-        passed: true
+        passed: true,
       };
-      
+
       await (engine as any).saveTestResult(testId, result);
       expect(engine.testResults.has(testId)).toBe(true);
     });
@@ -198,12 +198,12 @@ describe('AIValidationEngine', () => {
         sampleId: 'sample-002',
         matchRate: 0.75,
         confidence: 0.8,
-        passed: false
+        passed: false,
       };
-      
+
       await (engine as any).saveTestResult(testId, result);
       const loaded = await (engine as any).loadTestResults();
-      
+
       expect(loaded.size).toBeGreaterThan(0);
     });
   });

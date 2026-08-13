@@ -22,7 +22,9 @@ module.exports = function createPromotionRouter(promotionEngine) {
     try {
       const promotions = promotionEngine.getAllPromotions();
       res.json({ success: true, data: promotions });
-    } catch (error) { return errorResponse(res, error); }
+    } catch (error) {
+      return errorResponse(res, error);
+    }
   });
 
   // 应用促销
@@ -31,7 +33,9 @@ module.exports = function createPromotionRouter(promotionEngine) {
       const { order, userProfile } = req.body;
       const result = promotionEngine.applyPromotions(order, userProfile);
       res.json({ success: true, data: result });
-    } catch (error) { return errorResponse(res, error); }
+    } catch (error) {
+      return errorResponse(res, error);
+    }
   });
 
   // 更新用户档案
@@ -40,7 +44,9 @@ module.exports = function createPromotionRouter(promotionEngine) {
       const { userId, profile } = req.body;
       promotionEngine.updateUserProfile(userId, profile);
       res.json({ success: true, message: '用户档案更新成功' });
-    } catch (error) { return errorResponse(res, error); }
+    } catch (error) {
+      return errorResponse(res, error);
+    }
   });
 
   // 获取用户档案
@@ -48,7 +54,9 @@ module.exports = function createPromotionRouter(promotionEngine) {
     try {
       const profile = promotionEngine.getUserProfile(req.params.userId);
       res.json({ success: true, data: profile });
-    } catch (error) { return errorResponse(res, error); }
+    } catch (error) {
+      return errorResponse(res, error);
+    }
   });
 
   // 获取促销历史
@@ -56,7 +64,9 @@ module.exports = function createPromotionRouter(promotionEngine) {
     try {
       const history = promotionEngine.getPromotionHistory(req.params.userId);
       res.json({ success: true, data: history });
-    } catch (error) { return errorResponse(res, error); }
+    } catch (error) {
+      return errorResponse(res, error);
+    }
   });
 
   // 智能匹配推荐（销售端核心接口）

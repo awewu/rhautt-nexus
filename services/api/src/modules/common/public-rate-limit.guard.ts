@@ -1,4 +1,10 @@
-import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 
 interface Bucket {
   count: number;
@@ -38,7 +44,7 @@ export class PublicRateLimitGuard implements CanActivate {
       const retryAfterSeconds = Math.ceil((bucket.resetAt - now) / 1000);
       throw new HttpException(
         { success: false, error: '请求过于频繁，请稍后再试', retryAfterSeconds },
-        HttpStatus.TOO_MANY_REQUESTS,
+        HttpStatus.TOO_MANY_REQUESTS
       );
     }
     bucket.count += 1;

@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { JwtPayload } from '../auth/auth.service';
 import {
@@ -12,7 +24,9 @@ import {
 import { AgenticGeoService } from './agentic-geo.service';
 import { GeoFocusService } from './geo-focus.service';
 
-interface AuthRequest { user: JwtPayload; }
+interface AuthRequest {
+  user: JwtPayload;
+}
 
 /**
  * 增长中枢 / Nexus Growth 控制面（/api/v2/growth）。
@@ -29,111 +43,222 @@ export class GrowthController {
     private readonly contentAssets: GrowthContentAssetService,
     private readonly materials: GrowthMarketingMaterialService,
     private readonly agentic: AgenticGeoService,
-    private readonly geoFocus: GeoFocusService,
+    private readonly geoFocus: GeoFocusService
   ) {}
 
   // ── AgenticGEO 自主闭环（受治理·飞轮第一环）──
-  @UseGuards(AuthGuard) @Post('geo/agentic/plan')
-  agenticPlan(@Req() req: AuthRequest, @Body() body: any) { return this.agentic.planLoop(req.user, body || {}); }
+  @UseGuards(AuthGuard)
+  @Post('geo/agentic/plan')
+  agenticPlan(@Req() req: AuthRequest, @Body() body: any) {
+    return this.agentic.planLoop(req.user, body || {});
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/agentic/approve')
-  agenticApprove(@Req() req: AuthRequest, @Body() body: any) { return this.agentic.approve(req.user, body?.actionId, body?.input); }
+  @UseGuards(AuthGuard)
+  @Post('geo/agentic/approve')
+  agenticApprove(@Req() req: AuthRequest, @Body() body: any) {
+    return this.agentic.approve(req.user, body?.actionId, body?.input);
+  }
 
-  @UseGuards(AuthGuard) @Get('geo/agentic/status')
-  agenticStatus(@Req() _req: AuthRequest) { return this.agentic.status(); }
+  @UseGuards(AuthGuard)
+  @Get('geo/agentic/status')
+  agenticStatus(@Req() _req: AuthRequest) {
+    return this.agentic.status();
+  }
 
   // ── GEO 进化（借鉴分众智投）：选点·千面·认知资产·引爆·重分配 ──
-  @UseGuards(AuthGuard) @Post('geo/agentic/ignite')
-  agenticIgnite(@Req() req: AuthRequest, @Body() body: { category: string; segment?: string; limit?: number }) { return this.agentic.planIgnition(req.user, body?.category, body || {}); }
+  @UseGuards(AuthGuard)
+  @Post('geo/agentic/ignite')
+  agenticIgnite(
+    @Req() req: AuthRequest,
+    @Body() body: { category: string; segment?: string; limit?: number }
+  ) {
+    return this.agentic.planIgnition(req.user, body?.category, body || {});
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/focus/targets')
-  upsertTarget(@Req() req: AuthRequest, @Body() body: any) { return this.geoFocus.upsertTarget(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/focus/targets')
+  upsertTarget(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geoFocus.upsertTarget(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Get('geo/focus/targets')
-  listTargets(@Req() req: AuthRequest, @Query('category') category?: string) { return this.geoFocus.listTargets(req.user, category); }
+  @UseGuards(AuthGuard)
+  @Get('geo/focus/targets')
+  listTargets(@Req() req: AuthRequest, @Query('category') category?: string) {
+    return this.geoFocus.listTargets(req.user, category);
+  }
 
-  @UseGuards(AuthGuard) @Get('geo/focus/probe-pool')
-  listProbePool(@Req() req: AuthRequest, @Query() query: any) { return this.geoFocus.listProbePool(req.user, query || {}); }
+  @UseGuards(AuthGuard)
+  @Get('geo/focus/probe-pool')
+  listProbePool(@Req() req: AuthRequest, @Query() query: any) {
+    return this.geoFocus.listProbePool(req.user, query || {});
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/focus/probe-pool/seed')
-  seedProbePool(@Req() req: AuthRequest, @Body() body: any) { return this.geoFocus.seedProbePool(req.user, body || {}); }
+  @UseGuards(AuthGuard)
+  @Post('geo/focus/probe-pool/seed')
+  seedProbePool(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geoFocus.seedProbePool(req.user, body || {});
+  }
 
-  @UseGuards(AuthGuard) @Get('geo/focus/select')
-  selectTargets(@Req() req: AuthRequest, @Query('category') category: string, @Query('segment') segment?: string, @Query('limit') limit?: string) { return this.geoFocus.selectTargets(req.user, category, { segment, limit: limit ? Number(limit) : undefined }); }
+  @UseGuards(AuthGuard)
+  @Get('geo/focus/select')
+  selectTargets(
+    @Req() req: AuthRequest,
+    @Query('category') category: string,
+    @Query('segment') segment?: string,
+    @Query('limit') limit?: string
+  ) {
+    return this.geoFocus.selectTargets(req.user, category, {
+      segment,
+      limit: limit ? Number(limit) : undefined,
+    });
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/focus/cognition')
-  recordCognition(@Req() req: AuthRequest, @Body() body: any) { return this.geoFocus.recordCognition(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/focus/cognition')
+  recordCognition(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geoFocus.recordCognition(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Get('geo/focus/cognition')
-  cognitionFunnel(@Req() req: AuthRequest, @Query('category') category?: string) { return this.geoFocus.cognitionFunnel(req.user, category); }
+  @UseGuards(AuthGuard)
+  @Get('geo/focus/cognition')
+  cognitionFunnel(@Req() req: AuthRequest, @Query('category') category?: string) {
+    return this.geoFocus.cognitionFunnel(req.user, category);
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/focus/reallocate')
-  reallocate(@Req() req: AuthRequest, @Body() body: { adjustments: Array<{ id: string; deltaPriority: number }> }) { return this.geoFocus.reallocate(req.user, body?.adjustments); }
+  @UseGuards(AuthGuard)
+  @Post('geo/focus/reallocate')
+  reallocate(
+    @Req() req: AuthRequest,
+    @Body() body: { adjustments: Array<{ id: string; deltaPriority: number }> }
+  ) {
+    return this.geoFocus.reallocate(req.user, body?.adjustments);
+  }
 
   // ── E1 舆情监测 ──
-  @UseGuards(AuthGuard) @Post('opinion/mentions')
-  ingestMention(@Req() req: AuthRequest, @Body() body: any) { return this.opinion.ingestMention(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('opinion/mentions')
+  ingestMention(@Req() req: AuthRequest, @Body() body: any) {
+    return this.opinion.ingestMention(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Get('opinion/mentions')
-  listMentions(@Req() req: AuthRequest) { return this.opinion.listMentions(req.user); }
+  @UseGuards(AuthGuard)
+  @Get('opinion/mentions')
+  listMentions(@Req() req: AuthRequest) {
+    return this.opinion.listMentions(req.user);
+  }
 
-  @UseGuards(AuthGuard) @Get('opinion/alerts')
-  listAlerts(@Req() req: AuthRequest) { return this.opinion.listAlerts(req.user); }
+  @UseGuards(AuthGuard)
+  @Get('opinion/alerts')
+  listAlerts(@Req() req: AuthRequest) {
+    return this.opinion.listAlerts(req.user);
+  }
 
-  @UseGuards(AuthGuard) @Post('opinion/alerts/:id/status')
-  updateAlertStatus(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.opinion.updateAlertStatus(req.user, id, body); }
+  @UseGuards(AuthGuard)
+  @Post('opinion/alerts/:id/status')
+  updateAlertStatus(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) {
+    return this.opinion.updateAlertStatus(req.user, id, body);
+  }
 
-  @UseGuards(AuthGuard) @Get('opinion/connectors')
-  opinionConnectors(@Req() _req: AuthRequest) { return this.opinion.connectors(); }
+  @UseGuards(AuthGuard)
+  @Get('opinion/connectors')
+  opinionConnectors(@Req() _req: AuthRequest) {
+    return this.opinion.connectors();
+  }
 
-  @UseGuards(AuthGuard) @Post('opinion/pull')
-  opinionPull(@Req() req: AuthRequest, @Body() body: any) { return this.opinion.pullFromSource(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('opinion/pull')
+  opinionPull(@Req() req: AuthRequest, @Body() body: any) {
+    return this.opinion.pullFromSource(req.user, body);
+  }
 
   // ── E2 文案 Copilot ──
-  @UseGuards(AuthGuard) @Post('copy/generate')
-  generateCopy(@Req() req: AuthRequest, @Body() body: any) { return this.copy.generateCopy(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('copy/generate')
+  generateCopy(@Req() req: AuthRequest, @Body() body: any) {
+    return this.copy.generateCopy(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Get('prompt-templates')
-  listPromptTemplates(@Req() req: AuthRequest, @Query() query: any) { return this.copy.listPromptTemplates(req.user, query); }
+  @UseGuards(AuthGuard)
+  @Get('prompt-templates')
+  listPromptTemplates(@Req() req: AuthRequest, @Query() query: any) {
+    return this.copy.listPromptTemplates(req.user, query);
+  }
 
-  @UseGuards(AuthGuard) @Post('prompt-templates')
-  createPromptTemplate(@Req() req: AuthRequest, @Body() body: any) { return this.copy.createPromptTemplate(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('prompt-templates')
+  createPromptTemplate(@Req() req: AuthRequest, @Body() body: any) {
+    return this.copy.createPromptTemplate(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Patch('prompt-templates/:id')
-  updatePromptTemplate(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.copy.updatePromptTemplate(req.user, id, body); }
+  @UseGuards(AuthGuard)
+  @Patch('prompt-templates/:id')
+  updatePromptTemplate(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) {
+    return this.copy.updatePromptTemplate(req.user, id, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('prompt-templates/:id/archive')
-  archivePromptTemplate(@Req() req: AuthRequest, @Param('id') id: string) { return this.copy.archivePromptTemplate(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Post('prompt-templates/:id/archive')
+  archivePromptTemplate(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.copy.archivePromptTemplate(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Post('prompt-templates/:id/restore')
-  restorePromptTemplate(@Req() req: AuthRequest, @Param('id') id: string) { return this.copy.restorePromptTemplate(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Post('prompt-templates/:id/restore')
+  restorePromptTemplate(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.copy.restorePromptTemplate(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Post('copy/:id/save-prompt-template')
-  saveCopyPromptTemplate(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.copy.saveCopyPromptTemplate(req.user, id, body); }
+  @UseGuards(AuthGuard)
+  @Post('copy/:id/save-prompt-template')
+  saveCopyPromptTemplate(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) {
+    return this.copy.saveCopyPromptTemplate(req.user, id, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('copy/:id/approve')
-  approveCopy(@Req() req: AuthRequest, @Param('id') id: string) { return this.copy.approveCopy(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Post('copy/:id/approve')
+  approveCopy(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.copy.approveCopy(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Post('copy/:id/reject')
-  rejectCopy(@Req() req: AuthRequest, @Param('id') id: string) { return this.copy.rejectCopy(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Post('copy/:id/reject')
+  rejectCopy(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.copy.rejectCopy(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Patch('copy/:id')
-  updateCopy(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.copy.updateCopy(req.user, id, body); }
+  @UseGuards(AuthGuard)
+  @Patch('copy/:id')
+  updateCopy(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) {
+    return this.copy.updateCopy(req.user, id, body);
+  }
 
-  @UseGuards(AuthGuard) @Delete('copy/:id')
-  removeCopy(@Req() req: AuthRequest, @Param('id') id: string) { return this.copy.removeCopy(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Delete('copy/:id')
+  removeCopy(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.copy.removeCopy(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Get('copy')
-  listCopy(@Req() req: AuthRequest) { return this.copy.listCopy(req.user); }
+  @UseGuards(AuthGuard)
+  @Get('copy')
+  listCopy(@Req() req: AuthRequest) {
+    return this.copy.listCopy(req.user);
+  }
 
   // ── E3 GEO 分析 ──
-  @UseGuards(AuthGuard) @Post('geo/probe')
-  probe(@Req() req: AuthRequest, @Body() body: any) { return this.geo.probe(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/probe')
+  probe(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geo.probe(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/probe-jobs/run')
-  runProbeJob(@Req() req: AuthRequest, @Body() body: any) { return this.geo.runProbeJob(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/probe-jobs/run')
+  runProbeJob(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geo.runProbeJob(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/probe-jobs/stream')
+  @UseGuards(AuthGuard)
+  @Post('geo/probe-jobs/stream')
   async streamProbeJob(@Req() req: AuthRequest, @Body() body: any, @Res() reply: any) {
     reply.raw.writeHead(200, {
       'content-type': 'text/event-stream; charset=utf-8',
@@ -150,112 +275,219 @@ export class GrowthController {
     }
   }
 
-  @UseGuards(AuthGuard) @Get('geo/probe-jobs')
-  listProbeJobs(@Req() req: AuthRequest) { return this.geo.listProbeJobs(req.user); }
+  @UseGuards(AuthGuard)
+  @Get('geo/probe-jobs')
+  listProbeJobs(@Req() req: AuthRequest) {
+    return this.geo.listProbeJobs(req.user);
+  }
 
-  @UseGuards(AuthGuard) @Get('geo/probe-jobs/:id')
-  getProbeJob(@Req() req: AuthRequest, @Param('id') id: string) { return this.geo.getProbeJob(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Get('geo/probe-jobs/:id')
+  getProbeJob(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.geo.getProbeJob(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/probe-batches/run')
-  runProbeBatch(@Req() req: AuthRequest, @Body() body: any) { return this.geo.runProbeBatch(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/probe-batches/run')
+  runProbeBatch(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geo.runProbeBatch(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Get('geo/probe-batches')
-  listProbeBatches(@Req() req: AuthRequest, @Query() query: any) { return this.geo.listProbeBatches(req.user, query); }
+  @UseGuards(AuthGuard)
+  @Get('geo/probe-batches')
+  listProbeBatches(@Req() req: AuthRequest, @Query() query: any) {
+    return this.geo.listProbeBatches(req.user, query);
+  }
 
-  @UseGuards(AuthGuard) @Get('geo/probe-batches/:id')
-  getProbeBatch(@Req() req: AuthRequest, @Param('id') id: string) { return this.geo.getProbeBatch(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Get('geo/probe-batches/:id')
+  getProbeBatch(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.geo.getProbeBatch(req.user, id);
+  }
 
   // GEO 第 7 层 · 闭环实验（探测→缺口→内容→复投→验证 lift）
-  @UseGuards(AuthGuard) @Get('geo/experiments')
-  listGeoExperiments(@Req() req: AuthRequest, @Query() query: any) { return this.geo.listGeoExperiments(req.user, query); }
-  @UseGuards(AuthGuard) @Post('geo/experiments')
-  startGeoExperiment(@Req() req: AuthRequest, @Body() body: any) { return this.geo.startGeoExperiment(req.user, body); }
-  @UseGuards(AuthGuard) @Get('geo/experiments/:id')
-  getGeoExperiment(@Req() req: AuthRequest, @Param('id') id: string) { return this.geo.getGeoExperiment(req.user, id); }
-  @UseGuards(AuthGuard) @Post('geo/experiments/:id/generate-content')
-  generateGeoExperimentContent(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.geo.generateGeoExperimentContent(req.user, id, body); }
-  @UseGuards(AuthGuard) @Post('geo/experiments/:id/link-content')
-  linkGeoExperimentContent(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.geo.linkGeoExperimentContent(req.user, id, body); }
-  @UseGuards(AuthGuard) @Post('geo/experiments/:id/verify')
-  verifyGeoExperiment(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.geo.verifyGeoExperiment(req.user, id, body); }
+  @UseGuards(AuthGuard)
+  @Get('geo/experiments')
+  listGeoExperiments(@Req() req: AuthRequest, @Query() query: any) {
+    return this.geo.listGeoExperiments(req.user, query);
+  }
+  @UseGuards(AuthGuard)
+  @Post('geo/experiments')
+  startGeoExperiment(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geo.startGeoExperiment(req.user, body);
+  }
+  @UseGuards(AuthGuard)
+  @Get('geo/experiments/:id')
+  getGeoExperiment(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.geo.getGeoExperiment(req.user, id);
+  }
+  @UseGuards(AuthGuard)
+  @Post('geo/experiments/:id/generate-content')
+  generateGeoExperimentContent(
+    @Req() req: AuthRequest,
+    @Param('id') id: string,
+    @Body() body: any
+  ) {
+    return this.geo.generateGeoExperimentContent(req.user, id, body);
+  }
+  @UseGuards(AuthGuard)
+  @Post('geo/experiments/:id/link-content')
+  linkGeoExperimentContent(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) {
+    return this.geo.linkGeoExperimentContent(req.user, id, body);
+  }
+  @UseGuards(AuthGuard)
+  @Post('geo/experiments/:id/verify')
+  verifyGeoExperiment(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) {
+    return this.geo.verifyGeoExperiment(req.user, id, body);
+  }
   // 自进化：查看由实验 lift 反哺学到的策略权重
-  @UseGuards(AuthGuard) @Get('geo/strategy-weights')
-  getStrategyWeights(@Req() req: AuthRequest, @Query() query: any) { return this.geo.getStrategyWeights(req.user, query); }
+  @UseGuards(AuthGuard)
+  @Get('geo/strategy-weights')
+  getStrategyWeights(@Req() req: AuthRequest, @Query() query: any) {
+    return this.geo.getStrategyWeights(req.user, query);
+  }
 
   /** AI 视角 SWOT（由探测数据派生，可测而非自评）。 */
-  @UseGuards(AuthGuard) @Get('geo/swot')
-  getAiSwot(@Req() req: AuthRequest, @Query() query: any) { return this.geo.getAiSwot(req.user, query); }
+  @UseGuards(AuthGuard)
+  @Get('geo/swot')
+  getAiSwot(@Req() req: AuthRequest, @Query() query: any) {
+    return this.geo.getAiSwot(req.user, query);
+  }
 
   // ── 战略分析层 · 场景库 → prompt 簇 → 选题优先级 ──
-  @UseGuards(AuthGuard) @Post('geo/scenarios')
-  createScenario(@Req() req: AuthRequest, @Body() body: any) { return this.geo.createScenario(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/scenarios')
+  createScenario(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geo.createScenario(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Get('geo/scenarios')
-  listScenarios(@Req() req: AuthRequest, @Query() query: any) { return this.geo.listScenarios(req.user, query); }
+  @UseGuards(AuthGuard)
+  @Get('geo/scenarios')
+  listScenarios(@Req() req: AuthRequest, @Query() query: any) {
+    return this.geo.listScenarios(req.user, query);
+  }
 
   /** 播种器：品类词表 × 场景模板 → 批量建场景并派生选题（新品牌/品类冷启动）。 */
-  @UseGuards(AuthGuard) @Post('geo/scenarios/seed')
-  seedScenarios(@Req() req: AuthRequest, @Body() body: any) { return this.geo.seedScenarios(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/scenarios/seed')
+  seedScenarios(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geo.seedScenarios(req.user, body);
+  }
 
   /** 新品牌/品类启动序列：播种→派生选题→基线探测（自循环起转)。 */
-  @UseGuards(AuthGuard) @Post('geo/bootstrap')
-  bootstrapBrandCategory(@Req() req: AuthRequest, @Body() body: any) { return this.geo.bootstrapBrandCategory(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/bootstrap')
+  bootstrapBrandCategory(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geo.bootstrapBrandCategory(req.user, body);
+  }
 
   /** 由场景派生 prompt 簇并落入问题库（dryRun=true 仅预览）。 */
-  @UseGuards(AuthGuard) @Post('geo/scenarios/:id/derive')
+  @UseGuards(AuthGuard)
+  @Post('geo/scenarios/:id/derive')
   deriveScenarioTopics(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) {
     return this.geo.deriveScenarioTopics(req.user, id, body || {});
   }
 
   // 受治理动作引擎（Foundry Ontology 动词的轻量本地实现）：人与 AI Agent 走同一套治理闸
-  @UseGuards(AuthGuard) @Get('geo/actions')
-  listGeoActions() { return this.geo.listGeoActions(); }
+  @UseGuards(AuthGuard)
+  @Get('geo/actions')
+  listGeoActions() {
+    return this.geo.listGeoActions();
+  }
   /** 本体对象类型清单（动作 objectType 与事实图谱节点的单一真相源）。 */
-  @UseGuards(AuthGuard) @Get('ontology/object-types')
-  listObjectTypes() { return this.geo.listObjectTypes(); }
-  @UseGuards(AuthGuard) @Post('geo/actions/:actionId')
+  @UseGuards(AuthGuard)
+  @Get('ontology/object-types')
+  listObjectTypes() {
+    return this.geo.listObjectTypes();
+  }
+  @UseGuards(AuthGuard)
+  @Post('geo/actions/:actionId')
   invokeGeoAction(@Req() req: AuthRequest, @Param('actionId') actionId: string, @Body() body: any) {
-    return this.geo.invokeGeoAction(req.user, actionId, body?.input ?? body, { isProxy: body?.isProxy, approved: body?.approved });
+    return this.geo.invokeGeoAction(req.user, actionId, body?.input ?? body, {
+      isProxy: body?.isProxy,
+      approved: body?.approved,
+    });
   }
 
-  @UseGuards(AuthGuard) @Get('geo/visibility')
-  visibility(@Req() req: AuthRequest) { return this.geo.visibilityReport(req.user); }
+  @UseGuards(AuthGuard)
+  @Get('geo/visibility')
+  visibility(@Req() req: AuthRequest) {
+    return this.geo.visibilityReport(req.user);
+  }
 
-  @UseGuards(AuthGuard) @Get('geo/onsite-readiness')
-  onSiteReadiness(@Req() req: AuthRequest) { return this.geo.onSiteReadiness(req.user); }
+  @UseGuards(AuthGuard)
+  @Get('geo/onsite-readiness')
+  onSiteReadiness(@Req() req: AuthRequest) {
+    return this.geo.onSiteReadiness(req.user);
+  }
 
-  @UseGuards(AuthGuard) @Get('geo/engines')
-  geoEngines(@Req() req: AuthRequest) { return this.geo.engines(req.user); }
+  @UseGuards(AuthGuard)
+  @Get('geo/engines')
+  geoEngines(@Req() req: AuthRequest) {
+    return this.geo.engines(req.user);
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/question-set')
-  geoQuestionSet(@Req() req: AuthRequest, @Body() body: any) { return this.geo.questionSet(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/question-set')
+  geoQuestionSet(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geo.questionSet(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/questions')
-  createGeoQuestion(@Req() req: AuthRequest, @Body() body: any) { return this.geo.createGeoQuestion(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/questions')
+  createGeoQuestion(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geo.createGeoQuestion(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Patch('geo/questions/:id')
-  updateGeoQuestion(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.geo.updateGeoQuestion(req.user, id, body); }
+  @UseGuards(AuthGuard)
+  @Patch('geo/questions/:id')
+  updateGeoQuestion(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) {
+    return this.geo.updateGeoQuestion(req.user, id, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/questions/:id/disable')
-  disableGeoQuestion(@Req() req: AuthRequest, @Param('id') id: string) { return this.geo.disableGeoQuestion(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Post('geo/questions/:id/disable')
+  disableGeoQuestion(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.geo.disableGeoQuestion(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Delete('geo/questions/:id')
-  removeGeoQuestion(@Req() req: AuthRequest, @Param('id') id: string) { return this.geo.removeGeoQuestion(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Delete('geo/questions/:id')
+  removeGeoQuestion(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.geo.removeGeoQuestion(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/question-set/save-generated')
-  saveGeneratedGeoQuestions(@Req() req: AuthRequest, @Body() body: any) { return this.geo.saveGeneratedGeoQuestions(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/question-set/save-generated')
+  saveGeneratedGeoQuestions(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geo.saveGeneratedGeoQuestions(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/probe-worklist')
-  geoProbeWorklist(@Req() req: AuthRequest, @Body() body: any) { return this.geo.probeWorklist(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/probe-worklist')
+  geoProbeWorklist(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geo.probeWorklist(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/structured-data')
-  geoStructuredData(@Req() req: AuthRequest, @Body() body: any) { return this.geo.structuredData(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/structured-data')
+  geoStructuredData(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geo.structuredData(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/optimization-content')
-  geoOptimizationContent(@Req() req: AuthRequest, @Body() body: any) { return this.geo.generateOptimizationContent(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('geo/optimization-content')
+  geoOptimizationContent(@Req() req: AuthRequest, @Body() body: any) {
+    return this.geo.generateOptimizationContent(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('geo/optimization-content/stream')
-  async streamGeoOptimizationContent(@Req() req: AuthRequest, @Body() body: any, @Res() reply: any) {
+  @UseGuards(AuthGuard)
+  @Post('geo/optimization-content/stream')
+  async streamGeoOptimizationContent(
+    @Req() req: AuthRequest,
+    @Body() body: any,
+    @Res() reply: any
+  ) {
     reply.raw.writeHead(200, {
       'content-type': 'text/event-stream; charset=utf-8',
       'cache-control': 'no-cache, no-transform',
@@ -272,69 +504,132 @@ export class GrowthController {
   }
 
   // ── E4 营销自动化 ──
-  @UseGuards(AuthGuard) @Post('campaigns')
-  createCampaign(@Req() req: AuthRequest, @Body() body: any) { return this.campaign.createCampaign(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('campaigns')
+  createCampaign(@Req() req: AuthRequest, @Body() body: any) {
+    return this.campaign.createCampaign(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('campaigns/metrics')
-  recordMetric(@Req() req: AuthRequest, @Body() body: any) { return this.campaign.recordMetric(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('campaigns/metrics')
+  recordMetric(@Req() req: AuthRequest, @Body() body: any) {
+    return this.campaign.recordMetric(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Get('campaigns')
-  listCampaigns(@Req() req: AuthRequest) { return this.campaign.listCampaigns(req.user); }
+  @UseGuards(AuthGuard)
+  @Get('campaigns')
+  listCampaigns(@Req() req: AuthRequest) {
+    return this.campaign.listCampaigns(req.user);
+  }
 
-  @UseGuards(AuthGuard) @Get('campaigns/roi-board')
-  roiBoard(@Req() req: AuthRequest) { return this.campaign.roiBoard(req.user); }
+  @UseGuards(AuthGuard)
+  @Get('campaigns/roi-board')
+  roiBoard(@Req() req: AuthRequest) {
+    return this.campaign.roiBoard(req.user);
+  }
 
   // ── E5 营销物料库 ──
   // ── 内容工厂素材库：文案/公众号配图等数字素材，独立于营销物料库 ──
-  @UseGuards(AuthGuard) @Post('content-assets')
-  createContentAsset(@Req() req: AuthRequest, @Body() body: any) { return this.contentAssets.createAsset(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('content-assets')
+  createContentAsset(@Req() req: AuthRequest, @Body() body: any) {
+    return this.contentAssets.createAsset(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Get('content-assets')
-  listContentAssets(@Req() req: AuthRequest, @Query() query: any) { return this.contentAssets.listAssets(req.user, query); }
+  @UseGuards(AuthGuard)
+  @Get('content-assets')
+  listContentAssets(@Req() req: AuthRequest, @Query() query: any) {
+    return this.contentAssets.listAssets(req.user, query);
+  }
 
-  @UseGuards(AuthGuard) @Get('content-assets/:id')
-  getContentAsset(@Req() req: AuthRequest, @Param('id') id: string) { return this.contentAssets.getAsset(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Get('content-assets/:id')
+  getContentAsset(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.contentAssets.getAsset(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Patch('content-assets/:id')
-  updateContentAsset(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.contentAssets.updateAsset(req.user, id, body); }
+  @UseGuards(AuthGuard)
+  @Patch('content-assets/:id')
+  updateContentAsset(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) {
+    return this.contentAssets.updateAsset(req.user, id, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('content-assets/:id/usage')
-  recordContentAssetUsage(@Req() req: AuthRequest, @Param('id') id: string) { return this.contentAssets.recordUsage(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Post('content-assets/:id/usage')
+  recordContentAssetUsage(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.contentAssets.recordUsage(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Post('content-assets/:id/archive')
-  archiveContentAsset(@Req() req: AuthRequest, @Param('id') id: string) { return this.contentAssets.archiveAsset(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Post('content-assets/:id/archive')
+  archiveContentAsset(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.contentAssets.archiveAsset(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Delete('content-assets/:id')
-  removeContentAsset(@Req() req: AuthRequest, @Param('id') id: string) { return this.contentAssets.removeAsset(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Delete('content-assets/:id')
+  removeContentAsset(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.contentAssets.removeAsset(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Post('materials')
-  createMaterial(@Req() req: AuthRequest, @Body() body: any) { return this.materials.createMaterial(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('materials')
+  createMaterial(@Req() req: AuthRequest, @Body() body: any) {
+    return this.materials.createMaterial(req.user, body);
+  }
 
   // 多模态生成：AI 生成营销图（经 Tandem 图像网关，落物料库）
-  @UseGuards(AuthGuard) @Post('materials/generate-image')
-  generateMaterialImage(@Req() req: AuthRequest, @Body() body: any) { return this.materials.generateMaterialImage(req.user, body); }
+  @UseGuards(AuthGuard)
+  @Post('materials/generate-image')
+  generateMaterialImage(@Req() req: AuthRequest, @Body() body: any) {
+    return this.materials.generateMaterialImage(req.user, body);
+  }
 
-  @UseGuards(AuthGuard) @Get('materials')
-  listMaterials(@Req() req: AuthRequest, @Query() query: any) { return this.materials.listMaterials(req.user, query); }
+  @UseGuards(AuthGuard)
+  @Get('materials')
+  listMaterials(@Req() req: AuthRequest, @Query() query: any) {
+    return this.materials.listMaterials(req.user, query);
+  }
 
-  @UseGuards(AuthGuard) @Get('materials/:id')
-  getMaterial(@Req() req: AuthRequest, @Param('id') id: string) { return this.materials.getMaterial(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Get('materials/:id')
+  getMaterial(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.materials.getMaterial(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Patch('materials/:id')
-  updateMaterial(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.materials.updateMaterial(req.user, id, body); }
+  @UseGuards(AuthGuard)
+  @Patch('materials/:id')
+  updateMaterial(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) {
+    return this.materials.updateMaterial(req.user, id, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('materials/:id/approve')
-  approveMaterial(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.materials.approveMaterial(req.user, id, body); }
+  @UseGuards(AuthGuard)
+  @Post('materials/:id/approve')
+  approveMaterial(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) {
+    return this.materials.approveMaterial(req.user, id, body);
+  }
 
-  @UseGuards(AuthGuard) @Post('materials/:id/publish')
-  publishMaterial(@Req() req: AuthRequest, @Param('id') id: string) { return this.materials.publishMaterial(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Post('materials/:id/publish')
+  publishMaterial(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.materials.publishMaterial(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Post('materials/:id/download')
-  recordMaterialDownload(@Req() req: AuthRequest, @Param('id') id: string) { return this.materials.recordDownload(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Post('materials/:id/download')
+  recordMaterialDownload(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.materials.recordDownload(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Post('materials/:id/archive')
-  archiveMaterial(@Req() req: AuthRequest, @Param('id') id: string) { return this.materials.archiveMaterial(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Post('materials/:id/archive')
+  archiveMaterial(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.materials.archiveMaterial(req.user, id);
+  }
 
-  @UseGuards(AuthGuard) @Delete('materials/:id')
-  removeMaterial(@Req() req: AuthRequest, @Param('id') id: string) { return this.materials.removeMaterial(req.user, id); }
+  @UseGuards(AuthGuard)
+  @Delete('materials/:id')
+  removeMaterial(@Req() req: AuthRequest, @Param('id') id: string) {
+    return this.materials.removeMaterial(req.user, id);
+  }
 }

@@ -18,15 +18,15 @@ const analyticsEngine = getRuntimeEngine('analyticsEngine');
 router.post('/quotation', async (req, res) => {
   try {
     const { data, format = 'excel' } = req.body;
-    
+
     console.log('[Exports API] 导出报价单:', format);
-    
+
     const result = exportEngine.exportQuotation(data, format);
-    
+
     res.json({
       success: true,
       message: '报价单导出成功',
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -40,15 +40,15 @@ router.post('/quotation', async (req, res) => {
 router.post('/diagnosis', async (req, res) => {
   try {
     const { data, format = 'pdf' } = req.body;
-    
+
     console.log('[Exports API] 导出诊断报告');
-    
+
     const result = exportEngine.exportDiagnosis(data, format);
-    
+
     res.json({
       success: true,
       message: '诊断报告导出成功',
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -62,15 +62,15 @@ router.post('/diagnosis', async (req, res) => {
 router.post('/contract', async (req, res) => {
   try {
     const { data, format = 'pdf' } = req.body;
-    
+
     console.log('[Exports API] 导出合同文档');
-    
+
     const result = exportEngine.exportContract(data, format);
-    
+
     res.json({
       success: true,
       message: '合同文档导出成功',
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -84,15 +84,15 @@ router.post('/contract', async (req, res) => {
 router.post('/materials', async (req, res) => {
   try {
     const { data, format = 'excel' } = req.body;
-    
+
     console.log('[Exports API] 导出材料清单');
-    
+
     const result = exportEngine.exportMaterialList(data, format);
-    
+
     res.json({
       success: true,
       message: '材料清单导出成功',
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -106,15 +106,15 @@ router.post('/materials', async (req, res) => {
 router.post('/proposal', async (req, res) => {
   try {
     const { data, format = 'pptx' } = req.body;
-    
+
     console.log('[Exports API] 导出销售方案书');
-    
+
     const result = exportEngine.exportSalesProposal(data, format);
-    
+
     res.json({
       success: true,
       message: '销售方案书导出成功',
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -128,14 +128,14 @@ router.post('/proposal', async (req, res) => {
 router.get('/analytics/dashboard', async (req, res) => {
   try {
     const { timeRange = '30d' } = req.query;
-    
+
     console.log('[Analytics API] 获取仪表盘数据:', timeRange);
-    
+
     const result = analyticsEngine.getBusinessDashboard(timeRange);
-    
+
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -149,10 +149,10 @@ router.get('/analytics/dashboard', async (req, res) => {
 router.get('/analytics/customers', async (req, res) => {
   try {
     const result = analyticsEngine.getCustomerAnalytics();
-    
+
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -166,10 +166,10 @@ router.get('/analytics/customers', async (req, res) => {
 router.get('/analytics/design', async (req, res) => {
   try {
     const result = analyticsEngine.getDesignAnalytics();
-    
+
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -183,10 +183,10 @@ router.get('/analytics/design', async (req, res) => {
 router.get('/analytics/sales', async (req, res) => {
   try {
     const result = analyticsEngine.getSalesAnalytics();
-    
+
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -200,10 +200,10 @@ router.get('/analytics/sales', async (req, res) => {
 router.get('/analytics/construction', async (req, res) => {
   try {
     const result = analyticsEngine.getConstructionAnalytics();
-    
+
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -217,10 +217,10 @@ router.get('/analytics/construction', async (req, res) => {
 router.get('/analytics/finance', async (req, res) => {
   try {
     const result = analyticsEngine.getFinancialAnalytics();
-    
+
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -234,10 +234,10 @@ router.get('/analytics/finance', async (req, res) => {
 router.get('/analytics/insights', async (req, res) => {
   try {
     const result = analyticsEngine.getInsightsAndAlerts();
-    
+
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -251,15 +251,15 @@ router.get('/analytics/insights', async (req, res) => {
 router.post('/analytics/report', async (req, res) => {
   try {
     const { data, format = 'excel' } = req.body;
-    
+
     console.log('[Analytics API] 导出分析报表');
-    
+
     const result = exportEngine.exportAnalyticsReport(data, format);
-    
+
     res.json({
       success: true,
       message: '分析报表导出成功',
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -273,12 +273,12 @@ router.post('/analytics/report', async (req, res) => {
 router.post('/analytics/custom', async (req, res) => {
   try {
     const { config } = req.body;
-    
+
     const result = analyticsEngine.generateCustomReport(config);
-    
+
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -292,12 +292,12 @@ router.post('/analytics/custom', async (req, res) => {
 router.post('/analytics/compare', async (req, res) => {
   try {
     const { periodA, periodB } = req.body;
-    
+
     const result = analyticsEngine.comparePeriods(periodA, periodB);
-    
+
     res.json({
       success: true,
-      data: result
+      data: result,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -317,8 +317,8 @@ router.get('/formats', async (req, res) => {
       contract: ['pdf', 'docx', 'full-package'],
       materials: ['excel', 'csv', 'json'],
       proposal: ['pptx', 'html', 'pdf'],
-      analytics: ['excel', 'pdf', 'json', 'html']
-    }
+      analytics: ['excel', 'pdf', 'json', 'html'],
+    },
   });
 });
 

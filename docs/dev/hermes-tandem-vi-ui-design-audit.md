@@ -18,18 +18,18 @@ Hermes Tandem 是一个 Next.js 14 + Tailwind CSS + Radix UI + lucide-react 的�
 
 项目主色是 Rheem Red，定义在 `app/globals.css` 和 `tailwind.config.ts`：
 
-| Token | RGB | Hex | 用途 |
-| --- | --- | --- | --- |
-| `--brand-50` | `252 233 235` | `#FCE9EB` | 浅红背景、选中底色 |
-| `--brand-100` | `250 203 207` | `#FACBCF` | 轻提示边框 |
-| `--brand-200` | `245 150 156` | `#F5969C` | hover 边框 |
-| `--brand-300` | `237 96 104` | `#ED6068` | 深色背景辅助红 |
-| `--brand-400` | `220 61 69` | `#DC3D45` | 强提示 |
-| `--brand-500` | `200 32 44` | `#C8202C` | 主按钮、主状态、导航激活条 |
-| `--brand-600` | `159 24 34` | `#9F1822` | 主按钮 hover |
-| `--brand-700` | `126 19 26` | `#7E131A` | 文字强调 |
-| `--brand-800` | `93 14 19` | `#5D0E13` | 深色区域 |
-| `--brand-900` | `61 9 12` | `#3D090C` | 极深红 |
+| Token         | RGB           | Hex       | 用途                       |
+| ------------- | ------------- | --------- | -------------------------- |
+| `--brand-50`  | `252 233 235` | `#FCE9EB` | 浅红背景、选中底色         |
+| `--brand-100` | `250 203 207` | `#FACBCF` | 轻提示边框                 |
+| `--brand-200` | `245 150 156` | `#F5969C` | hover 边框                 |
+| `--brand-300` | `237 96 104`  | `#ED6068` | 深色背景辅助红             |
+| `--brand-400` | `220 61 69`   | `#DC3D45` | 强提示                     |
+| `--brand-500` | `200 32 44`   | `#C8202C` | 主按钮、主状态、导航激活条 |
+| `--brand-600` | `159 24 34`   | `#9F1822` | 主按钮 hover               |
+| `--brand-700` | `126 19 26`   | `#7E131A` | 文字强调                   |
+| `--brand-800` | `93 14 19`    | `#5D0E13` | 深色区域                   |
+| `--brand-900` | `61 9 12`     | `#3D090C` | 极深红                     |
 
 shadcn 兼容主色为 `--primary: 356 72% 45%`，破坏性操作色 `--destructive` 也被统一到红色体系。
 
@@ -37,39 +37,39 @@ shadcn 兼容主色为 `--primary: 356 72% 45%`，破坏性操作色 `--destruct
 
 Rheem/Teams 风格的关键辅助色：
 
-| Token | Hex | 用途 |
-| --- | --- | --- |
-| `--rheem-charcoal` | `#1F1F1F` | 桌面左侧 AppRail 背景 |
+| Token                | Hex       | 用途                      |
+| -------------------- | --------- | ------------------------- |
+| `--rheem-charcoal`   | `#1F1F1F` | 桌面左侧 AppRail 背景     |
 | `--rheem-charcoal-2` | `#2B2B2B` | AppRail hover/active 背景 |
-| `--rheem-ink-black` | `#0E0E0E` | 大标题、强品牌文字 |
-| `--rheem-steel` | `#5C6470` | 次级文字 |
-| `--rheem-hairline` | `#E5E7EB` | 细分割线 |
+| `--rheem-ink-black`  | `#0E0E0E` | 大标题、强品牌文字        |
+| `--rheem-steel`      | `#5C6470` | 次级文字                  |
+| `--rheem-hairline`   | `#E5E7EB` | 细分割线                  |
 
 界面 surface 采用 Apple System Gray 思路：
 
-| Token | Hex | 用途 |
-| --- | --- | --- |
-| `--surface-1` | `#FFFFFF` | 主内容面 |
-| `--surface-2` | `#FAFAFA` | 页面底色、弱区块 |
-| `--surface-3` | `#F4F4F5` | 输入框、hover、弱按钮 |
-| `--surface-elevated` | `rgba(255,255,255,.72)` | 玻璃面板 |
+| Token                | Hex                     | 用途                  |
+| -------------------- | ----------------------- | --------------------- |
+| `--surface-1`        | `#FFFFFF`               | 主内容面              |
+| `--surface-2`        | `#FAFAFA`               | 页面底色、弱区块      |
+| `--surface-3`        | `#F4F4F5`               | 输入框、hover、弱按钮 |
+| `--surface-elevated` | `rgba(255,255,255,.72)` | 玻璃面板              |
 
 文字 token：
 
-| Token | RGB | 用途 |
-| --- | --- | --- |
-| `--text-primary` | `9 9 11` | 主文字 |
-| `--text-secondary` | `82 82 91` | 副标题、说明 |
-| `--text-tertiary` | `161 161 170` | 弱信息、占位 |
+| Token              | RGB           | 用途         |
+| ------------------ | ------------- | ------------ |
+| `--text-primary`   | `9 9 11`      | 主文字       |
+| `--text-secondary` | `82 82 91`    | 副标题、说明 |
+| `--text-tertiary`  | `161 161 170` | 弱信息、占位 |
 
 语义色：
 
-| Token | RGB | 用途 |
-| --- | --- | --- |
-| `--semantic-success` | `16 185 129` | 成功、已完成 |
-| `--semantic-warning` | `245 158 11` | 警告、SLA 风险 |
-| `--semantic-danger` | `239 68 68` | 错误、否决、逾期 |
-| `--semantic-info` | `59 130 246` | 信息、进行中 |
+| Token                | RGB          | 用途             |
+| -------------------- | ------------ | ---------------- |
+| `--semantic-success` | `16 185 129` | 成功、已完成     |
+| `--semantic-warning` | `245 158 11` | 警告、SLA 风险   |
+| `--semantic-danger`  | `239 68 68`  | 错误、否决、逾期 |
+| `--semantic-info`    | `59 130 246` | 信息、进行中     |
 
 ### 2.3 深色模式
 
@@ -190,11 +190,17 @@ Rheem/Teams 风格的关键辅助色：
 font-family:
   'Noto Sans SC',
   'Inter',
-  -apple-system, BlinkMacSystemFont,
-  'Segoe UI Variable Text', 'Segoe UI',
-  'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei',
-  'Source Han Sans CN', 'Hiragino Sans GB',
-  system-ui, sans-serif;
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI Variable Text',
+  'Segoe UI',
+  'PingFang SC',
+  'Microsoft YaHei UI',
+  'Microsoft YaHei',
+  'Source Han Sans CN',
+  'Hiragino Sans GB',
+  system-ui,
+  sans-serif;
 ```
 
 Display 字体栈：
@@ -226,16 +232,16 @@ monospace;
 
 Tailwind 与全局 CSS 都定义了 8 级 Apple-style type scale：
 
-| Class | Size | Line height | Weight | Letter spacing | 用途 |
-| --- | --- | --- | --- | --- | --- |
-| `text-display` | 56px | 1.05 | 700 | -0.02em | 超大品牌标题 |
-| `text-title-1` | 36px | 1.1 | 700 | -0.015em | 页面大标题/核心数字 |
-| `text-title-2` | 28px | 1.2 | 600 | -0.01em | 一级页面标题 |
-| `text-title-3` | 22px | 1.25 | 600 | -0.005em | 区块标题 |
-| `text-headline` | 18px | 1.3 | 600 | 0 | 小标题 |
-| `text-body` | 15px | 1.5 | 400 | 0 | 正文 |
-| `text-caption` | 13px | 1.4 | 400 | 0 | 控件、列表、说明 |
-| `text-footnote` | 12px | 1.3 | 400 | 0 | 脚注、弱提示 |
+| Class           | Size | Line height | Weight | Letter spacing | 用途                |
+| --------------- | ---- | ----------- | ------ | -------------- | ------------------- |
+| `text-display`  | 56px | 1.05        | 700    | -0.02em        | 超大品牌标题        |
+| `text-title-1`  | 36px | 1.1         | 700    | -0.015em       | 页面大标题/核心数字 |
+| `text-title-2`  | 28px | 1.2         | 600    | -0.01em        | 一级页面标题        |
+| `text-title-3`  | 22px | 1.25        | 600    | -0.005em       | 区块标题            |
+| `text-headline` | 18px | 1.3         | 600    | 0              | 小标题              |
+| `text-body`     | 15px | 1.5         | 400    | 0              | 正文                |
+| `text-caption`  | 13px | 1.4         | 400    | 0              | 控件、列表、说明    |
+| `text-footnote` | 12px | 1.3         | 400    | 0              | 脚注、弱提示        |
 
 全局开启：
 
@@ -254,14 +260,14 @@ Tailwind 与全局 CSS 都定义了 8 级 Apple-style type scale：
 
 典型图标尺寸：
 
-| 场景 | 尺寸 | 示例 |
-| --- | --- | --- |
-| AppRail 主图标 | `18px` | `h-[18px] w-[18px]` |
-| 移动底部 Tab | `22px` | `h-[22px] w-[22px]` |
-| 普通按钮/列表 | `16px` | `h-4 w-4` |
-| 小链接/箭头 | `14px` | `h-3.5 w-3.5` |
-| 状态圆标内图标 | `16px` | `h-4 w-4` |
-| 页面标题图标 | `20-24px` | `h-5 w-5` / `h-6 w-6` |
+| 场景           | 尺寸      | 示例                  |
+| -------------- | --------- | --------------------- |
+| AppRail 主图标 | `18px`    | `h-[18px] w-[18px]`   |
+| 移动底部 Tab   | `22px`    | `h-[22px] w-[22px]`   |
+| 普通按钮/列表  | `16px`    | `h-4 w-4`             |
+| 小链接/箭头    | `14px`    | `h-3.5 w-3.5`         |
+| 状态圆标内图标 | `16px`    | `h-4 w-4`             |
+| 页面标题图标   | `20-24px` | `h-5 w-5` / `h-6 w-6` |
 
 ### 5.2 stroke 与颜色
 

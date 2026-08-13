@@ -77,12 +77,16 @@ for (const [domainId, spec] of Object.entries(domains)) {
   }
   for (const mod of owned) {
     if (owner.has(mod)) {
-      failures.push(`module "${mod}" owned by two domains: ${owner.get(mod)} and ${domainId} (a module belongs to exactly one domain; use crossDomainConsumers instead)`);
+      failures.push(
+        `module "${mod}" owned by two domains: ${owner.get(mod)} and ${domainId} (a module belongs to exactly one domain; use crossDomainConsumers instead)`
+      );
     } else {
       owner.set(mod, domainId);
     }
     if (!boundaryModules.includes(mod) && !planned.has(mod)) {
-      failures.push(`domain ${domainId} owns unknown module "${mod}" (not in apiModuleBoundary and not in plannedModules)`);
+      failures.push(
+        `domain ${domainId} owns unknown module "${mod}" (not in apiModuleBoundary and not in plannedModules)`
+      );
     }
   }
 }
@@ -97,7 +101,9 @@ for (const mod of boundaryModules) {
 // Planned modules that are already enforced should be promoted out of plannedModules.
 for (const mod of planned) {
   if (boundaryModules.includes(mod)) {
-    warnings.push(`"${mod}" is in plannedModules but already in apiModuleBoundary — promote it (remove from plannedModules)`);
+    warnings.push(
+      `"${mod}" is in plannedModules but already in apiModuleBoundary — promote it (remove from plannedModules)`
+    );
   }
 }
 
@@ -118,10 +124,14 @@ if (!anonDomain) {
 } else {
   const [anonId, anon] = anonDomain;
   if (!(anon.rules && anon.rules.anonymousCannotWriteOperationalTables === true)) {
-    failures.push(`${anonId} (anonymous) must declare rules.anonymousCannotWriteOperationalTables=true`);
+    failures.push(
+      `${anonId} (anonymous) must declare rules.anonymousCannotWriteOperationalTables=true`
+    );
   }
   if (!(anon.rules && domains[anon.rules.boundToDomain])) {
-    failures.push(`${anonId} (anonymous) must declare rules.boundToDomain pointing at an existing domain (lead→customer migration target)`);
+    failures.push(
+      `${anonId} (anonymous) must declare rules.boundToDomain pointing at an existing domain (lead→customer migration target)`
+    );
   } else if (domains[anon.rules.boundToDomain].trustBoundary !== 'bound-tenant') {
     failures.push(`${anonId}.rules.boundToDomain must target the bound-tenant domain`);
   }
@@ -129,9 +139,13 @@ if (!anonDomain) {
 if (!boundDomain) {
   failures.push('exactly one domain must declare trustBoundary="bound-tenant" (经营/客户赋能)');
 }
-const aiApprovalDomain = Object.values(domains).find((s) => s.rules && s.rules.aiOutputRequiresApprovalStatus === true);
+const aiApprovalDomain = Object.values(domains).find(
+  (s) => s.rules && s.rules.aiOutputRequiresApprovalStatus === true
+);
 if (!aiApprovalDomain) {
-  failures.push('the growth/推广增长 domain must declare rules.aiOutputRequiresApprovalStatus=true');
+  failures.push(
+    'the growth/推广增长 domain must declare rules.aiOutputRequiresApprovalStatus=true'
+  );
 }
 
 // ── Charter + doc anchoring ───────────────────────────────────────────────
@@ -139,7 +153,8 @@ if (!exists(CHARTER)) {
   failures.push(`missing ${CHARTER}`);
 } else {
   const charter = read(CHARTER);
-  if (!charter.includes('1.2.2')) failures.push('PROJECT-CHARTER.md missing section 1.2.2 (permission domains)');
+  if (!charter.includes('1.2.2'))
+    failures.push('PROJECT-CHARTER.md missing section 1.2.2 (permission domains)');
   for (const d of REQUIRED_DOMAINS) {
     if (!charter.includes(d)) warnings.push(`charter 1.2.2 does not mention ${d}`);
   }

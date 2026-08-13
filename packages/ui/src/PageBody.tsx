@@ -12,10 +12,12 @@ interface PageBodyProps {
  */
 export default function PageBody({ children, maxWidth = 1280 }: PageBodyProps) {
   return (
-    <div style={{
-      padding: 'var(--s8, 28px) var(--s10, 36px)',
-      maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
-    }}>
+    <div
+      style={{
+        padding: 'var(--s8, 28px) var(--s10, 36px)',
+        maxWidth: typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth,
+      }}
+    >
       {children}
     </div>
   );

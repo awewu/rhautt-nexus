@@ -5,17 +5,20 @@ const path = require('path');
 const crypto = require('crypto');
 
 const ROOT = path.join(__dirname, '..', '..');
-const JSON_OUTPUT = path.join(ROOT, 'evidence', 'operations', 'repository-bulk-retention-manifest.json');
-const MD_OUTPUT = path.join(ROOT, 'evidence', 'operations', 'repository-bulk-retention-manifest.md');
+const JSON_OUTPUT = path.join(
+  ROOT,
+  'evidence',
+  'operations',
+  'repository-bulk-retention-manifest.json'
+);
+const MD_OUTPUT = path.join(
+  ROOT,
+  'evidence',
+  'operations',
+  'repository-bulk-retention-manifest.md'
+);
 
-const PRUNE_DIRS = new Set([
-  '.git',
-  'node_modules',
-  'dist',
-  'build',
-  '.next',
-  '.turbo'
-]);
+const PRUNE_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', '.turbo']);
 
 const TEXT_EXTENSIONS = new Set([
   '.bat',
@@ -35,7 +38,7 @@ const TEXT_EXTENSIONS = new Set([
   '.txt',
   '.xml',
   '.yml',
-  '.yaml'
+  '.yaml',
 ]);
 
 const RETENTION_ROOTS = [
@@ -45,7 +48,7 @@ const RETENTION_ROOTS = [
     owner: 'sre-guardian',
     retentionAction: 'externalize',
     externalArtifactUriEnv: 'BACKUP_ARCHIVE_EXTERNAL_URI',
-    restoreEvidence: 'evidence/operations/backup-restore-drill.json'
+    restoreEvidence: 'evidence/operations/backup-restore-drill.json',
   },
   {
     root: '_archive',
@@ -53,7 +56,7 @@ const RETENTION_ROOTS = [
     owner: 'legacy-fusion-migrator',
     retentionAction: 'external-archive',
     externalArtifactUriEnv: 'LEGACY_ARCHIVE_EXTERNAL_URI',
-    restoreEvidence: 'audit/legacy-fusion-report.json'
+    restoreEvidence: 'audit/legacy-fusion-report.json',
   },
   {
     root: 'archive',
@@ -61,7 +64,7 @@ const RETENTION_ROOTS = [
     owner: 'legacy-fusion-migrator',
     retentionAction: 'external-archive',
     externalArtifactUriEnv: 'LEGACY_ARCHIVE_EXTERNAL_URI',
-    restoreEvidence: 'audit/legacy-fusion-report.json'
+    restoreEvidence: 'audit/legacy-fusion-report.json',
   },
   {
     root: 'server/archive',
@@ -69,7 +72,7 @@ const RETENTION_ROOTS = [
     owner: 'legacy-fusion-migrator',
     retentionAction: 'external-archive',
     externalArtifactUriEnv: 'LEGACY_ARCHIVE_EXTERNAL_URI',
-    restoreEvidence: 'audit/legacy-fusion-report.json'
+    restoreEvidence: 'audit/legacy-fusion-report.json',
   },
   {
     root: 'commercial-hvac-design',
@@ -77,8 +80,8 @@ const RETENTION_ROOTS = [
     owner: 'legacy-fusion-migrator',
     retentionAction: 'external-archive',
     externalArtifactUriEnv: 'LEGACY_ARCHIVE_EXTERNAL_URI',
-    restoreEvidence: 'audit/legacy-fusion-report.json'
-  }
+    restoreEvidence: 'audit/legacy-fusion-report.json',
+  },
 ];
 
 function slash(relativePath) {
@@ -135,7 +138,7 @@ function inspectFile(filePath, rootPolicy) {
     owner: rootPolicy.owner,
     bytes: buffer.length,
     lines: lineCount(buffer, filePath),
-    sha256: sha256Buffer(buffer)
+    sha256: sha256Buffer(buffer),
   };
 }
 
@@ -150,7 +153,7 @@ function summarize(entries, policies) {
       files: 0,
       bytes: 0,
       textLines: 0,
-      deletionSafe: false
+      deletionSafe: false,
     };
     byBucket[entry.bucket].files += 1;
     byBucket[entry.bucket].bytes += entry.bytes;
@@ -163,7 +166,7 @@ function summarize(entries, policies) {
       files: 0,
       bytes: 0,
       textLines: 0,
-      exists: true
+      exists: true,
     };
     byRoot[entry.root].files += 1;
     byRoot[entry.root].bytes += entry.bytes;
@@ -178,13 +181,13 @@ function summarize(entries, policies) {
       files: 0,
       bytes: 0,
       textLines: 0,
-      exists: exists(policy.root)
+      exists: exists(policy.root),
     };
   }
 
   return {
     byBucket: Object.values(byBucket).sort((a, b) => b.bytes - a.bytes),
-    byRoot: Object.values(byRoot).sort((a, b) => a.root.localeCompare(b.root))
+    byRoot: Object.values(byRoot).sort((a, b) => a.root.localeCompare(b.root)),
   };
 }
 
@@ -193,7 +196,7 @@ function externalUriStatus(policy) {
   return {
     env: policy.externalArtifactUriEnv,
     present: Boolean(value),
-    sha256: value ? sha256Text(value) : null
+    sha256: value ? sha256Text(value) : null,
   };
 }
 
@@ -207,7 +210,7 @@ function deletionGate(policy) {
     externalArtifactUri: external,
     restoreEvidence: {
       path: policy.restoreEvidence,
-      present: exists(policy.restoreEvidence)
+      present: exists(policy.restoreEvidence),
     },
     requiredBeforeDeletion: [
       'checksum manifest covers every retained file',
@@ -215,12 +218,14 @@ function deletionGate(policy) {
       `${policy.restoreEvidence} remains present and current`,
       'npm run guard:production-trunk-isolation passes',
       'npm run guard:workspace-size passes',
-      'rollback note references this manifest hash'
+      'rollback note references this manifest hash',
     ],
     deletionSafe: false,
     deletionBlockedBecause: external.present
-      ? ['rollback note and post-upload restore proof still required before removing local retained assets']
-      : [`${policy.externalArtifactUriEnv} is not set; local retained assets must not be removed`]
+      ? [
+          'rollback note and post-upload restore proof still required before removing local retained assets',
+        ]
+      : [`${policy.externalArtifactUriEnv} is not set; local retained assets must not be removed`],
   };
 }
 
@@ -245,26 +250,46 @@ function renderMarkdown(report) {
     '## Buckets',
     '',
     '| Bucket | Owner | Files | Bytes | Text Lines | Deletion Safe |',
-    '|---|---|---:|---:|---:|---|'
+    '|---|---|---:|---:|---:|---|',
   ];
 
   for (const bucket of report.summary.byBucket) {
-    lines.push(`| ${bucket.bucket} | ${bucket.owner} | ${bucket.files} | ${bucket.bytes} | ${bucket.textLines} | ${bucket.deletionSafe} |`);
+    lines.push(
+      `| ${bucket.bucket} | ${bucket.owner} | ${bucket.files} | ${bucket.bytes} | ${bucket.textLines} | ${bucket.deletionSafe} |`
+    );
   }
 
-  lines.push('', '## Roots', '', '| Root | Bucket | Owner | Exists | Files | Bytes | Text Lines |', '|---|---|---|---|---:|---:|---:|');
+  lines.push(
+    '',
+    '## Roots',
+    '',
+    '| Root | Bucket | Owner | Exists | Files | Bytes | Text Lines |',
+    '|---|---|---|---|---:|---:|---:|'
+  );
   for (const root of report.summary.byRoot) {
-    lines.push(`| ${root.root} | ${root.bucket} | ${root.owner} | ${root.exists} | ${root.files} | ${root.bytes} | ${root.textLines} |`);
+    lines.push(
+      `| ${root.root} | ${root.bucket} | ${root.owner} | ${root.exists} | ${root.files} | ${root.bytes} | ${root.textLines} |`
+    );
   }
 
-  lines.push('', '## Largest Retained Files', '', '| File | Bucket | Bytes | Lines | SHA-256 |', '|---|---|---:|---:|---|');
+  lines.push(
+    '',
+    '## Largest Retained Files',
+    '',
+    '| File | Bucket | Bytes | Lines | SHA-256 |',
+    '|---|---|---:|---:|---|'
+  );
   for (const file of report.topFiles) {
-    lines.push(`| ${file.file} | ${file.bucket} | ${file.bytes} | ${file.lines ?? ''} | ${file.sha256} |`);
+    lines.push(
+      `| ${file.file} | ${file.bucket} | ${file.bytes} | ${file.lines ?? ''} | ${file.sha256} |`
+    );
   }
 
   lines.push('', '## Deletion Gates', '');
   for (const gate of report.deletionGates) {
-    lines.push(`- ${gate.root}: owner ${gate.owner}, action ${gate.retentionAction}, deletionSafe ${gate.deletionSafe}, external URI env ${gate.externalArtifactUri.env} present ${gate.externalArtifactUri.present}.`);
+    lines.push(
+      `- ${gate.root}: owner ${gate.owner}, action ${gate.retentionAction}, deletionSafe ${gate.deletionSafe}, external URI env ${gate.externalArtifactUri.env} present ${gate.externalArtifactUri.present}.`
+    );
   }
 
   lines.push(
@@ -308,27 +333,31 @@ function main() {
 
   const summary = summarize(entries, RETENTION_ROOTS);
   const deletionGates = RETENTION_ROOTS.map(deletionGate);
-  const canonicalManifest = JSON.stringify(entries.map(entry => ({
-    file: entry.file,
-    root: entry.root,
-    bucket: entry.bucket,
-    owner: entry.owner,
-    bytes: entry.bytes,
-    lines: entry.lines,
-    sha256: entry.sha256
-  })));
+  const canonicalManifest = JSON.stringify(
+    entries.map((entry) => ({
+      file: entry.file,
+      root: entry.root,
+      bucket: entry.bucket,
+      owner: entry.owner,
+      bytes: entry.bytes,
+      lines: entry.lines,
+      sha256: entry.sha256,
+    }))
+  );
 
   const report = {
     platform: 'Rhautt Nexus / 瑞合数智枢纽',
     generatedAt: new Date().toISOString(),
-    status: failures.length ? 'blocked-repository-bulk-retention' : 'pass-manifest-only-not-deletion-safe',
+    status: failures.length
+      ? 'blocked-repository-bulk-retention'
+      : 'pass-manifest-only-not-deletion-safe',
     mode: 'local-retention-manifest',
     externalizationState: 'manifested-local-assets-not-yet-externalized',
     deletionSafe: false,
     totals: {
       files: entries.length,
       bytes: entries.reduce((sum, entry) => sum + entry.bytes, 0),
-      textLines: entries.reduce((sum, entry) => sum + (entry.lines || 0), 0)
+      textLines: entries.reduce((sum, entry) => sum + (entry.lines || 0), 0),
     },
     manifestSha256: sha256Text(canonicalManifest),
     summary,
@@ -339,24 +368,30 @@ function main() {
     policy: [
       'Local retained backup/archive files are not product runtime code.',
       'Local retained backup/archive files are not deletion-safe until external artifact storage, checksum proof, restore/reference proof, rollback note, and production guards are current.',
-      'This guard may pass while deletionSafe remains false; that is intentional governance, not launch completion.'
-    ]
+      'This guard may pass while deletionSafe remains false; that is intentional governance, not launch completion.',
+    ],
   };
 
   fs.mkdirSync(path.dirname(JSON_OUTPUT), { recursive: true });
   fs.writeFileSync(JSON_OUTPUT, `${JSON.stringify(report)}\n`);
   fs.writeFileSync(MD_OUTPUT, renderMarkdown(report));
 
-  console.log(JSON.stringify({
-    status: report.status,
-    outputPath: path.relative(ROOT, JSON_OUTPUT),
-    markdownPath: path.relative(ROOT, MD_OUTPUT),
-    files: report.totals.files,
-    bytes: report.totals.bytes,
-    textLines: report.totals.textLines,
-    deletionSafe: report.deletionSafe,
-    failures
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        status: report.status,
+        outputPath: path.relative(ROOT, JSON_OUTPUT),
+        markdownPath: path.relative(ROOT, MD_OUTPUT),
+        files: report.totals.files,
+        bytes: report.totals.bytes,
+        textLines: report.totals.textLines,
+        deletionSafe: report.deletionSafe,
+        failures,
+      },
+      null,
+      2
+    )
+  );
 
   if (failures.length) process.exit(1);
 }

@@ -8,7 +8,7 @@ function createSystemPacksRoutes(options = {}) {
   router.get('/', (req, res) => {
     res.json({
       success: true,
-      data: service.list(req.query)
+      data: service.list(req.query),
     });
   });
 
@@ -21,14 +21,14 @@ function createSystemPacksRoutes(options = {}) {
   router.post('/compose', (req, res) => {
     res.json({
       success: true,
-      data: service.compose(req.body || {})
+      data: service.compose(req.body || {}),
     });
   });
 
   router.post('/recommend', (req, res) => {
     res.json({
       success: true,
-      data: service.recommend(req.body || {})
+      data: service.recommend(req.body || {}),
     });
   });
 

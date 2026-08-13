@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import type { JwtPayload } from '../auth/auth.service';
 import { Permissions } from '../common/permissions.decorator';
 import { Public } from '../common/public.decorator';
@@ -16,20 +27,32 @@ export class SiteDealerController {
 
   @Get()
   @Permissions('brand.library.read')
-  list(@Req() req: AuthRequest, @Param('siteCode') siteCode: string, @Query() query: Record<string, unknown>) {
+  list(
+    @Req() req: AuthRequest,
+    @Param('siteCode') siteCode: string,
+    @Query() query: Record<string, unknown>
+  ) {
     return this.service.list(req.user, siteCode, query);
   }
 
   @Get(':dealerId')
   @Permissions('brand.library.read')
-  get(@Req() req: AuthRequest, @Param('siteCode') siteCode: string, @Param('dealerId') dealerId: string) {
+  get(
+    @Req() req: AuthRequest,
+    @Param('siteCode') siteCode: string,
+    @Param('dealerId') dealerId: string
+  ) {
     return this.service.get(req.user, siteCode, dealerId);
   }
 
   @Post()
   @Roles('platform_admin', 'hq_admin', 'brand_admin')
   @Permissions('brand.library.create')
-  create(@Req() req: AuthRequest, @Param('siteCode') siteCode: string, @Body() body: SiteDealerInput) {
+  create(
+    @Req() req: AuthRequest,
+    @Param('siteCode') siteCode: string,
+    @Body() body: SiteDealerInput
+  ) {
     return this.service.create(req.user, siteCode, body);
   }
 
@@ -40,7 +63,7 @@ export class SiteDealerController {
     @Req() req: AuthRequest,
     @Param('siteCode') siteCode: string,
     @Param('dealerId') dealerId: string,
-    @Body() body: SiteDealerInput,
+    @Body() body: SiteDealerInput
   ) {
     return this.service.update(req.user, siteCode, dealerId, body);
   }
@@ -48,14 +71,22 @@ export class SiteDealerController {
   @Delete(':dealerId')
   @Roles('platform_admin', 'hq_admin', 'brand_admin')
   @Permissions('brand.library.delete')
-  archive(@Req() req: AuthRequest, @Param('siteCode') siteCode: string, @Param('dealerId') dealerId: string) {
+  archive(
+    @Req() req: AuthRequest,
+    @Param('siteCode') siteCode: string,
+    @Param('dealerId') dealerId: string
+  ) {
     return this.service.archive(req.user, siteCode, dealerId);
   }
 
   @Post(':dealerId/archive')
   @Roles('platform_admin', 'hq_admin', 'brand_admin')
   @Permissions('brand.library.delete')
-  archiveByPost(@Req() req: AuthRequest, @Param('siteCode') siteCode: string, @Param('dealerId') dealerId: string) {
+  archiveByPost(
+    @Req() req: AuthRequest,
+    @Param('siteCode') siteCode: string,
+    @Param('dealerId') dealerId: string
+  ) {
     return this.service.archive(req.user, siteCode, dealerId);
   }
 }

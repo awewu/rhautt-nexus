@@ -30,7 +30,7 @@ test('令牌不匹配 → 401', () => {
 test('令牌匹配 → 放行并带回固定租户', () => {
   const r = checkPerceptionAccess(
     { GTM_PERCEPTION_TOKEN: 'secret', GTM_PERCEPTION_TENANT_ID: 't1' },
-    'Bearer secret',
+    'Bearer secret'
   );
   assert.deepEqual(r, { ok: true, tenantId: 't1' });
 });
@@ -45,21 +45,30 @@ test('合成 actor: 固定服务身份 + 只读角色 + 指定租户', () => {
 
 // ── 摘要聚合 ────────────────────────────────────────────────────────────
 
-function fakeMetrics(rollup: Array<Record<string, unknown>>, channels: Array<Record<string, unknown>>) {
+function fakeMetrics(
+  rollup: Array<Record<string, unknown>>,
+  channels: Array<Record<string, unknown>>
+) {
   return {
     getDailyRollup: async () => ({ rollup }),
-    getChannelAttribution: async (_a: unknown, period: string, model: string) => ({ period, model, channels }),
+    getChannelAttribution: async (_a: unknown, period: string, model: string) => ({
+      period,
+      model,
+      channels,
+    }),
   } as unknown as MetricsService;
 }
 
 test('漏斗跨行累加 + lead→revenue 转化率', async () => {
-  const svc = new GtmDigestService(fakeMetrics(
-    [
-      { reach: 100, lead: 10, visit: 5, proposal: 3, revenue: 2, referral: 1 },
-      { reach: 50, lead: 10, visit: 2, proposal: 1, revenue: 2, referral: 0 },
-    ],
-    [{ channel: 'geo', creditedConversions: 3, share: 1, touches: 9 }],
-  ));
+  const svc = new GtmDigestService(
+    fakeMetrics(
+      [
+        { reach: 100, lead: 10, visit: 5, proposal: 3, revenue: 2, referral: 1 },
+        { reach: 50, lead: 10, visit: 2, proposal: 1, revenue: 2, referral: 0 },
+      ],
+      [{ channel: 'geo', creditedConversions: 3, share: 1, touches: 9 }]
+    )
+  );
   const d = await svc.buildDigest(perceptionActor('t1'), { days: 30, period: '2026-08' });
   assert.equal(d.funnel.reach, 150);
   assert.equal(d.funnel.lead, 20);

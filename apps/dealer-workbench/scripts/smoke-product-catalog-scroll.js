@@ -117,7 +117,9 @@ async function main() {
     throw new Error(`Product Catalog All brands did not request: ${missingBrands.join(', ')}`);
   }
   if (deviceRequests.some((request) => !request.tenantId)) {
-    throw new Error(`Product Catalog brand requests must include tenantId: ${JSON.stringify(deviceRequests)}`);
+    throw new Error(
+      `Product Catalog brand requests must include tenantId: ${JSON.stringify(deviceRequests)}`
+    );
   }
   if (metrics.hasHorizontalOverflow) {
     throw new Error(`Product Catalog page overflowed horizontally: ${JSON.stringify(metrics)}`);

@@ -16,7 +16,7 @@ const MIME_EXTENSIONS = new Map([
 function createMediaOrigin(options) {
   const publicDir = path.resolve(options.publicDir);
   const mediaRoot = path.resolve(
-    process.env.EVERHOT_MEDIA_ROOT || path.join(publicDir, 'assets', 'runtime-media'),
+    process.env.EVERHOT_MEDIA_ROOT || path.join(publicDir, 'assets', 'runtime-media')
   );
   const siteMaterialsRoot = path.join(mediaRoot, 'site-materials');
   const artifactRoot = path.join(mediaRoot, 'artifacts');
@@ -34,7 +34,7 @@ function createMediaOrigin(options) {
         : 'public, max-age=31536000, immutable',
       'X-Content-Type-Options': 'nosniff',
     };
-    if (req.method === 'HEAD') return send(res, 200, null, headers), true;
+    if (req.method === 'HEAD') return (send(res, 200, null, headers), true);
     send(res, 200, fs.readFileSync(filePath), headers);
     return true;
   }
@@ -52,7 +52,8 @@ function createMediaOrigin(options) {
       .then((body) => {
         if (body.kind === 'site-material-bundle') {
           const files = Array.isArray(body.files) ? body.files : [];
-          for (const file of files) writeImage(siteMaterialsRoot, file.path, file.mimeType, file.dataBase64);
+          for (const file of files)
+            writeImage(siteMaterialsRoot, file.path, file.mimeType, file.dataBase64);
           if (!body.manifest || typeof body.manifest !== 'object' || Array.isArray(body.manifest)) {
             throw new Error('manifest is required');
           }
@@ -73,10 +74,12 @@ function createMediaOrigin(options) {
 
         throw new Error('unsupported media sync kind');
       })
-      .catch((error) => sendJson(res, send, error.code === 'BODY_TOO_LARGE' ? 413 : 400, {
-        success: false,
-        error: error.message || 'media sync failed',
-      }));
+      .catch((error) =>
+        sendJson(res, send, error.code === 'BODY_TOO_LARGE' ? 413 : 400, {
+          success: false,
+          error: error.message || 'media sync failed',
+        })
+      );
     return true;
   }
 
@@ -93,7 +96,10 @@ function requestPath(rawUrl) {
 
 function resolvePublicPath(urlPath, siteMaterialsRoot, artifactRoot) {
   if (urlPath.startsWith('/assets/img/site-materials/')) {
-    return { root: siteMaterialsRoot, relative: urlPath.slice('/assets/img/site-materials/'.length) };
+    return {
+      root: siteMaterialsRoot,
+      relative: urlPath.slice('/assets/img/site-materials/'.length),
+    };
   }
   if (urlPath.startsWith('/media/')) {
     return { root: artifactRoot, relative: urlPath.slice('/media/'.length) };
@@ -102,9 +108,14 @@ function resolvePublicPath(urlPath, siteMaterialsRoot, artifactRoot) {
 }
 
 function normalizeRelativePath(value) {
-  const decoded = String(value || '').replace(/\\/g, '/').replace(/^\/+/, '');
+  const decoded = String(value || '')
+    .replace(/\\/g, '/')
+    .replace(/^\/+/, '');
   const parts = decoded.split('/').filter(Boolean);
-  if (!parts.length || parts.some((part) => part === '.' || part === '..' || !/^[a-zA-Z0-9._-]+$/.test(part))) {
+  if (
+    !parts.length ||
+    parts.some((part) => part === '.' || part === '..' || !/^[a-zA-Z0-9._-]+$/.test(part))
+  ) {
     throw new Error('invalid media path');
   }
   return parts.join('/');
@@ -128,7 +139,9 @@ function writeImage(root, relativeInput, mimeTypeInput, dataBase64Input) {
   if (!allowedExtensions || !allowedExtensions.has(path.extname(relative).toLowerCase())) {
     throw new Error('unsupported image type or extension');
   }
-  const raw = String(dataBase64Input || '').replace(/^data:[^;]+;base64,/, '').replace(/\s/g, '');
+  const raw = String(dataBase64Input || '')
+    .replace(/^data:[^;]+;base64,/, '')
+    .replace(/\s/g, '');
   const buffer = Buffer.from(raw, 'base64');
   if (!buffer.length) throw new Error('empty image data');
   const destination = safeResolve(root, relative);

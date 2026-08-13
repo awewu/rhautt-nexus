@@ -44,7 +44,13 @@ Use this as the component and token baseline for Rheem product UI work. It combi
 Use Chinese-friendly system sans-serif:
 
 ```css
-font-family: "Microsoft YaHei", "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+font-family:
+  'Microsoft YaHei',
+  'PingFang SC',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  sans-serif;
 ```
 
 Rules:

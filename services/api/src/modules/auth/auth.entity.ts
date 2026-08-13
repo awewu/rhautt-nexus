@@ -1,12 +1,24 @@
 import {
-  Column, CreateDateColumn, Entity, Index,
-  PrimaryGeneratedColumn, UpdateDateColumn
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 export type UserRole =
-  | 'platform_admin' | 'hq_admin' | 'brand_admin' | 'regional_manager'
-  | 'dealer_admin' | 'store_manager' | 'designer'
-  | 'sales' | 'engineer' | 'installer' | 'customer';
+  | 'platform_admin'
+  | 'hq_admin'
+  | 'brand_admin'
+  | 'regional_manager'
+  | 'dealer_admin'
+  | 'store_manager'
+  | 'designer'
+  | 'sales'
+  | 'engineer'
+  | 'installer'
+  | 'customer';
 
 @Entity('users')
 @Index(['tenantId', 'phoneHash'], { unique: true })

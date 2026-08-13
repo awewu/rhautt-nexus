@@ -35,7 +35,7 @@ function errorResponse(res, err, status = 500, fallbackMessage) {
  */
 function asyncRoute(fn) {
   return (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(e => errorResponse(res, e));
+    Promise.resolve(fn(req, res, next)).catch((e) => errorResponse(res, e));
   };
 }
 

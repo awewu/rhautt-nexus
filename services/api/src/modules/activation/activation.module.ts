@@ -8,13 +8,20 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 
 @Module({
   imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([ActivationActivityEntity, ActivationParticipationEntity])]),
+    ...(TARGET_API_BOOT_SMOKE
+      ? []
+      : [TypeOrmModule.forFeature([ActivationActivityEntity, ActivationParticipationEntity])]),
     AuthModule,
   ],
   controllers: [ActivationController],
   providers: [
     ActivationService,
-    ...(TARGET_API_BOOT_SMOKE ? [bootSmokeRepositoryProvider(ActivationActivityEntity), bootSmokeRepositoryProvider(ActivationParticipationEntity)] : []),
+    ...(TARGET_API_BOOT_SMOKE
+      ? [
+          bootSmokeRepositoryProvider(ActivationActivityEntity),
+          bootSmokeRepositoryProvider(ActivationParticipationEntity),
+        ]
+      : []),
   ],
   exports: [ActivationService],
 })
@@ -28,11 +35,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class ActivationBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('activation');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('activation')
 export class ActivationBoundaryController {
   constructor(private readonly s: ActivationBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

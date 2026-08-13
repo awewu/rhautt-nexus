@@ -30,6 +30,7 @@ export async function GET(req: NextRequest, context: RouteContext) {
     headers.append('set-cookie', cookie);
   }
 
-  const body = upstream.status >= 300 && upstream.status < 400 ? null : await upstream.arrayBuffer();
+  const body =
+    upstream.status >= 300 && upstream.status < 400 ? null : await upstream.arrayBuffer();
   return new NextResponse(body, { status: upstream.status, headers });
 }

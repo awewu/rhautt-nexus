@@ -11,16 +11,31 @@ function createProjectsCandidateRoutes(options = {}) {
   router.use(requireTenantScope);
 
   router.get('/stats', async (req, res, next) => {
-    try { res.json({ success: true, data: await svc.stats(req.scope) }); } catch (e) { next(e); }
+    try {
+      res.json({ success: true, data: await svc.stats(req.scope) });
+    } catch (e) {
+      next(e);
+    }
   });
   router.post('/batch', (req, res) => {
-    res.json({ success: true, data: { operation: req.body?.operation, projectIds: req.body?.projectIds || [], status: 'accepted' } });
+    res.json({
+      success: true,
+      data: {
+        operation: req.body?.operation,
+        projectIds: req.body?.projectIds || [],
+        status: 'accepted',
+      },
+    });
   });
   router.get('/shared/:shareToken', (req, res) => {
     res.json({ success: true, data: { shareToken: req.params.shareToken } });
   });
   router.get('/', async (req, res, next) => {
-    try { res.json({ success: true, data: await svc.list(req.scope, req.query) }); } catch (e) { next(e); }
+    try {
+      res.json({ success: true, data: await svc.list(req.scope, req.query) });
+    } catch (e) {
+      next(e);
+    }
   });
   router.post('/', async (req, res, next) => {
     try {
@@ -33,7 +48,7 @@ function createProjectsCandidateRoutes(options = {}) {
       if (e.name === 'ValidationError' || (e.message && e.message.includes('validation failed'))) {
         return res.status(201).json({
           success: true,
-          data: { id: `PRJ-${Date.now()}`, tenantId: req.scope.tenantId, ...req.body }
+          data: { id: `PRJ-${Date.now()}`, tenantId: req.scope.tenantId, ...req.body },
         });
       }
       next(e);
@@ -43,29 +58,58 @@ function createProjectsCandidateRoutes(options = {}) {
     res.json({ success: true, data: [{ versionId: 'v1', projectId: req.params.projectId }] });
   });
   router.post('/:projectId/versions/:versionId/restore', (req, res) => {
-    res.json({ success: true, data: { projectId: req.params.projectId, versionId: req.params.versionId, restored: true } });
+    res.json({
+      success: true,
+      data: { projectId: req.params.projectId, versionId: req.params.versionId, restored: true },
+    });
   });
   router.post('/:projectId/copy', (req, res) => {
-    res.status(201).json({ success: true, data: { sourceProjectId: req.params.projectId, id: `PRJ-COPY-${Date.now()}` } });
+    res.status(201).json({
+      success: true,
+      data: { sourceProjectId: req.params.projectId, id: `PRJ-COPY-${Date.now()}` },
+    });
   });
   router.post('/:projectId/share', (req, res) => {
-    res.json({ success: true, data: { projectId: req.params.projectId, shareToken: `share-${Date.now()}` } });
+    res.json({
+      success: true,
+      data: { projectId: req.params.projectId, shareToken: `share-${Date.now()}` },
+    });
   });
   router.post('/:projectId/export', (req, res) => {
-    res.json({ success: true, data: { projectId: req.params.projectId, format: req.body?.format || 'pdf', status: 'queued' } });
+    res.json({
+      success: true,
+      data: {
+        projectId: req.params.projectId,
+        format: req.body?.format || 'pdf',
+        status: 'queued',
+      },
+    });
   });
   router.get('/:projectId', async (req, res, next) => {
     try {
       const p = await svc.get(req.scope, req.params.projectId);
       if (!p) return res.status(404).json({ success: false, error: 'not found' });
       res.json({ success: true, data: p });
-    } catch (e) { next(e); }
+    } catch (e) {
+      next(e);
+    }
   });
   router.put('/:projectId', async (req, res, next) => {
-    try { res.json({ success: true, data: await svc.update(req.scope, req.params.projectId, req.body || {}) }); } catch (e) { next(e); }
+    try {
+      res.json({
+        success: true,
+        data: await svc.update(req.scope, req.params.projectId, req.body || {}),
+      });
+    } catch (e) {
+      next(e);
+    }
   });
   router.delete('/:projectId', async (req, res, next) => {
-    try { res.json({ success: true, data: await svc.delete(req.scope, req.params.projectId) }); } catch (e) { next(e); }
+    try {
+      res.json({ success: true, data: await svc.delete(req.scope, req.params.projectId) });
+    } catch (e) {
+      next(e);
+    }
   });
 
   return router;

@@ -37,10 +37,12 @@ export class BrandBrainService {
     if (this.cache) return this.cache as Record<string, any>;
     try {
       this.cache = JSON.parse(
-        fs.readFileSync(path.join(process.cwd(), 'governance/growth-brand-brain.json'), 'utf8'),
+        fs.readFileSync(path.join(process.cwd(), 'governance/growth-brand-brain.json'), 'utf8')
       );
     } catch (err: unknown) {
-      this.logger.warn(`growth-brand-brain.json unavailable, degrading to global defaults: ${String(err)}`);
+      this.logger.warn(
+        `growth-brand-brain.json unavailable, degrading to global defaults: ${String(err)}`
+      );
       this.cache = { globalTone: '专业、克制、合规。', globalBannedClaims: [], brands: {} };
     }
     return this.cache as Record<string, any>;
@@ -81,7 +83,10 @@ export class BrandBrainService {
     if (ctx) {
       lines.push(`品牌：${ctx.name}。定位：${ctx.positioning}`);
       if (ctx.audiences.length) lines.push(`目标受众：${ctx.audiences.join('、')}`);
-      if (ctx.facts.length) lines.push(`只可基于以下可核实事实展开，禁止编造未列出的参数、荣誉、数据：\n- ${ctx.facts.join('\n- ')}`);
+      if (ctx.facts.length)
+        lines.push(
+          `只可基于以下可核实事实展开，禁止编造未列出的参数、荣誉、数据：\n- ${ctx.facts.join('\n- ')}`
+        );
       if (ctx.tone) lines.push(`品牌语气：${ctx.tone}`);
       if (ctx.bannedClaims.length) lines.push(`禁用词/主张：${ctx.bannedClaims.join('、')}`);
     } else {

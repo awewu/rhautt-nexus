@@ -1,4 +1,5 @@
-export type PromptEvidenceState = 'unverified' | 'promising' | 'proven' | 'negative' | 'inconclusive';
+export type PromptEvidenceState =
+  'unverified' | 'promising' | 'proven' | 'negative' | 'inconclusive';
 
 export type PromptEvidence = {
   verifiedCount: number;
@@ -18,7 +19,9 @@ export function promptEvidenceState(evidence: PromptEvidence): PromptEvidenceSta
   return 'promising';
 }
 
-export function comparePromptEvidence<T extends PromptEvidence & { usageCount?: number; updatedAt?: Date | string }>(a: T, b: T): number {
+export function comparePromptEvidence<
+  T extends PromptEvidence & { usageCount?: number; updatedAt?: Date | string },
+>(a: T, b: T): number {
   const stateRank: Record<PromptEvidenceState, number> = {
     proven: 4,
     promising: 3,
@@ -38,8 +41,13 @@ export function comparePromptEvidence<T extends PromptEvidence & { usageCount?: 
 }
 
 export function aggregatePromptLift(
-  current: { verifiedCount: number; positiveCount: number; negativeCount: number; totalLift: number },
-  lifts: number[],
+  current: {
+    verifiedCount: number;
+    positiveCount: number;
+    negativeCount: number;
+    totalLift: number;
+  },
+  lifts: number[]
 ) {
   const totalLift = current.totalLift + lifts.reduce((sum, lift) => sum + lift, 0);
   const verifiedCount = current.verifiedCount + lifts.length;
@@ -51,4 +59,3 @@ export function aggregatePromptLift(
     averageLift: verifiedCount ? Math.round((totalLift / verifiedCount) * 100) / 100 : 0,
   };
 }
-

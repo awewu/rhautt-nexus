@@ -6,7 +6,7 @@ const HealthService = require('../../server/modules/health/health.service');
 const ObservabilityService = require('../../server/modules/observability/observability.service');
 const {
   createRequestContext,
-  getRequestMetrics
+  getRequestMetrics,
 } = require('../../server/middleware/requestContext');
 const { createProductionApp } = require('../../server/modules/productionAppFactory');
 const dbLayer = require('../../server/db');
@@ -15,7 +15,7 @@ const { assertSeedAllowed } = require('../../scripts/seed-production-demo');
 jest.mock('../../server/db', () => ({
   getMode: jest.fn(),
   isConnected: jest.fn(),
-  isProductionDatabaseRequired: jest.fn()
+  isProductionDatabaseRequired: jest.fn(),
 }));
 
 function makeApp() {
@@ -26,14 +26,21 @@ function makeApp() {
 
 function makeObservedApp() {
   const app = express();
-  app.use(createRequestContext({ serviceName: 'rhautt-nexus-test', slowMs: 100, criticalMs: 1000 }));
-  app.get('/observed-ok', (req, res) => res.json({ success: true, requestId: req.requestId, traceId: req.traceId }));
-  app.use('/api/v2/health', createHealthRoutes({
-    service: new HealthService({
-      dbLayer,
-      observability: new ObservabilityService({ service: 'rhautt-nexus-test' })
+  app.use(
+    createRequestContext({ serviceName: 'rhautt-nexus-test', slowMs: 100, criticalMs: 1000 })
+  );
+  app.get('/observed-ok', (req, res) =>
+    res.json({ success: true, requestId: req.requestId, traceId: req.traceId })
+  );
+  app.use(
+    '/api/v2/health',
+    createHealthRoutes({
+      service: new HealthService({
+        dbLayer,
+        observability: new ObservabilityService({ service: 'rhautt-nexus-test' }),
+      }),
     })
-  }));
+  );
   return app;
 }
 
@@ -55,9 +62,7 @@ describe('production health and seed guardrails', () => {
     dbLayer.getMode.mockReturnValue('mongo');
     dbLayer.isConnected.mockReturnValue(true);
 
-    const res = await request(makeApp())
-      .get('/api/v2/health/db')
-      .expect(200);
+    const res = await request(makeApp()).get('/api/v2/health/db').expect(200);
 
     expect(res.body.data.productionReady).toBe(true);
     expect(res.body.data.productionDatabaseRequired).toBe(true);
@@ -68,16 +73,16 @@ describe('production health and seed guardrails', () => {
     dbLayer.getMode.mockReturnValue('memory');
     dbLayer.isConnected.mockReturnValue(false);
 
-    const res = await request(makeApp())
-      .get('/api/v2/health/live')
-      .expect(200);
+    const res = await request(makeApp()).get('/api/v2/health/live').expect(200);
 
     expect(res.body).toEqual(expect.objectContaining({ success: true }));
-    expect(res.body.data).toEqual(expect.objectContaining({
-      service: 'rhautt-nexus',
-      status: 'live',
-      uptimeSeconds: expect.any(Number)
-    }));
+    expect(res.body.data).toEqual(
+      expect.objectContaining({
+        service: 'rhautt-nexus',
+        status: 'live',
+        uptimeSeconds: expect.any(Number),
+      })
+    );
   });
 
   test('v2 readiness separates required database state from optional dependencies', async () => {
@@ -85,20 +90,20 @@ describe('production health and seed guardrails', () => {
     dbLayer.getMode.mockReturnValue('mongo');
     dbLayer.isConnected.mockReturnValue(true);
 
-    const res = await request(makeApp())
-      .get('/api/v2/health/ready')
-      .expect(200);
+    const res = await request(makeApp()).get('/api/v2/health/ready').expect(200);
 
-    expect(res.body.data).toEqual(expect.objectContaining({
-      service: 'rhautt-nexus',
-      status: 'ready',
-      required: { database: true },
-      optionalDependencies: expect.objectContaining({
-        redis: expect.any(String),
-        objectStorage: expect.any(String),
-        temporal: expect.any(String)
+    expect(res.body.data).toEqual(
+      expect.objectContaining({
+        service: 'rhautt-nexus',
+        status: 'ready',
+        required: { database: true },
+        optionalDependencies: expect.objectContaining({
+          redis: expect.any(String),
+          objectStorage: expect.any(String),
+          temporal: expect.any(String),
+        }),
       })
-    }));
+    );
   });
 
   test('v2 readiness fails when production database is not ready', async () => {
@@ -106,9 +111,7 @@ describe('production health and seed guardrails', () => {
     dbLayer.getMode.mockReturnValue('memory');
     dbLayer.isConnected.mockReturnValue(false);
 
-    const res = await request(makeApp())
-      .get('/api/v2/health/ready')
-      .expect(503);
+    const res = await request(makeApp()).get('/api/v2/health/ready').expect(503);
 
     expect(res.body.success).toBe(false);
     expect(res.body.data.status).toBe('not_ready');
@@ -128,47 +131,51 @@ describe('production health and seed guardrails', () => {
 
     expect(observed.headers['x-request-id']).toBe('req-observe-1');
     expect(observed.headers['x-trace-id']).toBe('trace-observe-1');
-    expect(observed.body).toEqual(expect.objectContaining({
-      requestId: 'req-observe-1',
-      traceId: 'trace-observe-1'
-    }));
+    expect(observed.body).toEqual(
+      expect.objectContaining({
+        requestId: 'req-observe-1',
+        traceId: 'trace-observe-1',
+      })
+    );
 
     const metrics = getRequestMetrics({ limit: 20, recentLimit: 5 });
     expect(metrics.requests.total).toBeGreaterThanOrEqual(1);
-    expect(metrics.recent).toEqual(expect.arrayContaining([
+    expect(metrics.recent).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          service: 'rhautt-nexus-test',
+          requestId: 'req-observe-1',
+          traceId: 'trace-observe-1',
+          durationMs: expect.any(Number),
+        }),
+      ])
+    );
+
+    const snapshot = await request(app).get('/api/v2/health/observability').expect(200);
+
+    expect(snapshot.body.data).toEqual(
       expect.objectContaining({
         service: 'rhautt-nexus-test',
-        requestId: 'req-observe-1',
-        traceId: 'trace-observe-1',
-        durationMs: expect.any(Number)
-      })
-    ]));
-
-    const snapshot = await request(app)
-      .get('/api/v2/health/observability')
-      .expect(200);
-
-    expect(snapshot.body.data).toEqual(expect.objectContaining({
-      service: 'rhautt-nexus-test',
-      boundary: 'observability-baseline',
-      signals: expect.objectContaining({
-        logs: 'structured-http-events',
-        traces: 'request-id-and-trace-id',
-        metrics: 'in-process-http-window'
-      }),
-      slo: expect.objectContaining({
-        status: expect.stringMatching(/within_slo|slo_risk/),
-        availability: expect.any(Number)
-      }),
-      metrics: expect.objectContaining({
-        requests: expect.objectContaining({
-          total: expect.any(Number)
+        boundary: 'observability-baseline',
+        signals: expect.objectContaining({
+          logs: 'structured-http-events',
+          traces: 'request-id-and-trace-id',
+          metrics: 'in-process-http-window',
         }),
-        latencyMs: expect.objectContaining({
-          p95: expect.any(Number)
-        })
+        slo: expect.objectContaining({
+          status: expect.stringMatching(/within_slo|slo_risk/),
+          availability: expect.any(Number),
+        }),
+        metrics: expect.objectContaining({
+          requests: expect.objectContaining({
+            total: expect.any(Number),
+          }),
+          latencyMs: expect.objectContaining({
+            p95: expect.any(Number),
+          }),
+        }),
       })
-    }));
+    );
   });
 
   test('db readiness rejects production memory fallback', async () => {
@@ -176,9 +183,7 @@ describe('production health and seed guardrails', () => {
     dbLayer.getMode.mockReturnValue('memory');
     dbLayer.isConnected.mockReturnValue(false);
 
-    const res = await request(makeApp())
-      .get('/api/v2/health/db')
-      .expect(503);
+    const res = await request(makeApp()).get('/api/v2/health/db').expect(503);
 
     expect(res.body.success).toBe(false);
     expect(res.body.data.productionReady).toBe(false);
@@ -190,9 +195,7 @@ describe('production health and seed guardrails', () => {
     dbLayer.getMode.mockReturnValue('memory');
     dbLayer.isConnected.mockReturnValue(false);
 
-    const res = await request(makeApp())
-      .get('/api/v2/health/db')
-      .expect(503);
+    const res = await request(makeApp()).get('/api/v2/health/db').expect(503);
 
     expect(res.body.success).toBe(false);
     expect(res.body.data.productionDatabaseRequired).toBe(true);
@@ -209,38 +212,43 @@ describe('production health and seed guardrails', () => {
         NODE_ENV: 'test',
         CORS_ORIGINS: '*',
         GLOBAL_RATE_LIMIT_MAX: '10000',
-        AUTH_RATE_LIMIT_MAX: '10000'
+        AUTH_RATE_LIMIT_MAX: '10000',
       },
-      logger: { log: jest.fn(), error: jest.fn() }
+      logger: { log: jest.fn(), error: jest.fn() },
     });
 
-    const legacyHealth = await request(runtime.app)
-      .get('/api/health')
-      .expect(200);
+    const legacyHealth = await request(runtime.app).get('/api/health').expect(200);
 
-    expect(legacyHealth.body).toEqual(expect.objectContaining({
-      success: true,
-      status: 'healthy',
-      version: '1.0.0'
-    }));
-    expect(legacyHealth.body.engines).toEqual(expect.objectContaining({
-      monitoring: expect.any(String),
-      templateLibraryEngine: expect.any(String)
-    }));
-
+    expect(legacyHealth.body).toEqual(
+      expect.objectContaining({
+        success: true,
+        status: 'healthy',
+        version: '1.0.0',
+      })
+    );
+    expect(legacyHealth.body.engines).toEqual(
+      expect.objectContaining({
+        monitoring: expect.any(String),
+        templateLibraryEngine: expect.any(String),
+      })
+    );
   });
 
   test('production demo seed refuses to run without explicit demo mode', () => {
-    expect(() => assertSeedAllowed({
-      NODE_ENV: 'production',
-      MONGODB_URI: 'mongodb://localhost:27017/rhautt',
-      DEMO_MODE: 'false'
-    })).toThrow('Refusing to seed demo users in production');
+    expect(() =>
+      assertSeedAllowed({
+        NODE_ENV: 'production',
+        MONGODB_URI: 'mongodb://localhost:27017/rhautt',
+        DEMO_MODE: 'false',
+      })
+    ).toThrow('Refusing to seed demo users in production');
   });
 
   test('production demo seed requires MongoDB URI', () => {
-    expect(() => assertSeedAllowed({
-      NODE_ENV: 'development'
-    })).toThrow('MONGODB_URI is required');
+    expect(() =>
+      assertSeedAllowed({
+        NODE_ENV: 'development',
+      })
+    ).toThrow('MONGODB_URI is required');
   });
 });

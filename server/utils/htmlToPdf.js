@@ -14,7 +14,7 @@ const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
 
-let _browser = null;   // 进程级复用（降低每次调用开销）
+let _browser = null; // 进程级复用（降低每次调用开销）
 let _loading = null;
 let _playwright = null;
 
@@ -26,21 +26,24 @@ async function getBrowser() {
       try {
         _playwright = require('playwright');
       } catch (e) {
-        throw new Error('playwright 未安装。请在 package.json 中确认 "playwright" 并重新 npm install');
+        throw new Error(
+          'playwright 未安装。请在 package.json 中确认 "playwright" 并重新 npm install'
+        );
       }
     }
     try {
       _browser = await _playwright.chromium.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
     } catch (e) {
       throw new Error(
-        'Chromium 内核未就绪（' + e.message + '）。' +
-        '请先运行：npx playwright install chromium'
+        'Chromium 内核未就绪（' + e.message + '）。' + '请先运行：npx playwright install chromium'
       );
     }
-    _browser.on('disconnected', () => { _browser = null; });
+    _browser.on('disconnected', () => {
+      _browser = null;
+    });
     return _browser;
   })();
   try {
@@ -73,7 +76,7 @@ async function renderFileToPdf(htmlPath, pdfPath, opts = {}) {
       printBackground: opts.printBackground !== false,
       landscape: !!opts.landscape,
       margin: opts.margin || { top: '12mm', right: '12mm', bottom: '12mm', left: '12mm' },
-      preferCSSPageSize: true
+      preferCSSPageSize: true,
     });
   } finally {
     await page.close().catch(() => {});
@@ -87,7 +90,9 @@ async function renderFileToPdf(htmlPath, pdfPath, opts = {}) {
 /** 关闭浏览器（进程退出时调用） */
 async function shutdown() {
   if (_browser) {
-    try { await _browser.close(); } catch (_) {}
+    try {
+      await _browser.close();
+    } catch (_) {}
     _browser = null;
   }
 }

@@ -27,7 +27,7 @@ export class AnalyticsService {
     return withRlsTransaction(
       this.ds,
       (em) => this.computeOverview(em, user, dealerId, storeId, isHq),
-      { tenantId: user.tenantId, actorId: user.userId ?? undefined, role: user.role },
+      { tenantId: user.tenantId, actorId: user.userId ?? undefined, role: user.role }
     );
   }
 
@@ -36,7 +36,7 @@ export class AnalyticsService {
     user: JwtPayload,
     dealerId: string | null,
     storeId: string | null,
-    isHq: boolean,
+    isHq: boolean
   ) {
     // $1=dealerId $2=storeId（NULL 即不约束）；tenant 由 RLS 自动隔离。
     const scoped = (col: { dealer?: string; store?: string }) => {
@@ -49,21 +49,30 @@ export class AnalyticsService {
 
     // 单事务单连接：顺序执行（并发查询会争用同一 pg 连接）。
     // dealers 无 dealer_id 列，dealer 过滤命中其自身 id
-    const dealerRow = await em.query(`SELECT count(*)::int AS c FROM ${S}.dealers ${dealerId ? 'WHERE id::text = $1' : ''}`, dealerId ? [dealerId] : []);
-    const storeRow = await em.query(`SELECT count(*)::int AS c FROM ${S}.stores ${scoped({ dealer: 'dealer_id', store: 'id' })}`, p);
+    const dealerRow = await em.query(
+      `SELECT count(*)::int AS c FROM ${S}.dealers ${dealerId ? 'WHERE id::text = $1' : ''}`,
+      dealerId ? [dealerId] : []
+    );
+    const storeRow = await em.query(
+      `SELECT count(*)::int AS c FROM ${S}.stores ${scoped({ dealer: 'dealer_id', store: 'id' })}`,
+      p
+    );
     const staffRow = await em.query(
       `SELECT count(*)::int AS c FROM ${S}.users
        WHERE role <> 'customer'
          AND ($1::text IS NULL OR dealer_id::text = $1)
          AND ($2::text IS NULL OR store_id::text = $2)`,
-      p,
+      p
     );
-    const customerRow = await em.query(`SELECT count(*)::int AS c FROM ${S}.customers ${scoped({ dealer: 'dealer_id', store: 'store_id' })}`, p);
+    const customerRow = await em.query(
+      `SELECT count(*)::int AS c FROM ${S}.customers ${scoped({ dealer: 'dealer_id', store: 'store_id' })}`,
+      p
+    );
     const stageRows = await em.query(
       `SELECT stage, count(*)::int AS count, COALESCE(SUM(estimated_budget), 0)::float AS amount
        FROM ${S}.opportunities ${scoped({ dealer: 'dealer_id', store: 'store_id' })}
        GROUP BY stage`,
-      p,
+      p
     );
     const dealerPerf = await em.query(
       `SELECT dealer_id AS "dealerId", count(*)::int AS "opportunityCount",
@@ -74,7 +83,7 @@ export class AnalyticsService {
        GROUP BY dealer_id
        ORDER BY "estimatedPipeline" DESC
        LIMIT 20`,
-      p,
+      p
     );
 
     const stages: Record<string, { count: number; amount: number }> = {};

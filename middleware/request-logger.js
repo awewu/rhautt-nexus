@@ -30,7 +30,7 @@ function requestTracer(req, res, next) {
     ip: req.ip || req.connection.remoteAddress,
     userAgent: req.headers['user-agent'],
     userId: req.user?.id,
-    userRole: req.user?.role
+    userRole: req.user?.role,
   };
 
   // 响应完成后记录
@@ -48,17 +48,20 @@ function requestTracer(req, res, next) {
     }
 
     // 控制台输出 (开发环境)
-    const statusColor = res.statusCode >= 400 ? '\x1b[31m' : // 红色
-                       res.statusCode >= 300 ? '\x1b[33m' : // 黄色
-                       '\x1b[32m'; // 绿色
+    const statusColor =
+      res.statusCode >= 400
+        ? '\x1b[31m' // 红色
+        : res.statusCode >= 300
+          ? '\x1b[33m' // 黄色
+          : '\x1b[32m'; // 绿色
     const resetColor = '\x1b[0m';
 
     console.log(
       `[${logEntry.timestamp}] ${statusColor}${res.statusCode}${resetColor} ` +
-      `${req.method} ${req.originalUrl} ` +
-      `${duration}ms ` +
-      `[${req.requestId}] ` +
-      `${req.user?.name || 'anonymous'}`
+        `${req.method} ${req.originalUrl} ` +
+        `${duration}ms ` +
+        `[${req.requestId}] ` +
+        `${req.user?.name || 'anonymous'}`
     );
 
     // 慢请求警告 (>1秒)
@@ -84,12 +87,14 @@ function performanceMonitor(req, res, next) {
     // 添加性能指标到请求对象
     req.performance = {
       durationMs,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     // 性能阈值告警
     if (durationMs > 5000) {
-      console.error(`🚨 Critical slow request: ${req.method} ${req.originalUrl} took ${durationMs.toFixed(2)}ms`);
+      console.error(
+        `🚨 Critical slow request: ${req.method} ${req.originalUrl} took ${durationMs.toFixed(2)}ms`
+      );
     }
   });
 
@@ -107,10 +112,11 @@ function accessLogger(req, res, next) {
     const duration = Date.now() - start;
 
     // 标准访问日志格式
-    const log = `${req.ip} - "${req.method} ${req.originalUrl} HTTP/${req.httpVersion}" ` +
-                `${res.statusCode} ${res.getHeader('content-length') || '-'} ` +
-                `"${req.headers['referer'] || '-'}" "${req.headers['user-agent'] || '-'}" ` +
-                `${duration}ms`;
+    const log =
+      `${req.ip} - "${req.method} ${req.originalUrl} HTTP/${req.httpVersion}" ` +
+      `${res.statusCode} ${res.getHeader('content-length') || '-'} ` +
+      `"${req.headers['referer'] || '-'}" "${req.headers['user-agent'] || '-'}" ` +
+      `${duration}ms`;
 
     // 写入访问日志文件 (可选)
     // fs.appendFileSync('logs/access.log', log + '\n');
@@ -127,17 +133,17 @@ function getRequestLogs(options = {}) {
 
   // 过滤
   if (options.method) {
-    logs = logs.filter(l => l.method === options.method);
+    logs = logs.filter((l) => l.method === options.method);
   }
   if (options.statusCode) {
-    logs = logs.filter(l => l.statusCode === options.statusCode);
+    logs = logs.filter((l) => l.statusCode === options.statusCode);
   }
   if (options.userId) {
-    logs = logs.filter(l => l.userId === options.userId);
+    logs = logs.filter((l) => l.userId === options.userId);
   }
   if (options.since) {
     const since = new Date(options.since);
-    logs = logs.filter(l => new Date(l.timestamp) >= since);
+    logs = logs.filter((l) => new Date(l.timestamp) >= since);
   }
 
   // 排序
@@ -161,7 +167,7 @@ function getPerformanceStats() {
     return { message: 'No data available' };
   }
 
-  const durations = logs.map(l => l.duration);
+  const durations = logs.map((l) => l.duration);
   const total = durations.reduce((a, b) => a + b, 0);
 
   // 排序计算百分位
@@ -175,11 +181,11 @@ function getPerformanceStats() {
     p50: durations[Math.floor(durations.length * 0.5)],
     p95: durations[Math.floor(durations.length * 0.95)],
     p99: durations[Math.floor(durations.length * 0.99)],
-    errorRate: logs.filter(l => l.statusCode >= 400).length / logs.length,
+    errorRate: logs.filter((l) => l.statusCode >= 400).length / logs.length,
     timeRange: {
       start: logs[0].timestamp,
-      end: logs[logs.length - 1].timestamp
-    }
+      end: logs[logs.length - 1].timestamp,
+    },
   };
 }
 
@@ -205,5 +211,5 @@ module.exports = {
   accessLogger,
   getRequestLogs,
   getPerformanceStats,
-  cleanupOldLogs
+  cleanupOldLogs,
 };

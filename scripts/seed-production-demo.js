@@ -37,9 +37,9 @@ async function main() {
         allowedBrands: ['Rheem', 'Ruud', 'Everhot', 'Rhautt Comfort'],
         featureFlags: new Map([
           ['crm', true],
-          ['quotation', true]
-        ])
-      }
+          ['quotation', true],
+        ]),
+      },
     },
     { upsert: true, new: true }
   );
@@ -54,7 +54,7 @@ async function main() {
       city: '成都',
       contact: { name: 'Demo Admin', phone: '13900000000' },
       contractLevel: 'strategic',
-      status: 'active'
+      status: 'active',
     },
     { upsert: true, new: true }
   );
@@ -68,7 +68,7 @@ async function main() {
       name: 'Rhautt Comfort Demo Store',
       city: '成都',
       address: 'Demo Address',
-      status: 'active'
+      status: 'active',
     },
     { upsert: true, new: true }
   );
@@ -79,7 +79,7 @@ async function main() {
     { phone: '13800000000', name: '经销商管理员', role: 'dealer_admin' },
     { phone: '13700000000', name: '门店经理', role: 'store_manager' },
     { phone: '13600000000', name: '设计师', role: 'designer' },
-    { phone: '13500000000', name: '销售顾问', role: 'sales' }
+    { phone: '13500000000', name: '销售顾问', role: 'sales' },
   ];
 
   for (const user of users) {
@@ -94,19 +94,25 @@ async function main() {
         name: user.name,
         role: user.role,
         permissions: [],
-        status: 'active'
+        status: 'active',
       },
       { upsert: true, new: true }
     );
   }
 
-  console.log(JSON.stringify({
-    success: true,
-    tenantId: tenant._id,
-    dealerId: dealer._id,
-    storeId: store._id,
-    users: users.map(u => ({ phone: u.phone, role: u.role }))
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        success: true,
+        tenantId: tenant._id,
+        dealerId: dealer._id,
+        storeId: store._id,
+        users: users.map((u) => ({ phone: u.phone, role: u.role })),
+      },
+      null,
+      2
+    )
+  );
 
   await mongoose.disconnect();
 }
@@ -121,5 +127,5 @@ if (require.main === module) {
 
 module.exports = {
   assertSeedAllowed,
-  main
+  main,
 };

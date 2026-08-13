@@ -9,9 +9,9 @@ const PHASE1_BACKEND_CLEANUP_MATRIX = [
       'apps/dealer-workbench retains brand, growth, product, public-site, and account operations',
       'apps/dealer-workbench/src/components/DealerNav.tsx keeps /products, /brand, /accounts',
       'apps/dealer-workbench/src/lib/api.ts calls /api/v2/auth, /api/v2/brand, /api/v2/brand-sites, /api/v2/product-catalog',
-      'apps/dealer-workbench proxies retained product/DAM/publish/growth calls to NestJS /api/v2'
+      'apps/dealer-workbench proxies retained product/DAM/publish/growth calls to NestJS /api/v2',
     ],
-    action: 'keep-active'
+    action: 'keep-active',
   },
   {
     id: 'legacy-compatibility-health-core-pages-governance',
@@ -25,13 +25,13 @@ const PHASE1_BACKEND_CLEANUP_MATRIX = [
       'standards',
       'page-aliases',
       'promotions',
-      'ops-runtime'
+      'ops-runtime',
     ],
     evidence: [
       'archive/legacy-ui/public/index.html still calls /api/health',
-      'route ownership keeps legacy compatibility owners while retained product work migrates to /api/v2'
+      'route ownership keeps legacy compatibility owners while retained product work migrates to /api/v2',
     ],
-    action: 'keep-active'
+    action: 'keep-active',
   },
   {
     id: 'unknown-mixed-legacy-modules',
@@ -45,15 +45,16 @@ const PHASE1_BACKEND_CLEANUP_MATRIX = [
       'quotation-v2',
       'calculation',
       'three-tier',
-      'package-purchase'
+      'package-purchase',
     ],
     evidence: [
       'module files are mixed legacy surfaces or broad compatibility facades',
-      'no retained active navigation evidence requires them, but their blast radius is not proven to be single-domain out-of-scope'
+      'no retained active navigation evidence requires them, but their blast radius is not proven to be single-domain out-of-scope',
     ],
     action: 'keep-active-pending-evidence',
-    reason: 'Keep unknown modules mounted until a narrower call graph or owner decision proves they are safe to disable.'
-  }
+    reason:
+      'Keep unknown modules mounted until a narrower call graph or owner decision proves they are safe to disable.',
+  },
 ];
 
 // P1 架构收敛（2026-07-06）：生产 /api/v2 默认由 productionMiddleware 的前置代理转发到
@@ -65,12 +66,37 @@ const PRODUCTION_ROUTE_CATALOG = [
     owner: 'server/routes legacy compatibility',
     status: 'legacy-compat',
     routes: [
-      { id: 'new-features', prefix: '/api', modulePath: './legacy-api/new-features.routes', label: 'OK new feature routes mounted (/api)' },
-      { id: 'marketing', prefix: '/api/marketing', modulePath: '../routes/marketing', label: 'OK marketing routes mounted (/api/marketing)' },
-      { id: 'business-domain', modulePath: '../routes/business-domain', factory: 'businessDomain', label: 'OK business domain routes mounted' },
-      { id: 'exports', prefix: '/api/exports', modulePath: '../routes/exports', label: 'OK export routes mounted (/api/exports)' },
-      { id: 'reports', prefix: '/api/reports', modulePath: '../routes/reports', label: 'OK report routes mounted (/api/reports)' }
-    ]
+      {
+        id: 'new-features',
+        prefix: '/api',
+        modulePath: './legacy-api/new-features.routes',
+        label: 'OK new feature routes mounted (/api)',
+      },
+      {
+        id: 'marketing',
+        prefix: '/api/marketing',
+        modulePath: '../routes/marketing',
+        label: 'OK marketing routes mounted (/api/marketing)',
+      },
+      {
+        id: 'business-domain',
+        modulePath: '../routes/business-domain',
+        factory: 'businessDomain',
+        label: 'OK business domain routes mounted',
+      },
+      {
+        id: 'exports',
+        prefix: '/api/exports',
+        modulePath: '../routes/exports',
+        label: 'OK export routes mounted (/api/exports)',
+      },
+      {
+        id: 'reports',
+        prefix: '/api/reports',
+        modulePath: '../routes/reports',
+        label: 'OK report routes mounted (/api/reports)',
+      },
+    ],
   },
   // 退场波2a(2026-08-06)：quote-calculation 组(oneclick/quotation/quotation-v2/calc/three-tier/package)
   // = 报价/选型计算，按 D5 属"客户赋能"独立产品线，已从营销中台生产入口卸载(前端零调用)。
@@ -81,8 +107,13 @@ const PRODUCTION_ROUTE_CATALOG = [
     owner: 'server/modules/legacy-api/channel.routes',
     status: 'legacy-compat',
     routes: [
-      { id: 'channel', prefix: '/api/channel', modulePath: './legacy-api/channel.routes', label: 'OK channel routes mounted' }
-    ]
+      {
+        id: 'channel',
+        prefix: '/api/channel',
+        modulePath: './legacy-api/channel.routes',
+        label: 'OK channel routes mounted',
+      },
+    ],
   },
   {
     id: 'admin-runtime-guards',
@@ -90,8 +121,13 @@ const PRODUCTION_ROUTE_CATALOG = [
     owner: 'server/modules/authRuntime',
     status: 'production',
     routes: [
-      { id: 'admin-guard', prefix: '/api/admin', middleware: 'adminGuard', label: 'OK admin guard mounted' }
-    ]
+      {
+        id: 'admin-guard',
+        prefix: '/api/admin',
+        middleware: 'adminGuard',
+        label: 'OK admin guard mounted',
+      },
+    ],
   },
   {
     id: 'core-and-v2',
@@ -101,8 +137,8 @@ const PRODUCTION_ROUTE_CATALOG = [
     routes: [
       { id: 'core-api', modulePath: '../routes/core-api', factory: 'coreApi' },
       // 退场波1(2026-08-06)：本地 v2.router 已退役；/api/v2/** 全量由 productionMiddleware 前置代理转发到 NestJS(services/api)。
-      { id: 'standards', modulePath: '../routes/standards.routes', factory: 'engines' }
-    ]
+      { id: 'standards', modulePath: '../routes/standards.routes', factory: 'engines' },
+    ],
   },
   {
     id: 'lifecycle-iot-front-office',
@@ -110,10 +146,19 @@ const PRODUCTION_ROUTE_CATALOG = [
     owner: 'server front-office runtime',
     status: 'production',
     routes: [
-      { id: 'front-office-runtime', modulePath: '../routes/front-office-runtime.routes', factory: 'frontOfficeRuntime' },
-      { id: 'admin-routes', prefix: '/api/admin', modulePath: '../routes/admin.routes', factory: 'adminRoutes' },
-      { id: 'ops-runtime', modulePath: '../routes/ops-runtime.routes', factory: 'opsRuntime' }
-    ]
+      {
+        id: 'front-office-runtime',
+        modulePath: '../routes/front-office-runtime.routes',
+        factory: 'frontOfficeRuntime',
+      },
+      {
+        id: 'admin-routes',
+        prefix: '/api/admin',
+        modulePath: '../routes/admin.routes',
+        factory: 'adminRoutes',
+      },
+      { id: 'ops-runtime', modulePath: '../routes/ops-runtime.routes', factory: 'opsRuntime' },
+    ],
   },
   {
     id: 'pages-and-governance',
@@ -122,9 +167,14 @@ const PRODUCTION_ROUTE_CATALOG = [
     status: 'legacy-compat',
     routes: [
       { id: 'page-aliases', modulePath: '../routes/page-aliases', factory: 'pageAliases' },
-      { id: 'promotions', prefix: '/api/promotions', modulePath: '../routes/promotion.routes', factory: 'promotion' }
-    ]
-  }
+      {
+        id: 'promotions',
+        prefix: '/api/promotions',
+        modulePath: '../routes/promotion.routes',
+        factory: 'promotion',
+      },
+    ],
+  },
 ];
 
 function loadRouteHandler(entry, context) {
@@ -146,7 +196,7 @@ function loadRouteHandler(entry, context) {
       return routeModule(context.db, context.engines, {
         JWT_SECRET: context.jwtSecret,
         authenticateToken: context.authenticateToken,
-        checkRole: context.checkRole
+        checkRole: context.checkRole,
       });
     case 'engines':
       return routeModule(context.engines);
@@ -155,20 +205,20 @@ function loadRouteHandler(entry, context) {
         db: context.db,
         engines: context.engines,
         authenticateToken: context.authenticateToken,
-        checkRole: context.checkRole
+        checkRole: context.checkRole,
       });
     case 'adminRoutes':
       return routeModule({
         db: context.db,
         engines: context.engines,
-        maskSensitiveData: context.maskSensitiveData
+        maskSensitiveData: context.maskSensitiveData,
       });
     case 'opsRuntime':
       return routeModule({
         db: context.db,
         engines: context.engines,
         authenticateToken: context.authenticateToken,
-        checkRole: context.checkRole
+        checkRole: context.checkRole,
       });
     case 'pageAliases':
       return routeModule(context.publicDir || path.join(__dirname, '..', '..', 'public'));
@@ -228,23 +278,25 @@ function mountProductionRouteCatalog(app, context) {
 }
 
 function getProductionRouteCatalogMountMetadata() {
-  return PRODUCTION_ROUTE_CATALOG.flatMap(group => group.routes
-    .filter(entry => entry.modulePath)
-    .map(entry => ({
-      id: entry.id,
-      groupId: group.id,
-      domain: group.domain,
-      owner: group.owner,
-      status: entry.status || group.status,
-      prefix: entry.prefix || '/',
-      modulePath: entry.modulePath,
-      optional: Boolean(entry.optional)
-    })));
+  return PRODUCTION_ROUTE_CATALOG.flatMap((group) =>
+    group.routes
+      .filter((entry) => entry.modulePath)
+      .map((entry) => ({
+        id: entry.id,
+        groupId: group.id,
+        domain: group.domain,
+        owner: group.owner,
+        status: entry.status || group.status,
+        prefix: entry.prefix || '/',
+        modulePath: entry.modulePath,
+        optional: Boolean(entry.optional),
+      }))
+  );
 }
 
 module.exports = {
   PHASE1_BACKEND_CLEANUP_MATRIX,
   PRODUCTION_ROUTE_CATALOG,
   getProductionRouteCatalogMountMetadata,
-  mountProductionRouteCatalog
+  mountProductionRouteCatalog,
 };
