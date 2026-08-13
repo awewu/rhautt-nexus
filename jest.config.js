@@ -18,22 +18,13 @@ module.exports = {
     '**/__tests__/**/*.ts',
   ],
 
-  // 覆盖率收集目标 - ⭐ 2026-04-26 聚焦核心业务引擎(避免归档/实验/装饰稀释)
+  // 覆盖率收集目标 - ⭐ 2026-08 对齐迁移现状：
+  // 原 12 引擎清单里，MultiDiscipline/AIConsultant/RoleSystemV8 已在 2026-04 清理中删除，
+  // 其余引擎的 Jest 单测也已随 Express→NestJS 迁移退役（见 testPathIgnorePatterns），
+  // NestJS 侧由 scripts/test-api-units.js 独立门禁覆盖。此处只对仍有活跃 Jest 单测的
+  // legacy 引擎设覆盖率门禁，避免用已退役测试的死目标把全绿测试打红。
   collectCoverageFrom: [
-    // 8 大核心HVAC引擎
-    'server/core/PainPointDiagnosisEngineV3.js',
     'server/core/LoadCalculationEngineV3.js',
-    'server/core/CFDSimulationEngine.js',
-    'server/core/MultiDisciplineEngine.js',
-    'server/core/ProfessionalStandardsLibrary.js',
-    'server/core/AIConsultantEngine.js',
-    // 关键商业引擎
-    'server/core/CommercialTaxEngine.js',
-    'server/core/CRMSalesManager.js',
-    'server/core/ConstructionManager.js',
-    'server/core/RoleSystemV8.js',
-    'server/core/ValueBasedQuotationEngine.js',
-    'server/core/ThreeTierEngine.js',
     // 排除项
     '!**/node_modules/**',
     '!**/test/**',

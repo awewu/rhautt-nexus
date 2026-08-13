@@ -377,6 +377,15 @@ for (const site of SITES) {
     written++;
   }
   if (!CHECK) console.log(`tech-content: [${site.slug}] ${list.length} 页 + 索引页`);
+
+  // 页面引用 /packages/tokens/<slug>.css（站点根路径），静态站点只发布 public/ 目录，
+  // 因此把仓库根 packages/tokens 的品牌令牌样式同步进 public/，否则线上 404 且 link-audit 报 missing target。
+  const tokensSrc = join(ROOT, 'packages', 'tokens', `${site.slug}.css`);
+  const tokensDest = join(pubDir, 'packages', 'tokens', `${site.slug}.css`);
+  if (existsSync(tokensSrc) && !CHECK && !DRY) {
+    mkdirSync(dirname(tokensDest), { recursive: true });
+    writeFileSync(tokensDest, readFileSync(tokensSrc, 'utf8'), 'utf8');
+  }
 }
 
 if (CHECK) {
