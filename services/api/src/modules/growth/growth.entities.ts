@@ -59,6 +59,31 @@ export class GrowthCopyAssetEntity {
   @Column({ name: 'compliance_flags', type: 'jsonb', default: [] }) complianceFlags: string[]; // 命中的合规词
   // 生成该内容所用的 GEO 策略键（AgenticGEO 归因基础：实验 lift → 归因到策略 → 反哺权重）
   @Column({ name: 'strategy_keys', type: 'jsonb', default: [] }) strategyKeys: string[];
+  @Column({ name: 'fact_refs', type: 'jsonb', default: [] }) factRefs: Array<{ type: string; id: string }>;
+  @Column({ name: 'prompt_template_id', type: 'uuid', nullable: true }) promptTemplateId: string | null;
+  @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
+  @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
+}
+
+@Entity('growth_prompt_template')
+@Index(['tenantId', 'status', 'brandSlug', 'channel'])
+export class GrowthPromptTemplateEntity {
+  @PrimaryGeneratedColumn('uuid') id: string;
+  @Column({ name: 'tenant_id' }) @Index() tenantId: string;
+  @Column({ type: 'varchar' }) name: string;
+  @Column({ name: 'prompt_body', type: 'text' }) promptBody: string;
+  @Column({ name: 'brand_slug', type: 'varchar', nullable: true }) brandSlug: string | null;
+  @Column({ type: 'varchar', nullable: true }) category: string | null;
+  @Column({ type: 'varchar', nullable: true }) channel: string | null;
+  @Column({ type: 'varchar', default: 'active' }) status: 'active' | 'archived';
+  @Column({ name: 'source_copy_asset_id', type: 'uuid', nullable: true }) sourceCopyAssetId: string | null;
+  @Column({ name: 'usage_count', type: 'int', default: 0 }) usageCount: number;
+  @Column({ name: 'verified_count', type: 'int', default: 0 }) verifiedCount: number;
+  @Column({ name: 'positive_count', type: 'int', default: 0 }) positiveCount: number;
+  @Column({ name: 'negative_count', type: 'int', default: 0 }) negativeCount: number;
+  @Column({ name: 'total_lift', type: 'int', default: 0 }) totalLift: number;
+  @Column({ name: 'average_lift', type: 'numeric', precision: 8, scale: 2, default: 0 }) averageLift: string;
+  @Column({ name: 'last_used_at', type: 'timestamptz', nullable: true }) lastUsedAt: Date | null;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
 }
@@ -263,6 +288,31 @@ export class GrowthMarketingMaterialEntity {
 
 // ── cockpit · 北极星地基（Phase 1 · migration 068）────────────────────────────
 // 北极星="活跃盈利经销商数"；盈利=混合口径(profit_proxy 代理 + profit_actual 可选真实)。
+@Entity('growth_content_asset')
+@Index(['tenantId', 'assetType'])
+@Index(['tenantId', 'brandSlug'])
+@Index(['tenantId', 'status'])
+export class GrowthContentAssetEntity {
+  @PrimaryGeneratedColumn('uuid') id: string;
+  @Column({ name: 'tenant_id' }) @Index() tenantId: string;
+  @Column({ type: 'varchar' }) title: string;
+  @Column({ name: 'asset_type', type: 'varchar' }) assetType: string;
+  @Column({ name: 'brand_slug', type: 'varchar', nullable: true }) brandSlug: string | null;
+  @Column({ type: 'varchar', nullable: true }) channel: string | null;
+  @Column({ type: 'text', nullable: true }) summary: string | null;
+  @Column({ type: 'jsonb', default: [] }) tags: string[];
+  @Column({ name: 'file_artifact_id', type: 'uuid', nullable: true }) fileArtifactId: string | null;
+  @Column({ name: 'file_url', type: 'text', nullable: true }) fileUrl: string | null;
+  @Column({ name: 'thumbnail_url', type: 'text', nullable: true }) thumbnailUrl: string | null;
+  @Column({ name: 'file_format', type: 'varchar', nullable: true }) fileFormat: string | null;
+  @Column({ name: 'usage_scene', type: 'varchar', nullable: true }) usageScene: string | null;
+  @Column({ type: 'varchar', default: 'active' }) status: string;
+  @Column({ name: 'usage_count', type: 'int', default: 0 }) usageCount: number;
+  @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
+  @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
+  @Column({ name: 'archived_at', type: 'timestamptz', nullable: true }) archivedAt: Date | null;
+}
+
 @Entity('dealer_success_snapshot')
 @Index(['tenantId', 'period', 'active'])
 @Index(['tenantId', 'dealerId', 'period'], { unique: true })
@@ -346,6 +396,7 @@ export class GrowthGeoExperimentEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
   @Column({ name: 'brand_slug', type: 'varchar' }) brandSlug: string;
+  @Column({ type: 'varchar' }) category: string;
   @Column({ name: 'question_id', type: 'uuid', nullable: true }) questionId: string | null;
   @Column({ type: 'text' }) question: string;
   @Column({ type: 'text', nullable: true }) hypothesis: string | null;
@@ -356,12 +407,16 @@ export class GrowthGeoExperimentEntity {
   @Column({ name: 'baseline_at', type: 'timestamptz', nullable: true }) baselineAt: Date | null;
   @Column({ name: 'copy_asset_id', type: 'uuid', nullable: true }) copyAssetId: string | null;
   @Column({ name: 'content_published_at', type: 'timestamptz', nullable: true }) contentPublishedAt: Date | null;
+  @Column({ name: 'publication_url', type: 'text', nullable: true }) publicationUrl: string | null;
+  @Column({ name: 'probe_engine', type: 'varchar', default: 'hermes-center-ai' }) probeEngine: string;
+  @Column({ name: 'probe_provider', type: 'varchar', default: 'qwen-max' }) probeProvider: string;
   @Column({ name: 'verify_batch_id', type: 'uuid', nullable: true }) verifyBatchId: string | null;
   @Column({ name: 'verify_cited_rate', type: 'int', nullable: true }) verifyCitedRate: number | null;
   @Column({ name: 'verify_at', type: 'timestamptz', nullable: true }) verifyAt: Date | null;
   @Column({ type: 'int', nullable: true }) lift: number | null;
   @Column({ name: 'kill_criteria', type: 'text', nullable: true }) killCriteria: string | null;
   @Column({ type: 'text', nullable: true }) conclusion: string | null;
+  @Column({ name: 'prompt_feedback_applied_at', type: 'timestamptz', nullable: true }) promptFeedbackAppliedAt: Date | null;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
 }
@@ -376,6 +431,7 @@ export const GROWTH_ENTITIES = [
   GrowthOpinionMentionEntity,
   GrowthOpinionAlertEntity,
   GrowthCopyAssetEntity,
+  GrowthPromptTemplateEntity,
   GrowthGeoProbeEntity,
   GrowthGeoQuestionEntity,
   GrowthGeoExperimentEntity,
@@ -385,6 +441,7 @@ export const GROWTH_ENTITIES = [
   GrowthCampaignEntity,
   GrowthCampaignMetricEntity,
   GrowthMarketingMaterialEntity,
+  GrowthContentAssetEntity,
   DealerSuccessSnapshotEntity,
   GrowthDealerDealInboxEntity,
   GrowthFunnelEventEntity,

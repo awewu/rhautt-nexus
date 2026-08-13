@@ -53,7 +53,7 @@ export default function LoginPage() {
       localStorage.setItem('token', res.token);
       localStorage.setItem('user', JSON.stringify(res.user));
       setToken(res.token);
-      window.location.href = '/brand';
+      window.location.href = '/cockpit';
     } catch (err: unknown) {
       setError((err as Error).message || '登录失败');
     } finally { setLoading(false); }
@@ -76,7 +76,7 @@ export default function LoginPage() {
       // returnUrl 在提交时从 URL 读取，避免 useSearchParams 需 Suspense 边界导致的客户端水合中断。
       const returnUrl = (typeof window !== 'undefined'
         ? new URLSearchParams(window.location.search).get('returnUrl')
-        : null) || '/brand';
+        : null) || '/cockpit';
       window.location.href = decodeURIComponent(returnUrl);
     } catch (err: unknown) {
       setError((err as Error).message || '登录失败');
@@ -84,15 +84,30 @@ export default function LoginPage() {
   }
 
   function handleSsoLogin() {
-    window.location.href = '/api/v2/auth/sso/login?redirect=/brand';
+    window.location.href = '/api/v2/auth/sso/login?redirect=/cockpit';
   }
 
-  // 仅开发环境：访客直进，跳过登录直接看工作台 UI（设临时超管态，不接真实后端数据）。
-  function handleDevGuest() {
-    localStorage.setItem('token', 'dev-guest');
-    localStorage.setItem('user', JSON.stringify({ id: 'dev-guest', name: '访客(dev)', role: 'platform_admin', roles: ['platform_admin'], permissions: ['*'] }));
-    setToken('dev-guest');
-    window.location.href = '/cmo';
+  // Local development shortcut: use the seeded admin account so protected pages can load real API data.
+  async function handleDevGuest() {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await auth.login('admin@rhautt.local', 'Test1234!');
+      localStorage.setItem('token', res.token);
+      localStorage.setItem('user', JSON.stringify(res.user));
+      setToken(res.token);
+      await fetch('/api/session/bridge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ token: res.token }),
+      }).catch(() => {});
+      const returnUrl = new URLSearchParams(window.location.search).get('returnUrl') || '/cockpit';
+      window.location.href = decodeURIComponent(returnUrl);
+    } catch (err: unknown) {
+      setError((err as Error).message || '开发直进失败');
+      setLoading(false);
+    }
   }
 
   return (
@@ -203,7 +218,7 @@ export default function LoginPage() {
               {process.env.NODE_ENV !== 'production' && (
                 <button type="button" onClick={handleDevGuest}
                   className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', gap: 8, padding: '12px', borderRadius: 'var(--r)', fontSize: 13, borderStyle: 'dashed', color: 'var(--t-tertiary)' }}>
-                  访客直进（仅开发 · 看 UI，不接真实数据）
+                  开发直进（自动登录 · 进入驾驶舱）
                 </button>
               )}
             </div>

@@ -21,6 +21,7 @@ function nextId(): string {
 function matchesOne(row: Row, where: Record<string, any>): boolean {
   return Object.entries(where).every(([k, v]) => {
     if (v === undefined) return true; // 忽略 undefined（等价于未约束）
+    if (v === null) return row[k] === null || row[k] === undefined;
     if (v && typeof v === 'object' && v._type === 'isNull') return row[k] === null || row[k] === undefined;
     return row[k] === v;
   });
@@ -121,10 +122,12 @@ export class FakeEntityManager {
   private readonly repos = new Map<unknown, InMemoryRepository>();
   constructor(seedRepos?: Map<unknown, InMemoryRepository>) {
     if (seedRepos) this.repos = seedRepos;
+    for (const repo of this.repos.values()) (repo as any).manager = this;
   }
   getRepository<T extends Row = Row>(entity: unknown): InMemoryRepository<T> {
     let repo = this.repos.get(entity);
     if (!repo) { repo = new InMemoryRepository(); this.repos.set(entity, repo); }
+    (repo as any).manager = this;
     return repo as InMemoryRepository<T>;
   }
   async query(): Promise<any[]> { return []; } // set_config no-op

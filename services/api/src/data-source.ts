@@ -17,7 +17,7 @@ export const AppDataSource = new DataSource({
   port: Number(process.env.POSTGRES_PORT || 5432),
   username: process.env.POSTGRES_USER || 'rhautt',
   password: process.env.POSTGRES_PASSWORD,
-  database: process.env.POSTGRES_DB || 'rhautt_nexus',
+  database: process.env.POSTGRES_DB || 'rhautt_GOT',
   schema: 'rhautt_nexus',
   entities: [__dirname + '/modules/**/*.entity.{ts,js}'],
   synchronize: false,

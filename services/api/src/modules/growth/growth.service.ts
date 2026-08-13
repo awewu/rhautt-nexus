@@ -19,6 +19,7 @@ import {
 import { GeoAnalyzerService } from './geo-analyzer.service';
 import { OpinionClassifierService } from './opinion-classifier.service';
 import { OpinionSourceService } from './opinion-source.service';
+import { ProductCatalogService } from '../product-catalog/product-catalog.service';
 import {
   GrowthCampaignEntity,
   GrowthCampaignMetricEntity,
@@ -26,6 +27,7 @@ import {
   GrowthGeoAnswerSnapshotEntity,
   GrowthGeoProbeBatchEntity,
   GrowthGeoExperimentEntity,
+  GrowthPromptTemplateEntity,
 } from './growth.entities';
 import { selectStrategies, renderStrategyBlock, GEO_STRATEGIES, ALWAYS_ON, blendHierarchicalDelta } from './geo-strategies';
 import { AuditLogEntity } from '../governance/governance.entity';
@@ -36,10 +38,13 @@ import {
   type GeoActionType,
 } from './geo-actions';
 import { getObjectType, listObjectTypes as listOntologyObjectTypes } from '../common/ontology';
+import { buildGeoLoopState, normalizePublicationUrl, qwenProviderName } from './geo-loop';
+import { aggregatePromptLift, comparePromptEvidence, promptEvidenceState } from './prompt-reservoir';
 import {
   GrowthGeoProbeEntity,
   GrowthGeoProbeJobEntity,
   GrowthGeoQuestionEntity,
+  GrowthContentAssetEntity,
   GrowthMarketingMaterialEntity,
   GrowthOpinionAlertEntity,
   GrowthOpinionMentionEntity,
@@ -60,9 +65,9 @@ const GEO_STAGES = new Set(['pre', 'mid', 'post', 'followup']);
 const GEO_BRANDS = new Set(['rheem', 'ruud', 'everhot']);
 const DEFAULT_GEO_BRAND = 'rheem';
 const GEO_BRAND_DISPLAY_NAMES: Record<string, string> = {
-  rheem: '鐟炵編 Rheem',
-  ruud: '鐟炲痉 Ruud',
-  everhot: '鎭掔儹 Everhot',
+  rheem: '瑞美 Rheem',
+  ruud: '瑞德 Ruud',
+  everhot: '恒热 Everhot',
 };
 const TERMINAL_GEO_JOB_STATUSES = new Set(['succeeded', 'failed', 'blocked']);
 const COPY_CHANNEL_LABELS: Record<string, string[]> = {
@@ -117,7 +122,45 @@ type GeoOptimizationContentDto = {
   competitors?: string[];
   contentGaps?: Array<Record<string, unknown>>;
   sources?: Array<Record<string, unknown>>;
+  factRefs?: Array<{ type: string; id: string }>;
 };
+
+async function applyPromptFeedback(em: EntityManager, tenantId: string, copyAssetId: string | null | undefined) {
+  if (!copyAssetId) return null;
+  const asset = await em.getRepository(GrowthCopyAssetEntity).findOne({ where: { tenantId, id: copyAssetId } as any });
+  if (!asset?.promptTemplateId) return null;
+
+  const template = await em.getRepository(GrowthPromptTemplateEntity).findOne({
+    where: { tenantId, id: asset.promptTemplateId } as any,
+    lock: { mode: 'pessimistic_write' },
+  });
+  if (!template) return null;
+  const experiments = await em.getRepository(GrowthGeoExperimentEntity)
+    .createQueryBuilder('experiment')
+    .setLock('pessimistic_write')
+    .where('experiment.tenant_id = :tenantId', { tenantId })
+    .andWhere('experiment.copy_asset_id = :copyAssetId', { copyAssetId })
+    .andWhere('experiment.lift IS NOT NULL')
+    .andWhere('experiment.prompt_feedback_applied_at IS NULL')
+    .getMany();
+  if (!experiments.length) return template;
+
+  const aggregate = aggregatePromptLift({
+    verifiedCount: template.verifiedCount,
+    positiveCount: template.positiveCount,
+    negativeCount: template.negativeCount,
+    totalLift: template.totalLift,
+  }, experiments.map((experiment) => Number(experiment.lift || 0)));
+  Object.assign(template, {
+    ...aggregate,
+    averageLift: String(aggregate.averageLift),
+  });
+  await em.getRepository(GrowthPromptTemplateEntity).save(template);
+  const appliedAt = new Date();
+  for (const experiment of experiments) experiment.promptFeedbackAppliedAt = appliedAt;
+  await em.getRepository(GrowthGeoExperimentEntity).save(experiments);
+  return template;
+}
 
 function cleanText(value: unknown, fallback = ''): string {
   return String(value ?? fallback).trim();
@@ -169,8 +212,8 @@ function extractCopyChannelDraft(draft: string, channel: string) {
 function normalizeGeoQuestionBrandText(question: string, brandSlug: string): string {
   const brand = geoBrandDisplayName(brandSlug);
   return cleanText(question)
-    .replace(/鐟炲悎鐟炲痉鏆栭€氱鎶€闆嗗洟/g, brand)
-    .replace(/鐟炲悎鐟炲痉/g, brand)
+    .replace(/瑞合瑞德暖通科技集团/g, brand)
+    .replace(/瑞合瑞德/g, brand)
     .replace(/rhautt_comfort/gi, brand)
     .replace(/rhautt-comfort/gi, brand)
     .replace(/Rhautt Comfort Group/g, brand)
@@ -402,12 +445,24 @@ export class GrowthCopyService {
   /** 鐢熸垚鏂囨鑽夌锛堟案杩?draft锛岄檮鍚堣鎵撴爣涓庢垚鏈級銆傜粡鍝佺墝澶ц剳鎺ュ湴锛氬搧鐗屼簨瀹?璇皵+绂佽銆?*/
   async generateCopy(
     user: JwtPayload,
-    dto: { channel: string; prompt: string; brandSlug?: string },
+    dto: { channel: string; prompt?: string; brandSlug?: string; promptTemplateId?: string },
   ) {
-    if (!dto?.channel || !dto?.prompt) throw new BadRequestException('channel and prompt required');
+    if (!dto?.channel) throw new BadRequestException('channel required');
+    const promptTemplateId = cleanNullable(dto?.promptTemplateId);
+    const template = promptTemplateId
+      ? await withRlsTransaction(this.ds, async (em) => {
+          const item = await em.getRepository(GrowthPromptTemplateEntity).findOne({
+            where: { tenantId: user.tenantId, id: promptTemplateId } as any,
+          });
+          if (!item || item.status !== 'active') throw new BadRequestException('active prompt template not found');
+          return item;
+        }, rls(user))
+      : null;
+    const prompt = cleanText(template?.promptBody || dto?.prompt);
+    if (!prompt) throw new BadRequestException('prompt or promptTemplateId required');
     const brandCtx = this.brandBrain.context(dto.brandSlug ?? null);
     const result = await this.ai.generateDraft({
-      prompt: dto.prompt,
+      prompt,
       channel: dto.channel,
       brandSlug: dto.brandSlug ?? null,
       provider: 'hermes-center-ai',
@@ -435,7 +490,8 @@ export class GrowthCopyService {
         tenantId: user.tenantId,
         channel: dto.channel,
         brandSlug: dto.brandSlug ?? null,
-        prompt: dto.prompt,
+        prompt,
+        promptTemplateId: template?.id ?? null,
         draft,
         status: 'draft',
         source: result.provider || 'hermes-center-ai',
@@ -443,7 +499,135 @@ export class GrowthCopyService {
         tokensCost: String(result.tokensCost),
         complianceFlags,
       }));
+      if (template) {
+        await em.getRepository(GrowthPromptTemplateEntity).increment(
+          { tenantId: user.tenantId, id: template.id } as any,
+          'usageCount',
+          1,
+        );
+        await em.getRepository(GrowthPromptTemplateEntity).update(
+          { tenantId: user.tenantId, id: template.id } as any,
+          { lastUsedAt: new Date() },
+        );
+      }
       return { success: true, data: { asset } };
+    }, rls(user));
+  }
+
+  async listPromptTemplates(user: JwtPayload, query: { status?: string; brandSlug?: string; channel?: string } = {}) {
+    return withRlsTransaction(this.ds, async (em) => {
+      const where: any = { tenantId: user.tenantId, status: query.status === 'archived' ? 'archived' : 'active' };
+      if (cleanText(query.brandSlug)) where.brandSlug = cleanText(query.brandSlug);
+      if (cleanText(query.channel)) where.channel = cleanText(query.channel);
+      const templates = await em.getRepository(GrowthPromptTemplateEntity).find({ where, take: 200 });
+      const items = templates.sort(comparePromptEvidence).map((item) => ({
+        ...item,
+        evidenceState: promptEvidenceState(item),
+      }));
+      return { success: true, data: { items } };
+    }, rls(user));
+  }
+
+  async createPromptTemplate(user: JwtPayload, dto: any) {
+    const name = cleanText(dto?.name).slice(0, 120);
+    const promptBody = cleanText(dto?.promptBody);
+    if (!name || !promptBody) throw new BadRequestException('name and promptBody required');
+    if (promptBody.length > 20000) throw new BadRequestException('promptBody is too long');
+    return withRlsTransaction(this.ds, async (em) => {
+      const repo = em.getRepository(GrowthPromptTemplateEntity);
+      const template = await repo.save(repo.create({
+        tenantId: user.tenantId,
+        name,
+        promptBody,
+        brandSlug: cleanNullable(dto?.brandSlug),
+        category: cleanNullable(dto?.category),
+        channel: cleanNullable(dto?.channel),
+        status: 'active',
+        sourceCopyAssetId: null,
+      }));
+      return { success: true, data: { template: { ...template, evidenceState: 'unverified' } } };
+    }, rls(user));
+  }
+
+  async updatePromptTemplate(user: JwtPayload, id: string, dto: any) {
+    return withRlsTransaction(this.ds, async (em) => {
+      const repo = em.getRepository(GrowthPromptTemplateEntity);
+      const template = await repo.findOne({ where: { tenantId: user.tenantId, id } as any });
+      if (!template) throw new BadRequestException('prompt template not found');
+      if (dto?.name !== undefined) {
+        const name = cleanText(dto.name).slice(0, 120);
+        if (!name) throw new BadRequestException('name required');
+        template.name = name;
+      }
+      if (dto?.promptBody !== undefined && cleanText(dto.promptBody) !== template.promptBody) {
+        if (template.usageCount > 0 || template.verifiedCount > 0) {
+          throw new BadRequestException('used prompt templates are immutable; create a new version');
+        }
+        const promptBody = cleanText(dto.promptBody);
+        if (!promptBody || promptBody.length > 20000) throw new BadRequestException('valid promptBody required');
+        template.promptBody = promptBody;
+      }
+      if (dto?.brandSlug !== undefined) template.brandSlug = cleanNullable(dto.brandSlug);
+      if (dto?.category !== undefined) template.category = cleanNullable(dto.category);
+      if (dto?.channel !== undefined) template.channel = cleanNullable(dto.channel);
+      await repo.save(template);
+      return { success: true, data: { template: { ...template, evidenceState: promptEvidenceState(template) } } };
+    }, rls(user));
+  }
+
+  async archivePromptTemplate(user: JwtPayload, id: string) {
+    return withRlsTransaction(this.ds, async (em) => {
+      const repo = em.getRepository(GrowthPromptTemplateEntity);
+      const template = await repo.findOne({ where: { tenantId: user.tenantId, id } as any });
+      if (!template) throw new BadRequestException('prompt template not found');
+      template.status = 'archived';
+      await repo.save(template);
+      return { success: true, data: { template } };
+    }, rls(user));
+  }
+
+  async restorePromptTemplate(user: JwtPayload, id: string) {
+    return withRlsTransaction(this.ds, async (em) => {
+      const repo = em.getRepository(GrowthPromptTemplateEntity);
+      const template = await repo.findOne({ where: { tenantId: user.tenantId, id } as any });
+      if (!template) throw new BadRequestException('prompt template not found');
+      template.status = 'active';
+      await repo.save(template);
+      return { success: true, data: { template: { ...template, evidenceState: promptEvidenceState(template) } } };
+    }, rls(user));
+  }
+
+  async saveCopyPromptTemplate(user: JwtPayload, copyAssetId: string, dto: any = {}) {
+    return withRlsTransaction(this.ds, async (em) => {
+      const assetRepo = em.getRepository(GrowthCopyAssetEntity);
+      const asset = await assetRepo.findOne({ where: { tenantId: user.tenantId, id: copyAssetId } as any });
+      if (!asset) throw new BadRequestException('copy asset not found');
+      if (asset.status === 'rejected') throw new BadRequestException('rejected copy prompt cannot be saved');
+      if (asset.promptTemplateId) {
+        const existing = await em.getRepository(GrowthPromptTemplateEntity).findOne({
+          where: { tenantId: user.tenantId, id: asset.promptTemplateId } as any,
+        });
+        if (existing) return { success: true, data: { template: { ...existing, evidenceState: promptEvidenceState(existing) }, alreadySaved: true } };
+      }
+
+      const defaultName = cleanText(asset.question || asset.prompt).replace(/\s+/g, ' ').slice(0, 48) || '未命名提示词';
+      const templateRepo = em.getRepository(GrowthPromptTemplateEntity);
+      const template = await templateRepo.save(templateRepo.create({
+        tenantId: user.tenantId,
+        name: cleanText(dto?.name, defaultName).slice(0, 120),
+        promptBody: asset.prompt,
+        brandSlug: asset.brandSlug,
+        category: asset.category,
+        channel: asset.channel,
+        status: 'active',
+        sourceCopyAssetId: asset.id,
+        usageCount: 1,
+        lastUsedAt: asset.createdAt || new Date(),
+      }));
+      asset.promptTemplateId = template.id;
+      await assetRepo.save(asset);
+      const updated = await applyPromptFeedback(em, user.tenantId, asset.id) || template;
+      return { success: true, data: { template: { ...updated, evidenceState: promptEvidenceState(updated) }, alreadySaved: false } };
     }, rls(user));
   }
 
@@ -554,6 +738,7 @@ export class GrowthGeoService {
     private readonly ai: AiGatewayService,
     private readonly brandBrain: BrandBrainService,
     private readonly eventBus: EventBusService,
+    private readonly products: ProductCatalogService,
   ) {
     this.registerGeoActions();
   }
@@ -566,7 +751,6 @@ export class GrowthGeoService {
       this.geoActionsRegistered = true;
       return;
     }
-    const self = this;
     const actions: GeoActionType[] = [
       {
         id: 'geo.generate-content',
@@ -575,7 +759,7 @@ export class GrowthGeoService {
         label: '生成 GEO 优化内容',
         zone: 'yellow', // 产出对外内容 → AI 代行需人工核准（对齐宪章 §12 draft→approved）
         validate: (input: any) => (input?.question ? { ok: true, errors: [] } : { ok: false, errors: ['question required'], code: 'invalid' }),
-        execute: (input: any, ctx: GeoActionContext) => self.generateOptimizationContent(self.actorToJwt(ctx), input),
+        execute: (input: any, ctx: GeoActionContext) => this.generateOptimizationContent(this.actorToJwt(ctx), input),
       },
       {
         id: 'geo.run-experiment',
@@ -583,7 +767,7 @@ export class GrowthGeoService {
         label: '开启 GEO 闭环实验（基线探测）',
         zone: 'green', // 探测只读外部引擎，不改对外内容 → 可自动
         validate: (input: any) => (input?.questionId || input?.question ? { ok: true, errors: [] } : { ok: false, errors: ['question or questionId required'], code: 'invalid' }),
-        execute: (input: any, ctx: GeoActionContext) => self.startGeoExperiment(self.actorToJwt(ctx), input),
+        execute: (input: any, ctx: GeoActionContext) => this.startGeoExperiment(this.actorToJwt(ctx), input),
       },
       {
         id: 'geo.bootstrap-brand-category',
@@ -594,7 +778,7 @@ export class GrowthGeoService {
         validate: (input: any) => (input?.brandSlug && input?.category
           ? { ok: true, errors: [] }
           : { ok: false, errors: ['brandSlug and category required'], code: 'invalid' }),
-        execute: (input: any, ctx: GeoActionContext) => self.bootstrapBrandCategory(self.actorToJwt(ctx), input),
+        execute: (input: any, ctx: GeoActionContext) => this.bootstrapBrandCategory(this.actorToJwt(ctx), input),
       },
       {
         id: 'geo.verify-lift',
@@ -602,7 +786,7 @@ export class GrowthGeoService {
         label: '复投验证 lift',
         zone: 'green', // 复投探测只读，验证效果，不改内容 → 可自动
         validate: (input: any) => (input?.id ? { ok: true, errors: [] } : { ok: false, errors: ['experiment id required'], code: 'invalid' }),
-        execute: (input: any, ctx: GeoActionContext) => self.verifyGeoExperiment(self.actorToJwt(ctx), input.id, input),
+        execute: (input: any, ctx: GeoActionContext) => this.verifyGeoExperiment(this.actorToJwt(ctx), input.id, input),
       },
     ];
     for (const a of actions) geoActionRegistry.register(a);
@@ -611,6 +795,72 @@ export class GrowthGeoService {
 
   private actorToJwt(ctx: GeoActionContext): JwtPayload {
     return { userId: ctx.actorUserId, tenantId: ctx.tenantId, role: ctx.role } as JwtPayload;
+  }
+
+  private async resolveD2FactContext(_user: JwtPayload, brandSlug: string, category: string) {
+    const tenantEnv = `${brandSlug.toUpperCase().replace(/[^A-Z0-9]/g, '_')}_TENANT_ID`;
+    const result: any = await this.products.listBrandPublicLocalized(
+      brandSlug,
+      'zh-CN',
+      process.env[tenantEnv],
+    );
+    const publishedItems = Array.isArray(result?.data?.items) ? result.data.items : [];
+    const categoryItems = publishedItems.filter((item: any) => {
+      const productCategory = cleanText(item.websiteCategory || item.cat);
+      return productCategory === category;
+    });
+    const items = categoryItems.length ? categoryItems : publishedItems;
+    if (!items.length) {
+      throw new BadRequestException(`未找到 ${brandSlug}/${category} 的 D2 产品事实，不能生成 GEO 对外草稿`);
+    }
+    const selected = items.slice(0, 8);
+    return {
+      factRefs: selected.map((item: any) => ({ type: 'product-sku', id: String(item.sku) })),
+      sources: selected.map((item: any) => ({
+        type: 'product-fact',
+        id: item.sku,
+        title: `${item.name || item.sku || '产品'}（${item.sku || '无 SKU'}）`,
+        summary: {
+          category: item.websiteCategory || item.cat || null,
+          specs: Array.isArray(item.specs) ? item.specs : [],
+          positioning: item.positioning || {},
+          jsonLd: item.jsonLd || {},
+        },
+        owned: true,
+      })),
+    };
+  }
+
+  private async geoExperimentView(em: EntityManager, user: JwtPayload, exp: GrowthGeoExperimentEntity) {
+    const copyAsset = exp.copyAssetId
+      ? await em.getRepository(GrowthCopyAssetEntity).findOne({ where: { tenantId: user.tenantId, id: exp.copyAssetId } as any })
+      : null;
+    const promptTemplate = copyAsset?.promptTemplateId
+      ? await em.getRepository(GrowthPromptTemplateEntity).findOne({ where: { tenantId: user.tenantId, id: copyAsset.promptTemplateId } as any })
+      : null;
+    return {
+      ...exp,
+      copyAsset: copyAsset ? {
+        id: copyAsset.id,
+        status: copyAsset.status,
+        draft: copyAsset.draft,
+        complianceFlags: copyAsset.complianceFlags || [],
+        factRefs: copyAsset.factRefs || [],
+        model: copyAsset.model,
+        promptTemplateId: copyAsset.promptTemplateId,
+      } : null,
+      promptTemplate: promptTemplate ? {
+        id: promptTemplate.id,
+        name: promptTemplate.name,
+        usageCount: promptTemplate.usageCount,
+        verifiedCount: promptTemplate.verifiedCount,
+        positiveCount: promptTemplate.positiveCount,
+        negativeCount: promptTemplate.negativeCount,
+        averageLift: Number(promptTemplate.averageLift),
+        evidenceState: promptEvidenceState(promptTemplate),
+      } : null,
+      loop: buildGeoLoopState(exp, copyAsset),
+    };
   }
 
   /**
@@ -1028,7 +1278,7 @@ export class GrowthGeoService {
     const question = cleanText(dto.question);
     if (!question) throw new BadRequestException('question required');
     if (!['faq', 'comparison', 'topic'].includes(kind)) throw new BadRequestException('invalid optimization content kind');
-    const sources = Array.isArray(dto.sources) ? dto.sources.slice(0, kind === 'topic' ? 4 : 6) : [];
+    const suppliedSources = Array.isArray(dto.sources) ? dto.sources.slice(0, kind === 'topic' ? 4 : 6) : [];
     const gaps = Array.isArray(dto.contentGaps) ? dto.contentGaps.slice(0, kind === 'topic' ? 4 : 6) : [];
     const competitors = cleanTags(dto.competitors);
     const answerLimit = kind === 'topic' ? 360 : 700;
@@ -1036,7 +1286,17 @@ export class GrowthGeoService {
     const sourcesLimit = kind === 'topic' ? 520 : 900;
     const brandSlug = cleanGeoBrand(dto.brandSlug);
     const brandName = geoBrandDisplayName(brandSlug);
+    const d2 = await this.resolveD2FactContext(user, brandSlug, cleanText(dto.category, 'home-comfort') || 'home-comfort');
+    const suppliedFactRefs = Array.isArray(dto.factRefs)
+      ? dto.factRefs
+        .map((ref) => ({ type: cleanText(ref?.type), id: cleanText(ref?.id) }))
+        .filter((ref) => ref.type && ref.id)
+      : [];
+    const factRefs = [...d2.factRefs, ...suppliedFactRefs]
+      .filter((ref, index, all) => all.findIndex((candidate) => candidate.type === ref.type && candidate.id === ref.id) === index);
+    const sources = [...d2.sources, ...suppliedSources].slice(0, kind === 'topic' ? 12 : 14);
     // 自进化：三层收缩（品牌→品类→研究基线）学到的权重指导本次策略选择
+    // 合并说明：保留 gtm 的 D2 事实上下文，同时保留本地的品类维度权重（传 category 才能继承品类经验）
     const strategyOverrides = await this.computeStrategyWeights(user, brandSlug, cleanNullable(dto.category) ?? undefined).catch(() => ({}));
     const { prompt, strategyKeys } = buildGeoOptimizationPrompt({
       kind,
@@ -1086,6 +1346,7 @@ export class GrowthGeoService {
         tokensCost: String(captured.tokensCost ?? 0),
         complianceFlags,
         strategyKeys,
+        factRefs,
       }));
       return { success: true, data: { asset, draft, strategies: strategyKeys, citations: captured.citations || [] } };
     }, rls(user));
@@ -1101,7 +1362,7 @@ export class GrowthGeoService {
       const question = cleanText(dto.question);
       if (!question) throw new BadRequestException('question required');
       if (!['faq', 'comparison', 'topic'].includes(kind)) throw new BadRequestException('invalid optimization content kind');
-      const sources = Array.isArray(dto.sources) ? dto.sources.slice(0, kind === 'topic' ? 4 : 6) : [];
+      const suppliedSources = Array.isArray(dto.sources) ? dto.sources.slice(0, kind === 'topic' ? 4 : 6) : [];
       const gaps = Array.isArray(dto.contentGaps) ? dto.contentGaps.slice(0, kind === 'topic' ? 4 : 6) : [];
       const competitors = cleanTags(dto.competitors);
       const answerLimit = kind === 'topic' ? 360 : 700;
@@ -1109,7 +1370,16 @@ export class GrowthGeoService {
       const sourcesLimit = kind === 'topic' ? 520 : 900;
       const brandSlug = cleanGeoBrand(dto.brandSlug);
       const brandName = geoBrandDisplayName(brandSlug);
-      // 修正：流式路径此前未接自进化权重，导致与非流式生成行为不一致。
+      const d2 = await this.resolveD2FactContext(user, brandSlug, cleanText(dto.category, 'home-comfort') || 'home-comfort');
+      const suppliedFactRefs = Array.isArray(dto.factRefs)
+        ? dto.factRefs
+          .map((ref) => ({ type: cleanText(ref?.type), id: cleanText(ref?.id) }))
+          .filter((ref) => ref.type && ref.id)
+        : [];
+      const factRefs = [...d2.factRefs, ...suppliedFactRefs]
+        .filter((ref, index, all) => all.findIndex((candidate) => candidate.type === ref.type && candidate.id === ref.id) === index);
+      const sources = [...d2.sources, ...suppliedSources].slice(0, kind === 'topic' ? 12 : 14);
+      // 修正：流式路径此前未接自进化权重，导致与非流式生成行为不一致（合并时保留该修正）。
       const strategyOverrides = await this.computeStrategyWeights(user, brandSlug, cleanNullable(dto.category) ?? undefined).catch(() => ({}));
       const { prompt, strategyKeys } = buildGeoOptimizationPrompt({
         kind,
@@ -1165,6 +1435,7 @@ export class GrowthGeoService {
           tokensCost: String(captured.tokensCost ?? 0),
           complianceFlags,
           strategyKeys,
+          factRefs,
         }));
         return { asset, draft, strategies: strategyKeys, citations: captured.citations || [] };
       }, rls(user));
@@ -1215,25 +1486,14 @@ export class GrowthGeoService {
     }, rls(user));
   }
 
-  async runProbeBatch(
+  private async queueProbeBatch(
     user: JwtPayload,
-    dto: { brandSlug?: string; category?: string; questionIds?: string[]; stage?: string; competitors?: string[] },
+    brandSlug: string,
+    category: string,
+    questions: GrowthGeoQuestionEntity[],
+    competitors: string[],
   ) {
-    const brandSlug = cleanGeoBrand(dto?.brandSlug);
-    const category = cleanText(dto?.category, 'home-comfort') || 'home-comfort';
-    const stage = cleanText(dto?.stage);
-    const competitors = cleanTags(dto?.competitors);
-    const questionIds = cleanTags(dto?.questionIds);
     const created = await withRlsTransaction(this.ds, async (em) => {
-      const questionWhere: any = { tenantId: user.tenantId, brandSlug, category, enabled: true };
-      if (GEO_STAGES.has(stage)) questionWhere.stage = stage;
-      if (questionIds.length) questionWhere.id = In(questionIds);
-      const questions = await em.getRepository(GrowthGeoQuestionEntity).find({
-        where: questionWhere,
-        order: { priority: 'ASC', createdAt: 'ASC' },
-        take: 50,
-      });
-      if (!questions.length) throw new BadRequestException('no enabled GEO questions selected');
       const batch = await em.getRepository(GrowthGeoProbeBatchEntity).save(
         em.getRepository(GrowthGeoProbeBatchEntity).create({
           tenantId: user.tenantId,
@@ -1269,6 +1529,29 @@ export class GrowthGeoService {
     }, 0);
 
     return { success: true, data: { batch: created.batch, jobs: created.jobs, queued: true } };
+  }
+
+  async runProbeBatch(
+    user: JwtPayload,
+    dto: { brandSlug?: string; category?: string; questionIds?: string[]; stage?: string; competitors?: string[] },
+  ) {
+    const brandSlug = cleanGeoBrand(dto?.brandSlug);
+    const category = cleanText(dto?.category, 'home-comfort') || 'home-comfort';
+    const stage = cleanText(dto?.stage);
+    const competitors = cleanTags(dto?.competitors);
+    const questionIds = cleanTags(dto?.questionIds);
+    const questions = await withRlsTransaction(this.ds, async (em) => {
+      const questionWhere: any = { tenantId: user.tenantId, brandSlug, category, enabled: true };
+      if (GEO_STAGES.has(stage)) questionWhere.stage = stage;
+      if (questionIds.length) questionWhere.id = In(questionIds);
+      return em.getRepository(GrowthGeoQuestionEntity).find({
+        where: questionWhere,
+        order: { priority: 'ASC', createdAt: 'ASC' },
+        take: 50,
+      });
+    }, rls(user));
+    if (!questions.length) throw new BadRequestException('no enabled GEO questions selected');
+    return this.queueProbeBatch(user, brandSlug, category, questions, competitors);
   }
 
   async listProbeBatches(user: JwtPayload, query: { brandSlug?: string; category?: string } = {}) {
@@ -1720,19 +2003,48 @@ export class GrowthGeoService {
   /** 开启一个实验：对某问题跑基线探测，记录发布前的出现率。 */
   async startGeoExperiment(
     user: JwtPayload,
-    dto: { brandSlug?: string; questionId?: string; question?: string; hypothesis?: string; killCriteria?: string; competitors?: string[] },
+    dto: { brandSlug?: string; category?: string; questionId?: string; question?: string; hypothesis?: string; killCriteria?: string; competitors?: string[] },
   ) {
-    const brandSlug = cleanGeoBrand(dto?.brandSlug);
-    const question = cleanText(dto?.question);
-    const questionId = cleanText(dto?.questionId) || null;
-    if (!question && !questionId) throw new BadRequestException('question or questionId required');
+    const requestedBrand = cleanGeoBrand(dto?.brandSlug);
+    const requestedCategory = cleanText(dto?.category, 'home-comfort') || 'home-comfort';
+    const requestedQuestion = cleanText(dto?.question);
+    const requestedQuestionId = cleanText(dto?.questionId) || null;
+    if (!requestedQuestion && !requestedQuestionId) throw new BadRequestException('question or questionId required');
+
+    const selected = await withRlsTransaction(this.ds, async (em) => {
+      const repo = em.getRepository(GrowthGeoQuestionEntity);
+      if (requestedQuestionId) {
+        const row = await repo.findOne({ where: { tenantId: user.tenantId, id: requestedQuestionId, enabled: true } as any });
+        if (!row) throw new BadRequestException('enabled GEO question not found');
+        return row;
+      }
+      const existing = await repo.findOne({
+        where: {
+          tenantId: user.tenantId,
+          brandSlug: requestedBrand,
+          category: requestedCategory,
+          question: requestedQuestion,
+        } as any,
+      });
+      if (existing) return existing;
+      return repo.save(repo.create({
+        tenantId: user.tenantId,
+        brandSlug: requestedBrand,
+        category: requestedCategory,
+        stage: 'pre',
+        question: requestedQuestion,
+        priority: 100,
+        enabled: true,
+      }));
+    }, rls(user));
+    const brandSlug = selected.brandSlug;
+    const category = selected.category;
+    const question = selected.question;
+    const questionId = selected.id;
+    const probeProvider = qwenProviderName();
 
     // 1. 跑基线探测批次（复用现有探测能力）
-    const probe = await this.runProbeBatch(user, {
-      brandSlug,
-      questionIds: questionId ? [questionId] : undefined,
-      competitors: dto?.competitors,
-    });
+    const probe = await this.queueProbeBatch(user, brandSlug, category, [selected], cleanTags(dto?.competitors));
     const baselineBatchId = probe?.data?.batch?.id;
 
     // 2. 落实验记录（此刻出现率未知，待批次跑完由 getGeoExperiment 回填）
@@ -1741,33 +2053,90 @@ export class GrowthGeoService {
       const exp = await repo.save(repo.create({
         tenantId: user.tenantId,
         brandSlug,
+        category,
         questionId,
-        question: question || probe?.data?.jobs?.[0]?.question || '(问题集)',
+        question,
         hypothesis: cleanNullable(dto?.hypothesis),
         killCriteria: cleanNullable(dto?.killCriteria),
         status: 'baseline',
         baselineBatchId,
         baselineAt: new Date(),
+        probeEngine: GEO_ENGINE,
+        probeProvider,
       }));
-      return { success: true, data: { experiment: exp, baselineBatchId } };
+      return { success: true, data: { experiment: await this.geoExperimentView(em, user, exp), baselineBatchId } };
     }, rls(user));
   }
 
-  /** 关联补的内容资产，并标记内容已发布（进入 verifying 前的干预步）。 */
-  async linkGeoExperimentContent(
+  /** 基线完成后，用同一问题和 D2 产品事实生成千问优化草稿。 */
+  async generateGeoExperimentContent(
     user: JwtPayload,
     id: string,
-    dto: { copyAssetId?: string },
+    dto: { kind?: 'faq' | 'comparison' | 'topic'; competitors?: string[] } = {},
   ) {
+    await this.getGeoExperiment(user, id);
+    const context = await withRlsTransaction(this.ds, async (em) => {
+      const exp = await em.getRepository(GrowthGeoExperimentEntity).findOne({ where: { tenantId: user.tenantId, id } as any });
+      if (!exp) throw new BadRequestException('experiment not found');
+      if (exp.baselineCitedRate === null) throw new BadRequestException('baseline probe has not completed');
+      if (exp.copyAssetId) throw new BadRequestException('experiment already has a content asset');
+      const jobs = exp.baselineBatchId ? await this.jobsForBatch(em, user, exp.baselineBatchId) : [];
+      const job = jobs[0] || null;
+      const snapshot = job?.snapshotId
+        ? await em.getRepository(GrowthGeoAnswerSnapshotEntity).findOne({ where: { tenantId: user.tenantId, id: job.snapshotId } as any })
+        : null;
+      return { exp, job, snapshot };
+    }, rls(user));
+
+    const generated = await this.generateOptimizationContent(user, {
+      kind: dto.kind || 'faq',
+      question: context.exp.question,
+      probeJobId: context.job?.id,
+      category: context.exp.category,
+      answerPreview: context.snapshot?.answerText || undefined,
+      brandSlug: context.exp.brandSlug,
+      competitors: dto.competitors,
+      sources: Array.isArray(context.snapshot?.citations) ? context.snapshot.citations : [],
+    });
+    const assetId = generated?.data?.asset?.id;
     return withRlsTransaction(this.ds, async (em) => {
       const repo = em.getRepository(GrowthGeoExperimentEntity);
       const exp = await repo.findOne({ where: { tenantId: user.tenantId, id } as any });
       if (!exp) throw new BadRequestException('experiment not found');
-      exp.copyAssetId = cleanText(dto?.copyAssetId) || null;
+      exp.copyAssetId = assetId;
+      await repo.save(exp);
+      return { success: true, data: { experiment: await this.geoExperimentView(em, user, exp), asset: generated.data.asset } };
+    }, rls(user));
+  }
+
+  /** 关联已核准内容，并以实际发布 URL 作为复投前证据。 */
+  async linkGeoExperimentContent(
+    user: JwtPayload,
+    id: string,
+    dto: { copyAssetId?: string; publicationUrl?: string },
+  ) {
+    const copyAssetId = cleanText(dto?.copyAssetId);
+    const publicationUrl = normalizePublicationUrl(dto?.publicationUrl);
+    if (!copyAssetId) throw new BadRequestException('approved copyAssetId required');
+    if (!publicationUrl) throw new BadRequestException('valid publicationUrl required');
+    return withRlsTransaction(this.ds, async (em) => {
+      const repo = em.getRepository(GrowthGeoExperimentEntity);
+      const exp = await repo.findOne({ where: { tenantId: user.tenantId, id } as any });
+      if (!exp) throw new BadRequestException('experiment not found');
+      const assetRepo = em.getRepository(GrowthCopyAssetEntity);
+      const asset = await assetRepo.findOne({ where: { tenantId: user.tenantId, id: copyAssetId } as any });
+      if (!asset) throw new BadRequestException('copy asset not found');
+      if (!['approved', 'published'].includes(asset.status)) throw new BadRequestException('copy asset must be approved before publication');
+      if (!(asset.factRefs || []).length) throw new BadRequestException('copy asset has no D2 fact references');
+      if (exp.copyAssetId && exp.copyAssetId !== copyAssetId) throw new BadRequestException('experiment is linked to another copy asset');
+      asset.status = 'published';
+      await assetRepo.save(asset);
+      exp.copyAssetId = copyAssetId;
       exp.contentPublishedAt = new Date();
+      exp.publicationUrl = publicationUrl;
       exp.status = 'content-linked';
       await repo.save(exp);
-      return { success: true, data: { experiment: exp } };
+      return { success: true, data: { experiment: await this.geoExperimentView(em, user, exp) } };
     }, rls(user));
   }
 
@@ -1781,12 +2150,16 @@ export class GrowthGeoService {
     const exp0 = await withRlsTransaction(this.ds, async (em) => {
       const e = await em.getRepository(GrowthGeoExperimentEntity).findOne({ where: { tenantId: user.tenantId, id } as any });
       if (!e) throw new BadRequestException('experiment not found');
+      if (e.status !== 'content-linked' || !e.copyAssetId || !e.publicationUrl || !e.contentPublishedAt) {
+        throw new BadRequestException('approved content and publication evidence required before verification');
+      }
       return e;
     }, rls(user));
 
     // 复投探测（与基线同问题）
     const probe = await this.runProbeBatch(user, {
       brandSlug: exp0.brandSlug,
+      category: exp0.category,
       questionIds: exp0.questionId ? [exp0.questionId] : undefined,
       competitors: dto?.competitors,
     });
@@ -1800,7 +2173,7 @@ export class GrowthGeoService {
       exp.verifyAt = new Date();
       exp.status = 'verifying';
       await repo.save(exp);
-      return { success: true, data: { experiment: exp, verifyBatchId, note: '复投探测已排队，稍后 GET 实验详情查看 lift' } };
+      return { success: true, data: { experiment: await this.geoExperimentView(em, user, exp), verifyBatchId, note: '复投探测已排队，稍后 GET 实验详情查看 lift' } };
     }, rls(user));
   }
 
@@ -1831,7 +2204,8 @@ export class GrowthGeoService {
         }
       }
       await repo.save(exp);
-      return { success: true, data: { experiment: exp } };
+      await applyPromptFeedback(em, user.tenantId, exp.copyAssetId);
+      return { success: true, data: { experiment: await this.geoExperimentView(em, user, exp) } };
     }, rls(user));
   }
 
@@ -1980,14 +2354,15 @@ export class GrowthGeoService {
     };
   }
 
-  async listGeoExperiments(user: JwtPayload, query: { brandSlug?: string } = {}) {
+  async listGeoExperiments(user: JwtPayload, query: { brandSlug?: string; category?: string } = {}) {
     return withRlsTransaction(this.ds, async (em) => {
       const where: any = { tenantId: user.tenantId };
       if (query.brandSlug !== undefined) where.brandSlug = cleanGeoBrand(query.brandSlug);
+      if (query.category !== undefined) where.category = cleanText(query.category);
       const items = await em.getRepository(GrowthGeoExperimentEntity).find({
         where, order: { createdAt: 'DESC' }, take: 50,
       });
-      return { success: true, data: { items } };
+      return { success: true, data: { items: await Promise.all(items.map((item) => this.geoExperimentView(em, user, item))) } };
     }, rls(user));
   }
 
@@ -3528,6 +3903,176 @@ export class GrowthCampaignService implements OnModuleInit {
 }
 
 @Injectable()
+export class GrowthContentAssetService {
+  constructor(
+    @InjectDataSource() private readonly ds: DataSource,
+    private readonly eventBus: EventBusService,
+  ) {}
+
+  async createAsset(user: JwtPayload, dto: Record<string, unknown>) {
+    const title = cleanText(dto?.title);
+    const assetType = cleanText(dto?.assetType);
+    if (!title || !assetType) throw new BadRequestException('title and assetType required');
+    return withRlsTransaction(this.ds, async (em) => {
+      const repo = em.getRepository(GrowthContentAssetEntity);
+      const asset = await repo.save(repo.create({
+        tenantId: user.tenantId,
+        title,
+        assetType,
+        brandSlug: cleanNullable(dto.brandSlug),
+        channel: cleanNullable(dto.channel),
+        summary: cleanNullable(dto.summary),
+        tags: cleanTags(dto.tags),
+        fileArtifactId: cleanNullable(dto.fileArtifactId),
+        fileUrl: cleanNullable(dto.fileUrl),
+        thumbnailUrl: cleanNullable(dto.thumbnailUrl),
+        fileFormat: cleanNullable(dto.fileFormat),
+        usageScene: cleanNullable(dto.usageScene),
+        status: 'active',
+      }));
+      await this.eventBus.publishInTx(em, {
+        tenantId: user.tenantId,
+        eventType: 'growth.content_asset.created',
+        aggregateType: 'growth_content_asset',
+        aggregateId: asset.id,
+        payload: { assetId: asset.id, assetType: asset.assetType, brandSlug: asset.brandSlug },
+      });
+      return { success: true, data: { asset } };
+    }, rls(user));
+  }
+
+  async listAssets(user: JwtPayload, query: Record<string, unknown> = {}) {
+    const assetType = cleanText(query.assetType);
+    const brandSlug = cleanText(query.brandSlug);
+    const keyword = cleanText(query.keyword || query.q);
+    const includeArchived = String(query.includeArchived || '') === 'true' || String(query.includeArchived || '') === '1';
+    const page = Math.max(Math.floor(Number(query.page) || 1), 1);
+    const pageSize = Math.min(Math.max(Math.floor(Number(query.pageSize) || 20), 1), 200);
+    const SORT_COLUMNS: Record<string, string> = {
+      title: 'title',
+      assetType: 'assetType',
+      brandSlug: 'brandSlug',
+      fileFormat: 'fileFormat',
+      usageScene: 'usageScene',
+      updatedAt: 'updatedAt',
+      createdAt: 'createdAt',
+      usageCount: 'usageCount',
+    };
+    const sortBy = SORT_COLUMNS[cleanText(query.sortBy)] || 'updatedAt';
+    const sortOrder = cleanText(query.sortOrder).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+    return withRlsTransaction(this.ds, async (em) => {
+      const repo = em.getRepository(GrowthContentAssetEntity);
+      const baseWhere: Record<string, unknown> = {
+        tenantId: user.tenantId,
+        ...(includeArchived ? {} : { archivedAt: IsNull() }),
+      };
+      if (assetType) baseWhere.assetType = assetType;
+      if (brandSlug) baseWhere.brandSlug = brandSlug;
+      const where = keyword
+        ? [
+            { ...baseWhere, title: ILike(`%${keyword}%`) },
+            { ...baseWhere, summary: ILike(`%${keyword}%`) },
+          ]
+        : baseWhere;
+      const [items, total] = await repo.findAndCount({
+        where: where as any,
+        order: { [sortBy]: sortOrder } as any,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      });
+      const existing = await repo
+        .createQueryBuilder('a')
+        .select('DISTINCT a.assetType', 'assetType')
+        .where('a.tenantId = :tenantId', { tenantId: user.tenantId })
+        .andWhere('a.archivedAt IS NULL')
+        .orderBy('a.assetType', 'ASC')
+        .limit(100)
+        .getRawMany();
+      const assetTypes = Array.from(new Set([
+        '封面图',
+        '正文配图',
+        '产品图',
+        '案例图',
+        '品牌VI',
+        '短视频',
+        ...existing.map((row) => cleanText(row.assetType)).filter(Boolean),
+      ]));
+      const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+      return { success: true, data: { items, total, page, pageSize, totalPages, assetTypes } };
+    }, rls(user));
+  }
+
+  async getAsset(user: JwtPayload, id: string) {
+    return withRlsTransaction(this.ds, async (em) => {
+      const asset = await em.getRepository(GrowthContentAssetEntity).findOne({ where: { tenantId: user.tenantId, id } });
+      if (!asset) throw new BadRequestException('content asset not found');
+      return { success: true, data: { asset } };
+    }, rls(user));
+  }
+
+  async updateAsset(user: JwtPayload, id: string, dto: Record<string, unknown>) {
+    return withRlsTransaction(this.ds, async (em) => {
+      const repo = em.getRepository(GrowthContentAssetEntity);
+      const asset = await repo.findOne({ where: { tenantId: user.tenantId, id } });
+      if (!asset || asset.archivedAt) throw new BadRequestException('content asset not found');
+      if (dto.title !== undefined) {
+        const title = cleanText(dto.title);
+        if (!title) throw new BadRequestException('title cannot be empty');
+        asset.title = title;
+      }
+      if (dto.assetType !== undefined) {
+        const assetType = cleanText(dto.assetType);
+        if (!assetType) throw new BadRequestException('assetType cannot be empty');
+        asset.assetType = assetType;
+      }
+      if (dto.status !== undefined) {
+        const status = cleanText(dto.status);
+        if (!MATERIAL_STATUSES.has(status)) throw new BadRequestException(`status must be one of ${Array.from(MATERIAL_STATUSES).join('/')}`);
+        asset.status = status;
+      }
+      if (dto.brandSlug !== undefined) asset.brandSlug = cleanNullable(dto.brandSlug);
+      if (dto.channel !== undefined) asset.channel = cleanNullable(dto.channel);
+      if (dto.summary !== undefined) asset.summary = cleanNullable(dto.summary);
+      if (dto.tags !== undefined) asset.tags = cleanTags(dto.tags);
+      if (dto.fileArtifactId !== undefined) asset.fileArtifactId = cleanNullable(dto.fileArtifactId);
+      if (dto.fileUrl !== undefined) asset.fileUrl = cleanNullable(dto.fileUrl);
+      if (dto.thumbnailUrl !== undefined) asset.thumbnailUrl = cleanNullable(dto.thumbnailUrl);
+      if (dto.fileFormat !== undefined) asset.fileFormat = cleanNullable(dto.fileFormat);
+      if (dto.usageScene !== undefined) asset.usageScene = cleanNullable(dto.usageScene);
+      await repo.save(asset);
+      return { success: true, data: { asset } };
+    }, rls(user));
+  }
+
+  async archiveAsset(user: JwtPayload, id: string) {
+    return withRlsTransaction(this.ds, async (em) => {
+      const repo = em.getRepository(GrowthContentAssetEntity);
+      const asset = await repo.findOne({ where: { tenantId: user.tenantId, id } });
+      if (!asset) throw new BadRequestException('content asset not found');
+      asset.status = 'archived';
+      asset.archivedAt = new Date();
+      await repo.save(asset);
+      return { success: true, data: { asset } };
+    }, rls(user));
+  }
+
+  async removeAsset(user: JwtPayload, id: string) {
+    return this.archiveAsset(user, id);
+  }
+
+  async recordUsage(user: JwtPayload, id: string) {
+    return withRlsTransaction(this.ds, async (em) => {
+      const repo = em.getRepository(GrowthContentAssetEntity);
+      const asset = await repo.findOne({ where: { tenantId: user.tenantId, id } });
+      if (!asset || asset.archivedAt) throw new BadRequestException('content asset not found');
+      asset.usageCount += 1;
+      await repo.save(asset);
+      return { success: true, data: { asset, fileUrl: asset.fileUrl, fileArtifactId: asset.fileArtifactId } };
+    }, rls(user));
+  }
+}
+
+@Injectable()
 export class GrowthMarketingMaterialService {
   constructor(
     @InjectDataSource() private readonly ds: DataSource,
@@ -3793,5 +4338,6 @@ export const GROWTH_SERVICES = [
   GrowthCopyService,
   GrowthGeoService,
   GrowthCampaignService,
+  GrowthContentAssetService,
   GrowthMarketingMaterialService,
 ];

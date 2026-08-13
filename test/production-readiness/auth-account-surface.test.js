@@ -15,8 +15,8 @@ describe('auth/account surface smoke', () => {
     expect(loginPage).toContain('auth.login(phone, password)');
     expect(loginPage).toContain('setToken(res.token)');
     expect(loginPage).toContain("localStorage.setItem('token', res.token)");
-    expect(loginPage).toContain(") || '/brand'");
-    expect(loginPage).toContain("'/api/v2/auth/sso/login?redirect=/brand'");
+    expect(loginPage).toContain(") || '/cockpit'");
+    expect(loginPage).toContain("'/api/v2/auth/sso/login?redirect=/cockpit'");
 
     const api = read('apps/dealer-workbench/src/lib/api.ts');
     expect(api).toContain("login: (phone: string, password: string)");

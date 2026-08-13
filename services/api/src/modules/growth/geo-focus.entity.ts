@@ -10,6 +10,12 @@ export class GeoTargetEntity {
   @Column({ type: 'varchar', nullable: true }) segment: string | null;
   @Column({ type: 'varchar', nullable: true }) scenario: string | null;
   @Column({ type: 'varchar', nullable: true }) engine: string | null;
+  @Column({ name: 'intent_stage', type: 'varchar', nullable: true }) intentStage: string | null;
+  @Column({ name: 'probe_type', type: 'varchar', default: 'category' }) probeType: string;
+  @Column({ name: 'region', type: 'varchar', nullable: true }) region: string | null;
+  @Column({ name: 'asset_gaps', type: 'jsonb', default: () => "'[]'::jsonb" }) assetGaps: string[];
+  @Column({ name: 'probe_strategy', type: 'jsonb', default: () => "'{}'::jsonb" }) probeStrategy: Record<string, unknown>;
+  @Column({ name: 'last_probed_at', type: 'timestamptz', nullable: true }) lastProbedAt: Date | null;
   @Column() query: string;
   @Column({ name: 'priority_score', type: 'numeric', default: 0 }) priorityScore: number;
   @Column({ name: 'variant_strategy', type: 'jsonb', default: () => "'{}'::jsonb" }) variantStrategy: Record<string, unknown>;

@@ -19,7 +19,7 @@ files, or the production secret manager:
 | `OIDC_CLIENT_SECRET` | Confidential client secret. Must never be committed or exposed to browser code. |
 | `OIDC_REDIRECT_URI` | Callback endpoint registered at the IdP. |
 | `OIDC_SCOPES` | Requested scopes. Current value: `openid profile email roles org`. |
-| `OIDC_POST_LOGIN_REDIRECT` | Nexus landing path after successful login. Current value: `/hub`. |
+| `OIDC_POST_LOGIN_REDIRECT` | Nexus landing path after successful login. Current value: `/cockpit`. |
 
 Optional variables:
 
@@ -40,7 +40,7 @@ OIDC_CLIENT_ID=cli_mrvdz1yr8jfzrb8u
 OIDC_CLIENT_SECRET=
 OIDC_REDIRECT_URI=http://localhost:5000/api/v2/auth/sso/callback
 OIDC_SCOPES=openid profile email roles org
-OIDC_POST_LOGIN_REDIRECT=/hub
+OIDC_POST_LOGIN_REDIRECT=/cockpit
 OIDC_USERINFO_ENABLED=true
 OIDC_ALLOWED_REDIRECT_HOSTS=localhost:5000
 OIDC_ROLES_CLAIM=roles
@@ -60,11 +60,11 @@ Use these non-secret values for production:
 OIDC_ISSUER=https://ai.rhautt.com
 OIDC_CLIENT_ID=cli_mrve0bgvgnl2gkjg
 OIDC_CLIENT_SECRET=
-OIDC_REDIRECT_URI=https://nexus.rhautt.com/api/v2/auth/sso/callback
+OIDC_REDIRECT_URI=https://gtm.rhautt.com/api/v2/auth/sso/callback
 OIDC_SCOPES=openid profile email roles org
-OIDC_POST_LOGIN_REDIRECT=/hub
+OIDC_POST_LOGIN_REDIRECT=/cockpit
 OIDC_USERINFO_ENABLED=true
-OIDC_ALLOWED_REDIRECT_HOSTS=nexus.rhautt.com
+OIDC_ALLOWED_REDIRECT_HOSTS=gtm.rhautt.com
 OIDC_ROLES_CLAIM=roles
 OIDC_ORG_CLAIM=org
 ```
@@ -79,9 +79,9 @@ rotate that secret in `https://ai.rhautt.com/` before production launch.
 `OIDC_REDIRECT_URI` is the OIDC callback registered with the IdP. For Rhautt
 Nexus it is `/api/v2/auth/sso/callback`.
 
-`OIDC_POST_LOGIN_REDIRECT=/hub` is the business landing page after Nexus has
+`OIDC_POST_LOGIN_REDIRECT=/cockpit` is the business landing page after Nexus has
 completed the callback, verified identity, created the local authenticated
-state, and selected a safe redirect path. `/hub` must not be registered as the
+state, and selected a safe redirect path. `/cockpit` must not be registered as the
 OIDC callback.
 
 ## Verification

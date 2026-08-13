@@ -5,9 +5,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   BrandSiteBasicSettingsEntity,
   BrandSiteEntity,
+  SiteDocumentCategoryEntity,
+  SiteDocumentEntity,
+  SiteDealerEntity,
   SiteInquiryEntity,
   SiteNewsArticleEntity,
   SiteProductAssignmentEntity,
+  SiteProductCategoryEntity,
 } from './brand-site.entity';
 import { BrandSiteController } from './brand-site.controller';
 import { BrandSiteService } from './brand-site.service';
@@ -18,7 +22,7 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 import { ProductCatalogModule } from '../product-catalog/product-catalog.module';
 import { PublicRateLimitGuard } from '../common/public-rate-limit.guard';
 import {
-  SiteProductAssignmentController, SiteProductPublicController,
+  SiteProductAssignmentController, SiteProductCategoryController, SiteProductPublicController,
 } from './site-product-assignment.controller';
 import { SiteProductAssignmentService } from './site-product-assignment.service';
 import { SiteNewsController, SiteNewsPublicController } from './site-news.controller';
@@ -30,6 +34,10 @@ import {
   BrandSiteBasicSettingsPublicController,
 } from './brand-site-basic-settings.controller';
 import { BrandSiteBasicSettingsService } from './brand-site-basic-settings.service';
+import { SiteDocumentController, SiteDocumentPublicController } from './site-document.controller';
+import { SiteDocumentService } from './site-document.service';
+import { SiteDealerController, SiteDealerPublicController } from './site-dealer.controller';
+import { SiteDealerService } from './site-dealer.service';
 
 /**
  * 品牌注册表模块（配置驱动的品牌基础要素 API）。
@@ -43,15 +51,21 @@ import { BrandSiteBasicSettingsService } from './brand-site-basic-settings.servi
       BrandSiteEntity,
       BrandSiteBasicSettingsEntity,
       SiteProductAssignmentEntity,
+      SiteProductCategoryEntity,
       SiteNewsArticleEntity,
+      SiteDocumentCategoryEntity,
+      SiteDocumentEntity,
+      SiteDealerEntity,
       SiteInquiryEntity,
       AuditLogEntity,
     ])]),
   ],
   controllers: [
-    BrandRegistryController, BrandSiteController, SiteProductAssignmentController, SiteProductPublicController,
+    BrandRegistryController, BrandSiteController, SiteProductAssignmentController, SiteProductCategoryController, SiteProductPublicController,
     SiteNewsController, SiteNewsPublicController, BrandSiteBasicSettingsController,
     BrandSiteBasicSettingsPublicController, SiteInquiryController, SiteInquiryPublicController,
+    SiteDocumentController, SiteDocumentPublicController,
+    SiteDealerController, SiteDealerPublicController,
   ],
   providers: [
     BrandRegistryService,
@@ -60,13 +74,19 @@ import { BrandSiteBasicSettingsService } from './brand-site-basic-settings.servi
     BrandSiteBasicSettingsService,
     SiteProductAssignmentService,
     SiteNewsService,
+    SiteDocumentService,
+    SiteDealerService,
     SiteInquiryService,
     PublicRateLimitGuard,
     ...(TARGET_API_BOOT_SMOKE ? [
       bootSmokeRepositoryProvider(BrandSiteEntity),
       bootSmokeRepositoryProvider(BrandSiteBasicSettingsEntity),
       bootSmokeRepositoryProvider(SiteProductAssignmentEntity),
+      bootSmokeRepositoryProvider(SiteProductCategoryEntity),
       bootSmokeRepositoryProvider(SiteNewsArticleEntity),
+      bootSmokeRepositoryProvider(SiteDocumentCategoryEntity),
+      bootSmokeRepositoryProvider(SiteDocumentEntity),
+      bootSmokeRepositoryProvider(SiteDealerEntity),
       bootSmokeRepositoryProvider(SiteInquiryEntity),
       bootSmokeRepositoryProvider(AuditLogEntity),
     ] : []),

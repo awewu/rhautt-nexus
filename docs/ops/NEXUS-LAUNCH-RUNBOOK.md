@@ -62,10 +62,10 @@ DB 用 docker(见 §0/§2);API 与工作台以 Node 进程跑生产:
 # 1) 生产库就绪(见 §2)
 SEED_ADMIN=1 ... npm run prod:provision
 # 2) 启动 API（preflight 自动前置校验；缺密钥拒启）
-NODE_ENV=production PORT=5500 npm run start:api
+NODE_ENV=production PORT=4500 npm run start:api
 # 3) 构建并启动工作台（Next standalone；API_URL 指向 API）
 npm --prefix apps/dealer-workbench run build
-API_URL=http://127.0.0.1:5500 node apps/dealer-workbench/.next/standalone/apps/dealer-workbench/server.js
+API_URL=http://127.0.0.1:4500 node apps/dealer-workbench/.next/standalone/apps/dealer-workbench/server.js
 # 建议用 pm2/systemd 守护两个进程 + 反代(nginx/caddy)统一入口 + TLS。
 ```
 

@@ -17,8 +17,8 @@ test('lists selected brand category tree ordered by sortOrder', async () => {
 
   assert.equal(result.data.total, 3);
   assert.deepEqual(result.data.items.map((item) => item.code), ['home', 'water', 'floor']);
-  assert.deepEqual(result.data.tree.map((item) => item.code), ['home']);
-  assert.deepEqual(result.data.tree[0].children.map((item) => item.code), ['water', 'floor']);
+  assert.deepEqual(result.data.tree!.map((item) => item.code), ['home']);
+  assert.deepEqual(result.data.tree![0].children.map((item) => item.code), ['water', 'floor']);
 });
 
 test('lazy category list returns only root rows with tree-table metadata', async () => {
@@ -106,6 +106,24 @@ test('public category tree is brand-scoped and exposes only website-safe fields'
       assert.equal(field in item, false, `${field} must not be exposed`);
     }
   }
+});
+
+test('public category tree hides a category when it or an ancestor is hidden from the website', async () => {
+  const hiddenRoot = category('hidden-root', 'everhot', 1, null, 'hidden-root', 20);
+  hiddenRoot.showOnWebsite = false;
+  const hiddenChild = category('hidden-child', 'everhot', 2, 'root', 'hidden-child', 20);
+  hiddenChild.showOnWebsite = false;
+  const { service } = serviceFixture([
+    category('root', 'everhot', 1, null, 'home', 10),
+    category('visible-child', 'everhot', 2, 'root', 'visible-child', 10),
+    hiddenChild,
+    hiddenRoot,
+    category('descendant-of-hidden-root', 'everhot', 2, 'hidden-root', 'hidden-descendant', 10),
+  ]);
+
+  const result = await service.publicList('everhot');
+
+  assert.deepEqual(result.data.items.map((item) => item.code), ['home', 'visible-child']);
 });
 
 test('public category tree rejects invalid brand codes', async () => {
@@ -356,6 +374,7 @@ function category(
     slug: null,
     sortOrder,
     status: 'active',
+    showOnWebsite: true,
     description: null,
     deletedAt: null,
     createdAt: new Date(`2026-01-01T00:00:${String(sortOrder).padStart(2, '0')}Z`),

@@ -17,6 +17,7 @@ export class BrandProductCategoryEntity {
   @Column({ type: 'varchar', nullable: true }) slug: string | null;
   @Column({ name: 'sort_order', default: 0 }) sortOrder: number;
   @Column({ default: 'active' }) @Index() status: BrandProductCategoryStatus;
+  @Column({ name: 'show_on_website', default: true }) @Index() showOnWebsite: boolean;
   @Column({ type: 'text', nullable: true }) description: string | null;
   @Column({ name: 'deleted_at', type: 'timestamptz', nullable: true }) deletedAt: Date | null;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;

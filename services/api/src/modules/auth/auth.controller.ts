@@ -48,7 +48,7 @@ export class AuthController {
     } catch {
       return res
         .status(302)
-        .header('Location', '/?returnUrl=%2Fbrand&ssoError=sso_unavailable')
+        .header('Location', '/?returnUrl=%2Fcockpit&ssoError=sso_unavailable')
         .send();
     }
   }
@@ -80,7 +80,7 @@ export class AuthController {
       return res
         .status(302)
         .header('Set-Cookie', this.oidcSsoCallback.clearTransientCookies())
-        .header('Location', `/?returnUrl=%2Fbrand&ssoError=${landingReason}`)
+        .header('Location', `/?returnUrl=%2Fcockpit&ssoError=${landingReason}`)
         .send();
     }
   }

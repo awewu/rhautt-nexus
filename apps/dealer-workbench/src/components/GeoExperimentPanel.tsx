@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
+  BookmarkPlus,
   CheckCircle2,
   ChevronDown,
   FlaskConical,
@@ -15,7 +16,7 @@ import {
   TrendingUp,
   X,
 } from 'lucide-react';
-import { growthGeo } from '../lib/api';
+import { growthCopy, growthGeo } from '../lib/api';
 
 /**
  * GEO 第 7 层 · 闭环实验面板
@@ -42,6 +43,26 @@ interface Experiment {
   lift?: number | null;
   conclusion?: string | null;
   contentPublishedAt?: string | null;
+  category?: string;
+  copyAssetId?: string | null;
+  publicationUrl?: string | null;
+  probeProvider?: string;
+  copyAsset?: {
+    id: string;
+    status: string;
+    complianceFlags?: string[];
+    factRefs?: Array<{ type: string; id: string }>;
+    model?: string | null;
+    promptTemplateId?: string | null;
+  } | null;
+  promptTemplate?: {
+    id: string;
+    name: string;
+    evidenceState: string;
+    verifiedCount: number;
+    averageLift: number;
+  } | null;
+  loop?: { phase: string; nextAction: string; terminal: boolean };
   createdAt: string;
 }
 
@@ -60,7 +81,10 @@ const STATUS_META: Record<ExperimentStatus, { label: string; tone: string; bg: s
 const pct = (v?: number | null) => (v === null || v === undefined ? '—' : `${Math.round(v)}%`);
 const fmtDate = (s?: string | null) => (s ? new Date(s).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) : '—');
 
-export function GeoExperimentPanel({ brandSlug = 'rheem' }: { brandSlug?: string }) {
+export function GeoExperimentPanel({
+  brandSlug = 'rheem',
+  category = '家用热水与舒适系统',
+}: { brandSlug?: string; category?: string }) {
   const [experiments, setExperiments] = useState<Experiment[]>([]);
   const [questions, setQuestions] = useState<GeoQuestion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,8 +100,8 @@ export function GeoExperimentPanel({ brandSlug = 'rheem' }: { brandSlug?: string
     setError(null);
     try {
       const [expRes, qRes] = await Promise.all([
-        growthGeo.experiments({ brandSlug }),
-        growthGeo.questionSet({ brandSlug }),
+        growthGeo.experiments({ brandSlug, category }),
+        growthGeo.questionSet({ brandSlug, category }),
       ]);
       setExperiments((expRes?.items || expRes || []) as Experiment[]);
       setQuestions(((qRes?.questions || []) as GeoQuestion[]).filter((q) => q.id));
@@ -86,7 +110,7 @@ export function GeoExperimentPanel({ brandSlug = 'rheem' }: { brandSlug?: string
     } finally {
       setLoading(false);
     }
-  }, [brandSlug]);
+  }, [brandSlug, category]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -120,6 +144,7 @@ export function GeoExperimentPanel({ brandSlug = 'rheem' }: { brandSlug?: string
       const q = questions.find((x) => x.id === form.questionId);
       await growthGeo.startExperiment({
         brandSlug,
+        category,
         questionId: form.questionId,
         question: q?.question,
         hypothesis: form.hypothesis || undefined,
@@ -136,13 +161,52 @@ export function GeoExperimentPanel({ brandSlug = 'rheem' }: { brandSlug?: string
     }
   };
 
-  const linkContent = async (id: string) => {
-    setBusyId(id);
+  const seedStandardQuestions = async () => {
+    setSubmitting(true);
+    setError(null);
     try {
-      await growthGeo.linkExperimentContent(id, {});
-      setNotice('已标记内容发布，可进行复投验证');
+      const questionSet = await growthGeo.questionSet({ brandSlug, category });
+      await growthGeo.saveGeneratedQuestions({ brandSlug, category, questions: questionSet?.generated || [] });
+      setNotice('标准问题库已初始化，可继续增删改和调整优先级');
       await load();
-    } catch (e) { setError(e instanceof Error ? e.message : '关联内容失败'); }
+    } catch (e) { setError(e instanceof Error ? e.message : '初始化标准问题库失败'); }
+    finally { setSubmitting(false); }
+  };
+
+  const generateContent = async (exp: Experiment) => {
+    setBusyId(exp.id);
+    setError(null);
+    try {
+      await growthGeo.generateExperimentContent(exp.id, { kind: 'faq' });
+      setNotice('千问已基于 D2 产品事实生成草稿，等待人工核准');
+      await load();
+    } catch (e) { setError(e instanceof Error ? e.message : '生成内容失败'); }
+    finally { setBusyId(null); }
+  };
+
+  const approveContent = async (exp: Experiment) => {
+    if (!exp.copyAssetId) return;
+    setBusyId(exp.id);
+    setError(null);
+    try {
+      await growthCopy.approve(exp.copyAssetId);
+      setNotice('内容已人工核准；实际发布后记录公开 URL 才能复测');
+      await load();
+    } catch (e) { setError(e instanceof Error ? e.message : '核准内容失败'); }
+    finally { setBusyId(null); }
+  };
+
+  const recordPublication = async (exp: Experiment) => {
+    if (!exp.copyAssetId) return;
+    const publicationUrl = window.prompt('输入已经公开可访问的内容 URL');
+    if (!publicationUrl) return;
+    setBusyId(exp.id);
+    setError(null);
+    try {
+      await growthGeo.linkExperimentContent(exp.id, { copyAssetId: exp.copyAssetId, publicationUrl });
+      setNotice('发布证据已记录，可以进行同问题复测');
+      await load();
+    } catch (e) { setError(e instanceof Error ? e.message : '记录发布证据失败'); }
     finally { setBusyId(null); }
   };
 
@@ -153,6 +217,20 @@ export function GeoExperimentPanel({ brandSlug = 'rheem' }: { brandSlug?: string
       setNotice('复投探测已排队，稍后自动回填 lift');
       await load();
     } catch (e) { setError(e instanceof Error ? e.message : '复投失败'); }
+    finally { setBusyId(null); }
+  };
+
+  const savePrompt = async (exp: Experiment) => {
+    if (!exp.copyAssetId || exp.copyAsset?.promptTemplateId) return;
+    setBusyId(exp.id);
+    setError(null);
+    try {
+      const result = await growthCopy.savePromptTemplate(exp.copyAssetId);
+      setNotice(result?.template?.verifiedCount > 0
+        ? '提示词已入池，本次实验 lift 已回填到模板成绩'
+        : '提示词已入池，实验完成后会自动回填效果');
+      await load();
+    } catch (e) { setError(e instanceof Error ? e.message : '提示词保存失败'); }
     finally { setBusyId(null); }
   };
 
@@ -177,6 +255,9 @@ export function GeoExperimentPanel({ brandSlug = 'rheem' }: { brandSlug?: string
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-outline btn-sm" type="button" onClick={seedStandardQuestions} disabled={submitting}>
+            {submitting ? <Loader2 size={14} className="animate-spin" /> : <Target size={14} />}初始化标准题库
+          </button>
           <button className="btn btn-outline btn-sm" type="button" onClick={load} disabled={loading}>
             {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}刷新
           </button>
@@ -250,8 +331,11 @@ export function GeoExperimentPanel({ brandSlug = 'rheem' }: { brandSlug?: string
             key={exp.id}
             exp={exp}
             busy={busyId === exp.id}
-            onLink={() => linkContent(exp.id)}
+            onGenerate={() => generateContent(exp)}
+            onApprove={() => approveContent(exp)}
+            onPublish={() => recordPublication(exp)}
             onVerify={() => verify(exp.id)}
+            onSavePrompt={() => savePrompt(exp)}
           />
         ))}
         {!experiments.length ? (
@@ -269,8 +353,14 @@ export function GeoExperimentPanel({ brandSlug = 'rheem' }: { brandSlug?: string
   );
 }
 
-function ExperimentCard({ exp, busy, onLink, onVerify }: {
-  exp: Experiment; busy: boolean; onLink: () => void; onVerify: () => void;
+function ExperimentCard({ exp, busy, onGenerate, onApprove, onPublish, onVerify, onSavePrompt }: {
+  exp: Experiment;
+  busy: boolean;
+  onGenerate: () => void;
+  onApprove: () => void;
+  onPublish: () => void;
+  onVerify: () => void;
+  onSavePrompt: () => void;
 }) {
   const meta = STATUS_META[exp.status];
   const lift = exp.lift;
@@ -322,12 +412,27 @@ function ExperimentCard({ exp, busy, onLink, onVerify }: {
 
         {/* 下一步操作 */}
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          {exp.status === 'baseline' ? (
-            <button className="btn btn-brand btn-sm" type="button" onClick={onLink} disabled={busy}>
-              {busy ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}已补内容 · 标记发布
+          {exp.loop?.nextAction === 'wait-for-baseline' ? (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--t-secondary)' }}>
+              <Loader2 size={14} className="animate-spin" />千问基线探测进行中
+            </span>
+          ) : null}
+          {exp.loop?.nextAction === 'generate-fact-grounded-draft' ? (
+            <button className="btn btn-brand btn-sm" type="button" onClick={onGenerate} disabled={busy}>
+              {busy ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}生成 D2 事实草稿
             </button>
           ) : null}
-          {exp.status === 'content-linked' ? (
+          {exp.loop?.nextAction === 'approve-draft' ? (
+            <button className="btn btn-brand btn-sm" type="button" onClick={onApprove} disabled={busy || Boolean(exp.copyAsset?.complianceFlags?.length)}>
+              {busy ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}人工核准草稿
+            </button>
+          ) : null}
+          {exp.loop?.nextAction === 'record-publication-evidence' ? (
+            <button className="btn btn-brand btn-sm" type="button" onClick={onPublish} disabled={busy}>
+              {busy ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}记录公开发布 URL
+            </button>
+          ) : null}
+          {exp.loop?.nextAction === 'verify-lift' ? (
             <button className="btn btn-brand btn-sm" type="button" onClick={onVerify} disabled={busy}>
               {busy ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}复投验证
             </button>
@@ -335,6 +440,21 @@ function ExperimentCard({ exp, busy, onLink, onVerify }: {
           {exp.status === 'verifying' ? (
             <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--brand)' }}>
               <Loader2 size={14} className="animate-spin" />复投探测进行中，稍后自动回填 lift
+            </span>
+          ) : null}
+          {exp.copyAsset && !exp.copyAsset.promptTemplateId ? (
+            <button className="btn btn-outline btn-sm" type="button" onClick={onSavePrompt} disabled={busy}>
+              {busy ? <Loader2 size={14} className="animate-spin" /> : <BookmarkPlus size={14} />}存入提示词池
+            </button>
+          ) : null}
+          {exp.promptTemplate ? (
+            <span className={exp.promptTemplate.evidenceState === 'proven' ? 'badge badge-success' : exp.promptTemplate.evidenceState === 'negative' ? 'badge badge-danger' : 'badge badge-info'}>
+              提示词：{exp.promptTemplate.name} · 验证 {exp.promptTemplate.verifiedCount} 次 · 平均 lift {exp.promptTemplate.averageLift > 0 ? '+' : ''}{exp.promptTemplate.averageLift}pp
+            </span>
+          ) : null}
+          {exp.copyAsset ? (
+            <span style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>
+              内容：{exp.copyAsset.status} · {exp.copyAsset.factRefs?.length || 0} 条事实引用 · {exp.copyAsset.model || exp.probeProvider || 'qwen'}
             </span>
           ) : null}
           {exp.killCriteria ? (

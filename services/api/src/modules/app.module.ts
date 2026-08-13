@@ -61,7 +61,7 @@ import { TARGET_API_BOOT_SMOKE, BootSmokeInfraModule } from './boot-smoke';
         port: Number(process.env.POSTGRES_PORT || 5432),
         username: process.env.POSTGRES_USER || 'rhautt',
         password: process.env.POSTGRES_PASSWORD,
-        database: process.env.POSTGRES_DB || 'rhautt_nexus',
+        database: process.env.POSTGRES_DB || 'rhautt_GOT',
         // 与 data-source.ts 及 curated 迁移保持一致：业务表位于 rhautt_nexus schema。
         // 缺省会退回 public（旧/空表），导致 bim_projects 等实体查询 500。
         schema: process.env.POSTGRES_SCHEMA || 'rhautt_nexus',

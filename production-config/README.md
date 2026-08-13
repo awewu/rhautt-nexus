@@ -5,8 +5,12 @@
 Production SSO values are documented in
 `docs/dev/rhautt-nexus-sso-oidc-config.md`.
 
-Use `https://nexus.rhautt.com/api/v2/auth/sso/callback` as the OIDC callback
-URL. `/hub` is only the Nexus business landing page after login succeeds.
+Use `https://gtm.rhautt.com/api/v2/auth/sso/callback` as the OIDC callback
+URL. `/cockpit` is the Nexus business landing page after login succeeds.
+
+For first launch, run `node scripts/db/seed-nestjs-auth.js` with migration/ops
+database credentials to create the `DEFAULT` tenant. Production SSO
+auto-provisioning can then use `OIDC_AUTO_PROVISION_TENANT_CODE=DEFAULT`.
 
 Do not commit `OIDC_CLIENT_SECRET`. Inject it through `.env.production`,
 `.env.nestjs`, Docker/PM2 runtime configuration, or the production secret

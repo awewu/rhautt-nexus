@@ -230,8 +230,8 @@ export default function DealerNav() {
   function isChildSelected(href: string) {
     const childPath = href.split('?')[0];
     if (childPath === '/products' && path === '/products') {
-      const childModule = new URLSearchParams(href.split('?')[1] || '').get('module') || 'catalog';
-      return (new URLSearchParams(search).get('module') || 'catalog') === childModule;
+      const childModule = new URLSearchParams(href.split('?')[1] || '').get('module') || 'dashboard';
+      return (new URLSearchParams(search).get('module') || 'dashboard') === childModule;
     }
     if (childPath === '/accounts' && path === '/accounts') {
       const childModule = new URLSearchParams(href.split('?')[1] || '').get('module') || 'users';
@@ -278,8 +278,8 @@ export default function DealerNav() {
     <>
       <aside className="sidebar" style={{ alignItems: 'center' }}>
         <div style={{ height: 3, width: '100%', background: 'var(--brand)', flexShrink: 0 }} />
-        <div style={{ margin: '12px auto 10px', width: 44, height: 24, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <img src="/images/rysnova-logo.jpg" alt="Rysnova" style={{ width: 44, height: 'auto', objectFit: 'contain', filter: 'brightness(1.15) contrast(1.05)' }} />
+        <div style={{ margin: '10px auto 9px', width: 54, height: 28, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+          <img src="/images/rhautt-group-logo-sidebar.png" alt="Rhautt Comfort" style={{ width: 50, height: 15, objectFit: 'contain', display: 'block' }} />
         </div>
         <div style={{ height: 1, width: 32, background: 'rgba(255,255,255,0.08)', margin: '0 auto 8px' }} />
 

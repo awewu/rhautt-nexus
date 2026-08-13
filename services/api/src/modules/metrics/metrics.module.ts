@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
 import { MetricsController } from './metrics.controller';
 import { MetricsService } from './metrics.service';
+import { GtmDigestController } from './gtm-digest.controller';
+import { GtmDigestService } from './gtm-digest.service';
 import { MetricDailyRollupEntity, MetricChannelAttributionEntity } from './metrics.entity';
 import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smoke';
 
@@ -11,9 +13,10 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
     ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([MetricDailyRollupEntity, MetricChannelAttributionEntity])]),
     AuthModule,
   ],
-  controllers: [MetricsController],
+  controllers: [MetricsController, GtmDigestController],
   providers: [
     MetricsService,
+    GtmDigestService,
     ...(TARGET_API_BOOT_SMOKE
       ? [bootSmokeRepositoryProvider(MetricDailyRollupEntity), bootSmokeRepositoryProvider(MetricChannelAttributionEntity)]
       : []),

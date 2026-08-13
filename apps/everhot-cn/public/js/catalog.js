@@ -11,7 +11,7 @@
   var RUNTIME_SITE_CODE = window.EVERHOT_SITE_CODE || 'everhot';
   var RUNTIME_API_BASE = window.EVERHOT_API_BASE || '';
   var RUNTIME_PRODUCTS_API = '/api/v2/sites/' + RUNTIME_SITE_CODE + '/products?locale=zh-CN';
-  var LEGACY_PRODUCTS_API = '/api/v2/brand/' + RUNTIME_SITE_CODE + '/products?locale=zh-CN';
+  var RUNTIME_CATEGORIES_API = '/api/v2/sites/' + RUNTIME_SITE_CODE + '/product-categories';
 
   function installCatalog(){
     window.EVERHOT_PRODUCTS = Array.isArray(window.EVERHOT_PRODUCTS) ? window.EVERHOT_PRODUCTS : [];
@@ -34,13 +34,159 @@
       return res.json();
     });
   }
-  function fetchWithLegacy(apiBase, primary, legacy, valid){
+  function fetchPublished(apiBase, primary, valid){
     function accept(json){
       if(!valid(json)) throw new Error('Invalid product response');
       return json;
     }
-    return fetchJson(apiBase + primary).then(accept)
-      .catch(function(){ return fetchJson(apiBase + legacy).then(accept); });
+    return fetchJson(apiBase + primary).then(accept);
+  }
+  function categoryText(product){
+    var meta = product && product.siteMeta && typeof product.siteMeta === 'object' ? product.siteMeta : {};
+    var productBinding = meta.productCategoryBinding && typeof meta.productCategoryBinding === 'object' ? meta.productCategoryBinding : {};
+    return [
+      product && product.websiteCategoryPath,
+      meta.websiteCategoryPath,
+      meta.siteProductCategory && meta.siteProductCategory.path,
+      product && product.websiteCategory,
+      meta.websiteCategory,
+      meta.siteProductCategory && meta.siteProductCategory.name,
+      product && product.categoryPath,
+      productBinding.pathLabel,
+      product && product.cat,
+      product && product.category,
+      product && product.series,
+      product && product.name
+    ].filter(Boolean).join(' / ');
+  }
+  function categoryPathValue(product){
+    var meta = product && product.siteMeta && typeof product.siteMeta === 'object' ? product.siteMeta : {};
+    var productBinding = meta.productCategoryBinding && typeof meta.productCategoryBinding === 'object' ? meta.productCategoryBinding : {};
+    return String(
+      (product && product.websiteCategoryPath)
+      || meta.websiteCategoryPath
+      || (meta.siteProductCategory && meta.siteProductCategory.path)
+      || (product && product.websiteCategory)
+      || meta.websiteCategory
+      || (meta.siteProductCategory && meta.siteProductCategory.name)
+      || (product && product.categoryPath)
+      || productBinding.pathLabel
+      || (product && product.category)
+      || ''
+    );
+  }
+  function categoryLeaf(product){
+    var parts = categoryPathValue(product).split('/').map(function(part){return part.trim();}).filter(Boolean);
+    return parts[parts.length-1] || '';
+  }
+  function productSiteCategory(product){
+    var meta = product && product.siteMeta && typeof product.siteMeta === 'object' ? product.siteMeta : {};
+    return meta.siteProductCategory && typeof meta.siteProductCategory === 'object' ? meta.siteProductCategory : {};
+  }
+  function normToken(value){
+    return String(value || '').trim().replace(/^\/+|\/+$/g,'').toLowerCase();
+  }
+  function normPath(value){
+    return String(value || '').split('/').map(function(part){return part.trim();}).filter(Boolean).join(' / ');
+  }
+  function categoryToken(row){
+    return normToken(row && (row.slug || row.code || row.websiteCategory || row.name));
+  }
+  function flattenSiteCategories(){
+    var tree = Array.isArray(window.EVERHOT_SITE_PRODUCT_CATEGORY_TREE) ? window.EVERHOT_SITE_PRODUCT_CATEGORY_TREE : [];
+    var items = Array.isArray(window.EVERHOT_SITE_PRODUCT_CATEGORIES) ? window.EVERHOT_SITE_PRODUCT_CATEGORIES : [];
+    var out = [];
+    function walk(row, chain){
+      if(!row || typeof row !== 'object') return;
+      var next = chain.concat([row]);
+      out.push({ row: row, chain: next, tokens: next.map(categoryToken).filter(Boolean), path: normPath(next.map(function(item){return item.name || item.websiteCategory || item.code || item.slug;}).filter(Boolean).join(' / ')) });
+      (Array.isArray(row.children) ? row.children : []).forEach(function(child){ walk(child, next); });
+    }
+    if(tree.length){
+      tree.forEach(function(row){ walk(row, []); });
+      return out;
+    }
+    var byId = {}, roots = [];
+    items.forEach(function(row){
+      if(!row || typeof row !== 'object') return;
+      var id = String(row.id || '');
+      byId[id] = Object.assign({}, row, { children: [] });
+    });
+    Object.keys(byId).forEach(function(id){
+      var row = byId[id];
+      var parentId = String(row.parentId || '');
+      if(parentId && byId[parentId]) byId[parentId].children.push(row);
+      else roots.push(row);
+    });
+    roots.forEach(function(row){ walk(row, []); });
+    return out;
+  }
+  function currentCatalogTokens(){
+    var parts = String(location.pathname || '').split('/').map(normToken).filter(Boolean);
+    var idx = parts.indexOf('products');
+    if(idx < 0) return [];
+    var tail = parts.slice(idx + 1).filter(function(part){ return part !== 'detail'; });
+    return tail;
+  }
+  function catalogCategoryContext(){
+    var tokens = currentCatalogTokens();
+    if(!tokens.length) return null;
+    var flat = flattenSiteCategories();
+    if(!flat.length) return null;
+    var target = flat.filter(function(item){
+      return item.tokens.length === tokens.length && item.tokens.every(function(token, index){ return token === tokens[index]; });
+    })[0];
+    if(!target) return null;
+    var ids = {}, paths = {};
+    flat.forEach(function(item){
+      var sameBranch = target.tokens.every(function(token, index){ return item.tokens[index] === token; });
+      if(!sameBranch) return;
+      if(item.row && item.row.id) ids[String(item.row.id)] = true;
+      if(item.path) paths[item.path] = true;
+    });
+    if(target.path) paths[target.path] = true;
+    return { target: target, ids: ids, paths: paths };
+  }
+  function productMatchesCatalogCategory(product, context){
+    if(!context) return true;
+    var meta = product && product.siteMeta && typeof product.siteMeta === 'object' ? product.siteMeta : {};
+    var category = productSiteCategory(product);
+    var id = String(category.id || '');
+    if(id && context.ids[id]) return true;
+    var paths = [
+      product && product.websiteCategoryPath,
+      meta.websiteCategoryPath,
+      category.path
+    ].map(normPath).filter(Boolean);
+    return paths.some(function(path){
+      if(context.paths[path]) return true;
+      return Object.keys(context.paths).some(function(parentPath){
+        return path.indexOf(parentPath + ' / ') === 0;
+      });
+    });
+  }
+  function resolveAudience(product){
+    var text = categoryText(product);
+    if(text.indexOf('\u5546\u7528')>-1 || /commercial/i.test(text)) return 'commercial';
+    var legacy = String(product && product.cat || '').toLowerCase();
+    if(legacy === 'residential' || legacy === 'commercial') return legacy;
+    return 'residential';
+  }
+  function resolveSystem(product){
+    var text = categoryText(product);
+    if(
+      text.indexOf('\u91c7\u6696')>-1
+      || text.indexOf('\u5236\u51b7')>-1
+      || text.indexOf('\u5730\u6696')>-1
+      || text.indexOf('\u7a7a\u8c03')>-1
+      || text.indexOf('\u70ed\u6cf5')>-1
+      || text.indexOf('\u65b0\u98ce')>-1
+      || text.indexOf('\u9664\u6e7f')>-1
+      || /heating|cooling|air/i.test(text)
+    ) return 'heating-cooling';
+    var legacy = String(product && product.sys || '').toLowerCase();
+    if(legacy === 'water-heating' || legacy === 'heating-cooling') return legacy;
+    return 'water-heating';
   }
   function normalizeRuntimeProduct(product){
     var copy = {};
@@ -48,6 +194,8 @@
     copy.slug = String(product && (product.slug || product.sku) || '');
     copy.tagline = product && (product.tagline || product.summary) || '';
     copy.image = product && (product.image || (product.mainImage && product.mainImage.url)) || '';
+    copy.cat = resolveAudience(copy);
+    copy.sys = resolveSystem(copy);
     return copy;
   }
   function isRuntimeProductForSite(product){
@@ -57,13 +205,27 @@
   function loadRuntimeProducts(){
     if(window.EVERHOT_PRODUCTS_READY) return window.EVERHOT_PRODUCTS_READY;
     if(!shouldUseRuntimeProducts()){ installCatalog(); setRuntimeStatus('static'); return Promise.resolve(false); }
-    if(!window.fetch){ installCatalog(); setRuntimeStatus('fallback'); return Promise.resolve(false); }
+    if(!window.fetch){ window.EVERHOT_PRODUCTS = []; installCatalog(); setRuntimeStatus('api-error'); return Promise.resolve(false); }
     setRuntimeStatus('loading');
     var apiBase = RUNTIME_API_BASE;
-    window.EVERHOT_PRODUCTS_READY = fetchWithLegacy(apiBase, RUNTIME_PRODUCTS_API, LEGACY_PRODUCTS_API, function(json){
+    var categoriesReady = fetchPublished(apiBase, RUNTIME_CATEGORIES_API, function(json){
       return !!(json && json.data && Array.isArray(json.data.items));
-    })
-      .then(function(json){
+    }).then(function(json){
+      var data = json && json.data || {};
+      window.EVERHOT_SITE_PRODUCT_CATEGORIES = Array.isArray(data.items) ? data.items : [];
+      window.EVERHOT_SITE_PRODUCT_CATEGORY_TREE = Array.isArray(data.tree) ? data.tree : [];
+      return true;
+    }).catch(function(){
+      window.EVERHOT_SITE_PRODUCT_CATEGORIES = [];
+      window.EVERHOT_SITE_PRODUCT_CATEGORY_TREE = [];
+      return false;
+    });
+    var productsReady = fetchPublished(apiBase, RUNTIME_PRODUCTS_API, function(json){
+      return !!(json && json.data && Array.isArray(json.data.items));
+    });
+    window.EVERHOT_PRODUCTS_READY = Promise.all([categoriesReady, productsReady])
+      .then(function(results){
+        var json = results[1];
         var items = json && json.data && json.data.items;
         if(Array.isArray(items)){
           window.EVERHOT_PRODUCTS = items.map(normalizeRuntimeProduct).filter(function(p){ return p.slug && isRuntimeProductForSite(p); });
@@ -71,11 +233,12 @@
           setRuntimeStatus(window.EVERHOT_PRODUCTS.length ? 'runtime' : 'empty');
           return true;
         }
+        window.EVERHOT_PRODUCTS = [];
         installCatalog();
-        setRuntimeStatus('fallback');
+        setRuntimeStatus('empty');
         return false;
       })
-      .catch(function(){ installCatalog(); setRuntimeStatus('fallback'); return false; });
+      .catch(function(){ window.EVERHOT_PRODUCTS = []; installCatalog(); setRuntimeStatus('api-error'); return false; });
     return window.EVERHOT_PRODUCTS_READY;
   }
   function loadRuntimeProduct(slug){
@@ -84,10 +247,9 @@
     if(found) return Promise.resolve(found);
     var apiBase = RUNTIME_API_BASE;
     var suffix = encodeURIComponent(slug) + '?locale=zh-CN';
-    return fetchWithLegacy(
+    return fetchPublished(
       apiBase,
       '/api/v2/sites/' + RUNTIME_SITE_CODE + '/products/' + suffix,
-      '/api/v2/brand/' + RUNTIME_SITE_CODE + '/products/' + suffix,
       function(json){ return !!(json && json.data && typeof json.data === 'object'); }
     )
       .then(function(json){
@@ -107,7 +269,8 @@
 
   function imageUrl(path) {
     if (!path || /^(?:https?:|data:)/.test(path)) return path;
-    return RUNTIME_API_BASE + path;
+    if (/^\/(?:api\/v2|uploads)\//i.test(path)) return RUNTIME_API_BASE + path;
+    return path;
   }
 
   function officialDetailHtml(product) {
@@ -176,7 +339,7 @@
 
   function iconSrc(p){
     var v=p&&p.icon ? String(p.icon) : '';
-    return (/^https?:\/\//.test(v) || v.indexOf('/api/')===0 || v.indexOf('/assets/')===0 || v.indexOf('data:image/')===0) ? v : '';
+    return (/^https?:\/\//.test(v) || v.indexOf('/api/')===0 || v.indexOf('/assets/')===0 || v.indexOf('data:image/')===0) ? imageUrl(v) : '';
   }
   function art(p){
     var icon=iconSrc(p);
@@ -198,16 +361,16 @@
   // 图片解析优先级：products-data 显式 image > 抓取生成的图片映射 > SVG 矢量插画
   // 后期替换：编辑 data/product-image-manifest.json 并重跑 scripts/fetch-product-images.mjs 即可。
   function imgSrc(p){
-    if(p && p.image) return p.image;
+    if(p && p.image) return imageUrl(p.image);
     var map = window.EVERHOT_PRODUCT_IMAGES;
-    if(map && p && map[p.slug]) return map[p.slug];
+    if(map && p && map[p.slug]) return imageUrl(map[p.slug]);
     return '';
   }
   // 参数长图（仅详情页「产品参数」区用）：products-data.specImage > 参数长图映射
   function specImg(p){
-    if(p && p.specImage) return p.specImage;
+    if(p && p.specImage) return imageUrl(p.specImage);
     var map = window.EVERHOT_PRODUCT_SPECIMAGES;
-    if(map && p && map[p.slug]) return map[p.slug];
+    if(map && p && map[p.slug]) return imageUrl(map[p.slug]);
     return '';
   }
   function media(p){
@@ -290,9 +453,9 @@
       + '<p class="catalog-empty-tx">页面会直接使用 Everhot 同源公开 API，加载完成后显示最新上架产品。</p></div>';
   }
   function runtimeNotice(){
-    if(window.EVERHOT_PRODUCTS_STATUS !== 'fallback') return '';
+    if(window.EVERHOT_PRODUCTS_STATUS !== 'api-error') return '';
     return '<div class="catalog-empty"><p class="catalog-empty-tt">产品 API 暂时不可用</p>'
-      + '<p class="catalog-empty-tx">当前显示本页随站点携带的离线目录；稍后刷新可重新读取最新后台数据。</p></div>';
+      + '<p class="catalog-empty-tx">当前未取到官网公开发布数据，请检查后台租户、站点与发布记录。</p></div>';
   }
 
   function renderGrids(){
@@ -300,7 +463,9 @@
       var key=g.getAttribute('data-catalog').split(':');
       var list=window.EVERHOT_CATALOG.by(key[0],key[1]);
       // 第三段可选：按 series 过滤，供子类型 SEO 落地页（data-catalog="residential:water-heating:零冷水"）
-      if(key[2]){ list=list.filter(function(p){return (p.series||'')===key[2];}); }
+      var categoryContext = catalogCategoryContext();
+      if(categoryContext){ list=list.filter(function(p){return productMatchesCatalogCategory(p,categoryContext);}); }
+      else if(key[2]){ list=list.filter(function(p){return (p.series||'')===key[2];}); }
       if(!list.length){ g.innerHTML=emptyState(); return; }
       renderCatalogGrid(g, list);
     });
@@ -335,9 +500,17 @@
     }).join('');
   }
   function catName(p){
-    var c=p.cat==='residential'?'家用':'商用';
-    var s=p.sys==='water-heating'?'热水系统':'采暖制冷';
-    return {c:c,s:s,sysPath:BASE+'/products/'+p.cat+'/'+p.sys+'/'};
+    var audience = resolveAudience(p);
+    var system = resolveSystem(p);
+    var c=audience==='residential'?'家用':'商用';
+    var s=categoryLeaf(p) || (system==='water-heating'?'热水系统':'采暖制冷');
+    return {c:c,s:s,sysPath:BASE+'/products/'+audience+'/'+system+'/'};
+  }
+  function productHeroSeriesText(p){
+    var parts=[];
+    if(p&&p.en) parts.push(p.en);
+    if(p&&p.series) parts.push(p.series);
+    return parts.join(' · ');
   }
   function configuredRelated(p){
     var rel=p&&p.related;
@@ -369,7 +542,7 @@
   }
   function related(p){
     var sib=configuredRelated(p);
-    if(!sib.length && window.EVERHOT_PRODUCTS_STATUS === 'fallback'){
+    if(!sib.length && window.EVERHOT_PRODUCTS_STATUS === 'runtime'){
       sib=window.EVERHOT_CATALOG.by(p.cat,p.sys).filter(function(x){return x.slug!==p.slug;}).slice(0,3);
     }
     if(!sib.length) return '';
@@ -491,7 +664,7 @@
       +     '<div class="pd-crumb"><a href="'+BASE+'/">首页</a> / <a href="'+BASE+'/products/">产品中心</a> / <a href="'+cn.sysPath+'">'+e(cn.c+cn.s)+'</a></div>'
       +     badges(p)
       +     '<h1>'+e(p.name)+'</h1>'
-      +     '<p class="pd-series">'+e(p.en)+' · '+e(p.series||'')+'</p>'
+      +     '<p class="pd-series">'+e(productHeroSeriesText(p))+'</p>'
       +     '<p class="pd-tagline">'+e(p.tagline)+'</p>'
       +     '<div class="pd-hero-actions"><a class="btn btn-light btn-lg" href="'+BASE+'/find-a-pro/">预约经销商选型</a>'
       +       '<a class="btn btn-outline-light btn-lg" href="'+cn.sysPath+'">查看同类产品</a></div>'

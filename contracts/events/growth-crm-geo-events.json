@@ -162,6 +162,15 @@
       "purpose": "物料上架→渠道分发 + 经销商可取用"
     },
     {
+      "eventType": "growth.content_asset.created",
+      "status": "implemented",
+      "aggregateType": "growth_content_asset",
+      "producer": "A/growth（内容资产库）",
+      "consumers": ["A/channel", "B/crm（经销商取用）"],
+      "payload": { "assetId": "string", "assetType": "string", "brandSlug": "string|null" },
+      "purpose": "内容资产入库→渠道/经销商可检索取用"
+    },
+    {
       "eventType": "growth.opinion.crisis_detected",
       "status": "implemented",
       "aggregateType": "growth_opinion_alert",

@@ -124,15 +124,15 @@ test('OIDC login redirect contains authorization code parameters', async () => {
   }
 });
 
-test('OIDC login defaults missing post-login redirect to /brand', async () => {
+test('OIDC login defaults missing post-login redirect to /cockpit', async () => {
   const fetchMock = withFetch(async () => ({
     ok: true,
     json: async () => DISCOVERY,
   }));
   try {
     const result = await service().createLoginRedirect();
-    assert.equal(result.redirect, '/brand');
-    assert.equal(cookieValue(findCookie(result.cookies, SSO_REDIRECT_COOKIE)), '/brand');
+    assert.equal(result.redirect, '/cockpit');
+    assert.equal(cookieValue(findCookie(result.cookies, SSO_REDIRECT_COOKIE)), '/cockpit');
   } finally {
     fetchMock.restore();
   }
@@ -147,7 +147,7 @@ test('OIDC login default local client returns through localhost callback before 
     const result = await service().createLoginRedirect('/brand');
     const url = new URL(result.location);
 
-    assert.equal(url.searchParams.get('client_id'), 'cli_mrvdz1yr8jfzrb8u');
+    assert.equal(url.searchParams.get('client_id'), 'cli_mslla90sk9xd8vewl421');
     assert.equal(
       url.searchParams.get('redirect_uri'),
       'http://localhost:5000/api/v2/auth/sso/callback'
@@ -158,7 +158,7 @@ test('OIDC login default local client returns through localhost callback before 
   }
 });
 
-test('OIDC login default production client returns through nexus callback before requested same-site path', async () => {
+test('OIDC login default production client returns through production callback before requested same-site path', async () => {
   const fetchMock = withFetch(async () => ({
     ok: true,
     json: async () => DISCOVERY,
@@ -170,7 +170,7 @@ test('OIDC login default production client returns through nexus callback before
     assert.equal(url.searchParams.get('client_id'), 'cli_mrve0bgvgnl2gkjg');
     assert.equal(
       url.searchParams.get('redirect_uri'),
-      'https://nexus.rhautt.com/api/v2/auth/sso/callback'
+      'https://gtm.rhautt.com/api/v2/auth/sso/callback'
     );
     assert.equal(result.redirect, '/brand');
   } finally {
@@ -178,15 +178,15 @@ test('OIDC login default production client returns through nexus callback before
   }
 });
 
-test('OIDC login normalizes external post-login redirects to /brand', async () => {
+test('OIDC login normalizes external post-login redirects to /cockpit', async () => {
   const fetchMock = withFetch(async () => ({
     ok: true,
     json: async () => DISCOVERY,
   }));
   try {
     const result = await service().createLoginRedirect('https://example.com');
-    assert.equal(result.redirect, '/brand');
-    assert.equal(cookieValue(findCookie(result.cookies, SSO_REDIRECT_COOKIE)), '/brand');
+    assert.equal(result.redirect, '/cockpit');
+    assert.equal(cookieValue(findCookie(result.cookies, SSO_REDIRECT_COOKIE)), '/cockpit');
   } finally {
     fetchMock.restore();
   }
@@ -276,5 +276,5 @@ test('AuthController redirects SSO login failures to a diagnostic brand fallback
   const result = await controller.ssoLogin('/brand', response);
 
   assert.equal(result.statusCode, 302);
-  assert.equal(headers.Location, '/?returnUrl=%2Fbrand&ssoError=sso_unavailable');
+  assert.equal(headers.Location, '/?returnUrl=%2Fcockpit&ssoError=sso_unavailable');
 });

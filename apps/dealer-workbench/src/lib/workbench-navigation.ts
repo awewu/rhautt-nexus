@@ -7,6 +7,7 @@ import {
   Gauge,
   Globe2,
   Landmark,
+  Library,
   Megaphone,
   Package,
   Route,
@@ -110,9 +111,11 @@ export const WORKBENCH_NAV: WorkbenchNavItem[] = [
     children: [
       { key: 'content', label: '内容工厂', href: '/content', icon: PenTool },
       { key: 'copywriter', label: '文案 Copilot', href: '/growth/copywriter', icon: PenTool },
+      { key: 'content-assets', label: '素材库', href: '/growth/content-assets', icon: FolderOpen },
       { key: 'wechat-review', label: '内容审核', href: '/growth/wechat-review', icon: BadgeCheck },
       { key: 'wechat-accounts', label: '发布账号配置', href: '/growth/wechat-accounts', icon: Settings2 },
       { key: 'wechat-drafts', label: '发布记录', href: '/growth/wechat-drafts', icon: Send },
+      { key: 'prompts', label: '提示词库', href: '/growth/prompts', icon: Library },
     ],
   },
   {
@@ -163,6 +166,19 @@ export const WORKBENCH_NAV: WorkbenchNavItem[] = [
     children: [{ key: 'portal-home', label: '经销商门户', href: '/portal', icon: Store }],
   },
   {
+    key: 'master-data',
+    label: '基础资料',
+    shortLabel: '基础资料',
+    desc: '产品分类 · 品牌字典 · 产品属性字典',
+    href: '/master-data/categories',
+    icon: Settings2,
+    group: 2,
+    permission: 'product.catalog.view',
+    children: [
+      { key: 'master-product-categories', label: '产品分类', href: '/master-data/categories', icon: FolderOpen },
+    ],
+  },
+  {
     key: 'product',
     label: '产品',
     shortLabel: '产品',
@@ -172,11 +188,11 @@ export const WORKBENCH_NAV: WorkbenchNavItem[] = [
     group: 2,
     permission: 'product.catalog.view',
     children: [
+      { key: 'product-data-console', label: '产品数据中台', href: '/products', icon: Gauge },
       { key: 'product-list', label: '产品目录', href: '/products?module=catalog', icon: Package },
       { key: 'product-mgmt', label: '产品管理(生命周期/上市/定价)', href: '/product-mgmt', icon: Boxes },
       { key: 'product-materials', label: '产品资料', href: '/products?module=materials', icon: FileText },
       { key: 'product-base', label: '产品目录底座', href: '/products?module=base', icon: Boxes },
-      { key: 'product-categories', label: '产品分类', href: '/products?module=categories', icon: FolderOpen },
     ],
   },
   // 客户赋能(独立产品线)界面：我的工作台 /dealer · 售前闭环 /presale 已从营销中台导航移除，
@@ -213,7 +229,7 @@ export function navItemForPath(path: string | null): WorkbenchNavItem {
   // 增长功能一级菜单
   if (path?.startsWith('/agentic-geo') || path?.startsWith('/geo-focus') || path?.startsWith('/growth/geo')) return byKey('geo');
   if (path?.startsWith('/insight')) return byKey('insight');
-  if (path?.startsWith('/content') || path?.startsWith('/growth/copywriter') || path?.startsWith('/growth/wechat')) return byKey('content');
+  if (path?.startsWith('/content') || path?.startsWith('/growth/copywriter') || path?.startsWith('/growth/content-assets') || path?.startsWith('/growth/prompts') || path?.startsWith('/growth/wechat')) return byKey('content');
   if (path?.startsWith('/channel')) return byKey('channel');
   if (path?.startsWith('/activation')) return byKey('activation');
   if (path?.startsWith('/gtm')) return byKey('gtm');
@@ -221,6 +237,7 @@ export function navItemForPath(path: string | null): WorkbenchNavItem {
   if (path?.startsWith('/growth/automation')) return byKey('automation');
   if (path?.startsWith('/growth/materials')) return byKey('materials');
   if (path?.startsWith('/portal')) return byKey('dealer-portal');
+  if (path?.startsWith('/master-data')) return byKey('master-data');
   if (path?.startsWith('/positioning')) return byKey('brand-sites');
   if (path?.startsWith('/product-mgmt')) return byKey('product');
   if (path?.startsWith('/accounts')) return byKey('accounts');

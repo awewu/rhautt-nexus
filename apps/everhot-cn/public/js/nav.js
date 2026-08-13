@@ -1,9 +1,12 @@
 /* Everhot unified mega-nav — three-audience model mirroring rheem.com */
 (function () {
   var BASE = '';
+  var SITE_CODE = window.EVERHOT_SITE_CODE || 'everhot';
+  var API_BASE = String(window.EVERHOT_API_BASE || '').replace(/\/$/, '');
 
   /* 埋点单点接入：全站(58 页)经 nav.js 载入合规统计，无第三方、DNT/同意可控 */
   (function(){ var s=document.createElement('script'); s.src=BASE+'/js/analytics.js'; s.defer=true; (document.head||document.documentElement).appendChild(s); })();
+  (function(){ var s=document.createElement('script'); s.src=BASE+'/js/site-basic-settings.js'; s.defer=true; (document.head||document.documentElement).appendChild(s); })();
 
   /* ── 统一线性图标系统（替代 emoji，提升 VI 调性，currentColor 描边）── */
   var ICON_PATHS = {
@@ -82,6 +85,180 @@
 
   function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
+  var WEBSITE_CATEGORY_BY_PATH = {
+    'products/residential/heating-cooling/air-conditioning/': 'central-air-conditioning',
+    'products/residential/heating-cooling/underfloor-heating/': 'floor-heating',
+    'products/residential/heating-cooling/fresh-air/': 'total-heat-fresh-air',
+    'products/residential/heating-cooling/geothermal/': 'geothermal-heat-pump',
+    'products/residential/water-heating/condensing-boiler/': 'gas-condensing-wall-hung-boiler',
+    'products/residential/water-heating/zero-cold-water/': 'zero-cold-water-gas-water-heater',
+    'products/residential/water-heating/heat-pump/': 'air-source-water-heater',
+    'products/residential/water-heating/?series=容积式': 'storage-gas-water-heater',
+    'products/residential/water-heating/electric/': 'electric-water-heater',
+    'products/residential/water-heating/combo/': 'heating-hot-water-combi',
+    'products/commercial/heating-cooling/air-source-heat-pump/': 'commercial-air-source-heat-pump',
+    'products/commercial/heating-cooling/modular-chiller/': 'commercial-air-conditioning',
+    'products/commercial/heating-cooling/gas-boiler/': 'commercial-gas-boiler',
+    'products/commercial/heating-cooling/fresh-air/': 'commercial-fresh-air',
+    'products/commercial/heating-cooling/?series=楼宇智控': 'building-control-system',
+    'products/commercial/heating-cooling/?series=运维服务': 'preventive-maintenance-service',
+    'products/commercial/water-heating/high-capacity/': 'high-capacity-gas-water-boiler',
+    'products/commercial/water-heating/air-source/': 'commercial-air-source-water-heater',
+    'products/commercial/water-heating/storage-tank/': 'commercial-storage-tank',
+    'products/commercial/water-heating/central-station/': 'commercial-central-hot-water-station',
+    'products/commercial/water-heating/?series=主备热备': 'backup-hot-water-system',
+    'products/commercial/water-heating/?series=数字运维': 'remote-ops-platform'
+  };
+
+  function websiteCategoryAttr(path){
+    var code=WEBSITE_CATEGORY_BY_PATH[path];
+    return code ? ' data-website-category="'+e(code)+'"' : '';
+  }
+
+  function categoryTextValue(item, key){
+    return String(item && item[key] != null ? item[key] : '').trim();
+  }
+
+  function categoryName(item){
+    return categoryTextValue(item,'name') || categoryTextValue(item,'websiteCategory') || categoryTextValue(item,'nameCn') || categoryTextValue(item,'code');
+  }
+
+  function categorySlug(item){
+    return (categoryTextValue(item,'slug') || categoryTextValue(item,'code')).replace(/^\/+|\/+$/g,'');
+  }
+
+  function sortCategories(items){
+    return (items || []).slice().sort(function(a,b){
+      return Number(a && (a.sortOrder || a.displayOrder) || 0) - Number(b && (b.sortOrder || b.displayOrder) || 0)
+        || categoryName(a).localeCompare(categoryName(b),'zh-Hans-CN');
+    });
+  }
+
+  function isAudienceRoot(item, audience){
+    var code=categoryTextValue(item,'code').toLowerCase();
+    var slugValue=categorySlug(item).toLowerCase();
+    var group=categoryTextValue(item,'menuGroup').toLowerCase();
+    var name=categoryName(item);
+    if(code===audience || slugValue===audience || group===audience)return true;
+    if(audience==='commercial' && name.indexOf('\u5546\u7528')>-1)return true;
+    if(audience==='residential' && name.indexOf('\u5bb6\u7528')>-1)return true;
+    return false;
+  }
+
+  function findAudienceRoot(tree, audience){
+    var queue=(tree||[]).slice();
+    while(queue.length){
+      var item=queue.shift();
+      if(isAudienceRoot(item,audience))return item;
+      (item.children||[]).forEach(function(child){queue.push(child);});
+    }
+    return null;
+  }
+
+  function categoryHref(audience, trail){
+    var parts=(trail||[]).map(categorySlug).filter(Boolean);
+    return 'products/'+audience+(parts.length?'/'+parts.join('/'):'')+'/';
+  }
+
+  function categoryColumnsFromRoot(audience, root){
+    var secondLevel=sortCategories(root && root.children);
+    return secondLevel.map(function(section){
+      var children=sortCategories(section.children);
+      var sectionTrail=[section];
+      return {
+        head: categoryName(section),
+        items: (children.length?children:[section]).map(function(item){
+          var trail=children.length?sectionTrail.concat([item]):[item];
+          return [categoryName(item),categoryHref(audience,trail)];
+        })
+      };
+    });
+  }
+
+  function nonProductColumns(menu, audience){
+    var prefix='products/'+audience+'/';
+    return (menu.cols||[]).filter(function(col){
+      if(col.featured || col.cards)return true;
+      return !(col.items||[]).some(function(item){return String(item && item[1] || '').indexOf(prefix)===0;});
+    });
+  }
+
+  function installRuntimeMenu(menuId, audience, root){
+    var menu=menus.filter(function(item){return item.id===menuId;})[0];
+    if(!menu || !root || !Array.isArray(root.children) || !root.children.length)return false;
+    menu.cols=categoryColumnsFromRoot(audience, root).concat(nonProductColumns(menu, audience));
+    return true;
+  }
+
+  function desktopColumnHtml(col){
+    var html='<div class="ev-mega-col'+(col.featured?' ev-mega-featured':'')+'"><p class="ev-mega-head">'+e(col.head)+'</p>';
+    if(col.cards){
+      html+='<div class="ev-mega-cards">';
+      col.cards.forEach(function(c){
+        html+='<a class="ev-mega-card" href="'+BASE+'/'+c[2]+'">'
+          +'<span class="ev-mega-card-ic" aria-hidden="true">'+ico(c[3])+'</span>'
+          +'<span class="ev-mega-card-tx"><strong>'+e(c[0])+'</strong><em>'+e(c[1])+'</em></span>'
+          +'<svg class="ev-mega-card-ar" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h9M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>';
+      });
+      html+='</div>';
+      if(col.cta){ html+='<a class="ev-mega-cta" href="'+BASE+'/'+col.cta[1]+'">'+e(col.cta[0])+' &#8594;</a>'; }
+      if(col.warranty){ html+='<a class="ev-mega-warranty" href="'+BASE+'/warranty/"><strong>淇濅慨涓庢敞鍐?/strong><span>浜у搧娉ㄥ唽 路 淇濅慨鏌ヨ</span></a>'; }
+    } else {
+      html+='<ul>';
+      (col.items||[]).forEach(function(it){ html+='<li><a href="'+BASE+'/'+it[1]+'"'+websiteCategoryAttr(it[1])+'>'+e(it[0])+'</a></li>'; });
+      html+='</ul>';
+    }
+    return html+'</div>';
+  }
+
+  function mobilePanelHtml(menu){
+    var html='';
+    (menu.cols||[]).forEach(function(col){
+      html+='<p class="ev-acc-head">'+e(col.head)+'</p><ul>';
+      if(col.cards){
+        col.cards.forEach(function(c){ html+='<li><a href="'+BASE+'/'+c[2]+'">'+e(c[0])+'</a></li>'; });
+        if(col.cta){ html+='<li><a href="'+BASE+'/'+col.cta[1]+'">'+e(col.cta[0])+'</a></li>'; }
+        if(col.warranty){ html+='<li><a href="'+BASE+'/warranty/">淇濅慨涓庢敞鍐?/a></li>'; }
+      } else {
+        (col.items||[]).forEach(function(it){ html+='<li><a href="'+BASE+'/'+it[1]+'"'+websiteCategoryAttr(it[1])+'>'+e(it[0])+'</a></li>'; });
+      }
+      html+='</ul>';
+    });
+    return html;
+  }
+
+  function renderRuntimeMenus(mount){
+    menus.forEach(function(menu, index){
+      var panel=mount.querySelector('#ev-mega-'+menu.id+' .ev-mega-inner');
+      if(panel) panel.innerHTML=(menu.cols||[]).map(desktopColumnHtml).join('');
+      var acc=mount.querySelectorAll('.ev-acc')[index];
+      var accPanel=acc && acc.querySelector('.ev-acc-panel');
+      if(accPanel){
+        accPanel.innerHTML=mobilePanelHtml(menu);
+        var btn=acc.querySelector('.ev-acc-btn');
+        if(btn && btn.getAttribute('aria-expanded')==='true') accPanel.style.maxHeight=accPanel.scrollHeight+'px';
+      }
+    });
+    upgradeIcons(mount);
+  }
+
+  function syncWebsiteCategoryNav(mount){
+    if(!window.fetch)return;
+    var url=API_BASE+'/api/v2/sites/'+encodeURIComponent(SITE_CODE)+'/product-categories';
+    fetch(url,{cache:'no-store',headers:{Accept:'application/json'}})
+      .then(function(response){return response.ok?response.json():null;})
+      .then(function(payload){
+        var data=payload&&payload.data;
+        if(!data)return;
+        var tree=data.tree||[];
+        var changed=false;
+        changed=installRuntimeMenu('homeowners','residential',findAudienceRoot(tree,'residential'))||changed;
+        changed=installRuntimeMenu('commercial','commercial',findAudienceRoot(tree,'commercial'))||changed;
+        if(changed)renderRuntimeMenus(mount);
+      })
+      .catch(function(){});
+  }
+
   function buildNav(){
     // 极简地区条：仅身份再唤起 + 集团 + 地区（右对齐、安静灰底，支持入口已收进 masthead「支持」下拉）
     var h='<a class="ev-skip" href="#evMain">跳到主要内容</a>'
@@ -135,7 +312,7 @@
           if(col.warranty){ h+='<a class="ev-mega-warranty" href="'+BASE+'/warranty/"><strong>保修与注册</strong><span>产品注册 · 保修查询</span></a>'; }
         } else {
           h+='<ul>';
-          col.items.forEach(function(it){ h+='<li><a href="'+BASE+'/'+it[1]+'">'+e(it[0])+'</a></li>'; });
+          col.items.forEach(function(it){ h+='<li><a href="'+BASE+'/'+it[1]+'"'+websiteCategoryAttr(it[1])+'>'+e(it[0])+'</a></li>'; });
           h+='</ul>';
         }
         h+='</div>';
@@ -165,7 +342,7 @@
           if(col.cta){ h+='<li><a href="'+BASE+'/'+col.cta[1]+'">'+e(col.cta[0])+'</a></li>'; }
           if(col.warranty){ h+='<li><a href="'+BASE+'/warranty/">保修与注册</a></li>'; }
         } else {
-          col.items.forEach(function(it){ h+='<li><a href="'+BASE+'/'+it[1]+'">'+e(it[0])+'</a></li>'; });
+          col.items.forEach(function(it){ h+='<li><a href="'+BASE+'/'+it[1]+'"'+websiteCategoryAttr(it[1])+'>'+e(it[0])+'</a></li>'; });
         }
         h+='</ul>';
       });
@@ -210,6 +387,7 @@
     if(!mount) return;
     mount.innerHTML=buildNav();
     upgradeIcons(mount); upgradeIcons(document);
+    syncWebsiteCategoryNav(mount);
 
     // A11y: 把导航与页脚之间的正文包进 <main id="evMain">，作为 skip-link 目标与主地标
     try{
@@ -293,9 +471,11 @@
         if(panel) panel.style.maxHeight=open?'':panel.scrollHeight+'px';
       });
     });
-    // close drawer when a link is tapped
-    mount.querySelectorAll('.ev-drawer-nav a, .ev-drawer-foot a').forEach(function(a){
-      a.addEventListener('click',closeDrawer);
+    // close drawer when a link is tapped; delegation keeps runtime DB menu links covered.
+    [mount.querySelector('.ev-drawer-nav'), mount.querySelector('.ev-drawer-foot')].forEach(function(area){
+      if(area) area.addEventListener('click',function(ev){
+        if(ev.target && ev.target.closest && ev.target.closest('a')) closeDrawer();
+      });
     });
 
     // ===== Audience gateway overlay logic =====
@@ -334,9 +514,9 @@
         window.scrollTo({top:0,behavior:'smooth'});
       });
       document.body.appendChild(backTop);
-      function updateBackTop(){
+      const updateBackTop=function(){
         backTop.classList.toggle('is-visible',window.scrollY>360);
-      }
+      };
       updateBackTop();
       window.addEventListener('scroll',updateBackTop,{passive:true});
     }

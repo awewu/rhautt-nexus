@@ -3,12 +3,20 @@ import type { ProductPositioning, AssetRef, ProductSeo, ProductMarketing } from 
 
 @Entity('products')
 @Index(['tenantId', 'sku'], { unique: true })
+@Index('products_brand_model_uidx', ['tenantId', 'brandCode', 'normalizedModel'], {
+  unique: true,
+  where: "deleted_at IS NULL AND record_status <> 'archived' AND COALESCE(brand_code, '') <> '' AND COALESCE(normalized_model, '') <> ''",
+})
 export class ProductEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ name: 'tenant_id', default: 'rhautt_shared' }) @Index() tenantId: string;
   @Column() sku: string;
   @Column() name: string;
   @Column({ type: 'varchar', nullable: true }) brand: string | null;
+  @Column({ name: 'brand_code', type: 'varchar', nullable: true }) @Index() brandCode: string | null;
+  @Column({ type: 'varchar', nullable: true }) model: string | null;
+  @Column({ name: 'normalized_model', type: 'varchar', nullable: true }) @Index() normalizedModel: string | null;
+  @Column({ name: 'working_name', type: 'varchar', nullable: true }) workingName: string | null;
   @Column({ type: 'varchar', nullable: true }) category: string | null;
   @Column({ type: 'jsonb', default: {} }) spec: Record<string, unknown>;
   // D2 定位层（P1）：把产品「说清楚」——卖给谁/渠道/用户/市场/卖点。
@@ -19,8 +27,24 @@ export class ProductEntity {
   @Column({ name: 'product_key', type: 'varchar', nullable: true }) @Index() productKey: string | null;
   @Column({ name: 'list_price', type: 'decimal', default: 0 }) listPrice: number;
   @Column({ name: 'cost_price', type: 'decimal', default: 0 }) costPrice: number;
+  @Column({ name: 'length_mm', type: 'decimal', nullable: true }) lengthMm: number | null;
+  @Column({ name: 'width_mm', type: 'decimal', nullable: true }) widthMm: number | null;
+  @Column({ name: 'height_mm', type: 'decimal', nullable: true }) heightMm: number | null;
+  @Column({ name: 'net_weight_kg', type: 'decimal', nullable: true }) netWeightKg: number | null;
+  @Column({ name: 'package_length_mm', type: 'decimal', nullable: true }) packageLengthMm: number | null;
+  @Column({ name: 'package_width_mm', type: 'decimal', nullable: true }) packageWidthMm: number | null;
+  @Column({ name: 'package_height_mm', type: 'decimal', nullable: true }) packageHeightMm: number | null;
+  @Column({ name: 'gross_weight_kg', type: 'decimal', nullable: true }) grossWeightKg: number | null;
   @Column({ type: 'varchar', default: 'CNY' }) currency: string;
   @Column({ default: 'active' }) @Index() status: string;
+  @Column({ name: 'record_status', default: 'active' }) recordStatus: string;
+  @Column({ name: 'data_readiness_status', default: 'imported_draft' }) dataReadinessStatus: string;
+  @Column({ name: 'readiness_checked_at', type: 'timestamptz', nullable: true }) readinessCheckedAt: Date | null;
+  @Column({ name: 'facts_verified_by', type: 'varchar', nullable: true }) factsVerifiedBy: string | null;
+  @Column({ name: 'facts_verified_at', type: 'timestamptz', nullable: true }) factsVerifiedAt: Date | null;
+  @Column({ name: 'source_system', type: 'varchar', nullable: true }) sourceSystem: string | null;
+  @Column({ name: 'source_record_key', type: 'varchar', nullable: true }) sourceRecordKey: string | null;
+  @Column({ name: 'row_version', default: 1 }) rowVersion: number;
   // 4.4 产品生命周期阶段：引入→成长→成熟→退市。
   @Column({ name: 'lifecycle_stage', default: 'intro' }) lifecycleStage: string;
   // D4 发布投影：published=对外/消费可见（存量默认 true）。
@@ -28,6 +52,81 @@ export class ProductEntity {
   @Column({ type: 'jsonb', default: {} }) meta: Record<string, unknown>;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
+  @Column({ name: 'deleted_at', type: 'timestamptz', nullable: true }) deletedAt: Date | null;
+}
+
+@Entity('product_skus')
+@Index(['tenantId', 'normalizedSkuCode'], { unique: true, where: 'deleted_at IS NULL' })
+export class ProductSkuEntity {
+  @PrimaryGeneratedColumn('uuid') id: string;
+  @Column({ name: 'tenant_id' }) @Index() tenantId: string;
+  @Column({ name: 'product_id' }) @Index() productId: string;
+  @Column({ name: 'sku_code' }) skuCode: string;
+  @Column({ name: 'normalized_sku_code' }) normalizedSkuCode: string;
+  @Column({ name: 'material_code', type: 'varchar', nullable: true }) materialCode: string | null;
+  @Column({ type: 'varchar', nullable: true }) gtin: string | null;
+  @Column({ type: 'varchar', nullable: true }) mpn: string | null;
+  @Column({ name: 'record_status', default: 'active' }) recordStatus: string;
+  @Column({ name: 'source_system', type: 'varchar', nullable: true }) sourceSystem: string | null;
+  @Column({ name: 'source_record_key', type: 'varchar', nullable: true }) sourceRecordKey: string | null;
+  @Column({ name: 'created_by', type: 'varchar', nullable: true }) createdBy: string | null;
+  @Column({ name: 'updated_by', type: 'varchar', nullable: true }) updatedBy: string | null;
+  @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
+  @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
+  @Column({ name: 'deleted_at', type: 'timestamptz', nullable: true }) deletedAt: Date | null;
+}
+
+@Entity('product_website_pricing')
+@Index('product_website_pricing_scope_uidx', ['tenantId', 'productId', 'brandCode', 'siteCode', 'locale'], {
+  unique: true,
+  where: 'deleted_at IS NULL',
+})
+export class ProductWebsitePricingEntity {
+  @PrimaryGeneratedColumn('uuid') id: string;
+  @Column({ name: 'tenant_id' }) @Index() tenantId: string;
+  @Column({ name: 'product_id' }) @Index() productId: string;
+  @Column({ name: 'brand_code', default: 'official' }) @Index() brandCode: string;
+  @Column({ name: 'site_code', default: 'official' }) siteCode: string;
+  @Column({ default: 'zh-CN' }) locale: string;
+  @Column({ name: 'price_display_mode', default: 'not_shown' }) priceDisplayMode: string;
+  @Column({ name: 'website_price', type: 'decimal', nullable: true }) websitePrice: number | null;
+  @Column({ name: 'website_price_min', type: 'decimal', nullable: true }) websitePriceMin: number | null;
+  @Column({ name: 'website_price_max', type: 'decimal', nullable: true }) websitePriceMax: number | null;
+  @Column({ name: 'promo_price', type: 'decimal', nullable: true }) promoPrice: number | null;
+  @Column({ default: 'CNY' }) currency: string;
+  @Column({ name: 'price_unit', type: 'varchar', nullable: true }) priceUnit: string | null;
+  @Column({ name: 'price_label', type: 'varchar', nullable: true }) priceLabel: string | null;
+  @Column({ name: 'price_note', type: 'varchar', nullable: true }) priceNote: string | null;
+  @Column({ name: 'tax_included', default: true }) taxIncluded: boolean;
+  @Column({ name: 'valid_from', type: 'timestamptz', nullable: true }) validFrom: Date | null;
+  @Column({ name: 'valid_to', type: 'timestamptz', nullable: true }) validTo: Date | null;
+  @Column({ default: 'active' }) status: string;
+  @Column({ name: 'created_by', type: 'varchar', nullable: true }) createdBy: string | null;
+  @Column({ name: 'updated_by', type: 'varchar', nullable: true }) updatedBy: string | null;
+  @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
+  @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
+  @Column({ name: 'deleted_at', type: 'timestamptz', nullable: true }) deletedAt: Date | null;
+}
+
+@Entity('product_brand_bindings')
+@Index('product_brand_bindings_brand_model_uidx', ['tenantId', 'brandCode', 'normalizedModel'], {
+  unique: true,
+  where: "deleted_at IS NULL AND status <> 'archived'",
+})
+export class ProductBrandBindingEntity {
+  @PrimaryGeneratedColumn('uuid') id: string;
+  @Column({ name: 'tenant_id' }) @Index() tenantId: string;
+  @Column({ name: 'product_id' }) @Index() productId: string;
+  @Column({ name: 'brand_code' }) brandCode: string;
+  @Column({ name: 'brand_model' }) brandModel: string;
+  @Column({ name: 'normalized_model' }) normalizedModel: string;
+  @Column({ name: 'brand_display_name', type: 'varchar', nullable: true }) brandDisplayName: string | null;
+  @Column({ default: 'active' }) status: string;
+  @Column({ name: 'created_by', type: 'varchar', nullable: true }) createdBy: string | null;
+  @Column({ name: 'updated_by', type: 'varchar', nullable: true }) updatedBy: string | null;
+  @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
+  @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
+  @Column({ name: 'deleted_at', type: 'timestamptz', nullable: true }) deletedAt: Date | null;
 }
 
 // D4 发布投影授权：消费租户(经销商) × 品牌 → 可只读该品牌已发布产品事实。

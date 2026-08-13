@@ -205,6 +205,11 @@ const BRAND_PRODUCT_TENANTS: Record<string, string | undefined> = {
   rheem: process.env.NEXT_PUBLIC_RHEEM_TENANT_ID || '4aee0000-0000-4000-8000-000000000001',
   ruud: process.env.NEXT_PUBLIC_RUUD_TENANT_ID || '7aad0000-0000-4000-8000-000000000001',
 };
+const PRODUCT_LIBRARY_TENANT_ID =
+  process.env.NEXT_PUBLIC_PRODUCT_LIBRARY_TENANT_ID
+  || process.env.NEXT_PUBLIC_RHAUTT_COMFORT_TENANT_ID
+  || process.env.NEXT_PUBLIC_EVERHOT_TENANT_ID
+  || 'e5e40000-0000-4000-8000-000000000001';
 
 const BRAND_SITE_ENVIRONMENT_FALLBACKS: Record<string, { testing: string; production: string }> = {
   rheem: { testing: 'http://localhost:5014/', production: 'https://www.rheem.com.cn/' },
@@ -449,7 +454,7 @@ export function buildBrandProductListQuery(
     page: String(page),
     pageSize: String(pageSize),
   };
-  const tenantId = BRAND_PRODUCT_TENANTS[brandCode] || '';
+  const tenantId = PRODUCT_LIBRARY_TENANT_ID;
   if (tenantId) query.tenantId = tenantId;
   const keyword = text(options.keyword);
   const status = text(options.status);
@@ -732,12 +737,17 @@ export function buildNewBrandProductPayload(
   const normalized = normalizeDraft(draft);
   const structured = structuredDraft ? normalizeStructuredDraft(structuredDraft) : null;
   const sku = skeletonSku(brandCode, normalized.model || normalized.publicSlug || normalized.name);
-  const tenantId = BRAND_PRODUCT_TENANTS[brandCode] || '';
+  const tenantId = PRODUCT_LIBRARY_TENANT_ID;
   return {
     ...(tenantId ? { tenantId } : {}),
     sku,
+    materialCode: sku,
     name: normalized.name || normalized.model || sku,
     brand: brandCode,
+    brandCode,
+    brands: [brandCode],
+    brandCodes: [brandCode],
+    model: normalized.model || sku,
     category: normalized.category,
     status: 'inactive',
     ...(assetRefs?.length ? { assetRefs } : {}),
@@ -805,9 +815,13 @@ export async function createBrandProduct(
   draft: BrandProductEditDraft,
   structuredDraft?: BrandStructuredContentDraft,
   assetRefs?: AssetRef[],
+  extraPayload?: Record<string, unknown>,
 ) {
   const products = await apiProducts();
-  return products.create(buildNewBrandProductPayload(brandCode, draft, structuredDraft, assetRefs));
+  return products.create({
+    ...buildNewBrandProductPayload(brandCode, draft, structuredDraft, assetRefs),
+    ...(extraPayload || {}),
+  });
 }
 
 export async function uploadBrandProductMainImage(

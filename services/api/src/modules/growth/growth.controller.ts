@@ -3,6 +3,7 @@ import { AuthGuard } from '../auth/auth.guard';
 import { JwtPayload } from '../auth/auth.service';
 import {
   GrowthCampaignService,
+  GrowthContentAssetService,
   GrowthCopyService,
   GrowthGeoService,
   GrowthMarketingMaterialService,
@@ -25,6 +26,7 @@ export class GrowthController {
     private readonly copy: GrowthCopyService,
     private readonly geo: GrowthGeoService,
     private readonly campaign: GrowthCampaignService,
+    private readonly contentAssets: GrowthContentAssetService,
     private readonly materials: GrowthMarketingMaterialService,
     private readonly agentic: AgenticGeoService,
     private readonly geoFocus: GeoFocusService,
@@ -49,6 +51,12 @@ export class GrowthController {
 
   @UseGuards(AuthGuard) @Get('geo/focus/targets')
   listTargets(@Req() req: AuthRequest, @Query('category') category?: string) { return this.geoFocus.listTargets(req.user, category); }
+
+  @UseGuards(AuthGuard) @Get('geo/focus/probe-pool')
+  listProbePool(@Req() req: AuthRequest, @Query() query: any) { return this.geoFocus.listProbePool(req.user, query || {}); }
+
+  @UseGuards(AuthGuard) @Post('geo/focus/probe-pool/seed')
+  seedProbePool(@Req() req: AuthRequest, @Body() body: any) { return this.geoFocus.seedProbePool(req.user, body || {}); }
 
   @UseGuards(AuthGuard) @Get('geo/focus/select')
   selectTargets(@Req() req: AuthRequest, @Query('category') category: string, @Query('segment') segment?: string, @Query('limit') limit?: string) { return this.geoFocus.selectTargets(req.user, category, { segment, limit: limit ? Number(limit) : undefined }); }
@@ -84,6 +92,24 @@ export class GrowthController {
   // ── E2 文案 Copilot ──
   @UseGuards(AuthGuard) @Post('copy/generate')
   generateCopy(@Req() req: AuthRequest, @Body() body: any) { return this.copy.generateCopy(req.user, body); }
+
+  @UseGuards(AuthGuard) @Get('prompt-templates')
+  listPromptTemplates(@Req() req: AuthRequest, @Query() query: any) { return this.copy.listPromptTemplates(req.user, query); }
+
+  @UseGuards(AuthGuard) @Post('prompt-templates')
+  createPromptTemplate(@Req() req: AuthRequest, @Body() body: any) { return this.copy.createPromptTemplate(req.user, body); }
+
+  @UseGuards(AuthGuard) @Patch('prompt-templates/:id')
+  updatePromptTemplate(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.copy.updatePromptTemplate(req.user, id, body); }
+
+  @UseGuards(AuthGuard) @Post('prompt-templates/:id/archive')
+  archivePromptTemplate(@Req() req: AuthRequest, @Param('id') id: string) { return this.copy.archivePromptTemplate(req.user, id); }
+
+  @UseGuards(AuthGuard) @Post('prompt-templates/:id/restore')
+  restorePromptTemplate(@Req() req: AuthRequest, @Param('id') id: string) { return this.copy.restorePromptTemplate(req.user, id); }
+
+  @UseGuards(AuthGuard) @Post('copy/:id/save-prompt-template')
+  saveCopyPromptTemplate(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.copy.saveCopyPromptTemplate(req.user, id, body); }
 
   @UseGuards(AuthGuard) @Post('copy/:id/approve')
   approveCopy(@Req() req: AuthRequest, @Param('id') id: string) { return this.copy.approveCopy(req.user, id); }
@@ -146,6 +172,8 @@ export class GrowthController {
   startGeoExperiment(@Req() req: AuthRequest, @Body() body: any) { return this.geo.startGeoExperiment(req.user, body); }
   @UseGuards(AuthGuard) @Get('geo/experiments/:id')
   getGeoExperiment(@Req() req: AuthRequest, @Param('id') id: string) { return this.geo.getGeoExperiment(req.user, id); }
+  @UseGuards(AuthGuard) @Post('geo/experiments/:id/generate-content')
+  generateGeoExperimentContent(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.geo.generateGeoExperimentContent(req.user, id, body); }
   @UseGuards(AuthGuard) @Post('geo/experiments/:id/link-content')
   linkGeoExperimentContent(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.geo.linkGeoExperimentContent(req.user, id, body); }
   @UseGuards(AuthGuard) @Post('geo/experiments/:id/verify')
@@ -257,6 +285,28 @@ export class GrowthController {
   roiBoard(@Req() req: AuthRequest) { return this.campaign.roiBoard(req.user); }
 
   // ── E5 营销物料库 ──
+  // ── 内容工厂素材库：文案/公众号配图等数字素材，独立于营销物料库 ──
+  @UseGuards(AuthGuard) @Post('content-assets')
+  createContentAsset(@Req() req: AuthRequest, @Body() body: any) { return this.contentAssets.createAsset(req.user, body); }
+
+  @UseGuards(AuthGuard) @Get('content-assets')
+  listContentAssets(@Req() req: AuthRequest, @Query() query: any) { return this.contentAssets.listAssets(req.user, query); }
+
+  @UseGuards(AuthGuard) @Get('content-assets/:id')
+  getContentAsset(@Req() req: AuthRequest, @Param('id') id: string) { return this.contentAssets.getAsset(req.user, id); }
+
+  @UseGuards(AuthGuard) @Patch('content-assets/:id')
+  updateContentAsset(@Req() req: AuthRequest, @Param('id') id: string, @Body() body: any) { return this.contentAssets.updateAsset(req.user, id, body); }
+
+  @UseGuards(AuthGuard) @Post('content-assets/:id/usage')
+  recordContentAssetUsage(@Req() req: AuthRequest, @Param('id') id: string) { return this.contentAssets.recordUsage(req.user, id); }
+
+  @UseGuards(AuthGuard) @Post('content-assets/:id/archive')
+  archiveContentAsset(@Req() req: AuthRequest, @Param('id') id: string) { return this.contentAssets.archiveAsset(req.user, id); }
+
+  @UseGuards(AuthGuard) @Delete('content-assets/:id')
+  removeContentAsset(@Req() req: AuthRequest, @Param('id') id: string) { return this.contentAssets.removeAsset(req.user, id); }
+
   @UseGuards(AuthGuard) @Post('materials')
   createMaterial(@Req() req: AuthRequest, @Body() body: any) { return this.materials.createMaterial(req.user, body); }
 

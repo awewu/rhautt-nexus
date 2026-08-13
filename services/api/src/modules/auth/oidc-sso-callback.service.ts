@@ -166,12 +166,12 @@ export class OidcSsoCallbackService {
     const issuer = this.configValue('OIDC_ISSUER') || DEFAULT_OIDC_ISSUER;
     const clientId =
       this.configValue('OIDC_CLIENT_ID') ||
-      (this.isProduction() ? 'cli_mrve0bgvgnl2gkjg' : 'cli_mrvdz1yr8jfzrb8u');
+      (this.isProduction() ? 'cli_mrve0bgvgnl2gkjg' : 'cli_mslla90sk9xd8vewl421');
     const clientSecret = this.configValue('OIDC_CLIENT_SECRET');
     const redirectUri =
       this.configValue('OIDC_REDIRECT_URI') ||
       (this.isProduction()
-        ? 'https://nexus.rhautt.com/api/v2/auth/sso/callback'
+        ? 'https://gtm.rhautt.com/api/v2/auth/sso/callback'
         : 'http://localhost:5000/api/v2/auth/sso/callback');
     if (requireSecret && !clientSecret) {
       this.fail(

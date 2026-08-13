@@ -22,7 +22,7 @@ async function run() {
     port: Number(process.env.POSTGRES_PORT || 5432),
     user: process.env.POSTGRES_USER || 'rhautt',
     password: process.env.POSTGRES_PASSWORD || 'rhautt_dev',
-    database: process.env.POSTGRES_DB || 'rhautt_nexus',
+    database: process.env.POSTGRES_DB || 'rhautt_GOT',
   });
 
   await client.connect();

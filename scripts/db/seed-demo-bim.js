@@ -32,7 +32,7 @@ const PROJECTS = [
 ];
 
 async function run() {
-  const client = new Client({ database: process.env.POSTGRES_DB || 'rhautt_nexus' }); // socket peer, superuser → 绕 RLS
+  const client = new Client({ database: process.env.POSTGRES_DB || 'rhautt_GOT' }); // socket peer, superuser → 绕 RLS
   await client.connect();
 
   const { rows: [t] } = await client.query("SELECT id FROM rhautt_nexus.tenants WHERE code='DEFAULT'");

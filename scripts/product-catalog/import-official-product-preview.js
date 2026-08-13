@@ -13,6 +13,7 @@ dotenv.config({ path: path.join(ROOT, '.env.nestjs'), quiet: true });
 dotenv.config({ path: path.join(ROOT, '.env'), override: false, quiet: true });
 
 const APPLY = process.argv.includes('--apply');
+const OFFICIAL_PRODUCT_IMPORTER_ID = '00000000-0000-4000-8000-000000000001';
 const BASE_ARG_INDEX = process.argv.indexOf('--base');
 const BASE = BASE_ARG_INDEX >= 0
   ? process.argv[BASE_ARG_INDEX + 1]
@@ -32,7 +33,7 @@ function buildClientConfig() {
     port: Number(process.env.POSTGRES_PORT || 5432),
     user: process.env.POSTGRES_USER || 'rhautt',
     password: process.env.POSTGRES_PASSWORD,
-    database: process.env.POSTGRES_DB || 'rhautt_nexus',
+    database: process.env.POSTGRES_DB || 'rhautt_GOT',
   };
 }
 
@@ -108,7 +109,7 @@ async function loadBrandTenants(client) {
 
 function makeToken(tenantId) {
   if (!process.env.JWT_SECRET) throw new Error('缺少 JWT_SECRET，无法通过受保护产品写入接口');
-  return jwt.sign({ userId: 'official-product-importer', tenantId, role: 'platform_admin' }, process.env.JWT_SECRET, {
+  return jwt.sign({ userId: OFFICIAL_PRODUCT_IMPORTER_ID, tenantId, role: 'platform_admin' }, process.env.JWT_SECRET, {
     expiresIn: '20m',
   });
 }
@@ -135,7 +136,7 @@ async function apiRequest(pathname, token, options = {}) {
 }
 
 async function listTenantProducts(tenantId, token) {
-  const payload = await apiRequest(`/product-catalog/devices?tenantId=${encodeURIComponent(tenantId)}`, token);
+  const payload = await apiRequest(`/product-catalog/devices?tenantId=${encodeURIComponent(tenantId)}&pageSize=100`, token);
   return payload?.data?.items || [];
 }
 
@@ -225,4 +226,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { BRAND_CONFIG, buildDto, validatePreview };
+module.exports = { BRAND_CONFIG, OFFICIAL_PRODUCT_IMPORTER_ID, buildDto, validatePreview };

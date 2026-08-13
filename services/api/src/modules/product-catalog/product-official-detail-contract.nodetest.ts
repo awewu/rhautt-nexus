@@ -156,6 +156,36 @@ test('public product list projection omits official detail html by default', () 
   assert.equal('officialDetailHtml' in projected, false);
 });
 
+test('public product projection exposes common product content from product_content marketing', () => {
+  const row = content('product-1', '<p>Long detail</p>');
+  row.marketing = {
+    headline: 'Stable comfort',
+    subhead: 'Whole-home heating summary',
+    series: 'Comfort series',
+    officialEnglishName: 'Wall-hung Boiler',
+    badges: ['new', 'recommended'],
+    specs: [{ k: 'Heating efficiency', v: '95%' }],
+    features: [{ title: 'Quiet running', desc: 'Lower operating noise' }],
+    featureBenefits: [],
+    highlights: [{ label: 'Coverage', value: '180m2' }],
+    faq: [{ q: 'How to install?', a: 'Use authorized installers.' }],
+  } as any;
+
+  const projected = (serviceFixture().service as any).publicProductProjection(
+    product('product-1', 'everhot'),
+    'zh-CN',
+    row,
+    { includeOfficialDetail: true },
+  );
+
+  assert.equal(projected.series, 'Comfort series');
+  assert.equal(projected.tagline, 'Whole-home heating summary');
+  assert.deepEqual(projected.specs, [{ k: 'Heating efficiency', v: '95%' }]);
+  assert.deepEqual(projected.features, [{ title: 'Quiet running', desc: 'Lower operating noise' }]);
+  assert.deepEqual(projected.highlights, [{ label: 'Coverage', value: '180m2' }]);
+  assert.deepEqual(projected.faqs, [{ q: 'How to install?', a: 'Use authorized installers.' }]);
+});
+
 function serviceFixture() {
   const productRepo = new InMemoryRepository<ProductEntity>();
   const priceRepo = new InMemoryRepository<PriceListItemEntity>();

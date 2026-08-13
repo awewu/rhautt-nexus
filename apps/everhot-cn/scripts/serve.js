@@ -127,6 +127,16 @@ const server = http.createServer((req, res) => {
       filePath = path.join(filePath, 'index.html');
     }
     fs.readFile(filePath, (readErr, data) => {
+      if (readErr && /^products\/detail\/[^/]+\/index\.html$/i.test(rel)) {
+        const detailTemplate = safeJoin(PUBLIC, path.join('products', 'detail', 'index.html'));
+        if (!detailTemplate) return send(res, 403, 'Forbidden');
+        return fs.readFile(detailTemplate, (templateErr, templateData) => {
+          if (templateErr) {
+            return send(res, 404, `404 Not Found: ${urlPath}`, { 'Content-Type': 'text/plain; charset=utf-8' });
+          }
+          send(res, 200, templateData, { 'Content-Type': TYPES['.html'], 'Cache-Control': 'no-store' });
+        });
+      }
       if (readErr) {
         return send(res, 404, `404 Not Found: ${urlPath}`, { 'Content-Type': 'text/plain; charset=utf-8' });
       }

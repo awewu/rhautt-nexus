@@ -71,7 +71,7 @@ recordSupervisor(
   { metadata: { cwd: appRoot, nodeVersion: process.version, port: DEALER_WORKBENCH_PORT } }
 );
 
-const child = spawn(process.execPath, [nextBin, 'dev', '--port', String(DEALER_WORKBENCH_PORT), '--webpack'], {
+const child = spawn(process.execPath, [nextBin, 'dev', '--port', String(DEALER_WORKBENCH_PORT)], {
   cwd: appRoot,
   env: process.env,
   stdio: ['inherit', 'pipe', 'pipe'],
