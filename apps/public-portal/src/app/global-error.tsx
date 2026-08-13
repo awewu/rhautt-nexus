@@ -20,7 +20,7 @@ export default function GlobalError({
             style={{
               fontSize: 72,
               fontWeight: 800,
-              color: '#4E9A3D',
+              color: 'var(--rh-green)',
               lineHeight: 1,
               marginBottom: 16,
             }}

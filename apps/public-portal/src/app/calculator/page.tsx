@@ -106,7 +106,7 @@ export default function CalculatorPage() {
                 step={10}
                 value={area}
                 onChange={(e) => setArea(Number(e.target.value))}
-                style={{ width: '100%', accentColor: '#4E9A3D' }}
+                style={{ width: '100%', accentColor: 'var(--rh-green)' }}
               />
               <div
                 style={{
@@ -248,7 +248,7 @@ export default function CalculatorPage() {
                   style={{
                     fontFamily: 'var(--rh-display)',
                     fontSize: 28,
-                    color: '#16A34A',
+                    color: 'var(--rh-air)',
                     lineHeight: 1,
                   }}
                 >
@@ -263,7 +263,7 @@ export default function CalculatorPage() {
                   style={{
                     fontFamily: 'var(--rh-display)',
                     fontSize: 28,
-                    color: '#16A34A',
+                    color: 'var(--rh-air)',
                     lineHeight: 1,
                   }}
                 >
@@ -278,7 +278,7 @@ export default function CalculatorPage() {
                   style={{
                     fontFamily: 'var(--rh-display)',
                     fontSize: 28,
-                    color: '#16A34A',
+                    color: 'var(--rh-air)',
                     lineHeight: 1,
                   }}
                 >

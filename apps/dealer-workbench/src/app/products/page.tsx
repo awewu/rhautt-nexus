@@ -9919,7 +9919,7 @@ function CategoryNodeCard({
         minWidth: 0,
         border: '1px solid var(--border)',
         borderRadius: 'var(--r-lg)',
-        background: '#FFFFFF',
+        background: 'var(--surface-1)',
         padding: '10px 12px',
         boxShadow: 'var(--sh-xs)',
       }}
@@ -10930,7 +10930,7 @@ function SiteProductCategoryCrudPanel({
       >
         <div
           className="inset"
-          style={{ padding: 12, borderRadius: 'var(--r-lg)', background: '#FFFFFF' }}
+          style={{ padding: 12, borderRadius: 'var(--r-lg)', background: 'var(--surface-1)' }}
         >
           <div
             style={{
@@ -11356,7 +11356,7 @@ function SiteProductCategoryTreePanel({
         padding: 10,
         border: '1px solid var(--border)',
         borderRadius: 'var(--r-lg)',
-        background: '#FFFFFF',
+        background: 'var(--surface-1)',
       }}
     >
       <div
@@ -11516,7 +11516,7 @@ function CategoryCrudTreePanel({
           padding: '8px 8px',
           border: '1px solid var(--border)',
           borderRadius: 8,
-          background: '#FFFFFF',
+          background: 'var(--surface-1)',
         }}
       >
         {rows.map((node) => {
@@ -11742,7 +11742,7 @@ function CategoryCrudTreeTable({
                         padding: 0,
                         flex: '0 0 30px',
                         border: expandable ? '1px solid var(--border)' : '1px solid transparent',
-                        background: expandable ? '#FFFFFF' : 'transparent',
+                        background: expandable ? 'var(--surface-1)' : 'transparent',
                         color: expandable ? 'var(--t-primary)' : 'var(--t-tertiary)',
                         transition:
                           'background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease',
@@ -11946,7 +11946,7 @@ function CategoryCrudNodeCard({
         minWidth: 0,
         border: active ? '1px solid var(--brand)' : '1px solid var(--border)',
         borderRadius: 'var(--r-md)',
-        background: active ? 'var(--brand-50)' : '#FFFFFF',
+        background: active ? 'var(--brand-50)' : 'var(--surface-1)',
         padding: node.level === 1 ? '12px 14px' : '10px 12px',
         boxShadow: active ? 'var(--sh-glow)' : 'var(--sh-xs)',
       }}

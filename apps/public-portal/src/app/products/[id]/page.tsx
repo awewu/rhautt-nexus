@@ -116,7 +116,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                     fontSize: 12,
                     fontWeight: 700,
                     background: 'rgba(22,163,74,0.10)',
-                    color: '#16A34A',
+                    color: 'var(--rh-air)',
                   }}
                 >
                   节能产品
