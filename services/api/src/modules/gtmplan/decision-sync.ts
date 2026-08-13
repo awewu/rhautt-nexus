@@ -11,6 +11,12 @@
  * - 来源系统由 Tandem 按服务令牌判定为 gtm, 请求体不携带 sourceSystem。
  */
 
+import type {
+  DecisionStatus,
+  DecisionType,
+  DecisionUpsertInput,
+} from '../../contracts/decision/decision.v1.contract';
+
 export type CampaignLike = {
   id: string;
   name: string;
@@ -24,19 +30,14 @@ export type CampaignLike = {
   updatedAt: Date | string;
 };
 
-export type DecisionUpsertPayload = {
-  refId: string;
-  type: 'campaign';
-  title: string;
-  status: 'proposed' | 'decided';
-  betId?: string;
-  evidenceRefs?: string[];
-  finalDecision?: unknown;
-  decidedBy?: string;
-  decidedAt?: string;
-  expectedOutcome?: string;
-  actualOutcome?: string;
-  outcomeStatus?: 'pending' | 'hit' | 'miss' | 'mixed';
+/**
+ * Tandem decision.v1 上报体 — 类型直接派生自 vendored 单一契约源
+ * (src/contracts/decision/decision.v1.contract.ts, 与 hermes-tandem 权威副本逐字节相同,
+ * 指纹防漂移见 decision-contract.nodetest.ts)。
+ */
+export type DecisionUpsertPayload = DecisionUpsertInput & {
+  type: Extract<DecisionType, 'campaign'>;
+  status: Extract<DecisionStatus, 'proposed' | 'decided'>;
 };
 
 export type DecisionSyncResult =
