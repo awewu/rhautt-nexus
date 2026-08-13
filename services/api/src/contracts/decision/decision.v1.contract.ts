@@ -79,7 +79,10 @@ export function computeContractFingerprint(): string {
     limits: DECISION_LIMITS,
     servicePrefix: SERVICE_ACCOUNT_PREFIX,
     // 治理规则版本号: 校验器语义变化 (即使词表不变) 时 +1
-    governanceRules: 1,
+    // v2: POST 上报也收口 Outcome Review 纪律 — hit/miss/mixed 必须
+    //     status≠proposed、必须人类 outcomeReviewedBy (禁服务账号),
+    //     并补齐 outcomeReviewedBy/outcomeReviewedAt/outcomeReviewNote 类型校验。
+    governanceRules: 2,
   });
   return createHash('sha256').update(spec).digest('hex').slice(0, 16);
 }
@@ -89,7 +92,7 @@ export function computeContractFingerprint(): string {
  * 升级流程: 改动 SPEC 后运行 computeContractFingerprint() 取新值填入此处,
  * 然后把整个文件同步到 StrategyOS / PLM / rhautt_gtm 的 vendored 副本。
  */
-export const CONTRACT_FINGERPRINT = 'ee4930d6e69a2a6d' as const;
+export const CONTRACT_FINGERPRINT = '292878317b41828d' as const;
 
 // ── 对象类型 ────────────────────────────────────────────────────────────
 
@@ -250,13 +253,22 @@ export function validateDecisionInput(body: unknown): DecisionValidation {
   ) {
     return { ok: false, error: 'outcomeStatus 必须是 pending | hit | miss | mixed' };
   }
-  if (
-    (b.outcomeStatus === 'hit' || b.outcomeStatus === 'miss' || b.outcomeStatus === 'mixed') &&
-    (typeof b.actualOutcome !== 'string' || !b.actualOutcome.trim())
-  ) {
-    return { ok: false, error: '结果回看 (outcomeStatus=hit/miss/mixed) 必须附 actualOutcome 说明' };
+  if (b.outcomeStatus === 'hit' || b.outcomeStatus === 'miss' || b.outcomeStatus === 'mixed') {
+    if (typeof b.actualOutcome !== 'string' || !b.actualOutcome.trim()) {
+      return { ok: false, error: '结果回看 (outcomeStatus=hit/miss/mixed) 必须附 actualOutcome 说明' };
+    }
+    // 治理纪律 (v2): POST 上报回看结果与 PATCH 同一套规则 — 不能绕过人类署名
+    if (b.status === 'proposed') {
+      return { ok: false, error: '不能回看未定案的决策 (status=proposed) — 先有人类 finalDecision 才有对错可标注' };
+    }
+    if (typeof b.outcomeReviewedBy !== 'string' || !b.outcomeReviewedBy.trim()) {
+      return { ok: false, error: '结果回看 (outcomeStatus=hit/miss/mixed) 必须携带 outcomeReviewedBy (人类回看者 id)' };
+    }
+    if (b.outcomeReviewedBy.startsWith(SERVICE_ACCOUNT_PREFIX)) {
+      return { ok: false, error: 'outcomeReviewedBy 不能是服务账号 — 对错标注必须归属人类' };
+    }
   }
-  for (const key of ['betId', 'decidedAt', 'expectedOutcome', 'actualOutcome', 'supersedes', 'auditRef', 'tenantId'] as const) {
+  for (const key of ['betId', 'decidedAt', 'expectedOutcome', 'actualOutcome', 'supersedes', 'auditRef', 'tenantId', 'outcomeReviewedBy', 'outcomeReviewedAt', 'outcomeReviewNote'] as const) {
     const v = b[key];
     if (v !== undefined && typeof v !== 'string') {
       return { ok: false, error: `${key} 必须是字符串` };
