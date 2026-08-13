@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { NEWS, getArticle } from '../../../lib/news';
 import { GROUP } from '../../../lib/brand';
+import { buildArticleJsonLd, serializeJsonLd } from '../../../lib/jsonld';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? `https://${GROUP.domain}`;
 
 export function generateStaticParams() {
   return NEWS.map((n) => ({ slug: n.slug }));
@@ -34,8 +37,15 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
   const article = getArticle(slug);
   if (!article) notFound();
 
+  // Article 是 AI 答案中最常被引用的实体类型之一，此前缺失等于放弃这部分可见度
+  const articleJsonLd = buildArticleJsonLd(article, { siteUrl: SITE_URL });
+
   return (
     <main id="main">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(articleJsonLd) }}
+      />
       {/* ── 文章头部 ── */}
       <section
         style={{

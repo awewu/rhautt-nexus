@@ -212,15 +212,21 @@ if (unmeasured.length) {
     `\n⚠️  UNMEASURED (${unmeasured.length}) —— 这些对外站的 GEO 就绪度**未被本门禁验证**，不等于合格：`
   );
   for (const u of unmeasured) console.warn(`- ${u}`);
+  // 已补：Next 应用改由 guard:geo-next 做源码级校验（根布局基准 / 路由级
+  // title+description+canonical / 关键实体 JSON-LD / robots 放行检索型 AI 爬虫）。
+  // 本门禁仍不覆盖它们的**渲染产物**，故继续如实标 unmeasured，不报 ready。
   console.warn(
-    '  处置：需为 Next 应用增加基于 metadata 导出/构建产物的 GEO 校验，否则集团站可见性长期无人守护。'
+    '  处置：Next 应用已由 `npm run guard:geo-next` 做源码级校验（覆盖元数据/实体 JSON-LD/爬虫放行）；'
+      + '\n        本门禁只管静态 HTML，渲染产物级验证仍是缺口（需构建后扫 .next/server/app）。'
   );
   try {
     require('../release/evidence-utils').updateReleaseEvidence('geoUnmeasuredSites', {
       command: 'npm run guard:geo',
-      status: 'unmeasured-gap',
+      status: 'source-level-covered',
       sites: unmeasured,
-      note: '本门禁只扫静态 HTML；Next 应用站点的 GEO 就绪度尚无校验手段',
+      coveredBy: 'npm run guard:geo-next（源码级）',
+      residualGap: '渲染产物级校验（构建后扫 .next/server/app 下 HTML）尚未自动化',
+      note: '本门禁只扫静态 HTML；Next 应用的源码级 GEO 校验已由 guard:geo-next 承担',
     });
   } catch {
     /* 台账不可写不应阻断 */

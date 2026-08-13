@@ -6,6 +6,9 @@ import {
   listSiteProducts,
   SITE_PRODUCT_BRAND_COLOR,
 } from '../../../lib/site-products';
+import { buildBreadcrumbJsonLd, buildProductJsonLd, serializeJsonLd } from '../../../lib/jsonld';
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? `https://${GROUP.domain}`;
 
 export async function generateMetadata({
   params,
@@ -38,8 +41,27 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     .slice(0, 4);
   const brandColor = SITE_PRODUCT_BRAND_COLOR[product.brand] || 'var(--rh-red-dk)';
 
+  // 结构化数据：产品实体 + 面包屑。事实全部来自 D2（site-products → /api/v2/sites/*/products），
+  // 规格落到 additionalProperty，使引擎能逐条抽取"该型号某参数=某值"。
+  const canonicalPath = `/products/${encodeURIComponent(product.id)}`;
+  const jsonLd = [
+    buildProductJsonLd(product, { siteUrl: SITE_URL, canonicalPath }),
+    buildBreadcrumbJsonLd(
+      [
+        { name: '产品系列', path: '/products' },
+        { name: product.cat, path: '/products' },
+        { name: product.name, path: canonicalPath },
+      ],
+      { siteUrl: SITE_URL },
+    ),
+  ];
+
   return (
     <main id="main">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
+      />
       <div style={{ background: 'var(--rh-s2)', borderBottom: '1px solid var(--rh-border)' }}>
         <div
           className="rh-container"

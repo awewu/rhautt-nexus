@@ -19,6 +19,14 @@ export type SiteProduct = {
   specs: { label: string; value: string }[];
   features: string[];
   scenarios: string[];
+  /**
+   * 商品标识（源自 D2 事实基座，缺失即空串）。
+   * 用于 Product JSON-LD 的 sku/mpn/gtin13 —— 引擎靠它把"同一型号"跨来源对齐；
+   * 也是后续 Agentic Commerce 产品 feed 的必填标识。**没有就留空，不编造。**
+   */
+  sku: string;
+  mpn: string;
+  gtin: string;
 };
 
 export type SiteProductListResult =
@@ -88,6 +96,9 @@ function mapProduct(value: unknown): SiteProduct | null {
     eco: tags.some((tag) => /节能|能效|eco|energy/i.test(tag)),
     image: text(product.image) || text(record(product.mainImage).url),
     specs,
+    sku: text(product.sku),
+    mpn: text(product.mpn) || text(siteMeta.mpn),
+    gtin: text(product.gtin) || text(product.gtin13) || text(siteMeta.gtin),
     features: textList(product.features),
     scenarios: textList(positioning.scenarios).length
       ? textList(positioning.scenarios)
