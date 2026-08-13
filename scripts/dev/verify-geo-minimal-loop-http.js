@@ -17,7 +17,7 @@ async function authHeaders() {
   await client.connect();
   const { rows } = await client.query(
     'select id, tenant_id, dealer_id, store_id, role, permissions from rhautt_nexus.users where status = $1 order by created_at asc limit 1',
-    ['active'],
+    ['active']
   );
   await client.end();
   if (!rows.length) throw new Error('no active user');
@@ -33,7 +33,7 @@ async function authHeaders() {
       permissions: user.permissions || [],
     },
     process.env.JWT_SECRET || 'rhautt-comfort-dev-secret-NEVER-USE-IN-PRODUCTION',
-    { expiresIn: '1h' },
+    { expiresIn: '1h' }
   );
   return { 'content-type': 'application/json', authorization: `Bearer ${token}` };
 }
@@ -45,7 +45,10 @@ async function json(path, headers, body, method = 'POST') {
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const payload = await res.json().catch(async () => ({ message: await res.text() }));
-  if (!res.ok) throw new Error(`${method} ${path} failed ${res.status}: ${JSON.stringify(payload).slice(0, 500)}`);
+  if (!res.ok)
+    throw new Error(
+      `${method} ${path} failed ${res.status}: ${JSON.stringify(payload).slice(0, 500)}`
+    );
   return payload.data || payload;
 }
 
@@ -75,7 +78,8 @@ async function main() {
   });
   const detail = await waitForBatch(headers, batchRun.batch.id);
   const succeeded = detail.jobs.filter((job) => job.status === 'succeeded');
-  if (!succeeded.length) throw new Error(`batch did not produce succeeded jobs: ${detail.batch.status}`);
+  if (!succeeded.length)
+    throw new Error(`batch did not produce succeeded jobs: ${detail.batch.status}`);
 
   const target = succeeded[0];
   const asset = await json('/api/v2/growth/geo/optimization-content', headers, {
@@ -90,36 +94,48 @@ async function main() {
     sources: [{ title: '官网资料', url: 'https://www.rhautt.com', owned: true }],
   });
 
-  console.log(JSON.stringify({
-    ok: true,
-    questions: questions.questions.length,
-    batch: {
-      id: detail.batch.id,
-      status: detail.batch.status,
-      totalProbes: detail.batch.totalProbes,
-      completedProbes: detail.batch.completedProbes,
-      citedRate: detail.batch.citedRate,
-      avgAivs: detail.batch.avgAivs,
-      highRiskCount: detail.batch.highRiskCount,
-    },
-    jobs: detail.jobs.map((job) => ({
-      id: job.id,
-      status: job.status,
-      aivs: job.aivs,
-      riskLevel: job.riskLevel,
-      snapshotId: job.snapshotId,
-      probeId: job.probeId,
-    })),
-    asset: {
-      id: asset.asset.id,
-      source: asset.asset.source,
-      probeJobId: asset.asset.probeJobId,
-      status: asset.asset.status,
-    },
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        ok: true,
+        questions: questions.questions.length,
+        batch: {
+          id: detail.batch.id,
+          status: detail.batch.status,
+          totalProbes: detail.batch.totalProbes,
+          completedProbes: detail.batch.completedProbes,
+          citedRate: detail.batch.citedRate,
+          avgAivs: detail.batch.avgAivs,
+          highRiskCount: detail.batch.highRiskCount,
+        },
+        jobs: detail.jobs.map((job) => ({
+          id: job.id,
+          status: job.status,
+          aivs: job.aivs,
+          riskLevel: job.riskLevel,
+          snapshotId: job.snapshotId,
+          probeId: job.probeId,
+        })),
+        asset: {
+          id: asset.asset.id,
+          source: asset.asset.source,
+          probeJobId: asset.asset.probeJobId,
+          status: asset.asset.status,
+        },
+      },
+      null,
+      2
+    )
+  );
 }
 
 main().catch((error) => {
-  console.error(JSON.stringify({ ok: false, error: error instanceof Error ? error.message : String(error) }, null, 2));
+  console.error(
+    JSON.stringify(
+      { ok: false, error: error instanceof Error ? error.message : String(error) },
+      null,
+      2
+    )
+  );
   process.exit(1);
 });

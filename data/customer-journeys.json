@@ -37,19 +37,11 @@
           "completedAt": "2026-04-23T03:35:40.156Z",
           "responsible": "王磊",
           "data": {
-            "painPoints": [
-              "地下室返潮严重",
-              "冬季采暖不均匀",
-              "老人房睡眠空气差"
-            ],
+            "painPoints": ["地下室返潮严重", "冬季采暖不均匀", "老人房睡眠空气差"],
             "houseType": "别墅",
             "area": 280,
             "budget": 200000,
-            "priorities": [
-              "舒适体验",
-              "节能环保",
-              "空气质量"
-            ]
+            "priorities": ["舒适体验", "节能环保", "空气质量"]
           },
           "notes": "问诊完成，识别3个核心痛点"
         },
@@ -59,16 +51,8 @@
           "completedAt": "2026-04-23T03:35:40.157Z",
           "responsible": "王磊",
           "data": {
-            "lockinActions": [
-              "上门勘查",
-              "3D呈现",
-              "案例展示",
-              "老客户推荐"
-            ],
-            "competitors": [
-              "大金",
-              "日立"
-            ],
+            "lockinActions": ["上门勘查", "3D呈现", "案例展示", "老客户推荐"],
+            "competitors": ["大金", "日立"],
             "clientTier": "premium",
             "confidence": 0.95
           },
@@ -89,12 +73,7 @@
               "finalPayment": 38074
             },
             "selectedTier": "premium",
-            "systems": [
-              "五恒系统",
-              "全屋净水系统",
-              "中央热水系统",
-              "智能控制系统"
-            ]
+            "systems": ["五恒系统", "全屋净水系统", "中央热水系统", "智能控制系统"]
           },
           "notes": "合同签订，金额 ¥190,373"
         },
@@ -159,11 +138,7 @@
               "EER": 3.8,
               "annualEnergySaving": "35%"
             },
-            "compliance": [
-              "GB 50736-2012",
-              "GB 50189-2015",
-              "ISO 50001"
-            ],
+            "compliance": ["GB 50736-2012", "GB 50189-2015", "ISO 50001"],
             "technicalReview": {
               "reviewer": "钱工",
               "passedAt": "2026-04-06T18:30:00.000Z"
@@ -180,11 +155,7 @@
             "startDate": "2026-04-08T15:28:00.000Z",
             "endDate": "2026-04-19T00:23:00.000Z",
             "workDays": 10,
-            "team": [
-              "孙师傅",
-              "水电工李师傅",
-              "弱电工老周"
-            ],
+            "team": ["孙师傅", "水电工李师傅", "弱电工老周"],
             "milestones": [
               {
                 "date": "2026-04-08T15:28:00.000Z",
@@ -301,10 +272,7 @@
             "subtotal": 278600,
             "discount": 22288,
             "finalTotal": 190373,
-            "promotionApplied": [
-              "套餐优惠85折",
-              "老客户推荐-¥1000"
-            ],
+            "promotionApplied": ["套餐优惠85折", "老客户推荐-¥1000"],
             "paymentTerms": "30%首付 / 50%进场款 / 20%尾款",
             "warranty": {
               "equipment": "5年整机",
@@ -636,19 +604,11 @@
           "completedAt": "2026-04-23T03:35:40.173Z",
           "responsible": "刘婷",
           "data": {
-            "painPoints": [
-              "婴儿房空气质量",
-              "夏季空调噪音",
-              "热水不稳定"
-            ],
+            "painPoints": ["婴儿房空气质量", "夏季空调噪音", "热水不稳定"],
             "houseType": "大平层",
             "area": 180,
             "budget": 120000,
-            "priorities": [
-              "舒适体验",
-              "节能环保",
-              "空气质量"
-            ]
+            "priorities": ["舒适体验", "节能环保", "空气质量"]
           },
           "notes": "问诊完成，识别3个核心痛点"
         },
@@ -658,16 +618,8 @@
           "completedAt": "2026-04-23T03:35:40.174Z",
           "responsible": "刘婷",
           "data": {
-            "lockinActions": [
-              "上门勘查",
-              "3D呈现",
-              "案例展示",
-              "老客户推荐"
-            ],
-            "competitors": [
-              "大金",
-              "日立"
-            ],
+            "lockinActions": ["上门勘查", "3D呈现", "案例展示", "老客户推荐"],
+            "competitors": ["大金", "日立"],
             "clientTier": "comfort",
             "confidence": 0.9
           },
@@ -688,12 +640,7 @@
               "finalPayment": 21781
             },
             "selectedTier": "comfort",
-            "systems": [
-              "中央空调",
-              "新风系统",
-              "中央热水系统",
-              "全屋净水系统"
-            ]
+            "systems": ["中央空调", "新风系统", "中央热水系统", "全屋净水系统"]
           },
           "notes": "合同签订，金额 ¥108,905"
         },
@@ -758,11 +705,7 @@
               "EER": 3.8,
               "annualEnergySaving": "35%"
             },
-            "compliance": [
-              "GB 50736-2012",
-              "GB 50189-2015",
-              "ISO 50001"
-            ],
+            "compliance": ["GB 50736-2012", "GB 50189-2015", "ISO 50001"],
             "technicalReview": {
               "reviewer": "赵工",
               "passedAt": "2026-04-03T18:02:00.000Z"
@@ -779,11 +722,7 @@
             "startDate": "2026-04-05T15:07:00.000Z",
             "endDate": "2026-04-16T00:36:00.000Z",
             "workDays": 10,
-            "team": [
-              "吴师傅",
-              "水电工李师傅",
-              "弱电工老周"
-            ],
+            "team": ["吴师傅", "水电工李师傅", "弱电工老周"],
             "milestones": [
               {
                 "date": "2026-04-05T15:07:00.000Z",
@@ -900,10 +839,7 @@
             "subtotal": 158600,
             "discount": 12688,
             "finalTotal": 108905,
-            "promotionApplied": [
-              "套餐优惠85折",
-              "老客户推荐-¥1000"
-            ],
+            "promotionApplied": ["套餐优惠85折", "老客户推荐-¥1000"],
             "paymentTerms": "30%首付 / 50%进场款 / 20%尾款",
             "warranty": {
               "equipment": "5年整机",
@@ -1207,19 +1143,11 @@
           "completedAt": "2026-04-23T03:35:40.180Z",
           "responsible": "陈浩",
           "data": {
-            "painPoints": [
-              "地暖效果差",
-              "多楼层温差大",
-              "地下室异味"
-            ],
+            "painPoints": ["地暖效果差", "多楼层温差大", "地下室异味"],
             "houseType": "联排",
             "area": 220,
             "budget": 150000,
-            "priorities": [
-              "舒适体验",
-              "节能环保",
-              "空气质量"
-            ]
+            "priorities": ["舒适体验", "节能环保", "空气质量"]
           },
           "notes": "问诊完成，识别3个核心痛点"
         },
@@ -1229,16 +1157,8 @@
           "completedAt": "2026-04-23T03:35:40.181Z",
           "responsible": "陈浩",
           "data": {
-            "lockinActions": [
-              "上门勘查",
-              "3D呈现",
-              "案例展示",
-              "老客户推荐"
-            ],
-            "competitors": [
-              "大金",
-              "日立"
-            ],
+            "lockinActions": ["上门勘查", "3D呈现", "案例展示", "老客户推荐"],
+            "competitors": ["大金", "日立"],
             "clientTier": "comfort",
             "confidence": 0.8
           },
@@ -1259,12 +1179,7 @@
               "finalPayment": 28410
             },
             "selectedTier": "comfort",
-            "systems": [
-              "中央空调",
-              "新风系统",
-              "中央热水系统",
-              "全屋净水系统"
-            ]
+            "systems": ["中央空调", "新风系统", "中央热水系统", "全屋净水系统"]
           },
           "notes": "合同签订，金额 ¥142,050"
         },
@@ -1329,11 +1244,7 @@
               "EER": 3.8,
               "annualEnergySaving": "35%"
             },
-            "compliance": [
-              "GB 50736-2012",
-              "GB 50189-2015",
-              "ISO 50001"
-            ],
+            "compliance": ["GB 50736-2012", "GB 50189-2015", "ISO 50001"],
             "technicalReview": {
               "reviewer": "钱工",
               "passedAt": "2026-03-30T18:51:00.000Z"
@@ -1350,11 +1261,7 @@
             "startDate": "2026-04-01T15:03:00.000Z",
             "endDate": "2026-04-12T00:39:00.000Z",
             "workDays": 10,
-            "team": [
-              "孙师傅",
-              "水电工李师傅",
-              "弱电工老周"
-            ],
+            "team": ["孙师傅", "水电工李师傅", "弱电工老周"],
             "milestones": [
               {
                 "date": "2026-04-01T15:03:00.000Z",
@@ -1471,10 +1378,7 @@
             "subtotal": 169400,
             "discount": 13552,
             "finalTotal": 142050,
-            "promotionApplied": [
-              "套餐优惠85折",
-              "老客户推荐-¥1000"
-            ],
+            "promotionApplied": ["套餐优惠85折", "老客户推荐-¥1000"],
             "paymentTerms": "30%首付 / 50%进场款 / 20%尾款",
             "warranty": {
               "equipment": "5年整机",
@@ -1778,19 +1682,11 @@
           "completedAt": "2026-04-23T03:35:40.189Z",
           "responsible": "林芳",
           "data": {
-            "painPoints": [
-              "新风系统选型",
-              "节能环保",
-              "智能控制"
-            ],
+            "painPoints": ["新风系统选型", "节能环保", "智能控制"],
             "houseType": "平层",
             "area": 140,
             "budget": 80000,
-            "priorities": [
-              "舒适体验",
-              "节能环保",
-              "空气质量"
-            ]
+            "priorities": ["舒适体验", "节能环保", "空气质量"]
           },
           "notes": "问诊完成，识别3个核心痛点"
         },
@@ -1800,16 +1696,8 @@
           "completedAt": "2026-04-23T03:35:40.191Z",
           "responsible": "林芳",
           "data": {
-            "lockinActions": [
-              "上门勘查",
-              "3D呈现",
-              "案例展示",
-              "老客户推荐"
-            ],
-            "competitors": [
-              "大金",
-              "日立"
-            ],
+            "lockinActions": ["上门勘查", "3D呈现", "案例展示", "老客户推荐"],
+            "competitors": ["大金", "日立"],
             "clientTier": "comfort",
             "confidence": 0.75
           },
@@ -1830,12 +1718,7 @@
               "finalPayment": 15297
             },
             "selectedTier": "comfort",
-            "systems": [
-              "中央空调",
-              "新风系统",
-              "中央热水系统",
-              "全屋净水系统"
-            ]
+            "systems": ["中央空调", "新风系统", "中央热水系统", "全屋净水系统"]
           },
           "notes": "合同签订，金额 ¥76,487"
         },
@@ -1900,11 +1783,7 @@
               "EER": 3.8,
               "annualEnergySaving": "35%"
             },
-            "compliance": [
-              "GB 50736-2012",
-              "GB 50189-2015",
-              "ISO 50001"
-            ],
+            "compliance": ["GB 50736-2012", "GB 50189-2015", "ISO 50001"],
             "technicalReview": {
               "reviewer": "赵工",
               "passedAt": "2026-03-27T18:21:00.000Z"
@@ -1921,11 +1800,7 @@
             "startDate": "2026-03-29T15:31:00.000Z",
             "endDate": "2026-04-09T00:13:00.000Z",
             "workDays": 10,
-            "team": [
-              "吴师傅",
-              "水电工李师傅",
-              "弱电工老周"
-            ],
+            "team": ["吴师傅", "水电工李师傅", "弱电工老周"],
             "milestones": [
               {
                 "date": "2026-03-29T15:31:00.000Z",
@@ -2042,10 +1917,7 @@
             "subtotal": 147800,
             "discount": 11824,
             "finalTotal": 76487,
-            "promotionApplied": [
-              "套餐优惠85折",
-              "老客户推荐-¥1000"
-            ],
+            "promotionApplied": ["套餐优惠85折", "老客户推荐-¥1000"],
             "paymentTerms": "30%首付 / 50%进场款 / 20%尾款",
             "warranty": {
               "equipment": "5年整机",
@@ -2349,19 +2221,11 @@
           "completedAt": "2026-04-23T03:35:40.199Z",
           "responsible": "王磊",
           "data": {
-            "painPoints": [
-              "全屋恒温恒湿",
-              "泳池恒温",
-              "高端品质"
-            ],
+            "painPoints": ["全屋恒温恒湿", "泳池恒温", "高端品质"],
             "houseType": "独栋",
             "area": 350,
             "budget": 280000,
-            "priorities": [
-              "舒适体验",
-              "节能环保",
-              "空气质量"
-            ]
+            "priorities": ["舒适体验", "节能环保", "空气质量"]
           },
           "notes": "问诊完成，识别3个核心痛点"
         },
@@ -2371,16 +2235,8 @@
           "completedAt": "2026-04-23T03:35:40.201Z",
           "responsible": "王磊",
           "data": {
-            "lockinActions": [
-              "上门勘查",
-              "3D呈现",
-              "案例展示",
-              "老客户推荐"
-            ],
-            "competitors": [
-              "大金",
-              "日立"
-            ],
+            "lockinActions": ["上门勘查", "3D呈现", "案例展示", "老客户推荐"],
+            "competitors": ["大金", "日立"],
             "clientTier": "premium",
             "confidence": 0.88
           },
@@ -2401,12 +2257,7 @@
               "finalPayment": 52585
             },
             "selectedTier": "premium",
-            "systems": [
-              "五恒系统",
-              "全屋净水系统",
-              "中央热水系统",
-              "智能控制系统"
-            ]
+            "systems": ["五恒系统", "全屋净水系统", "中央热水系统", "智能控制系统"]
           },
           "notes": "合同签订，金额 ¥262,928"
         },
@@ -2471,11 +2322,7 @@
               "EER": 3.8,
               "annualEnergySaving": "35%"
             },
-            "compliance": [
-              "GB 50736-2012",
-              "GB 50189-2015",
-              "ISO 50001"
-            ],
+            "compliance": ["GB 50736-2012", "GB 50189-2015", "ISO 50001"],
             "technicalReview": {
               "reviewer": "钱工",
               "passedAt": "2026-04-01T18:16:00.000Z"
@@ -2492,11 +2339,7 @@
             "startDate": "2026-04-03T15:15:00.000Z",
             "endDate": "2026-04-14T00:57:00.000Z",
             "workDays": 10,
-            "team": [
-              "孙师傅",
-              "水电工李师傅",
-              "弱电工老周"
-            ],
+            "team": ["孙师傅", "水电工李师傅", "弱电工老周"],
             "milestones": [
               {
                 "date": "2026-04-03T15:15:00.000Z",
@@ -2613,10 +2456,7 @@
             "subtotal": 297500,
             "discount": 23800,
             "finalTotal": 262928,
-            "promotionApplied": [
-              "套餐优惠85折",
-              "老客户推荐-¥1000"
-            ],
+            "promotionApplied": ["套餐优惠85折", "老客户推荐-¥1000"],
             "paymentTerms": "30%首付 / 50%进场款 / 20%尾款",
             "warranty": {
               "equipment": "5年整机",
@@ -2920,19 +2760,11 @@
           "completedAt": "2026-04-23T03:35:40.211Z",
           "responsible": "刘婷",
           "data": {
-            "painPoints": [
-              "母婴房空气洁净",
-              "除湿需求",
-              "24小时热水"
-            ],
+            "painPoints": ["母婴房空气洁净", "除湿需求", "24小时热水"],
             "houseType": "叠拼",
             "area": 200,
             "budget": 100000,
-            "priorities": [
-              "舒适体验",
-              "节能环保",
-              "空气质量"
-            ]
+            "priorities": ["舒适体验", "节能环保", "空气质量"]
           },
           "notes": "问诊完成，识别3个核心痛点"
         },
@@ -2942,16 +2774,8 @@
           "completedAt": "2026-04-23T03:35:40.214Z",
           "responsible": "刘婷",
           "data": {
-            "lockinActions": [
-              "上门勘查",
-              "3D呈现",
-              "案例展示",
-              "老客户推荐"
-            ],
-            "competitors": [
-              "大金",
-              "日立"
-            ],
+            "lockinActions": ["上门勘查", "3D呈现", "案例展示", "老客户推荐"],
+            "competitors": ["大金", "日立"],
             "clientTier": "comfort",
             "confidence": 0.7
           },
@@ -2972,12 +2796,7 @@
               "finalPayment": 18381
             },
             "selectedTier": "comfort",
-            "systems": [
-              "中央空调",
-              "新风系统",
-              "中央热水系统",
-              "全屋净水系统"
-            ]
+            "systems": ["中央空调", "新风系统", "中央热水系统", "全屋净水系统"]
           },
           "notes": "合同签订，金额 ¥91,905"
         },
@@ -3042,11 +2861,7 @@
               "EER": 3.8,
               "annualEnergySaving": "35%"
             },
-            "compliance": [
-              "GB 50736-2012",
-              "GB 50189-2015",
-              "ISO 50001"
-            ],
+            "compliance": ["GB 50736-2012", "GB 50189-2015", "ISO 50001"],
             "technicalReview": {
               "reviewer": "赵工",
               "passedAt": "2026-03-23T18:08:00.000Z"
@@ -3063,11 +2878,7 @@
             "startDate": "2026-03-25T15:50:00.000Z",
             "endDate": "2026-04-05T00:18:00.000Z",
             "workDays": 10,
-            "team": [
-              "吴师傅",
-              "水电工李师傅",
-              "弱电工老周"
-            ],
+            "team": ["吴师傅", "水电工李师傅", "弱电工老周"],
             "milestones": [
               {
                 "date": "2026-03-25T15:50:00.000Z",
@@ -3184,10 +2995,7 @@
             "subtotal": 164000,
             "discount": 13120,
             "finalTotal": 91905,
-            "promotionApplied": [
-              "套餐优惠85折",
-              "老客户推荐-¥1000"
-            ],
+            "promotionApplied": ["套餐优惠85折", "老客户推荐-¥1000"],
             "paymentTerms": "30%首付 / 50%进场款 / 20%尾款",
             "warranty": {
               "equipment": "5年整机",
@@ -3491,19 +3299,11 @@
           "completedAt": "2026-04-23T03:35:40.229Z",
           "responsible": "陈浩",
           "data": {
-            "painPoints": [
-              "呼吸系统敏感",
-              "春秋季过敏",
-              "安静舒适"
-            ],
+            "painPoints": ["呼吸系统敏感", "春秋季过敏", "安静舒适"],
             "houseType": "大平层",
             "area": 260,
             "budget": 180000,
-            "priorities": [
-              "舒适体验",
-              "节能环保",
-              "空气质量"
-            ]
+            "priorities": ["舒适体验", "节能环保", "空气质量"]
           },
           "notes": "问诊完成，识别3个核心痛点"
         },
@@ -3513,16 +3313,8 @@
           "completedAt": "2026-04-23T03:35:40.232Z",
           "responsible": "陈浩",
           "data": {
-            "lockinActions": [
-              "上门勘查",
-              "3D呈现",
-              "案例展示",
-              "老客户推荐"
-            ],
-            "competitors": [
-              "大金",
-              "日立"
-            ],
+            "lockinActions": ["上门勘查", "3D呈现", "案例展示", "老客户推荐"],
+            "competitors": ["大金", "日立"],
             "clientTier": "premium",
             "confidence": 0.85
           },
@@ -3543,12 +3335,7 @@
               "finalPayment": 34227
             },
             "selectedTier": "premium",
-            "systems": [
-              "五恒系统",
-              "全屋净水系统",
-              "中央热水系统",
-              "智能控制系统"
-            ]
+            "systems": ["五恒系统", "全屋净水系统", "中央热水系统", "智能控制系统"]
           },
           "notes": "合同签订，金额 ¥171,135"
         },
@@ -3613,11 +3400,7 @@
               "EER": 3.8,
               "annualEnergySaving": "35%"
             },
-            "compliance": [
-              "GB 50736-2012",
-              "GB 50189-2015",
-              "ISO 50001"
-            ],
+            "compliance": ["GB 50736-2012", "GB 50189-2015", "ISO 50001"],
             "technicalReview": {
               "reviewer": "钱工",
               "passedAt": "2026-04-04T18:45:00.000Z"
@@ -3634,11 +3417,7 @@
             "startDate": "2026-04-06T15:54:00.000Z",
             "endDate": "2026-04-17T00:30:00.000Z",
             "workDays": 10,
-            "team": [
-              "孙师傅",
-              "水电工李师傅",
-              "弱电工老周"
-            ],
+            "team": ["孙师傅", "水电工李师傅", "弱电工老周"],
             "milestones": [
               {
                 "date": "2026-04-06T15:54:00.000Z",
@@ -3755,10 +3534,7 @@
             "subtotal": 273200,
             "discount": 21856,
             "finalTotal": 171135,
-            "promotionApplied": [
-              "套餐优惠85折",
-              "老客户推荐-¥1000"
-            ],
+            "promotionApplied": ["套餐优惠85折", "老客户推荐-¥1000"],
             "paymentTerms": "30%首付 / 50%进场款 / 20%尾款",
             "warranty": {
               "equipment": "5年整机",
@@ -4062,19 +3838,11 @@
           "completedAt": "2026-04-23T03:35:40.246Z",
           "responsible": "林芳",
           "data": {
-            "painPoints": [
-              "预算有限",
-              "基础舒适",
-              "安装便捷"
-            ],
+            "painPoints": ["预算有限", "基础舒适", "安装便捷"],
             "houseType": "平层",
             "area": 110,
             "budget": 60000,
-            "priorities": [
-              "舒适体验",
-              "节能环保",
-              "空气质量"
-            ]
+            "priorities": ["舒适体验", "节能环保", "空气质量"]
           },
           "notes": "问诊完成，识别3个核心痛点"
         },
@@ -4084,16 +3852,8 @@
           "completedAt": "2026-04-23T03:35:40.249Z",
           "responsible": "林芳",
           "data": {
-            "lockinActions": [
-              "上门勘查",
-              "3D呈现",
-              "案例展示",
-              "老客户推荐"
-            ],
-            "competitors": [
-              "大金",
-              "日立"
-            ],
+            "lockinActions": ["上门勘查", "3D呈现", "案例展示", "老客户推荐"],
+            "competitors": ["大金", "日立"],
             "clientTier": "basic",
             "confidence": 0.65
           },
@@ -4114,10 +3874,7 @@
               "finalPayment": 11564
             },
             "selectedTier": "basic",
-            "systems": [
-              "中央空调",
-              "新风系统"
-            ]
+            "systems": ["中央空调", "新风系统"]
           },
           "notes": "合同签订，金额 ¥57,824"
         },
@@ -4170,11 +3927,7 @@
               "EER": 3.8,
               "annualEnergySaving": "35%"
             },
-            "compliance": [
-              "GB 50736-2012",
-              "GB 50189-2015",
-              "ISO 50001"
-            ],
+            "compliance": ["GB 50736-2012", "GB 50189-2015", "ISO 50001"],
             "technicalReview": {
               "reviewer": "赵工",
               "passedAt": "2026-03-17T18:48:00.000Z"
@@ -4191,11 +3944,7 @@
             "startDate": "2026-03-19T15:58:00.000Z",
             "endDate": "2026-03-30T00:53:00.000Z",
             "workDays": 10,
-            "team": [
-              "吴师傅",
-              "水电工李师傅",
-              "弱电工老周"
-            ],
+            "team": ["吴师傅", "水电工李师傅", "弱电工老周"],
             "milestones": [
               {
                 "date": "2026-03-19T15:58:00.000Z",
@@ -4294,10 +4043,7 @@
             "subtotal": 82700,
             "discount": 6616,
             "finalTotal": 57824,
-            "promotionApplied": [
-              "套餐优惠85折",
-              "老客户推荐-¥1000"
-            ],
+            "promotionApplied": ["套餐优惠85折", "老客户推荐-¥1000"],
             "paymentTerms": "30%首付 / 50%进场款 / 20%尾款",
             "warranty": {
               "equipment": "5年整机",
@@ -4601,19 +4347,11 @@
           "completedAt": "2026-04-23T03:35:40.263Z",
           "responsible": "王磊",
           "data": {
-            "painPoints": [
-              "多层水压不稳",
-              "地下室潮湿",
-              "系统联动"
-            ],
+            "painPoints": ["多层水压不稳", "地下室潮湿", "系统联动"],
             "houseType": "联排",
             "area": 240,
             "budget": 160000,
-            "priorities": [
-              "舒适体验",
-              "节能环保",
-              "空气质量"
-            ]
+            "priorities": ["舒适体验", "节能环保", "空气质量"]
           },
           "notes": "问诊完成，识别3个核心痛点"
         },
@@ -4623,16 +4361,8 @@
           "completedAt": "2026-04-23T03:35:40.267Z",
           "responsible": "王磊",
           "data": {
-            "lockinActions": [
-              "上门勘查",
-              "3D呈现",
-              "案例展示",
-              "老客户推荐"
-            ],
-            "competitors": [
-              "大金",
-              "日立"
-            ],
+            "lockinActions": ["上门勘查", "3D呈现", "案例展示", "老客户推荐"],
+            "competitors": ["大金", "日立"],
             "clientTier": "comfort",
             "confidence": 0.78
           },
@@ -4653,12 +4383,7 @@
               "finalPayment": 29565
             },
             "selectedTier": "comfort",
-            "systems": [
-              "中央空调",
-              "新风系统",
-              "中央热水系统",
-              "全屋净水系统"
-            ]
+            "systems": ["中央空调", "新风系统", "中央热水系统", "全屋净水系统"]
           },
           "notes": "合同签订，金额 ¥147,827"
         },
@@ -4723,11 +4448,7 @@
               "EER": 3.8,
               "annualEnergySaving": "35%"
             },
-            "compliance": [
-              "GB 50736-2012",
-              "GB 50189-2015",
-              "ISO 50001"
-            ],
+            "compliance": ["GB 50736-2012", "GB 50189-2015", "ISO 50001"],
             "technicalReview": {
               "reviewer": "钱工",
               "passedAt": "2026-03-29T18:19:00.000Z"
@@ -4744,11 +4465,7 @@
             "startDate": "2026-03-31T15:19:00.000Z",
             "endDate": "2026-04-11T00:24:00.000Z",
             "workDays": 10,
-            "team": [
-              "孙师傅",
-              "水电工李师傅",
-              "弱电工老周"
-            ],
+            "team": ["孙师傅", "水电工李师傅", "弱电工老周"],
             "milestones": [
               {
                 "date": "2026-03-31T15:19:00.000Z",
@@ -4865,10 +4582,7 @@
             "subtotal": 174800,
             "discount": 13984,
             "finalTotal": 147827,
-            "promotionApplied": [
-              "套餐优惠85折",
-              "老客户推荐-¥1000"
-            ],
+            "promotionApplied": ["套餐优惠85折", "老客户推荐-¥1000"],
             "paymentTerms": "30%首付 / 50%进场款 / 20%尾款",
             "warranty": {
               "equipment": "5年整机",
@@ -5172,19 +4886,11 @@
           "completedAt": "2026-04-23T03:35:40.285Z",
           "responsible": "刘婷",
           "data": {
-            "painPoints": [
-              "三代同堂差异化需求",
-              "独立分区控制",
-              "能耗可视化"
-            ],
+            "painPoints": ["三代同堂差异化需求", "独立分区控制", "能耗可视化"],
             "houseType": "独栋",
             "area": 420,
             "budget": 350000,
-            "priorities": [
-              "舒适体验",
-              "节能环保",
-              "空气质量"
-            ]
+            "priorities": ["舒适体验", "节能环保", "空气质量"]
           },
           "notes": "问诊完成，识别3个核心痛点"
         },
@@ -5194,16 +4900,8 @@
           "completedAt": "2026-04-23T03:35:40.288Z",
           "responsible": "刘婷",
           "data": {
-            "lockinActions": [
-              "上门勘查",
-              "3D呈现",
-              "案例展示",
-              "老客户推荐"
-            ],
-            "competitors": [
-              "大金",
-              "日立"
-            ],
+            "lockinActions": ["上门勘查", "3D呈现", "案例展示", "老客户推荐"],
+            "competitors": ["大金", "日立"],
             "clientTier": "premium",
             "confidence": 0.92
           },
@@ -5224,12 +4922,7 @@
               "finalPayment": 66259
             },
             "selectedTier": "premium",
-            "systems": [
-              "五恒系统",
-              "全屋净水系统",
-              "中央热水系统",
-              "智能控制系统"
-            ]
+            "systems": ["五恒系统", "全屋净水系统", "中央热水系统", "智能控制系统"]
           },
           "notes": "合同签订，金额 ¥331,299"
         },
@@ -5294,11 +4987,7 @@
               "EER": 3.8,
               "annualEnergySaving": "35%"
             },
-            "compliance": [
-              "GB 50736-2012",
-              "GB 50189-2015",
-              "ISO 50001"
-            ],
+            "compliance": ["GB 50736-2012", "GB 50189-2015", "ISO 50001"],
             "technicalReview": {
               "reviewer": "赵工",
               "passedAt": "2026-04-05T18:26:00.000Z"
@@ -5315,11 +5004,7 @@
             "startDate": "2026-04-07T15:20:00.000Z",
             "endDate": "2026-04-18T00:44:00.000Z",
             "workDays": 10,
-            "team": [
-              "吴师傅",
-              "水电工李师傅",
-              "弱电工老周"
-            ],
+            "team": ["吴师傅", "水电工李师傅", "弱电工老周"],
             "milestones": [
               {
                 "date": "2026-04-07T15:20:00.000Z",
@@ -5436,10 +5121,7 @@
             "subtotal": 316400,
             "discount": 25312,
             "finalTotal": 291088,
-            "promotionApplied": [
-              "套餐优惠85折",
-              "老客户推荐-¥1000"
-            ],
+            "promotionApplied": ["套餐优惠85折", "老客户推荐-¥1000"],
             "paymentTerms": "30%首付 / 50%进场款 / 20%尾款",
             "warranty": {
               "equipment": "5年整机",

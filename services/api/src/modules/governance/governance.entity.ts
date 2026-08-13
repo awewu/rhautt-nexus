@@ -9,8 +9,14 @@ export class AuditLogEntity {
   @Column({ name: 'action' }) @Index() action: string;
   @Column({ name: 'resource_type' }) resourceType: string;
   @Column({ name: 'resource_id', type: 'varchar', nullable: true }) resourceId: string | null;
-  @Column({ name: 'before_state', type: 'jsonb', nullable: true }) beforeState: Record<string, unknown> | null;
-  @Column({ name: 'after_state', type: 'jsonb', nullable: true }) afterState: Record<string, unknown> | null;
+  @Column({ name: 'before_state', type: 'jsonb', nullable: true }) beforeState: Record<
+    string,
+    unknown
+  > | null;
+  @Column({ name: 'after_state', type: 'jsonb', nullable: true }) afterState: Record<
+    string,
+    unknown
+  > | null;
   @Column({ name: 'request_id', type: 'varchar', nullable: true }) requestId: string | null;
   @Column({ name: 'trace_id', type: 'varchar', nullable: true }) traceId: string | null;
   @Column({ name: 'ip_hash', type: 'varchar', nullable: true }) ipHash: string | null;

@@ -1,8 +1,16 @@
 /** timer-registry 单元测试 */
-const { registerInterval, registerTimeout, unregister, stats, shutdownAllTimers } = require('../../server/utils/timer-registry');
+const {
+  registerInterval,
+  registerTimeout,
+  unregister,
+  stats,
+  shutdownAllTimers,
+} = require('../../server/utils/timer-registry');
 
 describe('timer-registry', () => {
-  afterEach(() => { shutdownAllTimers(); });
+  afterEach(() => {
+    shutdownAllTimers();
+  });
 
   it('registerInterval 返回 id+ref，stats 能查到', () => {
     const before = stats().active;
@@ -34,13 +42,20 @@ describe('timer-registry', () => {
     expect(stats().active).toBe(0);
   });
 
-  it('registerTimeout 触发后自动清理', done => {
-    registerTimeout(() => {
-      // 触发后自动清理（由 wrapper 实现）
-      setTimeout(() => {
-        const found = Array.from({ length: 10 }, (_, i) => stats().byName[Object.keys(stats().byName)[i]]).filter(Boolean);
-        done();
-      }, 10);
-    }, 5, 'auto-cleanup');
+  it('registerTimeout 触发后自动清理', (done) => {
+    registerTimeout(
+      () => {
+        // 触发后自动清理（由 wrapper 实现）
+        setTimeout(() => {
+          const found = Array.from(
+            { length: 10 },
+            (_, i) => stats().byName[Object.keys(stats().byName)[i]]
+          ).filter(Boolean);
+          done();
+        }, 10);
+      },
+      5,
+      'auto-cleanup'
+    );
   });
 });

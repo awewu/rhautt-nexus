@@ -12,14 +12,20 @@ dotenv.config({ path: path.join(ROOT, '.env'), override: false, quiet: true });
 
 const APPLY = process.argv.includes('--apply');
 const BASE_ARG_INDEX = process.argv.indexOf('--base');
-const BASE = BASE_ARG_INDEX >= 0
-  ? process.argv[BASE_ARG_INDEX + 1]
-  : process.env.PRODUCT_CATALOG_API_BASE || 'http://localhost:5500/api/v2';
+const BASE =
+  BASE_ARG_INDEX >= 0
+    ? process.argv[BASE_ARG_INDEX + 1]
+    : process.env.PRODUCT_CATALOG_API_BASE || 'http://localhost:5500/api/v2';
 
 const BRAND_CONFIG = Object.freeze({
   rheem: { code: 'rheem', label: 'Rheem', tenantCode: 'rheem', tenantEnv: 'RHEEM_TENANT_ID' },
   ruud: { code: 'ruud', label: 'Ruud', tenantCode: 'ruud', tenantEnv: 'RUUD_TENANT_ID' },
-  everhot: { code: 'everhot', label: 'Everhot', tenantCode: 'everhot', tenantEnv: 'EVERHOT_TENANT_ID' },
+  everhot: {
+    code: 'everhot',
+    label: 'Everhot',
+    tenantCode: 'everhot',
+    tenantEnv: 'EVERHOT_TENANT_ID',
+  },
 });
 
 const DRY_RUN_TENANTS = Object.freeze({
@@ -58,7 +64,9 @@ function normalizeSlug(value) {
 }
 
 function resolveBrand(sourceBrand) {
-  const text = String(sourceBrand || '').trim().toLowerCase();
+  const text = String(sourceBrand || '')
+    .trim()
+    .toLowerCase();
   if (text.includes('rheem')) return BRAND_CONFIG.rheem;
   if (text.includes('ruud')) return BRAND_CONFIG.ruud;
   if (text.includes('everhot')) return BRAND_CONFIG.everhot;
@@ -76,7 +84,8 @@ function buildDto(product, tenantId, categories, index = 0, existing = null) {
   const specText = typeof product.spec === 'string' ? product.spec : '';
   const categoryLabel = categoryLabels(categories).get(category) || category;
   const slug = normalizeSlug(sku);
-  if (!sku) throw new Error(`Simulated product is missing model/SKU: ${product.id || product.name}`);
+  if (!sku)
+    throw new Error(`Simulated product is missing model/SKU: ${product.id || product.name}`);
   if (!product.name) throw new Error(`Simulated product is missing name: ${sku}`);
 
   const brandMetadata = {
@@ -145,7 +154,8 @@ async function loadBrandTenants(client, env = process.env) {
   );
   const tenants = Object.fromEntries(rows.map((row) => [row.code, row.id]));
   for (const config of Object.values(BRAND_CONFIG)) {
-    if (!tenants[config.code] && env[config.tenantEnv]) tenants[config.code] = env[config.tenantEnv];
+    if (!tenants[config.code] && env[config.tenantEnv])
+      tenants[config.code] = env[config.tenantEnv];
   }
   return tenants;
 }
@@ -162,7 +172,9 @@ async function listExistingProducts(client, tenantIds) {
 }
 
 function planImport(records, existingProducts) {
-  const existingByKey = new Map(existingProducts.map((row) => [`${row.tenantId}\n${row.sku}`, row]));
+  const existingByKey = new Map(
+    existingProducts.map((row) => [`${row.tenantId}\n${row.sku}`, row])
+  );
   const duplicateKeys = new Set();
   const seen = new Set();
   const items = records.map((record) => {
@@ -173,7 +185,9 @@ function planImport(records, existingProducts) {
     return { record, action: existing ? 'update' : 'create', existingId: existing?.id || null };
   });
   if (duplicateKeys.size) {
-    throw new Error(`Duplicate seed key(s): ${[...duplicateKeys].map((key) => key.replace('\n', ':')).join(', ')}`);
+    throw new Error(
+      `Duplicate seed key(s): ${[...duplicateKeys].map((key) => key.replace('\n', ':')).join(', ')}`
+    );
   }
   return {
     items,
@@ -183,10 +197,15 @@ function planImport(records, existingProducts) {
 }
 
 function makeToken(tenantId) {
-  if (!process.env.JWT_SECRET) throw new Error('Missing JWT_SECRET for protected product-catalog API import');
-  return jwt.sign({ userId: 'simulated-product-importer', tenantId, role: 'platform_admin' }, process.env.JWT_SECRET, {
-    expiresIn: '20m',
-  });
+  if (!process.env.JWT_SECRET)
+    throw new Error('Missing JWT_SECRET for protected product-catalog API import');
+  return jwt.sign(
+    { userId: 'simulated-product-importer', tenantId, role: 'platform_admin' },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: '20m',
+    }
+  );
 }
 
 async function apiRequest(pathname, token, options = {}) {
@@ -206,7 +225,10 @@ async function apiRequest(pathname, token, options = {}) {
   } catch {
     payload = { raw: text.slice(0, 500) };
   }
-  if (!response.ok) throw new Error(`${options.method || 'GET'} ${pathname} -> ${response.status}: ${JSON.stringify(payload)}`);
+  if (!response.ok)
+    throw new Error(
+      `${options.method || 'GET'} ${pathname} -> ${response.status}: ${JSON.stringify(payload)}`
+    );
   return payload;
 }
 
@@ -275,7 +297,10 @@ async function applyImportToDatabase(client, plan) {
   try {
     for (const item of plan.items) {
       try {
-        await client.query('SELECT set_config($1, $2, true)', ['app.tenant_id', item.record.tenantId]);
+        await client.query('SELECT set_config($1, $2, true)', [
+          'app.tenant_id',
+          item.record.tenantId,
+        ]);
         const saved = await upsertProduct(client, item.record);
         result[saved?.inserted ? 'created' : 'updated'] += 1;
       } catch (error) {
@@ -326,7 +351,9 @@ async function main() {
     await client.connect();
     const tenants = await loadBrandTenants(client);
     const records = buildSeedRecords(source.products, source.categories, tenants);
-    const existing = await listExistingProducts(client, [...new Set(records.map((record) => record.tenantId))]);
+    const existing = await listExistingProducts(client, [
+      ...new Set(records.map((record) => record.tenantId)),
+    ]);
     const plan = planImport(records, existing);
     report.databaseAvailable = true;
     report.tenants = Object.fromEntries(Object.entries(tenants).filter(([, value]) => value));
@@ -349,18 +376,23 @@ async function main() {
     if (APPLY) throw error;
     const fallbackTenants = Object.fromEntries(
       Object.values(BRAND_CONFIG)
-        .map((config) => [config.code, process.env[config.tenantEnv] || DRY_RUN_TENANTS[config.code]])
+        .map((config) => [
+          config.code,
+          process.env[config.tenantEnv] || DRY_RUN_TENANTS[config.code],
+        ])
         .filter(([, value]) => value)
     );
     report.databaseError = error.message;
-    report.records = buildSeedRecords(source.products, source.categories, fallbackTenants).map((record) => ({
-      tenantId: record.tenantId,
-      sku: record.sku,
-      brand: record.brand,
-      name: record.name,
-      category: record.category,
-      status: record.status,
-    }));
+    report.records = buildSeedRecords(source.products, source.categories, fallbackTenants).map(
+      (record) => ({
+        tenantId: record.tenantId,
+        sku: record.sku,
+        brand: record.brand,
+        name: record.name,
+        category: record.category,
+        status: record.status,
+      })
+    );
     report.created = report.records.length;
   } finally {
     await client.end().catch(() => {});

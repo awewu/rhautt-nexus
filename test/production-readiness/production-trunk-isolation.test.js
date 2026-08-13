@@ -1,18 +1,21 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '../..');
+const { describeIfArtifacts } = require('./helpers/local-artifacts');
+// 门禁在缺少 archive/legacy-ui/public/legacy-surface-manifest.json 时自 SKIP 且不产出报告
+const LEGACY_MANIFEST = 'archive/legacy-ui/public/legacy-surface-manifest.json';
 
 function readJson(relativePath) {
   return JSON.parse(fs.readFileSync(path.join(ROOT, relativePath), 'utf8'));
 }
 
-describe('production trunk isolation evidence', () => {
+describeIfArtifacts([LEGACY_MANIFEST])('production trunk isolation evidence', () => {
   beforeAll(() => {
     execFileSync(process.execPath, ['scripts/agent-guards/production-trunk-isolation-check.js'], {
       cwd: ROOT,
-      stdio: 'pipe'
+      stdio: 'pipe',
     });
   });
 

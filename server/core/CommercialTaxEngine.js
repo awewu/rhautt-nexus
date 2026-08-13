@@ -12,24 +12,24 @@ class CommercialTaxEngine {
     // 税率配置 (2026年标准)
     this.taxRates = {
       vat: {
-        general: 0.13,        // 一般纳税人 13%
-        small: 0.03,          // 小规模纳税人 3%
-        construction: 0.09,   // 建筑服务 9%
-        equipment: 0.13       // 设备销售 13%
+        general: 0.13, // 一般纳税人 13%
+        small: 0.03, // 小规模纳税人 3%
+        construction: 0.09, // 建筑服务 9%
+        equipment: 0.13, // 设备销售 13%
       },
       surcharge: {
-        cityMaintenance: 0.07,    // 城市维护建设税 7%
+        cityMaintenance: 0.07, // 城市维护建设税 7%
         educationSurcharge: 0.03, // 教育费附加 3%
-        localEducation: 0.02      // 地方教育附加 2%
+        localEducation: 0.02, // 地方教育附加 2%
       },
       stampDuty: {
-        constructionContract: 0.0003,  // 建设工程勘察设计合同 0.03%
-        salesContract: 0.0003          // 购销合同 0.03%
+        constructionContract: 0.0003, // 建设工程勘察设计合同 0.03%
+        salesContract: 0.0003, // 购销合同 0.03%
       },
       incomeTax: {
-        corporate: 0.25,      // 企业所得税 25%
-        smallEnterprise: 0.20  // 小型微利企业 20%
-      }
+        corporate: 0.25, // 企业所得税 25%
+        smallEnterprise: 0.2, // 小型微利企业 20%
+      },
     };
   }
 
@@ -51,7 +51,7 @@ class CommercialTaxEngine {
       designAmount = 0,
       taxpayerType = 'general',
       projectType = 'commercial',
-      cityTier = '1'
+      cityTier = '1',
     } = params;
 
     const subtotal = equipmentAmount + installationAmount + designAmount;
@@ -61,7 +61,7 @@ class CommercialTaxEngine {
       equipmentAmount,
       installationAmount,
       designAmount,
-      taxpayerType
+      taxpayerType,
     });
 
     // 2. 附加税 (基于增值税额)
@@ -71,7 +71,7 @@ class CommercialTaxEngine {
     const stampDuty = this._calculateStampDuty({
       equipmentAmount,
       installationAmount,
-      designAmount
+      designAmount,
     });
 
     // 4. 合计
@@ -85,11 +85,16 @@ class CommercialTaxEngine {
         surcharge,
         stampDuty,
         total: totalTax,
-        totalRate: subtotal > 0 ? (totalTax / subtotal * 100).toFixed(2) + '%' : '0%'
+        totalRate: subtotal > 0 ? ((totalTax / subtotal) * 100).toFixed(2) + '%' : '0%',
       },
       totalWithTax,
       breakdown: this._generateBreakdown({
-        subtotal, vat, surcharge, stampDuty, totalTax, totalWithTax
+        subtotal,
+        vat,
+        surcharge,
+        stampDuty,
+        totalTax,
+        totalWithTax,
       }),
       summary: {
         税前金额: subtotal.toFixed(2),
@@ -98,8 +103,8 @@ class CommercialTaxEngine {
         印花税: stampDuty.total.toFixed(2),
         税费合计: totalTax.toFixed(2),
         税后总额: totalWithTax.toFixed(2),
-        综合税负率: subtotal > 0 ? (totalTax / subtotal * 100).toFixed(2) + '%' : '0%'
-      }
+        综合税负率: subtotal > 0 ? ((totalTax / subtotal) * 100).toFixed(2) + '%' : '0%',
+      },
     };
   }
 
@@ -108,11 +113,9 @@ class CommercialTaxEngine {
       const totalAmount = equipmentAmount + installationAmount + designAmount;
       const vatAmount = totalAmount * this.taxRates.vat.small;
       return {
-        items: [
-          { name: '增值税(小规模)', rate: '3%', amount: vatAmount.toFixed(2) }
-        ],
+        items: [{ name: '增值税(小规模)', rate: '3%', amount: vatAmount.toFixed(2) }],
         totalVAT: vatAmount,
-        taxpayerType: 'small'
+        taxpayerType: 'small',
       };
     }
 
@@ -126,17 +129,22 @@ class CommercialTaxEngine {
     return {
       items: [
         { name: '设备增值税', rate: '13%', base: equipmentAmount, amount: equipmentVAT.toFixed(2) },
-        { name: '安装服务增值税', rate: '9%', base: installationAmount, amount: installationVAT.toFixed(2) },
-        { name: '设计服务增值税', rate: '13%', base: designAmount, amount: designVAT.toFixed(2) }
+        {
+          name: '安装服务增值税',
+          rate: '9%',
+          base: installationAmount,
+          amount: installationVAT.toFixed(2),
+        },
+        { name: '设计服务增值税', rate: '13%', base: designAmount, amount: designVAT.toFixed(2) },
       ],
       totalVAT,
-      taxpayerType: 'general'
+      taxpayerType: 'general',
     };
   }
 
   _calculateSurcharge(vatAmount, cityTier) {
     // 城市维护建设税率根据城市等级不同
-    const cityRate = cityTier === '1' ? 0.07 : (cityTier === '2' ? 0.05 : 0.01);
+    const cityRate = cityTier === '1' ? 0.07 : cityTier === '2' ? 0.05 : 0.01;
 
     const cityMaintenance = vatAmount * cityRate;
     const educationSurcharge = vatAmount * this.taxRates.surcharge.educationSurcharge;
@@ -146,27 +154,38 @@ class CommercialTaxEngine {
 
     return {
       items: [
-        { name: '城市维护建设税', rate: (cityRate * 100) + '%', amount: cityMaintenance.toFixed(2) },
+        { name: '城市维护建设税', rate: cityRate * 100 + '%', amount: cityMaintenance.toFixed(2) },
         { name: '教育费附加', rate: '3%', amount: educationSurcharge.toFixed(2) },
-        { name: '地方教育附加', rate: '2%', amount: localEducation.toFixed(2) }
+        { name: '地方教育附加', rate: '2%', amount: localEducation.toFixed(2) },
       ],
       total,
-      cityTier
+      cityTier,
     };
   }
 
   _calculateStampDuty({ equipmentAmount, installationAmount, designAmount }) {
     const equipmentStamp = equipmentAmount * this.taxRates.stampDuty.salesContract;
-    const constructionStamp = (installationAmount + designAmount) * this.taxRates.stampDuty.constructionContract;
+    const constructionStamp =
+      (installationAmount + designAmount) * this.taxRates.stampDuty.constructionContract;
 
     const total = equipmentStamp + constructionStamp;
 
     return {
       items: [
-        { name: '购销合同印花税', rate: '0.03%', base: equipmentAmount, amount: equipmentStamp.toFixed(2) },
-        { name: '建设合同印花税', rate: '0.03%', base: installationAmount + designAmount, amount: constructionStamp.toFixed(2) }
+        {
+          name: '购销合同印花税',
+          rate: '0.03%',
+          base: equipmentAmount,
+          amount: equipmentStamp.toFixed(2),
+        },
+        {
+          name: '建设合同印花税',
+          rate: '0.03%',
+          base: installationAmount + designAmount,
+          amount: constructionStamp.toFixed(2),
+        },
       ],
-      total
+      total,
     };
   }
 
@@ -177,10 +196,13 @@ class CommercialTaxEngine {
     lines.push({ category: '增值税', items: vat.items });
     lines.push({ category: '附加税', items: surcharge.items });
     lines.push({ category: '印花税', items: stampDuty.items });
-    lines.push({ category: '税费汇总', items: [
-      { name: '税费合计', amount: totalTax.toFixed(2) },
-      { name: '税后总额', amount: totalWithTax.toFixed(2) }
-    ]});
+    lines.push({
+      category: '税费汇总',
+      items: [
+        { name: '税费合计', amount: totalTax.toFixed(2) },
+        { name: '税后总额', amount: totalWithTax.toFixed(2) },
+      ],
+    });
 
     return lines;
   }
@@ -199,8 +221,8 @@ class CommercialTaxEngine {
       summary: {
         不开票: totalAmount.toFixed(2),
         含票价: (totalAmount + simpleVAT).toFixed(2),
-        税差: simpleVAT.toFixed(2)
-      }
+        税差: simpleVAT.toFixed(2),
+      },
     };
   }
 }

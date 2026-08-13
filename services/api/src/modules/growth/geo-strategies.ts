@@ -43,7 +43,8 @@ export const GEO_STRATEGIES: GeoStrategy[] = [
     key: 'statistics',
     label: '统计数据添加',
     evidence: '普林斯顿 GEO: 位置调整词数 +41%（加具体定量数据，而非定性描述）',
-    instruction: '优先加入具体、可核实的定量数据（数值、比例、区间），而非"更节能""更舒适"这类定性描述。无来源支撑的数值一律写"待补充"，绝不编造。',
+    instruction:
+      '优先加入具体、可核实的定量数据（数值、比例、区间），而非"更节能""更舒适"这类定性描述。无来源支撑的数值一律写"待补充"，绝不编造。',
     kinds: ['faq', 'comparison', 'topic'],
     weight: 10,
   },
@@ -51,7 +52,8 @@ export const GEO_STRATEGIES: GeoStrategy[] = [
     key: 'cite-sources',
     label: '引用可信来源',
     evidence: '普林斯顿 GEO: 两项可见度指标均 +30%（明确引用可靠来源）',
-    instruction: '为关键论断标注可信来源（国标编号、官方规范、权威机构）。有参考资料时明确引用其出处；无来源的论断标注"依据待补充"。',
+    instruction:
+      '为关键论断标注可信来源（国标编号、官方规范、权威机构）。有参考资料时明确引用其出处；无来源的论断标注"依据待补充"。',
     kinds: ['faq', 'comparison', 'topic'],
     weight: 9,
   },
@@ -59,7 +61,8 @@ export const GEO_STRATEGIES: GeoStrategy[] = [
     key: 'quotation',
     label: '引文添加',
     evidence: '普林斯顿 GEO: 主观展示 +28%（加入来自权威来源的直接引文）',
-    instruction: '在合适处引入来自权威来源的简短直接引文（如国标条款原文、行业规范表述），增强被 AI 引用的可信度。',
+    instruction:
+      '在合适处引入来自权威来源的简短直接引文（如国标条款原文、行业规范表述），增强被 AI 引用的可信度。',
     kinds: ['comparison', 'topic'],
     weight: 7,
   },
@@ -75,7 +78,8 @@ export const GEO_STRATEGIES: GeoStrategy[] = [
     key: 'definition-opening',
     label: '定义式开头',
     evidence: 'RAG 引用研究: "X 是…"式开头（前 150 字符）显著提升被检索为答案的概率',
-    instruction: '每个要点/段落用"X 是…"的定义式陈述开头，前 150 字符内给出自包含的核心事实，便于 RAG 分块检索。',
+    instruction:
+      '每个要点/段落用"X 是…"的定义式陈述开头，前 150 字符内给出自包含的核心事实，便于 RAG 分块检索。',
     kinds: ['faq', 'topic'],
     weight: 8,
   },
@@ -83,7 +87,8 @@ export const GEO_STRATEGIES: GeoStrategy[] = [
     key: 'anchor-chunks',
     label: '锚句分块（100–150词/段）',
     evidence: 'RAG 引用研究: 100–150 词/段的自包含事实句 → 4.7× 引用率',
-    instruction: '把内容切分为 100–150 字的自包含段落，每段一个可独立引用的事实要点（锚句），不依赖上下文即可被单独摘取。',
+    instruction:
+      '把内容切分为 100–150 字的自包含段落，每段一个可独立引用的事实要点（锚句），不依赖上下文即可被单独摘取。',
     kinds: ['faq', 'topic'],
     weight: 8,
   },
@@ -91,7 +96,8 @@ export const GEO_STRATEGIES: GeoStrategy[] = [
     key: 'authority-tone',
     label: '权威语气 + E-E-A-T',
     evidence: 'AI 引擎系统性偏好第三方权威内容（Earned media bias, arXiv 2509.08919）',
-    instruction: '体现经验、专业、权威、可信（E-E-A-T）：给出方法依据、适用条件与边界，避免营销口吻和绝对化用语（合规）。',
+    instruction:
+      '体现经验、专业、权威、可信（E-E-A-T）：给出方法依据、适用条件与边界，避免营销口吻和绝对化用语（合规）。',
     kinds: ['comparison', 'topic'],
     weight: 7,
   },
@@ -108,18 +114,17 @@ export const ALWAYS_ON = new Set(['statistics', 'cite-sources', 'anchor-chunks']
  */
 export function selectStrategies(
   kind: GeoContentKind,
-  opts: { max?: number; weightOverrides?: Record<string, number> } = {},
+  opts: { max?: number; weightOverrides?: Record<string, number> } = {}
 ): GeoStrategy[] {
   const max = opts.max ?? 4;
   const overrides = opts.weightOverrides || {};
-  const applicable = GEO_STRATEGIES
-    .filter((s) => s.kinds.includes(kind))
-    .map((s) => ({ ...s, weight: s.weight + (overrides[s.key] ?? 0) }));
+  const applicable = GEO_STRATEGIES.filter((s) => s.kinds.includes(kind)).map((s) => ({
+    ...s,
+    weight: s.weight + (overrides[s.key] ?? 0),
+  }));
 
   const mustHave = applicable.filter((s) => ALWAYS_ON.has(s.key));
-  const rest = applicable
-    .filter((s) => !ALWAYS_ON.has(s.key))
-    .sort((a, b) => b.weight - a.weight);
+  const rest = applicable.filter((s) => !ALWAYS_ON.has(s.key)).sort((a, b) => b.weight - a.weight);
 
   // 保底优先，再按权重补足；总数仍受 max 约束（但不挤掉保底）。
   const selected = [...mustHave.sort((a, b) => b.weight - a.weight)];
@@ -140,10 +145,10 @@ export function selectStrategies(
  *       n_brand 大 → 收敛到品牌自身经验。
  */
 export interface HierarchicalDeltaOptions {
-  kBrand?: number;      // 品牌层平滑常数
-  kCategory?: number;   // 品类层向 L0 收缩的平滑常数
-  scale?: number;       // lift(百分点) → 权重量级
-  cap?: number;         // 增量上下限
+  kBrand?: number; // 品牌层平滑常数
+  kCategory?: number; // 品类层向 L0 收缩的平滑常数
+  scale?: number; // lift(百分点) → 权重量级
+  cap?: number; // 增量上下限
 }
 
 export interface HierarchicalDeltaResult {
@@ -156,7 +161,7 @@ export interface HierarchicalDeltaResult {
 
 export function blendHierarchicalDelta(
   input: { brandN: number; brandSum: number; categoryN: number; categorySum: number },
-  opts: HierarchicalDeltaOptions = {},
+  opts: HierarchicalDeltaOptions = {}
 ): HierarchicalDeltaResult {
   const kBrand = opts.kBrand ?? 5;
   const kCategory = opts.kCategory ?? 3;
@@ -178,7 +183,7 @@ export function blendHierarchicalDelta(
     prior: round1(prior),
     brandAvg: round1(brandAvg),
     categoryAvg: round1(categoryAvg),
-    source: brandN ? 'brand' : (categoryN ? 'category' : 'none'),
+    source: brandN ? 'brand' : categoryN ? 'category' : 'none',
   };
 }
 

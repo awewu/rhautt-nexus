@@ -10,10 +10,7 @@
       "finding": "Historical documents still contain unnamed-platform wording after 瑞诺瓦AI舒适家 was selected.",
       "owner": "prd-charter-monitor",
       "status": "active",
-      "requiredEvidence": [
-        "guard:nexus-naming",
-        "guard:delivery-goal"
-      ]
+      "requiredEvidence": ["guard:nexus-naming", "guard:delivery-goal"]
     },
     {
       "id": "QF-002",
@@ -36,9 +33,7 @@
       "finding": "105 HTML files are classified, but migration-candidate assets still need replacement evidence by domain.",
       "owner": "legacy-fusion-migrator",
       "status": "active",
-      "requiredEvidence": [
-        "harness:legacy-fusion"
-      ]
+      "requiredEvidence": ["harness:legacy-fusion"]
     },
     {
       "id": "QF-004",
@@ -47,10 +42,7 @@
       "finding": "Rysnova now has a production v2 artifact contract, but object storage adapter and export integrity checks still need implementation.",
       "owner": "rysnova-bim-engineering-builder",
       "status": "active",
-      "requiredEvidence": [
-        "test:artifacts",
-        "object storage artifact evidence"
-      ]
+      "requiredEvidence": ["test:artifacts", "object storage artifact evidence"]
     },
     {
       "id": "QF-005",
@@ -59,10 +51,7 @@
       "finding": "Customer lifecycle now has a project state model and v2 state route, but installed asset capability registry and service-plan transitions need deeper tests.",
       "owner": "iot-lifecycle-architect",
       "status": "active",
-      "requiredEvidence": [
-        "test:customer-lifecycle",
-        "test:tenant-isolation"
-      ]
+      "requiredEvidence": ["test:customer-lifecycle", "test:tenant-isolation"]
     },
     {
       "id": "QF-006",

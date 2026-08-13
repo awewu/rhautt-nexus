@@ -13,18 +13,28 @@ interface PageHeaderProps {
  */
 export default function PageHeader({ title, subtitle, actions }: PageHeaderProps) {
   return (
-    <div style={{
-      display: 'flex', alignItems: actions ? 'flex-start' : 'center',
-      justifyContent: 'space-between', gap: 16,
-      marginBottom: 24,
-      paddingBottom: 20,
-      borderBottom: '1px solid var(--border)',
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: actions ? 'flex-start' : 'center',
+        justifyContent: 'space-between',
+        gap: 16,
+        marginBottom: 24,
+        paddingBottom: 20,
+        borderBottom: '1px solid var(--border)',
+      }}
+    >
       <div>
-        <h1 style={{
-          fontSize: 22, fontWeight: 700, color: 'var(--t-strong)',
-          letterSpacing: '-0.005em', lineHeight: 1.25, margin: 0,
-        }}>
+        <h1
+          style={{
+            fontSize: 22,
+            fontWeight: 700,
+            color: 'var(--t-strong)',
+            letterSpacing: '-0.005em',
+            lineHeight: 1.25,
+            margin: 0,
+          }}
+        >
           {title}
         </h1>
         {subtitle && (

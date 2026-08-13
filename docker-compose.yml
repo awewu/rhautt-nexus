@@ -11,13 +11,13 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-rysnova2026}
       MONGO_INITDB_DATABASE: rysnova-hvac
     ports:
-      - "27017:27017"
+      - '27017:27017'
     volumes:
       - mongodb_data:/data/db
     networks:
       - rysnova-net
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,7 +36,7 @@ services:
     networks:
       - rysnova-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rhautt}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-rhautt}']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -60,7 +60,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-rhautt_nexus}
       MONGODB_URI: mongodb://rysnova:${MONGO_PASSWORD:-rysnova2026}@mongodb:27017/rysnova-hvac?authSource=admin
     ports:
-      - "3300:3300"
+      - '3300:3300'
     depends_on:
       postgres:
         condition: service_healthy
@@ -69,7 +69,7 @@ services:
     networks:
       - rysnova-net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3300/api/v2/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3300/api/v2/health']
       interval: 30s
       timeout: 5s
       retries: 3

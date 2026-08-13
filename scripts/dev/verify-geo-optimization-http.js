@@ -15,7 +15,7 @@ async function main() {
   await client.connect();
   const { rows } = await client.query(
     'select id, tenant_id, dealer_id, store_id, role, permissions from rhautt_nexus.users where status = $1 order by created_at asc limit 1',
-    ['active'],
+    ['active']
   );
   await client.end();
   if (!rows.length) throw new Error('no active user');
@@ -33,7 +33,7 @@ async function main() {
       permissions: user.permissions || [],
     },
     secret,
-    { expiresIn: '1h' },
+    { expiresIn: '1h' }
   );
 
   const kind = process.env.GEO_OPTIMIZATION_KIND || 'comparison';
@@ -55,7 +55,9 @@ async function main() {
   });
   if (!res.ok || !res.body) {
     const text = await res.text();
-    console.log(JSON.stringify({ ok: false, status: res.status, body: text.slice(0, 2000) }, null, 2));
+    console.log(
+      JSON.stringify({ ok: false, status: res.status, body: text.slice(0, 2000) }, null, 2)
+    );
     process.exit(1);
   }
   const reader = res.body.getReader();
@@ -85,20 +87,32 @@ async function main() {
       }
     }
   }
-  console.log(JSON.stringify({
-    ok: Boolean(doneEvent),
-    status: res.status,
-    deltaCount,
-    draftPreview: String(doneEvent?.draft || draft).slice(0, 240),
-    assetId: doneEvent?.asset?.id,
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        ok: Boolean(doneEvent),
+        status: res.status,
+        deltaCount,
+        draftPreview: String(doneEvent?.draft || draft).slice(0, 240),
+        assetId: doneEvent?.asset?.id,
+      },
+      null,
+      2
+    )
+  );
   if (!doneEvent) process.exit(1);
 }
 
 main().catch((error) => {
-  console.error(JSON.stringify({
-    ok: false,
-    error: error instanceof Error ? error.message : String(error),
-  }, null, 2));
+  console.error(
+    JSON.stringify(
+      {
+        ok: false,
+        error: error instanceof Error ? error.message : String(error),
+      },
+      null,
+      2
+    )
+  );
   process.exit(1);
 });

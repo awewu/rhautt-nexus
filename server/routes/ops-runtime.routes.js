@@ -27,14 +27,14 @@ function createOpsRuntimeRouter({ engines, authenticateToken, checkRole }) {
         aiValidation: engines.aiValidation ? 'active' : 'inactive',
         templateLibrary: engines.templateLibrary ? 'active' : 'inactive',
         templateLibraryEngine: engines.templateLibraryEngine ? 'active' : 'inactive',
-        aiAccuracyValidator: engines.aiAccuracyValidator ? 'active' : 'inactive'
+        aiAccuracyValidator: engines.aiAccuracyValidator ? 'active' : 'inactive',
       },
       newFeatures: {
         econetIntegration: true,
         aiValidation: true,
         templateLibrary: true,
-        aiAccuracyValidation: !!engines.aiAccuracyValidator
-      }
+        aiAccuracyValidation: !!engines.aiAccuracyValidator,
+      },
     });
   });
 
@@ -46,7 +46,7 @@ function createOpsRuntimeRouter({ engines, authenticateToken, checkRole }) {
         minPrice: req.query.minPrice ? parseFloat(req.query.minPrice) : undefined,
         maxPrice: req.query.maxPrice ? parseFloat(req.query.maxPrice) : undefined,
         minRating: req.query.minRating ? parseFloat(req.query.minRating) : undefined,
-        sortBy: req.query.sortBy || 'usageCount'
+        sortBy: req.query.sortBy || 'usageCount',
       };
 
       const result = engines.templateLibraryEngine.searchTemplates(query, filters);
@@ -59,7 +59,11 @@ function createOpsRuntimeRouter({ engines, authenticateToken, checkRole }) {
   router.post('/api/templates/use', auth, (req, res) => {
     try {
       const { templateId, customerInfo, customizations } = req.body || {};
-      const project = engines.templateLibraryEngine.createProjectFromTemplate(templateId, customerInfo, customizations);
+      const project = engines.templateLibraryEngine.createProjectFromTemplate(
+        templateId,
+        customerInfo,
+        customizations
+      );
       res.json({ success: true, data: project });
     } catch (error) {
       return errorResponse(res, error);
@@ -69,7 +73,10 @@ function createOpsRuntimeRouter({ engines, authenticateToken, checkRole }) {
   router.post('/api/templates/recommend', auth, (req, res) => {
     try {
       const { roomProfile, options } = req.body || {};
-      const recommendations = engines.templateLibraryEngine.recommendTemplates(roomProfile, options);
+      const recommendations = engines.templateLibraryEngine.recommendTemplates(
+        roomProfile,
+        options
+      );
       res.json({ success: true, data: recommendations });
     } catch (error) {
       return errorResponse(res, error);

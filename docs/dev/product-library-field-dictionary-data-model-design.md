@@ -36,70 +36,70 @@
 
 ## 2. 字段分层
 
-| 分层 | 保存内容 | 不保存内容 |
-| --- | --- | --- |
-| 产品核心 | 型号、名称、类型、生命周期、公共分类、事实状态 | 官网排序、实时库存、经销商价 |
-| SKU | 物料编码、销售单位、配置差异、包装 | 产品公共营销文案 |
-| 品牌绑定 | 品牌编码、品牌型号、品牌展示名、绑定状态 | 产品完整事实副本 |
-| 内容层 | 正式文案、详情、SEO/GEO 输入 | 官网货架状态 |
-| 参数层 | 技术参数、单位、来源、核验状态 | 自由 HTML 参数表 |
-| 素材/资料 | 图片、说明书、证书、BIM 等引用 | 二进制文件本体 |
-| 合规层 | 认证、标准、证据、有效期 | 无来源的口头说明 |
-| 导入治理 | 批次、源行、冲突、缺失项、决议 | 线下不可追溯清单 |
-| 站点投影 | 官网售价、展示开关、排序、推荐、slug | 产品事实主来源 |
+| 分层      | 保存内容                                       | 不保存内容                   |
+| --------- | ---------------------------------------------- | ---------------------------- |
+| 产品核心  | 型号、名称、类型、生命周期、公共分类、事实状态 | 官网排序、实时库存、经销商价 |
+| SKU       | 物料编码、销售单位、配置差异、包装             | 产品公共营销文案             |
+| 品牌绑定  | 品牌编码、品牌型号、品牌展示名、绑定状态       | 产品完整事实副本             |
+| 内容层    | 正式文案、详情、SEO/GEO 输入                   | 官网货架状态                 |
+| 参数层    | 技术参数、单位、来源、核验状态                 | 自由 HTML 参数表             |
+| 素材/资料 | 图片、说明书、证书、BIM 等引用                 | 二进制文件本体               |
+| 合规层    | 认证、标准、证据、有效期                       | 无来源的口头说明             |
+| 导入治理  | 批次、源行、冲突、缺失项、决议                 | 线下不可追溯清单             |
+| 站点投影  | 官网售价、展示开关、排序、推荐、slug           | 产品事实主来源               |
 
 ## 3. 关键状态
 
 ### 3.1 产品数据就绪状态
 
-| 状态 | 含义 |
-| --- | --- |
-| `imported_draft` | 已导入或录入，尚未完成完整性检查 |
+| 状态               | 含义                             |
+| ------------------ | -------------------------------- |
+| `imported_draft`   | 已导入或录入，尚未完成完整性检查 |
 | `needs_completion` | 已检查但存在缺失、冲突或阻断问题 |
-| `fact_verified` | 指定事实版本已核验 |
+| `fact_verified`    | 指定事实版本已核验               |
 
 `fact_verified` 只代表产品事实已核验，不代表官网可见、经销商可见、已发布或可售。
 
 ### 3.2 记录状态
 
-| 状态 | 含义 |
-| --- | --- |
-| `active` | 有效 |
+| 状态        | 含义                        |
+| ----------- | --------------------------- |
+| `active`    | 有效                        |
 | `withdrawn` | 停售/退出市场，但历史可追溯 |
-| `archived` | 归档，不再作为有效候选 |
+| `archived`  | 归档，不再作为有效候选      |
 
 ## 4. `products` 公共产品主表
 
 定位：保存公共产品事实主记录。
 
-| 字段 | 类型 | 必填 | 说明 |
-| --- | --- | --- | --- |
-| `id` | uuid | 是 | 产品主键 |
-| `tenant_id` | text/uuid | 是 | 公共产品库实例门牌；生产应为固定 UUID |
-| `sku` | text | 是 | 兼容字段，默认第一 SKU 或历史 SKU |
-| `name` | text | 是 | 工作名称或默认中文名 |
-| `brand` | text | 否 | 兼容字段，主品牌提示 |
-| `brand_code` | text | 否 | 兼容字段，主品牌提示；正式关系看绑定表 |
-| `model` | text | 是 | 产品型号 |
-| `normalized_model` | text | 是 | 规范化型号，用于匹配 |
-| `working_name` | text | 否 | 内部识别名称 |
-| `category` | text | 否 | 兼容分类编码 |
-| `spec` | jsonb | 是 | 兼容规格对象；结构化参数应进入参数层 |
-| `positioning` | jsonb | 是 | 产品定位 |
-| `asset_refs` | jsonb | 是 | 素材引用 |
-| `product_key` | text | 否 | 公共产品稳定键，建议 `common:{normalizedModel}` 或后续 MDM key |
-| `list_price` | numeric | 否 | 产品库基础价/参考价，不等于官网售价 |
-| `cost_price` | numeric | 否 | 内部成本价，不得公开 |
-| `currency` | text | 是 | 默认 `CNY` |
-| `status` | text | 是 | UI 状态 |
-| `record_status` | text | 是 | 记录状态 |
-| `data_readiness_status` | text | 是 | 数据就绪状态 |
-| `source_system` | text | 否 | 来源系统 |
-| `source_record_key` | text | 否 | 来源记录键 |
-| `lifecycle_stage` | text | 是 | 生命周期阶段 |
-| `published` | boolean | 是 | 历史兼容字段；本期不得用它驱动官网 |
-| `meta` | jsonb | 是 | 兼容扩展；不得成为事实唯一来源 |
-| `created_at/updated_at/deleted_at` | timestamptz | 是/否 | 审计字段 |
+| 字段                               | 类型        | 必填  | 说明                                                           |
+| ---------------------------------- | ----------- | ----- | -------------------------------------------------------------- |
+| `id`                               | uuid        | 是    | 产品主键                                                       |
+| `tenant_id`                        | text/uuid   | 是    | 公共产品库实例门牌；生产应为固定 UUID                          |
+| `sku`                              | text        | 是    | 兼容字段，默认第一 SKU 或历史 SKU                              |
+| `name`                             | text        | 是    | 工作名称或默认中文名                                           |
+| `brand`                            | text        | 否    | 兼容字段，主品牌提示                                           |
+| `brand_code`                       | text        | 否    | 兼容字段，主品牌提示；正式关系看绑定表                         |
+| `model`                            | text        | 是    | 产品型号                                                       |
+| `normalized_model`                 | text        | 是    | 规范化型号，用于匹配                                           |
+| `working_name`                     | text        | 否    | 内部识别名称                                                   |
+| `category`                         | text        | 否    | 兼容分类编码                                                   |
+| `spec`                             | jsonb       | 是    | 兼容规格对象；结构化参数应进入参数层                           |
+| `positioning`                      | jsonb       | 是    | 产品定位                                                       |
+| `asset_refs`                       | jsonb       | 是    | 素材引用                                                       |
+| `product_key`                      | text        | 否    | 公共产品稳定键，建议 `common:{normalizedModel}` 或后续 MDM key |
+| `list_price`                       | numeric     | 否    | 产品库基础价/参考价，不等于官网售价                            |
+| `cost_price`                       | numeric     | 否    | 内部成本价，不得公开                                           |
+| `currency`                         | text        | 是    | 默认 `CNY`                                                     |
+| `status`                           | text        | 是    | UI 状态                                                        |
+| `record_status`                    | text        | 是    | 记录状态                                                       |
+| `data_readiness_status`            | text        | 是    | 数据就绪状态                                                   |
+| `source_system`                    | text        | 否    | 来源系统                                                       |
+| `source_record_key`                | text        | 否    | 来源记录键                                                     |
+| `lifecycle_stage`                  | text        | 是    | 生命周期阶段                                                   |
+| `published`                        | boolean     | 是    | 历史兼容字段；本期不得用它驱动官网                             |
+| `meta`                             | jsonb       | 是    | 兼容扩展；不得成为事实唯一来源                                 |
+| `created_at/updated_at/deleted_at` | timestamptz | 是/否 | 审计字段                                                       |
 
 约束：
 
@@ -111,21 +111,21 @@
 
 定位：保存同一产品下的物料、销售配置或 SKU。
 
-| 字段 | 类型 | 必填 | 说明 |
-| --- | --- | --- | --- |
-| `id` | uuid | 是 | SKU 主键 |
-| `tenant_id` | text/uuid | 是 | 公共产品库实例门牌 |
-| `product_id` | uuid | 是 | 关联产品 |
-| `sku_code` | text | 是 | SKU 编码 |
-| `normalized_sku_code` | text | 是 | 规范化 SKU 编码 |
-| `material_code` | text | 否 | ERP 物料编码 |
-| `gtin` | text | 否 | 全球贸易项目代码 |
-| `mpn` | text | 否 | 制造商零件号 |
-| `record_status` | text | 是 | `active/archived` |
-| `source_system` | text | 否 | 来源系统 |
-| `source_record_key` | text | 否 | 来源记录键 |
-| `created_by/updated_by` | text | 否 | 操作者 |
-| `created_at/updated_at/deleted_at` | timestamptz | 是/否 | 审计字段 |
+| 字段                               | 类型        | 必填  | 说明               |
+| ---------------------------------- | ----------- | ----- | ------------------ |
+| `id`                               | uuid        | 是    | SKU 主键           |
+| `tenant_id`                        | text/uuid   | 是    | 公共产品库实例门牌 |
+| `product_id`                       | uuid        | 是    | 关联产品           |
+| `sku_code`                         | text        | 是    | SKU 编码           |
+| `normalized_sku_code`              | text        | 是    | 规范化 SKU 编码    |
+| `material_code`                    | text        | 否    | ERP 物料编码       |
+| `gtin`                             | text        | 否    | 全球贸易项目代码   |
+| `mpn`                              | text        | 否    | 制造商零件号       |
+| `record_status`                    | text        | 是    | `active/archived`  |
+| `source_system`                    | text        | 否    | 来源系统           |
+| `source_record_key`                | text        | 否    | 来源记录键         |
+| `created_by/updated_by`            | text        | 否    | 操作者             |
+| `created_at/updated_at/deleted_at` | timestamptz | 是/否 | 审计字段           |
 
 约束：
 
@@ -137,18 +137,18 @@
 
 定位：保存公共产品与设备品牌的关系。
 
-| 字段 | 类型 | 必填 | 说明 |
-| --- | --- | --- | --- |
-| `id` | uuid | 是 | 绑定主键 |
-| `tenant_id` | text/uuid | 是 | 公共产品库实例门牌 |
-| `product_id` | uuid | 是 | 关联公共产品 |
-| `brand_code` | text | 是 | 设备品牌，如 `everhot/rheem/ruud/lithnova` |
-| `brand_model` | text | 是 | 品牌口径型号 |
-| `normalized_model` | text | 是 | 品牌口径规范型号 |
-| `brand_display_name` | text | 否 | 品牌展示名 |
-| `status` | text | 是 | `active/archived` |
-| `created_by/updated_by` | text | 否 | 操作者 |
-| `created_at/updated_at/deleted_at` | timestamptz | 是/否 | 审计字段 |
+| 字段                               | 类型        | 必填  | 说明                                       |
+| ---------------------------------- | ----------- | ----- | ------------------------------------------ |
+| `id`                               | uuid        | 是    | 绑定主键                                   |
+| `tenant_id`                        | text/uuid   | 是    | 公共产品库实例门牌                         |
+| `product_id`                       | uuid        | 是    | 关联公共产品                               |
+| `brand_code`                       | text        | 是    | 设备品牌，如 `everhot/rheem/ruud/lithnova` |
+| `brand_model`                      | text        | 是    | 品牌口径型号                               |
+| `normalized_model`                 | text        | 是    | 品牌口径规范型号                           |
+| `brand_display_name`               | text        | 否    | 品牌展示名                                 |
+| `status`                           | text        | 是    | `active/archived`                          |
+| `created_by/updated_by`            | text        | 否    | 操作者                                     |
+| `created_at/updated_at/deleted_at` | timestamptz | 是/否 | 审计字段                                   |
 
 唯一键：
 
@@ -167,28 +167,28 @@ tenant_id + brand_code + normalized_model
 
 定位：保存官网/站点价格展示，不是产品事实价格。
 
-| 字段 | 类型 | 必填 | 说明 |
-| --- | --- | --- | --- |
-| `id` | uuid | 是 | 主键 |
-| `tenant_id` | text/uuid | 是 | 公共产品库实例门牌 |
-| `product_id` | uuid | 是 | 产品 |
-| `brand_code` | text | 是 | 品牌维度 |
-| `site_code` | text | 是 | 站点，如 `everhot` |
-| `locale` | text | 是 | 默认 `zh-CN` |
-| `price_display_mode` | text | 是 | 展示方式 |
-| `website_price` | numeric | 否 | 官网单价 |
-| `website_price_min` | numeric | 否 | 区间最低价 |
-| `website_price_max` | numeric | 否 | 区间最高价 |
-| `promo_price` | numeric | 否 | 促销价 |
-| `currency` | text | 是 | 默认 `CNY` |
-| `price_unit` | text | 否 | 单位，如 台/套 |
-| `price_label` | text | 否 | 价格标签 |
-| `price_note` | text | 否 | 价格说明 |
-| `tax_included` | boolean | 是 | 是否含税 |
-| `valid_from/valid_to` | timestamptz | 否 | 生效时间 |
-| `status` | text | 是 | `active/archived` |
-| `created_by/updated_by` | text | 否 | 操作者 |
-| `created_at/updated_at/deleted_at` | timestamptz | 是/否 | 审计字段 |
+| 字段                               | 类型        | 必填  | 说明               |
+| ---------------------------------- | ----------- | ----- | ------------------ |
+| `id`                               | uuid        | 是    | 主键               |
+| `tenant_id`                        | text/uuid   | 是    | 公共产品库实例门牌 |
+| `product_id`                       | uuid        | 是    | 产品               |
+| `brand_code`                       | text        | 是    | 品牌维度           |
+| `site_code`                        | text        | 是    | 站点，如 `everhot` |
+| `locale`                           | text        | 是    | 默认 `zh-CN`       |
+| `price_display_mode`               | text        | 是    | 展示方式           |
+| `website_price`                    | numeric     | 否    | 官网单价           |
+| `website_price_min`                | numeric     | 否    | 区间最低价         |
+| `website_price_max`                | numeric     | 否    | 区间最高价         |
+| `promo_price`                      | numeric     | 否    | 促销价             |
+| `currency`                         | text        | 是    | 默认 `CNY`         |
+| `price_unit`                       | text        | 否    | 单位，如 台/套     |
+| `price_label`                      | text        | 否    | 价格标签           |
+| `price_note`                       | text        | 否    | 价格说明           |
+| `tax_included`                     | boolean     | 是    | 是否含税           |
+| `valid_from/valid_to`              | timestamptz | 否    | 生效时间           |
+| `status`                           | text        | 是    | `active/archived`  |
+| `created_by/updated_by`            | text        | 否    | 操作者             |
+| `created_at/updated_at/deleted_at` | timestamptz | 是/否 | 审计字段           |
 
 唯一键：
 
@@ -216,17 +216,17 @@ tenant_id + product_id + brand_code + site_code + locale
 
 关键字段：
 
-| 字段 | 说明 |
-| --- | --- |
-| `tenant_id` | 公共产品库实例门牌 |
-| `product_id` | 产品 |
-| `locale` | 语言 |
-| `name` | 正式名称 |
-| `seo` | SEO/GEO 输入 |
-| `marketing` | 营销文案结构 |
-| `official_detail_html` | 官网详情 HTML，需安全净化 |
-| `status` | `draft/review/scheduled/published` |
-| `published_at/scheduled_at` | 发布时间 |
+| 字段                        | 说明                               |
+| --------------------------- | ---------------------------------- |
+| `tenant_id`                 | 公共产品库实例门牌                 |
+| `product_id`                | 产品                               |
+| `locale`                    | 语言                               |
+| `name`                      | 正式名称                           |
+| `seo`                       | SEO/GEO 输入                       |
+| `marketing`                 | 营销文案结构                       |
+| `official_detail_html`      | 官网详情 HTML，需安全净化          |
+| `status`                    | `draft/review/scheduled/published` |
+| `published_at/scheduled_at` | 发布时间                           |
 
 规则：
 
@@ -396,15 +396,15 @@ tenant_id + product_id + brand_code + site_code + locale
 
 核心映射：
 
-| 源字段 | 目标字段 | 说明 |
-| --- | --- | --- |
-| 物料品牌 | `brandCodes=["everhot"]` | 本期只允许恒热导入 |
-| 型号 | `products.model` / `product_brand_bindings.brand_model` | 判断产品与品牌绑定 |
-| 物料编码 | `product_skus.sku_code/material_code` | 判断 SKU |
-| 物料名称 | `products.name` / `working_name` | 可作为初始名称 |
-| 物料分类 | 主品类候选 | 需映射到公共品类 |
-| 启用状态 | 记录状态候选 | 作废规则优先 |
-| 价格字段 | `list_price` 或 `product_website_pricing` 候选 | 需确认字段语义 |
+| 源字段   | 目标字段                                                | 说明               |
+| -------- | ------------------------------------------------------- | ------------------ |
+| 物料品牌 | `brandCodes=["everhot"]`                                | 本期只允许恒热导入 |
+| 型号     | `products.model` / `product_brand_bindings.brand_model` | 判断产品与品牌绑定 |
+| 物料编码 | `product_skus.sku_code/material_code`                   | 判断 SKU           |
+| 物料名称 | `products.name` / `working_name`                        | 可作为初始名称     |
+| 物料分类 | 主品类候选                                              | 需映射到公共品类   |
+| 启用状态 | 记录状态候选                                            | 作废规则优先       |
+| 价格字段 | `list_price` 或 `product_website_pricing` 候选          | 需确认字段语义     |
 
 作废规则：
 

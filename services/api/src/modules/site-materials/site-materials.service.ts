@@ -99,7 +99,12 @@ const DEFAULT_MANIFEST: SiteMaterialManifest = {
 @Injectable()
 export class SiteMaterialsService {
   private readonly everhotPublicDir = resolveEverhotPublicDir();
-  private readonly materialDir = path.join(this.everhotPublicDir, 'assets', 'img', 'site-materials');
+  private readonly materialDir = path.join(
+    this.everhotPublicDir,
+    'assets',
+    'img',
+    'site-materials'
+  );
   private readonly manifestPath = path.join(this.materialDir, 'manifest.json');
 
   async list(brandCode: string): Promise<SiteMaterialManifest> {
@@ -110,7 +115,8 @@ export class SiteMaterialsService {
   async readAsset(brandCode: string, asset: string): Promise<{ buffer: Buffer; mimeType: string }> {
     this.assertSupportedBrand(brandCode);
     const remoteBuffer = await readRemoteSiteMaterialAsset(asset);
-    if (remoteBuffer) return { buffer: remoteBuffer, mimeType: mimeTypeFromFilename(path.basename(asset)) };
+    if (remoteBuffer)
+      return { buffer: remoteBuffer, mimeType: mimeTypeFromFilename(path.basename(asset)) };
     const localAssetPath = this.resolvePreviewAssetPath(asset);
     if (!localAssetPath) throw new BadRequestException('unsupported material asset');
 
@@ -122,13 +128,21 @@ export class SiteMaterialsService {
     }
   }
 
-  async upload(brandCode: string, body: {
-    key?: string;
-    filename?: string;
-    mimeType?: string;
-    dataBase64?: string;
-    files?: Array<{ filename?: string; mimeType?: string; dataBase64?: string; linkUrl?: string }>;
-  }): Promise<unknown> {
+  async upload(
+    brandCode: string,
+    body: {
+      key?: string;
+      filename?: string;
+      mimeType?: string;
+      dataBase64?: string;
+      files?: Array<{
+        filename?: string;
+        mimeType?: string;
+        dataBase64?: string;
+        linkUrl?: string;
+      }>;
+    }
+  ): Promise<unknown> {
     this.assertSupportedBrand(brandCode);
 
     if (body.key === 'home-hero-carousel') {
@@ -149,15 +163,20 @@ export class SiteMaterialsService {
       size: buffer.length,
       updatedAt: new Date().toISOString(),
     };
-    await this.writeManifest(manifest, [{ path: outputName, mimeType, dataBase64: buffer.toString('base64') }]);
+    await this.writeManifest(manifest, [
+      { path: outputName, mimeType, dataBase64: buffer.toString('base64') },
+    ]);
     return manifest[key];
   }
 
-  async update(brandCode: string, body: {
-    key?: string;
-    items?: SiteHeroCarouselItem[] | SiteAudienceCardItem[];
-    resetDefault?: boolean;
-  }) {
+  async update(
+    brandCode: string,
+    body: {
+      key?: string;
+      items?: SiteHeroCarouselItem[] | SiteAudienceCardItem[];
+      resetDefault?: boolean;
+    }
+  ) {
     this.assertSupportedBrand(brandCode);
 
     const materialKey = body.key as SiteMaterialKey;
@@ -196,7 +215,10 @@ export class SiteMaterialsService {
     }
 
     const items = (body.items as SiteHeroCarouselItem[])
-      .filter((item) => typeof item?.src === 'string' && item.src.startsWith('/assets/img/site-materials/'))
+      .filter(
+        (item) =>
+          typeof item?.src === 'string' && item.src.startsWith('/assets/img/site-materials/')
+      )
       .map((item, index) => ({
         id: String(item.id || `hero-${Date.now()}-${index}`),
         src: String(item.src),
@@ -221,13 +243,20 @@ export class SiteMaterialsService {
     if (!files.length) throw new BadRequestException('missing carousel images');
 
     const manifest = await this.readManifest();
-    const current = Array.isArray(manifest['home-hero-carousel']) ? manifest['home-hero-carousel'] : [];
+    const current = Array.isArray(manifest['home-hero-carousel'])
+      ? manifest['home-hero-carousel']
+      : [];
     const now = Date.now();
     const saved: SiteHeroCarouselItem[] = [];
     const bundleFiles: Array<{ path: string; mimeType: string; dataBase64: string }> = [];
 
     for (const [index, file] of files.entries()) {
-      const row = file as { filename?: string; mimeType?: string; dataBase64?: string; linkUrl?: string };
+      const row = file as {
+        filename?: string;
+        mimeType?: string;
+        dataBase64?: string;
+        linkUrl?: string;
+      };
       const { ext, buffer, mimeType } = decodeImage(row.mimeType, row.dataBase64);
       const id = `hero-${now}-${index}`;
       const outputName = `${id}.${ext}`;
@@ -246,7 +275,10 @@ export class SiteMaterialsService {
       });
     }
 
-    manifest['home-hero-carousel'] = [...current, ...saved].map((item, index) => ({ ...item, sortOrder: index }));
+    manifest['home-hero-carousel'] = [...current, ...saved].map((item, index) => ({
+      ...item,
+      sortOrder: index,
+    }));
     await this.writeManifest(manifest, bundleFiles);
     return manifest['home-hero-carousel'];
   }
@@ -264,7 +296,7 @@ export class SiteMaterialsService {
 
   private async writeManifest(
     manifest: SiteMaterialManifest,
-    files: Array<{ path: string; mimeType: string; dataBase64: string }> = [],
+    files: Array<{ path: string; mimeType: string; dataBase64: string }> = []
   ) {
     if (siteMediaOriginEnabled()) {
       await syncSiteMaterialBundle(manifest as Record<string, unknown>, files);
@@ -272,13 +304,17 @@ export class SiteMaterialsService {
     }
     await mkdir(this.materialDir, { recursive: true });
     for (const file of files) {
-      await writeFile(path.join(this.materialDir, file.path), Buffer.from(file.dataBase64, 'base64'));
+      await writeFile(
+        path.join(this.materialDir, file.path),
+        Buffer.from(file.dataBase64, 'base64')
+      );
     }
     await writeFile(this.manifestPath, JSON.stringify(manifest, null, 2), 'utf8');
   }
 
   private assertSupportedBrand(brandCode: string) {
-    if (brandCode !== 'everhot') throw new NotFoundException('only everhot site materials are supported');
+    if (brandCode !== 'everhot')
+      throw new NotFoundException('only everhot site materials are supported');
   }
 
   private resolvePreviewAssetPath(asset: string): string | null {
@@ -295,7 +331,9 @@ export class SiteMaterialsService {
     const relative = normalized.replace(/^\/+/, '');
     const resolved = path.resolve(this.everhotPublicDir, relative);
     const publicRoot = path.resolve(this.everhotPublicDir);
-    return resolved === publicRoot || resolved.startsWith(`${publicRoot}${path.sep}`) ? resolved : null;
+    return resolved === publicRoot || resolved.startsWith(`${publicRoot}${path.sep}`)
+      ? resolved
+      : null;
   }
 }
 

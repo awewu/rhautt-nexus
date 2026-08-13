@@ -58,12 +58,9 @@ function start() {
   const envResult = dotenv.config({ path: envFile, processEnv: process.env, quiet: true });
   if (envResult.error) throw envResult.error;
 
-  const backend = startService(
-    'backend-4500',
-    join(root, 'scripts', 'backend-launcher.js'),
-    root,
-    { DOTENV_CONFIG_PATH: envFile }
-  );
+  const backend = startService('backend-4500', join(root, 'scripts', 'backend-launcher.js'), root, {
+    DOTENV_CONFIG_PATH: envFile,
+  });
   const dealerRoot = join(root, 'frontend', 'apps', 'dealer-workbench');
   const dealer = startService('frontend-5000', join(dealerRoot, 'server.js'), dealerRoot, {
     NODE_ENV: 'production',
@@ -107,7 +104,9 @@ function status() {
     return;
   }
   for (const [name, entry] of Object.entries(state)) {
-    console.log(`${name}: ${isRunning(entry.pid) ? 'running' : 'stopped'} (PID ${entry.pid}, port ${entry.port})`);
+    console.log(
+      `${name}: ${isRunning(entry.pid) ? 'running' : 'stopped'} (PID ${entry.pid}, port ${entry.port})`
+    );
   }
 }
 

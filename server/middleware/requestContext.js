@@ -34,22 +34,25 @@ function createRequestContext(options = {}) {
         durationMs,
         ip: req.ip || req.socket?.remoteAddress,
         userId: req.user?.id,
-        tenantId: req.tenantId || req.user?.tenantId
+        tenantId: req.tenantId || req.user?.tenantId,
       };
 
       requestLogBuffer.push(entry);
       if (requestLogBuffer.length > MAX_LOGS) requestLogBuffer.shift();
 
-      const level = res.statusCode >= 500 || durationMs >= criticalMs
-        ? 'error'
-        : res.statusCode >= 400 || durationMs >= slowMs
-          ? 'warn'
-          : 'info';
+      const level =
+        res.statusCode >= 500 || durationMs >= criticalMs
+          ? 'error'
+          : res.statusCode >= 400 || durationMs >= slowMs
+            ? 'warn'
+            : 'info';
 
-      console[level](JSON.stringify({
-        event: 'http_request',
-        ...entry
-      }));
+      console[level](
+        JSON.stringify({
+          event: 'http_request',
+          ...entry,
+        })
+      );
     });
 
     next();
@@ -63,40 +66,47 @@ function getRecentRequestLogs(limit = 100) {
 function getRequestMetrics(options = {}) {
   const logs = requestLogBuffer.slice(-(options.limit || MAX_LOGS));
   const total = logs.length;
-  const status2xx = logs.filter(entry => entry.statusCode >= 200 && entry.statusCode < 300).length;
-  const status4xx = logs.filter(entry => entry.statusCode >= 400 && entry.statusCode < 500).length;
-  const status5xx = logs.filter(entry => entry.statusCode >= 500).length;
-  const durations = logs.map(entry => entry.durationMs).sort((left, right) => left - right);
-  const percentile = p => {
+  const status2xx = logs.filter(
+    (entry) => entry.statusCode >= 200 && entry.statusCode < 300
+  ).length;
+  const status4xx = logs.filter(
+    (entry) => entry.statusCode >= 400 && entry.statusCode < 500
+  ).length;
+  const status5xx = logs.filter((entry) => entry.statusCode >= 500).length;
+  const durations = logs.map((entry) => entry.durationMs).sort((left, right) => left - right);
+  const percentile = (p) => {
     if (!durations.length) return 0;
-    const index = Math.min(durations.length - 1, Math.max(0, Math.ceil((p / 100) * durations.length) - 1));
+    const index = Math.min(
+      durations.length - 1,
+      Math.max(0, Math.ceil((p / 100) * durations.length) - 1)
+    );
     return durations[index];
   };
 
   return {
     window: {
       sampleSize: total,
-      maxStored: MAX_LOGS
+      maxStored: MAX_LOGS,
     },
     requests: {
       total,
       status2xx,
       status4xx,
       status5xx,
-      errorRate: total ? Number((status5xx / total).toFixed(4)) : 0
+      errorRate: total ? Number((status5xx / total).toFixed(4)) : 0,
     },
     latencyMs: {
       p50: percentile(50),
       p95: percentile(95),
       p99: percentile(99),
-      max: durations.length ? durations[durations.length - 1] : 0
+      max: durations.length ? durations[durations.length - 1] : 0,
     },
-    recent: logs.slice(-Math.min(options.recentLimit || 20, 100))
+    recent: logs.slice(-Math.min(options.recentLimit || 20, 100)),
   };
 }
 
 module.exports = {
   createRequestContext,
   getRecentRequestLogs,
-  getRequestMetrics
+  getRequestMetrics,
 };

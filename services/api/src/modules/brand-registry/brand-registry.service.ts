@@ -92,7 +92,7 @@ export class BrandRegistryService {
       }
     }
     throw new Error(
-      'brand-registry.json not found. Set BRAND_REGISTRY_PATH or run from within the repo.',
+      'brand-registry.json not found. Set BRAND_REGISTRY_PATH or run from within the repo.'
     );
   }
 
@@ -142,21 +142,21 @@ export class BrandRegistryService {
   } {
     const data = this.load();
     let brands = data.brands;
-    if (opts?.type) brands = brands.filter(b => b.type === opts.type);
+    if (opts?.type) brands = brands.filter((b) => b.type === opts.type);
     if (typeof opts?.selfBuilt === 'boolean') {
-      brands = brands.filter(b => Boolean(b.selfBuilt) === opts.selfBuilt);
+      brands = brands.filter((b) => Boolean(b.selfBuilt) === opts.selfBuilt);
     }
     return {
       vendor: data._governance?._vendor,
       count: brands.length,
-      brands: brands.map(b => this.toSummary(b)),
+      brands: brands.map((b) => this.toSummary(b)),
     };
   }
 
   /** 单个品牌的完整要素（含 fundamentals / VI / NAP / 外链）。 */
   get(slug: string): BrandEntry {
     const data = this.load();
-    const brand = data.brands.find(b => b.slug === slug);
+    const brand = data.brands.find((b) => b.slug === slug);
     if (!brand) {
       throw new NotFoundException(`Unknown brand slug: ${slug}`);
     }

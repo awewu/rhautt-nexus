@@ -1,4 +1,13 @@
-import { Injectable, BadRequestException, ConflictException, ForbiddenException, Logger, NotFoundException, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Logger,
+  NotFoundException,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import {
@@ -21,13 +30,30 @@ import { EventBusService } from '../mdm/event-bus.service';
 import { TARGET_API_BOOT_SMOKE } from '../boot-smoke';
 import { FileArtifactService } from '../file-artifact/file-artifact.service';
 import {
-  PRODUCT_TAXONOMY, EMPTY_POSITIONING, sanitizePositioning, sanitizeAssetRefs, computeProductKey,
-  DEFAULT_LOCALE, LOCALES, EMPTY_SEO, EMPTY_MARKETING, sanitizeLocale, sanitizeSeo, sanitizeMarketing, sanitizeOfficialDetailHtml,
-  resolveTransition, isValidRelationType, inverseRelationType,
-  type ProductSeo, type ProductMarketing,
+  PRODUCT_TAXONOMY,
+  EMPTY_POSITIONING,
+  sanitizePositioning,
+  sanitizeAssetRefs,
+  computeProductKey,
+  DEFAULT_LOCALE,
+  LOCALES,
+  EMPTY_SEO,
+  EMPTY_MARKETING,
+  sanitizeLocale,
+  sanitizeSeo,
+  sanitizeMarketing,
+  sanitizeOfficialDetailHtml,
+  resolveTransition,
+  isValidRelationType,
+  inverseRelationType,
+  type ProductSeo,
+  type ProductMarketing,
 } from './product-taxonomy';
 import {
-  validateContentInput, validateTransitionInput, validateRelationInput, validateProductUpsertInput,
+  validateContentInput,
+  validateTransitionInput,
+  validateRelationInput,
+  validateProductUpsertInput,
 } from './product-catalog.validation';
 import { rankProductRecommendationCandidates } from './product-catalog-recommend';
 
@@ -72,31 +98,52 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
   private sweepTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(
-    @InjectDataSource()                    private readonly ds:       DataSource,
-    @InjectRepository(ProductEntity)      private readonly products: Repository<ProductEntity>,
-    @InjectRepository(PriceListItemEntity) private readonly prices:   Repository<PriceListItemEntity>,
-    @InjectRepository(ProductContentEntity) private readonly contents: Repository<ProductContentEntity>,
+    @InjectDataSource() private readonly ds: DataSource,
+    @InjectRepository(ProductEntity) private readonly products: Repository<ProductEntity>,
+    @InjectRepository(PriceListItemEntity) private readonly prices: Repository<PriceListItemEntity>,
+    @InjectRepository(ProductContentEntity)
+    private readonly contents: Repository<ProductContentEntity>,
     private readonly eventBus: EventBusService,
     private readonly fileArtifacts: FileArtifactService,
-    @InjectRepository(BrandProductCategoryEntity) private readonly categories?: Repository<BrandProductCategoryEntity>,
-    @InjectRepository(BrandPublishGrantEntity) private readonly grants?: Repository<BrandPublishGrantEntity>,
+    @InjectRepository(BrandProductCategoryEntity)
+    private readonly categories?: Repository<BrandProductCategoryEntity>,
+    @InjectRepository(BrandPublishGrantEntity)
+    private readonly grants?: Repository<BrandPublishGrantEntity>
   ) {}
 
   // ── D4 发布投影：经销商(消费租户)按品牌只读已发布产品事实（不复制、经 grant 授权）──
   async listConsumerGrants(actor: Pick<JwtPayload, 'userId' | 'tenantId' | 'role'>) {
-    return withRlsTransaction(this.ds, async (em) => {
-      const rows = await em.getRepository(BrandPublishGrantEntity).find({ where: { consumerTenantId: actor.tenantId, status: 'granted' } });
-      return { brands: rows.map((r) => r.brandCode) };
-    }, { tenantId: actor.tenantId, actorId: actor.userId, role: actor.role });
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        const rows = await em
+          .getRepository(BrandPublishGrantEntity)
+          .find({ where: { consumerTenantId: actor.tenantId, status: 'granted' } });
+        return { brands: rows.map((r) => r.brandCode) };
+      },
+      { tenantId: actor.tenantId, actorId: actor.userId, role: actor.role }
+    );
   }
 
-  async listPublishedProductsForConsumer(actor: Pick<JwtPayload, 'userId' | 'tenantId' | 'role'>, brandCode: string) {
+  async listPublishedProductsForConsumer(
+    actor: Pick<JwtPayload, 'userId' | 'tenantId' | 'role'>,
+    brandCode: string
+  ) {
     const { brands } = await this.listConsumerGrants(actor);
-    if (!brands.includes(brandCode)) throw new ForbiddenException('该租户无此品牌发布授权: ' + brandCode);
-    const rows = await this.products!.find({ where: { brand: brandCode, published: true, status: 'active' } });
+    if (!brands.includes(brandCode))
+      throw new ForbiddenException('该租户无此品牌发布授权: ' + brandCode);
+    const rows = await this.products!.find({
+      where: { brand: brandCode, published: true, status: 'active' },
+    });
     return {
       brand: brandCode,
-      products: rows.map((p) => ({ sku: p.sku, name: p.name, category: p.category, spec: p.spec, positioning: p.positioning })),
+      products: rows.map((p) => ({
+        sku: p.sku,
+        name: p.name,
+        category: p.category,
+        spec: p.spec,
+        positioning: p.positioning,
+      })),
     };
   }
 
@@ -143,7 +190,10 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
   }
 
   onModuleDestroy(): void {
-    if (this.sweepTimer) { clearInterval(this.sweepTimer); this.sweepTimer = null; }
+    if (this.sweepTimer) {
+      clearInterval(this.sweepTimer);
+      this.sweepTimer = null;
+    }
   }
 
   private static readonly UUID_RE =
@@ -157,20 +207,23 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     const resolved = tenantId || process.env.EVERHOT_TENANT_ID || '';
     if (!ProductCatalogService.UUID_RE.test(resolved)) {
       throw new BadRequestException(
-        '产品写入门牌必须是品牌运营租户 UUID（模型B 第1律）；rhautt_shared 哨兵已退役。请配置 EVERHOT_TENANT_ID 或显式传 tenantId=UUID。',
+        '产品写入门牌必须是品牌运营租户 UUID（模型B 第1律）；rhautt_shared 哨兵已退役。请配置 EVERHOT_TENANT_ID 或显式传 tenantId=UUID。'
       );
     }
     return resolved;
   }
 
   private productLibraryTenantId(tenantId?: string): string {
-    const resolved = process.env.PRODUCT_LIBRARY_TENANT_ID
-      || process.env.RHAUTT_COMFORT_TENANT_ID
-      || tenantId
-      || process.env.EVERHOT_TENANT_ID
-      || '';
+    const resolved =
+      process.env.PRODUCT_LIBRARY_TENANT_ID ||
+      process.env.RHAUTT_COMFORT_TENANT_ID ||
+      tenantId ||
+      process.env.EVERHOT_TENANT_ID ||
+      '';
     if (!ProductCatalogService.UUID_RE.test(resolved)) {
-      throw new BadRequestException('产品库写入必须使用公共产品库实例 tenantId(UUID)，请配置 PRODUCT_LIBRARY_TENANT_ID 或 RHAUTT_COMFORT_TENANT_ID。');
+      throw new BadRequestException(
+        '产品库写入必须使用公共产品库实例 tenantId(UUID)，请配置 PRODUCT_LIBRARY_TENANT_ID 或 RHAUTT_COMFORT_TENANT_ID。'
+      );
     }
     return resolved;
   }
@@ -181,13 +234,14 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
    * outbox 等副作用）按该租户强隔离；当为共享哨兵（如 'rhautt_shared'）时直读，
    * 保持 HQ 共享目录的既有行为不变（向后兼容 dev / 未启用 RLS 环境）。
    */
-  private scoped<T>(tenantId: string | undefined, work: (repo: Repository<ProductEntity>) => Promise<T>): Promise<T> {
+  private scoped<T>(
+    tenantId: string | undefined,
+    work: (repo: Repository<ProductEntity>) => Promise<T>
+  ): Promise<T> {
     if (tenantId && ProductCatalogService.UUID_RE.test(tenantId)) {
-      return withRlsTransaction(
-        this.ds,
-        (manager) => work(manager.getRepository(ProductEntity)),
-        { tenantId } as TenantScope,
-      );
+      return withRlsTransaction(this.ds, (manager) => work(manager.getRepository(ProductEntity)), {
+        tenantId,
+      } as TenantScope);
     }
     return work(this.products);
   }
@@ -197,7 +251,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     { q: 'segment', dim: 'targetSegments' },
     { q: 'channel', dim: 'channels' },
     { q: 'persona', dim: 'userPersonas' },
-    { q: 'market',  dim: 'markets' },
+    { q: 'market', dim: 'markets' },
     { q: 'scenario', dim: 'applicationScenarios' }, // P5 应用场景筛选（家用/商用双轨受控 code）
   ];
 
@@ -230,27 +284,30 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     const meta = this.metaObject(dto.meta);
     const brandMeta = this.metaObject(meta[brandCode]);
     return String(
-      dto.model
-      || spec.officialModel
-      || spec.model
-      || brandMeta.model
-      || meta.model
-      || dto.sku
-      || '',
+      dto.model ||
+        spec.officialModel ||
+        spec.model ||
+        brandMeta.model ||
+        meta.model ||
+        dto.sku ||
+        ''
     ).trim();
   }
 
   private brandCodesFromDto(dto: Record<string, unknown>): string[] {
     const out = new Set<string>();
     const push = (value: unknown) => {
-      const code = String(value || '').trim().toLowerCase();
+      const code = String(value || '')
+        .trim()
+        .toLowerCase();
       if (code) out.add(code);
     };
     if (Array.isArray(dto.brandCodes)) dto.brandCodes.forEach(push);
     if (Array.isArray(dto.brands)) dto.brands.forEach(push);
     if (Array.isArray(dto.brandBindings)) {
       for (const item of dto.brandBindings) {
-        if (item && typeof item === 'object' && !Array.isArray(item)) push((item as Record<string, unknown>).brandCode);
+        if (item && typeof item === 'object' && !Array.isArray(item))
+          push((item as Record<string, unknown>).brandCode);
       }
     }
     push(dto.brandCode);
@@ -285,50 +342,72 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     productId: string,
     brandCode: string,
     input: WebsitePricingInput | null,
-    actor?: ProductMutationActor,
+    actor?: ProductMutationActor
   ) {
     if (!input) return null;
     const repo = manager.getRepository(ProductWebsitePricingEntity);
-    const pricingBrandCode = String(input.brandCode || brandCode || 'official').trim().toLowerCase();
-    const siteCode = String(input.siteCode || 'official').trim().toLowerCase();
+    const pricingBrandCode = String(input.brandCode || brandCode || 'official')
+      .trim()
+      .toLowerCase();
+    const siteCode = String(input.siteCode || 'official')
+      .trim()
+      .toLowerCase();
     const locale = String(input.locale || 'zh-CN').trim() || 'zh-CN';
     const existing = await repo.findOne({
-      where: { tenantId, productId, brandCode: pricingBrandCode, siteCode, locale, deletedAt: null } as any,
+      where: {
+        tenantId,
+        productId,
+        brandCode: pricingBrandCode,
+        siteCode,
+        locale,
+        deletedAt: null,
+      } as any,
     });
-    const saved = await repo.save(repo.create({
-      ...(existing ?? {}),
-      tenantId,
-      productId,
-      brandCode: pricingBrandCode,
-      siteCode,
-      locale,
-      priceDisplayMode: String(input.priceDisplayMode || existing?.priceDisplayMode || 'not_shown'),
-      websitePrice: this.nullableNumber(input.websitePrice),
-      websitePriceMin: this.nullableNumber(input.websitePriceMin),
-      websitePriceMax: this.nullableNumber(input.websitePriceMax),
-      promoPrice: this.nullableNumber(input.promoPrice),
-      currency: String(input.currency || existing?.currency || 'CNY'),
-      priceUnit: input.priceUnit ? String(input.priceUnit) : existing?.priceUnit || null,
-      priceLabel: input.priceLabel ? String(input.priceLabel) : existing?.priceLabel || null,
-      priceNote: input.priceNote ? String(input.priceNote) : existing?.priceNote || null,
-      taxIncluded: input.taxIncluded === undefined ? existing?.taxIncluded ?? true : input.taxIncluded !== false,
-      validFrom: this.nullableDate(input.validFrom),
-      validTo: this.nullableDate(input.validTo),
-      status: 'active',
-      updatedBy: actor?.userId || existing?.updatedBy || null,
-      createdBy: existing?.createdBy || actor?.userId || null,
-    }));
+    const saved = await repo.save(
+      repo.create({
+        ...(existing ?? {}),
+        tenantId,
+        productId,
+        brandCode: pricingBrandCode,
+        siteCode,
+        locale,
+        priceDisplayMode: String(
+          input.priceDisplayMode || existing?.priceDisplayMode || 'not_shown'
+        ),
+        websitePrice: this.nullableNumber(input.websitePrice),
+        websitePriceMin: this.nullableNumber(input.websitePriceMin),
+        websitePriceMax: this.nullableNumber(input.websitePriceMax),
+        promoPrice: this.nullableNumber(input.promoPrice),
+        currency: String(input.currency || existing?.currency || 'CNY'),
+        priceUnit: input.priceUnit ? String(input.priceUnit) : existing?.priceUnit || null,
+        priceLabel: input.priceLabel ? String(input.priceLabel) : existing?.priceLabel || null,
+        priceNote: input.priceNote ? String(input.priceNote) : existing?.priceNote || null,
+        taxIncluded:
+          input.taxIncluded === undefined
+            ? (existing?.taxIncluded ?? true)
+            : input.taxIncluded !== false,
+        validFrom: this.nullableDate(input.validFrom),
+        validTo: this.nullableDate(input.validTo),
+        status: 'active',
+        updatedBy: actor?.userId || existing?.updatedBy || null,
+        createdBy: existing?.createdBy || actor?.userId || null,
+      })
+    );
     return saved;
   }
 
   private brandMeta(product: ProductEntity): Record<string, any> {
-    const brand = String(product.brand || 'everhot').trim().toLowerCase();
+    const brand = String(product.brand || 'everhot')
+      .trim()
+      .toLowerCase();
     const meta = (product.meta as any)?.[brand];
     return meta && typeof meta === 'object' && !Array.isArray(meta) ? meta : {};
   }
 
   private metaObject(value: unknown): Record<string, any> {
-    return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
+    return value && typeof value === 'object' && !Array.isArray(value)
+      ? (value as Record<string, any>)
+      : {};
   }
 
   private legacyCategoryPath(product: ProductEntity): string {
@@ -348,27 +427,38 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     const rootMeta = this.metaObject(product.meta);
     const categoryBindings = Array.isArray(brandMeta.categoryBindings)
       ? brandMeta.categoryBindings
-      : Array.isArray(rootMeta.categoryBindings) ? rootMeta.categoryBindings : [];
-    const primaryFromBindings = categoryBindings.find((binding) =>
-      binding && typeof binding === 'object' && (binding as Record<string, unknown>).role === 'primary',
+      : Array.isArray(rootMeta.categoryBindings)
+        ? rootMeta.categoryBindings
+        : [];
+    const primaryFromBindings = categoryBindings.find(
+      (binding) =>
+        binding &&
+        typeof binding === 'object' &&
+        (binding as Record<string, unknown>).role === 'primary'
     ) as Record<string, unknown> | undefined;
     return {
       primaryCategoryId: normalizedNullableText(
-        brandMeta.primaryCategoryId
-        ?? rootMeta.primaryCategoryId
-        ?? primaryFromBindings?.categoryId
-        ?? brandMeta.categoryId
-        ?? rootMeta.categoryId
-        ?? brandMeta.categoryLevel3Id
-        ?? rootMeta.categoryLevel3Id
-        ?? brandMeta.categoryLevel2Id
-        ?? rootMeta.categoryLevel2Id
-        ?? brandMeta.categoryLevel1Id
-        ?? rootMeta.categoryLevel1Id,
+        brandMeta.primaryCategoryId ??
+          rootMeta.primaryCategoryId ??
+          primaryFromBindings?.categoryId ??
+          brandMeta.categoryId ??
+          rootMeta.categoryId ??
+          brandMeta.categoryLevel3Id ??
+          rootMeta.categoryLevel3Id ??
+          brandMeta.categoryLevel2Id ??
+          rootMeta.categoryLevel2Id ??
+          brandMeta.categoryLevel1Id ??
+          rootMeta.categoryLevel1Id
       ),
-      categoryLevel1Id: normalizedNullableText(brandMeta.categoryLevel1Id ?? rootMeta.categoryLevel1Id),
-      categoryLevel2Id: normalizedNullableText(brandMeta.categoryLevel2Id ?? rootMeta.categoryLevel2Id),
-      categoryLevel3Id: normalizedNullableText(brandMeta.categoryLevel3Id ?? rootMeta.categoryLevel3Id),
+      categoryLevel1Id: normalizedNullableText(
+        brandMeta.categoryLevel1Id ?? rootMeta.categoryLevel1Id
+      ),
+      categoryLevel2Id: normalizedNullableText(
+        brandMeta.categoryLevel2Id ?? rootMeta.categoryLevel2Id
+      ),
+      categoryLevel3Id: normalizedNullableText(
+        brandMeta.categoryLevel3Id ?? rootMeta.categoryLevel3Id
+      ),
       categoryPath: normalizedNullableText(brandMeta.categoryPath ?? rootMeta.categoryPath) || '',
       categoryBindings,
     };
@@ -385,7 +475,9 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       }
     }
     if (Object.prototype.hasOwnProperty.call(dto, 'categoryBindings')) {
-      patch.categoryBindings = Array.isArray(dto.categoryBindings) ? dto.categoryBindings as Array<Record<string, unknown>> : [];
+      patch.categoryBindings = Array.isArray(dto.categoryBindings)
+        ? (dto.categoryBindings as Array<Record<string, unknown>>)
+        : [];
       touched = true;
     }
     return touched ? patch : null;
@@ -394,17 +486,21 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
   private metaHasCategoryBindingInput(metaInput: unknown, brand: string): boolean {
     const meta = this.metaObject(metaInput);
     const brandMeta = this.metaObject(meta[brand]);
-    return PRODUCT_CATEGORY_BINDING_FIELDS.some((field) =>
-      Object.prototype.hasOwnProperty.call(meta, field)
-      || Object.prototype.hasOwnProperty.call(brandMeta, field),
-    ) || Object.prototype.hasOwnProperty.call(meta, 'categoryBindings')
-      || Object.prototype.hasOwnProperty.call(brandMeta, 'categoryBindings');
+    return (
+      PRODUCT_CATEGORY_BINDING_FIELDS.some(
+        (field) =>
+          Object.prototype.hasOwnProperty.call(meta, field) ||
+          Object.prototype.hasOwnProperty.call(brandMeta, field)
+      ) ||
+      Object.prototype.hasOwnProperty.call(meta, 'categoryBindings') ||
+      Object.prototype.hasOwnProperty.call(brandMeta, 'categoryBindings')
+    );
   }
 
   private applyCategoryBindingInput(
     metaInput: unknown,
     brand: string,
-    patch: Partial<ProductCategoryBinding> | null,
+    patch: Partial<ProductCategoryBinding> | null
   ): Record<string, unknown> {
     const meta = { ...this.metaObject(metaInput) };
     if (!patch) return meta;
@@ -425,7 +521,9 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     return meta;
   }
 
-  private async categoryMapForProducts(products: ProductEntity[]): Promise<Map<string, BrandProductCategoryEntity>> {
+  private async categoryMapForProducts(
+    products: ProductEntity[]
+  ): Promise<Map<string, BrandProductCategoryEntity>> {
     const ids = new Set<string>();
     for (const product of products) {
       const binding = this.categoryBindingFromMeta(product);
@@ -447,20 +545,26 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
   private projectProductRead(
     product: ProductEntity,
     categories = new Map<string, BrandProductCategoryEntity>(),
-    websitePricing?: ProductWebsitePricingEntity | null,
+    websitePricing?: ProductWebsitePricingEntity | null
   ): Record<string, unknown> {
     const binding = this.categoryBindingFromMeta(product);
-    const primaryCategory = binding.primaryCategoryId ? categories.get(binding.primaryCategoryId) : null;
+    const primaryCategory = binding.primaryCategoryId
+      ? categories.get(binding.primaryCategoryId)
+      : null;
     const ancestry = primaryCategory ? categoryAncestry(primaryCategory, categories) : [];
     const pathFromCategories = ancestry.map((item) => item.nameCn).join(' / ');
-    const categoryBindings = binding.categoryBindings.length ? binding.categoryBindings : (
-      primaryCategory ? [{
-        categoryId: primaryCategory.id,
-        role: 'primary',
-        path: pathFromCategories,
-        ancestry: categoryProjection(ancestry),
-      }] : []
-    );
+    const categoryBindings = binding.categoryBindings.length
+      ? binding.categoryBindings
+      : primaryCategory
+        ? [
+            {
+              categoryId: primaryCategory.id,
+              role: 'primary',
+              path: pathFromCategories,
+              ancestry: categoryProjection(ancestry),
+            },
+          ]
+        : [];
     return {
       ...product,
       primaryCategoryId: binding.primaryCategoryId,
@@ -470,34 +574,44 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       categoryBindings,
       categoryAncestry: categoryProjection(ancestry),
       categoryPath: pathFromCategories || binding.categoryPath || this.legacyCategoryPath(product),
-      websitePricing: websitePricing ? {
-        id: websitePricing.id,
-        brandCode: websitePricing.brandCode,
-        siteCode: websitePricing.siteCode,
-        locale: websitePricing.locale,
-        priceDisplayMode: websitePricing.priceDisplayMode,
-        websitePrice: websitePricing.websitePrice,
-        websitePriceMin: websitePricing.websitePriceMin,
-        websitePriceMax: websitePricing.websitePriceMax,
-        promoPrice: websitePricing.promoPrice,
-        currency: websitePricing.currency,
-        priceUnit: websitePricing.priceUnit,
-        priceLabel: websitePricing.priceLabel,
-        priceNote: websitePricing.priceNote,
-        taxIncluded: websitePricing.taxIncluded,
-      } : null,
+      websitePricing: websitePricing
+        ? {
+            id: websitePricing.id,
+            brandCode: websitePricing.brandCode,
+            siteCode: websitePricing.siteCode,
+            locale: websitePricing.locale,
+            priceDisplayMode: websitePricing.priceDisplayMode,
+            websitePrice: websitePricing.websitePrice,
+            websitePriceMin: websitePricing.websitePriceMin,
+            websitePriceMax: websitePricing.websitePriceMax,
+            promoPrice: websitePricing.promoPrice,
+            currency: websitePricing.currency,
+            priceUnit: websitePricing.priceUnit,
+            priceLabel: websitePricing.priceLabel,
+            priceNote: websitePricing.priceNote,
+            taxIncluded: websitePricing.taxIncluded,
+          }
+        : null,
     };
   }
 
   private async validateCategoryBinding(
     manager: EntityManager,
-    product: ProductEntity,
+    product: ProductEntity
   ): Promise<Record<string, unknown>> {
-    const brand = String(product.brand || '').trim().toLowerCase();
-    if (!brand) throw new BadRequestException('Product brand is required before binding product categories.');
+    const brand = String(product.brand || '')
+      .trim()
+      .toLowerCase();
+    if (!brand)
+      throw new BadRequestException('Product brand is required before binding product categories.');
     const binding = this.categoryBindingFromMeta(product);
     const primaryCategoryId = binding.primaryCategoryId;
-    const ids = [primaryCategoryId, binding.categoryLevel1Id, binding.categoryLevel2Id, binding.categoryLevel3Id].filter(Boolean) as string[];
+    const ids = [
+      primaryCategoryId,
+      binding.categoryLevel1Id,
+      binding.categoryLevel2Id,
+      binding.categoryLevel3Id,
+    ].filter(Boolean) as string[];
     if (!ids.length) {
       return this.applyCategoryBindingInput(product.meta, brand, {
         primaryCategoryId: null,
@@ -516,15 +630,23 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       throw new BadRequestException('Selected product category does not exist.');
     }
     if (primary.brandCode !== brand && primary.brandCode !== 'common') {
-      throw new BadRequestException('Selected product categories must belong to the product brand.');
+      throw new BadRequestException(
+        'Selected product categories must belong to the product brand.'
+      );
     }
     if (primary.status !== 'active') {
       throw new BadRequestException('Selected product category must be active for new bindings.');
     }
     const ancestry = categoryAncestry(primary, byId);
-    for (const [index, id] of [binding.categoryLevel1Id, binding.categoryLevel2Id, binding.categoryLevel3Id].entries()) {
+    for (const [index, id] of [
+      binding.categoryLevel1Id,
+      binding.categoryLevel2Id,
+      binding.categoryLevel3Id,
+    ].entries()) {
       if (id && ancestry[index]?.id !== id) {
-        throw new BadRequestException(`categoryLevel${index + 1}Id must match the selected primary category ancestry.`);
+        throw new BadRequestException(
+          `categoryLevel${index + 1}Id must match the selected primary category ancestry.`
+        );
       }
     }
     const meta = { ...this.metaObject(product.meta) };
@@ -537,16 +659,18 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     else delete brandMeta.categoryLevel3Id;
     const path = ancestry.map((row) => row.nameCn).join(' / ');
     brandMeta.categoryPath = path;
-    brandMeta.categoryBindings = [{
-      categoryId: primary.id,
-      role: 'primary',
-      sortOrder: 0,
-      code: primary.code,
-      slug: primary.slug,
-      nameCn: primary.nameCn,
-      path,
-      ancestry: categoryProjection(ancestry),
-    }];
+    brandMeta.categoryBindings = [
+      {
+        categoryId: primary.id,
+        role: 'primary',
+        sortOrder: 0,
+        code: primary.code,
+        slug: primary.slug,
+        nameCn: primary.nameCn,
+        path,
+        ancestry: categoryProjection(ancestry),
+      },
+    ];
     meta[brand] = brandMeta;
     return meta;
   }
@@ -590,7 +714,11 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       .filter((r) => r.role === 'detail')
       .sort((a, b) => (Number(a.sortOrder) || 0) - (Number(b.sortOrder) || 0))
       .map(toPublic);
-    return { main: mainRef ? toPublic(mainRef) : null, icon: iconRef ? toPublic(iconRef) : null, gallery };
+    return {
+      main: mainRef ? toPublic(mainRef) : null,
+      icon: iconRef ? toPublic(iconRef) : null,
+      gallery,
+    };
   }
 
   private publicDocumentRefs(product: ProductEntity) {
@@ -606,11 +734,14 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       }));
   }
 
-  private rewriteOfficialDetailArtifactUrls(product: ProductEntity, html: string | null | undefined): string {
+  private rewriteOfficialDetailArtifactUrls(
+    product: ProductEntity,
+    html: string | null | undefined
+  ): string {
     if (!html) return '';
     return String(html).replace(
       /(?:https?:\/\/[^"'<>\s]+)?\/api\/v2\/file-artifact\/([0-9a-fA-F-]{36})\/content/g,
-      (_match, artifactId) => this.imageUrl(product, String(artifactId)),
+      (_match, artifactId) => this.imageUrl(product, String(artifactId))
     );
   }
 
@@ -634,13 +765,24 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     return ProductCatalogService.UUID_RE.test(tenantId) ? tenantId : null;
   }
 
-  private publicArtifactTenantCandidates(brand: string, productTenantId: string, product: ProductEntity, objectKey?: unknown): string[] {
+  private publicArtifactTenantCandidates(
+    brand: string,
+    productTenantId: string,
+    product: ProductEntity,
+    objectKey?: unknown
+  ): string[] {
     const candidates = [
       this.artifactTenantIdFromObjectKey(objectKey),
       productTenantId,
-      process.env[`SITE_${String(brand).toUpperCase().replace(/[^A-Z0-9]/g, '_')}_TENANT_ID`],
+      process.env[
+        `SITE_${String(brand)
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, '_')}_TENANT_ID`
+      ],
       process.env.SITE_EVERHOT_TENANT_ID,
-      ...sanitizeAssetRefs(product.assetRefs).map((ref) => this.artifactTenantIdFromObjectKey(ref.objectKey)),
+      ...sanitizeAssetRefs(product.assetRefs).map((ref) =>
+        this.artifactTenantIdFromObjectKey(ref.objectKey)
+      ),
     ];
     return [...new Set(candidates.filter((tenantId): tenantId is string => Boolean(tenantId)))];
   }
@@ -657,7 +799,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     product: ProductEntity,
     locale: string,
     content?: ProductContentEntity | null,
-    opts: { includeOfficialDetail?: boolean } = {},
+    opts: { includeOfficialDetail?: boolean } = {}
   ) {
     const meta = this.brandMeta(product);
     const positioning = sanitizePositioning(product.positioning ?? EMPTY_POSITIONING);
@@ -669,26 +811,41 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     const seo: ProductSeo = content?.seo ?? EMPTY_SEO;
     const categoryBinding = this.categoryBindingFromMeta(product);
     const marketingSpecs = Array.isArray((marketing as any).specs) ? (marketing as any).specs : [];
-    const marketingFeatures = Array.isArray((marketing as any).features) ? (marketing as any).features : [];
-    const marketingHighlights = Array.isArray((marketing as any).highlights) ? (marketing as any).highlights : [];
-    const marketingBadges = Array.isArray((marketing as any).badges) ? (marketing as any).badges : [];
+    const marketingFeatures = Array.isArray((marketing as any).features)
+      ? (marketing as any).features
+      : [];
+    const marketingHighlights = Array.isArray((marketing as any).highlights)
+      ? (marketing as any).highlights
+      : [];
+    const marketingBadges = Array.isArray((marketing as any).badges)
+      ? (marketing as any).badges
+      : [];
     const marketingCerts = Array.isArray((marketing as any).certs) ? (marketing as any).certs : [];
     const marketingFaq = Array.isArray((marketing as any).faq) ? (marketing as any).faq : [];
-    const marketingFeatureBenefits = Array.isArray((marketing as any).featureBenefits) ? (marketing as any).featureBenefits : [];
-    const productLibraryMeta = product.meta && typeof product.meta === 'object' && !Array.isArray(product.meta)
-      ? ((product.meta as any).productLibrary ?? {})
-      : {};
-    const productLibraryCompliance = productLibraryMeta && typeof productLibraryMeta === 'object' && !Array.isArray(productLibraryMeta)
-      ? ((productLibraryMeta as any).compliance ?? {})
-      : {};
-    const libraryCerts = Array.isArray((productLibraryCompliance as any).certificates) ? (productLibraryCompliance as any).certificates : [];
+    const marketingFeatureBenefits = Array.isArray((marketing as any).featureBenefits)
+      ? (marketing as any).featureBenefits
+      : [];
+    const productLibraryMeta =
+      product.meta && typeof product.meta === 'object' && !Array.isArray(product.meta)
+        ? ((product.meta as any).productLibrary ?? {})
+        : {};
+    const productLibraryCompliance =
+      productLibraryMeta &&
+      typeof productLibraryMeta === 'object' &&
+      !Array.isArray(productLibraryMeta)
+        ? ((productLibraryMeta as any).compliance ?? {})
+        : {};
+    const libraryCerts = Array.isArray((productLibraryCompliance as any).certificates)
+      ? (productLibraryCompliance as any).certificates
+      : [];
     const base: Record<string, unknown> = {
       slug: this.publicSlug(product),
       sku: product.sku,
       displayOrder: this.displayOrder(product),
       model: meta.model || (product.spec as any)?.officialModel || product.sku,
       name: content?.name || meta.name || product.name,
-      websiteCategory: meta.websiteCategory || meta.websiteCategoryCode || meta.cat || product.category,
+      websiteCategory:
+        meta.websiteCategory || meta.websiteCategoryCode || meta.cat || product.category,
       primaryCategoryId: categoryBinding.primaryCategoryId,
       categoryLevel1Id: categoryBinding.categoryLevel1Id,
       categoryLevel2Id: categoryBinding.categoryLevel2Id,
@@ -700,7 +857,13 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       series: (marketing as any).series || meta.series || '',
       tagline: marketing.subhead || marketing.headline || meta.tagline || '',
       tags: Array.isArray(meta.tags) ? meta.tags : [],
-      badges: marketingBadges.length ? marketingBadges : Array.isArray(meta.badges) ? meta.badges : Array.isArray(meta.tags) ? meta.tags : [],
+      badges: marketingBadges.length
+        ? marketingBadges
+        : Array.isArray(meta.badges)
+          ? meta.badges
+          : Array.isArray(meta.tags)
+            ? meta.tags
+            : [],
       en: (marketing as any).officialEnglishName || meta.en || '',
       icon: imageRefs.icon?.url || meta.icon || '🔥',
       image: mainImage?.url || '',
@@ -712,11 +875,30 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       features: marketingFeatures.length
         ? marketingFeatures
         : marketingFeatureBenefits.length
-          ? marketingFeatureBenefits.map((item: any) => ({ title: item.feature, desc: item.benefit }))
-          : Array.isArray(meta.features) ? meta.features : [],
-      highlights: marketingHighlights.length ? marketingHighlights : Array.isArray(meta.highlights) ? meta.highlights : [],
-      certs: marketingCerts.length ? marketingCerts : Array.isArray(meta.certs) && meta.certs.length ? meta.certs : libraryCerts.length ? libraryCerts : undefined,
-      faqs: marketingFaq.length ? marketingFaq.map((item: any) => ({ q: item.q, a: item.a })) : Array.isArray(meta.faqs) ? meta.faqs : undefined,
+          ? marketingFeatureBenefits.map((item: any) => ({
+              title: item.feature,
+              desc: item.benefit,
+            }))
+          : Array.isArray(meta.features)
+            ? meta.features
+            : [],
+      highlights: marketingHighlights.length
+        ? marketingHighlights
+        : Array.isArray(meta.highlights)
+          ? meta.highlights
+          : [],
+      certs: marketingCerts.length
+        ? marketingCerts
+        : Array.isArray(meta.certs) && meta.certs.length
+          ? meta.certs
+          : libraryCerts.length
+            ? libraryCerts
+            : undefined,
+      faqs: marketingFaq.length
+        ? marketingFaq.map((item: any) => ({ q: item.q, a: item.a }))
+        : Array.isArray(meta.faqs)
+          ? meta.faqs
+          : undefined,
       locale,
       positioning,
       marketing,
@@ -724,7 +906,10 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       jsonLd: this.buildJsonLd(product, content ?? null, locale),
     };
     if (opts.includeOfficialDetail) {
-      base.officialDetailHtml = this.rewriteOfficialDetailArtifactUrls(product, content?.officialDetailHtml);
+      base.officialDetailHtml = this.rewriteOfficialDetailArtifactUrls(
+        product,
+        content?.officialDetailHtml
+      );
     }
     return Object.fromEntries(Object.entries(base).filter(([, value]) => value !== undefined));
   }
@@ -734,7 +919,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     tenantId: string,
     brand: string,
     slugInput: unknown,
-    excludeId?: string,
+    excludeId?: string
   ): Promise<void> {
     const slug = this.normalizePublicSlug(slugInput);
     if (!slug) throw new BadRequestException(`${brand} 产品 slug 必填`);
@@ -742,7 +927,10 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       .createQueryBuilder('p')
       .where('p.tenant_id = :tenantId', { tenantId })
       .andWhere('p.brand = :brand', { brand })
-      .andWhere("COALESCE(NULLIF(p.meta -> :brand ->> 'slug', ''), p.sku) = :slug", { slug, brand });
+      .andWhere("COALESCE(NULLIF(p.meta -> :brand ->> 'slug', ''), p.sku) = :slug", {
+        slug,
+        brand,
+      });
     if (excludeId) qb.andWhere('p.id <> :excludeId', { excludeId });
     const conflict = await qb.getOne();
     if (conflict) throw new BadRequestException(`${brand} 产品 slug 已存在：${slug}`);
@@ -754,25 +942,38 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     const pageSize = Math.min(Math.max(Number(query.pageSize) || 50, 1), 100);
     return this.scoped(tenantId, async (repo) => {
       const qb = repo.createQueryBuilder('p').where('p.tenant_id = :tenantId', { tenantId });
-      if (query.brand)    qb.andWhere('p.brand = :brand', { brand: String(query.brand).toLowerCase() });
+      if (query.brand)
+        qb.andWhere('p.brand = :brand', { brand: String(query.brand).toLowerCase() });
       if (query.category) qb.andWhere('p.category = :category', { category: query.category });
       if (query.categoryLevel1Id) {
-        qb.andWhere("COALESCE(NULLIF(p.meta -> p.brand ->> 'categoryLevel1Id', ''), NULLIF(p.meta ->> 'categoryLevel1Id', '')) = :categoryLevel1Id", {
-          categoryLevel1Id: String(query.categoryLevel1Id),
-        });
+        qb.andWhere(
+          "COALESCE(NULLIF(p.meta -> p.brand ->> 'categoryLevel1Id', ''), NULLIF(p.meta ->> 'categoryLevel1Id', '')) = :categoryLevel1Id",
+          {
+            categoryLevel1Id: String(query.categoryLevel1Id),
+          }
+        );
       }
       if (query.categoryLevel2Id) {
-        qb.andWhere("COALESCE(NULLIF(p.meta -> p.brand ->> 'categoryLevel2Id', ''), NULLIF(p.meta ->> 'categoryLevel2Id', '')) = :categoryLevel2Id", {
-          categoryLevel2Id: String(query.categoryLevel2Id),
-        });
+        qb.andWhere(
+          "COALESCE(NULLIF(p.meta -> p.brand ->> 'categoryLevel2Id', ''), NULLIF(p.meta ->> 'categoryLevel2Id', '')) = :categoryLevel2Id",
+          {
+            categoryLevel2Id: String(query.categoryLevel2Id),
+          }
+        );
       }
       if (query.categoryLevel3Id) {
-        qb.andWhere("COALESCE(NULLIF(p.meta -> p.brand ->> 'categoryLevel3Id', ''), NULLIF(p.meta ->> 'categoryLevel3Id', '')) = :categoryLevel3Id", {
-          categoryLevel3Id: String(query.categoryLevel3Id),
-        });
+        qb.andWhere(
+          "COALESCE(NULLIF(p.meta -> p.brand ->> 'categoryLevel3Id', ''), NULLIF(p.meta ->> 'categoryLevel3Id', '')) = :categoryLevel3Id",
+          {
+            categoryLevel3Id: String(query.categoryLevel3Id),
+          }
+        );
       }
       if (query.categoryId) {
-        const categoryIds = await this.categoryFilterIds(String(query.categoryId), query.includeDescendants === true || query.includeDescendants === 'true');
+        const categoryIds = await this.categoryFilterIds(
+          String(query.categoryId),
+          query.includeDescendants === true || query.includeDescendants === 'true'
+        );
         qb.andWhere(
           `(COALESCE(NULLIF(p.meta -> p.brand ->> 'primaryCategoryId', ''), NULLIF(p.meta ->> 'primaryCategoryId', '')) IN (:...categoryIds)
             OR COALESCE(NULLIF(p.meta -> p.brand ->> 'categoryLevel1Id', ''), NULLIF(p.meta ->> 'categoryLevel1Id', '')) IN (:...categoryIds)
@@ -783,39 +984,45 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
               FROM jsonb_array_elements(COALESCE(p.meta -> p.brand -> 'categoryBindings', p.meta -> 'categoryBindings', '[]'::jsonb)) AS binding
               WHERE binding ->> 'categoryId' IN (:...categoryIds)
             ))`,
-          { categoryIds },
+          { categoryIds }
         );
       }
-      if (query.status)   qb.andWhere('p.status = :status', { status: query.status });
+      if (query.status) qb.andWhere('p.status = :status', { status: query.status });
       else qb.andWhere("p.status <> 'archived'");
       const keyword = query.keyword || query.q;
       if (keyword) {
         qb.andWhere(
           "(p.name ILIKE :q OR p.sku ILIKE :q OR p.brand ILIKE :q OR COALESCE(p.spec->>'officialModel', '') ILIKE :q OR COALESCE(p.meta -> p.brand ->> 'slug', '') ILIKE :q OR COALESCE(p.meta -> p.brand ->> 'series', '') ILIKE :q OR COALESCE(p.meta -> p.brand ->> 'tagline', '') ILIKE :q)",
-          { q: `%${String(keyword).trim()}%` },
+          { q: `%${String(keyword).trim()}%` }
         );
       }
       // 定位维度筛选（P4 消费）：jsonb 数组元素存在性。dim 取自白名单，非用户任意串。
       ProductCatalogService.POS_FILTERS.forEach((f, i) => {
         const v = query[f.q];
-        if (v) qb.andWhere(`jsonb_exists(p.positioning -> '${f.dim}', :posv${i})`, { [`posv${i}`]: String(v) });
+        if (v)
+          qb.andWhere(`jsonb_exists(p.positioning -> '${f.dim}', :posv${i})`, {
+            [`posv${i}`]: String(v),
+          });
       });
-      qb
-        .orderBy(
-          "CASE WHEN p.meta -> p.brand ->> 'displayOrder' ~ '^[0-9]+$' THEN (p.meta -> p.brand ->> 'displayOrder')::int ELSE 0 END",
-          'ASC',
-        )
+      qb.orderBy(
+        "CASE WHEN p.meta -> p.brand ->> 'displayOrder' ~ '^[0-9]+$' THEN (p.meta -> p.brand ->> 'displayOrder')::int ELSE 0 END",
+        'ASC'
+      )
         .addOrderBy('p.name', 'ASC')
         .addOrderBy('p.sku', 'ASC')
         .skip((page - 1) * pageSize)
         .take(pageSize);
       const [rows, total] = await qb.getManyAndCount();
       const categoryMap = await this.categoryMapForProducts(rows);
-      const pricingRows = rows.length ? await repo.manager.getRepository(ProductWebsitePricingEntity).find({
-        where: { tenantId, productId: In(rows.map((row) => row.id)), deletedAt: null } as any,
-      }) : [];
+      const pricingRows = rows.length
+        ? await repo.manager.getRepository(ProductWebsitePricingEntity).find({
+            where: { tenantId, productId: In(rows.map((row) => row.id)), deletedAt: null } as any,
+          })
+        : [];
       const pricingByProductId = new Map(pricingRows.map((row) => [row.productId, row]));
-      const items = rows.map((product) => this.projectProductRead(product, categoryMap, pricingByProductId.get(product.id) || null));
+      const items = rows.map((product) =>
+        this.projectProductRead(product, categoryMap, pricingByProductId.get(product.id) || null)
+      );
       const facetRows = await repo.find({ where: { tenantId } as any, take: 2000 });
       const toFacet = (values: Array<string | null | undefined>) => {
         const counts = new Map<string, number>();
@@ -833,7 +1040,10 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
         categories: toFacet(facetRows.map((p) => p.category)),
         statuses: toFacet(facetRows.map((p) => p.status)),
       };
-      return { success: true, data: { items, total, page, pageSize, pages: Math.ceil(total / pageSize), facets } };
+      return {
+        success: true,
+        data: { items, total, page, pageSize, pages: Math.ceil(total / pageSize), facets },
+      };
     });
   }
 
@@ -843,14 +1053,16 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
    */
   async dedupeCandidates(tenantId = 'rhautt_shared') {
     const rows = await this.scoped(tenantId, (repo) =>
-      repo.find({ where: { tenantId } as any, take: 2000 }),
+      repo.find({ where: { tenantId } as any, take: 2000 })
     );
     const groups = new Map<string, Array<Record<string, unknown>>>();
     for (const p of rows) {
       const key = p.productKey || computeProductKey(p.name, p.category);
       if (!key) continue;
       if (!groups.has(key)) groups.set(key, []);
-      groups.get(key)!.push({ id: p.id, sku: p.sku, name: p.name, brand: p.brand, category: p.category });
+      groups
+        .get(key)!
+        .push({ id: p.id, sku: p.sku, name: p.name, brand: p.brand, category: p.category });
     }
     const dupes = [...groups.entries()]
       .filter(([, members]) => members.length > 1)
@@ -867,8 +1079,12 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
         where: {
           tenantId,
           productId: product.id,
-          brandCode: String(product.brand || '').trim().toLowerCase(),
-          siteCode: String(product.brand || '').trim().toLowerCase(),
+          brandCode: String(product.brand || '')
+            .trim()
+            .toLowerCase(),
+          siteCode: String(product.brand || '')
+            .trim()
+            .toLowerCase(),
           locale: DEFAULT_LOCALE,
           deletedAt: null,
         } as any,
@@ -877,7 +1093,10 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  private async categoryFilterIds(categoryId: string, includeDescendants: boolean): Promise<string[]> {
+  private async categoryFilterIds(
+    categoryId: string,
+    includeDescendants: boolean
+  ): Promise<string[]> {
     const rootId = String(categoryId || '').trim();
     if (!rootId) throw new BadRequestException('categoryId is required.');
     if (!includeDescendants || !this.categories) return [rootId];
@@ -907,28 +1126,41 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
    */
   async recommend(criteria: Record<string, unknown>) {
     const norm = (v: unknown): string[] =>
-      Array.isArray(v) ? v.map((x) => String(x).trim()).filter(Boolean)
-        : typeof v === 'string' && v.trim() ? [v.trim()] : [];
+      Array.isArray(v)
+        ? v.map((x) => String(x).trim()).filter(Boolean)
+        : typeof v === 'string' && v.trim()
+          ? [v.trim()]
+          : [];
     const wanted: Record<string, string[]> = {
-      targetSegments:       norm(criteria.segments),
-      channels:             norm(criteria.channels),
-      userPersonas:         norm(criteria.personas),
-      markets:              norm(criteria.markets),
+      targetSegments: norm(criteria.segments),
+      channels: norm(criteria.channels),
+      userPersonas: norm(criteria.personas),
+      markets: norm(criteria.markets),
       applicationScenarios: norm(criteria.scenarios), // P5 应用场景（家用/商用）参与推荐打分
     };
     const painPoints = norm(criteria.painPoints).map((s) => s.toLowerCase());
     const systems = norm(criteria.systems).map((s) => s.toLowerCase());
-    const hasCriteria = systems.length > 0 || painPoints.length > 0 || Object.values(wanted).some((a) => a.length > 0);
+    const hasCriteria =
+      systems.length > 0 ||
+      painPoints.length > 0 ||
+      Object.values(wanted).some((a) => a.length > 0);
     const tenantId = (criteria.tenantId as string) || 'rhautt_shared';
     const brand = criteria.brand as string | undefined;
     const limit = Math.min(Number(criteria.limit) || 10, 50);
 
-    const rows = await this.scoped(tenantId, (repo) => repo.find({
-      where: (brand ? { tenantId, brand, status: 'active' } : { tenantId, status: 'active' }) as any,
-      take: 500,
-    }));
+    const rows = await this.scoped(tenantId, (repo) =>
+      repo.find({
+        where: (brand
+          ? { tenantId, brand, status: 'active' }
+          : { tenantId, status: 'active' }) as any,
+        take: 500,
+      })
+    );
 
-    const ranked = rankProductRecommendationCandidates(rows, hasCriteria ? { ...criteria, painPoints, systems } : criteria);
+    const ranked = rankProductRecommendationCandidates(
+      rows,
+      hasCriteria ? { ...criteria, painPoints, systems } : criteria
+    );
     const seenFamilies = new Set<string>();
     const uniqueRanked = ranked.filter(({ p }) => {
       const meta = this.brandMeta(p);
@@ -961,27 +1193,46 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
    */
   async priceBandsForSystems(
     criteria: { tenantId?: string; brand?: string },
-    systems: { code: string; label: string; keywords: string[] }[],
+    systems: { code: string; label: string; keywords: string[] }[]
   ) {
     const tenantId = criteria.tenantId || process.env.EVERHOT_TENANT_ID || 'rhautt_shared';
     const brand = criteria.brand;
-    const rows = await this.scoped(tenantId, (repo) => repo.find({
-      where: (brand ? { tenantId, brand, status: 'active' } : { tenantId, status: 'active' }) as any,
-      take: 1000,
-    }));
+    const rows = await this.scoped(tenantId, (repo) =>
+      repo.find({
+        where: (brand
+          ? { tenantId, brand, status: 'active' }
+          : { tenantId, status: 'active' }) as any,
+        take: 1000,
+      })
+    );
     const priced = rows.filter((p) => Number(p.listPrice) > 0);
     const currency = priced[0]?.currency || 'CNY';
     const bands = systems.map((sys) => {
       const kws = (sys.keywords.length ? sys.keywords : [sys.label]).map((k) => k.toLowerCase());
       const matches = priced.filter((p) => {
         const pos = p.positioning || ({} as any);
-        const hay = [p.category, p.name, pos.valueProposition, ...(pos.painPoints || []), ...(pos.scenarios || [])]
-          .filter(Boolean).join(' ').toLowerCase();
+        const hay = [
+          p.category,
+          p.name,
+          pos.valueProposition,
+          ...(pos.painPoints || []),
+          ...(pos.scenarios || []),
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
         return kws.some((k) => hay.includes(k));
       });
       if (!matches.length) return { code: sys.code, label: sys.label, priced: false, count: 0 };
       const prices = matches.map((m) => Number(m.listPrice)).sort((a, b) => a - b);
-      return { code: sys.code, label: sys.label, priced: true, count: prices.length, prices, currency };
+      return {
+        code: sys.code,
+        label: sys.label,
+        priced: true,
+        count: prices.length,
+        prices,
+        currency,
+      };
     });
     return { success: true, data: { currency, bands } };
   }
@@ -992,12 +1243,19 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
    * 共享哨兵租户直读；品牌运营 UUID 租户经 scoped()（RLS 作用域）读取。
    * 回读优先 meta.everhot（导入时保存的原始品牌产品对象，保证无损往返）。
    */
-  async listBrandPublic(brand: string, tenantId = process.env.EVERHOT_TENANT_ID || 'rhautt_shared') {
-    const rows = await this.scoped(tenantId, (repo) => repo.find({
-      where: { tenantId, brand, status: 'active' } as any,
-      take: 500,
-    }));
-    const items = rows.sort((a, b) => this.sortForWebsite(a, b)).map((p) => this.publicProductProjection(p, DEFAULT_LOCALE, null));
+  async listBrandPublic(
+    brand: string,
+    tenantId = process.env.EVERHOT_TENANT_ID || 'rhautt_shared'
+  ) {
+    const rows = await this.scoped(tenantId, (repo) =>
+      repo.find({
+        where: { tenantId, brand, status: 'active' } as any,
+        take: 500,
+      })
+    );
+    const items = rows
+      .sort((a, b) => this.sortForWebsite(a, b))
+      .map((p) => this.publicProductProjection(p, DEFAULT_LOCALE, null));
     return { success: true, data: { items, total: items.length } };
   }
 
@@ -1016,14 +1274,16 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     const tenantId = this.productLibraryTenantId(dto.tenantId as string | undefined);
     const confirmExistingProduct = dto.confirmExistingProduct === true;
     const categoryBindingPatch = this.categoryBindingInput(dto);
-    return withRlsTransaction(this.ds, async (manager) => {
-      const repo = manager.getRepository(ProductEntity);
-      const skuRepo = manager.getRepository(ProductSkuEntity);
-      const bindingRepo = manager.getRepository(ProductBrandBindingEntity);
-      const brandCodes = this.brandCodesFromDto(dto);
-      if (!brandCodes.length) throw new BadRequestException('新增产品必须至少选择一个品牌绑定');
-      const tenantBrand = brandCodes[0];
-      /*
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const repo = manager.getRepository(ProductEntity);
+        const skuRepo = manager.getRepository(ProductSkuEntity);
+        const bindingRepo = manager.getRepository(ProductBrandBindingEntity);
+        const brandCodes = this.brandCodesFromDto(dto);
+        if (!brandCodes.length) throw new BadRequestException('新增产品必须至少选择一个品牌绑定');
+        const tenantBrand = brandCodes[0];
+        /*
       const tenantBrand = await this.resolveTenantBrand(manager, tenantId);
       const requestedBrand = String(dto.brandCode || dto.brand || '').trim().toLowerCase();
       if (requestedBrand && requestedBrand !== tenantBrand) {
@@ -1031,189 +1291,279 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       }
 
       */
-      const model = this.productModelFromDto({ ...dto, brand: tenantBrand, brandCode: tenantBrand }, tenantBrand);
-      const normalizedModel = this.normalizeProductModel(model);
-      const skuCode = this.skuCodeFromDto(dto, model);
-      const normalizedSkuCode = this.normalizeSkuCode(skuCode);
-      if (!model || !normalizedModel) throw new BadRequestException('新增产品必须提供 model');
-      if (!skuCode || !normalizedSkuCode) throw new BadRequestException('新增产品必须提供 sku 或 materialCode');
+        const model = this.productModelFromDto(
+          { ...dto, brand: tenantBrand, brandCode: tenantBrand },
+          tenantBrand
+        );
+        const normalizedModel = this.normalizeProductModel(model);
+        const skuCode = this.skuCodeFromDto(dto, model);
+        const normalizedSkuCode = this.normalizeSkuCode(skuCode);
+        if (!model || !normalizedModel) throw new BadRequestException('新增产品必须提供 model');
+        if (!skuCode || !normalizedSkuCode)
+          throw new BadRequestException('新增产品必须提供 sku 或 materialCode');
 
-      const existingByModel = await repo.findOne({
-        where: ['active', 'withdrawn'].map((recordStatus) => ({
-          tenantId,
-          normalizedModel,
-          recordStatus,
-          deletedAt: null,
-        })) as any,
-      });
-      const existingBySku = await skuRepo.findOne({
-        where: { tenantId, normalizedSkuCode, deletedAt: null } as any,
-      });
-
-      if (existingBySku && (!existingByModel || existingBySku.productId !== existingByModel.id)) {
-        const boundProduct = await repo.findOne({ where: { id: existingBySku.productId } as any });
-        throw new ConflictException({
-          code: 'SKU_ALREADY_BOUND_TO_ANOTHER_PRODUCT',
-          message: `SKU/物料编码 ${skuCode} 已绑定到其他产品，不能自动合并。`,
-          data: {
-            skuCode,
-            existingSku: {
-              id: existingBySku.id,
-              productId: existingBySku.productId,
-              skuCode: existingBySku.skuCode,
-            },
-            boundProduct: boundProduct ? {
-              id: boundProduct.id,
-              brandCode: boundProduct.brandCode || boundProduct.brand,
-              model: boundProduct.model,
-              name: boundProduct.name,
-            } : null,
-            targetProduct: existingByModel ? {
-              id: existingByModel.id,
-              brandCode: existingByModel.brandCode || existingByModel.brand,
-              model: existingByModel.model,
-              name: existingByModel.name,
-            } : null,
-          },
+        const existingByModel = await repo.findOne({
+          where: ['active', 'withdrawn'].map((recordStatus) => ({
+            tenantId,
+            normalizedModel,
+            recordStatus,
+            deletedAt: null,
+          })) as any,
         });
-      }
-
-      if (existingByModel && !confirmExistingProduct) {
-        throw new ConflictException({
-          code: 'PRODUCT_MODEL_EXISTS',
-          message: `产品型号已存在：${tenantBrand} / ${model}。请确认是更新该产品并追加/更新 SKU，还是取消录入。`,
-          data: {
-            existingProduct: {
-              id: existingByModel.id,
-              brandCode: existingByModel.brandCode || existingByModel.brand,
-              model: existingByModel.model,
-              normalizedModel: existingByModel.normalizedModel,
-              name: existingByModel.name,
-              sku: existingByModel.sku,
-              status: existingByModel.status,
-            },
-            proposedSku: {
-              skuCode,
-              materialCode: String(dto.materialCode || skuCode),
-              alreadyExists: Boolean(existingBySku),
-            },
-            resolution: {
-              confirmField: 'confirmExistingProduct',
-              confirmValue: true,
-            },
-          },
+        const existingBySku = await skuRepo.findOne({
+          where: { tenantId, normalizedSkuCode, deletedAt: null } as any,
         });
-      }
 
-      const spec = this.metaObject(dto.spec);
-      const patch: Partial<ProductEntity> = {
-        tenantId,
-        sku: existingByModel?.sku || skuCode,
-        name: String(dto.name || existingByModel?.name || model).trim(),
-        brand: tenantBrand,
-        brandCode: tenantBrand,
-        model,
-        normalizedModel,
-        workingName: String(dto.workingName || dto.name || existingByModel?.workingName || existingByModel?.name || model).trim(),
-        category: Object.prototype.hasOwnProperty.call(dto, 'category') ? String(dto.category || '') : existingByModel?.category || null,
-        spec: Object.prototype.hasOwnProperty.call(dto, 'spec') ? spec : existingByModel?.spec || {},
-        productKey: existingByModel?.productKey || `common:${normalizedModel}`,
-        listPrice: Object.prototype.hasOwnProperty.call(dto, 'listPrice') ? Number(dto.listPrice || 0) : existingByModel?.listPrice || 0,
-        costPrice: Object.prototype.hasOwnProperty.call(dto, 'costPrice') ? Number(dto.costPrice || 0) : existingByModel?.costPrice || 0,
-        lengthMm: Object.prototype.hasOwnProperty.call(dto, 'lengthMm') ? this.optionalNonNegativeNumber(dto.lengthMm) : existingByModel?.lengthMm ?? null,
-        widthMm: Object.prototype.hasOwnProperty.call(dto, 'widthMm') ? this.optionalNonNegativeNumber(dto.widthMm) : existingByModel?.widthMm ?? null,
-        heightMm: Object.prototype.hasOwnProperty.call(dto, 'heightMm') ? this.optionalNonNegativeNumber(dto.heightMm) : existingByModel?.heightMm ?? null,
-        netWeightKg: Object.prototype.hasOwnProperty.call(dto, 'netWeightKg') ? this.optionalNonNegativeNumber(dto.netWeightKg) : existingByModel?.netWeightKg ?? null,
-        packageLengthMm: Object.prototype.hasOwnProperty.call(dto, 'packageLengthMm') ? this.optionalNonNegativeNumber(dto.packageLengthMm) : existingByModel?.packageLengthMm ?? null,
-        packageWidthMm: Object.prototype.hasOwnProperty.call(dto, 'packageWidthMm') ? this.optionalNonNegativeNumber(dto.packageWidthMm) : existingByModel?.packageWidthMm ?? null,
-        packageHeightMm: Object.prototype.hasOwnProperty.call(dto, 'packageHeightMm') ? this.optionalNonNegativeNumber(dto.packageHeightMm) : existingByModel?.packageHeightMm ?? null,
-        grossWeightKg: Object.prototype.hasOwnProperty.call(dto, 'grossWeightKg') ? this.optionalNonNegativeNumber(dto.grossWeightKg) : existingByModel?.grossWeightKg ?? null,
-        currency: String(dto.currency || existingByModel?.currency || 'CNY'),
-        status: String(dto.status || existingByModel?.status || 'active'),
-        recordStatus: String(dto.recordStatus || existingByModel?.recordStatus || 'active'),
-        dataReadinessStatus: String(dto.dataReadinessStatus || existingByModel?.dataReadinessStatus || 'imported_draft'),
-        sourceSystem: String(dto.sourceSystem || existingByModel?.sourceSystem || 'manual_create'),
-        sourceRecordKey: String(dto.sourceRecordKey || existingByModel?.sourceRecordKey || skuCode),
-        meta: this.applyCategoryBindingInput(dto.meta ?? existingByModel?.meta ?? {}, tenantBrand, categoryBindingPatch),
-        positioning: existingByModel?.positioning || EMPTY_POSITIONING,
-        assetRefs: existingByModel?.assetRefs || [],
-      };
-      if (Object.prototype.hasOwnProperty.call(dto, 'positioning')) patch.positioning = sanitizePositioning(dto.positioning);
-      if (Object.prototype.hasOwnProperty.call(dto, 'assetRefs')) patch.assetRefs = sanitizeAssetRefs(dto.assetRefs);
-      if (categoryBindingPatch || this.metaHasCategoryBindingInput(dto.meta, tenantBrand)) {
-        const candidate = repo.create({ ...(existingByModel ?? {}), ...patch } as any) as unknown as ProductEntity;
-        patch.meta = await this.validateCategoryBinding(manager, candidate);
-      }
-      await this.assertBrandSlugUnique(repo, tenantId, tenantBrand, (patch.meta as any)?.[tenantBrand]?.slug || existingByModel?.sku || skuCode, existingByModel?.id);
-
-      const saved = await repo.save(repo.create({ ...(existingByModel ?? {}), ...patch }));
-      for (const brandCode of brandCodes) {
-        const existingBinding = await bindingRepo.findOne({
-          where: { tenantId, brandCode, normalizedModel, deletedAt: null } as any,
-        });
-        if (existingBinding && existingBinding.productId !== saved.id) {
+        if (existingBySku && (!existingByModel || existingBySku.productId !== existingByModel.id)) {
+          const boundProduct = await repo.findOne({
+            where: { id: existingBySku.productId } as any,
+          });
           throw new ConflictException({
-            code: 'PRODUCT_MODEL_BINDING_CONFLICT',
-            message: `${brandCode} / ${model} 已绑定到其他产品，不能自动覆盖。`,
-            data: { brandCode, model, productId: existingBinding.productId, targetProductId: saved.id },
+            code: 'SKU_ALREADY_BOUND_TO_ANOTHER_PRODUCT',
+            message: `SKU/物料编码 ${skuCode} 已绑定到其他产品，不能自动合并。`,
+            data: {
+              skuCode,
+              existingSku: {
+                id: existingBySku.id,
+                productId: existingBySku.productId,
+                skuCode: existingBySku.skuCode,
+              },
+              boundProduct: boundProduct
+                ? {
+                    id: boundProduct.id,
+                    brandCode: boundProduct.brandCode || boundProduct.brand,
+                    model: boundProduct.model,
+                    name: boundProduct.name,
+                  }
+                : null,
+              targetProduct: existingByModel
+                ? {
+                    id: existingByModel.id,
+                    brandCode: existingByModel.brandCode || existingByModel.brand,
+                    model: existingByModel.model,
+                    name: existingByModel.name,
+                  }
+                : null,
+            },
           });
         }
-        await bindingRepo.save(bindingRepo.create({
-          ...(existingBinding ?? {}),
-          tenantId,
-          productId: saved.id,
-          brandCode,
-          brandModel: model,
-          normalizedModel,
-          brandDisplayName: String(dto.name || existingBinding?.brandDisplayName || saved.name || model).trim(),
-          status: 'active',
-          updatedBy: actor?.userId || existingBinding?.updatedBy || null,
-          createdBy: existingBinding?.createdBy || actor?.userId || null,
-        }));
-      }
-      const existingSkuForProduct = existingBySku?.productId === saved.id ? existingBySku : null;
-      await skuRepo.save(skuRepo.create({
-        ...(existingSkuForProduct ?? {}),
-        tenantId,
-        productId: saved.id,
-        skuCode,
-        normalizedSkuCode,
-        materialCode: String(dto.materialCode || existingSkuForProduct?.materialCode || skuCode),
-        gtin: dto.gtin ? String(dto.gtin) : existingSkuForProduct?.gtin || null,
-        mpn: dto.mpn ? String(dto.mpn) : existingSkuForProduct?.mpn || null,
-        recordStatus: String(dto.skuRecordStatus || existingSkuForProduct?.recordStatus || 'active'),
-        sourceSystem: String(dto.sourceSystem || existingSkuForProduct?.sourceSystem || 'manual_create'),
-        sourceRecordKey: String(dto.sourceRecordKey || existingSkuForProduct?.sourceRecordKey || skuCode),
-        updatedBy: actor?.userId || existingSkuForProduct?.updatedBy || null,
-        createdBy: existingSkuForProduct?.createdBy || actor?.userId || null,
-      }));
-      const websitePricing = await this.upsertWebsitePricing(
-        manager,
-        tenantId,
-        saved.id,
-        tenantBrand,
-        this.websitePricingFromDto(dto),
-        actor,
-      );
 
-      await this.recordProductMutation(manager, actor, existingByModel ? 'product.update' : 'product.create', existingByModel, saved);
-      return {
-        success: true,
-        data: saved,
-        meta: {
-          operation: existingByModel ? 'updated_existing_product' : 'created_product',
-          skuOperation: existingSkuForProduct ? 'updated_sku' : 'created_sku',
-          brandBindings: brandCodes,
-          websitePricing: websitePricing ? {
-            id: websitePricing.id,
-            brandCode: websitePricing.brandCode,
-            siteCode: websitePricing.siteCode,
-            locale: websitePricing.locale,
-            priceDisplayMode: websitePricing.priceDisplayMode,
-          } : null,
-        },
-      };
-    }, { tenantId, actorId: actor?.userId, role: actor?.role });
+        if (existingByModel && !confirmExistingProduct) {
+          throw new ConflictException({
+            code: 'PRODUCT_MODEL_EXISTS',
+            message: `产品型号已存在：${tenantBrand} / ${model}。请确认是更新该产品并追加/更新 SKU，还是取消录入。`,
+            data: {
+              existingProduct: {
+                id: existingByModel.id,
+                brandCode: existingByModel.brandCode || existingByModel.brand,
+                model: existingByModel.model,
+                normalizedModel: existingByModel.normalizedModel,
+                name: existingByModel.name,
+                sku: existingByModel.sku,
+                status: existingByModel.status,
+              },
+              proposedSku: {
+                skuCode,
+                materialCode: String(dto.materialCode || skuCode),
+                alreadyExists: Boolean(existingBySku),
+              },
+              resolution: {
+                confirmField: 'confirmExistingProduct',
+                confirmValue: true,
+              },
+            },
+          });
+        }
+
+        const spec = this.metaObject(dto.spec);
+        const patch: Partial<ProductEntity> = {
+          tenantId,
+          sku: existingByModel?.sku || skuCode,
+          name: String(dto.name || existingByModel?.name || model).trim(),
+          brand: tenantBrand,
+          brandCode: tenantBrand,
+          model,
+          normalizedModel,
+          workingName: String(
+            dto.workingName ||
+              dto.name ||
+              existingByModel?.workingName ||
+              existingByModel?.name ||
+              model
+          ).trim(),
+          category: Object.prototype.hasOwnProperty.call(dto, 'category')
+            ? String(dto.category || '')
+            : existingByModel?.category || null,
+          spec: Object.prototype.hasOwnProperty.call(dto, 'spec')
+            ? spec
+            : existingByModel?.spec || {},
+          productKey: existingByModel?.productKey || `common:${normalizedModel}`,
+          listPrice: Object.prototype.hasOwnProperty.call(dto, 'listPrice')
+            ? Number(dto.listPrice || 0)
+            : existingByModel?.listPrice || 0,
+          costPrice: Object.prototype.hasOwnProperty.call(dto, 'costPrice')
+            ? Number(dto.costPrice || 0)
+            : existingByModel?.costPrice || 0,
+          lengthMm: Object.prototype.hasOwnProperty.call(dto, 'lengthMm')
+            ? this.optionalNonNegativeNumber(dto.lengthMm)
+            : (existingByModel?.lengthMm ?? null),
+          widthMm: Object.prototype.hasOwnProperty.call(dto, 'widthMm')
+            ? this.optionalNonNegativeNumber(dto.widthMm)
+            : (existingByModel?.widthMm ?? null),
+          heightMm: Object.prototype.hasOwnProperty.call(dto, 'heightMm')
+            ? this.optionalNonNegativeNumber(dto.heightMm)
+            : (existingByModel?.heightMm ?? null),
+          netWeightKg: Object.prototype.hasOwnProperty.call(dto, 'netWeightKg')
+            ? this.optionalNonNegativeNumber(dto.netWeightKg)
+            : (existingByModel?.netWeightKg ?? null),
+          packageLengthMm: Object.prototype.hasOwnProperty.call(dto, 'packageLengthMm')
+            ? this.optionalNonNegativeNumber(dto.packageLengthMm)
+            : (existingByModel?.packageLengthMm ?? null),
+          packageWidthMm: Object.prototype.hasOwnProperty.call(dto, 'packageWidthMm')
+            ? this.optionalNonNegativeNumber(dto.packageWidthMm)
+            : (existingByModel?.packageWidthMm ?? null),
+          packageHeightMm: Object.prototype.hasOwnProperty.call(dto, 'packageHeightMm')
+            ? this.optionalNonNegativeNumber(dto.packageHeightMm)
+            : (existingByModel?.packageHeightMm ?? null),
+          grossWeightKg: Object.prototype.hasOwnProperty.call(dto, 'grossWeightKg')
+            ? this.optionalNonNegativeNumber(dto.grossWeightKg)
+            : (existingByModel?.grossWeightKg ?? null),
+          currency: String(dto.currency || existingByModel?.currency || 'CNY'),
+          status: String(dto.status || existingByModel?.status || 'active'),
+          recordStatus: String(dto.recordStatus || existingByModel?.recordStatus || 'active'),
+          dataReadinessStatus: String(
+            dto.dataReadinessStatus || existingByModel?.dataReadinessStatus || 'imported_draft'
+          ),
+          sourceSystem: String(
+            dto.sourceSystem || existingByModel?.sourceSystem || 'manual_create'
+          ),
+          sourceRecordKey: String(
+            dto.sourceRecordKey || existingByModel?.sourceRecordKey || skuCode
+          ),
+          meta: this.applyCategoryBindingInput(
+            dto.meta ?? existingByModel?.meta ?? {},
+            tenantBrand,
+            categoryBindingPatch
+          ),
+          positioning: existingByModel?.positioning || EMPTY_POSITIONING,
+          assetRefs: existingByModel?.assetRefs || [],
+        };
+        if (Object.prototype.hasOwnProperty.call(dto, 'positioning'))
+          patch.positioning = sanitizePositioning(dto.positioning);
+        if (Object.prototype.hasOwnProperty.call(dto, 'assetRefs'))
+          patch.assetRefs = sanitizeAssetRefs(dto.assetRefs);
+        if (categoryBindingPatch || this.metaHasCategoryBindingInput(dto.meta, tenantBrand)) {
+          const candidate = repo.create({
+            ...(existingByModel ?? {}),
+            ...patch,
+          } as any) as unknown as ProductEntity;
+          patch.meta = await this.validateCategoryBinding(manager, candidate);
+        }
+        await this.assertBrandSlugUnique(
+          repo,
+          tenantId,
+          tenantBrand,
+          (patch.meta as any)?.[tenantBrand]?.slug || existingByModel?.sku || skuCode,
+          existingByModel?.id
+        );
+
+        const saved = await repo.save(repo.create({ ...(existingByModel ?? {}), ...patch }));
+        for (const brandCode of brandCodes) {
+          const existingBinding = await bindingRepo.findOne({
+            where: { tenantId, brandCode, normalizedModel, deletedAt: null } as any,
+          });
+          if (existingBinding && existingBinding.productId !== saved.id) {
+            throw new ConflictException({
+              code: 'PRODUCT_MODEL_BINDING_CONFLICT',
+              message: `${brandCode} / ${model} 已绑定到其他产品，不能自动覆盖。`,
+              data: {
+                brandCode,
+                model,
+                productId: existingBinding.productId,
+                targetProductId: saved.id,
+              },
+            });
+          }
+          await bindingRepo.save(
+            bindingRepo.create({
+              ...(existingBinding ?? {}),
+              tenantId,
+              productId: saved.id,
+              brandCode,
+              brandModel: model,
+              normalizedModel,
+              brandDisplayName: String(
+                dto.name || existingBinding?.brandDisplayName || saved.name || model
+              ).trim(),
+              status: 'active',
+              updatedBy: actor?.userId || existingBinding?.updatedBy || null,
+              createdBy: existingBinding?.createdBy || actor?.userId || null,
+            })
+          );
+        }
+        const existingSkuForProduct = existingBySku?.productId === saved.id ? existingBySku : null;
+        await skuRepo.save(
+          skuRepo.create({
+            ...(existingSkuForProduct ?? {}),
+            tenantId,
+            productId: saved.id,
+            skuCode,
+            normalizedSkuCode,
+            materialCode: String(
+              dto.materialCode || existingSkuForProduct?.materialCode || skuCode
+            ),
+            gtin: dto.gtin ? String(dto.gtin) : existingSkuForProduct?.gtin || null,
+            mpn: dto.mpn ? String(dto.mpn) : existingSkuForProduct?.mpn || null,
+            recordStatus: String(
+              dto.skuRecordStatus || existingSkuForProduct?.recordStatus || 'active'
+            ),
+            sourceSystem: String(
+              dto.sourceSystem || existingSkuForProduct?.sourceSystem || 'manual_create'
+            ),
+            sourceRecordKey: String(
+              dto.sourceRecordKey || existingSkuForProduct?.sourceRecordKey || skuCode
+            ),
+            updatedBy: actor?.userId || existingSkuForProduct?.updatedBy || null,
+            createdBy: existingSkuForProduct?.createdBy || actor?.userId || null,
+          })
+        );
+        const websitePricing = await this.upsertWebsitePricing(
+          manager,
+          tenantId,
+          saved.id,
+          tenantBrand,
+          this.websitePricingFromDto(dto),
+          actor
+        );
+
+        await this.recordProductMutation(
+          manager,
+          actor,
+          existingByModel ? 'product.update' : 'product.create',
+          existingByModel,
+          saved
+        );
+        return {
+          success: true,
+          data: saved,
+          meta: {
+            operation: existingByModel ? 'updated_existing_product' : 'created_product',
+            skuOperation: existingSkuForProduct ? 'updated_sku' : 'created_sku',
+            brandBindings: brandCodes,
+            websitePricing: websitePricing
+              ? {
+                  id: websitePricing.id,
+                  brandCode: websitePricing.brandCode,
+                  siteCode: websitePricing.siteCode,
+                  locale: websitePricing.locale,
+                  priceDisplayMode: websitePricing.priceDisplayMode,
+                }
+              : null,
+          },
+        };
+      },
+      { tenantId, actorId: actor?.userId, role: actor?.role }
+    );
   }
 
   async upsert(dto: Partial<ProductEntity>, actor?: ProductMutationActor) {
@@ -1227,89 +1577,140 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     const categoryBindingPatch = this.categoryBindingInput(dto as Record<string, unknown>);
     if ('positioning' in dto) patch.positioning = sanitizePositioning(dto.positioning);
     if ('assetRefs' in dto) patch.assetRefs = sanitizeAssetRefs(dto.assetRefs);
-    return withRlsTransaction(this.ds, async (manager) => {
-      const repo = manager.getRepository(ProductEntity);
-      const existing = dto.sku
-        ? await repo.findOne({ where: { tenantId, sku: dto.sku } })
-        : null;
-      if (!existing && (!dto.sku?.trim() || !dto.name?.trim())) {
-        throw new BadRequestException('新增产品必须提供 sku 和 name');
-      }
-      const tenantBrand = await this.resolveTenantBrand(manager, tenantId);
-      if (dto.brand && dto.brand.toLowerCase() !== tenantBrand) {
-        throw new BadRequestException(`品牌必须与当前租户一致（${tenantBrand}）`);
-      }
-      patch.brand = tenantBrand;
-      patch.meta = this.applyCategoryBindingInput(patch.meta ?? existing?.meta ?? {}, tenantBrand, categoryBindingPatch);
-      const base = { ...(existing ?? {}), ...patch };
-      if (categoryBindingPatch || this.metaHasCategoryBindingInput(dto.meta, tenantBrand)) {
-        base.meta = await this.validateCategoryBinding(manager, base as ProductEntity);
-      }
-      await this.assertBrandSlugUnique(repo, tenantId, tenantBrand, (base.meta as any)?.[tenantBrand]?.slug || base.sku, existing?.id);
-      // MDM-lite product_key（P4）：缺失时自动回填（新行/历史行均覆盖），显式传入优先。
-      if (!base.productKey && base.name) base.productKey = computeProductKey(base.name, base.category);
-      const saved = await repo.save(repo.create(base));
-      await this.recordProductMutation(manager, actor, existing ? 'product.update' : 'product.create', existing, saved);
-      return { success: true, data: saved };
-    }, { tenantId, actorId: actor?.userId, role: actor?.role });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const repo = manager.getRepository(ProductEntity);
+        const existing = dto.sku ? await repo.findOne({ where: { tenantId, sku: dto.sku } }) : null;
+        if (!existing && (!dto.sku?.trim() || !dto.name?.trim())) {
+          throw new BadRequestException('新增产品必须提供 sku 和 name');
+        }
+        const tenantBrand = await this.resolveTenantBrand(manager, tenantId);
+        if (dto.brand && dto.brand.toLowerCase() !== tenantBrand) {
+          throw new BadRequestException(`品牌必须与当前租户一致（${tenantBrand}）`);
+        }
+        patch.brand = tenantBrand;
+        patch.meta = this.applyCategoryBindingInput(
+          patch.meta ?? existing?.meta ?? {},
+          tenantBrand,
+          categoryBindingPatch
+        );
+        const base = { ...(existing ?? {}), ...patch };
+        if (categoryBindingPatch || this.metaHasCategoryBindingInput(dto.meta, tenantBrand)) {
+          base.meta = await this.validateCategoryBinding(manager, base as ProductEntity);
+        }
+        await this.assertBrandSlugUnique(
+          repo,
+          tenantId,
+          tenantBrand,
+          (base.meta as any)?.[tenantBrand]?.slug || base.sku,
+          existing?.id
+        );
+        // MDM-lite product_key（P4）：缺失时自动回填（新行/历史行均覆盖），显式传入优先。
+        if (!base.productKey && base.name)
+          base.productKey = computeProductKey(base.name, base.category);
+        const saved = await repo.save(repo.create(base));
+        await this.recordProductMutation(
+          manager,
+          actor,
+          existing ? 'product.update' : 'product.create',
+          existing,
+          saved
+        );
+        return { success: true, data: saved };
+      },
+      { tenantId, actorId: actor?.userId, role: actor?.role }
+    );
   }
 
   async update(
     id: string,
     tenantId: string,
     dto: Record<string, unknown>,
-    actor: ProductMutationActor,
+    actor: ProductMutationActor
   ) {
     validateProductUpsertInput(dto);
     const mutable = [
-      'name', 'category', 'spec', 'positioning', 'assetRefs', 'productKey',
-      'listPrice', 'costPrice',
-      'lengthMm', 'widthMm', 'heightMm', 'netWeightKg',
-      'packageLengthMm', 'packageWidthMm', 'packageHeightMm', 'grossWeightKg',
-      'currency', 'status', 'lifecycleStage', 'dataReadinessStatus', 'meta',
+      'name',
+      'category',
+      'spec',
+      'positioning',
+      'assetRefs',
+      'productKey',
+      'listPrice',
+      'costPrice',
+      'lengthMm',
+      'widthMm',
+      'heightMm',
+      'netWeightKg',
+      'packageLengthMm',
+      'packageWidthMm',
+      'packageHeightMm',
+      'grossWeightKg',
+      'currency',
+      'status',
+      'lifecycleStage',
+      'dataReadinessStatus',
+      'meta',
     ] as const;
-    const patch = Object.fromEntries(mutable
-      .filter((key) => Object.prototype.hasOwnProperty.call(dto, key) && dto[key] !== undefined)
-      .map((key) => [key, dto[key]])) as Partial<ProductEntity>;
+    const patch = Object.fromEntries(
+      mutable
+        .filter((key) => Object.prototype.hasOwnProperty.call(dto, key) && dto[key] !== undefined)
+        .map((key) => [key, dto[key]])
+    ) as Partial<ProductEntity>;
     const categoryBindingPatch = this.categoryBindingInput(dto);
     const websitePricingInput = this.websitePricingFromDto(dto);
     if (!Object.keys(patch).length && categoryBindingPatch) patch.meta = {};
-    if (!Object.keys(patch).length && !websitePricingInput) throw new BadRequestException('没有可更新字段');
+    if (!Object.keys(patch).length && !websitePricingInput)
+      throw new BadRequestException('没有可更新字段');
     if ('positioning' in patch) patch.positioning = sanitizePositioning(patch.positioning);
     if ('assetRefs' in patch) patch.assetRefs = sanitizeAssetRefs(patch.assetRefs);
 
-    return withRlsTransaction(this.ds, async (manager) => {
-      const repo = manager.getRepository(ProductEntity);
-      const before = await repo.findOne({ where: { id, tenantId } });
-      const brand = String(before?.brand || '').trim().toLowerCase();
-      patch.meta = this.applyCategoryBindingInput(patch.meta ?? before?.meta ?? {}, brand, categoryBindingPatch);
-      const candidate = before
-        ? repo.create({ ...before, ...patch, id, tenantId, sku: before.sku, brand: before.brand })
-        : null;
-      if (candidate && (categoryBindingPatch || this.metaHasCategoryBindingInput(dto.meta, brand))) {
-        candidate.meta = await this.validateCategoryBinding(manager, candidate);
-      }
-      if (!before) throw new NotFoundException('产品不存在');
-      await this.assertBrandSlugUnique(
-        repo,
-        tenantId,
-        String(before.brand || ''),
-        (candidate?.meta as any)?.[String(before.brand || '')]?.slug || this.publicSlug(before),
-        before.id,
-      );
-      const saved = await repo.save(candidate!);
-      const websitePricing = await this.upsertWebsitePricing(
-        manager,
-        tenantId,
-        saved.id,
-        brand,
-        websitePricingInput,
-        actor,
-      );
-      const categoryMap = await this.categoryMapForProducts([saved]);
-      await this.recordProductMutation(manager, actor, 'product.update', before, saved);
-      return { success: true, data: this.projectProductRead(saved, categoryMap, websitePricing) };
-    }, { tenantId, actorId: actor.userId, role: actor.role });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const repo = manager.getRepository(ProductEntity);
+        const before = await repo.findOne({ where: { id, tenantId } });
+        const brand = String(before?.brand || '')
+          .trim()
+          .toLowerCase();
+        patch.meta = this.applyCategoryBindingInput(
+          patch.meta ?? before?.meta ?? {},
+          brand,
+          categoryBindingPatch
+        );
+        const candidate = before
+          ? repo.create({ ...before, ...patch, id, tenantId, sku: before.sku, brand: before.brand })
+          : null;
+        if (
+          candidate &&
+          (categoryBindingPatch || this.metaHasCategoryBindingInput(dto.meta, brand))
+        ) {
+          candidate.meta = await this.validateCategoryBinding(manager, candidate);
+        }
+        if (!before) throw new NotFoundException('产品不存在');
+        await this.assertBrandSlugUnique(
+          repo,
+          tenantId,
+          String(before.brand || ''),
+          (candidate?.meta as any)?.[String(before.brand || '')]?.slug || this.publicSlug(before),
+          before.id
+        );
+        const saved = await repo.save(candidate!);
+        const websitePricing = await this.upsertWebsitePricing(
+          manager,
+          tenantId,
+          saved.id,
+          brand,
+          websitePricingInput,
+          actor
+        );
+        const categoryMap = await this.categoryMapForProducts([saved]);
+        await this.recordProductMutation(manager, actor, 'product.update', before, saved);
+        return { success: true, data: this.projectProductRead(saved, categoryMap, websitePricing) };
+      },
+      { tenantId, actorId: actor.userId, role: actor.role }
+    );
   }
 
   private optionalNonNegativeNumber(value: unknown): number | null {
@@ -1319,18 +1720,23 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
   }
 
   async archive(id: string, tenantId: string, actor: ProductMutationActor) {
-    return withRlsTransaction(this.ds, async (manager) => {
-      const repo = manager.getRepository(ProductEntity);
-      const before = await repo.findOne({ where: { id, tenantId } });
-      if (!before) throw new NotFoundException('产品不存在');
-      const saved = before.status === 'archived'
-        ? before
-        : await repo.save(repo.create({ ...before, status: 'archived' }));
-      if (before.status !== 'archived') {
-        await this.recordProductMutation(manager, actor, 'product.archive', before, saved);
-      }
-      return { success: true, data: saved };
-    }, { tenantId, actorId: actor.userId, role: actor.role });
+    return withRlsTransaction(
+      this.ds,
+      async (manager) => {
+        const repo = manager.getRepository(ProductEntity);
+        const before = await repo.findOne({ where: { id, tenantId } });
+        if (!before) throw new NotFoundException('产品不存在');
+        const saved =
+          before.status === 'archived'
+            ? before
+            : await repo.save(repo.create({ ...before, status: 'archived' }));
+        if (before.status !== 'archived') {
+          await this.recordProductMutation(manager, actor, 'product.archive', before, saved);
+        }
+        return { success: true, data: saved };
+      },
+      { tenantId, actorId: actor.userId, role: actor.role }
+    );
   }
 
   private async resolveTenantBrand(manager: EntityManager, tenantId: string): Promise<string> {
@@ -1339,7 +1745,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
          FROM rhautt_nexus.tenants
         WHERE id::text = $1 AND status = 'active'
         LIMIT 1`,
-      [tenantId],
+      [tenantId]
     );
     const brand = String(rows[0]?.brand || '').trim();
     if (!brand) throw new BadRequestException('当前租户不是有效的品牌运营租户');
@@ -1365,31 +1771,44 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     actor: ProductMutationActor | undefined,
     action: 'product.create' | 'product.update' | 'product.archive',
     before: ProductEntity | null,
-    after: ProductEntity,
+    after: ProductEntity
   ) {
     const beforeState = this.productAuditState(before);
     const afterState = this.productAuditState(after);
     const auditRepo = manager.getRepository(AuditLogEntity);
-    await auditRepo.save(auditRepo.create({
-      tenantId: after.tenantId,
-      actorUserId: actor?.userId || null,
-      action,
-      resourceType: 'product',
-      resourceId: after.id,
-      beforeState,
-      afterState,
-      requestId: null,
-      traceId: null,
-      ipHash: null,
-    }));
+    await auditRepo.save(
+      auditRepo.create({
+        tenantId: after.tenantId,
+        actorUserId: actor?.userId || null,
+        action,
+        resourceType: 'product',
+        resourceId: after.id,
+        beforeState,
+        afterState,
+        requestId: null,
+        traceId: null,
+        ipHash: null,
+      })
+    );
     await this.eventBus.publishInTx(manager, {
       tenantId: after.tenantId,
-      eventType: `${action}d`.replace('createdd', 'created').replace('updatedd', 'updated').replace('archivedd', 'archived'),
+      eventType: `${action}d`
+        .replace('createdd', 'created')
+        .replace('updatedd', 'updated')
+        .replace('archivedd', 'archived'),
       aggregateType: 'product',
       aggregateId: after.id,
       payload: afterState || { id: after.id },
     });
-    this.logger.log(JSON.stringify({ event: action, tenantId: after.tenantId, productId: after.id, sku: after.sku, actorId: actor?.userId || null }));
+    this.logger.log(
+      JSON.stringify({
+        event: action,
+        tenantId: after.tenantId,
+        productId: after.id,
+        sku: after.sku,
+        actorId: actor?.userId || null,
+      })
+    );
   }
 
   /** D2 定位受控词表（供后台下拉 / 消费方一致筛选）。 */
@@ -1407,7 +1826,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
           where: { tenantId, dealerId, productId },
           order: { createdAt: 'DESC' },
         }),
-      { tenantId } as TenantScope,
+      { tenantId } as TenantScope
     );
     // products 为 HQ 共享目录（非 uuid 租户哨兵），不纳入 RLS，直读。
     const base = await this.products.findOne({ where: { id: productId } });
@@ -1439,14 +1858,22 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       async (manager) => {
         const repo = manager.getRepository(ProductContentEntity);
         const existing = await repo.findOne({ where: { tenantId, productId, locale } });
-        const patch: Partial<ProductContentEntity> = { ...(existing ?? {}), tenantId, productId, locale, status };
+        const patch: Partial<ProductContentEntity> = {
+          ...(existing ?? {}),
+          tenantId,
+          productId,
+          locale,
+          status,
+        };
         if ('name' in dto) patch.name = typeof dto.name === 'string' ? dto.name.trim() : null;
         if ('displayCurrency' in dto) patch.displayCurrency = String(dto.displayCurrency || 'CNY');
         if ('seo' in dto) patch.seo = sanitizeSeo(dto.seo);
         if ('gtin' in dto) patch.gtin = typeof dto.gtin === 'string' ? dto.gtin.trim() : null;
         if ('mpn' in dto) patch.mpn = typeof dto.mpn === 'string' ? dto.mpn.trim() : null;
         if ('officialDetailHtml' in dto) {
-          const product = await manager.getRepository(ProductEntity).findOne({ where: { tenantId, id: productId } as any });
+          const product = await manager
+            .getRepository(ProductEntity)
+            .findOne({ where: { tenantId, id: productId } as any });
           const html = product
             ? this.rewriteOfficialDetailArtifactUrls(product, String(dto.officialDetailHtml ?? ''))
             : String(dto.officialDetailHtml ?? '');
@@ -1457,7 +1884,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
         const saved = await repo.save(repo.create(patch));
         return { success: true, data: saved };
       },
-      { tenantId } as TenantScope,
+      { tenantId } as TenantScope
     );
   }
 
@@ -1470,7 +1897,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
           where: { tenantId, productId },
           order: { locale: 'ASC' },
         }),
-      { tenantId } as TenantScope,
+      { tenantId } as TenantScope
     );
     return { success: true, data: { items: rows, total: rows.length } };
   }
@@ -1488,13 +1915,17 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       this.ds,
       async (manager) => {
         const products = await manager.getRepository(ProductEntity).find({
-          where: (brand ? { tenantId, brand, status: 'active' } : { tenantId, status: 'active' }) as any,
+          where: (brand
+            ? { tenantId, brand, status: 'active' }
+            : { tenantId, status: 'active' }) as any,
           order: { name: 'ASC' },
           take: 1000,
         });
         const ids = products.map((p) => p.id);
         const contents = ids.length
-          ? await manager.getRepository(ProductContentEntity).find({ where: { tenantId, productId: In(ids) } })
+          ? await manager
+              .getRepository(ProductContentEntity)
+              .find({ where: { tenantId, productId: In(ids) } })
           : [];
         // productId → locale → status
         const byProduct = new Map<string, Map<string, string>>();
@@ -1502,7 +1933,9 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
           if (!byProduct.has(c.productId)) byProduct.set(c.productId, new Map());
           byProduct.get(c.productId)!.set(c.locale, c.status);
         }
-        const localePublished: Record<string, number> = Object.fromEntries(supported.map((l) => [l, 0]));
+        const localePublished: Record<string, number> = Object.fromEntries(
+          supported.map((l) => [l, 0])
+        );
         const items = products.map((p) => {
           const map = byProduct.get(p.id) ?? new Map<string, string>();
           const locales: Record<string, string> = {};
@@ -1524,7 +1957,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
         }));
         return { success: true, data: { supportedLocales: supported, total, summary, items } };
       },
-      { tenantId } as TenantScope,
+      { tenantId } as TenantScope
     );
   }
 
@@ -1536,16 +1969,24 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     manager: import('typeorm').EntityManager,
     tenantId: string,
     productId: string,
-    locale: string,
+    locale: string
   ): Promise<ProductContentEntity | null> {
     const repo = manager.getRepository(ProductContentEntity);
     // 发布门：status=published 且 publishedAt<=now（未来定时/scheduled 不外泄）。
     const live = (c: ProductContentEntity | null): ProductContentEntity | null =>
-      c && c.status === 'published' && (!c.publishedAt || c.publishedAt.getTime() <= Date.now()) ? c : null;
-    const wanted = live(await repo.findOne({ where: { tenantId, productId, locale, status: 'published' } }));
+      c && c.status === 'published' && (!c.publishedAt || c.publishedAt.getTime() <= Date.now())
+        ? c
+        : null;
+    const wanted = live(
+      await repo.findOne({ where: { tenantId, productId, locale, status: 'published' } })
+    );
     if (wanted) return wanted;
     if (locale !== DEFAULT_LOCALE) {
-      const fallback = live(await repo.findOne({ where: { tenantId, productId, locale: DEFAULT_LOCALE, status: 'published' } }));
+      const fallback = live(
+        await repo.findOne({
+          where: { tenantId, productId, locale: DEFAULT_LOCALE, status: 'published' },
+        })
+      );
       if (fallback) return fallback;
     }
     return null;
@@ -1553,7 +1994,9 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
 
   /** 发布门判定：status=published 且 publishedAt<=now（未来定时/scheduled 不外泄）。 */
   private isLiveContent(c: ProductContentEntity | null | undefined): boolean {
-    return !!c && c.status === 'published' && (!c.publishedAt || c.publishedAt.getTime() <= Date.now());
+    return (
+      !!c && c.status === 'published' && (!c.publishedAt || c.publishedAt.getTime() <= Date.now())
+    );
   }
 
   /**
@@ -1564,7 +2007,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     manager: import('typeorm').EntityManager,
     tenantId: string,
     productIds: string[],
-    locale: string,
+    locale: string
   ): Promise<Map<string, ProductContentEntity>> {
     const map = new Map<string, ProductContentEntity>();
     if (!productIds.length) return map;
@@ -1582,7 +2025,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
   private pickLocale(
     map: Map<string, ProductContentEntity>,
     productId: string,
-    locale: string,
+    locale: string
   ): ProductContentEntity | null {
     return map.get(`${productId}::${locale}`) ?? map.get(`${productId}::${DEFAULT_LOCALE}`) ?? null;
   }
@@ -1594,7 +2037,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
   private buildJsonLd(
     product: ProductEntity,
     content: ProductContentEntity | null,
-    locale: string,
+    locale: string
   ): Record<string, unknown> {
     const seo: ProductSeo = content?.seo ?? EMPTY_SEO;
     const name = content?.name || product.name;
@@ -1616,7 +2059,10 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
         '@type': 'Offer',
         priceCurrency: content?.displayCurrency || product.currency || 'CNY',
         price: Number(product.listPrice),
-        availability: product.status === 'active' ? 'https://schema.org/InStock' : 'https://schema.org/Discontinued',
+        availability:
+          product.status === 'active'
+            ? 'https://schema.org/InStock'
+            : 'https://schema.org/Discontinued',
       };
     }
     return jsonLd;
@@ -1627,7 +2073,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     product: ProductEntity,
     content: ProductContentEntity | null,
     locale: string,
-    opts: { includeOfficialDetail?: boolean } = {},
+    opts: { includeOfficialDetail?: boolean } = {}
   ) {
     return this.publicProductProjection(product, locale, content, opts);
   }
@@ -1650,13 +2096,20 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
           });
           // B2 消除 N+1：一次批量取所有产品的（请求 locale + 默认 locale）已发布内容，
           // 在内存里按回退链择优，替代逐产品 2 次查询。
-          const liveByProductLocale = await this.batchLiveContent(manager, tenantId, rows.map((p) => p.id), locale);
+          const liveByProductLocale = await this.batchLiveContent(
+            manager,
+            tenantId,
+            rows.map((p) => p.id),
+            locale
+          );
           const items = rows
             .sort((a, b) => this.sortForWebsite(a, b))
-            .map((p) => this.projectLocalized(p, this.pickLocale(liveByProductLocale, p.id, locale), locale));
+            .map((p) =>
+              this.projectLocalized(p, this.pickLocale(liveByProductLocale, p.id, locale), locale)
+            );
           return { success: true, data: { items, total: items.length, locale } };
         },
-        { tenantId } as TenantScope,
+        { tenantId } as TenantScope
       );
     }
     // 共享哨兵：直读产品，无 L7 内容（回退基础事实）。
@@ -1664,7 +2117,9 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       where: { tenantId, brand, status: 'active' } as any,
       take: 500,
     });
-    const items = rows.sort((a, b) => this.sortForWebsite(a, b)).map((p) => this.projectLocalized(p, null, locale));
+    const items = rows
+      .sort((a, b) => this.sortForWebsite(a, b))
+      .map((p) => this.projectLocalized(p, null, locale));
     return { success: true, data: { items, total: items.length, locale } };
   }
 
@@ -1682,20 +2137,35 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
           where: { id: In(ids), tenantId, status: 'active' } as any,
           take: 500,
         });
-        const liveByProductLocale = await this.batchLiveContent(manager, tenantId, rows.map((p) => p.id), locale);
+        const liveByProductLocale = await this.batchLiveContent(
+          manager,
+          tenantId,
+          rows.map((p) => p.id),
+          locale
+        );
         return rows.map((product) => ({
           productId: product.id,
           brand: product.brand,
           category: product.category,
-          ...this.projectLocalized(product, this.pickLocale(liveByProductLocale, product.id, locale), locale, { includeOfficialDetail: true }),
+          ...this.projectLocalized(
+            product,
+            this.pickLocale(liveByProductLocale, product.id, locale),
+            locale,
+            { includeOfficialDetail: true }
+          ),
         }));
       },
-      { tenantId } as TenantScope,
+      { tenantId } as TenantScope
     );
   }
 
   /** L5 公开单品（脱敏、含 JSON-LD）：按品牌+sku+locale 返回，含回退。 */
-  async getBrandProductLocalized(brand: string, sku: string, localeInput: unknown, tenantIdInput?: string) {
+  async getBrandProductLocalized(
+    brand: string,
+    sku: string,
+    localeInput: unknown,
+    tenantIdInput?: string
+  ) {
     const locale = sanitizeLocale(localeInput);
     const tenantId = tenantIdInput || process.env.EVERHOT_TENANT_ID || 'rhautt_shared';
     const slug = this.normalizePublicSlug(sku);
@@ -1703,20 +2173,26 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       return withRlsTransaction(
         this.ds,
         async (manager) => {
-          const product = await manager.getRepository(ProductEntity)
+          const product = await manager
+            .getRepository(ProductEntity)
             .createQueryBuilder('p')
             .where('p.tenant_id = :tenantId', { tenantId })
             .andWhere('p.brand = :brand', { brand })
             .andWhere('p.status = :status', { status: 'active' })
-            .andWhere("(p.sku = :sku OR COALESCE(NULLIF(p.meta -> :brand ->> 'slug', ''), p.sku) = :slug)", { sku, slug, brand })
+            .andWhere(
+              "(p.sku = :sku OR COALESCE(NULLIF(p.meta -> :brand ->> 'slug', ''), p.sku) = :slug)",
+              { sku, slug, brand }
+            )
             .getOne();
           if (!product) return { success: true, data: null };
           const content = await this.fetchContentForLocale(manager, tenantId, product.id, locale);
-          const projected = this.projectLocalized(product, content, locale, { includeOfficialDetail: true });
+          const projected = this.projectLocalized(product, content, locale, {
+            includeOfficialDetail: true,
+          });
           const related = await this.fetchRelatedForPublic(manager, tenantId, product.id, locale);
           return { success: true, data: { ...projected, related } };
         },
-        { tenantId } as TenantScope,
+        { tenantId } as TenantScope
       );
     }
     const product = await this.products
@@ -1724,27 +2200,41 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       .where('p.tenant_id = :tenantId', { tenantId })
       .andWhere('p.brand = :brand', { brand })
       .andWhere('p.status = :status', { status: 'active' })
-      .andWhere("(p.sku = :sku OR COALESCE(NULLIF(p.meta -> :brand ->> 'slug', ''), p.sku) = :slug)", { sku, slug, brand })
+      .andWhere(
+        "(p.sku = :sku OR COALESCE(NULLIF(p.meta -> :brand ->> 'slug', ''), p.sku) = :slug)",
+        { sku, slug, brand }
+      )
       .getOne();
     if (!product) return { success: true, data: null };
     return { success: true, data: this.projectLocalized(product, null, locale) };
   }
 
-  async getPublicProductImage(brand: string, sku: string, artifactId: string, tenantIdInput?: string) {
+  async getPublicProductImage(
+    brand: string,
+    sku: string,
+    artifactId: string,
+    tenantIdInput?: string
+  ) {
     const tenantId = tenantIdInput || process.env.EVERHOT_TENANT_ID || 'rhautt_shared';
     const slug = this.normalizePublicSlug(sku);
-    const findProduct = (repo: Repository<ProductEntity>) => repo
-      .createQueryBuilder('p')
-      .where('p.tenant_id = :tenantId', { tenantId })
-      .andWhere('p.brand = :brand', { brand })
-      .andWhere('p.status = :status', { status: 'active' })
-      .andWhere("(p.sku = :sku OR COALESCE(NULLIF(p.meta -> :brand ->> 'slug', ''), p.sku) = :slug)", { sku, slug, brand })
-      .getOne();
+    const findProduct = (repo: Repository<ProductEntity>) =>
+      repo
+        .createQueryBuilder('p')
+        .where('p.tenant_id = :tenantId', { tenantId })
+        .andWhere('p.brand = :brand', { brand })
+        .andWhere('p.status = :status', { status: 'active' })
+        .andWhere(
+          "(p.sku = :sku OR COALESCE(NULLIF(p.meta -> :brand ->> 'slug', ''), p.sku) = :slug)",
+          { sku, slug, brand }
+        )
+        .getOne();
     const loadAccess = async (manager: EntityManager) => {
       const product = await findProduct(manager.getRepository(ProductEntity));
       if (!product) return null;
       const refs = sanitizeAssetRefs(product.assetRefs);
-      const linkedRef = refs.find((r) => ['main', 'card', 'icon', 'detail'].includes(r.role) && r.artifactId === artifactId);
+      const linkedRef = refs.find(
+        (r) => ['main', 'card', 'icon', 'detail'].includes(r.role) && r.artifactId === artifactId
+      );
       if (linkedRef) return { product, objectKey: linkedRef.objectKey };
       const rows = await manager.getRepository(ProductContentEntity).find({
         where: { tenantId, productId: product.id, status: 'published' } as any,
@@ -1760,22 +2250,35 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     if (!access) return null;
     const found = await this.getPublicActiveArtifactFromCandidates(
       this.publicArtifactTenantCandidates(brand, tenantId, access.product, access.objectKey),
-      artifactId,
+      artifactId
     );
     if (!found) return null;
-    return String(found.row.mimeType || '').toLowerCase().startsWith('image/') ? found : null;
+    return String(found.row.mimeType || '')
+      .toLowerCase()
+      .startsWith('image/')
+      ? found
+      : null;
   }
 
-  async getPublicProductDocument(brand: string, sku: string, artifactId: string, tenantIdInput?: string) {
+  async getPublicProductDocument(
+    brand: string,
+    sku: string,
+    artifactId: string,
+    tenantIdInput?: string
+  ) {
     const tenantId = tenantIdInput || process.env.EVERHOT_TENANT_ID || 'rhautt_shared';
     const slug = this.normalizePublicSlug(sku);
-    const findProduct = (repo: Repository<ProductEntity>) => repo
-      .createQueryBuilder('p')
-      .where('p.tenant_id = :tenantId', { tenantId })
-      .andWhere('p.brand = :brand', { brand })
-      .andWhere('p.status = :status', { status: 'active' })
-      .andWhere("(p.sku = :sku OR COALESCE(NULLIF(p.meta -> :brand ->> 'slug', ''), p.sku) = :slug)", { sku, slug, brand })
-      .getOne();
+    const findProduct = (repo: Repository<ProductEntity>) =>
+      repo
+        .createQueryBuilder('p')
+        .where('p.tenant_id = :tenantId', { tenantId })
+        .andWhere('p.brand = :brand', { brand })
+        .andWhere('p.status = :status', { status: 'active' })
+        .andWhere(
+          "(p.sku = :sku OR COALESCE(NULLIF(p.meta -> :brand ->> 'slug', ''), p.sku) = :slug)",
+          { sku, slug, brand }
+        )
+        .getOne();
     const loadAccess = async (manager: EntityManager) => {
       const product = await findProduct(manager.getRepository(ProductEntity));
       if (!product) return null;
@@ -1789,7 +2292,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     if (!access) return null;
     const found = await this.getPublicActiveArtifactFromCandidates(
       this.publicArtifactTenantCandidates(brand, tenantId, access.product, access.objectKey),
-      artifactId,
+      artifactId
     );
     if (!found) return null;
     const mime = String(found.row.mimeType || '').toLowerCase();
@@ -1807,7 +2310,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     productId: string,
     localeInput: unknown,
     action: string,
-    opts: { tenantId?: string; scheduledAt?: unknown; note?: string; actor?: string } = {},
+    opts: { tenantId?: string; scheduledAt?: unknown; note?: string; actor?: string } = {}
   ) {
     validateTransitionInput({ ...opts, action }); // B1 类型边界：action 必填字符串、scheduledAt 必字符串
     const tenantId = this.requireWriteTenant(opts.tenantId);
@@ -1817,17 +2320,30 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       async (manager) => {
         const repo = manager.getRepository(ProductContentEntity);
         const content = await repo.findOne({ where: { tenantId, productId, locale } });
-        if (!content) throw new BadRequestException(`内容不存在：product=${productId} locale=${locale}（需先 upsert content）`);
+        if (!content)
+          throw new BadRequestException(
+            `内容不存在：product=${productId} locale=${locale}（需先 upsert content）`
+          );
         const target = resolveTransition(action, content.status);
         if (!target) {
-          throw new BadRequestException(`非法流转：动作「${action}」不可从状态「${content.status}」执行`);
+          throw new BadRequestException(
+            `非法流转：动作「${action}」不可从状态「${content.status}」执行`
+          );
         }
         const from = content.status;
         const now = new Date();
         content.status = target;
         if (action === 'submit') content.submittedAt = now;
-        if (action === 'approve') { content.reviewedBy = opts.actor ?? null; content.reviewedAt = now; content.publishedAt = now; content.scheduledAt = null; }
-        if (action === 'reject') { content.reviewedBy = opts.actor ?? null; content.reviewedAt = now; }
+        if (action === 'approve') {
+          content.reviewedBy = opts.actor ?? null;
+          content.reviewedAt = now;
+          content.publishedAt = now;
+          content.scheduledAt = null;
+        }
+        if (action === 'reject') {
+          content.reviewedBy = opts.actor ?? null;
+          content.reviewedAt = now;
+        }
         if (action === 'schedule') {
           const when = opts.scheduledAt ? new Date(String(opts.scheduledAt)) : null;
           if (!when || Number.isNaN(when.getTime()) || when.getTime() <= Date.now()) {
@@ -1835,17 +2351,25 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
           }
           content.scheduledAt = when;
         }
-        if (action === 'unpublish') { content.publishedAt = null; content.scheduledAt = null; }
+        if (action === 'unpublish') {
+          content.publishedAt = null;
+          content.scheduledAt = null;
+        }
         const saved = await repo.save(content);
         await manager.getRepository(ProductContentEventEntity).save(
           manager.getRepository(ProductContentEventEntity).create({
-            tenantId, contentId: saved.id, fromStatus: from, toStatus: target,
-            action, actor: opts.actor ?? null, note: opts.note ?? null,
-          }),
+            tenantId,
+            contentId: saved.id,
+            fromStatus: from,
+            toStatus: target,
+            action,
+            actor: opts.actor ?? null,
+            note: opts.note ?? null,
+          })
         );
         return { success: true, data: saved };
       },
-      { tenantId } as TenantScope,
+      { tenantId } as TenantScope
     );
   }
 
@@ -1871,14 +2395,21 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
           c.status = 'published';
           c.publishedAt = c.scheduledAt ?? new Date();
           await repo.save(c);
-          await events.save(events.create({
-            tenantId, contentId: c.id, fromStatus: from, toStatus: 'published',
-            action: 'publish-due', actor, note: null,
-          }));
+          await events.save(
+            events.create({
+              tenantId,
+              contentId: c.id,
+              fromStatus: from,
+              toStatus: 'published',
+              action: 'publish-due',
+              actor,
+              note: null,
+            })
+          );
         }
         return { success: true, data: { promoted: due.length } };
       },
-      { tenantId } as TenantScope,
+      { tenantId } as TenantScope
     );
   }
 
@@ -1886,11 +2417,26 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
   /** 单条关系 upsert（同一 RLS 事务内复用，供正/反向边共用）。 */
   private async upsertRelationRow(
     manager: import('typeorm').EntityManager,
-    tenantId: string, productId: string, relatedProductId: string, relationType: string, sortOrder: number,
+    tenantId: string,
+    productId: string,
+    relatedProductId: string,
+    relationType: string,
+    sortOrder: number
   ): Promise<ProductRelationEntity> {
     const repo = manager.getRepository(ProductRelationEntity);
-    const existing = await repo.findOne({ where: { tenantId, productId, relatedProductId, relationType } });
-    return repo.save(repo.create({ ...(existing ?? {}), tenantId, productId, relatedProductId, relationType, sortOrder }));
+    const existing = await repo.findOne({
+      where: { tenantId, productId, relatedProductId, relationType },
+    });
+    return repo.save(
+      repo.create({
+        ...(existing ?? {}),
+        tenantId,
+        productId,
+        relatedProductId,
+        relationType,
+        sortOrder,
+      })
+    );
   }
 
   /**
@@ -1906,20 +2452,39 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     const relationType = String(dto.relationType || '');
     if (!relatedProductId) throw new BadRequestException('relatedProductId 必填');
     if (relatedProductId === productId) throw new BadRequestException('产品不能与自身建立关系');
-    if (!isValidRelationType(relationType)) throw new BadRequestException(`非法 relationType：${relationType}`);
+    if (!isValidRelationType(relationType))
+      throw new BadRequestException(`非法 relationType：${relationType}`);
     const sortOrder = Number(dto.sortOrder) || 0;
     return withRlsTransaction(
       this.ds,
       async (manager) => {
-        const saved = await this.upsertRelationRow(manager, tenantId, productId, relatedProductId, relationType, sortOrder);
+        const saved = await this.upsertRelationRow(
+          manager,
+          tenantId,
+          productId,
+          relatedProductId,
+          relationType,
+          sortOrder
+        );
         const inverse = inverseRelationType(relationType);
         let reverse: ProductRelationEntity | null = null;
         if (inverse) {
-          reverse = await this.upsertRelationRow(manager, tenantId, relatedProductId, productId, inverse, sortOrder);
+          reverse = await this.upsertRelationRow(
+            manager,
+            tenantId,
+            relatedProductId,
+            productId,
+            inverse,
+            sortOrder
+          );
         }
-        return { success: true, data: saved, reverse: reverse ? { id: reverse.id, relationType: reverse.relationType } : null };
+        return {
+          success: true,
+          data: saved,
+          reverse: reverse ? { id: reverse.id, relationType: reverse.relationType } : null,
+        };
       },
-      { tenantId } as TenantScope,
+      { tenantId } as TenantScope
     );
   }
 
@@ -1927,11 +2492,12 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
   async listRelations(productId: string, tenantId: string) {
     const rows = await withRlsTransaction(
       this.ds,
-      (manager) => manager.getRepository(ProductRelationEntity).find({
-        where: { tenantId, productId },
-        order: { relationType: 'ASC', sortOrder: 'ASC' },
-      }),
-      { tenantId } as TenantScope,
+      (manager) =>
+        manager.getRepository(ProductRelationEntity).find({
+          where: { tenantId, productId },
+          order: { relationType: 'ASC', sortOrder: 'ASC' },
+        }),
+      { tenantId } as TenantScope
     );
     return { success: true, data: { items: rows, total: rows.length } };
   }
@@ -1953,13 +2519,21 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
         const inverse = inverseRelationType(row.relationType);
         if (inverse) {
           const rev = await repo.findOne({
-            where: { tenantId, productId: row.relatedProductId, relatedProductId: row.productId, relationType: inverse },
+            where: {
+              tenantId,
+              productId: row.relatedProductId,
+              relatedProductId: row.productId,
+              relationType: inverse,
+            },
           });
-          if (rev) { await repo.remove(rev); deleted += 1; }
+          if (rev) {
+            await repo.remove(rev);
+            deleted += 1;
+          }
         }
         return { success: true, data: { deleted } };
       },
-      { tenantId } as TenantScope,
+      { tenantId } as TenantScope
     );
   }
 
@@ -1971,7 +2545,7 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
     manager: import('typeorm').EntityManager,
     tenantId: string,
     productId: string,
-    locale: string,
+    locale: string
   ): Promise<Record<string, unknown[]>> {
     const rels = await manager.getRepository(ProductRelationEntity).find({
       where: { tenantId, productId },
@@ -1984,7 +2558,10 @@ export class ProductCatalogService implements OnModuleInit, OnModuleDestroy {
       });
       if (!target) continue;
       const content = await this.fetchContentForLocale(manager, tenantId, target.id, locale);
-      const projected = this.publicProductProjection(target, locale, content) as Record<string, any>;
+      const projected = this.publicProductProjection(target, locale, content) as Record<
+        string,
+        any
+      >;
       const card = {
         slug: projected.slug,
         sku: target.sku,
@@ -2015,11 +2592,15 @@ function normalizedNullableText(value: unknown): string | null {
 
 function categoryAncestry(
   row: BrandProductCategoryEntity,
-  byId: Map<string, BrandProductCategoryEntity>,
+  byId: Map<string, BrandProductCategoryEntity>
 ): BrandProductCategoryEntity[] {
   const ancestry: BrandProductCategoryEntity[] = [];
   const seen = new Set<string>();
-  for (let cursor: BrandProductCategoryEntity | undefined = row; cursor; cursor = cursor.parentId ? byId.get(cursor.parentId) : undefined) {
+  for (
+    let cursor: BrandProductCategoryEntity | undefined = row;
+    cursor;
+    cursor = cursor.parentId ? byId.get(cursor.parentId) : undefined
+  ) {
     if (seen.has(cursor.id)) break;
     seen.add(cursor.id);
     ancestry.unshift(cursor);

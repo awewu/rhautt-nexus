@@ -10,9 +10,7 @@
       "owner": "orchestrator-chief",
       "title": "Lock production delivery goal",
       "status": "done",
-      "evidence": [
-        "docs/RHAUTT-NEXUS-PRODUCTION-DELIVERY-GOAL.md"
-      ]
+      "evidence": ["docs/RHAUTT-NEXUS-PRODUCTION-DELIVERY-GOAL.md"]
     },
     {
       "id": "NX-DEL-002",
@@ -62,20 +60,14 @@
       "owner": "test-harness-builder",
       "title": "Add delivery goal guard and include it in guard:all",
       "status": "done",
-      "evidence": [
-        "scripts/agent-guards/delivery-goal-check.js",
-        "package.json"
-      ]
+      "evidence": ["scripts/agent-guards/delivery-goal-check.js", "package.json"]
     },
     {
       "id": "NX-PRD-001",
       "owner": "prd-charter-monitor",
       "title": "Replace authoritative unnamed-platform placeholders with 瑞诺瓦AI舒适家",
       "status": "done",
-      "evidence": [
-        "docs/PROJECT-CHARTER-AND-PRD.md",
-        "docs/FULL-REWRITE-START-DECISION-RECORD.md"
-      ]
+      "evidence": ["docs/PROJECT-CHARTER-AND-PRD.md", "docs/FULL-REWRITE-START-DECISION-RECORD.md"]
     },
     {
       "id": "NX-LEG-001",
@@ -122,9 +114,7 @@
       "owner": "test-harness-builder",
       "title": "Track release evidence gaps for staging capacity, visual, tenant isolation, SBOM, provenance, rollback, and backup restore",
       "status": "active",
-      "evidence": [
-        "evidence/release-evidence.json"
-      ]
+      "evidence": ["evidence/release-evidence.json"]
     },
     {
       "id": "NX-VIS-001",

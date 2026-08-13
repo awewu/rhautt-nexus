@@ -32,25 +32,38 @@ function loadEnv(file) {
 loadEnv(join(REPO, '.env.nestjs'));
 loadEnv(join(REPO, '.env'));
 
-const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > -1 ? process.argv[i + 1] : d; };
+const arg = (k, d) => {
+  const i = process.argv.indexOf('--' + k);
+  return i > -1 ? process.argv[i + 1] : d;
+};
 const DRY = process.argv.includes('--dry');
 const BASE = arg('base', process.env.EVERHOT_API_BASE || 'http://localhost:5500/api/v2');
 const SOURCE = arg('source', process.env.EVERHOT_PRODUCT_SOURCE || '');
-const ARCHIVE_EXISTING = process.argv.includes('--archive-existing') || process.argv.includes('--archive');
+const ARCHIVE_EXISTING =
+  process.argv.includes('--archive-existing') || process.argv.includes('--archive');
 // 门牌（模型B 第1律）：产品写入门牌必须是品牌运营租户 UUID；共享哨兵已退役、无回退。
 // 优先级：--tenant <UUID> > EVERHOT_TENANT_ID(品牌运营租户 UUID)。
 const TENANT = arg('tenant', process.env.EVERHOT_TENANT_ID);
 const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 if (!TENANT || !UUID_RE.test(TENANT)) {
-  console.error('✗ 产品写入门牌必须是品牌运营租户 UUID（模型B 第1律）；共享哨兵已退役。请配置 EVERHOT_TENANT_ID 或传 --tenant <UUID>。');
+  console.error(
+    '✗ 产品写入门牌必须是品牌运营租户 UUID（模型B 第1律）；共享哨兵已退役。请配置 EVERHOT_TENANT_ID 或传 --tenant <UUID>。'
+  );
   process.exit(1);
 }
 const SECRET = process.env.JWT_SECRET;
-if (!SECRET) { console.error('✗ 缺少 JWT_SECRET（.env.nestjs / .env 未找到）'); process.exit(1); }
+if (!SECRET) {
+  console.error('✗ 缺少 JWT_SECRET（.env.nestjs / .env 未找到）');
+  process.exit(1);
+}
 
 // 铸造后台写入令牌：payload 须满足 AuthGuard.isValidScope（userId + tenantId 为 id-like）
 const IMPORTER_USER_ID = '00000000-0000-4000-8000-000000000001';
-const token = jwt.sign({ userId: IMPORTER_USER_ID, tenantId: TENANT, role: 'brand_admin' }, SECRET, { expiresIn: '10m' });
+const token = jwt.sign(
+  { userId: IMPORTER_USER_ID, tenantId: TENANT, role: 'brand_admin' },
+  SECRET,
+  { expiresIn: '10m' }
+);
 const authHeaders = { authorization: `Bearer ${token}` };
 const jsonHeaders = { ...authHeaders, 'content-type': 'application/json' };
 
@@ -107,8 +120,12 @@ console.log(`读取 ${products.length} 个产品 → ${BASE}/product-catalog/dev
 
 if (SOURCE) console.log(`source=${SOURCE}`);
 if (ARCHIVE_EXISTING) {
-  console.error('✗ --archive-existing 已从本导入脚本移除：seed 脚本只做幂等 upsert，不做破坏性操作。');
-  console.error('  批量归档请显式执行：node apps/everhot-cn/scripts/archive-nexus-products.mjs --confirm');
+  console.error(
+    '✗ --archive-existing 已从本导入脚本移除：seed 脚本只做幂等 upsert，不做破坏性操作。'
+  );
+  console.error(
+    '  批量归档请显式执行：node apps/everhot-cn/scripts/archive-nexus-products.mjs --confirm'
+  );
   process.exit(1);
 }
 
@@ -123,7 +140,12 @@ function toDto(p) {
     category: p.cat || null,
     status: 'active',
     // 结构化摘要（可被后台/其它消费方直接用），完整对象存 meta.everhot
-    spec: { sys: p.sys || null, series: p.series || null, en: p.en || null, tagline: p.tagline || null },
+    spec: {
+      sys: p.sys || null,
+      series: p.series || null,
+      en: p.en || null,
+      tagline: p.tagline || null,
+    },
     meta: {
       everhot,
       source: SOURCE ? `${sourceOrigin()}/js/products-data.js` : 'products-data.js',
@@ -133,21 +155,33 @@ function toDto(p) {
   };
 }
 
-let ok = 0, fail = 0;
+let ok = 0,
+  fail = 0;
 for (const p of products) {
   const dto = toDto(p);
-  if (DRY) { console.log('[dry]', dto.sku, '→', dto.name); ok++; continue; }
+  if (DRY) {
+    console.log('[dry]', dto.sku, '→', dto.name);
+    ok++;
+    continue;
+  }
   try {
     const res = await fetch(`${BASE}/product-catalog/devices`, {
       method: 'POST',
       headers: jsonHeaders,
       body: JSON.stringify(dto),
     });
-    if (!res.ok) { console.error(`✗ ${dto.sku}  HTTP ${res.status}  ${(await res.text()).slice(0, 160)}`); fail++; continue; }
+    if (!res.ok) {
+      console.error(`✗ ${dto.sku}  HTTP ${res.status}  ${(await res.text()).slice(0, 160)}`);
+      fail++;
+      continue;
+    }
     const j = await res.json();
     console.log(`✓ ${dto.sku}  id=${j?.data?.id || '?'}`);
     ok++;
-  } catch (e) { console.error(`✗ ${dto.sku}  ${e.message}`); fail++; }
+  } catch (e) {
+    console.error(`✗ ${dto.sku}  ${e.message}`);
+    fail++;
+  }
 }
 console.log(`\n完成：成功 ${ok} / 失败 ${fail}${DRY ? '（dry-run）' : ''}`);
 process.exit(fail ? 1 : 0);

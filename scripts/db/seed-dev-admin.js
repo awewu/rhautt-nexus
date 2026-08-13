@@ -31,7 +31,9 @@ function hashPII(value) {
 function piiKey() {
   const raw = process.env.PII_ENCRYPTION_KEY;
   if (raw) {
-    const buf = /^[0-9a-fA-F]{64}$/.test(raw) ? Buffer.from(raw, 'hex') : Buffer.from(raw, 'base64');
+    const buf = /^[0-9a-fA-F]{64}$/.test(raw)
+      ? Buffer.from(raw, 'hex')
+      : Buffer.from(raw, 'base64');
     if (buf.length === 32) return buf;
   }
   return crypto.createHash('sha256').update('rhautt-nexus-dev-pii-key').digest();
@@ -50,7 +52,8 @@ function adminConnConfig() {
     host: process.env.POSTGRES_ADMIN_HOST || process.env.POSTGRES_HOST || '127.0.0.1',
     port: Number(process.env.POSTGRES_ADMIN_PORT || process.env.POSTGRES_PORT || 5459),
     user: process.env.POSTGRES_ADMIN_USER || process.env.POSTGRES_OWNER_USER || 'rhautt',
-    password: process.env.POSTGRES_ADMIN_PASSWORD || process.env.POSTGRES_OWNER_PASSWORD || 'rhautt2026',
+    password:
+      process.env.POSTGRES_ADMIN_PASSWORD || process.env.POSTGRES_OWNER_PASSWORD || 'rhautt2026',
     database: process.env.POSTGRES_ADMIN_DB || process.env.POSTGRES_DB || 'rhautt_GOT',
   };
 }
@@ -82,7 +85,7 @@ function adminConnConfig() {
            permissions = '["*"]'::jsonb, status = 'active',
            login_attempts = 0, lock_until = NULL, updated_at = now()
      RETURNING id`,
-    [tenantId, phoneHash, phoneEncrypted, passwordHash, '平台超管(dev种子)'],
+    [tenantId, phoneHash, phoneEncrypted, passwordHash, '平台超管(dev种子)']
   );
 
   console.log('✅ dev 管理员已就绪');
@@ -92,4 +95,7 @@ function adminConnConfig() {
   console.log(`   登录口令  = ${password}`);
   console.log('   角色      = platform_admin (permissions=["*"])');
   await c.end();
-})().catch((e) => { console.error('SEED_FAIL', e.message); process.exit(1); });
+})().catch((e) => {
+  console.error('SEED_FAIL', e.message);
+  process.exit(1);
+});

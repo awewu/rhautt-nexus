@@ -25,7 +25,14 @@ const EVIDENCE_JSON = path.join('evidence', 'architecture', 'product-fact-base.j
 const EVIDENCE_MD = path.join('evidence', 'architecture', 'product-fact-base.md');
 
 const FORBIDDEN_PUBLIC_FIELDS = ['costPrice', 'cost_price', 'dealerPrice', 'dealer_price'];
-const PUBLIC_READ_METHODS = ['listBrandPublic', 'listBrandPublicLocalized', 'getBrandProductLocalized', 'projectLocalized', 'recommend', 'list'];
+const PUBLIC_READ_METHODS = [
+  'listBrandPublic',
+  'listBrandPublicLocalized',
+  'getBrandProductLocalized',
+  'projectLocalized',
+  'recommend',
+  'list',
+];
 // 公开控制器允许的「读形 POST」处理器名（body 载查询条件、无变更）——如 recommend。
 const READ_SHAPED_POST = /recommend/i;
 
@@ -36,8 +43,13 @@ const checks = [];
 const abs = (rel) => path.join(ROOT, rel);
 const read = (rel) => fs.readFileSync(abs(rel), 'utf8');
 const exists = (rel) => fs.existsSync(abs(rel));
-function pass(name) { checks.push({ name, ok: true }); }
-function fail(name, detail) { checks.push({ name, ok: false, detail }); failures.push(`${name}: ${detail}`); }
+function pass(name) {
+  checks.push({ name, ok: true });
+}
+function fail(name, detail) {
+  checks.push({ name, ok: false, detail });
+  failures.push(`${name}: ${detail}`);
+}
 
 /** 以花括号配平提取一个方法体（从方法名签名到匹配的结束 }）。 */
 function extractMethod(src, name) {
@@ -49,13 +61,20 @@ function extractMethod(src, name) {
   let depth = 0;
   for (let j = i; j < src.length; j++) {
     if (src[j] === '{') depth++;
-    else if (src[j] === '}') { depth--; if (depth === 0) return src.slice(m.index, j + 1); }
+    else if (src[j] === '}') {
+      depth--;
+      if (depth === 0) return src.slice(m.index, j + 1);
+    }
   }
   return src.slice(m.index);
 }
 
 // ── 前置存在性 ──
-for (const [label, rel] of [['service', SERVICE], ['public-controller', PUBLIC_CTRL], ['module-boundary', BOUNDARY]]) {
+for (const [label, rel] of [
+  ['service', SERVICE],
+  ['public-controller', PUBLIC_CTRL],
+  ['module-boundary', BOUNDARY],
+]) {
   if (!exists(rel)) fail(`exists:${label}`, `${rel} 缺失`);
 }
 
@@ -66,11 +85,17 @@ if (exists(MODULES_DIR)) {
   const walk = (dir) => {
     for (const ent of fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })) {
       const rel = path.join(dir, ent.name);
-      if (ent.isDirectory()) { if (ent.name !== 'product-catalog') walk(rel); continue; }
+      if (ent.isDirectory()) {
+        if (ent.name !== 'product-catalog') walk(rel);
+        continue;
+      }
       if (!ent.name.endsWith('.ts')) continue;
       if (rel === BOUNDARY) continue; // 边界登记表允许引用名称
       const src = read(rel);
-      if (/from\s+['"][^'"]*product-catalog\.entity['"]/.test(src) || /\bProductEntity\b/.test(src)) {
+      if (
+        /from\s+['"][^'"]*product-catalog\.entity['"]/.test(src) ||
+        /\bProductEntity\b/.test(src)
+      ) {
         offenders.push(rel);
       }
       if (/ProductCatalogService/.test(src) && /\.upsert\s*\(/.test(src)) {
@@ -79,9 +104,17 @@ if (exists(MODULES_DIR)) {
     }
   };
   walk(MODULES_DIR);
-  if (offenders.length) fail('A.no-downstream-entity-import', `非 D2 模块引用了 ProductEntity：${offenders.join(', ')}`);
+  if (offenders.length)
+    fail(
+      'A.no-downstream-entity-import',
+      `非 D2 模块引用了 ProductEntity：${offenders.join(', ')}`
+    );
   else pass('A.no-downstream-entity-import');
-  if (upsertOffenders.length) fail('A.no-downstream-writeback', `下游模块调用了 product-catalog.upsert()：${upsertOffenders.join(', ')}`);
+  if (upsertOffenders.length)
+    fail(
+      'A.no-downstream-writeback',
+      `下游模块调用了 product-catalog.upsert()：${upsertOffenders.join(', ')}`
+    );
   else pass('A.no-downstream-writeback');
 }
 
@@ -98,8 +131,16 @@ if (exists(PUBLIC_CTRL)) {
     const handler = pm[2];
     if (!READ_SHAPED_POST.test(handler)) badPosts.push(handler);
   }
-  if (mutationVerb) fail('B.public-read-only', `公开控制器出现变更动词 @${mutationVerb[1]}（对外只读，禁止写入/删除）`);
-  else if (badPosts.length) fail('B.public-read-only', `公开控制器出现非读形 @Post 处理器：${badPosts.join(', ')}（仅允许 recommend 等读形查询）`);
+  if (mutationVerb)
+    fail(
+      'B.public-read-only',
+      `公开控制器出现变更动词 @${mutationVerb[1]}（对外只读，禁止写入/删除）`
+    );
+  else if (badPosts.length)
+    fail(
+      'B.public-read-only',
+      `公开控制器出现非读形 @Post 处理器：${badPosts.join(', ')}（仅允许 recommend 等读形查询）`
+    );
   else pass('B.public-read-only');
 }
 if (exists(SERVICE)) {
@@ -107,7 +148,10 @@ if (exists(SERVICE)) {
   const leaks = [];
   for (const name of PUBLIC_READ_METHODS) {
     const body = extractMethod(src, name);
-    if (!body) { warnings.push(`未能定位公开读方法 ${name}（源结构可能已变）`); continue; }
+    if (!body) {
+      warnings.push(`未能定位公开读方法 ${name}（源结构可能已变）`);
+      continue;
+    }
     for (const f of FORBIDDEN_PUBLIC_FIELDS) {
       if (body.includes(f)) leaks.push(`${name} 泄露 ${f}`);
     }
@@ -147,6 +191,8 @@ try {
   warnings.push(`evidence write failed: ${e.message}`);
 }
 
-console.log(`Product Fact Base Check: checks = ${checks.length}, failures = ${failures.length}, warnings = ${warnings.length}`);
+console.log(
+  `Product Fact Base Check: checks = ${checks.length}, failures = ${failures.length}, warnings = ${warnings.length}`
+);
 for (const f of failures) console.log(`- ${f}`);
 process.exit(failures.length ? 1 : 0);

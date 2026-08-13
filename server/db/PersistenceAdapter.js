@@ -24,27 +24,43 @@ const { isConnected } = require('./index');
 const MODEL_MAP = {
   customers: () => require('../models/customer.model'),
   contracts: () => require('../models/contract.model'),
-  products:  () => require('../models/Product'),
-  quotes:    () => require('../models/Quotation'),
-  users:     () => require('../models/User'),
+  products: () => require('../models/Product'),
+  quotes: () => require('../models/Quotation'),
+  users: () => require('../models/User'),
 };
 
 function getModel(collection) {
   const factory = MODEL_MAP[collection];
   if (!factory) return null;
-  try { return factory(); } catch { return null; }
+  try {
+    return factory();
+  } catch {
+    return null;
+  }
 }
 
 // ── 内存模式 CRUD ─────────────────────────────────────────────────────────────
 class MemoryAdapter {
-  constructor(memDb) { this.db = memDb; }
+  constructor(memDb) {
+    this.db = memDb;
+  }
 
-  _col(name) { return this.db[name] || []; }
+  _col(name) {
+    return this.db[name] || [];
+  }
 
-  getAll(col)              { return Promise.resolve([...this._col(col)]); }
-  getById(col, id)         { return Promise.resolve(this._col(col).find(x => x.id === id || x._id == id) || null); }
-  findOne(col, fn)         { return Promise.resolve(this._col(col).find(fn) || null); }
-  findMany(col, fn)        { return Promise.resolve(fn ? this._col(col).filter(fn) : [...this._col(col)]); }
+  getAll(col) {
+    return Promise.resolve([...this._col(col)]);
+  }
+  getById(col, id) {
+    return Promise.resolve(this._col(col).find((x) => x.id === id || x._id == id) || null);
+  }
+  findOne(col, fn) {
+    return Promise.resolve(this._col(col).find(fn) || null);
+  }
+  findMany(col, fn) {
+    return Promise.resolve(fn ? this._col(col).filter(fn) : [...this._col(col)]);
+  }
 
   insert(col, doc) {
     if (!this.db[col]) this.db[col] = [];
@@ -54,7 +70,7 @@ class MemoryAdapter {
 
   updateById(col, id, patch) {
     const arr = this.db[col] || [];
-    const idx = arr.findIndex(x => x.id === id || x._id == id);
+    const idx = arr.findIndex((x) => x.id === id || x._id == id);
     if (idx === -1) return Promise.resolve(null);
     arr[idx] = { ...arr[idx], ...patch, updatedAt: new Date().toISOString() };
     return Promise.resolve(arr[idx]);
@@ -63,13 +79,13 @@ class MemoryAdapter {
   deleteById(col, id) {
     if (!this.db[col]) return Promise.resolve(false);
     const len = this.db[col].length;
-    this.db[col] = this.db[col].filter(x => x.id !== id && x._id != id);
+    this.db[col] = this.db[col].filter((x) => x.id !== id && x._id != id);
     return Promise.resolve(this.db[col].length < len);
   }
 
   upsertById(col, id, doc) {
     if (!this.db[col]) this.db[col] = [];
-    const idx = this.db[col].findIndex(x => x.id === id || x._id == id);
+    const idx = this.db[col].findIndex((x) => x.id === id || x._id == id);
     if (idx === -1) {
       this.db[col].push({ ...doc, id });
       return Promise.resolve({ ...doc, id });
@@ -88,15 +104,20 @@ class MongoAdapter {
   }
 
   async getAll(col) {
-    try { return await this._model(col).find({}).lean(); }
-    catch { return []; }
+    try {
+      return await this._model(col).find({}).lean();
+    } catch {
+      return [];
+    }
   }
 
   async getById(col, id) {
     try {
       const m = this._model(col);
       return await m.findOne({ $or: [{ _id: id }, { id }] }).lean();
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }
 
   async findOne(col, filter) {
@@ -105,15 +126,19 @@ class MongoAdapter {
       const q = typeof filter === 'function' ? null : filter;
       if (!q) return null;
       return await m.findOne(q).lean();
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }
 
   async findMany(col, filter) {
     try {
       const m = this._model(col);
-      const q = (filter && typeof filter !== 'function') ? filter : {};
+      const q = filter && typeof filter !== 'function' ? filter : {};
       return await m.find(q).lean();
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   }
 
   async insert(col, doc) {
@@ -121,7 +146,9 @@ class MongoAdapter {
       const m = this._model(col);
       const record = new m(doc);
       return (await record.save()).toObject();
-    } catch { return doc; }
+    } catch {
+      return doc;
+    }
   }
 
   async updateById(col, id, patch) {
@@ -132,7 +159,9 @@ class MongoAdapter {
         { ...patch, updatedAt: new Date() },
         { new: true, lean: true }
       );
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }
 
   async deleteById(col, id) {
@@ -140,7 +169,9 @@ class MongoAdapter {
       const m = this._model(col);
       const r = await m.deleteOne({ $or: [{ _id: id }, { id }] });
       return r.deletedCount > 0;
-    } catch { return false; }
+    } catch {
+      return false;
+    }
   }
 
   async upsertById(col, id, doc) {
@@ -151,7 +182,9 @@ class MongoAdapter {
         { ...doc, updatedAt: new Date() },
         { new: true, upsert: true, lean: true }
       );
-    } catch { return doc; }
+    } catch {
+      return doc;
+    }
   }
 }
 
@@ -166,6 +199,8 @@ function getAdapter(memDb) {
   return _adapter;
 }
 
-function resetAdapter() { _adapter = null; }
+function resetAdapter() {
+  _adapter = null;
+}
 
 module.exports = { getAdapter, resetAdapter, MemoryAdapter, MongoAdapter };

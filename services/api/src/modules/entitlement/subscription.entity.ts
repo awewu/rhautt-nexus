@@ -1,6 +1,10 @@
 import {
-  Column, CreateDateColumn, Entity, Index,
-  PrimaryGeneratedColumn, UpdateDateColumn
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 /**
@@ -8,25 +12,31 @@ import {
  * 不单独售卖，恒可用，不出现在此枚举）。
  */
 export type SellableModuleId =
-  | 'site'            // 板块一 A · 建站/标准治理
+  | 'site' // 板块一 A · 建站/标准治理
   | 'product-catalog' // 板块一 B · 产品管理
-  | 'growth'          // 板块一 C · AI 增长
-  | 'crm'             // 板块二 · 引流线索成交
-  | 'diagnosis'       // 板块二 · AI 问诊
-  | 'quote'           // 板块二 · 报价
-  | 'design'          // 板块二 · 设计
-  | 'delivery'        // 板块二 · 交付/合同
-  | 'lifecycle'       // 板块二 · 生命周期
-  | 'analytics';      // 横向 · 分析
+  | 'growth' // 板块一 C · AI 增长
+  | 'crm' // 板块二 · 引流线索成交
+  | 'diagnosis' // 板块二 · AI 问诊
+  | 'quote' // 板块二 · 报价
+  | 'design' // 板块二 · 设计
+  | 'delivery' // 板块二 · 交付/合同
+  | 'lifecycle' // 板块二 · 生命周期
+  | 'analytics'; // 横向 · 分析
 
 export const SELLABLE_MODULES: readonly SellableModuleId[] = [
-  'site', 'product-catalog', 'growth',
-  'crm', 'diagnosis', 'quote', 'delivery', 'lifecycle',
-  'analytics'
+  'site',
+  'product-catalog',
+  'growth',
+  'crm',
+  'diagnosis',
+  'quote',
+  'delivery',
+  'lifecycle',
+  'analytics',
 ] as const;
 
 export type SubscriptionStatus =
-  | 'active' | 'trialing' | 'past_due' | 'suspended' | 'canceled' | 'expired';
+  'active' | 'trialing' | 'past_due' | 'suspended' | 'canceled' | 'expired';
 
 export type SubscriptionPlan = 'trial' | 'standard' | 'professional' | 'enterprise';
 

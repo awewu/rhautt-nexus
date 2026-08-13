@@ -9,15 +9,20 @@ class ProjectsService {
   list(scope, query = {}) {
     const filters = {};
     if (query.status && query.status !== 'all') filters.status = query.status;
-    if (query.search) filters.$or = [
-      { name: { $regex: query.search, $options: 'i' } },
-      { 'customer.name': { $regex: query.search, $options: 'i' } }
-    ];
+    if (query.search)
+      filters.$or = [
+        { name: { $regex: query.search, $options: 'i' } },
+        { 'customer.name': { $regex: query.search, $options: 'i' } },
+      ];
     return this.repo.list(scope, filters, { page: query.page, limit: query.limit });
   }
 
   create(scope, data) {
-    return this.repo.create(scope, { ...data, status: data.status || 'draft', ownerUserId: scope.userId });
+    return this.repo.create(scope, {
+      ...data,
+      status: data.status || 'draft',
+      ownerUserId: scope.userId,
+    });
   }
 
   get(scope, id) {
@@ -37,7 +42,7 @@ class ProjectsService {
     const [active, quoted, delivered] = await Promise.all([
       Project.countDocuments({ tenantId: scope.tenantId, status: 'designing' }),
       Project.countDocuments({ tenantId: scope.tenantId, status: 'review' }),
-      Project.countDocuments({ tenantId: scope.tenantId, status: 'completed' })
+      Project.countDocuments({ tenantId: scope.tenantId, status: 'completed' }),
     ]);
     return { active, quoted, delivered };
   }

@@ -22,11 +22,12 @@ export type SiteProduct = {
 };
 
 export type SiteProductListResult =
-  | { ok: true; items: SiteProduct[] }
-  | { ok: false; items: []; message: string };
+  { ok: true; items: SiteProduct[] } | { ok: false; items: []; message: string };
 
 function record(value: unknown): UnknownRecord {
-  return value && typeof value === 'object' && !Array.isArray(value) ? value as UnknownRecord : {};
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as UnknownRecord)
+    : {};
 }
 
 function text(value: unknown): string {
@@ -35,16 +36,20 @@ function text(value: unknown): string {
 
 function textList(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
-  return value.map((item) => {
-    if (typeof item === 'string') return item.trim();
-    const row = record(item);
-    return text(row.title) || text(row.desc) || text(row.label);
-  }).filter(Boolean);
+  return value
+    .map((item) => {
+      if (typeof item === 'string') return item.trim();
+      const row = record(item);
+      return text(row.title) || text(row.desc) || text(row.label);
+    })
+    .filter(Boolean);
 }
 
 function brandBackground(brand: string): string {
-  if (brand.toLowerCase() === 'ruud') return 'linear-gradient(135deg,rgba(44,49,52,0.16),rgba(228,0,43,0.08))';
-  if (brand.toLowerCase() === 'everhot') return 'linear-gradient(135deg,rgba(228,0,43,0.09),rgba(16,28,40,0.06))';
+  if (brand.toLowerCase() === 'ruud')
+    return 'linear-gradient(135deg,rgba(44,49,52,0.16),rgba(228,0,43,0.08))';
+  if (brand.toLowerCase() === 'everhot')
+    return 'linear-gradient(135deg,rgba(228,0,43,0.09),rgba(16,28,40,0.06))';
   return 'linear-gradient(135deg,rgba(228,0,43,0.12),rgba(118,35,47,0.06))';
 }
 
@@ -58,10 +63,14 @@ function mapProduct(value: unknown): SiteProduct | null {
   const positioning = record(product.positioning);
   const highlights = Array.isArray(product.highlights) ? product.highlights.map(record) : [];
   const firstHighlight = highlights[0] || {};
-  const specs = Array.isArray(product.specs) ? product.specs.map((item) => {
-    const row = record(item);
-    return { label: text(row.label) || text(row.k), value: text(row.value) || text(row.v) };
-  }).filter((item) => item.label && item.value) : [];
+  const specs = Array.isArray(product.specs)
+    ? product.specs
+        .map((item) => {
+          const row = record(item);
+          return { label: text(row.label) || text(row.k), value: text(row.value) || text(row.v) };
+        })
+        .filter((item) => item.label && item.value)
+    : [];
   const tags = [...textList(product.tags), ...textList(product.badges)];
   const brand = text(product.brand) || 'Rhautt';
 
@@ -73,12 +82,16 @@ function mapProduct(value: unknown): SiteProduct | null {
     cat: text(product.websiteCategory) || text(product.cat) || text(product.category) || '其他产品',
     code: text(siteMeta.code) || text(product.series) || text(product.sku).split('-')[0] || 'HVAC',
     bg: brandBackground(brand),
-    metric: [text(firstHighlight.value), text(firstHighlight.label)].filter(Boolean).join(' ') || text(product.series),
+    metric:
+      [text(firstHighlight.value), text(firstHighlight.label)].filter(Boolean).join(' ') ||
+      text(product.series),
     eco: tags.some((tag) => /节能|能效|eco|energy/i.test(tag)),
     image: text(product.image) || text(record(product.mainImage).url),
     specs,
     features: textList(product.features),
-    scenarios: textList(positioning.scenarios).length ? textList(positioning.scenarios) : textList(siteMeta.scenarios),
+    scenarios: textList(positioning.scenarios).length
+      ? textList(positioning.scenarios)
+      : textList(siteMeta.scenarios),
   };
 }
 
@@ -92,11 +105,16 @@ async function fetchPublic(path: string): Promise<Response> {
 export async function listSiteProducts(): Promise<SiteProductListResult> {
   try {
     const response = await fetchPublic('?locale=zh-CN');
-    if (!response.ok) return { ok: false, items: [], message: `产品服务返回 HTTP ${response.status}` };
+    if (!response.ok)
+      return { ok: false, items: [], message: `产品服务返回 HTTP ${response.status}` };
     const payload = record(await response.json());
     const data = record(payload.data);
-    if (!Array.isArray(data.items)) return { ok: false, items: [], message: '产品服务响应格式无效' };
-    return { ok: true, items: data.items.map(mapProduct).filter((item): item is SiteProduct => item !== null) };
+    if (!Array.isArray(data.items))
+      return { ok: false, items: [], message: '产品服务响应格式无效' };
+    return {
+      ok: true,
+      items: data.items.map(mapProduct).filter((item): item is SiteProduct => item !== null),
+    };
   } catch {
     return { ok: false, items: [], message: '产品服务暂时不可用' };
   }

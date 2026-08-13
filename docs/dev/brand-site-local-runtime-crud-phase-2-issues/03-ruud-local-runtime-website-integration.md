@@ -39,4 +39,3 @@ This issue must keep Ruud behavior independent from Rheem and Everhot website ru
 
 - `01-assignment-data-migration-seed-cleanup`
 - Phase 1 public brand-site runtime product endpoint
-

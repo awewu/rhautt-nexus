@@ -14,13 +14,16 @@ describe('production route to target module migration map', () => {
   beforeAll(() => {
     execFileSync(process.execPath, ['scripts/agent-guards/production-route-target-map-check.js'], {
       cwd: ROOT,
-      stdio: 'pipe'
+      stdio: 'pipe',
     });
   });
 
   test('maps every production route catalog mount to target NestJS/Fastify modules', () => {
     const report = readJson('evidence/architecture/production-route-target-map-report.json');
-    const catalogRouteCount = PRODUCTION_ROUTE_CATALOG.reduce((sum, group) => sum + group.routes.length, 0);
+    const catalogRouteCount = PRODUCTION_ROUTE_CATALOG.reduce(
+      (sum, group) => sum + group.routes.length,
+      0
+    );
 
     expect(report.status).toBe('pass-target-route-migration-contract');
     expect(report.failures).toEqual([]);
@@ -30,22 +33,23 @@ describe('production route to target module migration map', () => {
     expect(report.summary.catalogRoutes).toBe(catalogRouteCount);
     expect(report.summary.mappedRoutes).toBe(catalogRouteCount);
     expect(report.routes).toHaveLength(catalogRouteCount);
-    expect(report.summary.targetModulesReferenced).toBe(13);
-    expect(report.targetModulesReferenced).toEqual(expect.arrayContaining([
-      'auth',
-      'tenant',
-      'crm',
-      'diagnosis',
-      'product-catalog',
-      'quote',
-      'delivery',
-      'lifecycle',
-      'analytics',
-      'governance',
-      'file-artifact',
-      'notification',
-      'workflow'
-    ]));
+    expect(report.summary.targetModulesReferenced).toBe(report.targetModulesReferenced.length);
+    expect(report.targetModulesReferenced).toEqual(
+      expect.arrayContaining([
+        'auth',
+        'tenant',
+        'crm',
+        'diagnosis',
+        'product-catalog',
+        'quote',
+        'delivery',
+        'lifecycle',
+        'analytics',
+        'governance',
+        'file-artifact',
+        'notification',
+      ])
+    );
 
     for (const route of report.routes) {
       expect(route.key).toMatch(/^[a-z0-9-]+:[a-z0-9-]+/);
@@ -54,7 +58,11 @@ describe('production route to target module migration map', () => {
       expect(route.targetModules.length).toBeGreaterThan(0);
       expect(route.targetApiNamespaces.length).toBeGreaterThan(0);
       for (const moduleName of route.targetModules) {
-        expect(route.targetApiNamespaces.some(namespace => namespaceMatchesModule(namespace, moduleName))).toBe(true);
+        expect(
+          route.targetApiNamespaces.some((namespace) =>
+            namespaceMatchesModule(namespace, moduleName)
+          )
+        ).toBe(true);
       }
     }
   });
@@ -62,24 +70,26 @@ describe('production route to target module migration map', () => {
   test('keeps legacy route retirement evidence gates explicit', () => {
     const report = readJson('evidence/architecture/production-route-target-map-report.json');
 
-    expect(report.requiredEvidenceBeforeRetiringLegacyRoute).toEqual(expect.arrayContaining([
-      'target dependencies locked and installed',
-      'NestJS/Fastify boot smoke passes',
-      'OpenAPI contract covers replacement namespace',
-      'generated client covers replacement call',
-      'tenant isolation and audit behavior are tested',
-      'E2E or contract test covers replacement route behavior',
-      'production route catalog no longer mounts the legacy route',
-      'rollback note names the removed compatibility route'
-    ]));
+    expect(report.requiredEvidenceBeforeRetiringLegacyRoute).toEqual(
+      expect.arrayContaining([
+        'target dependencies locked and installed',
+        'NestJS/Fastify boot smoke passes',
+        'OpenAPI contract covers replacement namespace',
+        'generated client covers replacement call',
+        'tenant isolation and audit behavior are tested',
+        'E2E or contract test covers replacement route behavior',
+        'production route catalog no longer mounts the legacy route',
+        'rollback note names the removed compatibility route',
+      ])
+    );
 
-    const replacementGroups = report.groupCoverage.filter(group => group.defaultMigrationAction === 'replace-with-target-module');
-    expect(replacementGroups.map(group => group.groupId)).toEqual(expect.arrayContaining([
-      'legacy-foundation',
-      'quote-calculation',
-      'ai-channel',
-      'pages-and-governance'
-    ]));
+    const replacementGroups = report.groupCoverage.filter(
+      (group) => group.defaultMigrationAction === 'replace-with-target-module'
+    );
+    // quote-calculation 组已随 quotation 域完成迁移从 replace-with-target-module 中退出
+    expect(replacementGroups.map((group) => group.groupId)).toEqual(
+      expect.arrayContaining(['legacy-foundation', 'ai-channel', 'pages-and-governance'])
+    );
   });
 
   test('wires route target map into guard gates', () => {

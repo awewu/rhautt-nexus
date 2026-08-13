@@ -68,11 +68,14 @@ function moveStalePostmasterPidIfNeeded() {
   if (isPidAlive(firstLine)) {
     throw new Error(
       `PostgreSQL lock file exists and PID ${firstLine} is still alive. ` +
-        'If a foreground PostgreSQL window is open, close it first or stop that process.',
+        'If a foreground PostgreSQL window is open, close it first or stop that process.'
     );
   }
 
-  const stamp = new Date().toISOString().replace(/[-:TZ.]/g, '').slice(0, 14);
+  const stamp = new Date()
+    .toISOString()
+    .replace(/[-:TZ.]/g, '')
+    .slice(0, 14);
   const stalePath = `${postmasterPid}.stale-${stamp}`;
   fs.renameSync(postmasterPid, stalePath);
   console.log(`Moved stale PostgreSQL lock file to: ${stalePath}`);
@@ -118,7 +121,7 @@ async function main() {
       encoding: 'utf8',
       windowsHide: true,
       timeout: 20000,
-    },
+    }
   );
   if (output.trim()) process.stdout.write(output);
 
@@ -133,7 +136,7 @@ async function main() {
   const recentError = [tail(pgCtlLog), tail(stderrLog)].filter(Boolean).join('\n');
   throw new Error(
     `PostgreSQL did not become ready on 127.0.0.1:${port}.\n` +
-      `Recent stderr:\n${recentError || '(empty)'}`,
+      `Recent stderr:\n${recentError || '(empty)'}`
   );
 }
 

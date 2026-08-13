@@ -20,7 +20,7 @@ const MODELS: ReadonlyArray<AttributionModel> = ['linear', 'position', 'time_dec
 
 export function checkPerceptionAccess(
   env: NodeJS.ProcessEnv,
-  authorizationHeader: string | undefined,
+  authorizationHeader: string | undefined
 ): { ok: true; tenantId: string } | { ok: false; status: number; error: string } {
   const expected = (env.GTM_PERCEPTION_TOKEN || '').trim();
   const tenantId = (env.GTM_PERCEPTION_TENANT_ID || '').trim();
@@ -63,14 +63,16 @@ export class GtmDigestController {
     @Headers('authorization') authorization: string | undefined,
     @Query('days') days?: string,
     @Query('period') period?: string,
-    @Query('model') model?: string,
+    @Query('model') model?: string
   ) {
     const access = checkPerceptionAccess(process.env, authorization);
     if (!access.ok) {
       throw new HttpException({ ok: false, error: access.error }, access.status);
     }
     const parsedDays = Number(days);
-    const safeModel = MODELS.includes(model as AttributionModel) ? (model as AttributionModel) : undefined;
+    const safeModel = MODELS.includes(model as AttributionModel)
+      ? (model as AttributionModel)
+      : undefined;
     const result = await this.digest.buildDigest(perceptionActor(access.tenantId), {
       days: Number.isFinite(parsedDays) ? parsedDays : undefined,
       period: period || undefined,

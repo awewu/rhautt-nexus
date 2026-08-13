@@ -9,12 +9,12 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 @Module({
   imports: [
     ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([AnalyticsEventEntity])]),
-    AuthModule
+    AuthModule,
   ],
   controllers: [AnalyticsController],
   providers: [
     AnalyticsService,
-    ...(TARGET_API_BOOT_SMOKE ? [bootSmokeRepositoryProvider(AnalyticsEventEntity)] : [])
+    ...(TARGET_API_BOOT_SMOKE ? [bootSmokeRepositoryProvider(AnalyticsEventEntity)] : []),
   ],
 })
 export class AnalyticsModule {}
@@ -27,11 +27,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class AnalyticsBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('analytics');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('analytics')
 export class AnalyticsBoundaryController {
   constructor(private readonly s: AnalyticsBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

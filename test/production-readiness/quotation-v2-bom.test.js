@@ -8,7 +8,10 @@ const { createQuotationV2Routes } = quotationRoutes;
 function makeApp(routeOptions = {}) {
   const app = express();
   app.use(express.json());
-  app.use('/api/quotation-v2', routeOptions.useDefaultRouter ? quotationRoutes : createQuotationV2Routes(routeOptions));
+  app.use(
+    '/api/quotation-v2',
+    routeOptions.useDefaultRouter ? quotationRoutes : createQuotationV2Routes(routeOptions)
+  );
   return app;
 }
 
@@ -30,13 +33,37 @@ describe('quotation v2 BOM facade', () => {
       .post('/api/quotation-v2/from-bom')
       .send({
         items: [
-          { id: 'heatpump-l', name: '空气源热泵·大', category: 'equipment', qty: 1, unit: '台', unitPrice: 38000, total: 38000 },
-          { id: 'water-supply', name: '冷热水管 PPR DN25', category: 'pipe', qty: 42, unit: 'm', unitPrice: 85, total: 3570 },
-          { id: 'air-duct', name: '风管 200x100', category: 'pipe', qty: 25, unit: 'm', unitPrice: 220, total: 5500 }
+          {
+            id: 'heatpump-l',
+            name: '空气源热泵·大',
+            category: 'equipment',
+            qty: 1,
+            unit: '台',
+            unitPrice: 38000,
+            total: 38000,
+          },
+          {
+            id: 'water-supply',
+            name: '冷热水管 PPR DN25',
+            category: 'pipe',
+            qty: 42,
+            unit: 'm',
+            unitPrice: 85,
+            total: 3570,
+          },
+          {
+            id: 'air-duct',
+            name: '风管 200x100',
+            category: 'pipe',
+            qty: 25,
+            unit: 'm',
+            unitPrice: 220,
+            total: 5500,
+          },
         ],
         project: { name: '生产可用报价测试', city: '上海', area: 140, floor: 18 },
         dealer: { tier: 'premium' },
-        options: { discountRate: 0.05, taxRate: 0.06, financingMonths: 36 }
+        options: { discountRate: 0.05, taxRate: 0.06, financingMonths: 36 },
       })
       .expect(200);
 
@@ -55,16 +82,32 @@ describe('quotation v2 BOM facade', () => {
       .post('/api/quotation-v2/from-bom')
       .send({
         items: [
-          { name: '中央热水主机', category: 'equipment', qty: 1, unit: '台', unitPrice: 18000, total: 18000 },
-          { name: '回水管 PPR DN25', category: 'pipe', qty: 80, unit: 'm', unitPrice: 85, total: 6800 }
+          {
+            name: '中央热水主机',
+            category: 'equipment',
+            qty: 1,
+            unit: '台',
+            unitPrice: 18000,
+            total: 18000,
+          },
+          {
+            name: '回水管 PPR DN25',
+            category: 'pipe',
+            qty: 80,
+            unit: 'm',
+            unitPrice: 85,
+            total: 6800,
+          },
         ],
-        options: { discountRate: 0.18, targetMarginRate: 0.16, minMarginRate: 0.15 }
+        options: { discountRate: 0.18, targetMarginRate: 0.16, minMarginRate: 0.15 },
       })
       .expect(200);
 
     expect(res.body.data.marginGuard.status).toBe('floor_adjusted');
     expect(res.body.data.marginGuard.adjustment).toBeGreaterThan(0);
-    expect(res.body.data.summary.targetBeforeTax).toBeGreaterThanOrEqual(res.body.data.marginGuard.quoteFloor);
+    expect(res.body.data.summary.targetBeforeTax).toBeGreaterThanOrEqual(
+      res.body.data.marginGuard.quoteFloor
+    );
   });
 
   test('rejects empty BOM with client error contract', async () => {
@@ -82,7 +125,9 @@ describe('quotation v2 BOM facade', () => {
       .post('/api/quotation-v2/persist-from-bom')
       .send({
         customerId: '665f10000000000000000005',
-        items: [{ name: '中央热水主机', category: 'hotwater', qty: 1, unitPrice: 18000, total: 18000 }]
+        items: [
+          { name: '中央热水主机', category: 'hotwater', qty: 1, unitPrice: 18000, total: 18000 },
+        ],
       })
       .expect(401);
 
@@ -96,7 +141,9 @@ describe('quotation v2 BOM facade', () => {
       .set('x-tenant-id', '665f10000000000000000001')
       .send({
         customerId: '665f10000000000000000005',
-        items: [{ name: '中央热水主机', category: 'hotwater', qty: 1, unitPrice: 18000, total: 18000 }]
+        items: [
+          { name: '中央热水主机', category: 'hotwater', qty: 1, unitPrice: 18000, total: 18000 },
+        ],
       })
       .expect(401);
 
@@ -113,31 +160,44 @@ describe('quotation v2 BOM facade', () => {
           dealerId: scope.dealerId,
           storeId: scope.storeId,
           customerId: payload.customerId,
-          quotationNo: 'Q2-ROUTE-1'
+          quotationNo: 'Q2-ROUTE-1',
         },
         quote: { quoteId: 'QT-ROUTE-1' },
-        persisted: true
+        persisted: true,
       })),
       list: jest.fn(async (scope, query) => ({
         items: [{ tenantId: scope.tenantId, query }],
-        pagination: { total: 1 }
-      }))
+        pagination: { total: 1 },
+      })),
     };
-    const token = jwt.sign({
-      userId: '665f10000000000000000004',
-      tenantId: '665f10000000000000000001',
-      dealerId: '665f10000000000000000002',
-      storeId: '665f10000000000000000003',
-      role: 'designer'
-    }, jwtSecret);
+    const token = jwt.sign(
+      {
+        userId: '665f10000000000000000004',
+        tenantId: '665f10000000000000000001',
+        dealerId: '665f10000000000000000002',
+        storeId: '665f10000000000000000003',
+        role: 'designer',
+      },
+      jwtSecret
+    );
 
     const create = await request(makeApp({ quotationService }))
       .post('/api/quotation-v2/persist-from-bom')
       .set('Authorization', `Bearer ${token}`)
       .send({
         customerId: '665f10000000000000000005',
-        items: [{ id: 'rheem-dhw', name: '中央热水主机', category: 'hotwater', qty: 1, unit: '台', unitPrice: 18000, total: 18000 }],
-        project: { name: 'JWT 租户报价', city: '上海', area: 120 }
+        items: [
+          {
+            id: 'rheem-dhw',
+            name: '中央热水主机',
+            category: 'hotwater',
+            qty: 1,
+            unit: '台',
+            unitPrice: 18000,
+            total: 18000,
+          },
+        ],
+        project: { name: 'JWT 租户报价', city: '上海', area: 120 },
       })
       .expect(201);
 
@@ -149,10 +209,10 @@ describe('quotation v2 BOM facade', () => {
         tenantId: '665f10000000000000000001',
         dealerId: '665f10000000000000000002',
         storeId: '665f10000000000000000003',
-        userId: '665f10000000000000000004'
+        userId: '665f10000000000000000004',
       }),
       expect.objectContaining({
-        customerId: '665f10000000000000000005'
+        customerId: '665f10000000000000000005',
       })
     );
 
@@ -165,7 +225,7 @@ describe('quotation v2 BOM facade', () => {
     expect(quotationService.list).toHaveBeenCalledWith(
       expect.objectContaining({
         tenantId: '665f10000000000000000001',
-        dealerId: '665f10000000000000000002'
+        dealerId: '665f10000000000000000002',
       }),
       expect.anything()
     );

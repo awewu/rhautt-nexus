@@ -14,7 +14,7 @@ const {
   initializePostListenEngines,
   printStartupBanner,
   startPostListenServices,
-  startPreListenServices
+  startPreListenServices,
 } = require('./server/modules/runtimeServices');
 const { createProductionApp } = require('./server/modules/productionAppFactory');
 
@@ -42,7 +42,7 @@ function getRuntime(options = {}) {
   const runtimeProfile = resolveRuntimeProfile(options);
   if (!runtime || options.reset === true || runtime.runtimeProfile !== runtimeProfile) {
     runtime = createProductionApp({
-      runtimeProfile
+      runtimeProfile,
     });
   }
   return runtime;
@@ -79,33 +79,33 @@ async function startProductionServer(options = {}) {
     };
     const server = host
       ? app.listen(port, host, async () => {
-        try {
-          await onListening();
-          if (!settled) {
-            settled = true;
-            resolve(server);
+          try {
+            await onListening();
+            if (!settled) {
+              settled = true;
+              resolve(server);
+            }
+          } catch (error) {
+            if (!settled) {
+              settled = true;
+              reject(error);
+            }
           }
-        } catch (error) {
-          if (!settled) {
-            settled = true;
-            reject(error);
-          }
-        }
-      })
+        })
       : app.listen(port, async () => {
-        try {
-          await onListening();
-          if (!settled) {
-            settled = true;
-            resolve(server);
+          try {
+            await onListening();
+            if (!settled) {
+              settled = true;
+              resolve(server);
+            }
+          } catch (error) {
+            if (!settled) {
+              settled = true;
+              reject(error);
+            }
           }
-        } catch (error) {
-          if (!settled) {
-            settled = true;
-            reject(error);
-          }
-        }
-      });
+        });
     server.once('error', onError);
   });
 
@@ -119,7 +119,9 @@ async function startProductionServer(options = {}) {
       });
     } catch (error) {
       console.log('⚠️ HTTPS证书未配置，仅HTTP可用');
-      console.log('   生成证书命令: mkdir ssl && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ssl/server.key -out ssl/server.crt');
+      console.log(
+        '   生成证书命令: mkdir ssl && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ssl/server.key -out ssl/server.crt'
+      );
     }
   }
 
@@ -147,12 +149,20 @@ if (require.main === module) {
 
 // 导出供测试使用
 module.exports = {
-  get app() { return getRuntime({ runtimeProfile: 'safe' }).app; },
-  get runtime() { return getRuntime({ runtimeProfile: 'safe' }); },
+  get app() {
+    return getRuntime({ runtimeProfile: 'safe' }).app;
+  },
+  get runtime() {
+    return getRuntime({ runtimeProfile: 'safe' });
+  },
   getRuntime,
-  get httpServer() { return httpServer; },
-  get httpsServer() { return httpsServer; },
+  get httpServer() {
+    return httpServer;
+  },
+  get httpsServer() {
+    return httpsServer;
+  },
   resolveRuntimeProfile,
   resolveListenHost,
-  startProductionServer
+  startProductionServer,
 };

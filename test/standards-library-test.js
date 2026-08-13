@@ -14,17 +14,19 @@ console.log('\n📚 全部标准清单:');
 console.log('-'.repeat(80));
 const list = lib.listAllStandards();
 
-console.log(`\n🚿 热水标准 (${list.hotWater.china.length + list.hotWater.international.length}项):`);
+console.log(
+  `\n🚿 热水标准 (${list.hotWater.china.length + list.hotWater.international.length}项):`
+);
 console.log('   国标 (China GB/JG/CJJ):');
-list.hotWater.china.forEach(s => console.log(`     ✓ ${s}`));
+list.hotWater.china.forEach((s) => console.log(`     ✓ ${s}`));
 console.log('   国际标准 (ASHRAE/UPC/NSF/EN/ISO):');
-list.hotWater.international.forEach(s => console.log(`     ✓ ${s}`));
+list.hotWater.international.forEach((s) => console.log(`     ✓ ${s}`));
 
 console.log(`\n🌬️  DOAS标准 (${list.doas.core.length + list.doas.supporting.length}项):`);
 console.log('   核心标准:');
-list.doas.core.forEach(s => console.log(`     ✓ ${s}`));
+list.doas.core.forEach((s) => console.log(`     ✓ ${s}`));
 console.log('   配套标准:');
-list.doas.supporting.forEach(s => console.log(`     ✓ ${s}`));
+list.doas.supporting.forEach((s) => console.log(`     ✓ ${s}`));
 
 console.log(`\n📊 合计: ${list.total} 项专业标准`);
 
@@ -35,21 +37,21 @@ console.log('-'.repeat(80));
 const hwDesign = {
   buildingType: 'residential',
   population: 5,
-  dailyUsage: 320,           // 5人×60L = 300L
-  supplyTemp: 65,             // GB 50015要求60-75°C
+  dailyUsage: 320, // 5人×60L = 300L
+  supplyTemp: 65, // GB 50015要求60-75°C
   pressureTest: true,
-  storageTemp: 60,            // ASHRAE 188关键
+  storageTemp: 60, // ASHRAE 188关键
   distributionTemp: 55,
   returnTemp: 51,
-  insulationR: 4.5,           // ASHRAE 90.1
-  scaldProtection: true,      // UPC防烫
-  nsfCertified: true,         // NSF 61
-  thermalDisinfection: true,  // ASHRAE 188
+  insulationR: 4.5, // ASHRAE 90.1
+  scaldProtection: true, // UPC防烫
+  nsfCertified: true, // NSF 61
+  thermalDisinfection: true, // ASHRAE 188
   deadLegRemoved: true,
   solarSystem: true,
   solarFraction: 0.55,
   heatPumpWaterHeater: true,
-  cop: 3.2
+  cop: 3.2,
 };
 
 const hwResult = lib.checkHotWaterCompliance(hwDesign);
@@ -62,14 +64,14 @@ hwResult.china.checks.forEach((c, i) => {
 });
 
 console.log(`\n   🌍 国际标准检查 (${hwResult.international.checks.length}项):`);
-hwResult.international.checks.forEach(c => {
+hwResult.international.checks.forEach((c) => {
   const icon = c.status === 'PASS' ? '✅' : c.status === 'FAIL' ? '❌' : '⚠️';
   console.log(`   ${icon} [${c.regulation}] ${c.name}`);
   if (c.detail) console.log(`      ${c.detail}`);
 });
 
 console.log(`\n   🦠 军团菌风险检查 (ASHRAE 188-2018) - 健康关键:`);
-hwResult.legionellaRisk.checks.forEach(c => {
+hwResult.legionellaRisk.checks.forEach((c) => {
   const icon = c.status === 'PASS' ? '✅' : c.status === 'FAIL' ? '❌' : '⚠️';
   const sev = c.severity ? ` [${c.severity}]` : '';
   console.log(`   ${icon}${sev} ${c.name}: ${c.requirement}`);
@@ -79,7 +81,9 @@ console.log(`\n   🏆 综合结果:`);
 console.log(`      合规率: ${hwResult.summary.complianceRate}`);
 console.log(`      评分: ${hwResult.summary.score}/100`);
 console.log(`      等级: ${hwResult.summary.grade}`);
-console.log(`      通过/警告/失败: ${hwResult.summary.passed}/${hwResult.summary.warnings}/${hwResult.summary.failed}`);
+console.log(
+  `      通过/警告/失败: ${hwResult.summary.passed}/${hwResult.summary.warnings}/${hwResult.summary.failed}`
+);
 
 // ========== DOAS合规测试 ==========
 console.log('\n\n📋 测试2: 高端商业建筑DOAS系统合规检查');
@@ -88,58 +92,58 @@ console.log('-'.repeat(80));
 const doasDesign = {
   spaceType: 'office',
   occupancy: 50,
-  area: 500,                  // m²
-  outdoorAirflow: 280,         // L/s (Voz = 2.5×50 + 0.3×500 = 275)
+  area: 500, // m²
+  outdoorAirflow: 280, // L/s (Voz = 2.5×50 + 0.3×500 = 275)
   zoneEffectiveness: 0.85,
-  sfp: 1.3,                    // 比风机功率
-  sre: 78,                     // 显热回收
-  lre: 65,                     // 潜热回收
-  mervRating: 14,              // MERV14
-  epm1: 65,                    // ePM1效率
+  sfp: 1.3, // 比风机功率
+  sre: 78, // 显热回收
+  lre: 65, // 潜热回收
+  mervRating: 14, // MERV14
+  epm1: 65, // ePM1效率
   co2Monitoring: true,
   pm25Monitoring: true,
   demandControlVentilation: true,
   economizer: true,
   supplyAirReset: true,
   dxDoas: true,
-  ieer: 14.5
+  ieer: 14.5,
 };
 
 const doasResult = lib.checkDOASCompliance(doasDesign);
 
 console.log(`\n   ✈️  通风量(ASHRAE 62.1):`);
-doasResult.ventilation.checks.forEach(c => {
+doasResult.ventilation.checks.forEach((c) => {
   const icon = c.status === 'PASS' ? '✅' : c.status === 'FAIL' ? '❌' : '⚠️';
   console.log(`   ${icon} ${c.name}: ${c.detail || c.requirement}`);
 });
 
 console.log(`\n   ⚡ 能效(ASHRAE 90.1 + AHRI 920):`);
-doasResult.energy.checks.forEach(c => {
+doasResult.energy.checks.forEach((c) => {
   const icon = c.status === 'PASS' ? '✅' : c.status === 'FAIL' ? '❌' : '⚠️';
   console.log(`   ${icon} ${c.name}: 实际${c.actual} (要求${c.requirement})`);
 });
 
 console.log(`\n   🌫️  IAQ室内空气品质:`);
-doasResult.iaq.checks.forEach(c => {
+doasResult.iaq.checks.forEach((c) => {
   const icon = c.status === 'PASS' ? '✅' : c.status === 'FAIL' ? '❌' : '⚠️';
   console.log(`   ${icon} ${c.name}`);
 });
 
 console.log(`\n   🛡️  过滤(ASHRAE 52.2 + ISO 16890):`);
-doasResult.filtration.checks.forEach(c => {
+doasResult.filtration.checks.forEach((c) => {
   const icon = c.status === 'PASS' ? '✅' : c.status === 'FAIL' ? '❌' : '⚠️';
   console.log(`   ${icon} ${c.name}: ${c.detail || ''}`);
 });
 
 console.log(`\n   ♻️  热回收:`);
-doasResult.heatRecovery.checks.forEach(c => {
+doasResult.heatRecovery.checks.forEach((c) => {
   const icon = c.status === 'PASS' ? '✅' : c.status === 'FAIL' ? '❌' : '⚠️';
   const crit = c.critical ? ' [关键]' : '';
   console.log(`   ${icon}${crit} ${c.name}: ${c.detail || c.requirement}`);
 });
 
 console.log(`\n   🎛️  控制系统(Guideline 36):`);
-doasResult.controls.checks.forEach(c => {
+doasResult.controls.checks.forEach((c) => {
   const icon = c.status === 'PASS' ? '✅' : c.status === 'FAIL' ? '❌' : '⚠️';
   console.log(`   ${icon} ${c.name}`);
 });
@@ -149,7 +153,7 @@ console.log(`      合规率: ${doasResult.summary.complianceRate}`);
 console.log(`      评分: ${doasResult.summary.score}/100`);
 console.log(`      等级: ${doasResult.summary.grade}`);
 console.log(`      可申请认证:`);
-doasResult.summary.certifications.forEach(c => console.log(`        🎖️  ${c}`));
+doasResult.summary.certifications.forEach((c) => console.log(`        🎖️  ${c}`));
 
 // ========== 总结 ==========
 console.log('\n' + '='.repeat(80));

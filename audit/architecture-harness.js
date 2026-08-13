@@ -14,7 +14,7 @@ const ACTIVE_PAGES = [
   'archive/legacy-ui/public/index.html',
   'archive/legacy-ui/public/index-ready.html',
   'archive/legacy-ui/public/privacy.html',
-  'archive/legacy-ui/public/consent.html'
+  'archive/legacy-ui/public/consent.html',
 ];
 
 function read(file) {
@@ -41,8 +41,8 @@ function isReactCandidateReference(ref) {
     /^\/?node_modules\//,
     /^\/?(dist|build)\/assets\/.*\.(js|css)$/i,
     /^\/?(index|app)\.[jt]sx?$/i,
-    /^\/?src\/main\.[jt]sx?$/i
-  ].some(pattern => pattern.test(ref));
+    /^\/?src\/main\.[jt]sx?$/i,
+  ].some((pattern) => pattern.test(ref));
 }
 
 function activeReactCandidateReferences() {
@@ -60,7 +60,7 @@ function activeReactCandidateReferences() {
 function main() {
   execFileSync(process.execPath, [PRODUCT_HARNESS], {
     cwd: ROOT,
-    stdio: 'inherit'
+    stdio: 'inherit',
   });
 
   const consolidation = JSON.parse(read(PRODUCT_REPORT));
@@ -71,7 +71,7 @@ function main() {
     unassignedRouteGroups: consolidation.summary.unassignedRouteGroups,
     unmatchedActiveFrontendApiCalls: consolidation.summary.unmatchedActiveFrontendApiCalls,
     productionReactCandidateReferences: reactCandidateProductionReferences.length,
-    activePages: ACTIVE_PAGES.filter(file => fs.existsSync(path.join(ROOT, file))).length
+    activePages: ACTIVE_PAGES.filter((file) => fs.existsSync(path.join(ROOT, file))).length,
   };
 
   const report = {
@@ -81,34 +81,40 @@ function main() {
       routeDefinitions: summary.routeDefinitions,
       duplicateRouteGroups: consolidation.duplicateRouteGroups || [],
       unassignedRouteGroups: consolidation.unassignedRouteGroups || [],
-      phase1BackendCleanupMatrix: consolidation.phase1BackendCleanupMatrix || []
+      phase1BackendCleanupMatrix: consolidation.phase1BackendCleanupMatrix || [],
     },
     frontendApi: {
       activePages: ACTIVE_PAGES,
       activeFrontendApiCalls: consolidation.activeFrontendApiCalls || [],
       unmatchedActiveFrontendApiCalls: consolidation.unmatchedActiveFrontendApiCalls || [],
-      reactCandidateProductionReferences
+      reactCandidateProductionReferences,
     },
     contractScopes: {
       productionApi: 'active /api and retained /api/v2 route ownership',
-      reactServiceLayer: 'candidate - excluded from production navigation until contract and visual evidence pass'
-    }
+      reactServiceLayer:
+        'candidate - excluded from production navigation until contract and visual evidence pass',
+    },
   };
 
   fs.writeFileSync(REPORT_JSON, JSON.stringify(report, null, 2));
-  fs.writeFileSync(REPORT_MD, [
-    '# Architecture Harness Report',
-    '',
-    `- Generated: ${report.generatedAt}`,
-    `- Route definitions: ${summary.routeDefinitions}`,
-    `- Duplicate route groups: ${summary.duplicateRouteGroups}`,
-    `- Unassigned route groups: ${summary.unassignedRouteGroups}`,
-    `- Unmatched active frontend API calls: ${summary.unmatchedActiveFrontendApiCalls}`,
-    `- Production React candidate references: ${summary.productionReactCandidateReferences}`,
-    ''
-  ].join('\n'));
+  fs.writeFileSync(
+    REPORT_MD,
+    [
+      '# Architecture Harness Report',
+      '',
+      `- Generated: ${report.generatedAt}`,
+      `- Route definitions: ${summary.routeDefinitions}`,
+      `- Duplicate route groups: ${summary.duplicateRouteGroups}`,
+      `- Unassigned route groups: ${summary.unassignedRouteGroups}`,
+      `- Unmatched active frontend API calls: ${summary.unmatchedActiveFrontendApiCalls}`,
+      `- Production React candidate references: ${summary.productionReactCandidateReferences}`,
+      '',
+    ].join('\n')
+  );
 
-  console.log(`Architecture Harness: routes = ${summary.routeDefinitions}, duplicates = ${summary.duplicateRouteGroups}, unassigned = ${summary.unassignedRouteGroups}, unmatched = ${summary.unmatchedActiveFrontendApiCalls}, reactCandidateRefs = ${summary.productionReactCandidateReferences}`);
+  console.log(
+    `Architecture Harness: routes = ${summary.routeDefinitions}, duplicates = ${summary.duplicateRouteGroups}, unassigned = ${summary.unassignedRouteGroups}, unmatched = ${summary.unmatchedActiveFrontendApiCalls}, reactCandidateRefs = ${summary.productionReactCandidateReferences}`
+  );
 
   if (
     summary.duplicateRouteGroups > 0 ||

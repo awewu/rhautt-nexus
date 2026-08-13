@@ -2,7 +2,9 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = process.argv.includes('--port') ? Number(process.argv[process.argv.indexOf('--port') + 1]) : 4013;
+const PORT = process.argv.includes('--port')
+  ? Number(process.argv[process.argv.indexOf('--port') + 1])
+  : 4013;
 const ROOT = path.join(__dirname, '..', 'public');
 
 const MIME = {

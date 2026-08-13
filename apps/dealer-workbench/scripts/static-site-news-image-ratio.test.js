@@ -4,7 +4,15 @@ const path = require('node:path');
 const test = require('node:test');
 
 const consoleSource = fs.readFileSync(
-  path.join(__dirname, '..', 'src', 'app', 'comfort', '[[...section]]', 'BrandSiteConsoleShell.tsx'),
+  path.join(
+    __dirname,
+    '..',
+    'src',
+    'app',
+    'comfort',
+    '[[...section]]',
+    'BrandSiteConsoleShell.tsx'
+  ),
   'utf8'
 );
 const siteCss = fs.readFileSync(
@@ -16,7 +24,18 @@ const siteNewsJs = fs.readFileSync(
   'utf8'
 );
 const siteNewsService = fs.readFileSync(
-  path.join(__dirname, '..', '..', '..', 'services', 'api', 'src', 'modules', 'brand-registry', 'site-news.service.ts'),
+  path.join(
+    __dirname,
+    '..',
+    '..',
+    '..',
+    'services',
+    'api',
+    'src',
+    'modules',
+    'brand-registry',
+    'site-news.service.ts'
+  ),
   'utf8'
 );
 
@@ -44,13 +63,19 @@ test('site news cover upload shows the current echoed image in the asset style',
   assert.match(consoleSource, /建议 1280 × 600px/);
   assert.match(consoleSource, /hasDraftCoverImage \? '替换' : '上传'/);
   assert.match(consoleSource, /删除封面/);
-  assert.doesNotMatch(consoleSource, /<input className="input" type="file" accept="image\/png,image\/jpeg"/);
+  assert.doesNotMatch(
+    consoleSource,
+    /<input className="input" type="file" accept="image\/png,image\/jpeg"/
+  );
 });
 
 test('site news featured flag affects public ordering and is visible in console', () => {
   assert.match(consoleSource, /article\.isFeatured \? <span className="badge badge-info"/);
   assert.match(siteNewsService, /qb\.orderBy\('article\.isFeatured', 'DESC'\)/);
-  assert.match(siteNewsService, /order: \{ isFeatured: 'DESC', sortOrder: 'ASC', publishedAt: 'DESC', createdAt: 'DESC' \}/);
+  assert.match(
+    siteNewsService,
+    /order: \{ isFeatured: 'DESC', sortOrder: 'ASC', publishedAt: 'DESC', createdAt: 'DESC' \}/
+  );
   assert.match(siteNewsJs, /function sortNewsItems/);
   assert.match(siteNewsJs, /newsRank\(left\) - newsRank\(right\)/);
   assert.match(siteNewsJs, /grid\.innerHTML = sortNewsItems\(items\)\.slice/);

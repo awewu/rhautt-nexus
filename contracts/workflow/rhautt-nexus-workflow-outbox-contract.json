@@ -25,11 +25,7 @@
         "quote.approved",
         "customer.share.released"
       ],
-      "requiredAuditActions": [
-        "quotation.created",
-        "quote.approval.requested",
-        "quote.approved"
-      ],
+      "requiredAuditActions": ["quotation.created", "quote.approval.requested", "quote.approved"],
       "steps": [
         "validate-tenant-scope",
         "calculate-cost-and-margin",
@@ -44,10 +40,7 @@
         "backoff": "exponential",
         "timeout": "P7D"
       },
-      "compensation": [
-        "revoke-customer-share",
-        "mark-quote-approval-failed"
-      ]
+      "compensation": ["revoke-customer-share", "mark-quote-approval-failed"]
     },
     {
       "id": "contract-signing-workflow",
@@ -80,10 +73,7 @@
         "backoff": "exponential",
         "timeout": "P14D"
       },
-      "compensation": [
-        "void-generated-contract",
-        "revert-customer-visible-state"
-      ]
+      "compensation": ["void-generated-contract", "revert-customer-visible-state"]
     },
     {
       "id": "construction-delivery-workflow",
@@ -117,10 +107,7 @@
         "backoff": "exponential",
         "timeout": "P60D"
       },
-      "compensation": [
-        "reschedule-milestone",
-        "flag-delivery-risk"
-      ]
+      "compensation": ["reschedule-milestone", "flag-delivery-risk"]
     },
     {
       "id": "iot-handoff-workflow",
@@ -155,10 +142,7 @@
         "backoff": "exponential",
         "timeout": "P30D"
       },
-      "compensation": [
-        "mark-handoff-pending",
-        "open-service-review-task"
-      ]
+      "compensation": ["mark-handoff-pending", "open-service-review-task"]
     },
     {
       "id": "service-plan-workflow",
@@ -173,10 +157,7 @@
         "maintenance.scheduled",
         "customer.lifecycle.activated"
       ],
-      "requiredAuditActions": [
-        "lifecycle.project_state.update",
-        "service.plan.activated"
-      ],
+      "requiredAuditActions": ["lifecycle.project_state.update", "service.plan.activated"],
       "steps": [
         "activate-service-plan",
         "schedule-maintenance",
@@ -189,9 +170,7 @@
         "backoff": "exponential",
         "timeout": "P7D"
       },
-      "compensation": [
-        "mark-service-plan-review-required"
-      ]
+      "compensation": ["mark-service-plan-review-required"]
     }
   ],
   "sourceProbes": {

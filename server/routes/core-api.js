@@ -25,7 +25,11 @@
 const express = require('express');
 const { errorResponse } = require('../utils/sanitize-error');
 
-module.exports = function createCoreApiRouter(db, engines, { JWT_SECRET, authenticateToken, checkRole }) {
+module.exports = function createCoreApiRouter(
+  db,
+  engines,
+  { JWT_SECRET, authenticateToken, checkRole }
+) {
   const router = express.Router();
   const painDiagnosisEngine = engines.painDiagnosis || engines.painPointDiagnosis;
   const painMatchingEngine = engines.painMatching || engines.painPointMatching;
@@ -33,16 +37,23 @@ module.exports = function createCoreApiRouter(db, engines, { JWT_SECRET, authent
   // ── 健康检查 ──────────────────────────────────────────────────────────────
   router.get('/health', (req, res) => {
     res.json({
-      status: 'ok', service: '瑞诺瓦舒适家居系统',
-      version: '4.0', mode: process.env.NODE_ENV || 'development',
+      status: 'ok',
+      service: '瑞诺瓦舒适家居系统',
+      version: '4.0',
+      mode: process.env.NODE_ENV || 'development',
       db: require('../db/index').getMode(),
       uptime: Math.floor(process.uptime()),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   });
 
   router.get('/api/status', (req, res) => {
-    res.json({ success: true, status: 'running', version: '4.0', timestamp: new Date().toISOString() });
+    res.json({
+      success: true,
+      status: 'running',
+      version: '4.0',
+      timestamp: new Date().toISOString(),
+    });
   });
 
   // ── 客户管理 ──────────────────────────────────────────────────────────────
@@ -50,33 +61,58 @@ module.exports = function createCoreApiRouter(db, engines, { JWT_SECRET, authent
     try {
       const { phone } = req.query;
       if (!phone) return res.status(400).json({ success: false, error: '请提供手机号' });
-      const customer = (db.customers || []).find(c => c.phone === phone);
+      const customer = (db.customers || []).find((c) => c.phone === phone);
       if (!customer) return res.json({ success: true, data: null, message: '未找到客户档案' });
-      const quotes = (db.quotes || []).filter(q => q.customerId === customer.id);
-      const contracts = (db.contracts || []).filter(c => c.customerId === customer.id || c.customerPhone === phone);
+      const quotes = (db.quotes || []).filter((q) => q.customerId === customer.id);
+      const contracts = (db.contracts || []).filter(
+        (c) => c.customerId === customer.id || c.customerPhone === phone
+      );
       res.json({ success: true, data: { customer, quotes, contracts } });
-    } catch (e) { return errorResponse(res, e); }
+    } catch (e) {
+      return errorResponse(res, e);
+    }
   });
 
-  router.post('/api/customers', authenticateToken, checkRole(['sales', 'store_admin', 'designer']), (req, res) => {
-    try {
-      const { phone, name, houseType, area, city } = req.body;
-      if (!phone || !name) return res.status(400).json({ success: false, error: '姓名和手机号必填' });
-      const exists = (db.customers || []).find(c => c.phone === phone);
-      if (exists) return res.status(409).json({ success: false, error: '该手机号已存在客户档案' });
-      const newCustomer = { id: `C${Date.now()}`, phone, name, houseType, area, city, createdBy: req.user.id, salesId: req.user.id, createdAt: new Date().toISOString() };
-      if (!db.customers) db.customers = [];
-      db.customers.push(newCustomer);
-      res.json({ success: true, data: newCustomer });
-    } catch (e) { return errorResponse(res, e); }
-  });
+  router.post(
+    '/api/customers',
+    authenticateToken,
+    checkRole(['sales', 'store_admin', 'designer']),
+    (req, res) => {
+      try {
+        const { phone, name, houseType, area, city } = req.body;
+        if (!phone || !name)
+          return res.status(400).json({ success: false, error: '姓名和手机号必填' });
+        const exists = (db.customers || []).find((c) => c.phone === phone);
+        if (exists)
+          return res.status(409).json({ success: false, error: '该手机号已存在客户档案' });
+        const newCustomer = {
+          id: `C${Date.now()}`,
+          phone,
+          name,
+          houseType,
+          area,
+          city,
+          createdBy: req.user.id,
+          salesId: req.user.id,
+          createdAt: new Date().toISOString(),
+        };
+        if (!db.customers) db.customers = [];
+        db.customers.push(newCustomer);
+        res.json({ success: true, data: newCustomer });
+      } catch (e) {
+        return errorResponse(res, e);
+      }
+    }
+  );
 
   // ── 痛点问诊 ──────────────────────────────────────────────────────────────
   router.post('/api/pain-diagnosis', (req, res) => {
     try {
       const result = painDiagnosisEngine.diagnose(req.body);
       res.json({ success: true, data: result });
-    } catch (e) { return errorResponse(res, e); }
+    } catch (e) {
+      return errorResponse(res, e);
+    }
   });
 
   // ── 方案匹配 ──────────────────────────────────────────────────────────────
@@ -84,7 +120,9 @@ module.exports = function createCoreApiRouter(db, engines, { JWT_SECRET, authent
     try {
       const result = painMatchingEngine.match(req.body);
       res.json({ success: true, data: result });
-    } catch (e) { return errorResponse(res, e); }
+    } catch (e) {
+      return errorResponse(res, e);
+    }
   });
 
   // ── AI顾问 ────────────────────────────────────────────────────────────────
@@ -92,35 +130,54 @@ module.exports = function createCoreApiRouter(db, engines, { JWT_SECRET, authent
     try {
       const result = engines.aiConsultant.generateConsultation(req.body);
       res.json({ success: true, data: result });
-    } catch (e) { return errorResponse(res, e); }
+    } catch (e) {
+      return errorResponse(res, e);
+    }
   });
 
   router.post('/api/ai-consultant/compare', (req, res) => {
     try {
       const consultation = engines.aiConsultant.generateConsultation(req.body);
-      res.json({ success: true, data: { comparison: consultation.tiers, recommendation: consultation.recommendation } });
-    } catch (e) { return errorResponse(res, e); }
+      res.json({
+        success: true,
+        data: { comparison: consultation.tiers, recommendation: consultation.recommendation },
+      });
+    } catch (e) {
+      return errorResponse(res, e);
+    }
   });
 
   // ── 户型库 ────────────────────────────────────────────────────────────────
   router.get('/api/house-types', (req, res) => {
-    try { res.json({ success: true, data: engines.houseTypeLibrary.search(req.query) }); }
-    catch (e) { return errorResponse(res, e); }
+    try {
+      res.json({ success: true, data: engines.houseTypeLibrary.search(req.query) });
+    } catch (e) {
+      return errorResponse(res, e);
+    }
   });
 
   router.get('/api/house-types/stats', (req, res) => {
-    try { res.json({ success: true, data: engines.houseTypeLibrary.getStats() }); }
-    catch (e) { return errorResponse(res, e); }
+    try {
+      res.json({ success: true, data: engines.houseTypeLibrary.getStats() });
+    } catch (e) {
+      return errorResponse(res, e);
+    }
   });
 
   router.post('/api/house-types/recommend', (req, res) => {
-    try { res.json({ success: true, data: engines.houseTypeLibrary.recommend(req.body) }); }
-    catch (e) { return errorResponse(res, e); }
+    try {
+      res.json({ success: true, data: engines.houseTypeLibrary.recommend(req.body) });
+    } catch (e) {
+      return errorResponse(res, e);
+    }
   });
 
   router.post('/api/house-types/compare', (req, res) => {
-    try { res.json({ success: true, data: engines.houseTypeLibrary.compare(req.body.ids || []) }); }
-    catch (e) { return errorResponse(res, e); }
+    try {
+      res.json({ success: true, data: engines.houseTypeLibrary.compare(req.body.ids || []) });
+    } catch (e) {
+      return errorResponse(res, e);
+    }
   });
 
   router.get('/api/house-types/:id', (req, res) => {
@@ -128,16 +185,54 @@ module.exports = function createCoreApiRouter(db, engines, { JWT_SECRET, authent
       const ht = engines.houseTypeLibrary.getById(req.params.id);
       if (!ht) return res.status(404).json({ success: false, error: '户型不存在' });
       res.json({ success: true, data: ht });
-    } catch (e) { return errorResponse(res, e); }
+    } catch (e) {
+      return errorResponse(res, e);
+    }
   });
 
   // ── 系统设计 ──────────────────────────────────────────────────────────────
-  router.post('/api/design/water-system',       (req, res) => { try { res.json({ success: true, data: engines.waterSystem.generateDesign(req.body) }); } catch (e) { return errorResponse(res, e); } });
-  router.post('/api/design/heating-system',     (req, res) => { try { res.json({ success: true, data: engines.heatingSystem.generateDesign(req.body) }); } catch (e) { return errorResponse(res, e); } });
-  router.post('/api/design/air-conditioning',   (req, res) => { try { res.json({ success: true, data: engines.airConditioning.generateDesign(req.body) }); } catch (e) { return errorResponse(res, e); } });
-  router.post('/api/design/five-constant',      (req, res) => { try { res.json({ success: true, data: engines.fiveConstant.generateDesign(req.body) }); } catch (e) { return errorResponse(res, e); } });
-  router.post('/api/design/fresh-air-pro',      (req, res) => { try { res.json({ success: true, data: engines.freshAirPro.generateDesign(req.body) }); } catch (e) { return errorResponse(res, e); } });
-  router.post('/api/design/doas',               (req, res) => { try { res.json({ success: true, data: engines.freshAirPro.designDOAS(req.body) }); } catch (e) { return errorResponse(res, e); } });
+  router.post('/api/design/water-system', (req, res) => {
+    try {
+      res.json({ success: true, data: engines.waterSystem.generateDesign(req.body) });
+    } catch (e) {
+      return errorResponse(res, e);
+    }
+  });
+  router.post('/api/design/heating-system', (req, res) => {
+    try {
+      res.json({ success: true, data: engines.heatingSystem.generateDesign(req.body) });
+    } catch (e) {
+      return errorResponse(res, e);
+    }
+  });
+  router.post('/api/design/air-conditioning', (req, res) => {
+    try {
+      res.json({ success: true, data: engines.airConditioning.generateDesign(req.body) });
+    } catch (e) {
+      return errorResponse(res, e);
+    }
+  });
+  router.post('/api/design/five-constant', (req, res) => {
+    try {
+      res.json({ success: true, data: engines.fiveConstant.generateDesign(req.body) });
+    } catch (e) {
+      return errorResponse(res, e);
+    }
+  });
+  router.post('/api/design/fresh-air-pro', (req, res) => {
+    try {
+      res.json({ success: true, data: engines.freshAirPro.generateDesign(req.body) });
+    } catch (e) {
+      return errorResponse(res, e);
+    }
+  });
+  router.post('/api/design/doas', (req, res) => {
+    try {
+      res.json({ success: true, data: engines.freshAirPro.designDOAS(req.body) });
+    } catch (e) {
+      return errorResponse(res, e);
+    }
+  });
 
   router.post('/api/design/hvac-complete', (req, res) => {
     try {
@@ -146,13 +241,30 @@ module.exports = function createCoreApiRouter(db, engines, { JWT_SECRET, authent
       const water = engines.waterSystem.generateDesign(base);
       const heating = engines.heatingSystem.generateDesign(base);
       const air = engines.airConditioning.generateDesign(base);
-      res.json({ success: true, data: { water, heating, airConditioning: air, summary: { totalSystems: 3, area, houseType } } });
-    } catch (e) { return errorResponse(res, e); }
+      res.json({
+        success: true,
+        data: {
+          water,
+          heating,
+          airConditioning: air,
+          summary: { totalSystems: 3, area, houseType },
+        },
+      });
+    } catch (e) {
+      return errorResponse(res, e);
+    }
   });
 
   // ── 引擎健康 ──────────────────────────────────────────────────────────────
   router.get('/api/engines/health', (req, res) => {
-    res.json({ success: true, data: { status: 'all_ok', engines: Object.keys(engines).length, timestamp: new Date().toISOString() } });
+    res.json({
+      success: true,
+      data: {
+        status: 'all_ok',
+        engines: Object.keys(engines).length,
+        timestamp: new Date().toISOString(),
+      },
+    });
   });
 
   // ── 3D可视化 ──────────────────────────────────────────────────────────────
@@ -163,7 +275,12 @@ module.exports = function createCoreApiRouter(db, engines, { JWT_SECRET, authent
 
   // ── 语音交互 ──────────────────────────────────────────────────────────────
   router.get('/api/voice-interaction', (req, res) => {
-    res.json({ success: true, status: 'ready', supportedModes: ['text', 'voice'], engine: 'VoiceInteractionEngine v1.0' });
+    res.json({
+      success: true,
+      status: 'ready',
+      supportedModes: ['text', 'voice'],
+      engine: 'VoiceInteractionEngine v1.0',
+    });
   });
 
   router.post('/api/voice-interaction', (req, res) => {
@@ -171,11 +288,16 @@ module.exports = function createCoreApiRouter(db, engines, { JWT_SECRET, authent
       success: true,
       data: {
         recognized: req.body.voiceData || '请描述您的舒适需求',
-        intent: 'consultation', confidence: 0.92,
+        intent: 'consultation',
+        confidence: 0.92,
         response: '我理解您的需求，瑞美五恒系统可以为您提供恒温恒湿恒氧恒洁恒静的舒适环境。',
-        suggestions: ['告诉我您家的面积和户型', '描述目前居住的不舒适之处', '了解瑞美产品和解决方案']
+        suggestions: [
+          '告诉我您家的面积和户型',
+          '描述目前居住的不舒适之处',
+          '了解瑞美产品和解决方案',
+        ],
       },
-      engine: 'VoiceInteractionEngine v1.0'
+      engine: 'VoiceInteractionEngine v1.0',
     });
   });
 

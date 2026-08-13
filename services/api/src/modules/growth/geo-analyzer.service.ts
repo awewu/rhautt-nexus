@@ -46,17 +46,17 @@ export interface HallucinationRisk {
 export type GeoVisibilityTier = 'none' | 'mentioned' | 'cited';
 
 export interface GeoAnswerAnalysis {
-  weCited: boolean;                 // 向后兼容：等价于 tier !== 'none'（品牌名出现即真）
+  weCited: boolean; // 向后兼容：等价于 tier !== 'none'（品牌名出现即真）
   visibilityTier: GeoVisibilityTier;
-  hasOurSource: boolean;            // 答案是否含我方域名/URL 出处（cited 的判据）
-  citationRank: number | null;      // 我方首次出现在答案第几个句段（1-based），未引用为 null
+  hasOurSource: boolean; // 答案是否含我方域名/URL 出处（cited 的判据）
+  citationRank: number | null; // 我方首次出现在答案第几个句段（1-based），未引用为 null
   competitorsCited: string[];
-  aivs: number;                     // 0-100
+  aivs: number; // 0-100
   aivsBreakdown: { position: number; recommendation: number; evidence: number; prominence: number };
-  sentiment: 'positive' | 'negative' | 'neutral';   // AI 答案对我方品牌的情感倾向
+  sentiment: 'positive' | 'negative' | 'neutral'; // AI 答案对我方品牌的情感倾向
   ourMentions: number;
   competitorMentions: number;
-  trustSources: TrustSource[];      // 答案引用的出处 URL（我方/第三方）
+  trustSources: TrustSource[]; // 答案引用的出处 URL（我方/第三方）
   hallucinationRisks: HallucinationRisk[]; // 疑似 AI 编造的我方参数/事实（对照品牌大脑事实库）
 }
 
@@ -73,8 +73,32 @@ export interface GeoTask {
   action: string;
 }
 
-const RECOMMEND_CUES = ['推荐', '首选', '值得', '不错', '优选', '建议选', '口碑好', '靠谱', '领先', '知名'];
-const NEGATIVE_CUES = ['差', '坑', '不推荐', '避雷', '故障', '漏水', '投诉', '贵', '不值', '难用', '踩雷', '虚标'];
+const RECOMMEND_CUES = [
+  '推荐',
+  '首选',
+  '值得',
+  '不错',
+  '优选',
+  '建议选',
+  '口碑好',
+  '靠谱',
+  '领先',
+  '知名',
+];
+const NEGATIVE_CUES = [
+  '差',
+  '坑',
+  '不推荐',
+  '避雷',
+  '故障',
+  '漏水',
+  '投诉',
+  '贵',
+  '不值',
+  '难用',
+  '踩雷',
+  '虚标',
+];
 const SPEC_PATTERN = /(\d+(?:\.\d+)?\s*(?:年|L|升|kW|W|℃|度|%|级|米|m|mm|万|元|dB|分贝|Hz|匹|P))/;
 
 @Injectable()
@@ -95,7 +119,9 @@ export class GeoAnalyzerService {
     const names: string[] = [];
     const domains: string[] = [];
     try {
-      const reg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'brand-registry.json'), 'utf8'));
+      const reg = JSON.parse(
+        fs.readFileSync(path.join(process.cwd(), 'brand-registry.json'), 'utf8')
+      );
       const outward = new Set(['group', 'brand-site', 'consumer-app']);
       for (const b of reg.brands || []) {
         if (!outward.has(b.type)) continue;
@@ -104,10 +130,23 @@ export class GeoAnalyzerService {
         if (b.domain) domains.push(String(b.domain));
       }
     } catch (err: unknown) {
-      this.logger.warn(`brand-registry.json unavailable, using minimal brand profile: ${String(err)}`);
+      this.logger.warn(
+        `brand-registry.json unavailable, using minimal brand profile: ${String(err)}`
+      );
     }
     // 品牌关键词兜底（含设备品牌短名，用于答案文本匹配）。
-    for (const kw of ['瑞合瑞德', 'Rhautt', 'Rheem', '瑞美', 'Ruud', '瑞德', 'Everhot', '恒热', '瑞诺瓦', 'Rysnova']) {
+    for (const kw of [
+      '瑞合瑞德',
+      'Rhautt',
+      'Rheem',
+      '瑞美',
+      'Ruud',
+      '瑞德',
+      'Everhot',
+      '恒热',
+      '瑞诺瓦',
+      'Rysnova',
+    ]) {
       if (!names.includes(kw)) names.push(kw);
     }
     this.brandProfileCache = { names, domains };
@@ -118,32 +157,45 @@ export class GeoAnalyzerService {
    * 分析一段 AI 答案快照：我方是否被引用、位次、竞品、AIVS。
    * competitors: 调用方给定的竞品候选名单（在答案中命中即计入 competitorsCited）。
    */
-  analyzeAnswer(answerSnapshot: string, competitors: string[] = [], brandSlug?: string | null): GeoAnswerAnalysis {
+  analyzeAnswer(
+    answerSnapshot: string,
+    competitors: string[] = [],
+    brandSlug?: string | null
+  ): GeoAnswerAnalysis {
     const text = String(answerSnapshot || '');
     const { names, domains } = this.brandProfile();
-    const segments = text.split(/[。！？\n]+/).map((s) => s.trim()).filter(Boolean);
+    const segments = text
+      .split(/[。！？\n]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
     const total = Math.max(segments.length, 1);
 
     // 位次：我方品牌/域名首次出现在第几个句段。
     let citationRank: number | null = null;
     for (let i = 0; i < segments.length; i++) {
-      if (this.hits(segments[i], names) || this.hits(segments[i], domains)) { citationRank = i + 1; break; }
+      if (this.hits(segments[i], names) || this.hits(segments[i], domains)) {
+        citationRank = i + 1;
+        break;
+      }
     }
     // 三层可见度：品牌名出现=至少 mentioned；再有我方域名/URL 出处=cited（真引用）。
     // 这修正了此前把"被提及"当"被引用"的高估——mentioned 不代表 AI 读了我们的内容。
     const hasOurSource = domains.some((d) => d && text.includes(d));
     const nameAppears = citationRank !== null;
-    const visibilityTier: GeoVisibilityTier = hasOurSource ? 'cited' : nameAppears ? 'mentioned' : 'none';
+    const visibilityTier: GeoVisibilityTier = hasOurSource
+      ? 'cited'
+      : nameAppears
+        ? 'mentioned'
+        : 'none';
     const weCited = nameAppears;
 
     // 竞品候选只使用本次探测显式给定的名单，避免未配置时冒出默认竞品。
-    const candidateCompetitors = [...new Set(competitors)]
-      .filter((c) => c && !names.includes(c));
+    const candidateCompetitors = [...new Set(competitors)].filter((c) => c && !names.includes(c));
     const competitorsCited = [...new Set(candidateCompetitors.filter((c) => text.includes(c)))];
 
     // ── AIVS（0-100，对标 GEOlytic 权重）──
     // position 35%：越靠前越高
-    const position = weCited ? (1 - (citationRank! - 1) / total) : 0;
+    const position = weCited ? 1 - (citationRank! - 1) / total : 0;
     // recommendation 30%：我方句段附近是否含推荐性措辞
     const recommendation = weCited && this.nearRecommendation(segments, names, domains) ? 1 : 0;
     // evidence 20%：答案是否引用了我方域名（链接/出处）—— 即三层里的 cited 判据
@@ -151,7 +203,8 @@ export class GeoAnalyzerService {
     // prominence 15%：我方提及次数占（我方+竞品）总提及比
     const ourMentions = this.count(text, names) + this.count(text, domains);
     const competitorMentions = competitorsCited.reduce((s, c) => s + this.count(text, [c]), 0);
-    const prominence = ourMentions + competitorMentions > 0 ? ourMentions / (ourMentions + competitorMentions) : 0;
+    const prominence =
+      ourMentions + competitorMentions > 0 ? ourMentions / (ourMentions + competitorMentions) : 0;
 
     const breakdown = {
       position: Math.round(position * 35),
@@ -159,11 +212,19 @@ export class GeoAnalyzerService {
       evidence: Math.round(evidence * 20),
       prominence: Math.round(prominence * 15),
     };
-    const aivs = breakdown.position + breakdown.recommendation + breakdown.evidence + breakdown.prominence;
+    const aivs =
+      breakdown.position + breakdown.recommendation + breakdown.evidence + breakdown.prominence;
     return {
-      weCited, visibilityTier, hasOurSource, citationRank, competitorsCited, aivs, aivsBreakdown: breakdown,
+      weCited,
+      visibilityTier,
+      hasOurSource,
+      citationRank,
+      competitorsCited,
+      aivs,
+      aivsBreakdown: breakdown,
       sentiment: this.sentimentToward(segments, names, domains),
-      ourMentions, competitorMentions,
+      ourMentions,
+      competitorMentions,
       trustSources: this.extractTrustSources(text),
       hallucinationRisks: this.detectHallucinations(segments, names, domains, brandSlug),
     };
@@ -174,7 +235,12 @@ export class GeoAnalyzerService {
    * 规则：提及我方品牌且含具体参数/规格（数字+单位）的句段，若与 brand-brain facts 无一致依据，
    * 标为疑似 AI 编造——喂回品牌大脑做正本清源。
    */
-  detectHallucinations(segments: string[], names: string[], domains: string[], brandSlug?: string | null): HallucinationRisk[] {
+  detectHallucinations(
+    segments: string[],
+    names: string[],
+    domains: string[],
+    brandSlug?: string | null
+  ): HallucinationRisk[] {
     const ctx = this.brandBrain.context(brandSlug ?? null);
     const factsBlob = ctx ? ctx.facts.join(' ') : '';
     const risks: HallucinationRisk[] = [];
@@ -184,7 +250,10 @@ export class GeoAnalyzerService {
       if (!m) continue;
       // 若该具体数值未在品牌事实库出现 → 疑似编造。
       if (!factsBlob.includes(m[1].replace(/\s+/g, ''))) {
-        risks.push({ segment: seg.slice(0, 80), reason: `含未经品牌事实库核实的具体参数「${m[1].trim()}」` });
+        risks.push({
+          segment: seg.slice(0, 80),
+          reason: `含未经品牌事实库核实的具体参数「${m[1].trim()}」`,
+        });
       }
     }
     return risks.slice(0, 10);
@@ -200,7 +269,11 @@ export class GeoAnalyzerService {
       const domain = (url.replace(/^https?:\/\//i, '').split(/[/?#]/)[0] || '').toLowerCase();
       if (!domain || seen.has(domain)) continue;
       seen.add(domain);
-      out.push({ url, domain, ours: domains.some((d) => domain.includes(String(d).toLowerCase())) });
+      out.push({
+        url,
+        domain,
+        ours: domains.some((d) => domain.includes(String(d).toLowerCase())),
+      });
     }
     return out.slice(0, 20);
   }
@@ -211,7 +284,9 @@ export class GeoAnalyzerService {
    */
   generateQuestionSet(brandSlug?: string | null, category = '家用热水与舒适系统'): QuestionSet {
     const ctx = this.brandBrain.context(brandSlug ?? null);
-    const brand = brandSlug ? (GEO_BRAND_DISPLAY_NAMES[brandSlug] || ctx?.name || brandSlug) : '瑞美 Rheem';
+    const brand = brandSlug
+      ? GEO_BRAND_DISPLAY_NAMES[brandSlug] || ctx?.name || brandSlug
+      : '瑞美 Rheem';
     const questions: QuestionSet['questions'] = [
       { stage: 'pre', question: `${category}怎么选？有哪些值得推荐的品牌？` },
       { stage: 'pre', question: `${category}主流品牌对比，哪个口碑好？` },
@@ -234,14 +309,26 @@ export class GeoAnalyzerService {
   buildProbeWorklist(
     brandSlug?: string | null,
     category?: string,
-    engineFilter?: string[],
-  ): { brandSlug: string | null; category: string; total: number; items: { question: string; stage: string; engine: string; engineReady: boolean }[] } {
+    engineFilter?: string[]
+  ): {
+    brandSlug: string | null;
+    category: string;
+    total: number;
+    items: { question: string; stage: string; engine: string; engineReady: boolean }[];
+  } {
     const qs = this.generateQuestionSet(brandSlug ?? null, category);
-    const engines = this.engines().filter((e) => !engineFilter || !engineFilter.length || engineFilter.includes(e.engine));
+    const engines = this.engines().filter(
+      (e) => !engineFilter || !engineFilter.length || engineFilter.includes(e.engine)
+    );
     const items: { question: string; stage: string; engine: string; engineReady: boolean }[] = [];
     for (const q of qs.questions) {
       for (const e of engines) {
-        items.push({ question: q.question, stage: q.stage, engine: e.engine, engineReady: e.status === 'ready' });
+        items.push({
+          question: q.question,
+          stage: q.stage,
+          engine: e.engine,
+          engineReady: e.status === 'ready',
+        });
       }
     }
     return { brandSlug: qs.brandSlug, category: qs.category, total: items.length, items };
@@ -253,25 +340,47 @@ export class GeoAnalyzerService {
    */
   buildPlaybook(
     engineVisibility: { engine: string; probes: number; citedRate: number; avgAivs: number }[],
-    hallucinationCount: number,
+    hallucinationCount: number
   ): GeoTask[] {
     const tasks: GeoTask[] = [];
     for (const v of engineVisibility) {
       if (v.citedRate === 0) {
-        tasks.push({ priority: 'P0', engine: v.engine, kind: 'not-cited', action: `${v.engine}：完全未被引用，优先在该引擎索引友好渠道补权威内容 + 结构化数据` });
+        tasks.push({
+          priority: 'P0',
+          engine: v.engine,
+          kind: 'not-cited',
+          action: `${v.engine}：完全未被引用，优先在该引擎索引友好渠道补权威内容 + 结构化数据`,
+        });
       } else if (v.avgAivs < 40) {
-        tasks.push({ priority: 'P1', engine: v.engine, kind: 'low-rank', action: `${v.engine}：AIVS 偏低(${v.avgAivs})，强化推荐性证据与我方域名出处，回流 E2 补对比型内容` });
+        tasks.push({
+          priority: 'P1',
+          engine: v.engine,
+          kind: 'low-rank',
+          action: `${v.engine}：AIVS 偏低(${v.avgAivs})，强化推荐性证据与我方域名出处，回流 E2 补对比型内容`,
+        });
       }
     }
     if (hallucinationCount > 0) {
-      tasks.push({ priority: 'P0', kind: 'hallucination', action: `检出 ${hallucinationCount} 处疑似品牌幻觉，向品牌大脑提交事实修正并生成正本清源内容` });
+      tasks.push({
+        priority: 'P0',
+        kind: 'hallucination',
+        action: `检出 ${hallucinationCount} 处疑似品牌幻觉，向品牌大脑提交事实修正并生成正本清源内容`,
+      });
     }
     const onSite = this.onSiteReadiness();
     if (onSite.total > 0 && onSite.ready < onSite.total) {
-      tasks.push({ priority: 'P1', kind: 'onsite-schema', action: `站内 ${onSite.total - onSite.ready}/${onSite.total} 个对外站未就绪，补齐 Product/ItemList schema 与 sitemap（见 guard:geo）` });
+      tasks.push({
+        priority: 'P1',
+        kind: 'onsite-schema',
+        action: `站内 ${onSite.total - onSite.ready}/${onSite.total} 个对外站未就绪，补齐 Product/ItemList schema 与 sitemap（见 guard:geo）`,
+      });
     }
     if (tasks.length === 0) {
-      tasks.push({ priority: 'P2', kind: 'content-gap', action: '各引擎可见度良好，持续监测并扩充长尾问答内容' });
+      tasks.push({
+        priority: 'P2',
+        kind: 'content-gap',
+        action: '各引擎可见度良好，持续监测并扩充长尾问答内容',
+      });
     }
     return tasks;
   }
@@ -303,10 +412,15 @@ export class GeoAnalyzerService {
   }
 
   /** 站内可引用度：消费 guard:geo 产物。 */
-  onSiteReadiness(): { generatedAt: string | null; sites: unknown[]; ready: number; total: number } {
+  onSiteReadiness(): {
+    generatedAt: string | null;
+    sites: unknown[];
+    ready: number;
+    total: number;
+  } {
     try {
       const report = JSON.parse(
-        fs.readFileSync(path.join(process.cwd(), 'evidence/geo/geo-readiness-report.json'), 'utf8'),
+        fs.readFileSync(path.join(process.cwd(), 'evidence/geo/geo-readiness-report.json'), 'utf8')
       );
       const sites = report.summary || [];
       const ready = sites.filter((s: { status?: string }) => s.status === 'ready').length;
@@ -330,11 +444,17 @@ export class GeoAnalyzerService {
   }
   private nearRecommendation(segments: string[], names: string[], domains: string[]): boolean {
     return segments.some(
-      (seg) => (this.hits(seg, names) || this.hits(seg, domains)) && RECOMMEND_CUES.some((cue) => seg.includes(cue)),
+      (seg) =>
+        (this.hits(seg, names) || this.hits(seg, domains)) &&
+        RECOMMEND_CUES.some((cue) => seg.includes(cue))
     );
   }
   /** 答案对我方品牌的情感倾向：仅看提及我方的句段的正负面措辞。 */
-  private sentimentToward(segments: string[], names: string[], domains: string[]): 'positive' | 'negative' | 'neutral' {
+  private sentimentToward(
+    segments: string[],
+    names: string[],
+    domains: string[]
+  ): 'positive' | 'negative' | 'neutral' {
     let pos = 0;
     let neg = 0;
     for (const seg of segments) {

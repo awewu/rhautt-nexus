@@ -14,7 +14,7 @@ class CorePrincipleVisuals {
       bg: '#f7fafc',
       pain: '#fc8181',
       solution: '#68d391',
-      product: '#63b3ed'
+      product: '#63b3ed',
     };
   }
 
@@ -35,24 +35,24 @@ class CorePrincipleVisuals {
           content: {
             roomImage: this.generateRoomScene(roomProfile),
             keyFeatures: roomProfile.keyFeatures || ['西晒户型', '3室2厅', '有老人'],
-            highlightAreas: this.identifyPainAreas(diagnosis)
-          }
+            highlightAreas: this.identifyPainAreas(diagnosis),
+          },
         },
         center: {
           title: '痛点拆解',
           width: '40%',
           content: {
-            painTags: diagnosis.allTags.map(tag => ({
+            painTags: diagnosis.allTags.map((tag) => ({
               id: tag.id,
               name: tag.name,
               category: tag.category,
               icon: this.getPainIcon(tag.category),
               color: this.getPainColor(tag.category),
-              severity: tag.severity || 'medium'
+              severity: tag.severity || 'medium',
             })),
             categorySummary: this.summarizeByCategory(diagnosis.allTags),
-            aiRecognized: diagnosis.aiSuggestedTags.length
-          }
+            aiRecognized: diagnosis.aiSuggestedTags.length,
+          },
         },
         right: {
           title: '智能匹配',
@@ -61,22 +61,22 @@ class CorePrincipleVisuals {
             algorithmFlow: [
               { step: 1, name: '户型解析', status: 'complete' },
               { step: 2, name: '痛点识别', status: 'complete' },
-              { step: 3, name: '方案匹配', status: 'complete' }
+              { step: 3, name: '方案匹配', status: 'complete' },
             ],
             matchingScore: Math.round(diagnosis.recommendationPriority.length * 20),
-            recommendationCount: diagnosis.recommendationPriority.length
-          }
-        }
+            recommendationCount: diagnosis.recommendationPriority.length,
+          },
+        },
       },
       bottomBanner: {
         slogan: '「对症开药」一户一方案，拒绝千篇一律',
-        subSlogan: 'AI智能识别居住痛点，精准匹配舒适解决方案'
+        subSlogan: 'AI智能识别居住痛点，精准匹配舒适解决方案',
       },
       presentationMode: {
         hideUI: true,
         fullScreen: true,
-        animation: 'fade_in_sequence' // 痛点逐个显示动画
-      }
+        animation: 'fade_in_sequence', // 痛点逐个显示动画
+      },
     };
   }
 
@@ -102,9 +102,9 @@ class CorePrincipleVisuals {
             text: tag.name,
             category: tag.category,
             icon: this.getPainIcon(tag.category),
-            position: { row: index % 3, col: Math.floor(index / 3) }
+            position: { row: index % 3, col: Math.floor(index / 3) },
           })),
-          visualStyle: 'tag_cloud'
+          visualStyle: 'tag_cloud',
         },
         prescription: {
           title: '系统处方',
@@ -117,41 +117,41 @@ class CorePrincipleVisuals {
             forceRecommend: sys.forceRecommend,
             keyBenefit: sys.explanation,
             color: sys.forceRecommend ? this.colors.primary : this.colors.secondary,
-            position: { row: index, col: 0 }
+            position: { row: index, col: 0 },
           })),
           visualStyle: 'prescription_cards',
-          connections: this.generatePainToSystemConnections(diagnosis.allTags, systems)
+          connections: this.generatePainToSystemConnections(diagnosis.allTags, systems),
         },
         products: {
           title: '产品落地',
           subtitle: '瑞美/恒热全系产品',
-          items: packages.flatMap((pkg, pkgIndex) => 
+          items: packages.flatMap((pkg, pkgIndex) =>
             pkg.products.map((prod, prodIndex) => ({
               id: `prod_${pkgIndex}_${prodIndex}`,
               name: prod.model || prod,
               brand: prod.brand || '瑞美',
               system: pkg.system,
               price: prod.price || '询价',
-              position: { row: pkgIndex * 2 + prodIndex, col: 0 }
+              position: { row: pkgIndex * 2 + prodIndex, col: 0 },
             }))
           ),
-          visualStyle: 'product_grid'
-        }
+          visualStyle: 'product_grid',
+        },
       },
       centerSlogan: {
         text: '「对症开药」一户一方案，杜绝人工拼单',
         position: 'center_vertical',
-        style: 'highlight_banner'
+        style: 'highlight_banner',
       },
       flowArrows: {
         leftToCenter: { label: 'AI匹配算法', style: 'dashed_arrow' },
-        centerToRight: { label: '产品配置', style: 'solid_arrow' }
+        centerToRight: { label: '产品配置', style: 'solid_arrow' },
       },
       presentationMode: {
         hideUI: true,
         fullScreen: true,
-        animation: 'flow_reveal' // 流动揭示动画
-      }
+        animation: 'flow_reveal', // 流动揭示动画
+      },
     };
   }
 
@@ -172,13 +172,9 @@ class CorePrincipleVisuals {
           icon: '📝',
           duration: '3分钟',
           description: '5大维度痛点快速勾选',
-          details: [
-            '户型档案录入',
-            '居住痛点诊断',
-            'AI隐性痛点识别'
-          ],
+          details: ['户型档案录入', '居住痛点诊断', 'AI隐性痛点识别'],
           visual: 'checklist_completed',
-          status: 'completed'
+          status: 'completed',
         },
         {
           step: 2,
@@ -186,14 +182,10 @@ class CorePrincipleVisuals {
           icon: '🎯',
           duration: '2分钟',
           description: 'AI匹配最优系统组合',
-          details: [
-            'Tag匹配算法',
-            '强制推荐规则',
-            '方案弹窗展示'
-          ],
+          details: ['Tag匹配算法', '强制推荐规则', '方案弹窗展示'],
           visual: 'system_cards',
           status: 'completed',
-          highlight: `匹配${matchResult.recommendedSystems.length}大系统`
+          highlight: `匹配${matchResult.recommendedSystems.length}大系统`,
         },
         {
           step: 3,
@@ -201,13 +193,9 @@ class CorePrincipleVisuals {
           icon: '🎮',
           duration: '3分钟',
           description: '设备布局+管路走向可视化',
-          details: [
-            '户型生成',
-            '设备布局',
-            '原理图演示'
-          ],
+          details: ['户型生成', '设备布局', '原理图演示'],
           visual: '3d_preview',
-          status: 'completed'
+          status: 'completed',
         },
         {
           step: 4,
@@ -215,30 +203,26 @@ class CorePrincipleVisuals {
           icon: '💰',
           duration: '2分钟',
           description: '价值型报价+清单导出',
-          details: [
-            '痛点对应报价',
-            '促销配置',
-            '方案分享'
-          ],
+          details: ['痛点对应报价', '促销配置', '方案分享'],
           visual: 'quote_summary',
           status: 'completed',
-          highlight: `总价${matchResult.totalEstimate ? '约' + matchResult.totalEstimate.toLocaleString() + '元' : '按需定制'}`
-        }
+          highlight: `总价${matchResult.totalEstimate ? '约' + matchResult.totalEstimate.toLocaleString() + '元' : '按需定制'}`,
+        },
       ],
       timeline: {
         totalTime: '10分钟完成现场谈单',
         efficiency: '比传统方式节省80%时间',
-        conversion: '方案现场锁定率提升50%'
+        conversion: '方案现场锁定率提升50%',
       },
       bottomSlogan: {
         main: '「10分钟完成现场谈单，告别图纸+计算器时代」',
-        sub: 'AI赋能 · 方案即产即销 · 客户秒懂秒签'
+        sub: 'AI赋能 · 方案即产即销 · 客户秒懂秒签',
       },
       presentationMode: {
         hideUI: true,
         fullScreen: true,
-        animation: 'step_by_step_reveal'
-      }
+        animation: 'step_by_step_reveal',
+      },
     };
   }
 
@@ -254,21 +238,21 @@ class CorePrincipleVisuals {
       diagrams: [
         this.generatePainPointAnalysisDiagram(diagnosis, session.data.roomProfile),
         this.generateSolutionMappingDiagram(matchResult, diagnosis),
-        this.generateFullProcessDiagram(session, matchResult)
+        this.generateFullProcessDiagram(session, matchResult),
       ],
       navigation: {
         type: 'slide_nav',
         currentSlide: 1,
         totalSlides: 3,
         autoPlay: false,
-        loop: true
+        loop: true,
       },
       presentationTips: [
         '第一张图：讲痛点共鸣，让客户点头',
         '第二张图：讲方案价值，让客户心动',
-        '第三张图：讲流程高效，让客户放心'
+        '第三张图：讲流程高效，让客户放心',
       ],
-      exportFormats: ['pptx', 'pdf', 'html']
+      exportFormats: ['pptx', 'pdf', 'html'],
     };
   }
 
@@ -278,15 +262,15 @@ class CorePrincipleVisuals {
       type: 'simplified_floorplan',
       area: roomProfile.area,
       rooms: Math.ceil(roomProfile.area / 30),
-      highlight: roomProfile.keyFeatures
+      highlight: roomProfile.keyFeatures,
     };
   }
 
   identifyPainAreas(diagnosis) {
-    return diagnosis.allTags.slice(0, 3).map(tag => ({
+    return diagnosis.allTags.slice(0, 3).map((tag) => ({
       name: tag.name,
       location: '典型区域',
-      severity: tag.severity || 'medium'
+      severity: tag.severity || 'medium',
     }));
   }
 
@@ -304,45 +288,47 @@ class CorePrincipleVisuals {
 
   getPainIcon(category) {
     const icons = {
-      '温度体感痛点': '❄️',
-      '热水用水痛点': '🚿',
+      温度体感痛点: '❄️',
+      热水用水痛点: '🚿',
       '潮湿/空气痛点': '💨',
-      '水质健康痛点': '💧',
-      '省心总包痛点': '🏠'
+      水质健康痛点: '💧',
+      省心总包痛点: '🏠',
     };
     return icons[category] || '⚠️';
   }
 
   getPainColor(category) {
     const colors = {
-      '温度体感痛点': '#fc8181',
-      '热水用水痛点': '#63b3ed',
+      温度体感痛点: '#fc8181',
+      热水用水痛点: '#63b3ed',
       '潮湿/空气痛点': '#68d391',
-      '水质健康痛点': '#4299e1',
-      '省心总包痛点': '#ed8936'
+      水质健康痛点: '#4299e1',
+      省心总包痛点: '#ed8936',
     };
     return colors[category] || '#a0aec0';
   }
 
   getSystemIcon(systemName) {
     const icons = {
-      '中央热水系统': '💧',
-      '五恒恒温系统': '🌡️',
-      '新风除湿系统': '🍃',
-      '全屋净水系统': '🚰',
-      '中央空调系统': '❄️',
-      '瑞美全屋总包方案': '🏠'
+      中央热水系统: '💧',
+      五恒恒温系统: '🌡️',
+      新风除湿系统: '🍃',
+      全屋净水系统: '🚰',
+      中央空调系统: '❄️',
+      瑞美全屋总包方案: '🏠',
     };
     return icons[systemName] || '✨';
   }
 
   generatePainToSystemConnections(tags, systems) {
     // 简化的连接逻辑
-    return tags.map((tag, i) => ({
-      from: tag.id,
-      to: systems[i % systems.length]?.name,
-      type: 'solves'
-    })).filter(c => c.to);
+    return tags
+      .map((tag, i) => ({
+        from: tag.id,
+        to: systems[i % systems.length]?.name,
+        type: 'solves',
+      }))
+      .filter((c) => c.to);
   }
 }
 

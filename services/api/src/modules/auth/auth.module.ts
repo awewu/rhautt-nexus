@@ -37,7 +37,9 @@ function resolveJwtSecret(): string {
     ConfigModule,
     ...(TARGET_API_BOOT_SMOKE
       ? []
-      : [TypeOrmModule.forFeature([UserEntity, OtpChallengeEntity, ExternalIdentityBindingEntity])]),
+      : [
+          TypeOrmModule.forFeature([UserEntity, OtpChallengeEntity, ExternalIdentityBindingEntity]),
+        ]),
     EntitlementModule,
     JwtModule.register({
       secret: resolveJwtSecret(),
@@ -61,7 +63,7 @@ function resolveJwtSecret(): string {
           bootSmokeRepositoryProvider(OtpChallengeEntity),
           bootSmokeRepositoryProvider(ExternalIdentityBindingEntity),
         ]
-      : [])
+      : []),
   ],
   exports: [AuthGuard, JwtModule, SsoExternalIdentityService, RbacService],
 })
@@ -75,11 +77,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class AuthBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('auth');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('auth')
 export class AuthBoundaryController {
   constructor(private readonly s: AuthBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

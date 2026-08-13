@@ -1,11 +1,19 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('tenants')
 export class TenantEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ unique: true }) code: string;
   @Column() name: string;
-  @Column({ name: 'tenant_type', default: 'dealer_group' }) type: 'hq' | 'regional' | 'dealer_group';
+  @Column({ name: 'tenant_type', default: 'dealer_group' }) type:
+    'hq' | 'regional' | 'dealer_group';
   @Column({ default: 'active' }) @Index() status: 'active' | 'inactive' | 'suspended';
   @Column({ type: 'jsonb', default: {} }) settings: Record<string, unknown>;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;

@@ -57,7 +57,13 @@ class LegacyArtifactMigrator {
   constructor(private readonly config: MigrationConfig) {}
 
   async run(): Promise<MigrationResult> {
-    const result: MigrationResult = { processed: 0, created: 0, skipped: 0, errors: [], evidenceRecords: 0 };
+    const result: MigrationResult = {
+      processed: 0,
+      created: 0,
+      skipped: 0,
+      errors: [],
+      evidenceRecords: 0,
+    };
     const rows = await this.fetchLegacyRows();
     for (const row of rows) {
       result.processed++;
@@ -68,7 +74,9 @@ class LegacyArtifactMigrator {
           continue;
         }
         if (this.config.dryRun) {
-          console.log(`[DRY-RUN] would migrate ${row.legacyId} -> ${row.entityType}/${row.entityId}`);
+          console.log(
+            `[DRY-RUN] would migrate ${row.legacyId} -> ${row.entityType}/${row.entityId}`
+          );
           result.created++;
           continue;
         }
@@ -129,7 +137,9 @@ async function main() {
   const sourceArg = args.find((a) => a.startsWith('--source='));
   const source = sourceArg ? sourceArg.split('=')[1] : process.env.LEGACY_ARTIFACT_SOURCE;
   if (!source) {
-    console.error('Usage: npx ts-node scripts/migrate-legacy-artifacts.ts --dry-run --source=<source>');
+    console.error(
+      'Usage: npx ts-node scripts/migrate-legacy-artifacts.ts --dry-run --source=<source>'
+    );
     process.exit(1);
   }
 

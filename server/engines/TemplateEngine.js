@@ -17,17 +17,17 @@ class TemplateEngine {
 
   async initialize() {
     console.log('🔄 初始化方案模板引擎...');
-    
+
     try {
       // 创建存储目录
       await fs.mkdir(this.storagePath, { recursive: true });
-      
+
       // 加载现有模板
       await this.loadTemplates();
-      
+
       // 初始化默认分类
       this.initializeCategories();
-      
+
       this.initialized = true;
       console.log('✅ 方案模板引擎初始化完成');
       return true;
@@ -44,10 +44,10 @@ class TemplateEngine {
       { id: 'villa', name: '别墅方案', icon: '🏰', description: '高端别墅定制方案' },
       { id: 'apartment', name: '公寓方案', icon: '🏙️', description: '城市公寓标准方案' },
       { id: 'water_system', name: '水系统', icon: '💧', description: '热水/净水/软水方案' },
-      { id: 'air_system', name: '风系统', icon: '💨', description: '空调/新风/净化方案' }
+      { id: 'air_system', name: '风系统', icon: '💨', description: '空调/新风/净化方案' },
     ];
 
-    defaultCategories.forEach(cat => {
+    defaultCategories.forEach((cat) => {
       this.categories.set(cat.id, cat);
     });
   }
@@ -80,16 +80,16 @@ class TemplateEngine {
       category: templateData.category || 'residential',
       tags: templateData.tags || [],
       thumbnail: templateData.thumbnail || '',
-      
+
       // 方案内容
       solution: {
         painPoints: templateData.solution?.painPoints || [],
         devices: templateData.solution?.devices || [],
         layout: templateData.solution?.layout || {},
         quotation: templateData.solution?.quotation || {},
-        loadCalculation: templateData.solution?.loadCalculation || {}
+        loadCalculation: templateData.solution?.loadCalculation || {},
       },
-      
+
       // 元数据
       metadata: {
         createdBy: templateData.createdBy || 'system',
@@ -97,8 +97,8 @@ class TemplateEngine {
         updatedAt: new Date().toISOString(),
         version: '1.0',
         isPublic: templateData.isPublic !== false,
-        usageCount: 0
-      }
+        usageCount: 0,
+      },
     };
 
     this.templates.set(template.id, template);
@@ -122,8 +122,8 @@ class TemplateEngine {
       metadata: {
         ...template.metadata,
         updatedAt: new Date().toISOString(),
-        version: this.incrementVersion(template.metadata.version)
-      }
+        version: this.incrementVersion(template.metadata.version),
+      },
     });
 
     await this.saveTemplate(template);
@@ -141,10 +141,10 @@ class TemplateEngine {
     }
 
     this.templates.delete(templateId);
-    
+
     // 删除文件
     const filePath = path.join(this.storagePath, `${templateId}.json`);
-    await fs.unlink(filePath).catch(error => {
+    await fs.unlink(filePath).catch((error) => {
       console.warn(`[TemplateEngine] 删除文件失败: ${filePath}`, error.message);
       // 不阻塞流程，文件不存在时继续执行
     });
@@ -168,7 +168,7 @@ class TemplateEngine {
     await this.saveTemplate(template);
 
     console.log(`📥 加载模板: ${template.name} (使用次数: ${template.metadata.usageCount})`);
-    
+
     // 返回模板的深拷贝
     return JSON.parse(JSON.stringify(template));
   }
@@ -181,33 +181,31 @@ class TemplateEngine {
 
     // 按分类筛选
     if (query.category) {
-      results = results.filter(t => t.category === query.category);
+      results = results.filter((t) => t.category === query.category);
     }
 
     // 按标签筛选
     if (query.tags && query.tags.length > 0) {
-      results = results.filter(t => 
-        query.tags.some(tag => t.tags.includes(tag))
-      );
+      results = results.filter((t) => query.tags.some((tag) => t.tags.includes(tag)));
     }
 
     // 按关键词搜索
     if (query.keyword) {
       const keyword = query.keyword.toLowerCase();
-      results = results.filter(t =>
-        t.name.toLowerCase().includes(keyword) ||
-        t.description.toLowerCase().includes(keyword)
+      results = results.filter(
+        (t) =>
+          t.name.toLowerCase().includes(keyword) || t.description.toLowerCase().includes(keyword)
       );
     }
 
     // 按创建者筛选
     if (query.createdBy) {
-      results = results.filter(t => t.metadata.createdBy === query.createdBy);
+      results = results.filter((t) => t.metadata.createdBy === query.createdBy);
     }
 
     // 只返回公开模板
     if (query.publicOnly !== false) {
-      results = results.filter(t => t.metadata.isPublic);
+      results = results.filter((t) => t.metadata.isPublic);
     }
 
     // 排序
@@ -232,7 +230,7 @@ class TemplateEngine {
    */
   getPopularTemplates(limit = 10) {
     const templates = Array.from(this.templates.values())
-      .filter(t => t.metadata.isPublic)
+      .filter((t) => t.metadata.isPublic)
       .sort((a, b) => b.metadata.usageCount - a.metadata.usageCount)
       .slice(0, limit);
 
@@ -244,7 +242,7 @@ class TemplateEngine {
    */
   getRecentTemplates(limit = 10) {
     const templates = Array.from(this.templates.values())
-      .filter(t => t.metadata.isPublic)
+      .filter((t) => t.metadata.isPublic)
       .sort((a, b) => new Date(b.metadata.createdAt) - new Date(a.metadata.createdAt))
       .slice(0, limit);
 
@@ -269,7 +267,7 @@ class TemplateEngine {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       usageCount: 0,
-      parentTemplateId: templateId
+      parentTemplateId: templateId,
     };
 
     this.templates.set(duplicated.id, duplicated);
@@ -297,7 +295,7 @@ class TemplateEngine {
   async importTemplate(templateJson) {
     try {
       const template = JSON.parse(templateJson);
-      
+
       // 验证模板结构
       if (!template.name || !template.solution) {
         throw new Error('无效的模板格式');
@@ -309,7 +307,7 @@ class TemplateEngine {
         ...template.metadata,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        usageCount: 0
+        usageCount: 0,
       };
 
       this.templates.set(template.id, template);
@@ -345,9 +343,13 @@ class TemplateEngine {
   getStats() {
     return {
       totalTemplates: this.templates.size,
-      publicTemplates: Array.from(this.templates.values()).filter(t => t.metadata.isPublic).length,
+      publicTemplates: Array.from(this.templates.values()).filter((t) => t.metadata.isPublic)
+        .length,
       categories: this.categories.size,
-      totalUsage: Array.from(this.templates.values()).reduce((sum, t) => sum + t.metadata.usageCount, 0)
+      totalUsage: Array.from(this.templates.values()).reduce(
+        (sum, t) => sum + t.metadata.usageCount,
+        0
+      ),
     };
   }
 
@@ -364,12 +366,22 @@ class TemplateEngine {
         solution: {
           painPoints: ['tag_01', 'tag_02', 'tag_11'],
           devices: [
-            { id: 'dev_001', type: 'water_heater', model: 'Rheem EHD-50L', position: { x: 100, y: 200 } },
-            { id: 'dev_002', type: 'air_conditioner', model: 'Ruud Achiever 3.5kW', position: { x: 300, y: 150 } }
+            {
+              id: 'dev_001',
+              type: 'water_heater',
+              model: 'Rheem EHD-50L',
+              position: { x: 100, y: 200 },
+            },
+            {
+              id: 'dev_002',
+              type: 'air_conditioner',
+              model: 'Ruud Achiever 3.5kW',
+              position: { x: 300, y: 150 },
+            },
           ],
           layout: { area: 130, rooms: 3, bathrooms: 2 },
-          quotation: { total: 45800, discount: 0.9 }
-        }
+          quotation: { total: 45800, discount: 0.9 },
+        },
       },
       {
         name: '别墅全屋水系统',
@@ -379,13 +391,23 @@ class TemplateEngine {
         solution: {
           painPoints: ['tag_01', 'tag_22', 'tag_33'],
           devices: [
-            { id: 'dev_001', type: 'water_heater', model: 'Rheem EHD-80L', position: { x: 150, y: 300 } },
-            { id: 'dev_002', type: 'water_softener', model: 'Rheem WS-30', position: { x: 200, y: 350 } }
+            {
+              id: 'dev_001',
+              type: 'water_heater',
+              model: 'Rheem EHD-80L',
+              position: { x: 150, y: 300 },
+            },
+            {
+              id: 'dev_002',
+              type: 'water_softener',
+              model: 'Rheem WS-30',
+              position: { x: 200, y: 350 },
+            },
           ],
           layout: { area: 250, rooms: 5, bathrooms: 3 },
-          quotation: { total: 89000, discount: 0.85 }
-        }
-      }
+          quotation: { total: 89000, discount: 0.85 },
+        },
+      },
     ];
 
     for (const preset of presets) {

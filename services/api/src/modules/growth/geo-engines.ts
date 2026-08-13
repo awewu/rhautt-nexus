@@ -14,18 +14,38 @@ export interface GeoEngineDef {
 }
 
 export const GEO_ENGINES: GeoEngineDef[] = [
-  { engine: 'hermes-center-ai', label: '中心 AI（Hermes）', region: 'cn', credentialEnv: 'HERMES_CENTER_AI_BASE_URL' },
+  {
+    engine: 'hermes-center-ai',
+    label: '中心 AI（Hermes）',
+    region: 'cn',
+    credentialEnv: 'HERMES_CENTER_AI_BASE_URL',
+  },
   { engine: 'doubao', label: '豆包', region: 'cn', credentialEnv: 'GROWTH_GEO_DOUBAO_KEY' },
   { engine: 'deepseek', label: 'DeepSeek', region: 'cn', credentialEnv: 'GROWTH_GEO_DEEPSEEK_KEY' },
   { engine: 'yuanbao', label: '腾讯元宝', region: 'cn', credentialEnv: 'GROWTH_GEO_YUANBAO_KEY' },
   { engine: 'kimi', label: 'Kimi', region: 'cn', credentialEnv: 'GROWTH_GEO_KIMI_KEY' },
   { engine: 'qwen', label: '通义千问', region: 'cn', credentialEnv: 'GROWTH_GEO_QWEN_KEY' },
   { engine: 'wenxin', label: '文心一言', region: 'cn', credentialEnv: 'GROWTH_GEO_WENXIN_KEY' },
-  { engine: 'perplexity', label: 'Perplexity', region: 'global', credentialEnv: 'GROWTH_GEO_PERPLEXITY_KEY' },
-  { engine: 'chatgpt', label: 'ChatGPT / SearchGPT', region: 'global', credentialEnv: 'GROWTH_GEO_OPENAI_KEY' },
+  {
+    engine: 'perplexity',
+    label: 'Perplexity',
+    region: 'global',
+    credentialEnv: 'GROWTH_GEO_PERPLEXITY_KEY',
+  },
+  {
+    engine: 'chatgpt',
+    label: 'ChatGPT / SearchGPT',
+    region: 'global',
+    credentialEnv: 'GROWTH_GEO_OPENAI_KEY',
+  },
   { engine: 'gemini', label: 'Gemini', region: 'global', credentialEnv: 'GROWTH_GEO_GEMINI_KEY' },
   { engine: 'grok', label: 'Grok', region: 'global', credentialEnv: 'GROWTH_GEO_GROK_KEY' },
-  { engine: 'ai-overview', label: 'Google AI Overview', region: 'global', credentialEnv: 'GROWTH_GEO_AIO_KEY' },
+  {
+    engine: 'ai-overview',
+    label: 'Google AI Overview',
+    region: 'global',
+    credentialEnv: 'GROWTH_GEO_AIO_KEY',
+  },
 ];
 
 export interface GeoEngineStatus extends GeoEngineDef {
@@ -35,9 +55,12 @@ export interface GeoEngineStatus extends GeoEngineDef {
 export function geoEngineStatuses(): GeoEngineStatus[] {
   return GEO_ENGINES.map((e) => ({
     ...e,
-    status: e.engine === 'hermes-center-ai'
-      ? (process.env[e.credentialEnv] ? 'ready' : 'not-configured')
-      : 'pending-adapter',
+    status:
+      e.engine === 'hermes-center-ai'
+        ? process.env[e.credentialEnv]
+          ? 'ready'
+          : 'not-configured'
+        : 'pending-adapter',
   }));
 }
 

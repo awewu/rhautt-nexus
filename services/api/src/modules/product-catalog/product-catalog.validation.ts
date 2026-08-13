@@ -26,7 +26,8 @@ export function assertOptionalString(v: unknown, field: string): void {
 
 /** 必填非空字符串。 */
 export function assertRequiredString(v: unknown, field: string): string {
-  if (typeof v !== 'string' || !v.trim()) throw new BadRequestException(`${field} 必填且必须是非空字符串`);
+  if (typeof v !== 'string' || !v.trim())
+    throw new BadRequestException(`${field} 必填且必须是非空字符串`);
   return v.trim();
 }
 
@@ -74,7 +75,7 @@ function validateEverhotStructuredLists(meta: unknown): void {
 
 export function assertOptionalFiniteNumber(v: unknown, field: string): void {
   if (v === undefined || v === null || v === '') return;
-  const n = typeof v === 'number' ? v : (typeof v === 'string' ? Number(v) : NaN);
+  const n = typeof v === 'number' ? v : typeof v === 'string' ? Number(v) : NaN;
   if (!Number.isFinite(n)) throw new BadRequestException(`${field} 必须是数字`);
 }
 
@@ -104,10 +105,14 @@ function validateWebsitePricingInput(v: unknown): void {
     }
   }
   if (
-    pricing.priceDisplayMode !== undefined
-    && !['show_price', 'price_range', 'inquiry', 'contact_dealer', 'not_shown'].includes(String(pricing.priceDisplayMode))
+    pricing.priceDisplayMode !== undefined &&
+    !['show_price', 'price_range', 'inquiry', 'contact_dealer', 'not_shown'].includes(
+      String(pricing.priceDisplayMode)
+    )
   ) {
-    throw new BadRequestException('websitePricing.priceDisplayMode only supports show_price, price_range, inquiry, contact_dealer or not_shown');
+    throw new BadRequestException(
+      'websitePricing.priceDisplayMode only supports show_price, price_range, inquiry, contact_dealer or not_shown'
+    );
   }
 }
 
@@ -165,7 +170,11 @@ export function validateProductUpsertInput(dto: unknown): Record<string, unknown
   assertOptionalString(body.brandCode, 'brandCode');
   assertOptionalStringArray(body.brands, 'brands');
   assertOptionalStringArray(body.brandCodes, 'brandCodes');
-  assertOptionalObjectArray(body.brandBindings, 'brandBindings', ['brandCode', 'brandModel', 'brandDisplayName']);
+  assertOptionalObjectArray(body.brandBindings, 'brandBindings', [
+    'brandCode',
+    'brandModel',
+    'brandDisplayName',
+  ]);
   assertOptionalString(body.model, 'model');
   assertOptionalString(body.normalizedModel, 'normalizedModel');
   assertOptionalString(body.workingName, 'workingName');
@@ -204,16 +213,32 @@ export function validateProductUpsertInput(dto: unknown): Record<string, unknown
   assertOptionalObject(body.positioning, 'positioning');
   assertOptionalArray(body.assetRefs, 'assetRefs');
   assertOptionalBoolean(body.confirmExistingProduct, 'confirmExistingProduct');
-  if (body.status !== undefined && !['active', 'inactive', 'archived'].includes(String(body.status))) {
+  if (
+    body.status !== undefined &&
+    !['active', 'inactive', 'archived'].includes(String(body.status))
+  ) {
     throw new BadRequestException('status 仅支持 active、inactive 或 archived');
   }
-  if (body.recordStatus !== undefined && !['active', 'withdrawn', 'archived'].includes(String(body.recordStatus))) {
+  if (
+    body.recordStatus !== undefined &&
+    !['active', 'withdrawn', 'archived'].includes(String(body.recordStatus))
+  ) {
     throw new BadRequestException('recordStatus only supports active, withdrawn or archived');
   }
-  if (body.dataReadinessStatus !== undefined && !['imported_draft', 'needs_completion', 'fact_verified'].includes(String(body.dataReadinessStatus))) {
-    throw new BadRequestException('dataReadinessStatus only supports imported_draft, needs_completion or fact_verified');
+  if (
+    body.dataReadinessStatus !== undefined &&
+    !['imported_draft', 'needs_completion', 'fact_verified'].includes(
+      String(body.dataReadinessStatus)
+    )
+  ) {
+    throw new BadRequestException(
+      'dataReadinessStatus only supports imported_draft, needs_completion or fact_verified'
+    );
   }
-  if (body.skuRecordStatus !== undefined && !['active', 'archived'].includes(String(body.skuRecordStatus))) {
+  if (
+    body.skuRecordStatus !== undefined &&
+    !['active', 'archived'].includes(String(body.skuRecordStatus))
+  ) {
     throw new BadRequestException('skuRecordStatus only supports active or archived');
   }
   for (const field of [

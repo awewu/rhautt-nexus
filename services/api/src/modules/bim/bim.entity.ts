@@ -1,6 +1,10 @@
 import {
-  Column, CreateDateColumn, Entity, Index,
-  PrimaryGeneratedColumn, UpdateDateColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('bim_projects')
@@ -22,12 +26,14 @@ export class BimProjectEntity {
 
   @Column({ type: 'jsonb', default: () => "'{}'::jsonb" }) project: Record<string, unknown>;
   @Column({ type: 'jsonb', default: () => "'[]'::jsonb" }) bom: unknown[];
-  @Column({ type: 'jsonb', name: '"costBreakdown"', default: () => "'{}'::jsonb" }) costBreakdown: Record<string, unknown>;
+  @Column({ type: 'jsonb', name: '"costBreakdown"', default: () => "'{}'::jsonb" })
+  costBreakdown: Record<string, unknown>;
   @Column({ type: 'numeric', name: 'paid_value', default: 0 }) paidValue: number;
   @Column({ type: 'varchar', name: 'system_families', default: '' }) systemFamilies: string;
   @Column({ type: 'varchar', name: 'drawing_url', nullable: true }) drawingUrl: string | null;
   @Column({ type: 'varchar', name: 'bom_xlsx_url', nullable: true }) bomXlsxUrl: string | null;
-  @Column({ type: 'jsonb', name: 'acceptance_checklist', default: () => "'[]'::jsonb" }) acceptanceChecklist: unknown[];
+  @Column({ type: 'jsonb', name: 'acceptance_checklist', default: () => "'[]'::jsonb" })
+  acceptanceChecklist: unknown[];
   @Column({ type: 'timestamptz', name: 'accepted_at', nullable: true }) acceptedAt: Date | null;
   @Column({ type: 'varchar', name: 'accepted_by', nullable: true }) acceptedBy: string | null;
   @Column({ type: 'varchar', name: 'assigned_to', nullable: true }) assignedTo: string | null;
@@ -50,9 +56,13 @@ export class RysnovaBimArtifactEntity {
   @Column({ name: 'artifact_type', default: 'bim_model' }) artifactType: string;
   @Column() name: string;
   @Column({ type: 'varchar', name: 'file_key', nullable: true }) fileKey: string | null;
-  @Column({ type: 'jsonb', name: 'bim_data', default: () => "'{}'::jsonb" }) bimData: Record<string, unknown>;
+  @Column({ type: 'jsonb', name: 'bim_data', default: () => "'{}'::jsonb" }) bimData: Record<
+    string,
+    unknown
+  >;
   @Column({ default: 'draft' }) status: string;
-  @Column({ type: 'jsonb', name: 'artifact_doc', default: () => "'{}'::jsonb" }) artifactDoc: Record<string, unknown>;
+  @Column({ type: 'jsonb', name: 'artifact_doc', default: () => "'{}'::jsonb" })
+  artifactDoc: Record<string, unknown>;
   @Column({ type: 'varchar', name: 'project_key', nullable: true }) projectKey: string | null;
 
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
@@ -77,10 +87,12 @@ export class BcfTopicEntity {
   @Column({ default: 'normal' }) priority: string;
   @Column({ name: 'creation_author' }) creationAuthor: string;
   @Column({ type: 'varchar', name: 'assigned_to', nullable: true }) assignedTo: string | null;
-  @Column({ type: 'varchar', name: 'design_project_id', nullable: true }) designProjectId: string | null;
+  @Column({ type: 'varchar', name: 'design_project_id', nullable: true }) designProjectId:
+    string | null;
   @Column({ type: 'varchar', name: 'bim_project_id', nullable: true }) bimProjectId: string | null;
 
-  @Column({ type: 'jsonb', name: 'related_ifc_guids', default: () => "'[]'::jsonb" }) relatedIfcGuids: unknown[];
+  @Column({ type: 'jsonb', name: 'related_ifc_guids', default: () => "'[]'::jsonb" })
+  relatedIfcGuids: unknown[];
   @Column({ type: 'jsonb', default: () => "'[]'::jsonb" }) comments: unknown[];
   @Column({ type: 'jsonb', default: () => "'[]'::jsonb" }) viewpoints: unknown[];
 

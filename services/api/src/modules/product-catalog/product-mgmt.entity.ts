@@ -40,7 +40,10 @@ export class PricingPolicyEntity {
   @Column({ name: 'policy_type' }) policyType: string;
   @Column({ name: 'proposed_price', type: 'numeric', default: 0 }) proposedPrice: number;
   @Column({ name: 'cost_price', type: 'numeric', default: 0 }) costPrice: number;
-  @Column({ name: 'margin_calc', type: 'jsonb', default: () => "'{}'::jsonb" }) marginCalc: Record<string, unknown>;
+  @Column({ name: 'margin_calc', type: 'jsonb', default: () => "'{}'::jsonb" }) marginCalc: Record<
+    string,
+    unknown
+  >;
   @Column({ default: 'draft' }) status: string;
   @Column({ name: 'submitted_by', type: 'varchar', nullable: true }) submittedBy: string | null;
   @Column({ type: 'varchar', nullable: true }) approver: string | null;

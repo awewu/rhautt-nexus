@@ -21,28 +21,49 @@ test('完全无数据时不产生权重（不臆造）', () => {
 
 test('n=1 的极端值被先验主导，噪声不冒充经验', () => {
   // 品牌仅 1 次实验且 lift 极高(100)，品类经验平平(均值 0)
-  const noisy = blendHierarchicalDelta({ brandN: 1, brandSum: 100, categoryN: 10, categorySum: 0 }, K);
+  const noisy = blendHierarchicalDelta(
+    { brandN: 1, brandSum: 100, categoryN: 10, categorySum: 0 },
+    K
+  );
   // 若不做收缩，delta 会是 100*0.2=20；收缩后应远小于此
   assert.ok(noisy.delta < 5, `单次噪声不应主导，实际 ${noisy.delta}`);
   assert.ok(noisy.brandAvg === 100, '原始品牌均值仍如实暴露，便于排查');
 });
 
 test('样本变大时收敛到品牌自身经验', () => {
-  const small = blendHierarchicalDelta({ brandN: 1, brandSum: 20, categoryN: 10, categorySum: 0 }, K);
-  const large = blendHierarchicalDelta({ brandN: 50, brandSum: 1000, categoryN: 10, categorySum: 0 }, K);
+  const small = blendHierarchicalDelta(
+    { brandN: 1, brandSum: 20, categoryN: 10, categorySum: 0 },
+    K
+  );
+  const large = blendHierarchicalDelta(
+    { brandN: 50, brandSum: 1000, categoryN: 10, categorySum: 0 },
+    K
+  );
   assert.ok(large.delta > small.delta, '大样本应更贴近品牌自身均值(20)');
-  assert.ok(Math.abs(large.delta - 20 * 0.2) < 0.6, `大样本应收敛到 brandAvg×scale，实际 ${large.delta}`);
+  assert.ok(
+    Math.abs(large.delta - 20 * 0.2) < 0.6,
+    `大样本应收敛到 brandAvg×scale，实际 ${large.delta}`
+  );
 });
 
 test('增量有上下限，防单点主导', () => {
-  const huge = blendHierarchicalDelta({ brandN: 100, brandSum: 100000, categoryN: 0, categorySum: 0 }, K);
+  const huge = blendHierarchicalDelta(
+    { brandN: 100, brandSum: 100000, categoryN: 0, categorySum: 0 },
+    K
+  );
   assert.equal(huge.delta, 5, '应被 cap 夹住');
-  const negative = blendHierarchicalDelta({ brandN: 100, brandSum: -100000, categoryN: 0, categorySum: 0 }, K);
+  const negative = blendHierarchicalDelta(
+    { brandN: 100, brandSum: -100000, categoryN: 0, categorySum: 0 },
+    K
+  );
   assert.equal(negative.delta, -5, '负向同样被夹住');
 });
 
 test('负 lift 会降权（自进化能纠错，不是只会加分）', () => {
-  const r = blendHierarchicalDelta({ brandN: 10, brandSum: -50, categoryN: 10, categorySum: -50 }, K);
+  const r = blendHierarchicalDelta(
+    { brandN: 10, brandSum: -50, categoryN: 10, categorySum: -50 },
+    K
+  );
   assert.ok(r.delta < 0, '持续负 lift 的策略应被降权');
 });
 

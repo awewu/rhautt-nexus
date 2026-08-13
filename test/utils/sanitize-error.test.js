@@ -5,8 +5,13 @@ describe('sanitize-error', () => {
   const origEnv = process.env.NODE_ENV;
   let consoleErrorSpy;
 
-  beforeEach(() => { consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {}); });
-  afterEach(() => { consoleErrorSpy.mockRestore(); process.env.NODE_ENV = origEnv; });
+  beforeEach(() => {
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+    process.env.NODE_ENV = origEnv;
+  });
 
   describe('sanitize()', () => {
     it('生产环境不泄漏 err.message', () => {
@@ -45,28 +50,34 @@ describe('sanitize-error', () => {
       const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
       errorResponse(res, new Error('x'), 404);
       expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: false, errorId: expect.any(String) }));
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ success: false, errorId: expect.any(String) })
+      );
     });
   });
 
   describe('asyncRoute()', () => {
-    it('捕获异步 handler 抛出的异常', done => {
+    it('捕获异步 handler 抛出的异常', (done) => {
       process.env.NODE_ENV = 'production';
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn(r => {
+        json: jest.fn((r) => {
           expect(r.success).toBe(false);
           expect(r.error).toBe('服务暂时不可用');
           done();
-        })
+        }),
       };
-      const handler = asyncRoute(async () => { throw new Error('异步崩溃'); });
+      const handler = asyncRoute(async () => {
+        throw new Error('异步崩溃');
+      });
       handler({}, res, () => {});
     });
 
     it('成功 handler 正常执行', async () => {
       const res = { json: jest.fn() };
-      const handler = asyncRoute(async (req, r) => { r.json({ ok: true }); });
+      const handler = asyncRoute(async (req, r) => {
+        r.json({ ok: true });
+      });
       await handler({}, res, () => {});
       expect(res.json).toHaveBeenCalledWith({ ok: true });
     });

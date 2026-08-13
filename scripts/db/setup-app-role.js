@@ -25,18 +25,21 @@ async function main() {
     process.exit(1);
   }
 
-  const client = process.env.DATABASE_URL || process.env.POSTGRES_URI
-    ? new Client({ connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URI })
-    : new Client({
-        host: process.env.POSTGRES_HOST || 'localhost',
-        port: Number(process.env.POSTGRES_PORT || 5432),
-        user: process.env.POSTGRES_SUPERUSER || process.env.POSTGRES_USER || 'rhautt',
-        password: process.env.POSTGRES_SUPERUSER_PASSWORD || process.env.POSTGRES_PASSWORD,
-        database: process.env.POSTGRES_DB || 'rhautt_GOT',
-      });
+  const client =
+    process.env.DATABASE_URL || process.env.POSTGRES_URI
+      ? new Client({ connectionString: process.env.DATABASE_URL || process.env.POSTGRES_URI })
+      : new Client({
+          host: process.env.POSTGRES_HOST || 'localhost',
+          port: Number(process.env.POSTGRES_PORT || 5432),
+          user: process.env.POSTGRES_SUPERUSER || process.env.POSTGRES_USER || 'rhautt',
+          password: process.env.POSTGRES_SUPERUSER_PASSWORD || process.env.POSTGRES_PASSWORD,
+          database: process.env.POSTGRES_DB || 'rhautt_GOT',
+        });
 
   await client.connect();
-  const { rows } = await client.query("SELECT rolbypassrls, rolsuper FROM pg_roles WHERE rolname='rhautt_app'");
+  const { rows } = await client.query(
+    "SELECT rolbypassrls, rolsuper FROM pg_roles WHERE rolname='rhautt_app'"
+  );
   if (!rows.length) {
     console.error('rhautt_app 不存在——请先执行迁移 071（node scripts/db/apply-migrations.js）');
     await client.end();
@@ -58,4 +61,7 @@ function literal(value) {
   return `'${String(value).replace(/'/g, "''")}'`;
 }
 
-main().catch((err) => { console.error('setup-app-role 失败:', err.message); process.exit(1); });
+main().catch((err) => {
+  console.error('setup-app-role 失败:', err.message);
+  process.exit(1);
+});

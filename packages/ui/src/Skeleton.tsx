@@ -11,7 +11,12 @@ interface SkeletonProps {
  * 骨架屏基元（DESIGN.md §9/§16）。异步区 loading 态用它，禁白屏/无限 spinner。
  * 多块组合：<SkeletonText lines={3} /> 或直接堆叠多个 <Skeleton />。
  */
-export default function Skeleton({ width = '100%', height = 16, radius = 6, style }: SkeletonProps) {
+export default function Skeleton({
+  width = '100%',
+  height = 16,
+  radius = 6,
+  style,
+}: SkeletonProps) {
   return (
     <>
       <style>{'@keyframes nx-skeleton-pulse{0%,100%{opacity:1}50%{opacity:.45}}'}</style>

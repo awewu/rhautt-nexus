@@ -23,6 +23,7 @@ npm run start:multi
 ```
 
 启动的服务：
+
 - 🌐 Web主服务: http://localhost:3000
 - ⚡ 改图联动服务: WebSocket 端口3001
 - 🔧 API微服务: http://localhost:3002
@@ -107,14 +108,14 @@ open coverage/lcov-report/index.html
 
 启动后，可通过以下地址访问：
 
-| 服务 | 地址 | 说明 |
-|------|------|------|
-| 控制台 | http://localhost:3000 | 主控制台入口 |
-| 改图联动 | http://localhost:3000/drawing-sync.html | 设计师/客户协同 |
-| 模板库 | http://localhost:3000/template-library.html | 方案模板管理 |
-| 数据备份 | http://localhost:3000/backup-management.html | 备份与恢复 |
-| AI测试 | http://localhost:3000/ai-accuracy-test.html | 精度测试报告 |
-| API文档 | http://localhost:3002/api/docs | API接口文档 |
+| 服务     | 地址                                         | 说明            |
+| -------- | -------------------------------------------- | --------------- |
+| 控制台   | http://localhost:3000                        | 主控制台入口    |
+| 改图联动 | http://localhost:3000/drawing-sync.html      | 设计师/客户协同 |
+| 模板库   | http://localhost:3000/template-library.html  | 方案模板管理    |
+| 数据备份 | http://localhost:3000/backup-management.html | 备份与恢复      |
+| AI测试   | http://localhost:3000/ai-accuracy-test.html  | 精度测试报告    |
+| API文档  | http://localhost:3002/api/docs               | API接口文档     |
 
 ## 📁 新增文件清单
 

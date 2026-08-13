@@ -1,4 +1,11 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 /**
  * 增长中枢 / Nexus Growth (D5 · 板块三对内底座) 数据实体。
@@ -12,14 +19,14 @@ import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, Update
 export class GrowthOpinionMentionEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
-  @Column({ type: 'varchar' }) source: string;                     // weibo/xiaohongshu/zhihu/douyin/dianping/news/ai-answer
+  @Column({ type: 'varchar' }) source: string; // weibo/xiaohongshu/zhihu/douyin/dianping/news/ai-answer
   @Column({ type: 'text', nullable: true }) url: string | null;
   @Column({ name: 'author_hash', type: 'varchar', nullable: true }) authorHash: string | null; // PIPL 脱敏哈希
   @Column({ type: 'text' }) content: string;
   @Column({ type: 'varchar', default: 'neutral' }) sentiment: string; // positive/negative/neutral
-  @Column({ type: 'varchar', default: 'general' }) intent: string;    // inquiry/complaint/compare/smear/general
+  @Column({ type: 'varchar', default: 'general' }) intent: string; // inquiry/complaint/compare/smear/general
   @Column({ type: 'varchar', default: 'P3' }) @Index() severity: string; // P0..P3
-  @Column({ type: 'jsonb', default: [] }) entities: string[];         // 识别到的品牌/产品/门店实体
+  @Column({ type: 'jsonb', default: [] }) entities: string[]; // 识别到的品牌/产品/门店实体
   @Column({ name: 'captured_at', type: 'timestamptz', default: () => 'now()' }) capturedAt: Date;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
 }
@@ -32,7 +39,7 @@ export class GrowthOpinionAlertEntity {
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
   @Column({ name: 'mention_ids', type: 'jsonb', default: [] }) mentionIds: string[];
   @Column({ type: 'varchar', default: 'P1' }) severity: string;
-  @Column({ type: 'varchar', default: 'open' }) status: string;      // open/ack/resolved
+  @Column({ type: 'varchar', default: 'open' }) status: string; // open/ack/resolved
   @Column({ name: 'playbook_draft', type: 'text', nullable: true }) playbookDraft: string | null; // 危机话术草稿（待核准）
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
@@ -44,7 +51,7 @@ export class GrowthOpinionAlertEntity {
 export class GrowthCopyAssetEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
-  @Column({ type: 'varchar' }) channel: string;                     // xiaohongshu/douyin/zhihu/wechat/seo/ad
+  @Column({ type: 'varchar' }) channel: string; // xiaohongshu/douyin/zhihu/wechat/seo/ad
   @Column({ type: 'varchar', default: 'manual' }) source: string;
   @Column({ name: 'probe_job_id', type: 'uuid', nullable: true }) probeJobId: string | null;
   @Column({ name: 'brand_slug', type: 'varchar', nullable: true }) brandSlug: string | null;
@@ -55,12 +62,17 @@ export class GrowthCopyAssetEntity {
   @Column({ type: 'varchar', default: 'draft' }) @Index() status: string; // draft/approved/published/rejected
   @Column({ type: 'varchar', nullable: true }) reviewer: string | null;
   @Column({ type: 'varchar', nullable: true }) model: string | null;
-  @Column({ name: 'tokens_cost', type: 'numeric', precision: 12, scale: 4, default: 0 }) tokensCost: string;
+  @Column({ name: 'tokens_cost', type: 'numeric', precision: 12, scale: 4, default: 0 })
+  tokensCost: string;
   @Column({ name: 'compliance_flags', type: 'jsonb', default: [] }) complianceFlags: string[]; // 命中的合规词
   // 生成该内容所用的 GEO 策略键（AgenticGEO 归因基础：实验 lift → 归因到策略 → 反哺权重）
   @Column({ name: 'strategy_keys', type: 'jsonb', default: [] }) strategyKeys: string[];
-  @Column({ name: 'fact_refs', type: 'jsonb', default: [] }) factRefs: Array<{ type: string; id: string }>;
-  @Column({ name: 'prompt_template_id', type: 'uuid', nullable: true }) promptTemplateId: string | null;
+  @Column({ name: 'fact_refs', type: 'jsonb', default: [] }) factRefs: Array<{
+    type: string;
+    id: string;
+  }>;
+  @Column({ name: 'prompt_template_id', type: 'uuid', nullable: true }) promptTemplateId:
+    string | null;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
 }
@@ -76,13 +88,15 @@ export class GrowthPromptTemplateEntity {
   @Column({ type: 'varchar', nullable: true }) category: string | null;
   @Column({ type: 'varchar', nullable: true }) channel: string | null;
   @Column({ type: 'varchar', default: 'active' }) status: 'active' | 'archived';
-  @Column({ name: 'source_copy_asset_id', type: 'uuid', nullable: true }) sourceCopyAssetId: string | null;
+  @Column({ name: 'source_copy_asset_id', type: 'uuid', nullable: true }) sourceCopyAssetId:
+    string | null;
   @Column({ name: 'usage_count', type: 'int', default: 0 }) usageCount: number;
   @Column({ name: 'verified_count', type: 'int', default: 0 }) verifiedCount: number;
   @Column({ name: 'positive_count', type: 'int', default: 0 }) positiveCount: number;
   @Column({ name: 'negative_count', type: 'int', default: 0 }) negativeCount: number;
   @Column({ name: 'total_lift', type: 'int', default: 0 }) totalLift: number;
-  @Column({ name: 'average_lift', type: 'numeric', precision: 8, scale: 2, default: 0 }) averageLift: string;
+  @Column({ name: 'average_lift', type: 'numeric', precision: 8, scale: 2, default: 0 })
+  averageLift: string;
   @Column({ name: 'last_used_at', type: 'timestamptz', nullable: true }) lastUsedAt: Date | null;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
@@ -95,7 +109,7 @@ export class GrowthGeoProbeEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
   @Column({ type: 'text' }) question: string;
-  @Column({ type: 'varchar' }) engine: string;                      // doubao/kimi/deepseek/wenxiaoyan/chatgpt/perplexity/...
+  @Column({ type: 'varchar' }) engine: string; // doubao/kimi/deepseek/wenxiaoyan/chatgpt/perplexity/...
   @Column({ name: 'brand_slug', type: 'varchar', nullable: true }) brandSlug: string | null;
   @Column({ type: 'varchar', nullable: true }) category: string | null;
   @Column({ type: 'varchar', nullable: true }) stage: string | null;
@@ -125,7 +139,8 @@ export class GrowthGeoQuestionEntity {
   @Column({ type: 'int', default: 100 }) priority: number;
   @Column({ type: 'boolean', default: true }) enabled: boolean;
   /** 选题可追溯：由哪个场景派生（NULL = 人工录入的历史问题）。 */
-  @Column({ name: 'source_scenario_id', type: 'uuid', nullable: true }) sourceScenarioId: string | null;
+  @Column({ name: 'source_scenario_id', type: 'uuid', nullable: true }) sourceScenarioId:
+    string | null;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
 }
@@ -141,7 +156,8 @@ export class GrowthScenarioEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
   @Column({ type: 'varchar' }) category: string;
-  @Column({ type: 'varchar', default: 'owner' }) audience: 'owner' | 'decorator' | 'designer' | 'installer';
+  @Column({ type: 'varchar', default: 'owner' }) audience:
+    'owner' | 'decorator' | 'designer' | 'installer';
   @Column({ name: 'pain_point', type: 'varchar' }) painPoint: string;
   @Column({ name: 'house_type', type: 'varchar', nullable: true }) houseType: string | null;
   @Column({ name: 'climate_zone', type: 'varchar', nullable: true }) climateZone: string | null;
@@ -162,7 +178,8 @@ export class GrowthGeoProbeBatchEntity {
   @Column({ name: 'brand_slug', type: 'varchar' }) brandSlug: string;
   @Column({ type: 'varchar' }) category: string;
   @Column({ type: 'varchar', default: 'hermes-center-ai' }) engine: string;
-  @Column({ type: 'varchar', default: 'pending' }) status: 'pending' | 'running' | 'succeeded' | 'failed' | 'blocked';
+  @Column({ type: 'varchar', default: 'pending' }) status:
+    'pending' | 'running' | 'succeeded' | 'failed' | 'blocked';
   @Column({ name: 'total_probes', type: 'int', default: 0 }) totalProbes: number;
   @Column({ name: 'completed_probes', type: 'int', default: 0 }) completedProbes: number;
   @Column({ name: 'cited_rate', type: 'int', default: 0 }) citedRate: number;
@@ -186,7 +203,7 @@ export class GrowthCampaignEntity {
   @Column({ type: 'varchar' }) channel: string;
   @Column({ type: 'numeric', precision: 14, scale: 2, default: 0 }) budget: string;
   @Column({ type: 'jsonb', default: {} }) utm: Record<string, unknown>;
-  @Column({ type: 'varchar', default: 'draft' }) status: string;    // draft/approved/running/paused/closed
+  @Column({ type: 'varchar', default: 'draft' }) status: string; // draft/approved/running/paused/closed
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
 }
@@ -225,7 +242,8 @@ export class GrowthGeoProbeJobEntity {
   @Column({ name: 'batch_id', type: 'uuid', nullable: true }) batchId: string | null;
   @Column({ name: 'question_id', type: 'uuid', nullable: true }) questionId: string | null;
   @Column({ type: 'jsonb', default: [] }) competitors: string[];
-  @Column({ type: 'varchar', default: 'pending' }) status: 'pending' | 'running' | 'succeeded' | 'failed' | 'blocked';
+  @Column({ type: 'varchar', default: 'pending' }) status:
+    'pending' | 'running' | 'succeeded' | 'failed' | 'blocked';
   @Column({ name: 'error_message', type: 'text', nullable: true }) errorMessage: string | null;
   @Column({ name: 'started_at', type: 'timestamptz', nullable: true }) startedAt: Date | null;
   @Column({ name: 'finished_at', type: 'timestamptz', nullable: true }) finishedAt: Date | null;
@@ -249,8 +267,12 @@ export class GrowthGeoAnswerSnapshotEntity {
   @Column({ name: 'answer_text', type: 'text' }) answerText: string;
   @Column({ type: 'jsonb', default: [] }) citations: Array<Record<string, unknown>>;
   @Column({ name: 'raw_html', type: 'text', nullable: true }) rawHtml: string | null;
-  @Column({ name: 'raw_response', type: 'jsonb', default: {} }) rawResponse: Record<string, unknown>;
-  @Column({ name: 'screenshot_artifact_id', type: 'uuid', nullable: true }) screenshotArtifactId: string | null;
+  @Column({ name: 'raw_response', type: 'jsonb', default: {} }) rawResponse: Record<
+    string,
+    unknown
+  >;
+  @Column({ name: 'screenshot_artifact_id', type: 'uuid', nullable: true }) screenshotArtifactId:
+    string | null;
   @Column({ name: 'captured_at', type: 'timestamptz', default: () => 'now()' }) capturedAt: Date;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
 }
@@ -266,7 +288,8 @@ export class GrowthMarketingMaterialEntity {
   @Column({ name: 'material_type', type: 'varchar' }) materialType: string;
   @Column({ name: 'brand_slug', type: 'varchar', nullable: true }) brandSlug: string | null;
   @Column({ type: 'varchar', nullable: true }) channel: string | null;
-  @Column({ name: 'target_audience', type: 'varchar', nullable: true }) targetAudience: string | null;
+  @Column({ name: 'target_audience', type: 'varchar', nullable: true }) targetAudience:
+    string | null;
   @Column({ type: 'text', nullable: true }) summary: string | null;
   @Column({ type: 'jsonb', default: [] }) tags: string[];
   @Column({ name: 'file_artifact_id', type: 'uuid', nullable: true }) fileArtifactId: string | null;
@@ -320,12 +343,15 @@ export class DealerSuccessSnapshotEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
   @Column({ name: 'dealer_id', type: 'varchar' }) dealerId: string;
-  @Column({ type: 'varchar' }) period: string;                         // YYYY-MM
+  @Column({ type: 'varchar' }) period: string; // YYYY-MM
   @Column({ type: 'boolean', default: true }) active: boolean;
   @Column({ type: 'numeric', precision: 16, scale: 2, default: 0 }) gmv: string;
-  @Column({ name: 'profit_proxy', type: 'numeric', precision: 16, scale: 2, default: 0 }) profitProxy: string;
-  @Column({ name: 'profit_actual', type: 'numeric', precision: 16, scale: 2, nullable: true }) profitActual: string | null;
-  @Column({ name: 'close_rate', type: 'numeric', precision: 6, scale: 4, default: 0 }) closeRate: string;
+  @Column({ name: 'profit_proxy', type: 'numeric', precision: 16, scale: 2, default: 0 })
+  profitProxy: string;
+  @Column({ name: 'profit_actual', type: 'numeric', precision: 16, scale: 2, nullable: true })
+  profitActual: string | null;
+  @Column({ name: 'close_rate', type: 'numeric', precision: 6, scale: 4, default: 0 })
+  closeRate: string;
   @Column({ type: 'numeric', precision: 6, scale: 2, nullable: true }) nps: string | null;
   @Column({ type: 'numeric', precision: 6, scale: 4, nullable: true }) retention: string | null;
   @Column({ type: 'int', default: 0 }) deals: number;
@@ -356,7 +382,8 @@ export class GrowthFunnelEventEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
   @Column({ name: 'source_event_id', type: 'varchar' }) sourceEventId: string;
-  @Column({ type: 'varchar' }) stage: 'reach' | 'lead' | 'visit' | 'proposal' | 'revenue' | 'referral';
+  @Column({ type: 'varchar' }) stage:
+    'reach' | 'lead' | 'visit' | 'proposal' | 'revenue' | 'referral';
   @Column({ name: 'subject_id', type: 'varchar', nullable: true }) subjectId: string | null;
   // 获客渠道（归一自事件 payload.source，见 geo-attribution.ts）：北极星分渠道归因用。
   // 现存历史行为 null（未归因），诚实计入总数但不算 GEO。
@@ -373,7 +400,8 @@ export class GrowthMetricDailySnapshotEntity {
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
   @Column({ name: 'metric_key', type: 'varchar' }) metricKey: string;
   @Column({ type: 'numeric', default: 0 }) value: string;
-  @Column({ name: 'snapshot_date', type: 'date', default: () => 'CURRENT_DATE' }) snapshotDate: string;
+  @Column({ name: 'snapshot_date', type: 'date', default: () => 'CURRENT_DATE' })
+  snapshotDate: string;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
 }
 
@@ -382,7 +410,7 @@ export class GrowthMetricDailySnapshotEntity {
 export class GrowthNorthStarSnapshotEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
-  @Column({ type: 'varchar' }) metric: string;                          // active_profitable_dealers / network_gmv / ...
+  @Column({ type: 'varchar' }) metric: string; // active_profitable_dealers / network_gmv / ...
   @Column({ type: 'numeric', precision: 18, scale: 4, default: 0 }) value: string;
   @Column({ type: 'varchar' }) period: string;
   @Column({ name: 'computed_at', type: 'timestamptz', default: () => 'now()' }) computedAt: Date;
@@ -401,22 +429,29 @@ export class GrowthGeoExperimentEntity {
   @Column({ type: 'text' }) question: string;
   @Column({ type: 'text', nullable: true }) hypothesis: string | null;
   @Column({ type: 'varchar', default: 'baseline' })
-  status: 'baseline' | 'content-linked' | 'verifying' | 'improved' | 'no-change' | 'regressed' | 'killed';
-  @Column({ name: 'baseline_batch_id', type: 'uuid', nullable: true }) baselineBatchId: string | null;
-  @Column({ name: 'baseline_cited_rate', type: 'int', nullable: true }) baselineCitedRate: number | null;
+  status:
+    'baseline' | 'content-linked' | 'verifying' | 'improved' | 'no-change' | 'regressed' | 'killed';
+  @Column({ name: 'baseline_batch_id', type: 'uuid', nullable: true }) baselineBatchId:
+    string | null;
+  @Column({ name: 'baseline_cited_rate', type: 'int', nullable: true }) baselineCitedRate:
+    number | null;
   @Column({ name: 'baseline_at', type: 'timestamptz', nullable: true }) baselineAt: Date | null;
   @Column({ name: 'copy_asset_id', type: 'uuid', nullable: true }) copyAssetId: string | null;
-  @Column({ name: 'content_published_at', type: 'timestamptz', nullable: true }) contentPublishedAt: Date | null;
+  @Column({ name: 'content_published_at', type: 'timestamptz', nullable: true })
+  contentPublishedAt: Date | null;
   @Column({ name: 'publication_url', type: 'text', nullable: true }) publicationUrl: string | null;
-  @Column({ name: 'probe_engine', type: 'varchar', default: 'hermes-center-ai' }) probeEngine: string;
+  @Column({ name: 'probe_engine', type: 'varchar', default: 'hermes-center-ai' })
+  probeEngine: string;
   @Column({ name: 'probe_provider', type: 'varchar', default: 'qwen-max' }) probeProvider: string;
   @Column({ name: 'verify_batch_id', type: 'uuid', nullable: true }) verifyBatchId: string | null;
-  @Column({ name: 'verify_cited_rate', type: 'int', nullable: true }) verifyCitedRate: number | null;
+  @Column({ name: 'verify_cited_rate', type: 'int', nullable: true }) verifyCitedRate:
+    number | null;
   @Column({ name: 'verify_at', type: 'timestamptz', nullable: true }) verifyAt: Date | null;
   @Column({ type: 'int', nullable: true }) lift: number | null;
   @Column({ name: 'kill_criteria', type: 'text', nullable: true }) killCriteria: string | null;
   @Column({ type: 'text', nullable: true }) conclusion: string | null;
-  @Column({ name: 'prompt_feedback_applied_at', type: 'timestamptz', nullable: true }) promptFeedbackAppliedAt: Date | null;
+  @Column({ name: 'prompt_feedback_applied_at', type: 'timestamptz', nullable: true })
+  promptFeedbackAppliedAt: Date | null;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
 }

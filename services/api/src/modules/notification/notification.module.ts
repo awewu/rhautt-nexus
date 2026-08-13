@@ -9,12 +9,12 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 @Module({
   imports: [
     ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([NotificationEntity])]),
-    AuthModule
+    AuthModule,
   ],
   controllers: [NotificationController],
   providers: [
     NotificationService,
-    ...(TARGET_API_BOOT_SMOKE ? [bootSmokeRepositoryProvider(NotificationEntity)] : [])
+    ...(TARGET_API_BOOT_SMOKE ? [bootSmokeRepositoryProvider(NotificationEntity)] : []),
   ],
   exports: [NotificationService],
 })
@@ -28,11 +28,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class NotificationBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('notification');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('notification')
 export class NotificationBoundaryController {
   constructor(private readonly s: NotificationBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

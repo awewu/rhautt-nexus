@@ -2,7 +2,7 @@
 /**
  * 多端口同步启动交付系统
  * Multi-Port Synchronized Delivery Launcher
- * 
+ *
  * 同时启动：
  * - Web主服务 (3000)
  * - WebSocket/改图联动服务 (3001)
@@ -21,7 +21,7 @@ const SERVICES = [
     cmd: 'node',
     args: ['server-production.js'],
     color: '\x1b[34m', // Blue
-    delay: 0
+    delay: 0,
   },
   {
     name: '⚡ WebSocket/改图联动',
@@ -29,7 +29,7 @@ const SERVICES = [
     cmd: 'node',
     args: ['server/core/DrawingSyncEngine.js'],
     color: '\x1b[32m', // Green
-    delay: 2000
+    delay: 2000,
   },
   {
     name: '🔧 API微服务',
@@ -37,7 +37,7 @@ const SERVICES = [
     cmd: 'node',
     args: ['server/api-service.js'],
     color: '\x1b[33m', // Yellow
-    delay: 4000
+    delay: 4000,
   },
   {
     name: '📁 静态资源服务',
@@ -45,8 +45,8 @@ const SERVICES = [
     cmd: 'npx',
     args: ['serve', 'archive/legacy-ui/public', '-l', '3003'],
     color: '\x1b[35m', // Magenta
-    delay: 6000
-  }
+    delay: 6000,
+  },
 ];
 
 const RESET = '\x1b[0m';
@@ -62,7 +62,7 @@ function startService(service) {
     setTimeout(() => {
       const proc = spawn(service.cmd, service.args, {
         stdio: 'pipe',
-        shell: true
+        shell: true,
       });
 
       proc.stdout.on('data', (data) => {
@@ -95,8 +95,8 @@ function startService(service) {
 
 async function startAll() {
   console.log('\n🚀 多端口同步启动交付系统\n');
-  console.log('=' .repeat(60));
-  
+  console.log('='.repeat(60));
+
   // 顺序启动服务（避免端口冲突）
   for (const service of SERVICES) {
     try {
@@ -111,7 +111,7 @@ async function startAll() {
     console.log('\n🖥️  启动桌面版应用...\n');
     const desktop = spawn('npm', ['run', 'start:desktop'], {
       stdio: 'inherit',
-      shell: true
+      shell: true,
     });
     processes.push(desktop);
   }, 8000);
@@ -122,15 +122,15 @@ async function startAll() {
 
 function healthCheck() {
   console.log('\n📊 服务健康检查\n');
-  console.log('=' .repeat(60));
-  
-  SERVICES.forEach(s => {
+  console.log('='.repeat(60));
+
+  SERVICES.forEach((s) => {
     const status = '✅ 运行中';
     console.log(`${s.color}[${s.name}]${RESET} http://localhost:${s.port} ${status}`);
   });
   console.log('\n🖥️  [桌面版]    Electron主进程\n');
-  
-  console.log('=' .repeat(60));
+
+  console.log('='.repeat(60));
   console.log('🎯 访问地址:');
   console.log('   Web控制台: http://localhost:3000');
   console.log('   改图联动:  http://localhost:3000/drawing-sync.html');
@@ -142,7 +142,7 @@ function healthCheck() {
 // 优雅退出
 process.on('SIGINT', () => {
   console.log('\n\n🛑 正在停止所有服务...\n');
-  processes.forEach(p => p.kill());
+  processes.forEach((p) => p.kill());
   process.exit(0);
 });
 

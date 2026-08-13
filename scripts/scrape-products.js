@@ -23,7 +23,7 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         refrigerant: 'R410A',
         connection: '喇叭口',
-        control: '线控+遥控'
+        control: '线控+遥控',
       },
       technicalParams: {
         capacity: 3500,
@@ -33,10 +33,10 @@ const MOCK_PRODUCT_DATABASE = {
         airflow: 650,
         noise: 32,
         weight: 22,
-        dimensions: { length: 700, width: 210, height: 450 }
+        dimensions: { length: 700, width: 210, height: 450 },
       },
       pricing: { cost: 2800, retail: 4500, unit: 'piece' },
-      tags: ['风管机', '1.5匹', '家用']
+      tags: ['风管机', '1.5匹', '家用'],
     },
     {
       sku: 'RH-IDU-18K',
@@ -49,7 +49,7 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         refrigerant: 'R410A',
         connection: '喇叭口',
-        control: '线控+遥控'
+        control: '线控+遥控',
       },
       technicalParams: {
         capacity: 5000,
@@ -59,10 +59,10 @@ const MOCK_PRODUCT_DATABASE = {
         airflow: 900,
         noise: 35,
         weight: 28,
-        dimensions: { length: 900, width: 230, height: 550 }
+        dimensions: { length: 900, width: 230, height: 550 },
       },
       pricing: { cost: 3800, retail: 6200, unit: 'piece' },
-      tags: ['风管机', '2匹', '家用']
+      tags: ['风管机', '2匹', '家用'],
     },
     {
       sku: 'RH-IDU-24K',
@@ -75,7 +75,7 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         refrigerant: 'R410A',
         connection: '焊接',
-        control: '线控+APP'
+        control: '线控+APP',
       },
       technicalParams: {
         capacity: 7200,
@@ -85,10 +85,10 @@ const MOCK_PRODUCT_DATABASE = {
         airflow: 1200,
         noise: 38,
         weight: 35,
-        dimensions: { length: 1100, width: 250, height: 650 }
+        dimensions: { length: 1100, width: 250, height: 650 },
       },
       pricing: { cost: 5200, retail: 8500, unit: 'piece' },
-      tags: ['风管机', '3匹', '家用']
+      tags: ['风管机', '3匹', '家用'],
     },
     {
       sku: 'RH-IDU-36K',
@@ -101,7 +101,7 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         refrigerant: 'R410A',
         connection: '焊接',
-        control: '线控+中央控制'
+        control: '线控+中央控制',
       },
       technicalParams: {
         capacity: 12000,
@@ -111,10 +111,10 @@ const MOCK_PRODUCT_DATABASE = {
         airflow: 1800,
         noise: 42,
         weight: 48,
-        dimensions: { length: 1400, width: 280, height: 750 }
+        dimensions: { length: 1400, width: 280, height: 750 },
       },
       pricing: { cost: 8500, retail: 13800, unit: 'piece' },
-      tags: ['风管机', '5匹', '商用']
+      tags: ['风管机', '5匹', '商用'],
     },
     {
       sku: 'RH-ODU-48K',
@@ -127,7 +127,7 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         refrigerant: 'R410A',
         compressor: '直流变频',
-        defrost: '智能除霜'
+        defrost: '智能除霜',
       },
       technicalParams: {
         capacity: 16000,
@@ -136,10 +136,10 @@ const MOCK_PRODUCT_DATABASE = {
         voltage: '380V',
         cop: 3.8,
         weight: 85,
-        dimensions: { length: 950, width: 340, height: 1250 }
+        dimensions: { length: 950, width: 340, height: 1250 },
       },
       pricing: { cost: 12500, retail: 19800, unit: 'piece' },
-      tags: ['多联机', '6匹', '变频']
+      tags: ['多联机', '6匹', '变频'],
     },
     {
       sku: 'RH-ODU-80K',
@@ -152,7 +152,7 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         refrigerant: 'R410A',
         compressor: '双转子变频',
-        defrost: '智能除霜'
+        defrost: '智能除霜',
       },
       technicalParams: {
         capacity: 28000,
@@ -161,10 +161,10 @@ const MOCK_PRODUCT_DATABASE = {
         voltage: '380V',
         cop: 3.6,
         weight: 145,
-        dimensions: { length: 1350, width: 380, height: 1600 }
+        dimensions: { length: 1350, width: 380, height: 1600 },
       },
       pricing: { cost: 21500, retail: 33800, unit: 'piece' },
-      tags: ['多联机', '10匹', '变频']
+      tags: ['多联机', '10匹', '变频'],
     },
     {
       sku: 'RH-ODU-120K',
@@ -177,7 +177,7 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         refrigerant: 'R410A',
         compressor: '涡旋变频',
-        defrost: '智能除霜'
+        defrost: '智能除霜',
       },
       technicalParams: {
         capacity: 40000,
@@ -186,13 +186,13 @@ const MOCK_PRODUCT_DATABASE = {
         voltage: '380V',
         cop: 3.5,
         weight: 210,
-        dimensions: { length: 1650, width: 420, height: 1750 }
+        dimensions: { length: 1650, width: 420, height: 1750 },
       },
       pricing: { cost: 32800, retail: 52800, unit: 'piece' },
-      tags: ['多联机', '14匹', '变频', '别墅']
-    }
+      tags: ['多联机', '14匹', '变频', '别墅'],
+    },
   ],
-  
+
   // 美的中央空调产品 (基于公开资料)
   midea_hvac: [
     {
@@ -206,7 +206,7 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         refrigerant: 'R410A',
         connection: '喇叭口',
-        control: '遥控'
+        control: '遥控',
       },
       technicalParams: {
         capacity: 2600,
@@ -216,10 +216,10 @@ const MOCK_PRODUCT_DATABASE = {
         airflow: 520,
         noise: 30,
         weight: 18,
-        dimensions: { length: 620, width: 195, height: 410 }
+        dimensions: { length: 620, width: 195, height: 410 },
       },
       pricing: { cost: 2200, retail: 3500, unit: 'piece' },
-      tags: ['风管机', '1匹', '小房间']
+      tags: ['风管机', '1匹', '小房间'],
     },
     {
       sku: 'MD-ODU-36K',
@@ -232,7 +232,7 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         refrigerant: 'R410A',
         compressor: '直流变频',
-        defrost: '智能除霜'
+        defrost: '智能除霜',
       },
       technicalParams: {
         capacity: 12000,
@@ -241,13 +241,13 @@ const MOCK_PRODUCT_DATABASE = {
         voltage: '380V',
         cop: 3.6,
         weight: 78,
-        dimensions: { length: 900, width: 320, height: 1100 }
+        dimensions: { length: 900, width: 320, height: 1100 },
       },
       pricing: { cost: 9800, retail: 15800, unit: 'piece' },
-      tags: ['多联机', '5匹', '变频']
-    }
+      tags: ['多联机', '5匹', '变频'],
+    },
   ],
-  
+
   // 管材管件 (行业标准)
   pipes_fittings: [
     // 铜管
@@ -262,17 +262,17 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         standard: 'GB/T 18033',
         material: 'T2紫铜',
-        coil: '盘管/直管'
+        coil: '盘管/直管',
       },
       pipeParams: {
         diameter: 6.35,
         wallThickness: 0.8,
         material: '铜',
         pressure: 4.5,
-        tempRange: { min: -40, max: 120 }
+        tempRange: { min: -40, max: 120 },
       },
       pricing: { cost: 28, retail: 45, unit: 'meter' },
-      tags: ['铜管', '6.35mm', '冷媒管']
+      tags: ['铜管', '6.35mm', '冷媒管'],
     },
     {
       sku: 'CU-PIPE-9.52',
@@ -285,17 +285,17 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         standard: 'GB/T 18033',
         material: 'T2紫铜',
-        coil: '盘管/直管'
+        coil: '盘管/直管',
       },
       pipeParams: {
         diameter: 9.52,
         wallThickness: 0.8,
         material: '铜',
         pressure: 4.5,
-        tempRange: { min: -40, max: 120 }
+        tempRange: { min: -40, max: 120 },
       },
       pricing: { cost: 38, retail: 65, unit: 'meter' },
-      tags: ['铜管', '9.52mm', '冷媒管']
+      tags: ['铜管', '9.52mm', '冷媒管'],
     },
     {
       sku: 'CU-PIPE-12.7',
@@ -308,17 +308,17 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         standard: 'GB/T 18033',
         material: 'T2紫铜',
-        coil: '盘管/直管'
+        coil: '盘管/直管',
       },
       pipeParams: {
         diameter: 12.7,
         wallThickness: 1.0,
         material: '铜',
         pressure: 4.5,
-        tempRange: { min: -40, max: 120 }
+        tempRange: { min: -40, max: 120 },
       },
       pricing: { cost: 52, retail: 85, unit: 'meter' },
-      tags: ['铜管', '12.7mm', '冷媒管']
+      tags: ['铜管', '12.7mm', '冷媒管'],
     },
     {
       sku: 'CU-PIPE-15.88',
@@ -331,17 +331,17 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         standard: 'GB/T 18033',
         material: 'T2紫铜',
-        coil: '盘管/直管'
+        coil: '盘管/直管',
       },
       pipeParams: {
         diameter: 15.88,
         wallThickness: 1.0,
         material: '铜',
         pressure: 4.5,
-        tempRange: { min: -40, max: 120 }
+        tempRange: { min: -40, max: 120 },
       },
       pricing: { cost: 72, retail: 115, unit: 'meter' },
-      tags: ['铜管', '15.88mm', '冷媒管']
+      tags: ['铜管', '15.88mm', '冷媒管'],
     },
     {
       sku: 'CU-PIPE-19.05',
@@ -354,19 +354,19 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         standard: 'GB/T 18033',
         material: 'T2紫铜',
-        coil: '盘管/直管'
+        coil: '盘管/直管',
       },
       pipeParams: {
         diameter: 19.05,
         wallThickness: 1.2,
         material: '铜',
         pressure: 4.5,
-        tempRange: { min: -40, max: 120 }
+        tempRange: { min: -40, max: 120 },
       },
       pricing: { cost: 98, retail: 155, unit: 'meter' },
-      tags: ['铜管', '19.05mm', '冷媒管']
+      tags: ['铜管', '19.05mm', '冷媒管'],
     },
-    
+
     // PPR给水管
     {
       sku: 'PPR-PIPE-20',
@@ -379,17 +379,17 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         standard: 'GB/T 18742',
         material: 'PPR',
-        color: '灰色'
+        color: '灰色',
       },
       pipeParams: {
         diameter: 20,
         wallThickness: 2.0,
         material: 'PPR',
         pressure: 1.6,
-        tempRange: { min: 0, max: 95 }
+        tempRange: { min: 0, max: 95 },
       },
       pricing: { cost: 8, retail: 15, unit: 'meter' },
-      tags: ['PPR', '20mm', '给水管']
+      tags: ['PPR', '20mm', '给水管'],
     },
     {
       sku: 'PPR-PIPE-25',
@@ -402,17 +402,17 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         standard: 'GB/T 18742',
         material: 'PPR',
-        color: '灰色'
+        color: '灰色',
       },
       pipeParams: {
         diameter: 25,
         wallThickness: 2.3,
         material: 'PPR',
         pressure: 1.6,
-        tempRange: { min: 0, max: 95 }
+        tempRange: { min: 0, max: 95 },
       },
       pricing: { cost: 12, retail: 22, unit: 'meter' },
-      tags: ['PPR', '25mm', '给水管']
+      tags: ['PPR', '25mm', '给水管'],
     },
     {
       sku: 'PPR-PIPE-32',
@@ -425,19 +425,19 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         standard: 'GB/T 18742',
         material: 'PPR',
-        color: '灰色'
+        color: '灰色',
       },
       pipeParams: {
         diameter: 32,
         wallThickness: 3.0,
         material: 'PPR',
         pressure: 1.6,
-        tempRange: { min: 0, max: 95 }
+        tempRange: { min: 0, max: 95 },
       },
       pricing: { cost: 18, retail: 32, unit: 'meter' },
-      tags: ['PPR', '32mm', '给水管']
+      tags: ['PPR', '32mm', '给水管'],
     },
-    
+
     // PVC排水管
     {
       sku: 'PVC-PIPE-25',
@@ -450,17 +450,17 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         standard: 'GB/T 5836',
         material: 'PVC-U',
-        color: '白色'
+        color: '白色',
       },
       pipeParams: {
         diameter: 25,
         wallThickness: 1.5,
         material: 'PVC-U',
         pressure: 0.6,
-        tempRange: { min: 0, max: 60 }
+        tempRange: { min: 0, max: 60 },
       },
       pricing: { cost: 3, retail: 6, unit: 'meter' },
-      tags: ['PVC', '25mm', '冷凝水管']
+      tags: ['PVC', '25mm', '冷凝水管'],
     },
     {
       sku: 'PVC-PIPE-32',
@@ -473,20 +473,20 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         standard: 'GB/T 5836',
         material: 'PVC-U',
-        color: '白色'
+        color: '白色',
       },
       pipeParams: {
         diameter: 32,
         wallThickness: 1.8,
         material: 'PVC-U',
         pressure: 0.6,
-        tempRange: { min: 0, max: 60 }
+        tempRange: { min: 0, max: 60 },
       },
       pricing: { cost: 5, retail: 9, unit: 'meter' },
-      tags: ['PVC', '32mm', '冷凝水管']
-    }
+      tags: ['PVC', '32mm', '冷凝水管'],
+    },
   ],
-  
+
   // 管件
   fittings: [
     {
@@ -499,14 +499,14 @@ const MOCK_PRODUCT_DATABASE = {
       description: 'T2紫铜三通，焊接连接',
       specifications: {
         connection: '焊接',
-        material: 'T2紫铜'
+        material: 'T2紫铜',
       },
       pipeParams: {
         diameter: 9.52,
-        material: '铜'
+        material: '铜',
       },
       pricing: { cost: 15, retail: 28, unit: 'piece' },
-      tags: ['铜管件', '三通', '9.52mm']
+      tags: ['铜管件', '三通', '9.52mm'],
     },
     {
       sku: 'CU-ELBOW-90-9.52',
@@ -519,14 +519,14 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         connection: '焊接',
         material: 'T2紫铜',
-        angle: '90°'
+        angle: '90°',
       },
       pipeParams: {
         diameter: 9.52,
-        material: '铜'
+        material: '铜',
       },
       pricing: { cost: 12, retail: 22, unit: 'piece' },
-      tags: ['铜管件', '弯头', '9.52mm']
+      tags: ['铜管件', '弯头', '9.52mm'],
     },
     {
       sku: 'PPR-TEE-25',
@@ -538,17 +538,17 @@ const MOCK_PRODUCT_DATABASE = {
       description: 'PPR等径三通，热熔连接',
       specifications: {
         connection: '热熔',
-        material: 'PPR'
+        material: 'PPR',
       },
       pipeParams: {
         diameter: 25,
-        material: 'PPR'
+        material: 'PPR',
       },
       pricing: { cost: 3, retail: 6, unit: 'piece' },
-      tags: ['PPR管件', '三通', '25mm']
-    }
+      tags: ['PPR管件', '三通', '25mm'],
+    },
   ],
-  
+
   // 保温材料
   insulation: [
     {
@@ -562,15 +562,15 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         material: '橡塑',
         fireRating: 'B1',
-        conductivity: '0.034'
+        conductivity: '0.034',
       },
       pipeParams: {
         diameter: 9.52,
         wallThickness: 10,
-        material: '橡塑'
+        material: '橡塑',
       },
       pricing: { cost: 6, retail: 12, unit: 'meter' },
-      tags: ['保温', '橡塑', '9.52mm', 'B1级']
+      tags: ['保温', '橡塑', '9.52mm', 'B1级'],
     },
     {
       sku: 'INS-12.7-13',
@@ -583,15 +583,15 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         material: '橡塑',
         fireRating: 'B1',
-        conductivity: '0.034'
+        conductivity: '0.034',
       },
       pipeParams: {
         diameter: 12.7,
         wallThickness: 13,
-        material: '橡塑'
+        material: '橡塑',
       },
       pricing: { cost: 8, retail: 15, unit: 'meter' },
-      tags: ['保温', '橡塑', '12.7mm', 'B1级']
+      tags: ['保温', '橡塑', '12.7mm', 'B1级'],
     },
     {
       sku: 'INS-19.05-19',
@@ -604,18 +604,18 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         material: '橡塑',
         fireRating: 'B1',
-        conductivity: '0.034'
+        conductivity: '0.034',
       },
       pipeParams: {
         diameter: 19.05,
         wallThickness: 19,
-        material: '橡塑'
+        material: '橡塑',
       },
       pricing: { cost: 12, retail: 22, unit: 'meter' },
-      tags: ['保温', '橡塑', '19.05mm', 'B1级']
-    }
+      tags: ['保温', '橡塑', '19.05mm', 'B1级'],
+    },
   ],
-  
+
   // 分集水器
   manifolds: [
     {
@@ -629,14 +629,14 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         material: '黄铜',
         connection: '1寸',
-        flowMeter: '有'
+        flowMeter: '有',
       },
       technicalParams: {
         weight: 2.5,
-        dimensions: { length: 300, width: 80, height: 100 }
+        dimensions: { length: 300, width: 80, height: 100 },
       },
       pricing: { cost: 180, retail: 320, unit: 'piece' },
-      tags: ['分集水器', '2路', '地暖']
+      tags: ['分集水器', '2路', '地暖'],
     },
     {
       sku: 'MF-4WAY',
@@ -649,14 +649,14 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         material: '黄铜',
         connection: '1寸',
-        flowMeter: '有'
+        flowMeter: '有',
       },
       technicalParams: {
         weight: 4.2,
-        dimensions: { length: 450, width: 80, height: 100 }
+        dimensions: { length: 450, width: 80, height: 100 },
       },
       pricing: { cost: 280, retail: 480, unit: 'piece' },
-      tags: ['分集水器', '4路', '地暖']
+      tags: ['分集水器', '4路', '地暖'],
     },
     {
       sku: 'MF-6WAY',
@@ -669,14 +669,14 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         material: '黄铜',
         connection: '1寸',
-        flowMeter: '有'
+        flowMeter: '有',
       },
       technicalParams: {
         weight: 6.0,
-        dimensions: { length: 600, width: 80, height: 100 }
+        dimensions: { length: 600, width: 80, height: 100 },
       },
       pricing: { cost: 380, retail: 650, unit: 'piece' },
-      tags: ['分集水器', '6路', '地暖']
+      tags: ['分集水器', '6路', '地暖'],
     },
     {
       sku: 'MF-8WAY',
@@ -689,17 +689,17 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         material: '黄铜',
         connection: '1寸',
-        flowMeter: '有'
+        flowMeter: '有',
       },
       technicalParams: {
         weight: 7.8,
-        dimensions: { length: 750, width: 80, height: 100 }
+        dimensions: { length: 750, width: 80, height: 100 },
       },
       pricing: { cost: 480, retail: 820, unit: 'piece' },
-      tags: ['分集水器', '8路', '地暖']
-    }
+      tags: ['分集水器', '8路', '地暖'],
+    },
   ],
-  
+
   // 新风机
   freshAir: [
     {
@@ -713,7 +713,7 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         heatRecovery: '全热交换',
         filter: 'H13级',
-        control: '触屏'
+        control: '触屏',
       },
       technicalParams: {
         airflow: 150,
@@ -722,10 +722,10 @@ const MOCK_PRODUCT_DATABASE = {
         voltage: '220V',
         noise: 28,
         weight: 18,
-        dimensions: { length: 700, width: 550, height: 220 }
+        dimensions: { length: 700, width: 550, height: 220 },
       },
       pricing: { cost: 2200, retail: 3800, unit: 'piece' },
-      tags: ['新风机', '150风量', '全热交换']
+      tags: ['新风机', '150风量', '全热交换'],
     },
     {
       sku: 'FAU-250',
@@ -738,7 +738,7 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         heatRecovery: '全热交换',
         filter: 'H13级',
-        control: '触屏+APP'
+        control: '触屏+APP',
       },
       technicalParams: {
         airflow: 250,
@@ -747,10 +747,10 @@ const MOCK_PRODUCT_DATABASE = {
         voltage: '220V',
         noise: 32,
         weight: 24,
-        dimensions: { length: 850, width: 620, height: 260 }
+        dimensions: { length: 850, width: 620, height: 260 },
       },
       pricing: { cost: 3200, retail: 5500, unit: 'piece' },
-      tags: ['新风机', '250风量', '全热交换']
+      tags: ['新风机', '250风量', '全热交换'],
     },
     {
       sku: 'FAU-350',
@@ -763,7 +763,7 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         heatRecovery: '全热交换',
         filter: 'H13级',
-        control: '触屏+APP'
+        control: '触屏+APP',
       },
       technicalParams: {
         airflow: 350,
@@ -772,10 +772,10 @@ const MOCK_PRODUCT_DATABASE = {
         voltage: '220V',
         noise: 36,
         weight: 32,
-        dimensions: { length: 980, width: 700, height: 300 }
+        dimensions: { length: 980, width: 700, height: 300 },
       },
       pricing: { cost: 4500, retail: 7800, unit: 'piece' },
-      tags: ['新风机', '350风量', '全热交换']
+      tags: ['新风机', '350风量', '全热交换'],
     },
     {
       sku: 'FAU-500',
@@ -788,7 +788,7 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         heatRecovery: '全热交换',
         filter: 'H13级',
-        control: '中央控制'
+        control: '中央控制',
       },
       technicalParams: {
         airflow: 500,
@@ -797,13 +797,13 @@ const MOCK_PRODUCT_DATABASE = {
         voltage: '220V',
         noise: 40,
         weight: 42,
-        dimensions: { length: 1200, width: 850, height: 350 }
+        dimensions: { length: 1200, width: 850, height: 350 },
       },
       pricing: { cost: 6800, retail: 11800, unit: 'piece' },
-      tags: ['新风机', '500风量', '全热交换', '商用']
-    }
+      tags: ['新风机', '500风量', '全热交换', '商用'],
+    },
   ],
-  
+
   // 电气元件
   electrical: [
     {
@@ -817,15 +817,15 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         poles: '1P',
         curve: 'C',
-        standard: 'IEC 60898'
+        standard: 'IEC 60898',
       },
       technicalParams: {
         current: 16,
         voltage: '230V',
-        breakingCapacity: 6000
+        breakingCapacity: 6000,
       },
       pricing: { cost: 25, retail: 45, unit: 'piece' },
-      tags: ['断路器', '16A', '施耐德']
+      tags: ['断路器', '16A', '施耐德'],
     },
     {
       sku: 'MCB-20A',
@@ -838,15 +838,15 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         poles: '1P',
         curve: 'C',
-        standard: 'IEC 60898'
+        standard: 'IEC 60898',
       },
       technicalParams: {
         current: 20,
         voltage: '230V',
-        breakingCapacity: 6000
+        breakingCapacity: 6000,
       },
       pricing: { cost: 28, retail: 50, unit: 'piece' },
-      tags: ['断路器', '20A', '施耐德']
+      tags: ['断路器', '20A', '施耐德'],
     },
     {
       sku: 'MCB-32A',
@@ -859,15 +859,15 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         poles: '1P',
         curve: 'C',
-        standard: 'IEC 60898'
+        standard: 'IEC 60898',
       },
       technicalParams: {
         current: 32,
         voltage: '230V',
-        breakingCapacity: 6000
+        breakingCapacity: 6000,
       },
       pricing: { cost: 35, retail: 62, unit: 'piece' },
-      tags: ['断路器', '32A', '施耐德']
+      tags: ['断路器', '32A', '施耐德'],
     },
     {
       sku: 'WIRE-BV2.5',
@@ -880,14 +880,14 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         core: '单芯',
         material: '铜',
-        insulation: 'PVC'
+        insulation: 'PVC',
       },
       technicalParams: {
         current: 16,
-        voltage: '450/750V'
+        voltage: '450/750V',
       },
       pricing: { cost: 120, retail: 200, unit: 'piece' },
-      tags: ['电线', '2.5平方', '100米']
+      tags: ['电线', '2.5平方', '100米'],
     },
     {
       sku: 'WIRE-BV4',
@@ -900,16 +900,16 @@ const MOCK_PRODUCT_DATABASE = {
       specifications: {
         core: '单芯',
         material: '铜',
-        insulation: 'PVC'
+        insulation: 'PVC',
       },
       technicalParams: {
         current: 25,
-        voltage: '450/750V'
+        voltage: '450/750V',
       },
       pricing: { cost: 180, retail: 300, unit: 'piece' },
-      tags: ['电线', '4平方', '100米']
-    }
-  ]
+      tags: ['电线', '4平方', '100米'],
+    },
+  ],
 };
 
 /**
@@ -917,54 +917,56 @@ const MOCK_PRODUCT_DATABASE = {
  */
 async function scrapeProducts() {
   console.log('🚀 开始抓取产品数据...\n');
-  
+
   const allProducts = [];
-  
+
   // 收集所有产品
-  Object.values(MOCK_PRODUCT_DATABASE).forEach(category => {
+  Object.values(MOCK_PRODUCT_DATABASE).forEach((category) => {
     allProducts.push(...category);
   });
-  
+
   console.log(`✅ 共收集 ${allProducts.length} 个产品:\n`);
-  
+
   // 按类别统计
   const stats = {};
-  allProducts.forEach(p => {
+  allProducts.forEach((p) => {
     const key = `${p.category}/${p.subcategory}`;
     stats[key] = (stats[key] || 0) + 1;
   });
-  
-  Object.entries(stats).sort().forEach(([key, count]) => {
-    console.log(`  ${key}: ${count} 个`);
-  });
-  
+
+  Object.entries(stats)
+    .sort()
+    .forEach(([key, count]) => {
+      console.log(`  ${key}: ${count} 个`);
+    });
+
   // 保存为JSON文件
   const outputPath = path.join(__dirname, '..', 'data', 'scraped-products.json');
-  
+
   // 确保目录存在
   const dir = path.dirname(outputPath);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  
+
   // 添加元数据
   const output = {
     metadata: {
       scrapedAt: new Date().toISOString(),
       source: '模拟抓取（基于公开资料）',
       version: '1.0',
-      totalProducts: allProducts.length
+      totalProducts: allProducts.length,
     },
-    products: allProducts
+    products: allProducts,
   };
-  
+
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2), 'utf8');
-  
+
   console.log(`\n💾 数据已保存到: ${outputPath}`);
-  
+
   // 生成导入脚本
   generateImportScript(allProducts);
-  
+
   return allProducts;
 }
 
@@ -1005,15 +1007,15 @@ db.products.createIndex({ name: 'text', description: 'text', tags: 'text' });
 
 print('✅ 索引创建完成');
 `;
-  
+
   const scriptPath = path.join(__dirname, '..', 'data', 'import-products.js');
   fs.writeFileSync(scriptPath, script, 'utf8');
-  
+
   console.log(`📝 MongoDB导入脚本: ${scriptPath}`);
 }
 
 // 执行爬虫
-scrapeProducts().catch(err => {
+scrapeProducts().catch((err) => {
   console.error('❌ 抓取失败:', err);
   process.exit(1);
 });

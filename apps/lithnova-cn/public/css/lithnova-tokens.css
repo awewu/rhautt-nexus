@@ -10,47 +10,48 @@
 
 :root {
   /* Brand palette */
-  --ln-green:        #0A7C4A;
-  --ln-green-dk:     #075C36;
-  --ln-green-dk2:    #054528;
-  --ln-green-lt:     #E8F5EE;
-  --ln-accent:       #2ECC71;
-  --ln-accent-lt:    #D4F8E3;
+  --ln-green: #0a7c4a;
+  --ln-green-dk: #075c36;
+  --ln-green-dk2: #054528;
+  --ln-green-lt: #e8f5ee;
+  --ln-accent: #2ecc71;
+  --ln-accent-lt: #d4f8e3;
 
   /* Neutral */
-  --ln-ink:          #0F1F17;
-  --ln-ink-dim:      #3A4F43;
-  --ln-gray:         #6E8278;
-  --ln-gray-lt:      #A8B8B0;
-  --ln-border:       #D6EAE0;
-  --ln-border-lt:    #EBF4EF;
-  --ln-surface:      #F4FBF7;
-  --ln-page:         #FFFFFF;
+  --ln-ink: #0f1f17;
+  --ln-ink-dim: #3a4f43;
+  --ln-gray: #6e8278;
+  --ln-gray-lt: #a8b8b0;
+  --ln-border: #d6eae0;
+  --ln-border-lt: #ebf4ef;
+  --ln-surface: #f4fbf7;
+  --ln-page: #ffffff;
 
   /* Semantic */
-  --ln-warm:         #F6A94C;
-  --ln-warm-lt:      #FFF4E5;
-  --ln-blue:         #1E6091;
+  --ln-warm: #f6a94c;
+  --ln-warm-lt: #fff4e5;
+  --ln-blue: #1e6091;
 
   /* Typography */
-  --ln-font:         "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --ln-display:      "PingFang SC", "Microsoft YaHei", sans-serif;
+  --ln-font:
+    'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ln-display: 'PingFang SC', 'Microsoft YaHei', sans-serif;
 
-  --ln-size-h1:      56px;
-  --ln-size-h2:      42px;
-  --ln-size-h3:      28px;
-  --ln-size-h4:      20px;
-  --ln-size-body:    16px;
-  --ln-size-small:   14px;
-  --ln-size-micro:   12px;
+  --ln-size-h1: 56px;
+  --ln-size-h2: 42px;
+  --ln-size-h3: 28px;
+  --ln-size-h4: 20px;
+  --ln-size-body: 16px;
+  --ln-size-small: 14px;
+  --ln-size-micro: 12px;
 
   /* Spacing */
-  --ln-radius:       8px;
-  --ln-radius-lg:    14px;
-  --ln-shadow:       0 4px 20px rgba(10, 124, 74, 0.08);
-  --ln-shadow-lg:    0 12px 40px rgba(10, 124, 74, 0.12);
+  --ln-radius: 8px;
+  --ln-radius-lg: 14px;
+  --ln-shadow: 0 4px 20px rgba(10, 124, 74, 0.08);
+  --ln-shadow-lg: 0 12px 40px rgba(10, 124, 74, 0.12);
 
   /* Layout */
-  --ln-max-width:    1280px;
-  --ln-header-h:     72px;
+  --ln-max-width: 1280px;
+  --ln-header-h: 72px;
 }

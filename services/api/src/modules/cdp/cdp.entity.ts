@@ -6,11 +6,13 @@ export class CdpProfileEntity {
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
   @Column({ name: 'external_ref', type: 'varchar', nullable: true }) externalRef: string | null;
   @Column({ name: 'name_enc', type: 'text', nullable: true }) nameEnc: string | null;
-  @Column({ name: 'phone_hash', type: 'varchar', nullable: true }) @Index() phoneHash: string | null;
+  @Column({ name: 'phone_hash', type: 'varchar', nullable: true }) @Index() phoneHash:
+    string | null;
   @Column({ name: 'phone_enc', type: 'text', nullable: true }) phoneEnc: string | null;
   @Column({ name: 'email_enc', type: 'text', nullable: true }) emailEnc: string | null;
   @Column({ type: 'jsonb', default: () => "'{}'::jsonb" }) attributes: Record<string, unknown>;
-  @Column({ name: 'segment_codes', type: 'jsonb', default: () => "'[]'::jsonb" }) segmentCodes: string[];
+  @Column({ name: 'segment_codes', type: 'jsonb', default: () => "'[]'::jsonb" })
+  segmentCodes: string[];
   @Column({ name: 'consent_status', default: 'unknown' }) consentStatus: string;
   @Column({ type: 'varchar', nullable: true }) source: string | null;
   @Column({ name: 'created_at', type: 'timestamptz', default: () => 'now()' }) createdAt: Date;

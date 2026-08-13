@@ -11,7 +11,17 @@ function normalizePath(reqPath = '') {
 }
 
 function createLegacySurfaceClassifier(options = {}) {
-  const manifestPath = options.manifestPath || path.join(__dirname, '..', '..', 'archive', 'legacy-ui', 'public', 'legacy-surface-manifest.json');
+  const manifestPath =
+    options.manifestPath ||
+    path.join(
+      __dirname,
+      '..',
+      '..',
+      'archive',
+      'legacy-ui',
+      'public',
+      'legacy-surface-manifest.json'
+    );
   const surfaces = new Map();
 
   try {
@@ -31,7 +41,7 @@ function createLegacySurfaceClassifier(options = {}) {
     }
     return {
       active: false,
-      bucket: surfaces.get(reqPath) || 'unclassified'
+      bucket: surfaces.get(reqPath) || 'unclassified',
     };
   };
 }
@@ -59,7 +69,7 @@ function createProductionStaticSurfaceGuard(options = {}) {
       error: 'HTML surface is not part of the active production navigation',
       path: reqPath,
       active: false,
-      surfaceBucket: surface.bucket
+      surfaceBucket: surface.bucket,
     });
   };
 }
@@ -67,5 +77,5 @@ function createProductionStaticSurfaceGuard(options = {}) {
 module.exports = {
   ACTIVE_HTML_PATHS,
   createLegacySurfaceClassifier,
-  createProductionStaticSurfaceGuard
+  createProductionStaticSurfaceGuard,
 };

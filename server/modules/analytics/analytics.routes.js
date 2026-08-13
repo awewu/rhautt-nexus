@@ -14,7 +14,7 @@ function createAnalyticsRoutes(options = {}) {
     try {
       const data = await service.getOverview(req.scope, {
         dealerId: req.query.dealerId,
-        storeId: req.query.storeId
+        storeId: req.query.storeId,
       });
       res.json({ success: true, data });
     } catch (error) {

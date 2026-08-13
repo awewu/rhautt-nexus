@@ -1,18 +1,21 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '../..');
+const { describeIfArtifacts } = require('./helpers/local-artifacts');
+// 门禁在缺少 archive/legacy-ui/public/legacy-surface-manifest.json 时自 SKIP 且不产出报告
+const LEGACY_MANIFEST = 'archive/legacy-ui/public/legacy-surface-manifest.json';
 
 function readJson(relativePath) {
   return JSON.parse(fs.readFileSync(path.join(ROOT, relativePath), 'utf8'));
 }
 
-describe('legacy surface ownership evidence', () => {
+describeIfArtifacts([LEGACY_MANIFEST])('legacy surface ownership evidence', () => {
   beforeAll(() => {
     execFileSync(process.execPath, ['scripts/agent-guards/legacy-surface-ownership-check.js'], {
       cwd: ROOT,
-      stdio: 'pipe'
+      stdio: 'pipe',
     });
   });
 
@@ -44,16 +47,15 @@ describe('legacy surface ownership evidence', () => {
 
   test('keeps every archived legacy asset under a non-active action', () => {
     const report = readJson('audit/legacy-surface-ownership-report.json');
-    const active = report.surfaces.filter(surface => surface.manifestBucket === 'active');
-    const nonActive = report.surfaces.filter(surface => surface.manifestBucket !== 'active');
+    const active = report.surfaces.filter((surface) => surface.manifestBucket === 'active');
+    const nonActive = report.surfaces.filter((surface) => surface.manifestBucket !== 'active');
 
     expect(active).toHaveLength(0);
     expect(nonActive).toHaveLength(report.summary.nonActiveGovernedAssets);
-    expect(nonActive.every(surface => surface.action !== 'active')).toBe(true);
-    expect(nonActive.map(surface => surface.migrationStatus)).toEqual(expect.arrayContaining([
-      'migrate-owner-assigned',
-      'archived-reference-guarded'
-    ]));
+    expect(nonActive.every((surface) => surface.action !== 'active')).toBe(true);
+    expect(nonActive.map((surface) => surface.migrationStatus)).toEqual(
+      expect.arrayContaining(['migrate-owner-assigned', 'archived-reference-guarded'])
+    );
   });
 
   test('production guard scripts include legacy surface ownership in both visual and nonvisual gates', () => {

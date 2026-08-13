@@ -19,7 +19,7 @@ const PHONE_RE = /^1[3-9]\d{9}$/;
 export class OtpService {
   constructor(
     @InjectRepository(OtpChallengeEntity) private readonly otps: Repository<OtpChallengeEntity>,
-    @Inject(SMS_SENDER) private readonly sms: SmsSender,
+    @Inject(SMS_SENDER) private readonly sms: SmsSender
   ) {}
 
   private phoneHash(phone: string): string {
@@ -37,13 +37,15 @@ export class OtpService {
     if (recent) throw new HttpException('验证码发送过于频繁，请稍后再试', 429);
 
     const code = String(Math.floor(100000 + Math.random() * 900000));
-    await this.otps.save(this.otps.create({
-      phoneHash,
-      codeHash: await bcrypt.hash(code, 8),
-      purpose,
-      attempts: 0,
-      expiresAt: new Date(Date.now() + OTP_TTL_MS),
-    }));
+    await this.otps.save(
+      this.otps.create({
+        phoneHash,
+        codeHash: await bcrypt.hash(code, 8),
+        purpose,
+        attempts: 0,
+        expiresAt: new Date(Date.now() + OTP_TTL_MS),
+      })
+    );
     await this.sms.send(phone, code);
     return { sent: true };
   }

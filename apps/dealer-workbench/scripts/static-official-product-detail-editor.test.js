@@ -46,9 +46,18 @@ test('official detail html is saved and read through product content APIs', () =
 });
 
 test('empty official detail does not block product base save and existing detail can be cleared', () => {
-  assert.match(source, /const existingOfficialDetailHtml = officialDetailFromContent\(contentData\);/);
-  assert.match(source, /if \(text\(draft\.officialDetailHtml\) \|\| existingOfficialDetailHtml\) \{/);
-  assert.match(source, /saveOfficialProductDetailContent\(product\.id, tenantIdForProduct\(product\), draft\.officialDetailHtml\)/);
+  assert.match(
+    source,
+    /const existingOfficialDetailHtml = officialDetailFromContent\(contentData\);/
+  );
+  assert.match(
+    source,
+    /if \(text\(draft\.officialDetailHtml\) \|\| existingOfficialDetailHtml\) \{/
+  );
+  assert.match(
+    source,
+    /saveOfficialProductDetailContent\(product\.id, tenantIdForProduct\(product\), draft\.officialDetailHtml\)/
+  );
   assert.match(source, /官网产品详情加载失败；基础信息仍可编辑保存/);
 });
 
@@ -64,7 +73,10 @@ test('product catalog resolves uploaded images and avoids browser popups', () =>
   assert.match(source, /function productMainImageSrc/);
   assert.match(source, /function productAssetUrl/);
   assert.match(source, /artifactContentUrl\(ref\.artifactId \|\| ref\.id\)/);
-  assert.match(source, /const \{ alertFloating, promptFloating, floatingDialog \} = useFloatingDialog\(\)/);
+  assert.match(
+    source,
+    /const \{ alertFloating, promptFloating, floatingDialog \} = useFloatingDialog\(\)/
+  );
   assert.doesNotMatch(source, /window\.(confirm|prompt|alert)\(/);
 });
 
@@ -85,8 +97,14 @@ test('product catalog create and edit share manual pdf management', () => {
 });
 
 test('product catalog edit opens the brand-style modal instead of inline table editing', () => {
-  const row = source.slice(source.indexOf('function ProductCatalogRow('), source.indexOf('function OfficialProductDetailEditor('));
-  assert.match(row, /const editDialog = canUpdateProduct && editing && typeof document !== 'undefined'/);
+  const row = source.slice(
+    source.indexOf('function ProductCatalogRow('),
+    source.indexOf('function OfficialProductDetailEditor(')
+  );
+  assert.match(
+    row,
+    /const editDialog = canUpdateProduct && editing && typeof document !== 'undefined'/
+  );
   assert.match(row, /createPortal\(/);
   assert.match(row, /className="product-edit-modal"/);
   assert.match(row, /onClick=\{\(\) => setEditing\(true\)\}/);
@@ -96,7 +114,10 @@ test('product catalog edit opens the brand-style modal instead of inline table e
 
 test('product catalog search defers expensive filtering and count requests', () => {
   assert.match(source, /const \[deferredKeyword, setDeferredKeyword\] = useState\(''\)/);
-  assert.match(source, /window\.setTimeout\(\(\) => setDeferredKeyword\(keyword\.trim\(\)\), 260\)/);
+  assert.match(
+    source,
+    /window\.setTimeout\(\(\) => setDeferredKeyword\(keyword\.trim\(\)\), 260\)/
+  );
   assert.match(source, /const q = deferredKeyword;/);
   assert.match(source, /const query = deferredKeyword\.toLowerCase\(\);/);
 });

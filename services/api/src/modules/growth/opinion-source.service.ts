@@ -51,22 +51,32 @@ export class OpinionSourceService {
   constructor() {
     // manual：始终可用（人工/表单/客服工单录入）。
     this.register({
-      source: 'manual', label: '人工录入', requiresCredential: false,
+      source: 'manual',
+      label: '人工录入',
+      requiresCredential: false,
       fetch: async () => [],
     });
     // news：真实 RSS 实拉（Bing 新闻，公开无凭证）。
     this.register({
-      source: 'news', label: '新闻(RSS)', requiresCredential: false,
+      source: 'news',
+      label: '新闻(RSS)',
+      requiresCredential: false,
       fetch: (query, limit) => this.fetchNewsRss(query, limit),
     });
     // 外部源：凭证门控，未配置时 fetch 抛出显式错误（不静默臆造）。
     for (const e of EXTERNAL_SOURCES) {
       this.register({
-        source: e.source, label: e.label, requiresCredential: true, credentialEnv: e.env,
+        source: e.source,
+        label: e.label,
+        requiresCredential: true,
+        credentialEnv: e.env,
         fetch: async () => {
-          if (!process.env[e.env]) throw new Error(`connector ${e.source} not configured (missing ${e.env})`);
+          if (!process.env[e.env])
+            throw new Error(`connector ${e.source} not configured (missing ${e.env})`);
           // 真实抓取适配待接入；配置凭证后在此实现 HTTP 拉取 + 归一化。
-          this.logger.warn(`connector ${e.source} configured but live fetch adapter not yet implemented`);
+          this.logger.warn(
+            `connector ${e.source} configured but live fetch adapter not yet implemented`
+          );
           return [];
         },
       });
@@ -83,7 +93,10 @@ export class OpinionSourceService {
       source: c.source,
       label: c.label,
       requiresCredential: c.requiresCredential,
-      status: !c.requiresCredential || (c.credentialEnv && process.env[c.credentialEnv]) ? 'ready' : 'not-configured',
+      status:
+        !c.requiresCredential || (c.credentialEnv && process.env[c.credentialEnv])
+          ? 'ready'
+          : 'not-configured',
     }));
   }
 
@@ -142,8 +155,11 @@ export class OpinionSourceService {
     return raw
       .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
       .replace(/<[^>]+>/g, '')
-      .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'").replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&amp;/g, '&')
       .replace(/\s+/g, ' ')
       .trim();
   }

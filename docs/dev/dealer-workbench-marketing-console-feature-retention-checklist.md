@@ -28,32 +28,32 @@
 
 已核对当前页面路由文件：
 
-| 路由 | 文件 | 处理 |
-| --- | --- | --- |
-| `/` | `apps/dealer-workbench/src/app/page.tsx` | 保留，作为登录/营销入口 |
-| `/brand` | `apps/dealer-workbench/src/app/brand/page.tsx` | 保留 |
-| `/comfort/*` | `apps/dealer-workbench/src/app/comfort/[[...section]]/page.tsx` | 保留营销官网管理子路由 |
-| `/growth/*` | `apps/dealer-workbench/src/app/growth/[[...section]]/page.tsx` | 保留 |
-| `/products` | `apps/dealer-workbench/src/app/products/page.tsx` | 保留，明确不删除 |
-| `/accounts` | `apps/dealer-workbench/src/app/accounts/page.tsx` | 保留 |
-| `/crm` | `apps/dealer-workbench/src/app/crm/page.tsx` | 删除 |
-| `/projects` | `apps/dealer-workbench/src/app/projects/page.tsx` | 删除 |
-| `/design` | `apps/dealer-workbench/src/app/design/page.tsx` | 删除 |
-| `/design/pro` | `apps/dealer-workbench/src/app/design/pro/page.tsx` | 删除 |
-| `/design/visualize` | `apps/dealer-workbench/src/app/design/visualize/page.tsx` | 删除 |
-| `/bim` | `apps/dealer-workbench/src/app/bim/page.tsx` | 删除 |
-| `/bim/[id]` | `apps/dealer-workbench/src/app/bim/[id]/page.tsx` | 删除 |
-| `/bim/artifacts` | `apps/dealer-workbench/src/app/bim/artifacts/page.tsx` | 删除 |
-| `/bim/deepen-queue` | `apps/dealer-workbench/src/app/bim/deepen-queue/page.tsx` | 删除 |
-| `/bim/deepen/[projectId]` | `apps/dealer-workbench/src/app/bim/deepen/[projectId]/page.tsx` | 删除 |
-| `/finance` | `apps/dealer-workbench/src/app/finance/page.tsx` | 删除 |
-| `/team` | `apps/dealer-workbench/src/app/team/page.tsx` | 删除 |
-| `/aftersales` | `apps/dealer-workbench/src/app/aftersales/page.tsx` | 删除 |
-| `/hub` | `apps/dealer-workbench/src/app/hub/page.tsx` | 删除 |
-| `/hub-console` | `apps/dealer-workbench/src/app/hub-console/page.tsx` | 删除 |
-| `/mobile` | `apps/dealer-workbench/src/app/mobile/page.tsx` | 删除 as mobile entry page unless a retained marketing mobile shell explicitly replaces it |
-| `/dashboard` | `apps/dealer-workbench/src/app/dashboard/page.tsx` | Remove from current nav/shell; retain only if replaced by a marketing-only overview |
-| `/analytics` | `apps/dealer-workbench/src/app/analytics/page.tsx` | Remove from current nav/shell; retain only if replaced by marketing-only analytics |
+| 路由                      | 文件                                                            | 处理                                                                                      |
+| ------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `/`                       | `apps/dealer-workbench/src/app/page.tsx`                        | 保留，作为登录/营销入口                                                                   |
+| `/brand`                  | `apps/dealer-workbench/src/app/brand/page.tsx`                  | 保留                                                                                      |
+| `/comfort/*`              | `apps/dealer-workbench/src/app/comfort/[[...section]]/page.tsx` | 保留营销官网管理子路由                                                                    |
+| `/growth/*`               | `apps/dealer-workbench/src/app/growth/[[...section]]/page.tsx`  | 保留                                                                                      |
+| `/products`               | `apps/dealer-workbench/src/app/products/page.tsx`               | 保留，明确不删除                                                                          |
+| `/accounts`               | `apps/dealer-workbench/src/app/accounts/page.tsx`               | 保留                                                                                      |
+| `/crm`                    | `apps/dealer-workbench/src/app/crm/page.tsx`                    | 删除                                                                                      |
+| `/projects`               | `apps/dealer-workbench/src/app/projects/page.tsx`               | 删除                                                                                      |
+| `/design`                 | `apps/dealer-workbench/src/app/design/page.tsx`                 | 删除                                                                                      |
+| `/design/pro`             | `apps/dealer-workbench/src/app/design/pro/page.tsx`             | 删除                                                                                      |
+| `/design/visualize`       | `apps/dealer-workbench/src/app/design/visualize/page.tsx`       | 删除                                                                                      |
+| `/bim`                    | `apps/dealer-workbench/src/app/bim/page.tsx`                    | 删除                                                                                      |
+| `/bim/[id]`               | `apps/dealer-workbench/src/app/bim/[id]/page.tsx`               | 删除                                                                                      |
+| `/bim/artifacts`          | `apps/dealer-workbench/src/app/bim/artifacts/page.tsx`          | 删除                                                                                      |
+| `/bim/deepen-queue`       | `apps/dealer-workbench/src/app/bim/deepen-queue/page.tsx`       | 删除                                                                                      |
+| `/bim/deepen/[projectId]` | `apps/dealer-workbench/src/app/bim/deepen/[projectId]/page.tsx` | 删除                                                                                      |
+| `/finance`                | `apps/dealer-workbench/src/app/finance/page.tsx`                | 删除                                                                                      |
+| `/team`                   | `apps/dealer-workbench/src/app/team/page.tsx`                   | 删除                                                                                      |
+| `/aftersales`             | `apps/dealer-workbench/src/app/aftersales/page.tsx`             | 删除                                                                                      |
+| `/hub`                    | `apps/dealer-workbench/src/app/hub/page.tsx`                    | 删除                                                                                      |
+| `/hub-console`            | `apps/dealer-workbench/src/app/hub-console/page.tsx`            | 删除                                                                                      |
+| `/mobile`                 | `apps/dealer-workbench/src/app/mobile/page.tsx`                 | 删除 as mobile entry page unless a retained marketing mobile shell explicitly replaces it |
+| `/dashboard`              | `apps/dealer-workbench/src/app/dashboard/page.tsx`              | Remove from current nav/shell; retain only if replaced by a marketing-only overview       |
+| `/analytics`              | `apps/dealer-workbench/src/app/analytics/page.tsx`              | Remove from current nav/shell; retain only if replaced by marketing-only analytics        |
 
 ### 1.2 `apps/dealer-workbench/src/lib/workbench-navigation.ts` 当前导航快照
 

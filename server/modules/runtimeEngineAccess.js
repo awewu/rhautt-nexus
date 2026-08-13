@@ -21,5 +21,5 @@ function getRuntimeEngine(name, options = {}) {
 module.exports = {
   getRuntimeEngine,
   getSharedSafeEngines,
-  resolveRuntimeEngines
+  resolveRuntimeEngines,
 };

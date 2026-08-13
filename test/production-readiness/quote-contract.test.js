@@ -35,23 +35,35 @@ describe('套间二 · quote 报价模块 · 契约与接线', () => {
   });
 
   test('load-calc / econet / persist 请求体的必填契约', () => {
-    const loadCalc = spec.paths['/api/v2/quotation/load-calc'].post.requestBody.content['application/json'].schema;
+    const loadCalc =
+      spec.paths['/api/v2/quotation/load-calc'].post.requestBody.content['application/json'].schema;
     expect(loadCalc.required).toContain('area');
-    const econet = spec.paths['/api/v2/quotation/econet-premium'].post.requestBody.content['application/json'].schema;
+    const econet =
+      spec.paths['/api/v2/quotation/econet-premium'].post.requestBody.content['application/json']
+        .schema;
     expect(econet.required).toContain('devices');
-    const persist = spec.paths['/api/v2/quotation'].post.requestBody.content['application/json'].schema;
+    const persist =
+      spec.paths['/api/v2/quotation'].post.requestBody.content['application/json'].schema;
     expect(persist.required).toContain('customerId');
     expect(persist.additionalProperties).toBe(false);
     expect(spec.paths['/api/v2/quotation'].post.responses['201']).toBeTruthy();
     expect(spec.paths['/api/v2/quotation'].post.responses['404']).toBeTruthy();
     expect(spec.paths['/api/v2/quotation/{id}/lock'].post.responses['404']).toBeTruthy();
-    expect(spec.paths['/api/v2/quotation'].get.parameters.some((p) => p.name === 'opportunityId')).toBe(true);
+    expect(
+      spec.paths['/api/v2/quotation'].get.parameters.some((p) => p.name === 'opportunityId')
+    ).toBe(true);
   });
 
   test('生成客户端暴露 8 个报价方法', () => {
     for (const m of [
-      'generateQuotation', 'quotationLoadCalc', 'quotationEconetPremium', 'exportQuotation',
-      'quotationGuardrailCheck', 'persistQuotation', 'listQuotations', 'lockQuotation',
+      'generateQuotation',
+      'quotationLoadCalc',
+      'quotationEconetPremium',
+      'exportQuotation',
+      'quotationGuardrailCheck',
+      'persistQuotation',
+      'listQuotations',
+      'lockQuotation',
     ]) {
       expect(client).toContain(`async ${m}`);
     }
@@ -64,7 +76,9 @@ describe('套间二 · quote 报价模块 · 契约与接线', () => {
       expect(ctrl).toMatch(new RegExp(`@Public\\(\\)[^\\n]*'${p}'`));
     }
     // persist/list/lock 受 AuthGuard
-    expect(ctrl).toMatch(/persist[\s\S]{0,40}UseGuards\(AuthGuard\)|UseGuards\(AuthGuard\)[\s\S]{0,40}persist/);
+    expect(ctrl).toMatch(
+      /persist[\s\S]{0,40}UseGuards\(AuthGuard\)|UseGuards\(AuthGuard\)[\s\S]{0,40}persist/
+    );
     expect(ctrl).toContain('lockQuotation');
   });
 
@@ -74,8 +88,12 @@ describe('套间二 · quote 报价模块 · 契约与接线', () => {
     expect(deps['class-validator']).toBeUndefined();
     const val = read(`${MODULE_DIR}/quote.validation.ts`);
     for (const fn of [
-      'validateGenerateInput', 'validateLoadCalcInput', 'validateEconetInput',
-      'validateExportInput', 'validateGuardrailInput', 'validatePersistInput',
+      'validateGenerateInput',
+      'validateLoadCalcInput',
+      'validateEconetInput',
+      'validateExportInput',
+      'validateGuardrailInput',
+      'validatePersistInput',
     ]) {
       expect(val).toContain(`export function ${fn}`);
     }
@@ -91,7 +109,9 @@ describe('套间二 · quote 报价模块 · 契约与接线', () => {
   test('B1 校验：错误类型硬失败、合法输入透明放行（functional，运行时转译）', () => {
     const ts = require('typescript');
     const src = read(`${MODULE_DIR}/quote.validation.ts`);
-    const out = ts.transpileModule(src, { compilerOptions: { module: 'commonjs', target: 'es2019' } }).outputText;
+    const out = ts.transpileModule(src, {
+      compilerOptions: { module: 'commonjs', target: 'es2019' },
+    }).outputText;
     const mod = { exports: {} };
     // eslint-disable-next-line no-new-func
     new Function('module', 'exports', 'require', out)(mod, mod.exports, require);
@@ -105,13 +125,13 @@ describe('套间二 · quote 报价模块 · 契约与接线', () => {
     expect(() => V.validatePersistInput({ customerId: 'c1', items: [] })).not.toThrow();
 
     // 错误类型硬失败
-    expect(() => V.validateGenerateInput({ devices: {} })).toThrow();       // devices 非数组
-    expect(() => V.validateLoadCalcInput({ area: 0 })).toThrow();            // area 非正数
-    expect(() => V.validateLoadCalcInput({ area: 'abc' })).toThrow();        // area 非数字
+    expect(() => V.validateGenerateInput({ devices: {} })).toThrow(); // devices 非数组
+    expect(() => V.validateLoadCalcInput({ area: 0 })).toThrow(); // area 非正数
+    expect(() => V.validateLoadCalcInput({ area: 'abc' })).toThrow(); // area 非数字
     expect(() => V.validateEconetInput({ devices: [{ quantity: 1 }] })).toThrow(); // 缺 type
-    expect(() => V.validateEconetInput({})).toThrow();                       // 缺 devices
-    expect(() => V.validateGuardrailInput({ items: 'x' })).toThrow();        // items 非数组
-    expect(() => V.validatePersistInput({})).toThrow();                      // 缺 customerId
+    expect(() => V.validateEconetInput({})).toThrow(); // 缺 devices
+    expect(() => V.validateGuardrailInput({ items: 'x' })).toThrow(); // items 非数组
+    expect(() => V.validatePersistInput({})).toThrow(); // 缺 customerId
     expect(() => V.validatePersistInput({ customerId: 'c1', items: {} })).toThrow(); // items 非数组
   });
 });

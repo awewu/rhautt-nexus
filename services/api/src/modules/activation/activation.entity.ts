@@ -23,7 +23,8 @@ export class ActivationParticipationEntity {
   @PrimaryGeneratedColumn('uuid') id: string;
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
   @Column({ name: 'activity_id', type: 'uuid', nullable: true }) activityId: string | null;
-  @Column({ name: 'participant_ref', type: 'varchar', nullable: true }) participantRef: string | null;
+  @Column({ name: 'participant_ref', type: 'varchar', nullable: true }) participantRef:
+    string | null;
   @Column() action: string;
   @Column({ name: 'referred_lead', default: false }) referredLead: boolean;
   @Column({ name: 'created_at', type: 'timestamptz', default: () => 'now()' }) createdAt: Date;

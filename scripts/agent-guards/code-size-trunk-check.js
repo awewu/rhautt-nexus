@@ -2,14 +2,26 @@
 
 const fs = require('fs');
 const path = require('path');
-require('./_artifact-gate').requireArtifactOrSkip('archive/legacy-ui/public/legacy-surface-manifest.json', {
-  guard: 'guard:code-size-trunk', reason: '遗留 UI 已归档移除，archive/ 在 .gitignore 且无生成步骤',
-});
+require('./_artifact-gate').requireArtifactOrSkip(
+  'archive/legacy-ui/public/legacy-surface-manifest.json',
+  {
+    guard: 'guard:code-size-trunk',
+    reason: '遗留 UI 已归档移除，archive/ 在 .gitignore 且无生成步骤',
+  }
+);
 const { ACTIVE_HTML_PATHS } = require('../../server/middleware/productionStaticSurfaceGuard');
-const { getProductionRouteCatalogMountMetadata } = require('../../server/modules/productionRouteCatalog');
+const {
+  getProductionRouteCatalogMountMetadata,
+} = require('../../server/modules/productionRouteCatalog');
 
 const ROOT = path.join(__dirname, '..', '..');
-const MANIFEST_PATH = path.join(ROOT, 'archive', 'legacy-ui', 'public', 'legacy-surface-manifest.json');
+const MANIFEST_PATH = path.join(
+  ROOT,
+  'archive',
+  'legacy-ui',
+  'public',
+  'legacy-surface-manifest.json'
+);
 const JSON_OUTPUT = path.join(ROOT, 'audit', 'code-size-trunk-report.json');
 const MD_OUTPUT = path.join(ROOT, 'audit', 'code-size-trunk-report.md');
 
@@ -23,17 +35,10 @@ const INCLUDED_EXTENSIONS = new Set([
   '.json',
   '.md',
   '.sql',
-  '.svg'
+  '.svg',
 ]);
 
-const PRUNE_DIRS = new Set([
-  '.git',
-  'node_modules',
-  'dist',
-  'build',
-  '.next',
-  '.turbo'
-]);
+const PRUNE_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next', '.turbo']);
 
 const PRODUCTION_TRUNK_PREFIXES = [
   'server/modules/',
@@ -47,7 +52,7 @@ const PRODUCTION_TRUNK_PREFIXES = [
   'packages/',
   'archive/legacy-ui/public/css/',
   'archive/legacy-ui/public/shared/',
-  'archive/legacy-ui/public/js/'
+  'archive/legacy-ui/public/js/',
 ];
 
 const COMPATIBILITY_RUNTIME_PREFIXES = [
@@ -56,7 +61,7 @@ const COMPATIBILITY_RUNTIME_PREFIXES = [
   'server/services/',
   'server/api/',
   'server/admin/',
-  'server/utils/'
+  'server/utils/',
 ];
 
 const COMPATIBILITY_TRUNK_FILES = new Set([
@@ -66,12 +71,12 @@ const COMPATIBILITY_TRUNK_FILES = new Set([
   'package.json',
   'nx.json',
   'tsconfig.base.json',
-  'pnpm-workspace.yaml'
+  'pnpm-workspace.yaml',
 ]);
 
 const LEGACY_RUNTIME_SNAPSHOT_FILES = new Set([
   'server-production-fixed.js',
-  'server-production-v7.js'
+  'server-production-v7.js',
 ]);
 
 const DESKTOP_SHELL_FILES = new Set([
@@ -79,11 +84,19 @@ const DESKTOP_SHELL_FILES = new Set([
   'main.js',
   'preload.js',
   'preload-simple.js',
-  'package-electron.json'
+  'package-electron.json',
 ]);
 
 const EVIDENCE_PREFIXES = ['audit/', 'evidence/'];
-const DOC_PREFIXES = ['docs/', 'README.md', 'CLAUDE.md', 'PRD-CURRENT.md', 'PRODUCT-SCOPE.md', 'PROJECT-DELIVERY.md', 'progress.md'];
+const DOC_PREFIXES = [
+  'docs/',
+  'README.md',
+  'CLAUDE.md',
+  'PRD-CURRENT.md',
+  'PRODUCT-SCOPE.md',
+  'PROJECT-DELIVERY.md',
+  'progress.md',
+];
 const GOVERNANCE_PREFIXES = ['governance/', '.claude/', '.github/', 'skills/'];
 const BACKUP_PREFIXES = ['backups/'];
 const CANDIDATE_PREFIXES = ['frontend/'];
@@ -92,9 +105,14 @@ const DATA_PREFIXES = ['data/', 'database/'];
 const CONTRACT_PREFIXES = ['contracts/'];
 const TEST_PREFIXES = ['test/', 'test-data/'];
 const GENERATED_APP_ARTIFACT_PREFIXES = ['exports/', 'storage/'];
-const DELIVERY_TOOLING_PREFIXES = ['scripts/agent-guards/', 'scripts/release/', 'scripts/contracts/'];
+const DELIVERY_TOOLING_PREFIXES = [
+  'scripts/agent-guards/',
+  'scripts/release/',
+  'scripts/contracts/',
+];
 const DEV_TOOLING_PREFIXES = ['scripts/', 'docker/', '.hermes/', '.windsurf/', 'hammer-reports/'];
-const ROOT_DOC_OR_REPORT_PATTERN = /^(?:.*(?:REPORT|PLAN|GUIDE|CHECKLIST|AUDIT|SUMMARY|REVIEW|ANALYSIS|ROADMAP|DELIVERY|PRD|PROGRESS|INVENTORY|TASK|VALIDATION|EVOLUTION|RYSNOVA|COMPETITOR|SYSTEM|PROJECT|REFACTOR|SPRINT|HAMMER|ACCEPTANCE|DEPLOY|INSPECTION|HANDOFF).*\.(?:md|json|txt)|.+\.bat|.+\.ps1)$/i;
+const ROOT_DOC_OR_REPORT_PATTERN =
+  /^(?:.*(?:REPORT|PLAN|GUIDE|CHECKLIST|AUDIT|SUMMARY|REVIEW|ANALYSIS|ROADMAP|DELIVERY|PRD|PROGRESS|INVENTORY|TASK|VALIDATION|EVOLUTION|RYSNOVA|COMPETITOR|SYSTEM|PROJECT|REFACTOR|SPRINT|HAMMER|ACCEPTANCE|DEPLOY|INSPECTION|HANDOFF).*\.(?:md|json|txt)|.+\.bat|.+\.ps1)$/i;
 const ROOT_SUPPORT_FILES = new Set([
   'package-lock.json',
   'package-electron.json',
@@ -111,7 +129,7 @@ const ROOT_SUPPORT_FILES = new Set([
   '.prettierrc',
   '.hintrc',
   '.env.example',
-  '.env.production'
+  '.env.production',
 ]);
 
 let acorn = null;
@@ -155,12 +173,12 @@ function isRuntimeScriptFile(relativePath) {
 
 function sumRuntimeScriptLines(items) {
   return items
-    .filter(item => isRuntimeScriptFile(item.file))
+    .filter((item) => isRuntimeScriptFile(item.file))
     .reduce((sum, item) => sum + item.lines, 0);
 }
 
 function countRuntimeScriptFiles(items) {
-  return items.filter(item => isRuntimeScriptFile(item.file)).length;
+  return items.filter((item) => isRuntimeScriptFile(item.file)).length;
 }
 
 function resolveLocalRequire(fromRelativePath, specifier) {
@@ -175,7 +193,7 @@ function resolveLocalRequire(fromRelativePath, specifier) {
     `${basePath}.ts`,
     path.join(basePath, 'index.js'),
     path.join(basePath, 'index.json'),
-    path.join(basePath, 'index.ts')
+    path.join(basePath, 'index.ts'),
   ];
 
   for (const candidate of candidates) {
@@ -221,7 +239,7 @@ function collectTopLevelRequiresWithAst(relativePath, text) {
     ast = acorn.parse(text, {
       ecmaVersion: 'latest',
       sourceType: 'script',
-      allowHashBang: true
+      allowHashBang: true,
     });
   } catch (error) {
     return null;
@@ -230,11 +248,10 @@ function collectTopLevelRequiresWithAst(relativePath, text) {
   const specifiers = [];
 
   function isFunctionNode(node) {
-    return node && [
-      'FunctionDeclaration',
-      'FunctionExpression',
-      'ArrowFunctionExpression'
-    ].includes(node.type);
+    return (
+      node &&
+      ['FunctionDeclaration', 'FunctionExpression', 'ArrowFunctionExpression'].includes(node.type)
+    );
   }
 
   function isClassNode(node) {
@@ -242,7 +259,8 @@ function collectTopLevelRequiresWithAst(relativePath, text) {
   }
 
   function isRequireCall(node) {
-    return node &&
+    return (
+      node &&
       node.type === 'CallExpression' &&
       node.callee &&
       node.callee.type === 'Identifier' &&
@@ -250,13 +268,12 @@ function collectTopLevelRequiresWithAst(relativePath, text) {
       node.arguments &&
       node.arguments.length === 1 &&
       node.arguments[0].type === 'Literal' &&
-      typeof node.arguments[0].value === 'string';
+      typeof node.arguments[0].value === 'string'
+    );
   }
 
   function isImmediateFunctionCall(node) {
-    return node &&
-      node.type === 'CallExpression' &&
-      isFunctionNode(node.callee);
+    return node && node.type === 'CallExpression' && isFunctionNode(node.callee);
   }
 
   function visit(node, options = {}) {
@@ -281,7 +298,8 @@ function collectTopLevelRequiresWithAst(relativePath, text) {
     }
 
     for (const [key, value] of Object.entries(node)) {
-      if (key === 'type' || key === 'start' || key === 'end' || key === 'loc' || key === 'range') continue;
+      if (key === 'type' || key === 'start' || key === 'end' || key === 'loc' || key === 'range')
+        continue;
       if (Array.isArray(value)) {
         for (const child of value) {
           if (child && typeof child.type === 'string') visit(child);
@@ -325,7 +343,9 @@ function resolveRequireSpecifiers(relativePath, specifiers) {
 function getRouteCatalogRuntimeEntries() {
   try {
     return getProductionRouteCatalogMountMetadata()
-      .map(entry => resolveLocalRequire('server/modules/productionRouteCatalog.js', entry.modulePath))
+      .map((entry) =>
+        resolveLocalRequire('server/modules/productionRouteCatalog.js', entry.modulePath)
+      )
       .filter(Boolean);
   } catch (error) {
     return [];
@@ -352,7 +372,7 @@ function buildReachableRuntimeGraph(entryFiles) {
 
   return {
     files: visited,
-    unresolved
+    unresolved,
   };
 }
 
@@ -376,12 +396,12 @@ function buildEagerRuntimeGraph(entryFiles) {
 
   return {
     files: visited,
-    unresolved
+    unresolved,
   };
 }
 
 function startsWithAny(relativePath, prefixes) {
-  return prefixes.some(prefix => relativePath === prefix || relativePath.startsWith(prefix));
+  return prefixes.some((prefix) => relativePath === prefix || relativePath.startsWith(prefix));
 }
 
 function buildHtmlClassification() {
@@ -397,7 +417,8 @@ function classify(relativePath, htmlBuckets) {
   if (startsWithAny(relativePath, BACKUP_PREFIXES)) return 'backup-excluded';
   if (startsWithAny(relativePath, ARCHIVE_PREFIXES)) return 'archive-excluded';
   if (startsWithAny(relativePath, EVIDENCE_PREFIXES)) return 'generated-evidence';
-  if (startsWithAny(relativePath, GENERATED_APP_ARTIFACT_PREFIXES)) return 'generated-app-artifacts';
+  if (startsWithAny(relativePath, GENERATED_APP_ARTIFACT_PREFIXES))
+    return 'generated-app-artifacts';
   if (startsWithAny(relativePath, DOC_PREFIXES)) return 'documentation';
   if (startsWithAny(relativePath, GOVERNANCE_PREFIXES)) return 'governance';
   if (startsWithAny(relativePath, TEST_PREFIXES)) return 'test-fixtures-and-tests';
@@ -411,7 +432,8 @@ function classify(relativePath, htmlBuckets) {
   if (LEGACY_RUNTIME_SNAPSHOT_FILES.has(relativePath)) return 'root-legacy-runtime-snapshot';
   if (DESKTOP_SHELL_FILES.has(relativePath)) return 'desktop-shell';
   if (ROOT_SUPPORT_FILES.has(relativePath)) return 'root-support';
-  if (!relativePath.includes('/') && ROOT_DOC_OR_REPORT_PATTERN.test(relativePath)) return 'root-legacy-report';
+  if (!relativePath.includes('/') && ROOT_DOC_OR_REPORT_PATTERN.test(relativePath))
+    return 'root-legacy-report';
   if (relativePath.startsWith('archive/legacy-ui/public/') && relativePath.endsWith('.html')) {
     const bucket = htmlBuckets[relativePath] || 'unclassified-html';
     return bucket === 'active' ? 'production-active-page' : `legacy-html-${bucket}`;
@@ -419,7 +441,10 @@ function classify(relativePath, htmlBuckets) {
   if (startsWithAny(relativePath, COMPATIBILITY_RUNTIME_PREFIXES)) {
     return 'production-compatibility-runtime';
   }
-  if (COMPATIBILITY_TRUNK_FILES.has(relativePath) || startsWithAny(relativePath, PRODUCTION_TRUNK_PREFIXES)) {
+  if (
+    COMPATIBILITY_TRUNK_FILES.has(relativePath) ||
+    startsWithAny(relativePath, PRODUCTION_TRUNK_PREFIXES)
+  ) {
     return 'production-trunk';
   }
   return 'supporting-code';
@@ -476,11 +501,13 @@ function renderMarkdown(report) {
     '## Delivery Size Budget',
     '',
     '| Metric | Current | Budget | Status | Meaning |',
-    '|---|---:|---:|---|---|'
+    '|---|---:|---:|---|---|',
   ];
 
   for (const budget of report.deliverySizeBudget) {
-    lines.push(`| ${budget.metric} | ${budget.current} | ${budget.budget} | ${budget.status} | ${budget.meaning.replace(/\|/g, '\\|')} |`);
+    lines.push(
+      `| ${budget.metric} | ${budget.current} | ${budget.budget} | ${budget.status} | ${budget.meaning.replace(/\|/g, '\\|')} |`
+    );
   }
 
   lines.push(
@@ -503,7 +530,9 @@ function renderMarkdown(report) {
     '|---|---:|---:|'
   );
 
-  for (const [bucket, summary] of Object.entries(report.buckets).sort((a, b) => b[1].lines - a[1].lines)) {
+  for (const [bucket, summary] of Object.entries(report.buckets).sort(
+    (a, b) => b[1].lines - a[1].lines
+  )) {
     lines.push(`| ${bucket} | ${summary.files} | ${summary.lines} |`);
   }
 
@@ -542,9 +571,9 @@ function main() {
     'audit/code-size-trunk-report.json',
     'audit/code-size-trunk-report.md',
     'audit/workspace-size-governance-report.json',
-    'audit/workspace-size-governance-report.md'
+    'audit/workspace-size-governance-report.md',
   ]);
-  const files = walk(ROOT).filter(file => !generatedSizeReports.has(file));
+  const files = walk(ROOT).filter((file) => !generatedSizeReports.has(file));
   const htmlBuckets = buildHtmlClassification();
   const { buckets, topFiles } = summarize(files, htmlBuckets);
   const totals = Object.values(buckets).reduce(
@@ -555,22 +584,15 @@ function main() {
     .filter(([bucket]) => bucket.startsWith('legacy-html-'))
     .reduce((sum, [, bucket]) => sum + bucket.lines, 0);
   const productionWebCoreLines =
-    (buckets['production-active-page']?.lines || 0) +
-    (buckets['production-trunk']?.lines || 0);
+    (buckets['production-active-page']?.lines || 0) + (buckets['production-trunk']?.lines || 0);
   const productionActivePageLines = buckets['production-active-page']?.lines || 0;
   const productionTrunkLines = buckets['production-trunk']?.lines || 0;
-  const productionCompatibilityRuntimeLines = buckets['production-compatibility-runtime']?.lines || 0;
+  const productionCompatibilityRuntimeLines =
+    buckets['production-compatibility-runtime']?.lines || 0;
   const productionRuntimeLines = productionWebCoreLines + productionCompatibilityRuntimeLines;
-  const reachableRuntimeEntryFiles = [
-    'server-production.js',
-    ...getRouteCatalogRuntimeEntries()
-  ];
-  const eagerRuntimeEntryFiles = [
-    'server-production.js'
-  ];
-  const legacyDevServerEntryFiles = [
-    'server/index.js'
-  ];
+  const reachableRuntimeEntryFiles = ['server-production.js', ...getRouteCatalogRuntimeEntries()];
+  const eagerRuntimeEntryFiles = ['server-production.js'];
+  const legacyDevServerEntryFiles = ['server/index.js'];
   const reachableRuntimeGraph = buildReachableRuntimeGraph(reachableRuntimeEntryFiles);
   const eagerRuntimeGraph = buildEagerRuntimeGraph(eagerRuntimeEntryFiles);
   const legacyDevServerReachableGraph = buildReachableRuntimeGraph(legacyDevServerEntryFiles);
@@ -580,47 +602,75 @@ function main() {
     eagerRuntimeGraph.files.add(`public${activePath}`);
   }
   const reachableRuntimeTopFiles = [...reachableRuntimeGraph.files]
-    .filter(file => fs.existsSync(path.join(ROOT, file)) && INCLUDED_EXTENSIONS.has(path.extname(file)))
-    .map(file => ({ file, lines: lineCount(file) }))
+    .filter(
+      (file) => fs.existsSync(path.join(ROOT, file)) && INCLUDED_EXTENSIONS.has(path.extname(file))
+    )
+    .map((file) => ({ file, lines: lineCount(file) }))
     .sort((a, b) => b.lines - a.lines);
-  const productionReachableRuntimeLines = reachableRuntimeTopFiles.reduce((sum, item) => sum + item.lines, 0);
+  const productionReachableRuntimeLines = reachableRuntimeTopFiles.reduce(
+    (sum, item) => sum + item.lines,
+    0
+  );
   const productionReachableJsRuntimeLines = sumRuntimeScriptLines(reachableRuntimeTopFiles);
   const productionReachableJsRuntimeFiles = countRuntimeScriptFiles(reachableRuntimeTopFiles);
-  const reachableRuntimeFiles = new Set(reachableRuntimeTopFiles.map(item => item.file));
-  const compatibilityRuntimeFiles = topFiles.filter(item => item.bucket === 'production-compatibility-runtime');
+  const reachableRuntimeFiles = new Set(reachableRuntimeTopFiles.map((item) => item.file));
+  const compatibilityRuntimeFiles = topFiles.filter(
+    (item) => item.bucket === 'production-compatibility-runtime'
+  );
   const productionReachableCompatibilityTopFiles = compatibilityRuntimeFiles
-    .filter(item => reachableRuntimeFiles.has(item.file))
+    .filter((item) => reachableRuntimeFiles.has(item.file))
     .sort((a, b) => b.lines - a.lines);
   const productionUnreachableCompatibilityInventoryTopFiles = compatibilityRuntimeFiles
-    .filter(item => !reachableRuntimeFiles.has(item.file))
+    .filter((item) => !reachableRuntimeFiles.has(item.file))
     .sort((a, b) => b.lines - a.lines);
-  const productionReachableCompatibilityLines = productionReachableCompatibilityTopFiles
-    .reduce((sum, item) => sum + item.lines, 0);
-  const productionUnreachableCompatibilityInventoryLines = productionUnreachableCompatibilityInventoryTopFiles
-    .reduce((sum, item) => sum + item.lines, 0);
+  const productionReachableCompatibilityLines = productionReachableCompatibilityTopFiles.reduce(
+    (sum, item) => sum + item.lines,
+    0
+  );
+  const productionUnreachableCompatibilityInventoryLines =
+    productionUnreachableCompatibilityInventoryTopFiles.reduce((sum, item) => sum + item.lines, 0);
   const eagerRuntimeTopFiles = [...eagerRuntimeGraph.files]
-    .filter(file => fs.existsSync(path.join(ROOT, file)) && INCLUDED_EXTENSIONS.has(path.extname(file)))
-    .map(file => ({ file, lines: lineCount(file) }))
+    .filter(
+      (file) => fs.existsSync(path.join(ROOT, file)) && INCLUDED_EXTENSIONS.has(path.extname(file))
+    )
+    .map((file) => ({ file, lines: lineCount(file) }))
     .sort((a, b) => b.lines - a.lines);
-  const productionEagerRuntimeLines = eagerRuntimeTopFiles.reduce((sum, item) => sum + item.lines, 0);
+  const productionEagerRuntimeLines = eagerRuntimeTopFiles.reduce(
+    (sum, item) => sum + item.lines,
+    0
+  );
   const productionEagerJsRuntimeLines = sumRuntimeScriptLines(eagerRuntimeTopFiles);
   const productionEagerJsRuntimeFiles = countRuntimeScriptFiles(eagerRuntimeTopFiles);
   const legacyDevServerReachableTopFiles = [...legacyDevServerReachableGraph.files]
-    .filter(file => fs.existsSync(path.join(ROOT, file)) && INCLUDED_EXTENSIONS.has(path.extname(file)))
-    .map(file => ({ file, lines: lineCount(file) }))
+    .filter(
+      (file) => fs.existsSync(path.join(ROOT, file)) && INCLUDED_EXTENSIONS.has(path.extname(file))
+    )
+    .map((file) => ({ file, lines: lineCount(file) }))
     .sort((a, b) => b.lines - a.lines);
-  const legacyDevServerReachableLines = legacyDevServerReachableTopFiles.reduce((sum, item) => sum + item.lines, 0);
+  const legacyDevServerReachableLines = legacyDevServerReachableTopFiles.reduce(
+    (sum, item) => sum + item.lines,
+    0
+  );
   const legacyDevServerEagerTopFiles = [...legacyDevServerEagerGraph.files]
-    .filter(file => fs.existsSync(path.join(ROOT, file)) && INCLUDED_EXTENSIONS.has(path.extname(file)))
-    .map(file => ({ file, lines: lineCount(file) }))
+    .filter(
+      (file) => fs.existsSync(path.join(ROOT, file)) && INCLUDED_EXTENSIONS.has(path.extname(file))
+    )
+    .map((file) => ({ file, lines: lineCount(file) }))
     .sort((a, b) => b.lines - a.lines);
-  const legacyDevServerEagerLines = legacyDevServerEagerTopFiles.reduce((sum, item) => sum + item.lines, 0);
+  const legacyDevServerEagerLines = legacyDevServerEagerTopFiles.reduce(
+    (sum, item) => sum + item.lines,
+    0
+  );
 
-  const activePageFiles = new Set([...ACTIVE_HTML_PATHS].map(pathName => `public${pathName}`));
-  const activeManifestFiles = new Set(Object.entries(htmlBuckets).filter(([, bucket]) => bucket === 'active').map(([file]) => file));
+  const activePageFiles = new Set([...ACTIVE_HTML_PATHS].map((pathName) => `public${pathName}`));
+  const activeManifestFiles = new Set(
+    Object.entries(htmlBuckets)
+      .filter(([, bucket]) => bucket === 'active')
+      .map(([file]) => file)
+  );
   const activeMismatch = [
-    ...[...activePageFiles].filter(file => !activeManifestFiles.has(file)),
-    ...[...activeManifestFiles].filter(file => !activePageFiles.has(file))
+    ...[...activePageFiles].filter((file) => !activeManifestFiles.has(file)),
+    ...[...activeManifestFiles].filter((file) => !activePageFiles.has(file)),
   ];
 
   const thresholds = {
@@ -633,7 +683,7 @@ function main() {
     maxProductionEagerJsRuntimeLines: 5000,
     maxProductionReachableCompatibilityLines: 15000,
     maxProductionActivePageLines: 15000,
-    note: 'Warnings are deliberately non-failing while the rewrite is in transition; active classification drift and production delivery budget breaches are failing.'
+    note: 'Warnings are deliberately non-failing while the rewrite is in transition; active classification drift and production delivery budget breaches are failing.',
   };
   const warnings = [];
   if (productionRuntimeLines > thresholds.warningProductionRuntimeLines) {
@@ -647,45 +697,46 @@ function main() {
       metric: 'productionReachableRuntimeLines',
       current: productionReachableRuntimeLines,
       budget: thresholds.maxProductionReachableRuntimeLines,
-      meaning: 'Static reachable runtime from the production entry, route catalog, and active pages.'
+      meaning:
+        'Static reachable runtime from the production entry, route catalog, and active pages.',
     },
     {
       metric: 'productionReachableJsRuntimeLines',
       current: productionReachableJsRuntimeLines,
       budget: thresholds.maxProductionReachableJsRuntimeLines,
-      meaning: 'Reachable JavaScript/TypeScript runtime only, excluding active HTML markup.'
+      meaning: 'Reachable JavaScript/TypeScript runtime only, excluding active HTML markup.',
     },
     {
       metric: 'productionEagerRuntimeLines',
       current: productionEagerRuntimeLines,
       budget: thresholds.maxProductionEagerRuntimeLines,
-      meaning: 'Startup path plus active pages; this is the main production boot-size control.'
+      meaning: 'Startup path plus active pages; this is the main production boot-size control.',
     },
     {
       metric: 'productionEagerJsRuntimeLines',
       current: productionEagerJsRuntimeLines,
       budget: thresholds.maxProductionEagerJsRuntimeLines,
-      meaning: 'Actual eager JavaScript startup path from server-production.js.'
+      meaning: 'Actual eager JavaScript startup path from server-production.js.',
     },
     {
       metric: 'productionReachableCompatibilityLines',
       current: productionReachableCompatibilityLines,
       budget: thresholds.maxProductionReachableCompatibilityLines,
-      meaning: 'Legacy compatibility debt still reachable from production routes.'
+      meaning: 'Legacy compatibility debt still reachable from production routes.',
     },
     {
       metric: 'productionActivePageLines',
       current: productionActivePageLines,
       budget: thresholds.maxProductionActivePageLines,
-      meaning: 'Currently active public HTML surfaces while the target monorepo is being built.'
-    }
-  ].map(item => ({
+      meaning: 'Currently active public HTML surfaces while the target monorepo is being built.',
+    },
+  ].map((item) => ({
     ...item,
-    status: item.current <= item.budget ? 'pass' : 'fail'
+    status: item.current <= item.budget ? 'pass' : 'fail',
   }));
   const sizeBudgetFailures = deliverySizeBudget
-    .filter(item => item.status === 'fail')
-    .map(item => `${item.metric} exceeds budget ${item.budget}: ${item.current}`);
+    .filter((item) => item.status === 'fail')
+    .map((item) => `${item.metric} exceeds budget ${item.budget}: ${item.current}`);
 
   const report = {
     generatedAt: new Date().toISOString(),
@@ -703,7 +754,8 @@ function main() {
     productionReachableCompatibilityLines,
     productionReachableCompatibilityFiles: productionReachableCompatibilityTopFiles.length,
     productionUnreachableCompatibilityInventoryLines,
-    productionUnreachableCompatibilityInventoryFiles: productionUnreachableCompatibilityInventoryTopFiles.length,
+    productionUnreachableCompatibilityInventoryFiles:
+      productionUnreachableCompatibilityInventoryTopFiles.length,
     productionReachableRuntimeLines,
     productionReachableRuntimeFiles: reachableRuntimeTopFiles.length,
     productionReachableJsRuntimeLines,
@@ -731,40 +783,47 @@ function main() {
     reachableRuntimeTopFiles,
     eagerRuntimeTopFiles,
     productionReachableCompatibilityTopFiles,
-    productionUnreachableCompatibilityInventoryTopFiles
+    productionUnreachableCompatibilityInventoryTopFiles,
   };
 
   fs.mkdirSync(path.dirname(JSON_OUTPUT), { recursive: true });
   fs.writeFileSync(JSON_OUTPUT, JSON.stringify(report, null, 2));
   fs.writeFileSync(MD_OUTPUT, renderMarkdown(report));
 
-  console.log(JSON.stringify({
-    status: report.status,
-    outputPath: path.relative(ROOT, JSON_OUTPUT),
-    markdownPath: path.relative(ROOT, MD_OUTPUT),
-    productionRuntimeLines,
-    productionWebCoreLines,
-    productionActivePageLines,
-    productionTrunkLines,
-    productionCompatibilityRuntimeLines,
-    productionReachableCompatibilityLines,
-    productionReachableCompatibilityFiles: productionReachableCompatibilityTopFiles.length,
-    productionUnreachableCompatibilityInventoryLines,
-    productionUnreachableCompatibilityInventoryFiles: productionUnreachableCompatibilityInventoryTopFiles.length,
-    productionReachableRuntimeLines,
-    productionReachableRuntimeFiles: reachableRuntimeTopFiles.length,
-    productionReachableJsRuntimeLines,
-    productionReachableJsRuntimeFiles,
-    productionEagerRuntimeLines,
-    productionEagerRuntimeFiles: eagerRuntimeTopFiles.length,
-    productionEagerJsRuntimeLines,
-    productionEagerJsRuntimeFiles,
-    legacyDevServerReachableLines,
-    legacyDevServerEagerLines,
-    legacyHtmlLines,
-    sizeBudgetFailures,
-    warnings: report.warnings
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        status: report.status,
+        outputPath: path.relative(ROOT, JSON_OUTPUT),
+        markdownPath: path.relative(ROOT, MD_OUTPUT),
+        productionRuntimeLines,
+        productionWebCoreLines,
+        productionActivePageLines,
+        productionTrunkLines,
+        productionCompatibilityRuntimeLines,
+        productionReachableCompatibilityLines,
+        productionReachableCompatibilityFiles: productionReachableCompatibilityTopFiles.length,
+        productionUnreachableCompatibilityInventoryLines,
+        productionUnreachableCompatibilityInventoryFiles:
+          productionUnreachableCompatibilityInventoryTopFiles.length,
+        productionReachableRuntimeLines,
+        productionReachableRuntimeFiles: reachableRuntimeTopFiles.length,
+        productionReachableJsRuntimeLines,
+        productionReachableJsRuntimeFiles,
+        productionEagerRuntimeLines,
+        productionEagerRuntimeFiles: eagerRuntimeTopFiles.length,
+        productionEagerJsRuntimeLines,
+        productionEagerJsRuntimeFiles,
+        legacyDevServerReachableLines,
+        legacyDevServerEagerLines,
+        legacyHtmlLines,
+        sizeBudgetFailures,
+        warnings: report.warnings,
+      },
+      null,
+      2
+    )
+  );
 
   if (report.status.startsWith('blocked')) process.exit(1);
 }

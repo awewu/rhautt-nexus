@@ -17,7 +17,7 @@ const REQUIRED_DEPENDENCIES = [
   { name: '@nestjs/platform-fastify', label: 'NestJS Fastify adapter' },
   { name: 'fastify', label: 'Fastify HTTP runtime' },
   { name: 'reflect-metadata', label: 'NestJS metadata reflection runtime' },
-  { name: 'rxjs', label: 'NestJS reactive dependency' }
+  { name: 'rxjs', label: 'NestJS reactive dependency' },
 ];
 
 const failures = [];
@@ -59,20 +59,23 @@ function inspect() {
   const packageSource = read('package.json');
   const pkg = JSON.parse(packageSource);
   const lock = exists('package-lock.json') ? readJson('package-lock.json') : null;
-  const dependencies = REQUIRED_DEPENDENCIES.map(item => {
+  const dependencies = REQUIRED_DEPENDENCIES.map((item) => {
     const version = dependencyVersion(pkg, item.name);
     return {
       ...item,
       declared: Boolean(version),
       version,
       lockfilePresent: dependencyLocked(lock, item.name),
-      nodeModulesPresent: exists(`node_modules/${item.name}/package.json`)
+      nodeModulesPresent: exists(`node_modules/${item.name}/package.json`),
     };
   });
-  const missing = dependencies.filter(item => !item.declared);
-  const missingLockfile = dependencies.filter(item => item.declared && !item.lockfilePresent);
-  const missingNodeModules = dependencies.filter(item => item.declared && !item.nodeModulesPresent);
-  const ready = missing.length === 0 && missingLockfile.length === 0 && missingNodeModules.length === 0;
+  const missing = dependencies.filter((item) => !item.declared);
+  const missingLockfile = dependencies.filter((item) => item.declared && !item.lockfilePresent);
+  const missingNodeModules = dependencies.filter(
+    (item) => item.declared && !item.nodeModulesPresent
+  );
+  const ready =
+    missing.length === 0 && missingLockfile.length === 0 && missingNodeModules.length === 0;
 
   return {
     generatedAt: new Date().toISOString(),
@@ -85,21 +88,25 @@ function inspect() {
     dependencies,
     summary: {
       required: REQUIRED_DEPENDENCIES.length,
-      declared: dependencies.filter(item => item.declared).length,
-      locked: dependencies.filter(item => item.lockfilePresent).length,
-      installed: dependencies.filter(item => item.nodeModulesPresent).length,
-      missing: missing.map(item => item.name),
-      missingLockfile: missingLockfile.map(item => item.name),
-      missingNodeModules: missingNodeModules.map(item => item.name),
-      failures: failures.length
+      declared: dependencies.filter((item) => item.declared).length,
+      locked: dependencies.filter((item) => item.lockfilePresent).length,
+      installed: dependencies.filter((item) => item.nodeModulesPresent).length,
+      missing: missing.map((item) => item.name),
+      missingLockfile: missingLockfile.map((item) => item.name),
+      missingNodeModules: missingNodeModules.map((item) => item.name),
+      failures: failures.length,
     },
     installAttempt: {
-      command: 'npm install next nx @nestjs/core @nestjs/common @nestjs/platform-fastify fastify reflect-metadata rxjs',
-      sandboxAttempt: 'npm install next nx @nestjs/core @nestjs/common @nestjs/platform-fastify fastify reflect-metadata rxjs --fetch-timeout=30000 --fetch-retries=1',
-      lastObservedFailure: 'sandbox npm install reached registry lookup but failed with getaddrinfo ENOTFOUND registry.npmjs.org',
-      escalatedAttempt: 'require_escalated npm install was retried twice; both approval reviews timed out',
-      note: 'Do not claim NestJS/Fastify boot proof until dependencies are declared, package-lock locked, and installed.'
-    }
+      command:
+        'npm install next nx @nestjs/core @nestjs/common @nestjs/platform-fastify fastify reflect-metadata rxjs',
+      sandboxAttempt:
+        'npm install next nx @nestjs/core @nestjs/common @nestjs/platform-fastify fastify reflect-metadata rxjs --fetch-timeout=30000 --fetch-retries=1',
+      lastObservedFailure:
+        'sandbox npm install reached registry lookup but failed with getaddrinfo ENOTFOUND registry.npmjs.org',
+      escalatedAttempt:
+        'require_escalated npm install was retried twice; both approval reviews timed out',
+      note: 'Do not claim NestJS/Fastify boot proof until dependencies are declared, package-lock locked, and installed.',
+    },
   };
 }
 
@@ -116,10 +123,12 @@ function renderMarkdown(report) {
     `Final launch architecture proof: ${report.finalLaunchArchitectureProof}`,
     '',
     '| Dependency | Declared | Locked | Installed | Version | Purpose |',
-    '|---|---:|---:|---:|---|---|'
+    '|---|---:|---:|---:|---|---|',
   ];
   for (const item of report.dependencies) {
-    lines.push(`| ${item.name} | ${item.declared ? 'yes' : 'no'} | ${item.lockfilePresent ? 'yes' : 'no'} | ${item.nodeModulesPresent ? 'yes' : 'no'} | ${item.version || ''} | ${item.label} |`);
+    lines.push(
+      `| ${item.name} | ${item.declared ? 'yes' : 'no'} | ${item.lockfilePresent ? 'yes' : 'no'} | ${item.nodeModulesPresent ? 'yes' : 'no'} | ${item.version || ''} | ${item.label} |`
+    );
   }
   lines.push(
     '',
@@ -146,7 +155,7 @@ if (report) {
     status: report.status,
     path: REPORT_JSON,
     summaryPath: REPORT_MD,
-    required: REQUIRED_DEPENDENCIES.map(item => item.name),
+    required: REQUIRED_DEPENDENCIES.map((item) => item.name),
     bootProofEligible: report.bootProofEligible,
     finalLaunchArchitectureProof: false,
     declared: report.summary.declared,
@@ -156,11 +165,13 @@ if (report) {
     missingLockfile: report.summary.missingLockfile,
     missingNodeModules: report.summary.missingNodeModules,
     lastObservedFailure: 'getaddrinfo ENOTFOUND registry.npmjs.org',
-    note: 'Target dependencies are not lockfile-complete or installed; NestJS/Fastify boot proof and Next.js/Nx build proof cannot be claimed.'
+    note: 'Target dependencies are not lockfile-complete or installed; NestJS/Fastify boot proof and Next.js/Nx build proof cannot be claimed.',
   });
 }
 
-console.log(`Target Dependency Readiness Check: status = ${report?.status || 'failed'}, failures = ${failures.length}`);
+console.log(
+  `Target Dependency Readiness Check: status = ${report?.status || 'failed'}, failures = ${failures.length}`
+);
 
 if (failures.length) {
   for (const failure of failures) console.error(`- ${failure}`);

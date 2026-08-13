@@ -19,7 +19,7 @@ class DXFParserService {
   async parseDXF(filePath) {
     try {
       let dxfString;
-      
+
       if (Buffer.isBuffer(filePath)) {
         dxfString = filePath.toString('utf-8');
       } else {
@@ -27,19 +27,19 @@ class DXFParserService {
       }
 
       const dxf = this.parser.parseSync(dxfString);
-      
+
       // 提取房间信息
       const rooms = this.extractRooms(dxf);
-      
+
       // 提取墙体信息
       const walls = this.extractWalls(dxf);
-      
+
       // 计算总面积
       const totalArea = this.calculateTotalArea(rooms);
-      
+
       // 提取尺寸信息
       const dimensions = this.extractDimensions(dxf);
-      
+
       return {
         success: true,
         filename: typeof filePath === 'string' ? filePath : 'buffer.dxf',
@@ -48,13 +48,13 @@ class DXFParserService {
         walls,
         totalArea,
         dimensions,
-        raw: dxf
+        raw: dxf,
       };
     } catch (error) {
       console.error('DXF解析错误:', error);
       return {
         success: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -66,7 +66,7 @@ class DXFParserService {
    */
   extractRooms(dxf) {
     const rooms = [];
-    
+
     // 从INSERT实体中提取房间标记（通常是块引用）
     if (dxf.entities) {
       dxf.entities.forEach((entity, index) => {
@@ -75,7 +75,7 @@ class DXFParserService {
           if (room) {
             rooms.push({
               id: `room_${index}`,
-              ...room
+              ...room,
             });
           }
         }
@@ -98,16 +98,16 @@ class DXFParserService {
    */
   parseRoomFromInsert(insert) {
     const blockName = insert.name || '';
-    
+
     // 常见的房间块名称模式
     const roomPatterns = {
-      '客厅': /客厅|living/i,
-      '卧室': /卧室|主卧|次卧|bedroom/i,
-      '厨房': /厨房|kitchen/i,
-      '卫生间': /卫生间|厕所|bathroom|toilet/i,
-      '书房': /书房|study/i,
-      '餐厅': /餐厅|dining/i,
-      '阳台': /阳台|balcony/i
+      客厅: /客厅|living/i,
+      卧室: /卧室|主卧|次卧|bedroom/i,
+      厨房: /厨房|kitchen/i,
+      卫生间: /卫生间|厕所|bathroom|toilet/i,
+      书房: /书房|study/i,
+      餐厅: /餐厅|dining/i,
+      阳台: /阳台|balcony/i,
     };
 
     let roomType = 'other';
@@ -126,7 +126,7 @@ class DXFParserService {
       type: this.getRoomTypeCode(roomType),
       area: 0, // 需要计算
       position: insert.position || [0, 0, 0],
-      blockName: blockName
+      blockName: blockName,
     };
   }
 
@@ -145,12 +145,13 @@ class DXFParserService {
           const vertices = this.getPolylineVertices(entity);
           if (vertices.length >= 3) {
             const area = this.calculatePolygonArea(vertices);
-            if (area > 1) { // 大于1平方米的封闭区域
+            if (area > 1) {
+              // 大于1平方米的封闭区域
               polylines.push({
                 id: `room_${index}`,
                 vertices,
                 area,
-                entity
+                entity,
               });
             }
           }
@@ -160,10 +161,10 @@ class DXFParserService {
 
     // 按面积排序，过滤掉小面积（可能是家具而非房间）
     polylines.sort((a, b) => b.area - a.area);
-    
+
     // 取前8个最大的封闭区域作为房间
     const topPolylines = polylines.slice(0, 8);
-    
+
     topPolylines.forEach((poly, index) => {
       rooms.push({
         id: poly.id,
@@ -171,7 +172,7 @@ class DXFParserService {
         type: this.guessRoomTypeByArea(poly.area, index),
         area: Math.round(poly.area * 100) / 100,
         vertices: poly.vertices,
-        isPolyline: true
+        isPolyline: true,
       });
     });
 
@@ -185,7 +186,7 @@ class DXFParserService {
    */
   getPolylineVertices(entity) {
     if (entity.vertices) {
-      return entity.vertices.map(v => [v.x, v.y]);
+      return entity.vertices.map((v) => [v.x, v.y]);
     }
     return [];
   }
@@ -204,9 +205,9 @@ class DXFParserService {
       area += vertices[i][0] * vertices[j][1];
       area -= vertices[j][0] * vertices[i][1];
     }
-    
+
     area = Math.abs(area) / 2;
-    
+
     // 假设单位是毫米，转换为平方米
     return area / 1000000;
   }
@@ -247,14 +248,14 @@ class DXFParserService {
    */
   getRoomTypeCode(type) {
     const typeMap = {
-      '客厅': 'living_room',
-      '卧室': 'bedroom',
-      '厨房': 'kitchen',
-      '卫生间': 'bathroom',
-      '书房': 'study',
-      '餐厅': 'dining',
-      '阳台': 'balcony',
-      'other': 'other'
+      客厅: 'living_room',
+      卧室: 'bedroom',
+      厨房: 'kitchen',
+      卫生间: 'bathroom',
+      书房: 'study',
+      餐厅: 'dining',
+      阳台: 'balcony',
+      other: 'other',
     };
     return typeMap[type] || 'other';
   }
@@ -276,10 +277,10 @@ class DXFParserService {
             start: [entity.vertices[0].x, entity.vertices[0].y],
             end: [entity.vertices[1].x, entity.vertices[1].y],
             thickness: entity.thickness || 200,
-            type: 'line'
+            type: 'line',
           });
         }
-        
+
         // 从LWPOLYLINE提取墙体
         if (entity.type === 'LWPOLYLINE') {
           const vertices = this.getPolylineVertices(entity);
@@ -289,7 +290,7 @@ class DXFParserService {
               start: vertices[i],
               end: vertices[i + 1],
               thickness: entity.thickness || 200,
-              type: 'polyline_segment'
+              type: 'polyline_segment',
             });
           }
         }
@@ -324,7 +325,7 @@ class DXFParserService {
             type: entity.dimensionType,
             text: entity.text,
             value: this.parseDimensionValue(entity.text),
-            position: entity.anchorPoint
+            position: entity.anchorPoint,
           });
         }
       });
@@ -352,32 +353,32 @@ class DXFParserService {
    */
   calculateHeatingLoad(dxfData, params = {}) {
     const { rooms, totalArea } = dxfData;
-    const { 
+    const {
       climateZone = 'cold', // 气候区
       insulation = 'good', // 保温情况
-      floorHeight = 2.8    // 层高
+      floorHeight = 2.8, // 层高
     } = params;
 
     // 基础热负荷指标 (W/㎡)
     const baseLoadFactors = {
-      'cold': { 'good': 80, 'average': 100, 'poor': 120 },
-      'moderate': { 'good': 60, 'average': 80, 'poor': 100 },
-      'warm': { 'good': 40, 'average': 60, 'poor': 80 }
+      cold: { good: 80, average: 100, poor: 120 },
+      moderate: { good: 60, average: 80, poor: 100 },
+      warm: { good: 40, average: 60, poor: 80 },
     };
 
     const baseFactor = baseLoadFactors[climateZone]?.[insulation] || 80;
-    
+
     // 层高修正
     const heightFactor = floorHeight / 2.8;
-    
-    const roomLoads = rooms.map(room => {
+
+    const roomLoads = rooms.map((room) => {
       const roomLoad = room.area * baseFactor * heightFactor;
       return {
         roomId: room.id,
         roomName: room.name,
         area: room.area,
         heatingLoad: Math.round(roomLoad),
-        coolingLoad: Math.round(roomLoad * 0.7) // 制冷负荷约为采暖的70%
+        coolingLoad: Math.round(roomLoad * 0.7), // 制冷负荷约为采暖的70%
       };
     });
 
@@ -390,7 +391,7 @@ class DXFParserService {
       totalCoolingLoad,
       totalArea,
       averageLoadPerSqm: Math.round(totalHeatingLoad / totalArea),
-      parameters: { climateZone, insulation, floorHeight }
+      parameters: { climateZone, insulation, floorHeight },
     };
   }
 
@@ -401,14 +402,14 @@ class DXFParserService {
    */
   getStatistics(dxfData) {
     const { rooms, walls, dimensions } = dxfData;
-    
+
     return {
       roomCount: rooms.length,
       wallCount: walls.length,
       dimensionCount: dimensions.length,
       totalArea: dxfData.totalArea,
       roomTypes: this.countRoomTypes(rooms),
-      averageRoomArea: rooms.length > 0 ? dxfData.totalArea / rooms.length : 0
+      averageRoomArea: rooms.length > 0 ? dxfData.totalArea / rooms.length : 0,
     };
   }
 
@@ -419,7 +420,7 @@ class DXFParserService {
    */
   countRoomTypes(rooms) {
     const counts = {};
-    rooms.forEach(room => {
+    rooms.forEach((room) => {
       const type = room.type || 'other';
       counts[type] = (counts[type] || 0) + 1;
     });

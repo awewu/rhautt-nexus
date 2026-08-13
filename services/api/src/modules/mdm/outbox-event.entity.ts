@@ -1,6 +1,4 @@
-import {
-  Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 /**
  * M15 · 跨板块事件总线（event_bus）的 outbox 表。
@@ -17,8 +15,8 @@ export class OutboxEventEntity {
 
   @Column({ name: 'tenant_id', type: 'varchar', nullable: true }) @Index() tenantId: string | null;
 
-  @Column({ name: 'event_type' }) eventType: string;          // e.g. product.master.updated / lead.created
-  @Column({ name: 'aggregate_type' }) aggregateType: string;  // e.g. global_product / lead
+  @Column({ name: 'event_type' }) eventType: string; // e.g. product.master.updated / lead.created
+  @Column({ name: 'aggregate_type' }) aggregateType: string; // e.g. global_product / lead
   @Column({ name: 'aggregate_id' }) aggregateId: string;
 
   @Column({ type: 'jsonb', default: {} }) payload: Record<string, unknown>;

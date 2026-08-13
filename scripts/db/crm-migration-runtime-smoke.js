@@ -19,7 +19,8 @@ async function request(base, path, init = {}, token) {
     },
   });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(`${base}${path} -> HTTP ${response.status} ${JSON.stringify(payload)}`);
+  if (!response.ok)
+    throw new Error(`${base}${path} -> HTTP ${response.status} ${JSON.stringify(payload)}`);
   return payload.data ?? payload;
 }
 
@@ -41,7 +42,9 @@ async function run() {
   });
   if (!login.token) throw new Error('CRM smoke login returned no token');
 
-  const jwtPayload = JSON.parse(Buffer.from(login.token.split('.')[1], 'base64url').toString('utf8'));
+  const jwtPayload = JSON.parse(
+    Buffer.from(login.token.split('.')[1], 'base64url').toString('utf8')
+  );
   const tenantId = jwtPayload.tenantId;
   if (!tenantId) throw new Error('CRM smoke token returned no tenantId');
 
@@ -53,33 +56,64 @@ async function run() {
   await db.connect();
 
   try {
-    const created = await request(DIRECT, '/api/v2/crm/leads', {
-      method: 'POST',
-      body: JSON.stringify({ phone, name: 'CRM migration smoke', source: 'migration-smoke', city: 'Shanghai' }),
-    }, login.token);
+    const created = await request(
+      DIRECT,
+      '/api/v2/crm/leads',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          phone,
+          name: 'CRM migration smoke',
+          source: 'migration-smoke',
+          city: 'Shanghai',
+        }),
+      },
+      login.token
+    );
     customerId = created.customer?.id;
-    if (!customerId || created.duplicate) throw new Error('direct CRM lead creation did not create a customer');
-    if (created.customer.phoneEncrypted || created.customer.phoneHash) throw new Error('CRM response leaked internal PII fields');
+    if (!customerId || created.duplicate)
+      throw new Error('direct CRM lead creation did not create a customer');
+    if (created.customer.phoneEncrypted || created.customer.phoneHash)
+      throw new Error('CRM response leaked internal PII fields');
 
-    const duplicate = await request(PROXY, '/api/v2/crm/leads', {
-      method: 'POST',
-      body: JSON.stringify({ phone, name: 'CRM migration smoke duplicate' }),
-    }, login.token);
-    if (!duplicate.duplicate || duplicate.customer?.id !== customerId) throw new Error('proxy CRM duplicate contract failed');
+    const duplicate = await request(
+      PROXY,
+      '/api/v2/crm/leads',
+      {
+        method: 'POST',
+        body: JSON.stringify({ phone, name: 'CRM migration smoke duplicate' }),
+      },
+      login.token
+    );
+    if (!duplicate.duplicate || duplicate.customer?.id !== customerId)
+      throw new Error('proxy CRM duplicate contract failed');
 
     const pipeline = await request(PROXY, '/api/v2/crm/pipeline', {}, login.token);
-    opportunityId = pipeline.items?.find(item => item.customerId === customerId)?.id;
-    if (!opportunityId) throw new Error('proxy CRM pipeline did not return the created opportunity');
+    opportunityId = pipeline.items?.find((item) => item.customerId === customerId)?.id;
+    if (!opportunityId)
+      throw new Error('proxy CRM pipeline did not return the created opportunity');
 
-    const updated = await request(PROXY, `/api/v2/crm/opportunities/${opportunityId}/stage`, {
-      method: 'PUT', body: JSON.stringify({ stage: 'qualified' }),
-    }, login.token);
-    if (updated.stage !== 'qualified') throw new Error('proxy CRM stage update did not return the updated entity');
+    const updated = await request(
+      PROXY,
+      `/api/v2/crm/opportunities/${opportunityId}/stage`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ stage: 'qualified' }),
+      },
+      login.token
+    );
+    if (updated.stage !== 'qualified')
+      throw new Error('proxy CRM stage update did not return the updated entity');
 
-    const interaction = await request(DIRECT, '/api/v2/crm/interactions', {
-      method: 'POST',
-      body: JSON.stringify({ customerId, opportunityId, type: 'note', content: 'runtime smoke' }),
-    }, login.token);
+    const interaction = await request(
+      DIRECT,
+      '/api/v2/crm/interactions',
+      {
+        method: 'POST',
+        body: JSON.stringify({ customerId, opportunityId, type: 'note', content: 'runtime smoke' }),
+      },
+      login.token
+    );
     interactionId = interaction.id;
     if (!interactionId) throw new Error('direct CRM interaction creation returned no id');
 
@@ -90,7 +124,7 @@ async function run() {
          (SELECT phone_encrypted LIKE 'v1:%' FROM rhautt_nexus.customers WHERE id = $1) AS encrypted,
          (SELECT count(*)::int FROM rhautt_nexus.audit_logs WHERE resource_id = ANY($2::text[])) AS audit_count,
          (SELECT count(*)::int FROM rhautt_nexus.mdm_outbox_events WHERE aggregate_id = ANY($2::text[])) AS outbox_count`,
-      [customerId, [customerId, opportunityId, interactionId]],
+      [customerId, [customerId, opportunityId, interactionId]]
     );
     const row = proof.rows[0];
     if (!row.encrypted || row.audit_count < 3 || row.outbox_count < 3) {
@@ -98,23 +132,32 @@ async function run() {
     }
     await db.query('COMMIT');
 
-    console.log(JSON.stringify({
-      ok: true,
-      direct: DIRECT,
-      proxy: PROXY,
-      encrypted: row.encrypted,
-      auditCount: row.audit_count,
-      outboxCount: row.outbox_count,
-    }));
+    console.log(
+      JSON.stringify({
+        ok: true,
+        direct: DIRECT,
+        proxy: PROXY,
+        encrypted: row.encrypted,
+        auditCount: row.audit_count,
+        outboxCount: row.outbox_count,
+      })
+    );
   } finally {
     if (customerId) {
       await db.query('BEGIN');
       await db.query('SELECT set_config($1, $2, true)', ['app.tenant_id', tenantId]);
       await db.query('DELETE FROM rhautt_nexus.interactions WHERE customer_id = $1', [customerId]);
-      await db.query('DELETE FROM rhautt_nexus.lifecycle_links WHERE customer_id = $1', [customerId]);
+      await db.query('DELETE FROM rhautt_nexus.lifecycle_links WHERE customer_id = $1', [
+        customerId,
+      ]);
       await db.query('DELETE FROM rhautt_nexus.opportunities WHERE customer_id = $1', [customerId]);
-      await db.query('DELETE FROM rhautt_nexus.audit_logs WHERE resource_id = ANY($1::text[])', [[customerId, opportunityId, interactionId].filter(Boolean)]);
-      await db.query('DELETE FROM rhautt_nexus.mdm_outbox_events WHERE aggregate_id = ANY($1::text[])', [[customerId, opportunityId, interactionId].filter(Boolean)]);
+      await db.query('DELETE FROM rhautt_nexus.audit_logs WHERE resource_id = ANY($1::text[])', [
+        [customerId, opportunityId, interactionId].filter(Boolean),
+      ]);
+      await db.query(
+        'DELETE FROM rhautt_nexus.mdm_outbox_events WHERE aggregate_id = ANY($1::text[])',
+        [[customerId, opportunityId, interactionId].filter(Boolean)]
+      );
       await db.query('DELETE FROM rhautt_nexus.customers WHERE id = $1', [customerId]);
       await db.query('COMMIT');
     }
@@ -122,7 +165,7 @@ async function run() {
   }
 }
 
-run().catch(error => {
+run().catch((error) => {
   console.error(error.message);
   process.exit(1);
 });

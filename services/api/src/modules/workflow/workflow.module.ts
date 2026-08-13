@@ -9,12 +9,12 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 @Module({
   imports: [
     ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([WorkflowInstanceEntity])]),
-    AuthModule
+    AuthModule,
   ],
   controllers: [WorkflowController],
   providers: [
     WorkflowService,
-    ...(TARGET_API_BOOT_SMOKE ? [bootSmokeRepositoryProvider(WorkflowInstanceEntity)] : [])
+    ...(TARGET_API_BOOT_SMOKE ? [bootSmokeRepositoryProvider(WorkflowInstanceEntity)] : []),
   ],
 })
 export class WorkflowModule {}
@@ -27,11 +27,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class WorkflowBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('workflow');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('workflow')
 export class WorkflowBoundaryController {
   constructor(private readonly s: WorkflowBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

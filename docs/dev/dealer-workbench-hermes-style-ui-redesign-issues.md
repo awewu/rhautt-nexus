@@ -15,17 +15,17 @@ These issues are published under `docs/dev/dealer-workbench-hermes-style-ui-rede
 
 ## Issue List
 
-| Issue | Title | Type | Blocked by | Parallel wave |
-| --- | --- | --- | --- | --- |
-| 00 | Marketing scope inventory and obsolete module removal checklist | AFK | None | Wave 0 |
-| 01 | Rheem Red design tokens and base UI primitives | AFK | None | Wave 0 |
-| 02 | Marketing shell and navigation pruning | AFK | 00 optional | Wave 0 |
-| 03 | Marketing table, status, loading, empty, and error baseline | AFK | 01 optional | Wave 0 |
-| 04 | Obsolete module page/code deletion | AFK | 00, 02 | Wave 1 |
-| 05 | Brand website console pages redesign | AFK | 00, 01, 02, 03, 04 | Wave 2 |
-| 06 | Market growth pages redesign | AFK | 00, 01, 02, 03, 04 | Wave 2 |
-| 07 | Product and marketing account pages redesign | AFK | 00, 01, 02, 03, 04 | Wave 2 |
-| 08 | Final marketing-console regression and obsolete-entry proof | AFK | 05, 06, 07 | Wave 3 |
+| Issue | Title                                                           | Type | Blocked by         | Parallel wave |
+| ----- | --------------------------------------------------------------- | ---- | ------------------ | ------------- |
+| 00    | Marketing scope inventory and obsolete module removal checklist | AFK  | None               | Wave 0        |
+| 01    | Rheem Red design tokens and base UI primitives                  | AFK  | None               | Wave 0        |
+| 02    | Marketing shell and navigation pruning                          | AFK  | 00 optional        | Wave 0        |
+| 03    | Marketing table, status, loading, empty, and error baseline     | AFK  | 01 optional        | Wave 0        |
+| 04    | Obsolete module page/code deletion                              | AFK  | 00, 02             | Wave 1        |
+| 05    | Brand website console pages redesign                            | AFK  | 00, 01, 02, 03, 04 | Wave 2        |
+| 06    | Market growth pages redesign                                    | AFK  | 00, 01, 02, 03, 04 | Wave 2        |
+| 07    | Product and marketing account pages redesign                    | AFK  | 00, 01, 02, 03, 04 | Wave 2        |
+| 08    | Final marketing-console regression and obsolete-entry proof     | AFK  | 05, 06, 07         | Wave 3        |
 
 ## First Batch Parallel Execution
 

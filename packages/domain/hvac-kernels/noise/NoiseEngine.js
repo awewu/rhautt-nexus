@@ -21,13 +21,13 @@
 
 // GB 50118-2010 室内允许噪声级（dB(A)）——常用房间，昼间/夜间（高要求标准取严值）
 const GB50118_INDOOR_LIMITS = {
-  bedroom:    { day: 45, night: 37 }, // 卧室
+  bedroom: { day: 45, night: 37 }, // 卧室
   livingroom: { day: 45, night: 45 }, // 起居室（厅）
-  study:      { day: 40, night: 40 }, // 书房（按高要求住宅）
-  office:     { day: 45, night: 45 },
-  meeting:    { day: 40, night: 40 },
-  ward:       { day: 40, night: 35 }, // 病房
-  classroom:  { day: 45, night: 45 },
+  study: { day: 40, night: 40 }, // 书房（按高要求住宅）
+  office: { day: 45, night: 45 },
+  meeting: { day: 40, night: 40 },
+  ward: { day: 40, night: 35 }, // 病房
+  classroom: { day: 45, night: 45 },
 };
 
 const DEFAULT_ROOM_ABSORPTION = 0.15; // 平均吸声系数 α（家具/软装一般住宅经验值）
@@ -135,10 +135,10 @@ function evaluateRoomNoise(params = {}) {
     metric: 'indoor_noise_dba',
     roomType,
     period,
-    predictedLp,            // 预测受声点 A 声级 dB(A)
-    limit,                  // GB 50118（或企标覆盖）允许噪声级
-    pass,                   // 是否达标
-    marginDb,               // 余量（正=达标余量，负=超标量）
+    predictedLp, // 预测受声点 A 声级 dB(A)
+    limit, // GB 50118（或企标覆盖）允许噪声级
+    pass, // 是否达标
+    marginDb, // 余量（正=达标余量，负=超标量）
     perSource,
     assumptions: {
       standard: 'GB 50118-2010',
@@ -158,7 +158,10 @@ function evaluateRooms(rooms = []) {
   const results = (Array.isArray(rooms) ? rooms : []).map((r) => evaluateRoomNoise(r));
   const evaluated = results.filter((r) => r.pass !== null);
   const failed = evaluated.filter((r) => r.pass === false);
-  const worst = evaluated.reduce((w, r) => (w === null || (r.marginDb ?? Infinity) < (w.marginDb ?? Infinity) ? r : w), null);
+  const worst = evaluated.reduce(
+    (w, r) => (w === null || (r.marginDb ?? Infinity) < (w.marginDb ?? Infinity) ? r : w),
+    null
+  );
   return {
     pass: evaluated.length ? failed.length === 0 : null,
     failedCount: failed.length,

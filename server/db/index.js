@@ -27,15 +27,18 @@ function resetForTests() {
 async function connect(options = {}) {
   const env = options.env || process.env;
   const uri = env.MONGODB_URI;
-  const requireMongo = typeof options.requireMongo === 'boolean'
-    ? options.requireMongo
-    : isProductionDatabaseRequired(env);
+  const requireMongo =
+    typeof options.requireMongo === 'boolean'
+      ? options.requireMongo
+      : isProductionDatabaseRequired(env);
 
   lastError = null;
 
   if (!uri) {
     if (requireMongo) {
-      lastError = new Error('[DB] MONGODB_URI is required when NODE_ENV=production or REQUIRE_MONGODB=true');
+      lastError = new Error(
+        '[DB] MONGODB_URI is required when NODE_ENV=production or REQUIRE_MONGODB=true'
+      );
       throw lastError;
     }
     connected = false;
@@ -46,7 +49,7 @@ async function connect(options = {}) {
 
   try {
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: Number(env.MONGODB_SERVER_SELECTION_TIMEOUT_MS || 5000)
+      serverSelectionTimeoutMS: Number(env.MONGODB_SERVER_SELECTION_TIMEOUT_MS || 5000),
     });
     connected = true;
     mode = 'mongo';
@@ -66,9 +69,15 @@ async function connect(options = {}) {
   }
 }
 
-function isConnected() { return connected; }
-function getMode() { return mode; }
-function getLastError() { return lastError; }
+function isConnected() {
+  return connected;
+}
+function getMode() {
+  return mode;
+}
+function getLastError() {
+  return lastError;
+}
 
 /**
  * 业务写入前的持久化断言。
@@ -92,5 +101,5 @@ module.exports = {
   isConnected,
   isProductionDatabaseRequired,
   requirePersistence,
-  resetForTests
+  resetForTests,
 };

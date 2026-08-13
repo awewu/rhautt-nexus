@@ -188,10 +188,7 @@
         "guard:legacy-migration-matrix",
         "guard:compat-engine-matrix"
       ],
-      "harnesses": [
-        "harness:ai-control",
-        "harness:all"
-      ],
+      "harnesses": ["harness:ai-control", "harness:all"],
       "progress": {
         "percent": 86,
         "stage": "rysnova-bim-engineering-traceability-contract-bound",
@@ -247,14 +244,8 @@
         "Keep Rhautt Comfort as Powered by/support expression on module surfaces, not the primary module logo.",
         "Keep 瑞诺瓦 and Rysnova module boundaries enforced by PRD, registry, target app metadata, contract, and guard."
       ],
-      "guards": [
-        "guard:nexus-naming",
-        "guard:delivery-goal",
-        "guard:module-independence"
-      ],
-      "harnesses": [
-        "harness:consolidation"
-      ],
+      "guards": ["guard:nexus-naming", "guard:delivery-goal", "guard:module-independence"],
+      "harnesses": ["harness:consolidation"],
       "progress": {
         "percent": 72,
         "stage": "boundary-guarding-active",
@@ -291,21 +282,13 @@
         "Industry differentiation evidence is still mostly internal PRD and feature-depth driven; fresh external competitor research remains constrained by network access.",
         "Designer, Rysnova, customer project, and quote surfaces must keep moving from demo depth to closed-loop operating-system depth."
       ],
-      "blockers": [
-        "Fresh competitor/source research needs network access when required."
-      ],
+      "blockers": ["Fresh competitor/source research needs network access when required."],
       "nextActions": [
         "Challenge every active module against lead, diagnosis, design, quote, contract, construction, acceptance, after-sales, and IoT handoff completeness.",
         "Convert product critique into buildable gaps owned by backend, frontend, data, Rysnova, lifecycle, and UI/VI lanes."
       ],
-      "guards": [
-        "harness:features",
-        "guard:delivery-goal"
-      ],
-      "harnesses": [
-        "harness:features",
-        "harness:consolidation"
-      ],
+      "guards": ["harness:features", "guard:delivery-goal"],
+      "harnesses": ["harness:features", "harness:consolidation"],
       "progress": {
         "percent": 38,
         "stage": "product-depth-review-active",
@@ -409,9 +392,7 @@
         "guard:rheem-vi-production:strict",
         "guard:delivery-goal"
       ],
-      "harnesses": [
-        "harness:operational"
-      ],
+      "harnesses": ["harness:operational"],
       "progress": {
         "percent": 60,
         "stage": "rheem-vi-strict-pass-visual-proof-pending",
@@ -489,9 +470,7 @@
         "Compatibility Express/Mongo trunk still exists while target NestJS/Fastify trunk is not boot-proven.",
         "Lazy compatibility facades reduce safe startup load, but they are not a substitute for target module replacement."
       ],
-      "blockers": [
-        "Target dependency install previously blocked by registry/network access."
-      ],
+      "blockers": ["Target dependency install previously blocked by registry/network access."],
       "nextActions": [
         "Preserve dual-mode module architecture: Rhautt portal embedded plus standalone launchable for 瑞诺瓦 and Rysnova.",
         "Guard target app metadata so consumer-diagnosis and rysnova-bim-workbench keep separate namespaces, API owners, and standalone aliases.",
@@ -524,9 +503,7 @@
         "guard:legacy-migration-matrix",
         "guard:compat-engine-matrix"
       ],
-      "harnesses": [
-        "harness:arch"
-      ],
+      "harnesses": ["harness:arch"],
       "progress": {
         "percent": 88,
         "stage": "quote-cost-p0-extractions-architected",
@@ -638,9 +615,7 @@
         "guard:target-api-boot-smoke",
         "guard:route-target-map"
       ],
-      "harnesses": [
-        "harness:integrity"
-      ],
+      "harnesses": ["harness:integrity"],
       "progress": {
         "percent": 72,
         "stage": "route-replacement-ledger-active",
@@ -690,9 +665,7 @@
         "Current PostgreSQL evidence is target/schema/simulation focused; staging-applied proof is still missing.",
         "Real staging migrations must apply productModuleId/productDeploymentMode indexes before launch."
       ],
-      "blockers": [
-        "POSTGRES_STAGING_URL is not configured."
-      ],
+      "blockers": ["POSTGRES_STAGING_URL is not configured."],
       "nextActions": [
         "Keep moduleId/moduleNamespace/dataNamespace on 瑞诺瓦 diagnosis reports and Rysnova artifacts as standalone-capable data-domain keys.",
         "Keep productModuleId/productNamespace/productDataNamespace on shared CRM, opportunity, and quotation records so product modules can be analyzed, migrated, or split later.",
@@ -705,9 +678,7 @@
         "guard:postgres-staging-smoke",
         "guard:module-independence"
       ],
-      "harnesses": [
-        "harness:integrity"
-      ],
+      "harnesses": ["harness:integrity"],
       "progress": {
         "percent": 50,
         "stage": "tenant-schema-contract-active",
@@ -838,10 +809,7 @@
         "guard:legacy-migration-matrix",
         "guard:compat-engine-matrix"
       ],
-      "harnesses": [
-        "harness:legacy-fusion",
-        "harness:consolidation"
-      ],
+      "harnesses": ["harness:legacy-fusion", "harness:consolidation"],
       "progress": {
         "percent": 80,
         "stage": "quote-and-security-p0-partial-extractions-guarded",
@@ -909,9 +877,7 @@
         "guard:module-independence",
         "guard:generated-client"
       ],
-      "harnesses": [
-        "harness:integrity"
-      ],
+      "harnesses": ["harness:integrity"],
       "progress": {
         "percent": 64,
         "stage": "rysnova-bim-engineering-traceability-contract-synchronized",
@@ -931,9 +897,7 @@
         "docs/RHAUTT-NEXUS-ENTERPRISE-AI-CONTROL-ARCHITECTURE.md",
         ".claude/agents/enterprise-ai-control-architect.md"
       ],
-      "outputs": [
-        "docs/RHAUTT-NEXUS-ENTERPRISE-AI-CONTROL-ARCHITECTURE.md"
-      ],
+      "outputs": ["docs/RHAUTT-NEXUS-ENTERPRISE-AI-CONTROL-ARCHITECTURE.md"],
       "evidence": [
         "docs/RHAUTT-NEXUS-ENTERPRISE-AI-CONTROL-ARCHITECTURE.md",
         "scripts/agent-guards/ai-control-plane-check.js",
@@ -947,12 +911,8 @@
         "Tie assistant workflows to permissions, audit, and human approval states.",
         "Avoid unsupported claims of autonomous production agents."
       ],
-      "guards": [
-        "guard:agent-runs"
-      ],
-      "harnesses": [
-        "harness:ai-control"
-      ],
+      "guards": ["guard:agent-runs"],
+      "harnesses": ["harness:ai-control"],
       "progress": {
         "percent": 36,
         "stage": "control-plane-design-active",
@@ -1015,13 +975,8 @@
         "Keep margin guard, approval, audit, outbox, and lifecycle handoff in the same production evidence chain.",
         "Complete public route/API/OpenAPI/generated-client proof for standard quote behavior before retiring server/core/QuoteEngine.js."
       ],
-      "guards": [
-        "guard:frontend-api-contract",
-        "guard:delivery-goal"
-      ],
-      "harnesses": [
-        "harness:features"
-      ],
+      "guards": ["guard:frontend-api-contract", "guard:delivery-goal"],
+      "harnesses": ["harness:features"],
       "progress": {
         "percent": 64,
         "stage": "quote-cost-p0-extraction-active",
@@ -1103,10 +1058,7 @@
         "guard:frontend-api-contract",
         "guard:delivery-goal:nonvisual"
       ],
-      "harnesses": [
-        "harness:features",
-        "harness:operational"
-      ],
+      "harnesses": ["harness:features", "harness:operational"],
       "progress": {
         "percent": 65,
         "stage": "rysnova-bim-traceable-delivery-chain-active",
@@ -1157,14 +1109,8 @@
         "Turn standards findings into blockers, warnings, and advisory optimizations in design, quote, Rysnova, and lifecycle outputs.",
         "Keep the six required standardsCoverage domains as a guard-blocked contract for every full central hot water, heating, whole-air, and smart-control composition."
       ],
-      "guards": [
-        "guard:standards",
-        "harness:features"
-      ],
-      "harnesses": [
-        "harness:features",
-        "harness:operational"
-      ],
+      "guards": ["guard:standards", "harness:features"],
+      "harnesses": ["harness:features", "harness:operational"],
       "progress": {
         "percent": 52,
         "stage": "six-domain-standards-coverage-impact-bound",
@@ -1208,20 +1154,14 @@
         "External object storage final proof is missing.",
         "BIM/Revit/CAD interoperability is contract-level, not fully production-integrated."
       ],
-      "blockers": [
-        "External object storage credentials and endpoint are not configured."
-      ],
+      "blockers": ["External object storage credentials and endpoint are not configured."],
       "nextActions": [
         "Run external object-storage smoke when provider config exists.",
         "Add stronger CAD/BIM artifact validations before production promotion.",
         "Use engineeringTraceabilityManifest to prepare object-storage-ready package manifest and external storage integrity proof hooks."
       ],
-      "guards": [
-        "guard:object-storage-evidence"
-      ],
-      "harnesses": [
-        "harness:legacy-fusion"
-      ],
+      "guards": ["guard:object-storage-evidence"],
+      "harnesses": ["harness:legacy-fusion"],
       "progress": {
         "percent": 40,
         "stage": "traceability-manifest-storage-ready-local",
@@ -1263,13 +1203,8 @@
         "Add staging proof for lifecycle portal read path.",
         "Preserve summary-list/detail-view split for customer project portal to keep lifecycle pages scalable."
       ],
-      "guards": [
-        "guard:frontend-api-contract",
-        "guard:capacity-evidence"
-      ],
-      "harnesses": [
-        "harness:features"
-      ],
+      "guards": ["guard:frontend-api-contract", "guard:capacity-evidence"],
+      "harnesses": ["harness:features"],
       "progress": {
         "percent": 45,
         "stage": "customer-lifecycle-contract-active",
@@ -1300,21 +1235,14 @@
         "server/modules/lifecycle/lifecycle.service.js",
         "test/production-readiness/lifecycle-service.test.js"
       ],
-      "openRisks": [
-        "No real IoT platform contract callback proof exists yet."
-      ],
+      "openRisks": ["No real IoT platform contract callback proof exists yet."],
       "blockers": [],
       "nextActions": [
         "Maintain lifecycle_handoff_only boundary.",
         "Prepare explicit installed-asset binding and warranty/service handoff contracts."
       ],
-      "guards": [
-        "guard:workflow-outbox-contract",
-        "guard:frontend-api-contract"
-      ],
-      "harnesses": [
-        "harness:operational"
-      ],
+      "guards": ["guard:workflow-outbox-contract", "guard:frontend-api-contract"],
+      "harnesses": ["harness:operational"],
       "progress": {
         "percent": 33,
         "stage": "handoff-boundary-active",
@@ -1493,10 +1421,7 @@
         "guard:legacy-migration-matrix",
         "guard:compat-engine-matrix"
       ],
-      "harnesses": [
-        "harness:all",
-        "harness:ai-control"
-      ],
+      "harnesses": ["harness:all", "harness:ai-control"],
       "progress": {
         "percent": 97,
         "stage": "traceability-contract-tests-guarded",
@@ -1544,9 +1469,7 @@
       "openRisks": [
         "Staging network capacity and production-like recovery drills still need real environment proof."
       ],
-      "blockers": [
-        "No reachable staging capacity target is configured."
-      ],
+      "blockers": ["No reachable staging capacity target is configured."],
       "nextActions": [
         "Run capacity load in production-like staging.",
         "Keep local in-process capacity distinct from launch proof.",
@@ -1566,9 +1489,7 @@
         "guard:workspace-size",
         "guard:repository-bulk-retention"
       ],
-      "harnesses": [
-        "harness:operational"
-      ],
+      "harnesses": ["harness:operational"],
       "progress": {
         "percent": 54,
         "stage": "backup-archive-checksum-baseline-active",
@@ -1620,13 +1541,8 @@
         "Replace dev fallback PII secret with managed KMS/secret configuration and rotation evidence before launch.",
         "Keep DataEncryption legacy asset non-deletion-safe until rollback, checksum, SBOM/provenance, and external security posture proof are current."
       ],
-      "guards": [
-        "guard:database",
-        "guard:delivery-goal"
-      ],
-      "harnesses": [
-        "harness:integrity"
-      ],
+      "guards": ["guard:database", "guard:delivery-goal"],
+      "harnesses": ["harness:integrity"],
       "progress": {
         "percent": 49,
         "stage": "pii-encryption-extraction-proven",

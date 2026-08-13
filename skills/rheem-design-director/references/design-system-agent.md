@@ -14,7 +14,7 @@ Example:
 
 ```css
 :root {
-  --rheem-red: #E4002B;
+  --rheem-red: #e4002b;
   --color-action-primary: var(--rheem-red);
   --button-primary-bg: var(--color-action-primary);
 }

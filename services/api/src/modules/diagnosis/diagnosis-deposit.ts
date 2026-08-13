@@ -57,10 +57,24 @@ export function buildPaymentInstruction(config: DealerCollectionConfig): Payment
   const base = { note: REFUNDABLE_NOTE };
   switch (config.channel) {
     case 'link':
-      if (config.payUrl) return { ...base, channel: 'link', online: true, title: '向经销商在线支付定金', payUrl: config.payUrl };
+      if (config.payUrl)
+        return {
+          ...base,
+          channel: 'link',
+          online: true,
+          title: '向经销商在线支付定金',
+          payUrl: config.payUrl,
+        };
       break;
     case 'qr':
-      if (config.qrImageUrl) return { ...base, channel: 'qr', online: true, title: '扫码向经销商支付定金', qrImageUrl: config.qrImageUrl };
+      if (config.qrImageUrl)
+        return {
+          ...base,
+          channel: 'qr',
+          online: true,
+          title: '扫码向经销商支付定金',
+          qrImageUrl: config.qrImageUrl,
+        };
       break;
     case 'wechat_merchant':
     case 'alipay_merchant':
@@ -80,7 +94,8 @@ export function buildPaymentInstruction(config: DealerCollectionConfig): Payment
 }
 
 // ── 定金订单状态机（可退） ────────────────────────────────────────────────
-export type DepositState = 'created' | 'awaiting_payment' | 'paid' | 'refunded' | 'cancelled' | 'expired';
+export type DepositState =
+  'created' | 'awaiting_payment' | 'paid' | 'refunded' | 'cancelled' | 'expired';
 
 export const DEPOSIT_TRANSITIONS: Record<string, { from: DepositState[]; to: DepositState }> = {
   issue: { from: ['created'], to: 'awaiting_payment' },
@@ -91,7 +106,10 @@ export const DEPOSIT_TRANSITIONS: Record<string, { from: DepositState[]; to: Dep
 };
 
 /** 校验一个动作能否从当前态执行；返回目标态或 null（非法）。 */
-export function resolveDepositTransition(action: string, current: DepositState): DepositState | null {
+export function resolveDepositTransition(
+  action: string,
+  current: DepositState
+): DepositState | null {
   const t = DEPOSIT_TRANSITIONS[action];
   if (!t) return null;
   return t.from.includes(current) ? t.to : null;

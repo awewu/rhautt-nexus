@@ -30,7 +30,10 @@ export type SiteAudienceCardItem = {
 };
 
 export type SiteMaterialManifest = Partial<
-  Record<SiteMaterialKey, { src: string; filename: string; mimeType: string; size: number; updatedAt: string }> &
+  Record<
+    SiteMaterialKey,
+    { src: string; filename: string; mimeType: string; size: number; updatedAt: string }
+  > &
     Record<SiteHeroCarouselKey, SiteHeroCarouselItem[]> &
     Record<SiteAudienceCardsKey, SiteAudienceCardItem[]>
 >;

@@ -24,12 +24,19 @@ interface AsyncBoundaryProps {
  * 用法：<AsyncBoundary status={status} onRetry={reload}>{ok 内容}</AsyncBoundary>
  */
 export default function AsyncBoundary({
-  status, skeleton, emptyTitle = '暂无数据', emptyDescription, emptyAction,
-  errorMessage, onRetry, children,
+  status,
+  skeleton,
+  emptyTitle = '暂无数据',
+  emptyDescription,
+  emptyAction,
+  errorMessage,
+  onRetry,
+  children,
 }: AsyncBoundaryProps) {
   if (status === 'loading') return <>{skeleton ?? <SkeletonText lines={3} />}</>;
   if (status === 'error') return <ErrorState message={errorMessage} onRetry={onRetry} />;
-  if (status === 'empty') return <EmptyState title={emptyTitle} description={emptyDescription} action={emptyAction} />;
+  if (status === 'empty')
+    return <EmptyState title={emptyTitle} description={emptyDescription} action={emptyAction} />;
   return <>{children}</>;
 }
 

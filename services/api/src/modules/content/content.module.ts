@@ -28,15 +28,17 @@ const CONTENT_REPOSITORIES = [
   controllers: [ContentController],
   providers: [
     ContentService,
-    ...(TARGET_API_BOOT_SMOKE ? [
-      bootSmokeRepositoryProvider(ContentAssetEntity),
-      bootSmokeRepositoryProvider(ContentPublishTaskEntity),
-      bootSmokeRepositoryProvider(productFactEntity),
-      bootSmokeRepositoryProvider(ProductSellingPointEntity),
-      bootSmokeRepositoryProvider(FileArtifactEntity),
-      bootSmokeRepositoryProvider(GrowthContentAssetEntity),
-      bootSmokeRepositoryProvider(GrowthMarketingMaterialEntity),
-    ] : []),
+    ...(TARGET_API_BOOT_SMOKE
+      ? [
+          bootSmokeRepositoryProvider(ContentAssetEntity),
+          bootSmokeRepositoryProvider(ContentPublishTaskEntity),
+          bootSmokeRepositoryProvider(productFactEntity),
+          bootSmokeRepositoryProvider(ProductSellingPointEntity),
+          bootSmokeRepositoryProvider(FileArtifactEntity),
+          bootSmokeRepositoryProvider(GrowthContentAssetEntity),
+          bootSmokeRepositoryProvider(GrowthMarketingMaterialEntity),
+        ]
+      : []),
   ],
   exports: [ContentService],
 })
@@ -50,11 +52,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class ContentBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('content');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('content')
 export class ContentBoundaryController {
   constructor(private readonly s: ContentBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

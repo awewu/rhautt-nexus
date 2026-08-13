@@ -2,9 +2,13 @@
 
 const fs = require('fs');
 const path = require('path');
-require('./_artifact-gate').requireArtifactOrSkip('docs/_archive/PRODUCTION-TRUNK-REWRITE-PLAN.md', {
-  guard: 'guard:trunk-migration', reason: 'docs/_archive 基线文档 git 历史 0 次、从未入库；需改为校验现役 docs/ 基线',
-});
+require('./_artifact-gate').requireArtifactOrSkip(
+  'docs/_archive/PRODUCTION-TRUNK-REWRITE-PLAN.md',
+  {
+    guard: 'guard:trunk-migration',
+    reason: 'docs/_archive 基线文档 git 历史 0 次、从未入库；需改为校验现役 docs/ 基线',
+  }
+);
 
 const ROOT = path.join(__dirname, '..', '..');
 const { ACTIVE_HTML_PATHS } = require('../../server/middleware/productionStaticSurfaceGuard');
@@ -55,7 +59,7 @@ const REQUIRED_FILES = [
   'scripts/agent-guards/ruud-vi-research-check.js',
   'scripts/agent-guards/portal-architecture-check.js',
   'scripts/agent-guards/database-schema-check.js',
-  'scripts/agent-guards/workspace-size-governance-check.js'
+  'scripts/agent-guards/workspace-size-governance-check.js',
 ];
 
 const REQUIRED_PACKAGE_SCRIPTS = [
@@ -75,7 +79,7 @@ const REQUIRED_PACKAGE_SCRIPTS = [
   'harness:all',
   'test:production-readiness',
   'perf:capacity',
-  'production:self-check:sandbox'
+  'production:self-check:sandbox',
 ];
 
 const REQUIRED_ACTIVE_PAGES = [
@@ -86,14 +90,14 @@ const REQUIRED_ACTIVE_PAGES = [
   '/customer-view.html',
   '/staff-portal.html',
   '/business-console.html',
-  '/login.html'
+  '/login.html',
 ];
 
 const REQUIRED_ROUTE_DOMAINS = [
   'lifecycle-iot-front-office',
   'comfort-home-domain',
   'admin-governance',
-  'platform-core'
+  'platform-core',
 ];
 
 const REQUIRED_RUUD_TOKENS = [
@@ -105,7 +109,7 @@ const REQUIRED_RUUD_TOKENS = [
   'warranty',
   'find a contractor',
   'BIM',
-  'integrated'
+  'integrated',
 ];
 
 function read(relativePath) {
@@ -140,22 +144,37 @@ if (exists('package.json')) {
   if (pkg.scripts?.['guard:all'] && !pkg.scripts['guard:all'].includes('guard:nexus-naming')) {
     failures.push('package.json guard:all must include guard:nexus-naming');
   }
-  if (pkg.scripts?.['guard:all'] && !pkg.scripts['guard:all'].includes('guard:production-trunk-isolation')) {
+  if (
+    pkg.scripts?.['guard:all'] &&
+    !pkg.scripts['guard:all'].includes('guard:production-trunk-isolation')
+  ) {
     failures.push('package.json guard:all must include guard:production-trunk-isolation');
   }
-  if (pkg.scripts?.['guard:all:nonvisual'] && !pkg.scripts['guard:all:nonvisual'].includes('guard:production-trunk-isolation')) {
+  if (
+    pkg.scripts?.['guard:all:nonvisual'] &&
+    !pkg.scripts['guard:all:nonvisual'].includes('guard:production-trunk-isolation')
+  ) {
     failures.push('package.json guard:all:nonvisual must include guard:production-trunk-isolation');
   }
   if (pkg.scripts?.['guard:all'] && !pkg.scripts['guard:all'].includes('guard:workspace-size')) {
     failures.push('package.json guard:all must include guard:workspace-size');
   }
-  if (pkg.scripts?.['guard:all:nonvisual'] && !pkg.scripts['guard:all:nonvisual'].includes('guard:workspace-size')) {
+  if (
+    pkg.scripts?.['guard:all:nonvisual'] &&
+    !pkg.scripts['guard:all:nonvisual'].includes('guard:workspace-size')
+  ) {
     failures.push('package.json guard:all:nonvisual must include guard:workspace-size');
   }
-  if (pkg.scripts?.['guard:all'] && !pkg.scripts['guard:all'].includes('guard:legacy-surface-ownership')) {
+  if (
+    pkg.scripts?.['guard:all'] &&
+    !pkg.scripts['guard:all'].includes('guard:legacy-surface-ownership')
+  ) {
     failures.push('package.json guard:all must include guard:legacy-surface-ownership');
   }
-  if (pkg.scripts?.['guard:all:nonvisual'] && !pkg.scripts['guard:all:nonvisual'].includes('guard:legacy-surface-ownership')) {
+  if (
+    pkg.scripts?.['guard:all:nonvisual'] &&
+    !pkg.scripts['guard:all:nonvisual'].includes('guard:legacy-surface-ownership')
+  ) {
     failures.push('package.json guard:all:nonvisual must include guard:legacy-surface-ownership');
   }
   if (!pkg.scripts?.['production:self-check']) {
@@ -173,19 +192,24 @@ if (exists('server-production.js')) {
   const compositionSource = `${server}\n${factory}`;
   const appUseCount = countMatches(server, /\bapp\.use\s*\(/g);
   if (!compositionSource.includes('registerProductionRoutes(app')) {
-    failures.push('production app composition does not delegate route mounting to registerProductionRoutes');
+    failures.push(
+      'production app composition does not delegate route mounting to registerProductionRoutes'
+    );
   }
   if (!server.includes('createProductionApp')) {
     failures.push('server-production.js must delegate app composition to createProductionApp');
   }
   if (appUseCount > 8) {
-    failures.push(`server-production.js has ${appUseCount} app.use calls; keep production trunk thin`);
+    failures.push(
+      `server-production.js has ${appUseCount} app.use calls; keep production trunk thin`
+    );
   }
 }
 
-const routeDomains = new Set(PRODUCTION_ROUTE_CATALOG.map(group => group.domain));
+const routeDomains = new Set(PRODUCTION_ROUTE_CATALOG.map((group) => group.domain));
 for (const domain of REQUIRED_ROUTE_DOMAINS) {
-  if (!routeDomains.has(domain)) failures.push(`production route catalog missing domain: ${domain}`);
+  if (!routeDomains.has(domain))
+    failures.push(`production route catalog missing domain: ${domain}`);
 }
 
 for (const group of PRODUCTION_ROUTE_CATALOG) {
@@ -204,7 +228,9 @@ for (const page of REQUIRED_ACTIVE_PAGES) {
 
 if (exists('archive/legacy-ui/public/legacy-surface-manifest.json')) {
   const manifest = JSON.parse(read('archive/legacy-ui/public/legacy-surface-manifest.json'));
-  const active = new Set((manifest.surfaces?.active || []).map(file => `/${path.basename(file)}`));
+  const active = new Set(
+    (manifest.surfaces?.active || []).map((file) => `/${path.basename(file)}`)
+  );
   for (const page of REQUIRED_ACTIVE_PAGES) {
     if (!active.has(page)) failures.push(`legacy surface manifest active bucket missing: ${page}`);
   }
@@ -224,7 +250,9 @@ if (exists('docs/_archive/RUUD-VI-RESEARCH.md')) {
     }
   }
   if (!research.includes('Evidence Gap')) {
-    failures.push('Ruud VI research must explicitly record evidence gap until official full crawl exists');
+    failures.push(
+      'Ruud VI research must explicitly record evidence gap until official full crawl exists'
+    );
   }
 }
 
@@ -244,7 +272,7 @@ if (exists('docs/_archive/RHAUTT-NEXUS-PRODUCTION-DELIVERY-GOAL.md')) {
     'SLSA provenance',
     'rollback drill',
     '105 个旧 HTML',
-    'React candidate'
+    'React candidate',
   ]) {
     if (!goal.includes(token)) failures.push(`production delivery goal missing token: ${token}`);
   }
@@ -253,11 +281,15 @@ if (exists('docs/_archive/RHAUTT-NEXUS-PRODUCTION-DELIVERY-GOAL.md')) {
 if (exists('src/App.jsx')) {
   const app = read('src/App.jsx');
   if (app.includes('BrowserRouter') || app.includes('Routes')) {
-    warnings.push('React/Vite surface still exists; keep it candidate-only until API contract gate passes');
+    warnings.push(
+      'React/Vite surface still exists; keep it candidate-only until API contract gate passes'
+    );
   }
 }
 
-console.log(`Trunk Migration Check: files = ${REQUIRED_FILES.length}, routeGroups = ${PRODUCTION_ROUTE_CATALOG.length}, failures = ${failures.length}, warnings = ${warnings.length}`);
+console.log(
+  `Trunk Migration Check: files = ${REQUIRED_FILES.length}, routeGroups = ${PRODUCTION_ROUTE_CATALOG.length}, failures = ${failures.length}, warnings = ${warnings.length}`
+);
 
 if (failures.length) {
   for (const failure of failures) console.error(`- ${failure}`);

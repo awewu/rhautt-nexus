@@ -11,29 +11,35 @@
  *   6. 水泵扬程 = 最不利环路总阻力 × 安全系数
  */
 
-const Cp = 4187;        // 水比热 J/(kg·K)
-const G  = 9.81;        // m/s²
+const Cp = 4187; // 水比热 J/(kg·K)
+const G = 9.81; // m/s²
 
 // 标准管径表 (DN, 内径mm) — PPR/PEX 常用规格
 const PIPE_SIZES = [
-  { dn: 'DN15', id: 15 }, { dn: 'DN20', id: 20 }, { dn: 'DN25', id: 25 },
-  { dn: 'DN32', id: 32 }, { dn: 'DN40', id: 40 }, { dn: 'DN50', id: 50 },
-  { dn: 'DN65', id: 65 }, { dn: 'DN80', id: 80 }, { dn: 'DN100', id: 100 },
+  { dn: 'DN15', id: 15 },
+  { dn: 'DN20', id: 20 },
+  { dn: 'DN25', id: 25 },
+  { dn: 'DN32', id: 32 },
+  { dn: 'DN40', id: 40 },
+  { dn: 'DN50', id: 50 },
+  { dn: 'DN65', id: 65 },
+  { dn: 'DN80', id: 80 },
+  { dn: 'DN100', id: 100 },
 ];
 
 // 推荐流速范围 (m/s) — GB 50015 / GB 50736
 const VELOCITY = {
-  hot_water: { min: 0.8, max: 1.2, ideal: 1.0 },   // 热水管
-  heating:   { min: 0.5, max: 1.0, ideal: 0.8 },   // 采暖管
-  main:      { min: 0.8, max: 1.5, ideal: 1.2 },   // 主干管
+  hot_water: { min: 0.8, max: 1.2, ideal: 1.0 }, // 热水管
+  heating: { min: 0.5, max: 1.0, ideal: 0.8 }, // 采暖管
+  main: { min: 0.8, max: 1.5, ideal: 1.2 }, // 主干管
 };
 
 // 局部阻力当量长度系数 (附件→当量管长倍数, ×D)
 const LOCAL_RESIST = {
-  elbow90: 30,    // 90°弯头
-  tee: 60,        // 三通
-  valve: 10,      // 阀门
-  reducer: 15,    // 变径
+  elbow90: 30, // 90°弯头
+  tee: 60, // 三通
+  valve: 10, // 阀门
+  reducer: 15, // 变径
 };
 
 class HydraulicEngine {
@@ -50,56 +56,66 @@ class HydraulicEngine {
   kinematicViscosity(T) {
     // 运动粘度 m²/s — 分段插值 (常用工况)
     const table = [
-      [10, 1.306e-6], [20, 1.004e-6], [30, 0.801e-6], [40, 0.658e-6],
-      [50, 0.553e-6], [55, 0.511e-6], [60, 0.475e-6], [70, 0.413e-6],
+      [10, 1.306e-6],
+      [20, 1.004e-6],
+      [30, 0.801e-6],
+      [40, 0.658e-6],
+      [50, 0.553e-6],
+      [55, 0.511e-6],
+      [60, 0.475e-6],
+      [70, 0.413e-6],
       [80, 0.365e-6],
     ];
     if (T <= table[0][0]) return table[0][1];
     if (T >= table[table.length - 1][0]) return table[table.length - 1][1];
     for (let i = 0; i < table.length - 1; i++) {
-      const [t0, v0] = table[i], [t1, v1] = table[i + 1];
-      if (T >= t0 && T <= t1) return v0 + (v1 - v0) * (T - t0) / (t1 - t0);
+      const [t0, v0] = table[i],
+        [t1, v1] = table[i + 1];
+      if (T >= t0 && T <= t1) return v0 + ((v1 - v0) * (T - t0)) / (t1 - t0);
     }
     return 0.5e-6;
   }
 
   /* ── 摩擦系数 ───────────────────────────────────── */
   frictionFactor(Re) {
-    if (Re < 2300) return 64 / Re;                    // 层流
+    if (Re < 2300) return 64 / Re; // 层流
     if (Re < 1e5) return 0.3164 / Math.pow(Re, 0.25); // Blasius 紊流
-    return 0.0032 + 0.221 / Math.pow(Re, 0.237);      // 高雷诺数
+    return 0.0032 + 0.221 / Math.pow(Re, 0.237); // 高雷诺数
   }
 
   /* ── 单段管道水力计算 ───────────────────────────── */
   calcSegment(flow_Lh, length_m, systemType = 'heating', T = 60, fittings = {}) {
-    const Q = flow_Lh / 1000 / 3600;        // m³/s
+    const Q = flow_Lh / 1000 / 3600; // m³/s
     const rho = this.density(T);
     const nu = this.kinematicViscosity(T);
     const vSpec = VELOCITY[systemType] || VELOCITY.heating;
 
     // 管径选型: 取流速达标的最小标准管径
-    const idealD = Math.sqrt(4 * Q / (Math.PI * vSpec.ideal)) * 1000; // mm
+    const idealD = Math.sqrt((4 * Q) / (Math.PI * vSpec.ideal)) * 1000; // mm
     let chosen = PIPE_SIZES[PIPE_SIZES.length - 1];
     for (const p of PIPE_SIZES) {
       const v = Q / (Math.PI * Math.pow(p.id / 2000, 2)); // m/s
-      if (v <= vSpec.max) { chosen = p; break; }
+      if (v <= vSpec.max) {
+        chosen = p;
+        break;
+      }
     }
 
-    const D = chosen.id / 1000;             // m
+    const D = chosen.id / 1000; // m
     const area = Math.PI * Math.pow(D / 2, 2);
-    const v = Q / area;                     // 实际流速 m/s
-    const Re = v * D / nu;
+    const v = Q / area; // 实际流速 m/s
+    const Re = (v * D) / nu;
     const lambda = this.frictionFactor(Re);
 
     // 沿程阻力
-    const frictionLoss = lambda * (length_m / D) * (rho * v * v / 2); // Pa
+    const frictionLoss = lambda * (length_m / D) * ((rho * v * v) / 2); // Pa
 
     // 局部阻力 (当量长度法)
     let equivLen = 0;
     for (const [type, count] of Object.entries(fittings)) {
       equivLen += (LOCAL_RESIST[type] || 0) * D * count;
     }
-    const localLoss = lambda * (equivLen / D) * (rho * v * v / 2);
+    const localLoss = lambda * (equivLen / D) * ((rho * v * v) / 2);
     const totalLoss = frictionLoss + localLoss;
 
     return {
@@ -125,8 +141,8 @@ class HydraulicEngine {
     const dT = supplyT - returnT;
     if (dT <= 0) throw new Error('供回水温差必须>0');
     const rho = this.density((supplyT + returnT) / 2);
-    const mDot = power_W / (Cp * dT);       // kg/s
-    return mDot / rho * 1000 * 3600;        // L/h
+    const mDot = power_W / (Cp * dT); // kg/s
+    return (mDot / rho) * 1000 * 3600; // L/h
   }
 
   /* ── 管网树状求解 ───────────────────────────────── */
@@ -139,7 +155,7 @@ class HydraulicEngine {
   solveNetwork(network, opts = {}) {
     const { systemType = 'heating', supplyT = 60, returnT = 50 } = opts;
     const T = (supplyT + returnT) / 2;
-    const nodeMap = new Map(network.nodes.map(n => [n.id, n]));
+    const nodeMap = new Map(network.nodes.map((n) => [n.id, n]));
 
     // 邻接: from→[pipe]
     const children = new Map();
@@ -162,7 +178,7 @@ class HydraulicEngine {
       const node = nodeMap.get(nodeId);
       let flow = node && node.type === 'terminal' ? terminalFlow(node) : 0;
       let terms = node && node.type === 'terminal' ? 1 : 0;
-      for (const p of (children.get(nodeId) || [])) {
+      for (const p of children.get(nodeId) || []) {
         const c = subtree(p.to);
         pipeFlow.set(p.id, c.flow);
         pipeTermCount.set(p.id, c.terms);
@@ -171,18 +187,24 @@ class HydraulicEngine {
       }
       return { flow, terms };
     };
-    const source = network.nodes.find(n => n.type === 'source');
+    const source = network.nodes.find((n) => n.type === 'source');
     if (!source) throw new Error('管网缺少热源节点(source)');
     const totalFlow = subtree(source.id).flow;
 
     // 逐段水力 — 主管判定: 承担多个末端流量的管段才是主干管
-    const segments = network.pipes.map(p => {
+    const segments = network.pipes.map((p) => {
       const flow = pipeFlow.get(p.id) || 0;
       const isMain = (pipeTermCount.get(p.id) || 0) > 1;
-      const r = this.calcSegment(flow, p.length_m, isMain ? 'main' : systemType, T, p.fittings || {});
+      const r = this.calcSegment(
+        flow,
+        p.length_m,
+        isMain ? 'main' : systemType,
+        T,
+        p.fittings || {}
+      );
       return { pipeId: p.id, from: p.from, to: p.to, isMain, ...r };
     });
-    const segMap = new Map(segments.map(s => [s.pipeId, s]));
+    const segMap = new Map(segments.map((s) => [s.pipeId, s]));
 
     // 最不利环路: 从 source 到各 terminal 累计压降最大的路径
     const parentPipe = new Map();
@@ -190,7 +212,9 @@ class HydraulicEngine {
     let worst = { terminal: null, drop: 0, path: [] };
     for (const n of network.nodes) {
       if (n.type !== 'terminal') continue;
-      let cur = n.id, drop = 0; const path = [];
+      let cur = n.id,
+        drop = 0;
+      const path = [];
       while (parentPipe.has(cur)) {
         const p = parentPipe.get(cur);
         const s = segMap.get(p.id);
@@ -207,7 +231,9 @@ class HydraulicEngine {
     const pumpHead_m = pumpHead_Pa / (rho * G);
 
     return {
-      systemType, supplyT, returnT,
+      systemType,
+      supplyT,
+      returnT,
       totalFlow_Lh: Math.round(totalFlow),
       segments,
       worstLoop: {
@@ -225,10 +251,14 @@ class HydraulicEngine {
         const spec = VELOCITY[s.isMain ? 'main' : systemType] || VELOCITY.heating;
         // 真正的问题: 流速超上限(噪音/冲蚀)
         if (s.velocity > spec.max)
-          acc.push(`管段 ${s.pipeId} 流速 ${s.velocity} m/s 超上限 ${spec.max}，存在噪音/冲蚀风险，建议加大管径`);
+          acc.push(
+            `管段 ${s.pipeId} 流速 ${s.velocity} m/s 超上限 ${spec.max}，存在噪音/冲蚀风险，建议加大管径`
+          );
         // 主干管流速过低(<0.15)才提示选型偏大; 支管低流速在住宅系统属正常
         else if (s.isMain && s.velocity < 0.15)
-          acc.push(`主干管 ${s.pipeId} 流速仅 ${s.velocity} m/s，管径偏大（已是最小 DN15 则属正常小流量）`);
+          acc.push(
+            `主干管 ${s.pipeId} 流速仅 ${s.velocity} m/s，管径偏大（已是最小 DN15 则属正常小流量）`
+          );
         return acc;
       }, []),
     };
@@ -241,15 +271,18 @@ class HydraulicEngine {
  *   自动变径: 每段按其承担风量独立选径 → 下游随风量减小逐级变径。
  * ══════════════════════════════════════════════════════════════════════ */
 // 标准圆风管公称直径 (mm) — 通风常用系列
-const DUCT_SIZES = [100, 120, 140, 160, 180, 200, 220, 250, 280, 320, 360, 400, 450, 500, 560, 630, 700, 800, 900, 1000, 1120, 1250];
+const DUCT_SIZES = [
+  100, 120, 140, 160, 180, 200, 220, 250, 280, 320, 360, 400, 450, 500, 560, 630, 700, 800, 900,
+  1000, 1120, 1250,
+];
 // 风速上限 (m/s) — 住宅/公建低速风管 GB 50736 建议
 const AIR_VELOCITY = {
-  main: { max: 6.5, ideal: 5.0 },     // 主风管
-  branch: { max: 4.5, ideal: 3.5 },   // 支风管
+  main: { max: 6.5, ideal: 5.0 }, // 主风管
+  branch: { max: 4.5, ideal: 3.5 }, // 支风管
   terminal: { max: 3.0, ideal: 2.5 }, // 末端/风口支管
 };
-const RHO_AIR = 1.2;            // 空气密度 kg/m³ (20°C)
-const NU_AIR = 1.53e-5;         // 空气运动粘度 m²/s (20°C)
+const RHO_AIR = 1.2; // 空气密度 kg/m³ (20°C)
+const NU_AIR = 1.53e-5; // 空气运动粘度 m²/s (20°C)
 
 HydraulicEngine.prototype.frictionFactorAir = function (Re) {
   if (Re < 2300) return 64 / Re;
@@ -258,33 +291,48 @@ HydraulicEngine.prototype.frictionFactorAir = function (Re) {
 };
 
 /** 单段风管：按风量自动选径(圆风管) + 比摩阻/沿程阻力 + 局部阻力(当量长度)。 */
-HydraulicEngine.prototype.calcDuctSegment = function (flow_m3h, length_m, role = 'branch', fittings = {}) {
-  const Q = flow_m3h / 3600;                    // m³/s
+HydraulicEngine.prototype.calcDuctSegment = function (
+  flow_m3h,
+  length_m,
+  role = 'branch',
+  fittings = {}
+) {
+  const Q = flow_m3h / 3600; // m³/s
   const spec = AIR_VELOCITY[role] || AIR_VELOCITY.branch;
   // 选径：取风速≤上限的最小标准圆风管
   let chosen = DUCT_SIZES[DUCT_SIZES.length - 1];
   for (const d of DUCT_SIZES) {
     const v = Q / (Math.PI * Math.pow(d / 2000, 2));
-    if (v <= spec.max) { chosen = d; break; }
+    if (v <= spec.max) {
+      chosen = d;
+      break;
+    }
   }
-  const D = chosen / 1000;                       // m
-  const v = Q / (Math.PI * Math.pow(D / 2, 2));  // 实际风速 m/s
-  const Re = v * D / NU_AIR;
+  const D = chosen / 1000; // m
+  const v = Q / (Math.PI * Math.pow(D / 2, 2)); // 实际风速 m/s
+  const Re = (v * D) / NU_AIR;
   const lambda = this.frictionFactorAir(Re);
-  const specificFriction = lambda * (1 / D) * (RHO_AIR * v * v / 2); // Pa/m 比摩阻
-  const frictionLoss = specificFriction * length_m;                  // Pa
+  const specificFriction = lambda * (1 / D) * ((RHO_AIR * v * v) / 2); // Pa/m 比摩阻
+  const frictionLoss = specificFriction * length_m; // Pa
   let equivLen = 0;
-  for (const [type, count] of Object.entries(fittings)) equivLen += (LOCAL_RESIST[type] || 0) * D * count;
-  const localLoss = lambda * (equivLen / D) * (RHO_AIR * v * v / 2);
+  for (const [type, count] of Object.entries(fittings))
+    equivLen += (LOCAL_RESIST[type] || 0) * D * count;
+  const localLoss = lambda * (equivLen / D) * ((RHO_AIR * v * v) / 2);
   const totalLoss = frictionLoss + localLoss;
-  const idealD = Math.sqrt(4 * Q / (Math.PI * spec.ideal)) * 1000;
+  const idealD = Math.sqrt((4 * Q) / (Math.PI * spec.ideal)) * 1000;
   return {
     flow_m3h: Math.round(flow_m3h),
-    dn: `D${chosen}`, diameter: chosen, idealDiameter: Math.round(idealD * 10) / 10,
-    velocity: Math.round(v * 1000) / 1000, velocityOk: v <= spec.max,
-    reynolds: Math.round(Re), lambda: Math.round(lambda * 10000) / 10000,
+    dn: `D${chosen}`,
+    diameter: chosen,
+    idealDiameter: Math.round(idealD * 10) / 10,
+    velocity: Math.round(v * 1000) / 1000,
+    velocityOk: v <= spec.max,
+    reynolds: Math.round(Re),
+    lambda: Math.round(lambda * 10000) / 10000,
     specificFriction_PaPerM: Math.round(specificFriction * 100) / 100,
-    length_m, frictionLoss_Pa: Math.round(frictionLoss), localLoss_Pa: Math.round(localLoss),
+    length_m,
+    frictionLoss_Pa: Math.round(frictionLoss),
+    localLoss_Pa: Math.round(localLoss),
     totalLoss_Pa: Math.round(totalLoss),
   };
 };
@@ -305,12 +353,14 @@ HydraulicEngine.prototype.solveDuctNetwork = function (network) {
   const segTerms = new Map();
   const subtree = (nid) => {
     const node = nodeMap.get(nid);
-    let flow = node && node.type === 'terminal' ? (Number(node.flow_m3h) || 0) : 0;
+    let flow = node && node.type === 'terminal' ? Number(node.flow_m3h) || 0 : 0;
     let terms = node && node.type === 'terminal' ? 1 : 0;
-    for (const p of (children.get(nid) || [])) {
+    for (const p of children.get(nid) || []) {
       const c = subtree(p.to);
-      segFlow.set(p.id, c.flow); segTerms.set(p.id, c.terms);
-      flow += c.flow; terms += c.terms;
+      segFlow.set(p.id, c.flow);
+      segTerms.set(p.id, c.terms);
+      flow += c.flow;
+      terms += c.terms;
     }
     return { flow, terms };
   };
@@ -321,8 +371,14 @@ HydraulicEngine.prototype.solveDuctNetwork = function (network) {
   const segments = network.pipes.map((p) => {
     const flow = segFlow.get(p.id) || 0;
     const tc = segTerms.get(p.id) || 0;
-    const role = tc > 1 ? 'main' : (tc === 1 ? 'branch' : 'terminal');
-    return { pipeId: p.id, from: p.from, to: p.to, role, ...this.calcDuctSegment(flow, p.length_m, role, p.fittings || {}) };
+    const role = tc > 1 ? 'main' : tc === 1 ? 'branch' : 'terminal';
+    return {
+      pipeId: p.id,
+      from: p.from,
+      to: p.to,
+      role,
+      ...this.calcDuctSegment(flow, p.length_m, role, p.fittings || {}),
+    };
   });
   const segMap = new Map(segments.map((s) => [s.pipeId, s]));
 
@@ -331,22 +387,33 @@ HydraulicEngine.prototype.solveDuctNetwork = function (network) {
   let worst = { terminal: null, drop: 0, path: [] };
   for (const n of network.nodes) {
     if (n.type !== 'terminal') continue;
-    let cur = n.id, drop = 0; const path = [];
+    let cur = n.id,
+      drop = 0;
+    const path = [];
     while (parentPipe.has(cur)) {
       const p = parentPipe.get(cur);
       const s = segMap.get(p.id);
       drop += s ? s.totalLoss_Pa : 0;
-      path.unshift(p.id); cur = p.from;
+      path.unshift(p.id);
+      cur = p.from;
     }
     if (drop > worst.drop) worst = { terminal: n.id, drop, path };
   }
   // 风机余压 = 最不利环路阻力 × 1.1 附加 (送风单程；回风另计)
   const fanStatic_Pa = Math.round(worst.drop * 1.1);
   return {
-    system: 'air-duct', totalFlow_m3h: Math.round(totalFlow), segments,
+    system: 'air-duct',
+    totalFlow_m3h: Math.round(totalFlow),
+    segments,
     worstLoop: { terminal: worst.terminal, ducts: worst.path, drop_Pa: Math.round(worst.drop) },
-    fan: { staticPressure_Pa: fanStatic_Pa, flow_m3h: Math.round(totalFlow), note: '风机余压=最不利环路阻力×1.1（送风单程）' },
-    warnings: segments.filter((s) => !s.velocityOk).map((s) => `风管 ${s.pipeId} 风速 ${s.velocity} m/s 超上限，建议加大截面`),
+    fan: {
+      staticPressure_Pa: fanStatic_Pa,
+      flow_m3h: Math.round(totalFlow),
+      note: '风机余压=最不利环路阻力×1.1（送风单程）',
+    },
+    warnings: segments
+      .filter((s) => !s.velocityOk)
+      .map((s) => `风管 ${s.pipeId} 风速 ${s.velocity} m/s 超上限，建议加大截面`),
   };
 };
 

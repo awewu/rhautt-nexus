@@ -3,6 +3,7 @@
 Source of truth: `server/modules/productionRouteCatalog.js` exports `PHASE1_BACKEND_CLEANUP_MATRIX`.
 
 Evidence used:
+
 - `scripts/agent-guards/active-navigation-check.js` keeps Hub modules `brand-console`, `growth`, `product`, `public`, `comfort`, `accounts`.
 - The same guard hides `diagnosis`, `crm`, `bim`, `bim-deepen`, `customer`, and `aftersales` navigation.
 - Active legacy pages are `index.html`, `index-ready.html`, `privacy.html`, and `consent.html`.
@@ -11,6 +12,7 @@ Evidence used:
 ## Retained
 
 Keep active:
+
 - `v2`
 - `admin-guard`
 - `cache-delete-guard`
@@ -22,6 +24,7 @@ Reason: retained pages and consoles require auth/account permissions, brand, pro
 ## Unreachable Out Of Scope
 
 Disable from active production mounting, without deleting backend files:
+
 - `dxf-bim`
 - `rysnova-bim-base`
 - `construction`
@@ -35,6 +38,7 @@ Reason: these mounts serve only hidden Phase 1 domains: BIM/Rysnova BIM preview/
 ## Legacy Compatibility
 
 Keep active for now:
+
 - `new-features`
 - `marketing`
 - `exports`
@@ -56,6 +60,7 @@ Reason: these are existing compatibility or governance surfaces. They need a sep
 ## Unknown
 
 Keep active pending narrower evidence:
+
 - `business-domain`
 - `front-office-runtime`
 - `ai-assistant`

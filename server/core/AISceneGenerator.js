@@ -1,4 +1,3 @@
-
 // [Hermes Auto-Optimization 2026-04-18T18:39:52.454Z]
 // Action: expand_equipment_db
 // Change: 扩展设备数据库，增加边界条件处理
@@ -26,7 +25,7 @@ class AISceneGenerator {
    */
   understandIntent(userInput) {
     const text = userInput.toLowerCase();
-    
+
     console.log('[AIScene] 分析用户意图...');
 
     // 意图识别
@@ -38,7 +37,7 @@ class AISceneGenerator {
       budget: this.extractBudget(text),
       requirements: this.extractRequirements(text),
       preferences: this.extractPreferences(text),
-      constraints: this.extractConstraints(text)
+      constraints: this.extractConstraints(text),
     };
 
     // 实体抽取
@@ -47,7 +46,7 @@ class AISceneGenerator {
       location: this.extractLocation(text),
       time: this.extractTime(text),
       systems: this.extractSystems(text),
-      features: this.extractFeatures(text)
+      features: this.extractFeatures(text),
     };
 
     // 情感分析
@@ -60,7 +59,7 @@ class AISceneGenerator {
       entities,
       sentiment,
       confidence: this.calculateConfidence(intent, entities),
-      suggestedQuestions: this.generateFollowupQuestions(intent)
+      suggestedQuestions: this.generateFollowupQuestions(intent),
     };
   }
 
@@ -71,21 +70,21 @@ class AISceneGenerator {
    */
   generateDesign(intentData) {
     const { intent, entities } = intentData;
-    
+
     console.log('[AIScene] 生成设计方案...');
 
     // 基于意图生成方案
     const design = {
       id: `design_${Date.now()}`,
       timestamp: new Date().toISOString(),
-      
+
       // 项目信息
       project: {
         name: this.generateProjectName(intent),
         houseType: intent.houseType || '住宅',
         area: intent.area || 100,
         rooms: intent.rooms || { bedrooms: 3, living: 1, bathrooms: 2 },
-        orientation: entities.location?.orientation || '南向'
+        orientation: entities.location?.orientation || '南向',
       },
 
       // 系统配置
@@ -101,7 +100,7 @@ class AISceneGenerator {
       control: this.generateControlLogic(intent),
 
       // 预估效果
-      performance: this.estimatePerformance(intent)
+      performance: this.estimatePerformance(intent),
     };
 
     // 生成报价
@@ -116,7 +115,7 @@ class AISceneGenerator {
    */
   recommendScenarios(userProfile) {
     const { familyType, budget, priorities, climate } = userProfile;
-    
+
     console.log('[AIScene] 推荐场景方案...');
 
     const scenarios = [];
@@ -131,7 +130,7 @@ class AISceneGenerator {
         features: ['节能', '静音', '易维护'],
         estimatedCost: { min: 50000, max: 80000 },
         savings: '比传统方案省30%',
-        matchScore: this.calculateMatchScore(userProfile, 'economy')
+        matchScore: this.calculateMatchScore(userProfile, 'economy'),
       });
     }
 
@@ -145,7 +144,7 @@ class AISceneGenerator {
         features: ['恒温', '恒湿', '智能控制', '空气净化'],
         estimatedCost: { min: 100000, max: 150000 },
         savings: '节能35%，舒适度提升50%',
-        matchScore: this.calculateMatchScore(userProfile, 'quality')
+        matchScore: this.calculateMatchScore(userProfile, 'quality'),
       });
     }
 
@@ -159,7 +158,7 @@ class AISceneGenerator {
         features: ['五恒系统', '全屋智能', '健康监测', 'AI管家'],
         estimatedCost: { min: 200000, max: 350000 },
         savings: '节能40%，健康指数提升80%',
-        matchScore: this.calculateMatchScore(userProfile, 'luxury')
+        matchScore: this.calculateMatchScore(userProfile, 'luxury'),
       });
     }
 
@@ -169,7 +168,7 @@ class AISceneGenerator {
     return {
       recommended: scenarios[0],
       alternatives: scenarios.slice(1, 3),
-      reason: this.generateRecommendationReason(userProfile, scenarios[0])
+      reason: this.generateRecommendationReason(userProfile, scenarios[0]),
     };
   }
 
@@ -177,11 +176,11 @@ class AISceneGenerator {
    * 4. 多方案对比
    */
   compareScenarios(scenarioIds) {
-    const scenarios = scenarioIds.map(id => this.getScenarioById(id));
-    
+    const scenarios = scenarioIds.map((id) => this.getScenarioById(id));
+
     const comparison = {
       dimensions: ['cost', 'comfort', 'energy', 'smart', 'health'],
-      scenarios: scenarios.map(s => ({
+      scenarios: scenarios.map((s) => ({
         id: s.id,
         name: s.name,
         scores: {
@@ -189,11 +188,11 @@ class AISceneGenerator {
           comfort: this.scoreComfort(s),
           energy: this.scoreEnergy(s),
           smart: this.scoreSmart(s),
-          health: this.scoreHealth(s)
+          health: this.scoreHealth(s),
         },
         pros: this.getPros(s),
-        cons: this.getCons(s)
-      }))
+        cons: this.getCons(s),
+      })),
     };
 
     // 生成对比图表数据
@@ -221,10 +220,10 @@ class AISceneGenerator {
         changes: [
           { item: '热泵选型', from: '标准款', to: '高效款', saving: '15%' },
           { item: '保温厚度', from: '20mm', to: '30mm', saving: '10%' },
-          { item: '智能控制', from: '定时', to: 'AI自适应', saving: '15%' }
+          { item: '智能控制', from: '定时', to: 'AI自适应', saving: '15%' },
         ],
         totalSaving: '40%',
-        additionalCost: 5000
+        additionalCost: 5000,
       });
     }
 
@@ -236,10 +235,10 @@ class AISceneGenerator {
         changes: [
           { item: '风口布局', from: '单侧', to: '双侧对流', improvement: '温度均匀性+30%' },
           { item: '加湿系统', from: '无', to: '全屋加湿', improvement: '湿度控制±5%' },
-          { item: '静音设计', from: '标准', to: '超静音', improvement: '噪音-10dB' }
+          { item: '静音设计', from: '标准', to: '超静音', improvement: '噪音-10dB' },
         ],
         comfortScore: '95分',
-        additionalCost: 8000
+        additionalCost: 8000,
       });
     }
 
@@ -251,10 +250,10 @@ class AISceneGenerator {
         changes: [
           { item: '语音控制', from: '无', to: '全屋语音', feature: '支持自然语言' },
           { item: '场景联动', from: '3种', to: '20种', feature: 'AI自动场景' },
-          { item: '远程控制', from: 'APP', to: '小程序+APP', feature: '无需下载' }
+          { item: '远程控制', from: 'APP', to: '小程序+APP', feature: '无需下载' },
         ],
         convenience: '提升80%',
-        additionalCost: 3000
+        additionalCost: 3000,
       });
     }
 
@@ -263,7 +262,7 @@ class AISceneGenerator {
       optimizationTarget,
       optimizations,
       totalAdditionalCost: optimizations.reduce((sum, o) => sum + o.additionalCost, 0),
-      expectedROI: '2年收回成本'
+      expectedROI: '2年收回成本',
     };
   }
 
@@ -293,7 +292,7 @@ class AISceneGenerator {
       response,
       intent,
       suggestedActions: this.suggestNextActions(intent),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -351,12 +350,24 @@ class AISceneGenerator {
     // 匹配阿拉伯数字 + 口 (如"3口人")
     const numMatch = text.match(/(\d+)口/);
     if (numMatch) return parseInt(numMatch[1]);
-    
+
     // 匹配中文数字 (如"两个老人")
-    const chineseNums = { '一': 1, '二': 2, '两': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10 };
+    const chineseNums = {
+      一: 1,
+      二: 2,
+      两: 2,
+      三: 3,
+      四: 4,
+      五: 5,
+      六: 6,
+      七: 7,
+      八: 8,
+      九: 9,
+      十: 10,
+    };
     const chineseMatch = text.match(/([一二两三四五六七八九十])[个位口]/);
     if (chineseMatch) return chineseNums[chineseMatch[1]];
-    
+
     return null;
   }
 
@@ -417,13 +428,13 @@ class AISceneGenerator {
 
   generateSystemConfig(intent, entities) {
     const requirements = intent.requirements || [];
-    
+
     return {
       hvac: requirements.includes('制冷') || requirements.includes('制热'),
       freshAir: requirements.includes('新风'),
       waterHeater: requirements.includes('热水'),
       floorHeating: requirements.includes('制热') && intent.houseType !== '公寓',
-      waterPurifier: requirements.includes('净水')
+      waterPurifier: requirements.includes('净水'),
     };
   }
 
@@ -431,7 +442,7 @@ class AISceneGenerator {
     // 简化设备选型
     return [
       { type: 'outdoor_unit', model: 'RHEEM-ODU-48K', quantity: 1 },
-      { type: 'indoor_unit', model: 'RHEEM-IDU-12K', quantity: intent.rooms?.bedrooms || 3 }
+      { type: 'indoor_unit', model: 'RHEEM-IDU-12K', quantity: intent.rooms?.bedrooms || 3 },
     ];
   }
 
@@ -439,7 +450,7 @@ class AISceneGenerator {
     return {
       totalLength: intent.area ? intent.area * 3 : 300,
       insulation: true,
-      routes: ['主卧', '次卧', '客厅', '书房']
+      routes: ['主卧', '次卧', '客厅', '书房'],
     };
   }
 
@@ -447,7 +458,7 @@ class AISceneGenerator {
     return {
       modes: ['home', 'away', 'sleep'],
       automation: true,
-      remoteControl: true
+      remoteControl: true,
     };
   }
 
@@ -455,7 +466,7 @@ class AISceneGenerator {
     return {
       energySaving: '35%',
       comfortScore: '90分',
-      paybackPeriod: '3年'
+      paybackPeriod: '3年',
     };
   }
 
@@ -465,8 +476,8 @@ class AISceneGenerator {
       breakdown: {
         equipment: design.project.area * 600,
         installation: design.project.area * 300,
-        materials: design.project.area * 100
-      }
+        materials: design.project.area * 100,
+      },
     };
   }
 
@@ -480,24 +491,60 @@ class AISceneGenerator {
   }
 
   // 其他辅助方法省略...
-  loadIntentPatterns() { return {}; }
-  loadSystemTemplates() { return {}; }
-  loadDeviceDatabase() { return {}; }
-  getScenarioById(id) { return {}; }
-  scoreCost(s) { return 80; }
-  scoreComfort(s) { return 85; }
-  scoreEnergy(s) { return 90; }
-  scoreSmart(s) { return 75; }
-  scoreHealth(s) { return 88; }
-  getPros(s) { return ['节能', '舒适']; }
-  getCons(s) { return ['初期投入较高']; }
-  generateChartData(scenarios) { return {}; }
-  generateComparisonSuggestion(scenarios) { return '建议选择匹配度最高的方案'; }
-  answerQuestion(intent) { return '这是您需要的信息...'; }
-  describeDesign(design) { return '设计方案已生成...'; }
-  helpCompare(intent) { return '方案对比如下...'; }
-  generalResponse(intent) { return '请问有什么可以帮您？'; }
-  suggestNextActions(intent) { return ['查看方案', '预约设计', '获取报价']; }
+  loadIntentPatterns() {
+    return {};
+  }
+  loadSystemTemplates() {
+    return {};
+  }
+  loadDeviceDatabase() {
+    return {};
+  }
+  getScenarioById(id) {
+    return {};
+  }
+  scoreCost(s) {
+    return 80;
+  }
+  scoreComfort(s) {
+    return 85;
+  }
+  scoreEnergy(s) {
+    return 90;
+  }
+  scoreSmart(s) {
+    return 75;
+  }
+  scoreHealth(s) {
+    return 88;
+  }
+  getPros(s) {
+    return ['节能', '舒适'];
+  }
+  getCons(s) {
+    return ['初期投入较高'];
+  }
+  generateChartData(scenarios) {
+    return {};
+  }
+  generateComparisonSuggestion(scenarios) {
+    return '建议选择匹配度最高的方案';
+  }
+  answerQuestion(intent) {
+    return '这是您需要的信息...';
+  }
+  describeDesign(design) {
+    return '设计方案已生成...';
+  }
+  helpCompare(intent) {
+    return '方案对比如下...';
+  }
+  generalResponse(intent) {
+    return '请问有什么可以帮您？';
+  }
+  suggestNextActions(intent) {
+    return ['查看方案', '预约设计', '获取报价'];
+  }
 }
 
 module.exports = AISceneGenerator;

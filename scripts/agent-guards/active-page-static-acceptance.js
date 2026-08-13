@@ -3,7 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 require('./_artifact-gate').requireArtifactOrSkip('apps/nexus-console/src/lib/boards.ts', {
-  guard: 'guard:active-page-static', reason: 'apps/nexus-console 不存在；现役工作台为 apps/dealer-workbench，本门禁待按新路径重写',
+  guard: 'guard:active-page-static',
+  reason: 'apps/nexus-console 不存在；现役工作台为 apps/dealer-workbench，本门禁待按新路径重写',
 });
 const crypto = require('crypto');
 const { JSDOM } = require('jsdom');
@@ -13,14 +14,20 @@ const REPORT_JSON = path.join(ROOT, 'audit', 'active-page-static-acceptance-repo
 const REPORT_MD = path.join(ROOT, 'audit', 'active-page-static-acceptance-report.md');
 
 const pages = [
-  { path: '/index.html', title: /工作入口|数智枢纽/, requiredText: ['瑞合瑞德数智枢纽', '品牌管理', '客户与赋能', '瑞合瑞德暖通科技集团'] },
-  { path: '/index-ready.html', title: /瑞合瑞德集团/, requiredText: ['瑞合瑞德集团', '瑞诺瓦舒适家', 'Rheem', 'Ruud', 'Everhot'] }
+  {
+    path: '/index.html',
+    title: /工作入口|数智枢纽/,
+    requiredText: ['瑞合瑞德数智枢纽', '品牌管理', '客户与赋能', '瑞合瑞德暖通科技集团'],
+  },
+  {
+    path: '/index-ready.html',
+    title: /瑞合瑞德集团/,
+    requiredText: ['瑞合瑞德集团', '瑞诺瓦舒适家', 'Rheem', 'Ruud', 'Everhot'],
+  },
 ];
 
 const brandMarketingNavigationSmoke = {
-  sources: [
-    'apps/dealer-workbench/src/components/DealerNav.tsx'
-  ],
+  sources: ['apps/dealer-workbench/src/components/DealerNav.tsx'],
   nexusConsoleBoardSource: 'apps/nexus-console/src/lib/boards.ts',
   nexusConsolePageSource: 'apps/nexus-console/src/app/[board]/[[...section]]/page.tsx',
   requiredLabels: [
@@ -33,7 +40,7 @@ const brandMarketingNavigationSmoke = {
     '市场物料',
     '品牌官网管理',
     '上新 / 发布',
-    '市场营销 · 增长引擎'
+    '市场营销 · 增长引擎',
   ],
   requiredPaths: [
     '/brand',
@@ -48,7 +55,7 @@ const brandMarketingNavigationSmoke = {
     '/comfort/sites',
     '/comfort/dam',
     '/comfort/catalog',
-    '/comfort/publish'
+    '/comfort/publish',
   ],
   requiredBoardSections: [
     "id: 'comfort'",
@@ -60,14 +67,14 @@ const brandMarketingNavigationSmoke = {
     "key: 'geo'",
     "key: 'copywriter'",
     "key: 'sentiment'",
-    "key: 'automation'"
+    "key: 'automation'",
   ],
   requiredRenderedSections: [
     "board === 'growth' && sectionKey === 'geo'",
     "board === 'comfort' && sectionKey === 'sites'",
     "board === 'comfort' && sectionKey === 'catalog'",
     "board === 'comfort' && sectionKey === 'dam'",
-    "board === 'comfort' && sectionKey === 'publish'"
+    "board === 'comfort' && sectionKey === 'publish'",
   ],
   forbiddenDeepLinks: [
     "key: 'diagnosis'",
@@ -95,8 +102,8 @@ const brandMarketingNavigationSmoke = {
     "href: '/aftersales'",
     "href: '/team'",
     "href: '/dashboard'",
-    "href: '/enablement'"
-  ]
+    "href: '/enablement'",
+  ],
 };
 
 const forbiddenVisiblePatterns = [
@@ -114,14 +121,14 @@ const forbiddenVisiblePatterns = [
   /一键生成/,
   /魔法/,
   /舒适岛/,
-  /锁客/
+  /锁客/,
 ];
 
 const forbiddenSourcePatterns = [
   /待命名软件平台/,
   /Rhautt Comfort\s*=\s*数字化软件生产主干/,
   /Rhautt Comfort\s*完全重构/,
-  /\bRenova\b/
+  /\bRenova\b/,
 ];
 
 function read(relativePath) {
@@ -153,20 +160,24 @@ function inspectPage(spec) {
   const html = exists ? read(relativePath) : '';
   const visibleText = exists ? visibleTextFrom(html) : '';
   const title = exists ? titleFrom(html) : '';
-  const requiredMatches = (spec.requiredText || []).map(text => ({
+  const requiredMatches = (spec.requiredText || []).map((text) => ({
     text,
-    matched: visibleText.includes(text) || html.includes(text) || Boolean(spec.optionalText?.includes(text))
+    matched:
+      visibleText.includes(text) ||
+      html.includes(text) ||
+      Boolean(spec.optionalText?.includes(text)),
   }));
   const forbiddenVisible = forbiddenVisiblePatterns
-    .filter(pattern => pattern.test(visibleText))
-    .map(pattern => String(pattern));
+    .filter((pattern) => pattern.test(visibleText))
+    .map((pattern) => String(pattern));
   const forbiddenSource = forbiddenSourcePatterns
-    .filter(pattern => pattern.test(html))
-    .map(pattern => String(pattern));
+    .filter((pattern) => pattern.test(html))
+    .map((pattern) => String(pattern));
 
-  const passed = exists &&
+  const passed =
+    exists &&
     spec.title.test(title) &&
-    requiredMatches.every(item => item.matched) &&
+    requiredMatches.every((item) => item.matched) &&
     forbiddenVisible.length === 0 &&
     forbiddenSource.length === 0;
 
@@ -179,43 +190,53 @@ function inspectPage(spec) {
     requiredMatches,
     forbiddenVisible,
     forbiddenSource,
-    passed
+    passed,
   };
 }
 
 function inspectBrandMarketingNavigation() {
-  const sourceFiles = brandMarketingNavigationSmoke.sources.map(file => ({
+  const sourceFiles = brandMarketingNavigationSmoke.sources.map((file) => ({
     file,
-    source: read(file)
+    source: read(file),
   }));
-  const combined = sourceFiles.map(item => item.source).join('\n');
+  const combined = sourceFiles.map((item) => item.source).join('\n');
   const boardSource = read(brandMarketingNavigationSmoke.nexusConsoleBoardSource);
   const pageSource = read(brandMarketingNavigationSmoke.nexusConsolePageSource);
-  const missingLabels = brandMarketingNavigationSmoke.requiredLabels.filter(label => !combined.includes(label));
-  const missingPaths = brandMarketingNavigationSmoke.requiredPaths.filter(targetPath => !combined.includes(`'${targetPath}'`));
-  const missingBoardSections = brandMarketingNavigationSmoke.requiredBoardSections.filter(token => !boardSource.includes(token));
-  const missingRenderedSections = brandMarketingNavigationSmoke.requiredRenderedSections.filter(token => !pageSource.includes(token));
-  const forbiddenDeepLinks = brandMarketingNavigationSmoke.forbiddenDeepLinks
-    .filter(token => combined.includes(token));
+  const missingLabels = brandMarketingNavigationSmoke.requiredLabels.filter(
+    (label) => !combined.includes(label)
+  );
+  const missingPaths = brandMarketingNavigationSmoke.requiredPaths.filter(
+    (targetPath) => !combined.includes(`'${targetPath}'`)
+  );
+  const missingBoardSections = brandMarketingNavigationSmoke.requiredBoardSections.filter(
+    (token) => !boardSource.includes(token)
+  );
+  const missingRenderedSections = brandMarketingNavigationSmoke.requiredRenderedSections.filter(
+    (token) => !pageSource.includes(token)
+  );
+  const forbiddenDeepLinks = brandMarketingNavigationSmoke.forbiddenDeepLinks.filter((token) =>
+    combined.includes(token)
+  );
   return {
     name: 'brand-marketing-retained-navigation',
-    sources: sourceFiles.map(item => item.file),
-    requiredLabels: brandMarketingNavigationSmoke.requiredLabels.map(label => ({
+    sources: sourceFiles.map((item) => item.file),
+    requiredLabels: brandMarketingNavigationSmoke.requiredLabels.map((label) => ({
       label,
-      matched: !missingLabels.includes(label)
+      matched: !missingLabels.includes(label),
     })),
-    requiredPaths: brandMarketingNavigationSmoke.requiredPaths.map(targetPath => ({
+    requiredPaths: brandMarketingNavigationSmoke.requiredPaths.map((targetPath) => ({
       path: targetPath,
-      matched: !missingPaths.includes(targetPath)
+      matched: !missingPaths.includes(targetPath),
     })),
     missingBoardSections,
     missingRenderedSections,
     forbiddenDeepLinks,
-    passed: missingLabels.length === 0 &&
+    passed:
+      missingLabels.length === 0 &&
       missingPaths.length === 0 &&
       missingBoardSections.length === 0 &&
       missingRenderedSections.length === 0 &&
-      forbiddenDeepLinks.length === 0
+      forbiddenDeepLinks.length === 0,
   };
 }
 
@@ -228,17 +249,23 @@ function renderMarkdown(report) {
     'This is a static HTML acceptance gate for active pages. It does not replace browser visual acceptance.',
     '',
     '| Page | Title | Required Text | Forbidden Visible | Forbidden Source | Result |',
-    '|---|---|---:|---:|---:|---:|'
+    '|---|---|---:|---:|---:|---:|',
   ];
   for (const result of report.results) {
-    lines.push(`| ${result.path} | ${String(result.title).replace(/\|/g, '/')} | ${result.requiredMatches.filter(item => item.matched).length}/${result.requiredMatches.length} | ${result.forbiddenVisible.length} | ${result.forbiddenSource.length} | ${result.passed ? 'pass' : 'fail'} |`);
+    lines.push(
+      `| ${result.path} | ${String(result.title).replace(/\|/g, '/')} | ${result.requiredMatches.filter((item) => item.matched).length}/${result.requiredMatches.length} | ${result.forbiddenVisible.length} | ${result.forbiddenSource.length} | ${result.passed ? 'pass' : 'fail'} |`
+    );
   }
   lines.push('', '## Focused Navigation Smoke', '');
   for (const smoke of report.navigationSmokes) {
     lines.push(`- ${smoke.name}: ${smoke.passed ? 'pass' : 'fail'}`);
     if (!smoke.passed) {
-      lines.push(`  - labels: ${smoke.requiredLabels.filter(item => item.matched).length}/${smoke.requiredLabels.length}`);
-      lines.push(`  - paths: ${smoke.requiredPaths.filter(item => item.matched).length}/${smoke.requiredPaths.length}`);
+      lines.push(
+        `  - labels: ${smoke.requiredLabels.filter((item) => item.matched).length}/${smoke.requiredLabels.length}`
+      );
+      lines.push(
+        `  - paths: ${smoke.requiredPaths.filter((item) => item.matched).length}/${smoke.requiredPaths.length}`
+      );
       lines.push(`  - missing board sections: ${smoke.missingBoardSections.length}`);
       lines.push(`  - missing rendered sections: ${smoke.missingRenderedSections.length}`);
       lines.push(`  - forbidden deep links: ${smoke.forbiddenDeepLinks.length}`);
@@ -254,26 +281,32 @@ const report = {
   mode: 'static-html-prd-vi-acceptance',
   summary: {
     pages: results.length,
-    passed: results.filter(result => result.passed).length,
-    failed: results.filter(result => !result.passed).length,
+    passed: results.filter((result) => result.passed).length,
+    failed: results.filter((result) => !result.passed).length,
     navigationSmokes: navigationSmokes.length,
-    navigationSmokesPassed: navigationSmokes.filter(result => result.passed).length,
-    navigationSmokesFailed: navigationSmokes.filter(result => !result.passed).length
+    navigationSmokesPassed: navigationSmokes.filter((result) => result.passed).length,
+    navigationSmokesFailed: navigationSmokes.filter((result) => !result.passed).length,
   },
   results,
-  navigationSmokes
+  navigationSmokes,
 };
 
 fs.writeFileSync(REPORT_JSON, JSON.stringify(report, null, 2));
 fs.writeFileSync(REPORT_MD, renderMarkdown(report));
 
-console.log(`Active page static acceptance: ${report.summary.passed}/${report.summary.pages} pages passed; ${report.summary.navigationSmokesPassed}/${report.summary.navigationSmokes} navigation smokes passed`);
+console.log(
+  `Active page static acceptance: ${report.summary.passed}/${report.summary.pages} pages passed; ${report.summary.navigationSmokesPassed}/${report.summary.navigationSmokes} navigation smokes passed`
+);
 if (report.summary.failed || report.summary.navigationSmokesFailed) {
-  for (const result of results.filter(item => !item.passed)) {
-    console.error(`- ${result.path}: title=${result.title}; required=${result.requiredMatches.filter(item => item.matched).length}/${result.requiredMatches.length}; forbiddenVisible=${result.forbiddenVisible.length}; forbiddenSource=${result.forbiddenSource.length}`);
+  for (const result of results.filter((item) => !item.passed)) {
+    console.error(
+      `- ${result.path}: title=${result.title}; required=${result.requiredMatches.filter((item) => item.matched).length}/${result.requiredMatches.length}; forbiddenVisible=${result.forbiddenVisible.length}; forbiddenSource=${result.forbiddenSource.length}`
+    );
   }
-  for (const smoke of navigationSmokes.filter(item => !item.passed)) {
-    console.error(`- ${smoke.name}: labels=${smoke.requiredLabels.filter(item => item.matched).length}/${smoke.requiredLabels.length}; paths=${smoke.requiredPaths.filter(item => item.matched).length}/${smoke.requiredPaths.length}; missingBoardSections=${smoke.missingBoardSections.length}; missingRenderedSections=${smoke.missingRenderedSections.length}; forbiddenDeepLinks=${smoke.forbiddenDeepLinks.length}`);
+  for (const smoke of navigationSmokes.filter((item) => !item.passed)) {
+    console.error(
+      `- ${smoke.name}: labels=${smoke.requiredLabels.filter((item) => item.matched).length}/${smoke.requiredLabels.length}; paths=${smoke.requiredPaths.filter((item) => item.matched).length}/${smoke.requiredPaths.length}; missingBoardSections=${smoke.missingBoardSections.length}; missingRenderedSections=${smoke.missingRenderedSections.length}; forbiddenDeepLinks=${smoke.forbiddenDeepLinks.length}`
+    );
     for (const token of smoke.forbiddenDeepLinks) console.error(`  forbidden: ${token}`);
   }
   process.exit(1);

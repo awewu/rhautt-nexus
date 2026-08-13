@@ -92,7 +92,12 @@ export const SEGMENT_OPERATING_MODELS: Readonly<Record<ScenarioFamily, SegmentOp
   residential: {
     family: 'residential',
     label: '家用（C端消费驱动）',
-    promotion: ['C端内容种草(AI问诊/GEO/口碑)', '门店/样板间体验', '经销商分销获客', '品牌矩阵曝光'],
+    promotion: [
+      'C端内容种草(AI问诊/GEO/口碑)',
+      '门店/样板间体验',
+      '经销商分销获客',
+      '品牌矩阵曝光',
+    ],
     enablement: ['标准化系统套餐', '一键精算+AI方案', '经销商工作台自助', '话术/物料一键取用'],
     delivery: ['标准化快速交付', '生命周期14态', '验收打勾', 'IoT仅移交'],
     techSupport: ['远程指导+经销商自服务', '保修台账', '标准SLA'],
@@ -100,7 +105,12 @@ export const SEGMENT_OPERATING_MODELS: Readonly<Record<ScenarioFamily, SegmentOp
   commercial: {
     family: 'commercial',
     label: '商用/轻商（B端项目驱动）',
-    promotion: ['B端项目获客(工程渠道/招投标)', '行业展会/标杆案例', 'GEO专业词+技术白皮书', '客情与关系营销'],
+    promotion: [
+      'B端项目获客(工程渠道/招投标)',
+      '行业展会/标杆案例',
+      'GEO专业词+技术白皮书',
+      '客情与关系营销',
+    ],
     enablement: ['定制化选型+负荷精算', '多专业BIM深化协同', '投标报价/技术标书', '厂商专家支持'],
     delivery: ['项目制里程碑交付', '深化图纸/工程量/标准符合性', '多方分阶段验收', '调试与移交'],
     techSupport: ['驻场/专业工程师', 'SLA+运维合同', '能效优化/长期服务'],
@@ -109,7 +119,9 @@ export const SEGMENT_OPERATING_MODELS: Readonly<Record<ScenarioFamily, SegmentOp
 
 /** targetSegment（home/villa/commercial/project）→ 场景族。 */
 export function segmentFamily(targetSegment: string): ScenarioFamily {
-  return targetSegment === 'commercial' || targetSegment === 'project' ? 'commercial' : 'residential';
+  return targetSegment === 'commercial' || targetSegment === 'project'
+    ? 'commercial'
+    : 'residential';
 }
 
 /** 素材角色 · 产品挂载的 DAM 引用类别（P2） */
@@ -180,8 +192,12 @@ export const PRODUCT_TAXONOMY = {
   applicationScenarios: APPLICATION_SCENARIOS,
   segmentModels: SEGMENT_OPERATING_MODELS,
   assetRoles: ASSET_ROLES,
-  get relationTypes() { return RELATION_TYPES; },
-  get locales() { return LOCALES; },
+  get relationTypes() {
+    return RELATION_TYPES;
+  },
+  get locales() {
+    return LOCALES;
+  },
 } as const;
 
 function codeSet(terms: readonly TaxonomyTerm[]): Set<string> {
@@ -232,7 +248,9 @@ export function computeProductKey(name?: string | null, category?: string | null
     .toLowerCase()
     .replace(/[\s\-_/]+/g, '')
     .replace(/[^a-z0-9\u4e00-\u9fff]/g, '');
-  const cat = String(category ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const cat = String(category ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
   return cat && norm ? `${cat}:${norm}` : norm;
 }
 
@@ -266,7 +284,10 @@ export function sanitizeAssetRefs(input: unknown): AssetRef[] {
     }
   }
   const sortedMultiRefs = multiRefs
-    .map((ref, index) => ({ ...ref, sortOrder: Number.isFinite(ref.sortOrder) ? ref.sortOrder : index }))
+    .map((ref, index) => ({
+      ...ref,
+      sortOrder: Number.isFinite(ref.sortOrder) ? ref.sortOrder : index,
+    }))
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
   return [...singletonByRole.values(), ...sortedMultiRefs];
 }
@@ -435,20 +456,32 @@ export function sanitizeMarketing(input: unknown): ProductMarketing {
     badges: sanitizeStrings(m.badges),
     certs: sanitizeStrings((m as any).certs),
     specs: specs
-      .map((x) => ({ k: str((x as any)?.k ?? (x as any)?.key ?? (x as any)?.label), v: str((x as any)?.v ?? (x as any)?.value) }))
+      .map((x) => ({
+        k: str((x as any)?.k ?? (x as any)?.key ?? (x as any)?.label),
+        v: str((x as any)?.v ?? (x as any)?.value),
+      }))
       .filter((x) => x.k || x.v),
     features: features
-      .map((x) => ({ title: str((x as any)?.title ?? (x as any)?.feature), desc: str((x as any)?.desc ?? (x as any)?.description ?? (x as any)?.benefit) }))
+      .map((x) => ({
+        title: str((x as any)?.title ?? (x as any)?.feature),
+        desc: str((x as any)?.desc ?? (x as any)?.description ?? (x as any)?.benefit),
+      }))
       .filter((x) => x.title || x.desc),
     featureBenefits: fbs
-      .map((x) => ({ feature: str((x as FeatureBenefit)?.feature), benefit: str((x as FeatureBenefit)?.benefit) }))
+      .map((x) => ({
+        feature: str((x as FeatureBenefit)?.feature),
+        benefit: str((x as FeatureBenefit)?.benefit),
+      }))
       .filter((x) => x.feature || x.benefit),
     highlights: highlights
       .map((x) => {
         if (typeof x === 'string') return str(x);
-        return { label: str((x as any)?.label ?? (x as any)?.k ?? (x as any)?.key), value: str((x as any)?.value ?? (x as any)?.v) };
+        return {
+          label: str((x as any)?.label ?? (x as any)?.k ?? (x as any)?.key),
+          value: str((x as any)?.value ?? (x as any)?.v),
+        };
       })
-      .filter((x) => typeof x === 'string' ? Boolean(x) : Boolean(x.label || x.value)),
+      .filter((x) => (typeof x === 'string' ? Boolean(x) : Boolean(x.label || x.value))),
     faq: faqs
       .map((x) => ({ q: str((x as FaqItem)?.q), a: str((x as FaqItem)?.a) }))
       .filter((x) => x.q && x.a),
@@ -456,8 +489,26 @@ export function sanitizeMarketing(input: unknown): ProductMarketing {
 }
 
 const OFFICIAL_DETAIL_ALLOWED_TAGS = new Set([
-  'p', 'br', 'strong', 'b', 'em', 'i', 'ul', 'ol', 'li', 'a', 'img',
-  'h2', 'h3', 'h4', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+  'p',
+  'br',
+  'strong',
+  'b',
+  'em',
+  'i',
+  'ul',
+  'ol',
+  'li',
+  'a',
+  'img',
+  'h2',
+  'h3',
+  'h4',
+  'table',
+  'thead',
+  'tbody',
+  'tr',
+  'th',
+  'td',
 ]);
 const OFFICIAL_DETAIL_VOID_TAGS = new Set(['br', 'img']);
 
@@ -472,10 +523,13 @@ function escapeOfficialDetailHtml(value: string): string {
 
 function readHtmlAttrs(raw: string): Record<string, string> {
   const attrs: Record<string, string> = {};
-  raw.replace(/([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/g, (_match, name, dquoted, squoted, bare) => {
-    attrs[String(name).toLowerCase()] = String(dquoted ?? squoted ?? bare ?? '');
-    return '';
-  });
+  raw.replace(
+    /([a-zA-Z_:][-a-zA-Z0-9_:.]*)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/g,
+    (_match, name, dquoted, squoted, bare) => {
+      attrs[String(name).toLowerCase()] = String(dquoted ?? squoted ?? bare ?? '');
+      return '';
+    }
+  );
   return attrs;
 }
 
@@ -487,7 +541,12 @@ function safeOfficialDetailUrl(value: string, kind: 'href' | 'src'): string {
   return '';
 }
 
-function officialDetailTagHtml(tag: string, attrsRaw: string, closing: boolean, selfClosing: boolean): string {
+function officialDetailTagHtml(
+  tag: string,
+  attrsRaw: string,
+  closing: boolean,
+  selfClosing: boolean
+): string {
   if (!OFFICIAL_DETAIL_ALLOWED_TAGS.has(tag)) return '';
   if (closing) return OFFICIAL_DETAIL_VOID_TAGS.has(tag) ? '' : `</${tag}>`;
 
@@ -526,7 +585,7 @@ export function sanitizeOfficialDetailHtml(input: unknown): string | null {
       String(match[1] || '').toLowerCase(),
       match[2] || '',
       /^<\//.test(full),
-      /\/\s*>$/.test(full),
+      /\/\s*>$/.test(full)
     );
     cursor = match.index + full.length;
   }

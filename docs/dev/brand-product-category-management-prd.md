@@ -102,22 +102,22 @@ Everhot 恒热
 
 建议新增品牌产品分类实体，字段如下：
 
-| 字段 | 说明 |
-| --- | --- |
-| `id` | 分类 ID |
-| `brandCode` | 品牌编码，如 `rheem`、`ruud`、`everhot` |
-| `parentId` | 父分类 ID，一级分类为空 |
-| `level` | 层级：1、2、3 |
-| `code` | 分类编码，同品牌下建议唯一 |
-| `nameCn` | 中文名称 |
-| `nameEn` | 英文名称，可选 |
-| `slug` | 官网路径或公开标识，可选 |
-| `sortOrder` | 排序 |
-| `status` | `active` / `inactive` |
-| `description` | 后台备注，可选 |
-| `createdAt` | 创建时间 |
-| `updatedAt` | 更新时间 |
-| `deletedAt` | 软删除时间 |
+| 字段          | 说明                                    |
+| ------------- | --------------------------------------- |
+| `id`          | 分类 ID                                 |
+| `brandCode`   | 品牌编码，如 `rheem`、`ruud`、`everhot` |
+| `parentId`    | 父分类 ID，一级分类为空                 |
+| `level`       | 层级：1、2、3                           |
+| `code`        | 分类编码，同品牌下建议唯一              |
+| `nameCn`      | 中文名称                                |
+| `nameEn`      | 英文名称，可选                          |
+| `slug`        | 官网路径或公开标识，可选                |
+| `sortOrder`   | 排序                                    |
+| `status`      | `active` / `inactive`                   |
+| `description` | 后台备注，可选                          |
+| `createdAt`   | 创建时间                                |
+| `updatedAt`   | 更新时间                                |
+| `deletedAt`   | 软删除时间                              |
 
 约束：
 
@@ -131,12 +131,12 @@ Everhot 恒热
 
 产品目录记录需要能保存分类路径。建议在产品品牌元数据中增加或统一以下字段：
 
-| 字段 | 说明 |
-| --- | --- |
-| `categoryLevel1Id` | 一级分类 ID |
-| `categoryLevel2Id` | 二级分类 ID |
-| `categoryLevel3Id` | 三级分类 ID，可空 |
-| `categoryPath` | 冗余展示路径，如 `家用 / 热水系统 / 空气能热水器` |
+| 字段               | 说明                                              |
+| ------------------ | ------------------------------------------------- |
+| `categoryLevel1Id` | 一级分类 ID                                       |
+| `categoryLevel2Id` | 二级分类 ID                                       |
+| `categoryLevel3Id` | 三级分类 ID，可空                                 |
+| `categoryPath`     | 冗余展示路径，如 `家用 / 热水系统 / 空气能热水器` |
 
 兼容策略：
 

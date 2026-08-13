@@ -14,19 +14,23 @@
  *   // 进程退出时自动清理（或手动 shutdownAllTimers()）
  */
 
-const timers = new Map();  // id → { type, name, ref }
+const timers = new Map(); // id → { type, name, ref }
 let nextId = 1;
 
 function registerInterval(fn, ms, name = 'unnamed') {
   const ref = setInterval(fn, ms);
   const id = nextId++;
   timers.set(id, { type: 'interval', name, ref, createdAt: new Date() });
-  return { id, ref };  // 调用方可选择 clearInterval(ref) 或 unregister(id)
+  return { id, ref }; // 调用方可选择 clearInterval(ref) 或 unregister(id)
 }
 
 function registerTimeout(fn, ms, name = 'unnamed') {
   const ref = setTimeout(() => {
-    try { fn(); } finally { timers.delete(id); }
+    try {
+      fn();
+    } finally {
+      timers.delete(id);
+    }
   }, ms);
   const id = nextId++;
   timers.set(id, { type: 'timeout', name, ref, createdAt: new Date() });
@@ -61,7 +65,7 @@ function shutdownAllTimers() {
 }
 
 // 进程退出自动清理
-['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach(sig => {
+['SIGTERM', 'SIGINT', 'SIGQUIT'].forEach((sig) => {
   process.once(sig, () => {
     const n = shutdownAllTimers();
     console.log(`🧹 [${sig}] 已清理 ${n} 个已登记定时器`);

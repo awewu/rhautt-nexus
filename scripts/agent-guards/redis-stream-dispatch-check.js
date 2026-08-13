@@ -23,15 +23,12 @@ if (!fs.existsSync(path.join(ROOT, SEMANTICS_TEST))) {
   try {
     // 跨平台：环境变量走 execSync 的 env 选项，不能用 `VAR=value cmd` 前缀
     // （该前缀是 POSIX shell 语法，在 Windows cmd/PowerShell 下会导致命令解析失败 → 门禁恒红）。
-    const out = execSync(
-      `node -r ts-node/register/transpile-only --test ${SEMANTICS_TEST}`,
-      {
-        cwd: ROOT,
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'pipe'],
-        env: { ...process.env, TS_NODE_PROJECT: 'services/api/tsconfig.json' },
-      },
-    );
+    const out = execSync(`node -r ts-node/register/transpile-only --test ${SEMANTICS_TEST}`, {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: { ...process.env, TS_NODE_PROJECT: 'services/api/tsconfig.json' },
+    });
     const fail = (out.match(/^# fail (\d+)/m) || [])[1];
     if (fail && Number(fail) > 0) failures.push(`Redis Stream 语义单测有 ${fail} 个失败`);
   } catch (e) {
@@ -41,19 +38,43 @@ if (!fs.existsSync(path.join(ROOT, SEMANTICS_TEST))) {
 
 // 2) 真实 Redis 运行时烟雾（有 Redis 才跑）
 try {
-  const out = execSync('node scripts/release/redis-stream-smoke.js', { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  const out = execSync('node scripts/release/redis-stream-smoke.js', {
+    cwd: ROOT,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
   if (/跳过/.test(out)) notes.push('真实 Redis 不可达，运行时烟雾已 skip（不阻断）');
   else notes.push('真实 Redis 运行时烟雾通过');
 } catch (e) {
-  failures.push(`Redis Stream 运行时烟雾失败：${String((e.stdout || '') + (e.stderr || '')).slice(0, 300)}`);
+  failures.push(
+    `Redis Stream 运行时烟雾失败：${String((e.stdout || '') + (e.stderr || '')).slice(0, 300)}`
+  );
 }
 
 const evidenceDir = path.join(ROOT, 'evidence', 'events');
-try { fs.mkdirSync(evidenceDir, { recursive: true }); } catch { /* noop */ }
 try {
-  fs.writeFileSync(path.join(evidenceDir, 'redis-stream-dispatch-report.json'),
-    JSON.stringify({ guard: 'redis-stream-dispatch-check', at: new Date().toISOString(), passed: failures.length === 0, failures, notes }, null, 2));
-} catch { /* noop */ }
+  fs.mkdirSync(evidenceDir, { recursive: true });
+} catch {
+  /* noop */
+}
+try {
+  fs.writeFileSync(
+    path.join(evidenceDir, 'redis-stream-dispatch-report.json'),
+    JSON.stringify(
+      {
+        guard: 'redis-stream-dispatch-check',
+        at: new Date().toISOString(),
+        passed: failures.length === 0,
+        failures,
+        notes,
+      },
+      null,
+      2
+    )
+  );
+} catch {
+  /* noop */
+}
 
 for (const n of notes) console.log(`ℹ️  ${n}`);
 if (failures.length) {
@@ -61,4 +82,6 @@ if (failures.length) {
   for (const f of failures) console.error(`   - ${f}`);
   process.exit(1);
 }
-console.log('✅ redis-stream-dispatch-check 通过：消费组语义单测全绿；真实 Redis 烟雾通过或按需 skip。');
+console.log(
+  '✅ redis-stream-dispatch-check 通过：消费组语义单测全绿；真实 Redis 烟雾通过或按需 skip。'
+);

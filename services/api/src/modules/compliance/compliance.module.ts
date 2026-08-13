@@ -10,9 +10,7 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
  * 能力：PIPL 同意管理(consent)、撤回、数据保留(dataRetention)、PII 加密(encryptPII)。
  */
 @Module({
-  imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([ConsentEntity])]),
-  ],
+  imports: [...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([ConsentEntity])])],
   controllers: [ComplianceController],
   providers: [
     ComplianceService,

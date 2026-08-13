@@ -19,7 +19,7 @@ describe('auth/account surface smoke', () => {
     expect(loginPage).toContain("'/api/v2/auth/sso/login?redirect=/cockpit'");
 
     const api = read('apps/dealer-workbench/src/lib/api.ts');
-    expect(api).toContain("login: (phone: string, password: string)");
+    expect(api).toContain('login: (phone: string, password: string)');
     expect(api).toContain("apiFetch('/api/v2/auth/login'");
     expect(api).toContain("credentials: 'include'");
   });
@@ -52,14 +52,12 @@ describe('auth/account surface smoke', () => {
     const spec = JSON.parse(read('contracts/openapi/rhautt-nexus-v2.openapi.json'));
     const api = read('apps/dealer-workbench/src/lib/api.ts');
 
-    for (const route of [
-      "admin/users'",
-      "admin/users/:id'",
-      "admin/users/:id/reset-password'",
-    ]) {
+    for (const route of ["admin/users'", "admin/users/:id'", "admin/users/:id/reset-password'"]) {
       expect(controller).toContain(route);
     }
-    expect(controller.match(/@Roles\('platform_admin', 'hq_admin', 'dealer_admin'\)/g).length).toBeGreaterThanOrEqual(4);
+    expect(
+      controller.match(/@Roles\('platform_admin', 'hq_admin', 'dealer_admin'\)/g).length
+    ).toBeGreaterThanOrEqual(4);
 
     const operations = [
       spec.paths['/api/v2/auth/admin/users'].get,

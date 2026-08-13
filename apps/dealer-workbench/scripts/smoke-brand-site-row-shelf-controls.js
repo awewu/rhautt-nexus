@@ -33,7 +33,9 @@ async function main() {
       category: 'hot_water',
       status: 'inactive',
       spec: { officialModel: 'UN-100', system: 'water_heating' },
-      meta: { everhot: { slug: 'everhot-unlisted', cat: '热水器', sys: '热水系统', displayOrder: 10 } },
+      meta: {
+        everhot: { slug: 'everhot-unlisted', cat: '热水器', sys: '热水系统', displayOrder: 10 },
+      },
     },
     {
       id: 'product-published',
@@ -44,7 +46,9 @@ async function main() {
       category: 'hot_water',
       status: 'active',
       spec: { officialModel: 'PB-200', system: 'water_heating' },
-      meta: { everhot: { slug: 'everhot-published', cat: '热水器', sys: '热水系统', displayOrder: 20 } },
+      meta: {
+        everhot: { slug: 'everhot-published', cat: '热水器', sys: '热水系统', displayOrder: 20 },
+      },
     },
     {
       id: 'product-hidden',
@@ -55,7 +59,9 @@ async function main() {
       category: 'hot_water',
       status: 'active',
       spec: { officialModel: 'HD-300', system: 'water_heating' },
-      meta: { everhot: { slug: 'everhot-hidden', cat: '热水器', sys: '热水系统', displayOrder: 30 } },
+      meta: {
+        everhot: { slug: 'everhot-hidden', cat: '热水器', sys: '热水系统', displayOrder: 30 },
+      },
     },
   ];
   const assignments = [
@@ -99,7 +105,10 @@ async function main() {
     const url = new URL(request.url());
     const path = url.pathname;
     if (path.endsWith('/product-assignments') && request.method() === 'GET') {
-      await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: assignments, total: assignments.length }) });
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({ items: assignments, total: assignments.length }),
+      });
       return;
     }
     if (path.endsWith('/product-assignments') && request.method() === 'POST') {
@@ -152,7 +161,10 @@ async function main() {
   });
 
   await page.route('**/api/v2/product-catalog/taxonomy', async (route) => {
-    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ targetSegments: [], channels: [], assetRoles: [] }) });
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ targetSegments: [], channels: [], assetRoles: [] }),
+    });
   });
 
   await page.route('**/api/v2/product-catalog/devices**', async (route) => {
@@ -163,7 +175,10 @@ async function main() {
         body: route.request().postData(),
       });
     }
-    await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: products, total: products.length }) });
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ items: products, total: products.length }),
+    });
   });
 
   await page.goto(`${baseUrl}/comfort/sites/everhot`, { waitUntil: 'networkidle' });
@@ -192,10 +207,14 @@ async function main() {
     hiddenAssignments[0] !== 'assignment-published' ||
     catalogWrites.length !== 0
   ) {
-    throw new Error(JSON.stringify({ createdAssignments, publishedAssignments, hiddenAssignments, catalogWrites }));
+    throw new Error(
+      JSON.stringify({ createdAssignments, publishedAssignments, hiddenAssignments, catalogWrites })
+    );
   }
 
-  console.log('brand site row shelf controls smoke passed: row labels rendered, publish/hide used assignment APIs, and catalog status stayed separate');
+  console.log(
+    'brand site row shelf controls smoke passed: row labels rendered, publish/hide used assignment APIs, and catalog status stayed separate'
+  );
 }
 
 main().catch((error) => {

@@ -4,7 +4,14 @@ import type { Observable } from 'rxjs';
 import { AuditLogService } from './audit-log.service';
 
 const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-const SECRET_KEYS = new Set(['password', 'newPassword', 'oldPassword', 'token', 'authorization', 'dataBase64']);
+const SECRET_KEYS = new Set([
+  'password',
+  'newPassword',
+  'oldPassword',
+  'token',
+  'authorization',
+  'dataBase64',
+]);
 
 @Injectable()
 export class AuditLogInterceptor implements NestInterceptor {
@@ -56,7 +63,7 @@ export class AuditLogInterceptor implements NestInterceptor {
           },
         });
         return throwError(() => error);
-      }),
+      })
     );
   }
 
@@ -65,7 +72,12 @@ export class AuditLogInterceptor implements NestInterceptor {
     if (!req.user?.tenantId) return false;
     const path = String(req.originalUrl || req.url || '');
     if (path.includes('/audit-logs')) return false;
-    if (path.includes('/auth/login') || path.includes('/auth/logout') || path.includes('/auth/refresh-token')) return false;
+    if (
+      path.includes('/auth/login') ||
+      path.includes('/auth/logout') ||
+      path.includes('/auth/refresh-token')
+    )
+      return false;
     return true;
   }
 }
@@ -80,7 +92,15 @@ function describeRequest(req: any) {
   const method = String(req.method || '').toUpperCase();
   const path = stripApiPrefix(String(req.route?.path || req.path || req.url || ''));
   const fullPath = stripApiPrefix(String(req.originalUrl || req.url || path).split('?')[0]);
-  const resourceId = String(req.params?.id || req.params?.articleId || req.params?.assignmentId || req.params?.relId || req.body?.id || '').trim() || null;
+  const resourceId =
+    String(
+      req.params?.id ||
+        req.params?.articleId ||
+        req.params?.assignmentId ||
+        req.params?.relId ||
+        req.body?.id ||
+        ''
+    ).trim() || null;
   const resourceType = resourceTypeForPath(fullPath);
   return {
     resourceType,
@@ -90,14 +110,21 @@ function describeRequest(req: any) {
 }
 
 function stripApiPrefix(path: string) {
-  return path.replace(/^\/api\/v2\//, '/').replace(/^\/api\//, '/').replace(/^\//, '');
+  return path
+    .replace(/^\/api\/v2\//, '/')
+    .replace(/^\/api\//, '/')
+    .replace(/^\//, '');
 }
 
 function actionFor(method: string, path: string) {
   if (method === 'DELETE') return 'delete';
   if (method === 'PUT') return 'update';
   if (method === 'PATCH') return 'update';
-  if (/publish|transition|restore|hide|archive|reset-password|roles|permissions|logo|upload|verify/i.test(path)) {
+  if (
+    /publish|transition|restore|hide|archive|reset-password|roles|permissions|logo|upload|verify/i.test(
+      path
+    )
+  ) {
     if (/reset-password/i.test(path)) return 'reset_password';
     if (/permissions/i.test(path)) return 'assign_permissions';
     if (/roles/i.test(path)) return 'assign_roles';
@@ -113,14 +140,16 @@ function actionFor(method: string, path: string) {
 function resourceTypeForPath(path: string) {
   if (path.includes('product-catalog')) return 'product.catalog';
   if (path.includes('brand-sites') && path.includes('news')) return 'marketing.content';
-  if (path.includes('file-artifact') || path.includes('site-materials') || path.includes('logo')) return 'marketing.assets';
+  if (path.includes('file-artifact') || path.includes('site-materials') || path.includes('logo'))
+    return 'marketing.assets';
   if (path.includes('brand-sites') && path.includes('publish')) return 'brand.library';
   if (path.includes('brand-sites')) return 'brand.library';
   if (path.includes('auth/admin/users')) return 'admin.users';
   if (path.includes('auth/admin/roles')) return 'admin.roles';
   if (path.includes('brand-product-categories')) return 'product.catalog';
   if (path.includes('diagnosis')) return 'diagnosis.consultation';
-  if (path.includes('crm') || path.includes('customers') || path.includes('opportunities')) return 'crm.consultation';
+  if (path.includes('crm') || path.includes('customers') || path.includes('opportunities'))
+    return 'crm.consultation';
   return path.split('/').filter(Boolean).slice(0, 2).join('.') || 'system';
 }
 

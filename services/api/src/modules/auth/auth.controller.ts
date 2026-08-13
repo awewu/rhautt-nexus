@@ -1,4 +1,18 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { OidcSsoCallbackService } from './oidc-sso-callback.service';
@@ -13,7 +27,7 @@ export class AuthController {
   constructor(
     private readonly svc: AuthService,
     private readonly oidcSsoLogin: OidcSsoLoginService,
-    private readonly oidcSsoCallback: OidcSsoCallbackService,
+    private readonly oidcSsoCallback: OidcSsoCallbackService
   ) {}
 
   @Public()
@@ -33,10 +47,15 @@ export class AuthController {
         const dev = await this.svc.issueDevSsoLogin();
         return res
           .status(302)
-          .header('Set-Cookie', `nx_token=${dev.token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`)
+          .header(
+            'Set-Cookie',
+            `nx_token=${dev.token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`
+          )
           .header('Location', this.oidcSsoLogin.safeRedirect(redirect))
           .send();
-      } catch { /* 桩失败则回落真 OIDC 流程 */ }
+      } catch {
+        /* 桩失败则回落真 OIDC 流程 */
+      }
     }
     try {
       const next = await this.oidcSsoLogin.createLoginRedirect(redirect);
@@ -59,14 +78,15 @@ export class AuthController {
     @Query('code') code: string | string[] | undefined,
     @Query('state') state: string | string[] | undefined,
     @Req() req: any,
-    @Res() res: any,
+    @Res() res: any
   ) {
     try {
       const next = await this.oidcSsoCallback.handleCallback({
         code,
         state,
         cookieHeader: req.headers?.cookie,
-        requestId: this.firstHeader(req, 'x-request-id') || this.firstHeader(req, 'x-correlation-id'),
+        requestId:
+          this.firstHeader(req, 'x-request-id') || this.firstHeader(req, 'x-correlation-id'),
         traceId: this.firstHeader(req, 'x-trace-id'),
       });
       return res
@@ -76,7 +96,8 @@ export class AuthController {
         .send();
     } catch (error: any) {
       const reason = this.ssoFailureReason(error);
-      const landingReason = reason === 'pending_authorization' ? 'unauthorized' : 'sso_callback_failed';
+      const landingReason =
+        reason === 'pending_authorization' ? 'unauthorized' : 'sso_callback_failed';
       return res
         .status(302)
         .header('Set-Cookie', this.oidcSsoCallback.clearTransientCookies())
@@ -114,12 +135,16 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(AuthGuard)
-  me(@Req() req: any) { return this.svc.getMe(req.user); }
+  me(@Req() req: any) {
+    return this.svc.getMe(req.user);
+  }
 
   // Legacy /api/auth/user 与 /api/auth/me 等价；NestJS v2 保留以兼容旧前端。
   @Get('user')
   @UseGuards(AuthGuard)
-  user(@Req() req: any) { return this.svc.getMe(req.user); }
+  user(@Req() req: any) {
+    return this.svc.getMe(req.user);
+  }
 
   @Put('user')
   @UseGuards(AuthGuard)
@@ -136,17 +161,31 @@ export class AuthController {
   @Post('refresh-token')
   @HttpCode(200)
   @UseGuards(AuthGuard)
-  refresh(@Req() req: any) { return this.svc.refreshToken(req.user); }
+  refresh(@Req() req: any) {
+    return this.svc.refreshToken(req.user);
+  }
 
   @Post('logout')
   @HttpCode(200)
   @UseGuards(AuthGuard)
-  logout() { return this.svc.logout(); }
+  logout() {
+    return this.svc.logout();
+  }
 
   // 经销商自助注册（注册即用 + 事后限权）。品牌员工账号仍须走后台开户。
   @Public()
   @Post('register')
-  register(@Body() body: { identifier?: string; phone?: string; email?: string; password: string; name?: string; companyName?: string }) {
+  register(
+    @Body()
+    body: {
+      identifier?: string;
+      phone?: string;
+      email?: string;
+      password: string;
+      name?: string;
+      companyName?: string;
+    }
+  ) {
     return this.svc.register(body);
   }
 
@@ -163,7 +202,18 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Roles('platform_admin', 'hq_admin', 'dealer_admin')
   @Permissions('admin.users.create')
-  adminCreateUser(@Req() req: any, @Body() body: { identifier: string; password: string; name?: string; role: UserRole; dealerId?: string | null; storeId?: string | null }) {
+  adminCreateUser(
+    @Req() req: any,
+    @Body()
+    body: {
+      identifier: string;
+      password: string;
+      name?: string;
+      role: UserRole;
+      dealerId?: string | null;
+      storeId?: string | null;
+    }
+  ) {
     return this.svc.adminCreateUser(req.user, body);
   }
 
@@ -171,7 +221,18 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Roles('platform_admin', 'hq_admin', 'dealer_admin')
   @Permissions('admin.users.update')
-  adminUpdateUser(@Req() req: any, @Param('id') id: string, @Body() body: { role?: UserRole; status?: 'active' | 'inactive' | 'suspended'; name?: string; dealerId?: string | null; storeId?: string | null }) {
+  adminUpdateUser(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body()
+    body: {
+      role?: UserRole;
+      status?: 'active' | 'inactive' | 'suspended';
+      name?: string;
+      dealerId?: string | null;
+      storeId?: string | null;
+    }
+  ) {
     return this.svc.adminUpdateUser(req.user, id, body);
   }
 
@@ -179,7 +240,16 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Roles('platform_admin', 'hq_admin', 'dealer_admin')
   @Permissions('admin.users.assign_roles')
-  adminSetUserRoles(@Req() req: any, @Param('id') id: string, @Body() body: { roleIds?: string[]; primaryRoleId?: string; scope?: { scopeType?: string; scopeDimension?: string | null; scopeRef?: string | null } }) {
+  adminSetUserRoles(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body()
+    body: {
+      roleIds?: string[];
+      primaryRoleId?: string;
+      scope?: { scopeType?: string; scopeDimension?: string | null; scopeRef?: string | null };
+    }
+  ) {
     return this.svc.adminSetUserRoles(req.user, id, body);
   }
 
@@ -196,7 +266,11 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Roles('platform_admin', 'hq_admin', 'dealer_admin')
   @Permissions('admin.users.reset_password')
-  adminResetPassword(@Req() req: any, @Param('id') id: string, @Body() body: { newPassword: string }) {
+  adminResetPassword(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: { newPassword: string }
+  ) {
     return this.svc.adminResetPassword(req.user, id, body.newPassword);
   }
 
@@ -228,7 +302,10 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Roles('platform_admin', 'hq_admin', 'dealer_admin')
   @Permissions('admin.roles.create')
-  adminCreateRole(@Req() req: any, @Body() body: { code?: string; name?: string; description?: string; permissions?: string[] }) {
+  adminCreateRole(
+    @Req() req: any,
+    @Body() body: { code?: string; name?: string; description?: string; permissions?: string[] }
+  ) {
     return this.svc.adminCreateRole(req.user, body);
   }
 
@@ -236,7 +313,11 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Roles('platform_admin', 'hq_admin', 'dealer_admin')
   @Permissions('admin.roles.update')
-  adminUpdateRole(@Req() req: any, @Param('id') id: string, @Body() body: { name?: string; description?: string; status?: 'active' | 'inactive' }) {
+  adminUpdateRole(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: { name?: string; description?: string; status?: 'active' | 'inactive' }
+  ) {
     return this.svc.adminUpdateRole(req.user, id, body);
   }
 
@@ -244,7 +325,11 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Roles('platform_admin', 'hq_admin', 'dealer_admin')
   @Permissions('admin.roles.assign_permissions')
-  adminSetRolePermissions(@Req() req: any, @Param('id') id: string, @Body() body: { permissions?: string[] }) {
+  adminSetRolePermissions(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: { permissions?: string[] }
+  ) {
     return this.svc.adminSetRolePermissions(req.user, id, body);
   }
 

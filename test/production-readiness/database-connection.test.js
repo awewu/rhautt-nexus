@@ -5,8 +5,8 @@ const dbLayer = require('../../server/db');
 jest.mock('mongoose', () => ({
   connect: jest.fn(),
   connection: {
-    readyState: 0
-  }
+    readyState: 0,
+  },
 }));
 
 describe('database connection production fail-fast', () => {
@@ -17,7 +17,7 @@ describe('database connection production fail-fast', () => {
 
   test('development without MONGODB_URI stays in memory mode', async () => {
     const connected = await dbLayer.connect({
-      env: { NODE_ENV: 'development' }
+      env: { NODE_ENV: 'development' },
     });
 
     expect(connected).toBe(false);
@@ -27,9 +27,11 @@ describe('database connection production fail-fast', () => {
   });
 
   test('production without MONGODB_URI fails before serving traffic', async () => {
-    await expect(dbLayer.connect({
-      env: { NODE_ENV: 'production' }
-    })).rejects.toThrow('MONGODB_URI is required');
+    await expect(
+      dbLayer.connect({
+        env: { NODE_ENV: 'production' },
+      })
+    ).rejects.toThrow('MONGODB_URI is required');
 
     expect(dbLayer.getMode()).toBe('memory');
     expect(dbLayer.isConnected()).toBe(false);
@@ -39,14 +41,16 @@ describe('database connection production fail-fast', () => {
   test('REQUIRE_MONGODB=true fails on MongoDB connection errors outside production', async () => {
     mongoose.connect.mockRejectedValueOnce(new Error('server selection timeout'));
 
-    await expect(dbLayer.connect({
-      env: {
-        NODE_ENV: 'development',
-        REQUIRE_MONGODB: 'true',
-        MONGODB_URI: 'mongodb://localhost:27017/rhautt-test',
-        MONGODB_SERVER_SELECTION_TIMEOUT_MS: '1'
-      }
-    })).rejects.toThrow('MongoDB connection failed in required mode');
+    await expect(
+      dbLayer.connect({
+        env: {
+          NODE_ENV: 'development',
+          REQUIRE_MONGODB: 'true',
+          MONGODB_URI: 'mongodb://localhost:27017/rhautt-test',
+          MONGODB_SERVER_SELECTION_TIMEOUT_MS: '1',
+        },
+      })
+    ).rejects.toThrow('MongoDB connection failed in required mode');
 
     expect(dbLayer.getMode()).toBe('memory');
     expect(dbLayer.isConnected()).toBe(false);
@@ -58,8 +62,8 @@ describe('database connection production fail-fast', () => {
     const connected = await dbLayer.connect({
       env: {
         NODE_ENV: 'production',
-        MONGODB_URI: 'mongodb://user:pass@localhost:27017/rhautt'
-      }
+        MONGODB_URI: 'mongodb://user:pass@localhost:27017/rhautt',
+      },
     });
 
     expect(connected).toBe(true);

@@ -13,11 +13,13 @@
 
 /** 全角字符（含全角空格）转半角。 */
 function toHalfWidth(input: string): string {
-  return input
-    // 全角空格 U+3000 → 半角空格
-    .replace(/\u3000/g, ' ')
-    // 全角 ASCII（U+FF01–U+FF5E）→ 半角（偏移 0xFEE0）
-    .replace(/[\uFF01-\uFF5E]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0));
+  return (
+    input
+      // 全角空格 U+3000 → 半角空格
+      .replace(/\u3000/g, ' ')
+      // 全角 ASCII（U+FF01–U+FF5E）→ 半角（偏移 0xFEE0）
+      .replace(/[\uFF01-\uFF5E]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
+  );
 }
 
 /**

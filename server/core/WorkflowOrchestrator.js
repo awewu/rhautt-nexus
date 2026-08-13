@@ -1,6 +1,6 @@
 /**
  * 工作流程编排器 - 形成完全闭环的业务流程
- * 
+ *
  * 完整流程：
  * 户型信息 → 痛点诊断 → AI方案匹配 → 负荷计算 → 设备选型 → 报价生成
  */
@@ -10,10 +10,10 @@ class WorkflowOrchestrator {
     this.engines = engines;
     this.workflowSteps = [
       'painDiagnosis',
-      'solutionMatching', 
+      'solutionMatching',
       'loadCalculation',
       'deviceSelection',
-      'quotationGeneration'
+      'quotationGeneration',
     ];
   }
 
@@ -26,48 +26,48 @@ class WorkflowOrchestrator {
       roomProfile,
       steps: [],
       finalSolution: null,
-      errors: []
+      errors: [],
     };
 
     try {
       // 步骤1: 痛点诊断
       const diagnosisResult = await this.executeStep('painDiagnosis', {
         roomProfile,
-        selectedTags: selectedPainPoints
+        selectedTags: selectedPainPoints,
       });
       workflowResult.steps.push({ step: 'painDiagnosis', result: diagnosisResult });
-      
+
       // 步骤2: AI方案匹配
       const matchingResult = await this.executeStep('solutionMatching', {
         diagnosis: diagnosisResult,
-        roomProfile
+        roomProfile,
       });
       workflowResult.steps.push({ step: 'solutionMatching', result: matchingResult });
-      
+
       // 步骤3: 负荷计算
       const loadResult = await this.executeStep('loadCalculation', {
         roomProfile,
-        solution: matchingResult
+        solution: matchingResult,
       });
       workflowResult.steps.push({ step: 'loadCalculation', result: loadResult });
-      
+
       // 步骤4: 设备选型
       const deviceResult = await this.executeStep('deviceSelection', {
         load: loadResult,
         roomProfile,
-        solution: matchingResult
+        solution: matchingResult,
       });
       workflowResult.steps.push({ step: 'deviceSelection', result: deviceResult });
-      
+
       // 步骤5: 报价生成
       const quotationResult = await this.executeStep('quotationGeneration', {
         solution: matchingResult,
         devices: deviceResult,
         roomProfile,
-        painPoints: diagnosisResult.allTags || selectedPainPoints
+        painPoints: diagnosisResult.allTags || selectedPainPoints,
       });
       workflowResult.steps.push({ step: 'quotationGeneration', result: quotationResult });
-      
+
       // 汇总最终方案
       workflowResult.finalSolution = {
         painDiagnosis: diagnosisResult,
@@ -75,11 +75,15 @@ class WorkflowOrchestrator {
         loadCalculation: loadResult,
         deviceSelection: deviceResult,
         quotation: quotationResult,
-        summary: this.generateSummary(diagnosisResult, matchingResult, deviceResult, quotationResult)
+        summary: this.generateSummary(
+          diagnosisResult,
+          matchingResult,
+          deviceResult,
+          quotationResult
+        ),
       };
-      
+
       workflowResult.success = true;
-      
     } catch (error) {
       workflowResult.success = false;
       workflowResult.errors.push(error.message);
@@ -93,25 +97,25 @@ class WorkflowOrchestrator {
    */
   async executeStep(stepName, input) {
     try {
-      switch(stepName) {
+      switch (stepName) {
         case 'painDiagnosis':
           return this.engines.painDiagnosis.diagnose(input.roomProfile, input.selectedTags);
-        
+
         case 'solutionMatching':
           return this.engines.painMatching.match(input.diagnosis, input.roomProfile);
-        
+
         case 'loadCalculation':
           // 负荷计算引擎需要特定参数
           return this.engines.loadCalculation.calculate(input.roomProfile);
-        
+
         case 'deviceSelection':
           // 设备选型引擎需要负荷结果
           return this.engines.deviceSelection.select(input.load, input.roomProfile);
-        
+
         case 'quotationGeneration':
           // 报价生成引擎
           return this.engines.quotation.generate(input.solution, input.devices, input.painPoints);
-        
+
         default:
           throw new Error(`Unknown step: ${stepName}`);
       }
@@ -134,7 +138,7 @@ class WorkflowOrchestrator {
       totalPrice: quotation.totalPrice || 0,
       estimatedMargin: quotation.margin || 0,
       keyFeatures: solution.features || [],
-      priorityRecommendations: solution.priorityRecommendations || []
+      priorityRecommendations: solution.priorityRecommendations || [],
     };
   }
 
@@ -146,24 +150,24 @@ class WorkflowOrchestrator {
       timestamp: new Date().toISOString(),
       roomProfile,
       selectedPainPoints,
-      quickSolution: null
+      quickSolution: null,
     };
 
     try {
       // 只执行痛点诊断和方案匹配
       const diagnosis = this.engines.painDiagnosis.diagnose(roomProfile, selectedPainPoints);
       const solution = this.engines.painMatching.match(diagnosis, roomProfile);
-      
+
       quickResult.quickSolution = {
         diagnosis,
         solution,
         summary: {
           totalPainPoints: diagnosis.allTags?.length || 0,
           recommendedSystems: solution.systems?.length || 0,
-          keyFeatures: solution.features || []
-        }
+          keyFeatures: solution.features || [],
+        },
       };
-      
+
       quickResult.success = true;
     } catch (error) {
       quickResult.success = false;
@@ -180,7 +184,7 @@ class WorkflowOrchestrator {
     return {
       availableSteps: this.workflowSteps,
       engineStatus: this.checkEngineStatus(),
-      lastExecution: null
+      lastExecution: null,
     };
   }
 
@@ -193,7 +197,7 @@ class WorkflowOrchestrator {
       painMatching: !!this.engines.painMatching,
       loadCalculation: !!this.engines.loadCalculation,
       deviceSelection: !!this.engines.deviceSelection,
-      quotation: !!this.engines.quotation
+      quotation: !!this.engines.quotation,
     };
   }
 }

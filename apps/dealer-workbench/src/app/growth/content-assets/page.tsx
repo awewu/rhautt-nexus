@@ -4,7 +4,12 @@ import GrowthContentAssetsTable from '../../../components/GrowthContentAssetsTab
 
 export default function GrowthContentAssetsPage() {
   return (
-    <div style={{ background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)', minHeight: '100%' }}>
+    <div
+      style={{
+        background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)',
+        minHeight: '100%',
+      }}
+    >
       <div className="page-container growth-copywriter-page" style={{ display: 'grid', gap: 20 }}>
         <PageHeader
           title="素材库管理"

@@ -24,12 +24,12 @@
 
 组件映射（需 editor 席位执行 `send_code_connect_mappings`）建议首批：
 
-| Figma 组件 | 代码位置 | 说明 |
-|---|---|---|
-| Mega Nav / Util Bar | `public/css/everhot.css` `.ev-util-bar` | 已全 token 化 |
-| Mega Panel (compact) | `.ev-mega--compact / .ev-mega-mini` | 右锚定窄面板 |
-| Product Card | `.product-card` | 卡片栅格 |
-| Section Head | `.section-head` | 区块标题节奏 |
+| Figma 组件           | 代码位置                                | 说明          |
+| -------------------- | --------------------------------------- | ------------- |
+| Mega Nav / Util Bar  | `public/css/everhot.css` `.ev-util-bar` | 已全 token 化 |
+| Mega Panel (compact) | `.ev-mega--compact / .ev-mega-mini`     | 右锚定窄面板  |
+| Product Card         | `.product-card`                         | 卡片栅格      |
+| Section Head         | `.section-head`                         | 区块标题节奏  |
 
 ## 三、令牌纪律（已落地）
 

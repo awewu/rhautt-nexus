@@ -8,16 +8,16 @@ import { Engine } from 'json-rules-engine';
 export interface GuardrailLine {
   sku?: string | null;
   name?: string | null;
-  unitPrice: number;      // 售价
-  unitCost?: number;      // 成本（缺省则跳过毛利校验）
-  guidePrice?: number;    // 品牌指导价(MDM verified，缺省则跳过折扣校验)
+  unitPrice: number; // 售价
+  unitCost?: number; // 成本（缺省则跳过毛利校验）
+  guidePrice?: number; // 品牌指导价(MDM verified，缺省则跳过折扣校验)
   quantity?: number;
 }
 
 export interface GuardrailThresholds {
-  minGrossMarginPct: number;  // 整单最低毛利率(%)
-  maxDiscountPct: number;     // 相对指导价最大折扣(%)
-  minLineMarginPct: number;   // 单行最低毛利率(%)
+  minGrossMarginPct: number; // 整单最低毛利率(%)
+  maxDiscountPct: number; // 相对指导价最大折扣(%)
+  minLineMarginPct: number; // 单行最低毛利率(%)
 }
 
 export interface GuardrailInput {
@@ -33,8 +33,8 @@ export interface GuardrailViolation {
 }
 
 export interface GuardrailResult {
-  passed: boolean;          // 无任何违规
-  blocked: boolean;         // 含 block 级违规（应阻断锁价/签约）
+  passed: boolean; // 无任何违规
+  blocked: boolean; // 含 block 级违规（应阻断锁价/签约）
   thresholds: GuardrailThresholds;
   facts: Record<string, number | null>;
   violations: GuardrailViolation[];
@@ -83,8 +83,10 @@ export class PriceGuardrailService {
       }
     }
 
-    const grossMarginPct = hasCost && subtotal > 0 ? ((subtotal - totalCost) / subtotal) * 100 : null;
-    const discountPct = hasGuide && guideTotal > 0 ? ((guideTotal - subtotal) / guideTotal) * 100 : null;
+    const grossMarginPct =
+      hasCost && subtotal > 0 ? ((subtotal - totalCost) / subtotal) * 100 : null;
+    const discountPct =
+      hasGuide && guideTotal > 0 ? ((guideTotal - subtotal) / guideTotal) * 100 : null;
 
     return {
       subtotal: round(subtotal),
@@ -104,17 +106,27 @@ export class PriceGuardrailService {
 
     // 整单毛利下限（block）
     engine.addRule({
-      conditions: { all: [{ fact: 'grossMarginPct', operator: 'lessThan', value: thresholds.minGrossMarginPct }] },
+      conditions: {
+        all: [
+          { fact: 'grossMarginPct', operator: 'lessThan', value: thresholds.minGrossMarginPct },
+        ],
+      },
       event: { type: 'gross-margin-floor', params: { severity: 'block' } },
     });
     // 折扣上限（block）
     engine.addRule({
-      conditions: { all: [{ fact: 'discountPct', operator: 'greaterThan', value: thresholds.maxDiscountPct }] },
+      conditions: {
+        all: [{ fact: 'discountPct', operator: 'greaterThan', value: thresholds.maxDiscountPct }],
+      },
       event: { type: 'discount-ceiling', params: { severity: 'block' } },
     });
     // 单行毛利下限（warn）
     engine.addRule({
-      conditions: { all: [{ fact: 'worstLineMarginPct', operator: 'lessThan', value: thresholds.minLineMarginPct }] },
+      conditions: {
+        all: [
+          { fact: 'worstLineMarginPct', operator: 'lessThan', value: thresholds.minLineMarginPct },
+        ],
+      },
       event: { type: 'line-margin-floor', params: { severity: 'warn' } },
     });
 
@@ -124,7 +136,9 @@ export class PriceGuardrailService {
       worstLineMarginPct: facts.worstLineMarginPct,
     });
 
-    const violations: GuardrailViolation[] = events.map((e) => this.toViolation(e.type, (e.params as any)?.severity, thresholds, facts));
+    const violations: GuardrailViolation[] = events.map((e) =>
+      this.toViolation(e.type, (e.params as any)?.severity, thresholds, facts)
+    );
     const blocked = violations.some((v) => v.severity === 'block');
 
     return {
@@ -143,14 +157,38 @@ export class PriceGuardrailService {
     };
   }
 
-  private toViolation(type: string, severity: 'block' | 'warn', t: GuardrailThresholds, f: ReturnType<PriceGuardrailService['computeFacts']>): GuardrailViolation {
+  private toViolation(
+    type: string,
+    severity: 'block' | 'warn',
+    t: GuardrailThresholds,
+    f: ReturnType<PriceGuardrailService['computeFacts']>
+  ): GuardrailViolation {
     switch (type) {
       case 'gross-margin-floor':
-        return { rule: type, severity, message: `整单毛利率 ${f.grossMarginPct}% 低于下限 ${t.minGrossMarginPct}%`, detail: { grossMarginPct: f.grossMarginPct, min: t.minGrossMarginPct } };
+        return {
+          rule: type,
+          severity,
+          message: `整单毛利率 ${f.grossMarginPct}% 低于下限 ${t.minGrossMarginPct}%`,
+          detail: { grossMarginPct: f.grossMarginPct, min: t.minGrossMarginPct },
+        };
       case 'discount-ceiling':
-        return { rule: type, severity, message: `相对指导价折扣 ${f.discountPct}% 超过上限 ${t.maxDiscountPct}%`, detail: { discountPct: f.discountPct, max: t.maxDiscountPct } };
+        return {
+          rule: type,
+          severity,
+          message: `相对指导价折扣 ${f.discountPct}% 超过上限 ${t.maxDiscountPct}%`,
+          detail: { discountPct: f.discountPct, max: t.maxDiscountPct },
+        };
       case 'line-margin-floor':
-        return { rule: type, severity, message: `存在单行毛利率 ${f.worstLineMarginPct}% 低于下限 ${t.minLineMarginPct}%（${f._worstLine?.name ?? f._worstLine?.sku ?? '未命名行'}）`, detail: { worstLineMarginPct: f.worstLineMarginPct, min: t.minLineMarginPct, line: f._worstLine } };
+        return {
+          rule: type,
+          severity,
+          message: `存在单行毛利率 ${f.worstLineMarginPct}% 低于下限 ${t.minLineMarginPct}%（${f._worstLine?.name ?? f._worstLine?.sku ?? '未命名行'}）`,
+          detail: {
+            worstLineMarginPct: f.worstLineMarginPct,
+            min: t.minLineMarginPct,
+            line: f._worstLine,
+          },
+        };
       default:
         return { rule: type, severity, message: `命中护栏规则 ${type}` };
     }

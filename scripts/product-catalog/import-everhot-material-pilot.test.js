@@ -12,7 +12,10 @@ const {
 test('selects the ten representative Everhot source rows in the declared order', () => {
   const rows = readPilotRows();
   assert.equal(rows.length, 10);
-  assert.deepEqual(rows.map((row) => Number(row['源Excel行'])), SOURCE_ROWS);
+  assert.deepEqual(
+    rows.map((row) => Number(row['源Excel行'])),
+    SOURCE_ROWS
+  );
   assert.ok(rows.every((row) => row.brandCode === 'everhot' && row['导入候选'] === '是'));
 });
 
@@ -43,9 +46,15 @@ test('readiness keeps source facts distinct from missing content and assets', ()
 
 test('only allows idempotent overwrite of records from the same pilot batch', () => {
   assert.doesNotThrow(() => assertSafeExisting(null, 'NEW-SKU'));
-  assert.doesNotThrow(() => assertSafeExisting({ meta: { productLibrary: { batchCode: BATCH_CODE } } }, 'PILOT-SKU'));
+  assert.doesNotThrow(() =>
+    assertSafeExisting({ meta: { productLibrary: { batchCode: BATCH_CODE } } }, 'PILOT-SKU')
+  );
   assert.throws(
-    () => assertSafeExisting({ meta: { productLibrary: { batchCode: 'another-import' } } }, 'OWNED-SKU'),
-    /禁止覆盖/,
+    () =>
+      assertSafeExisting(
+        { meta: { productLibrary: { batchCode: 'another-import' } } },
+        'OWNED-SKU'
+      ),
+    /禁止覆盖/
   );
 });

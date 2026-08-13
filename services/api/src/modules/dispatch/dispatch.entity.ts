@@ -1,6 +1,10 @@
 import {
-  Column, CreateDateColumn, Entity, Index,
-  PrimaryGeneratedColumn, UpdateDateColumn,
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 /**
@@ -15,13 +19,14 @@ export class DealerDirectoryEntity {
 
   @Column({ type: 'varchar', name: 'tenant_id', nullable: true }) tenantId: string | null;
   @Column({ name: 'dealer_id' }) @Index() dealerId: string;
-  @Column({ type: 'varchar', name: 'dealer_tenant_id', nullable: true }) dealerTenantId: string | null;
+  @Column({ type: 'varchar', name: 'dealer_tenant_id', nullable: true }) dealerTenantId:
+    string | null;
   @Column({ type: 'varchar', name: 'store_id', nullable: true }) storeId: string | null;
 
   @Column() name: string;
   @Column({ type: 'varchar', nullable: true }) province: string | null;
   @Column({ type: 'varchar', nullable: true }) city: string | null;
-  @Column('text', { array: true, default: () => "ARRAY[]::text[]" }) categories: string[];
+  @Column('text', { array: true, default: () => 'ARRAY[]::text[]' }) categories: string[];
   @Column({ type: 'varchar', name: 'contract_level', nullable: true }) contractLevel: string | null;
 
   @Column({ default: true }) active: boolean;
@@ -43,7 +48,8 @@ export class RoutingDecisionEntity {
 
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
   @Column({ name: 'intake_customer_id' }) @Index() intakeCustomerId: string;
-  @Column({ type: 'varchar', name: 'intake_opportunity_id', nullable: true }) intakeOpportunityId: string | null;
+  @Column({ type: 'varchar', name: 'intake_opportunity_id', nullable: true }) intakeOpportunityId:
+    string | null;
 
   @Column({ type: 'varchar', nullable: true }) source: string | null;
   @Column({ type: 'varchar', nullable: true }) city: string | null;
@@ -51,9 +57,12 @@ export class RoutingDecisionEntity {
   @Column({ type: 'varchar', nullable: true }) category: string | null;
 
   @Column({ default: 'geo+category+load' }) rule: string;
-  @Column({ type: 'varchar', name: 'chosen_dealer_id', nullable: true }) chosenDealerId: string | null;
-  @Column({ type: 'varchar', name: 'chosen_store_id', nullable: true }) chosenStoreId: string | null;
-  @Column({ type: 'varchar', name: 'chosen_dealer_tenant_id', nullable: true }) chosenDealerTenantId: string | null;
+  @Column({ type: 'varchar', name: 'chosen_dealer_id', nullable: true }) chosenDealerId:
+    string | null;
+  @Column({ type: 'varchar', name: 'chosen_store_id', nullable: true }) chosenStoreId:
+    string | null;
+  @Column({ type: 'varchar', name: 'chosen_dealer_tenant_id', nullable: true })
+  chosenDealerTenantId: string | null;
 
   @Column({ type: 'decimal', nullable: true }) score: number | null;
   @Column({ type: 'jsonb', default: () => "'[]'::jsonb" }) candidates: unknown;

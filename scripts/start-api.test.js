@@ -10,8 +10,14 @@ test('API starter loads the Nest production environment portably', () => {
   const config = configureRuntimeEnvironment(env);
 
   assert.equal(config.envPath, path.join(config.repoRoot, '.env.nestjs'));
-  assert.equal(config.tsProjectPath, path.join(config.repoRoot, 'services', 'api', 'tsconfig.json'));
-  assert.equal(config.compiledEntry, path.join(config.repoRoot, 'dist', 'services', 'api', 'main.js'));
+  assert.equal(
+    config.tsProjectPath,
+    path.join(config.repoRoot, 'services', 'api', 'tsconfig.json')
+  );
+  assert.equal(
+    config.compiledEntry,
+    path.join(config.repoRoot, 'dist', 'services', 'api', 'main.js')
+  );
   assert.equal(env.DOTENV_CONFIG_PATH, config.envPath);
   assert.equal(env.TS_NODE_PROJECT, config.tsProjectPath);
   assert.equal(env.API_COMPILED_ENTRY, config.compiledEntry);

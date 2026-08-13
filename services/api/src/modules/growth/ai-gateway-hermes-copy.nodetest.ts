@@ -9,15 +9,18 @@ function restoreEnv(key: string, value: string | undefined) {
 
 function sseResponse(chunks: string[]): Response {
   const encoder = new TextEncoder();
-  return new Response(new ReadableStream({
-    start(controller) {
-      for (const chunk of chunks) controller.enqueue(encoder.encode(chunk));
-      controller.close();
-    },
-  }), {
-    status: 200,
-    headers: { 'content-type': 'text/event-stream' },
-  });
+  return new Response(
+    new ReadableStream({
+      start(controller) {
+        for (const chunk of chunks) controller.enqueue(encoder.encode(chunk));
+        controller.close();
+      },
+    }),
+    {
+      status: 200,
+      headers: { 'content-type': 'text/event-stream' },
+    }
+  );
 }
 
 test('copy generation uses Hermes center AI stream when requested', async () => {
@@ -77,13 +80,14 @@ test('copy generation does not silently fall back when Hermes is required', asyn
   try {
     const service = new AiGatewayService();
     await assert.rejects(
-      () => service.generateDraft({
-        provider: 'hermes-center-ai',
-        requireRealProvider: true,
-        channel: 'xiaohongshu',
-        prompt: '写一条推广热水器的文案',
-      }),
-      /HERMES_CENTER_AI_BASE_URL is not configured/,
+      () =>
+        service.generateDraft({
+          provider: 'hermes-center-ai',
+          requireRealProvider: true,
+          channel: 'xiaohongshu',
+          prompt: '写一条推广热水器的文案',
+        }),
+      /HERMES_CENTER_AI_BASE_URL is not configured/
     );
   } finally {
     restoreEnv('HERMES_CENTER_AI_BASE_URL', oldBaseUrl);

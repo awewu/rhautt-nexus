@@ -18,14 +18,26 @@ function fixture(rebateRows: any[] = []) {
 
 test('返利提报：毛利闸未过 → 标记 gatePassed=false + 返回告警', async () => {
   const { svc } = fixture();
-  const r: any = await svc.submitRebate(actor, { period: '2026Q1', basis: 'gmv', amount: 1800, gmv: 10000, baseMarginRate: 0.2 });
+  const r: any = await svc.submitRebate(actor, {
+    period: '2026Q1',
+    basis: 'gmv',
+    amount: 1800,
+    gmv: 10000,
+    baseMarginRate: 0.2,
+  });
   assert.equal(r.gatePassed, false);
   assert.ok(r.warning, '应返回毛利告警');
 });
 
 test('返利审批：毛利闸未过时批准被拦(基座3)', async () => {
   const { svc, rebateRepo } = fixture([
-    { id: 'rb1', tenantId: 't1', status: 'submitted', amount: 1800, marginCalc: { gatePassed: false } },
+    {
+      id: 'rb1',
+      tenantId: 't1',
+      status: 'submitted',
+      amount: 1800,
+      marginCalc: { gatePassed: false },
+    },
   ]);
   await assert.rejects(() => svc.decideRebate(actor, 'rb1', 'approved'), /毛利闸未通过/);
   // 状态未被改动
@@ -35,7 +47,13 @@ test('返利审批：毛利闸未过时批准被拦(基座3)', async () => {
 
 test('返利审批：毛利闸通过时可批准', async () => {
   const { svc, rebateRepo } = fixture([
-    { id: 'rb2', tenantId: 't1', status: 'submitted', amount: 500, marginCalc: { gatePassed: true } },
+    {
+      id: 'rb2',
+      tenantId: 't1',
+      status: 'submitted',
+      amount: 500,
+      marginCalc: { gatePassed: true },
+    },
   ]);
   const r: any = await svc.decideRebate(actor, 'rb2', 'approved');
   assert.equal(r.status, 'approved');

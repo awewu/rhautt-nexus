@@ -9,20 +9,22 @@ import { MdmModule } from '../mdm/mdm.module';
 
 @Module({
   imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([TenantEntity, DealerEntity, StoreEntity])]),
+    ...(TARGET_API_BOOT_SMOKE
+      ? []
+      : [TypeOrmModule.forFeature([TenantEntity, DealerEntity, StoreEntity])]),
     AuthModule,
-    MdmModule
+    MdmModule,
   ],
   controllers: [TenantController],
   providers: [
     TenantService,
     ...(TARGET_API_BOOT_SMOKE
       ? [
-        bootSmokeRepositoryProvider(TenantEntity),
-        bootSmokeRepositoryProvider(DealerEntity),
-        bootSmokeRepositoryProvider(StoreEntity)
-      ]
-      : [])
+          bootSmokeRepositoryProvider(TenantEntity),
+          bootSmokeRepositoryProvider(DealerEntity),
+          bootSmokeRepositoryProvider(StoreEntity),
+        ]
+      : []),
   ],
   exports: [TenantService],
 })
@@ -36,11 +38,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class TenantBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('tenant');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('tenant')
 export class TenantBoundaryController {
   constructor(private readonly s: TenantBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

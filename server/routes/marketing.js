@@ -23,7 +23,7 @@ router.post('/coupons', auth, async (req, res) => {
     res.json({
       success: true,
       message: '优惠券创建成功',
-      data: coupon
+      data: coupon,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -52,11 +52,11 @@ router.post('/coupons/calculate', async (req, res) => {
   try {
     const { couponCode, orderAmount } = req.body;
     const coupon = engine.getCouponByCode(couponCode);
-    
+
     if (!coupon) {
       return res.status(404).json({ success: false, message: '优惠券不存在' });
     }
-    
+
     const result = engine.calculateDiscount(coupon, orderAmount);
     res.json({ success: true, data: result });
   } catch (error) {
@@ -71,7 +71,7 @@ router.post('/coupons/calculate', async (req, res) => {
 router.get('/coupons', async (req, res) => {
   try {
     const { type = 'all', status = 'active' } = req.query;
-    
+
     // 模拟返回优惠券列表
     const coupons = [
       {
@@ -81,7 +81,7 @@ router.get('/coupons', async (req, res) => {
         value: 100,
         minOrder: 1000,
         remaining: 500,
-        endDate: '2026-12-31'
+        endDate: '2026-12-31',
       },
       {
         id: 'CP2',
@@ -90,7 +90,7 @@ router.get('/coupons', async (req, res) => {
         value: 200,
         minOrder: 5000,
         remaining: 200,
-        endDate: '2026-12-31'
+        endDate: '2026-12-31',
       },
       {
         id: 'CP3',
@@ -99,13 +99,13 @@ router.get('/coupons', async (req, res) => {
         value: 10,
         minOrder: 2000,
         remaining: 100,
-        endDate: '2026-12-31'
-      }
+        endDate: '2026-12-31',
+      },
     ];
-    
+
     res.json({
       success: true,
-      data: coupons.filter(c => status === 'all' || c.status === status)
+      data: coupons.filter((c) => status === 'all' || c.status === status),
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -122,10 +122,10 @@ router.post('/referral', async (req, res) => {
   try {
     const { userId } = req.user || {};
     const { referrerId } = req.body;
-    
+
     // 如果没有登录，使用临时ID
     const newUserId = userId || `temp_${Date.now()}`;
-    
+
     const result = engine.createReferral(newUserId, referrerId);
     res.json(result);
   } catch (error) {
@@ -141,7 +141,7 @@ router.get('/promoter/dashboard', auth, async (req, res) => {
   try {
     const { userId } = req.user;
     const { period = '30d' } = req.query;
-    
+
     const dashboard = engine.getPromoterDashboard(userId, period);
     res.json({ success: true, data: dashboard });
   } catch (error) {
@@ -157,15 +157,15 @@ router.get('/promoter/invite-code', auth, async (req, res) => {
   try {
     const { userId } = req.user;
     const code = engine.generateTrackingCode(userId, 'referral');
-    
+
     res.json({
       success: true,
       data: {
         code,
         shareUrl: `https://rheem.com/register?ref=${code}`,
         qrCode: `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(`https://rheem.com/register?ref=${code}`)}`,
-        shareText: '注册瑞美舒适家居，首单立减100元！'
-      }
+        shareText: '注册瑞美舒适家居，首单立减100元！',
+      },
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -180,17 +180,17 @@ router.post('/commission/withdraw', auth, async (req, res) => {
   try {
     const { userId } = req.user;
     const { amount, method = 'wechat' } = req.body;
-    
+
     // 检查可提现余额
     const stats = engine.getReferralStats(userId, 'all');
-    
+
     if (stats.available < amount) {
       return res.status(400).json({
         success: false,
-        message: `可提现余额不足，当前可用: ${stats.available}`
+        message: `可提现余额不足，当前可用: ${stats.available}`,
       });
     }
-    
+
     // 处理提现
     res.json({
       success: true,
@@ -200,8 +200,8 @@ router.post('/commission/withdraw', auth, async (req, res) => {
         amount,
         method,
         status: 'pending',
-        estimatedArrival: '1-3个工作日'
-      }
+        estimatedArrival: '1-3个工作日',
+      },
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -220,7 +220,7 @@ router.post('/group-buy', auth, async (req, res) => {
     res.json({
       success: true,
       message: '拼团活动创建成功',
-      data: activity
+      data: activity,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -235,14 +235,14 @@ router.post('/group-buy/:id/join', auth, async (req, res) => {
   try {
     const { userId } = req.user;
     const { groupId, action = 'join' } = req.body;
-    
+
     let result;
     if (action === 'create') {
       result = engine.createGroup(req.params.id, userId);
     } else {
       result = engine.joinGroup(groupId, userId);
     }
-    
+
     res.json(result);
   } catch (error) {
     return errorResponse(res, error);
@@ -265,7 +265,7 @@ router.get('/group-buy', async (req, res) => {
         minMembers: 3,
         currentMembers: 1,
         status: 'forming',
-        expireIn: 23 * 3600 // 23小时
+        expireIn: 23 * 3600, // 23小时
       },
       {
         id: 'GB2',
@@ -275,10 +275,10 @@ router.get('/group-buy', async (req, res) => {
         discount: 15,
         minMembers: 2,
         currentMembers: 2,
-        status: 'success'
-      }
+        status: 'success',
+      },
     ];
-    
+
     res.json({ success: true, data: activities });
   } catch (error) {
     return errorResponse(res, error);
@@ -297,7 +297,7 @@ router.post('/flash-sale', auth, async (req, res) => {
     res.json({
       success: true,
       message: '秒杀活动创建成功',
-      data: sale
+      data: sale,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -312,7 +312,7 @@ router.post('/flash-sale/:id/buy', auth, async (req, res) => {
   try {
     const { userId } = req.user;
     const { quantity = 1 } = req.body;
-    
+
     const result = engine.flashSaleBuy(req.params.id, userId, quantity);
     res.json(result);
   } catch (error) {
@@ -336,7 +336,7 @@ router.get('/flash-sale', async (req, res) => {
         stock: 10,
         remaining: 3,
         status: 'ongoing',
-        endTime: new Date(Date.now() + 2 * 3600 * 1000)
+        endTime: new Date(Date.now() + 2 * 3600 * 1000),
       },
       {
         id: 'FS2',
@@ -347,10 +347,10 @@ router.get('/flash-sale', async (req, res) => {
         stock: 20,
         remaining: 15,
         status: 'warmup',
-        startTime: new Date(Date.now() + 24 * 3600 * 1000)
-      }
+        startTime: new Date(Date.now() + 24 * 3600 * 1000),
+      },
     ];
-    
+
     res.json({ success: true, data: sales });
   } catch (error) {
     return errorResponse(res, error);
@@ -379,7 +379,7 @@ router.get('/points/rules', async (req, res) => {
 router.get('/points/balance', auth, async (req, res) => {
   try {
     const { userId } = req.user;
-    
+
     // 模拟积分数据
     res.json({
       success: true,
@@ -388,8 +388,8 @@ router.get('/points/balance', auth, async (req, res) => {
         totalEarned: 5000,
         totalSpent: 2420,
         expireSoon: 300,
-        expireDate: '2026-06-30'
-      }
+        expireDate: '2026-06-30',
+      },
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -418,17 +418,19 @@ router.get('/checkin/status', auth, async (req, res) => {
   try {
     const { userId } = req.user;
     const lastCheckin = engine.getLastCheckin(userId);
-    
+
     const today = new Date().toDateString();
     const checkedToday = lastCheckin && lastCheckin.date === today;
-    
+
     res.json({
       success: true,
       data: {
         checkedToday,
         continuousDays: lastCheckin?.continuous || 0,
-        nextReward: checkedToday ? 0 : engine.getPointsRules().checkin.continuous[Math.min((lastCheckin?.continuous || 0), 6)]
-      }
+        nextReward: checkedToday
+          ? 0
+          : engine.getPointsRules().checkin.continuous[Math.min(lastCheckin?.continuous || 0, 6)],
+      },
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -458,7 +460,7 @@ router.get('/membership/my-level', auth, async (req, res) => {
   try {
     const { userId } = req.user;
     const level = engine.calculateMembershipLevel(userId);
-    
+
     res.json({
       success: true,
       data: {
@@ -467,9 +469,9 @@ router.get('/membership/my-level', auth, async (req, res) => {
           points: 1250,
           pointsNeeded: 2000,
           spend: 8500,
-          spendNeeded: 10000
-        }
-      }
+          spendNeeded: 10000,
+        },
+      },
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -486,17 +488,17 @@ router.post('/share/generate', auth, async (req, res) => {
   try {
     const { userId } = req.user;
     const { type, targetId, channel } = req.body;
-    
+
     const content = engine.generateShareContent({
       type,
       targetId,
       userId,
-      channel
+      channel,
     });
-    
+
     res.json({
       success: true,
-      data: content
+      data: content,
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -510,7 +512,7 @@ router.post('/share/generate', auth, async (req, res) => {
 router.post('/share/track', async (req, res) => {
   try {
     const { trackingCode, action, visitorInfo } = req.body;
-    
+
     const result = engine.trackShare(trackingCode, action, visitorInfo);
     res.json({ success: true, data: result });
   } catch (error) {
@@ -527,7 +529,7 @@ router.post('/share/track', async (req, res) => {
 router.get('/analytics/overview', auth, async (req, res) => {
   try {
     const { period = '30d' } = req.query;
-    
+
     res.json({
       success: true,
       data: {
@@ -537,22 +539,22 @@ router.get('/analytics/overview', auth, async (req, res) => {
           activeUsers: 8500,
           totalOrders: 3200,
           totalRevenue: 15800000,
-          conversionRate: 3.2
+          conversionRate: 3.2,
         },
         fission: {
           totalShares: 8500,
           shareConversion: 12.5,
           referralOrders: 680,
           referralRevenue: 3200000,
-          topPromoters: 15
+          topPromoters: 15,
         },
         promotions: {
           couponsUsed: 1200,
           groupBuys: 45,
           flashSales: 8,
-          totalDiscount: 580000
-        }
-      }
+          totalDiscount: 580000,
+        },
+      },
     });
   } catch (error) {
     return errorResponse(res, error);
@@ -566,16 +568,16 @@ router.get('/analytics/overview', auth, async (req, res) => {
 router.get('/analytics/ranking', async (req, res) => {
   try {
     const { type = 'weekly', limit = 10 } = req.query;
-    
+
     // 模拟排行榜数据
     const rankings = [
       { rank: 1, name: '张**', avatar: '', invites: 56, earnings: 5200 },
       { rank: 2, name: '李**', avatar: '', invites: 42, earnings: 3800 },
       { rank: 3, name: '王**', avatar: '', invites: 38, earnings: 3200 },
       { rank: 4, name: '赵**', avatar: '', invites: 31, earnings: 2600 },
-      { rank: 5, name: '陈**', avatar: '', invites: 28, earnings: 2100 }
+      { rank: 5, name: '陈**', avatar: '', invites: 28, earnings: 2100 },
     ];
-    
+
     res.json({
       success: true,
       data: {
@@ -585,9 +587,9 @@ router.get('/analytics/ranking', async (req, res) => {
           rank: 156,
           invites: 5,
           earnings: 480,
-          percentile: '前15%'
-        }
-      }
+          percentile: '前15%',
+        },
+      },
     });
   } catch (error) {
     return errorResponse(res, error);

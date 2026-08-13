@@ -15,11 +15,17 @@ test('API wrapper redirects expired authenticated sessions to login', () => {
   assert.match(apiSource, /clearToken\(\);/);
   assert.match(apiSource, /localStorage\.removeItem\('token'\);/);
   assert.match(apiSource, /localStorage\.removeItem\('user'\);/);
-  assert.match(apiSource, /window\.location\.href = `\/\?returnUrl=\$\{encodeURIComponent\(returnUrl\)\}`;/);
+  assert.match(
+    apiSource,
+    /window\.location\.href = `\/\?returnUrl=\$\{encodeURIComponent\(returnUrl\)\}`;/
+  );
   assert.match(apiSource, /redirectToLogin\(path, res\.status, json\);/);
 });
 
 test('login form authentication errors stay on the login page', () => {
   assert.match(apiSource, /const AUTH_LOGIN_PATH = '\/api\/v2\/auth\/login';/);
-  assert.match(apiSource, /if \(path === AUTH_LOGIN_PATH \|\| typeof window === 'undefined' \|\| !isAuthExpired\(status, details\)\) return;/);
+  assert.match(
+    apiSource,
+    /if \(path === AUTH_LOGIN_PATH \|\| typeof window === 'undefined' \|\| !isAuthExpired\(status, details\)\) return;/
+  );
 });

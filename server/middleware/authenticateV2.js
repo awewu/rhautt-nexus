@@ -34,7 +34,7 @@ function authenticateV2(req, res, next) {
   if (!token) {
     return res.status(401).json({
       success: false,
-      error: '缺少访问令牌'
+      error: '缺少访问令牌',
     });
   }
 
@@ -43,14 +43,14 @@ function authenticateV2(req, res, next) {
     if (!isValidScope(req.user)) {
       return res.status(403).json({
         success: false,
-        error: '访问令牌租户范围无效'
+        error: '访问令牌租户范围无效',
       });
     }
     return next();
   } catch (error) {
     return res.status(403).json({
       success: false,
-      error: '访问令牌无效'
+      error: '访问令牌无效',
     });
   }
 }
@@ -67,5 +67,5 @@ function isValidScope(user = {}) {
 module.exports = {
   authenticateV2,
   getJwtSecret,
-  isValidScope
+  isValidScope,
 };

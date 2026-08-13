@@ -3,7 +3,9 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { withRlsTransaction } from '../common/rls';
 import {
-  SubscriptionEntity, SellableModuleId, SubscriptionPlan,
+  SubscriptionEntity,
+  SellableModuleId,
+  SubscriptionPlan,
   SELLABLE_MODULES,
 } from './subscription.entity';
 
@@ -18,7 +20,7 @@ export interface GrantInput {
 export class EntitlementService {
   constructor(
     @InjectDataSource() private readonly ds: DataSource,
-    @InjectRepository(SubscriptionEntity) private readonly subs: Repository<SubscriptionEntity>,
+    @InjectRepository(SubscriptionEntity) private readonly subs: Repository<SubscriptionEntity>
   ) {}
 
   private assertSellable(moduleId: string): asserts moduleId is SellableModuleId {
@@ -29,9 +31,11 @@ export class EntitlementService {
 
   /** 列出某租户全部订阅（RLS 绑定该租户）。 */
   async listForTenant(tenantId: string): Promise<SubscriptionEntity[]> {
-    return withRlsTransaction(this.ds, (em) =>
-      em.getRepository(SubscriptionEntity).find({ where: { tenantId } }),
-    { tenantId });
+    return withRlsTransaction(
+      this.ds,
+      (em) => em.getRepository(SubscriptionEntity).find({ where: { tenantId } }),
+      { tenantId }
+    );
   }
 
   /** 当前有效（active/trialing 且未过期）的模块 id 集合。 */
@@ -48,31 +52,47 @@ export class EntitlementService {
   }
 
   /** 平台开通/更新订阅（platform_admin）。以目标租户 scope 写入，满足 FORCE RLS WITH CHECK。 */
-  async grant(tenantId: string, actorId: string | null, input: GrantInput): Promise<SubscriptionEntity> {
+  async grant(
+    tenantId: string,
+    actorId: string | null,
+    input: GrantInput
+  ): Promise<SubscriptionEntity> {
     this.assertSellable(input.moduleId);
-    return withRlsTransaction(this.ds, async (em) => {
-      const repo = em.getRepository(SubscriptionEntity);
-      const existing = await repo.findOne({ where: { tenantId, moduleId: input.moduleId } });
-      const patch: Partial<SubscriptionEntity> = {
-        tenantId,
-        moduleId: input.moduleId,
-        plan: input.plan ?? 'standard',
-        status: 'active',
-        seats: input.seats ?? null,
-        endsAt: input.endsAt ?? null,
-      };
-      const entity = existing ? repo.merge(existing, patch) : repo.create(patch);
-      return repo.save(entity);
-    }, { tenantId, actorId: actorId ?? undefined });
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        const repo = em.getRepository(SubscriptionEntity);
+        const existing = await repo.findOne({ where: { tenantId, moduleId: input.moduleId } });
+        const patch: Partial<SubscriptionEntity> = {
+          tenantId,
+          moduleId: input.moduleId,
+          plan: input.plan ?? 'standard',
+          status: 'active',
+          seats: input.seats ?? null,
+          endsAt: input.endsAt ?? null,
+        };
+        const entity = existing ? repo.merge(existing, patch) : repo.create(patch);
+        return repo.save(entity);
+      },
+      { tenantId, actorId: actorId ?? undefined }
+    );
   }
 
   /** 平台停用订阅（platform_admin）。 */
-  async revoke(tenantId: string, actorId: string | null, moduleId: SellableModuleId): Promise<{ revoked: boolean }> {
+  async revoke(
+    tenantId: string,
+    actorId: string | null,
+    moduleId: SellableModuleId
+  ): Promise<{ revoked: boolean }> {
     this.assertSellable(moduleId);
-    return withRlsTransaction(this.ds, async (em) => {
-      const repo = em.getRepository(SubscriptionEntity);
-      const res = await repo.update({ tenantId, moduleId }, { status: 'canceled' });
-      return { revoked: (res.affected ?? 0) > 0 };
-    }, { tenantId, actorId: actorId ?? undefined });
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        const repo = em.getRepository(SubscriptionEntity);
+        const res = await repo.update({ tenantId, moduleId }, { status: 'canceled' });
+        return { revoked: (res.affected ?? 0) > 0 };
+      },
+      { tenantId, actorId: actorId ?? undefined }
+    );
   }
 }

@@ -48,8 +48,16 @@ describe('heating 采暖内核', () => {
   });
 
   test('不变量：designHeatingSystem 结构完整且无 NaN', () => {
-    const d = k.heating.designHeatingSystem({ area: 120, floorArea: 120, city: '上海', insulation: 'medium', houseType: '三居' });
-    expect(Object.keys(d)).toEqual(expect.arrayContaining(['heatLoad', 'heatSource', 'systems', 'summary']));
+    const d = k.heating.designHeatingSystem({
+      area: 120,
+      floorArea: 120,
+      city: '上海',
+      insulation: 'medium',
+      houseType: '三居',
+    });
+    expect(Object.keys(d)).toEqual(
+      expect.arrayContaining(['heatLoad', 'heatSource', 'systems', 'summary'])
+    );
     expect(d.heatLoad.totalLoad).toBeGreaterThan(0);
     assertNoNaN(d.heatLoad);
   });
@@ -75,7 +83,9 @@ describe('hot-water 热水内核', () => {
 
   test('不变量：产出含选型与循环，且无 NaN', () => {
     const r = k.hotWater.calculateResidentialHotWater(P);
-    expect(Object.keys(r)).toEqual(expect.arrayContaining(['load', 'heater', 'circulation', 'pipes']));
+    expect(Object.keys(r)).toEqual(
+      expect.arrayContaining(['load', 'heater', 'circulation', 'pipes'])
+    );
     assertNoNaN(r.load);
   });
 });
@@ -93,10 +103,15 @@ describe('air-conditioning 空调内核', () => {
   // 回归：房间对象缺 name 时 selectIndoorUnit/suggestIndoorType 曾直接崩溃，
   // 导致整份空调设计不可用（2026-08-04 修复为缺失回落默认型式）。
   test('回归：房间缺 name 不得崩溃', () => {
-    expect(() => k.airConditioning.designAirConditioning({
-      ...BASE,
-      rooms: [{ type: 'livingRoom', area: 35 }, { type: 'bedroom', area: 18 }],
-    })).not.toThrow();
+    expect(() =>
+      k.airConditioning.designAirConditioning({
+        ...BASE,
+        rooms: [
+          { type: 'livingRoom', area: 35 },
+          { type: 'bedroom', area: 18 },
+        ],
+      })
+    ).not.toThrow();
   });
 
   // ⚠️ 待领域评审后启用（宪章 §8 未决 #4）：
@@ -106,7 +121,11 @@ describe('air-conditioning 空调内核', () => {
   test.skip('不变量（待评审启用）：整机冷负荷不得小于各房间负荷之和', () => {
     const d = k.airConditioning.designAirConditioning({
       ...BASE,
-      rooms: [{ name: '客厅', area: 35 }, { name: '主卧', area: 18 }, { name: '次卧', area: 15 }],
+      rooms: [
+        { name: '客厅', area: 35 },
+        { name: '主卧', area: 18 },
+        { name: '次卧', area: 15 },
+      ],
     });
     const sumRooms = d.loads.cooling.roomLoads.reduce((s, r) => s + r.load, 0);
     expect(d.loads.cooling.totalLoad).toBeGreaterThanOrEqual(sumRooms);
@@ -115,7 +134,11 @@ describe('air-conditioning 空调内核', () => {
   test('带房间清单可产出室内机配置', () => {
     const d = k.airConditioning.designAirConditioning({
       ...BASE,
-      rooms: [{ name: '客厅', area: 35 }, { name: '主卧', area: 18 }, { name: '次卧', area: 15 }],
+      rooms: [
+        { name: '客厅', area: 35 },
+        { name: '主卧', area: 18 },
+        { name: '次卧', area: 15 },
+      ],
     });
     expect(d.acSystem.indoorUnits.length).toBe(3);
     assertNoNaN(d.loads);
@@ -124,7 +147,13 @@ describe('air-conditioning 空调内核', () => {
 
 describe('fresh-air 新风内核', () => {
   test('黄金值：120m²/3人 standard 等级', () => {
-    const d = k.freshAir.designFreshAir({ area: 120, occupancy: 3, height: 2.8, climateZone: '夏热冬冷', level: 'standard' });
+    const d = k.freshAir.designFreshAir({
+      area: 120,
+      occupancy: 3,
+      height: 2.8,
+      climateZone: '夏热冬冷',
+      level: 'standard',
+    });
     expect(d.performance.totalFreshAir).toBe('180 m³/h');
     expect(d.performance.perPerson).toBe('60 m³/h·人');
     expect(d.performance.perSqm).toBe('1.5 m³/h·㎡');
@@ -135,7 +164,9 @@ describe('fresh-air 新风内核', () => {
     const few = k.freshAir.designFreshAir({ area: 120, occupancy: 2, level: 'standard' });
     const many = k.freshAir.designFreshAir({ area: 120, occupancy: 8, level: 'standard' });
     const num = (s) => parseFloat(String(s));
-    expect(num(many.performance.totalFreshAir)).toBeGreaterThanOrEqual(num(few.performance.totalFreshAir));
+    expect(num(many.performance.totalFreshAir)).toBeGreaterThanOrEqual(
+      num(few.performance.totalFreshAir)
+    );
   });
 
   // facade 的 calculateAirVolume 第 4 参是 STANDARDS 对象而非字符串；
@@ -155,7 +186,9 @@ describe('hydraulic 水力内核', () => {
     const Engine = k.hydraulic.HydraulicEngine;
     expect(typeof Engine).toBe('function');
     const inst = new Engine();
-    const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(inst)).filter((m) => m !== 'constructor');
+    const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(inst)).filter(
+      (m) => m !== 'constructor'
+    );
     expect(methods.length).toBeGreaterThan(0);
   });
 });

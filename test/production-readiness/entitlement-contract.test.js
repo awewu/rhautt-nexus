@@ -27,15 +27,24 @@ describe('entitlement 订阅授权 · 契约与接线', () => {
   });
 
   test('生成客户端暴露 4 个 entitlement 方法', () => {
-    for (const method of ['getEntitlementMe', 'listEntitlementSubscriptions', 'grantEntitlement', 'revokeEntitlement']) {
+    for (const method of [
+      'getEntitlementMe',
+      'listEntitlementSubscriptions',
+      'grantEntitlement',
+      'revokeEntitlement',
+    ]) {
       expect(client).toContain(`async ${method}`);
     }
   });
 
   test('entitlement 模块源文件齐备', () => {
     for (const f of [
-      'subscription.entity.ts', 'entitlement.decorator.ts', 'entitlement.service.ts',
-      'entitlement.guard.ts', 'entitlement.controller.ts', 'entitlement.module.ts',
+      'subscription.entity.ts',
+      'entitlement.decorator.ts',
+      'entitlement.service.ts',
+      'entitlement.guard.ts',
+      'entitlement.controller.ts',
+      'entitlement.module.ts',
     ]) {
       expect(fs.existsSync(path.join(ROOT, MODULE_DIR, f))).toBe(true);
     }

@@ -19,16 +19,25 @@ function brandSiteLabel(site: BrandSiteTopBarItem): string {
   return `${site.nameCn || site.nameEn} ${site.nameEn || ''}`.trim();
 }
 
-function selectedChildLabel(path: string, search: string, brandSiteLabels: Record<string, string>): string {
+function selectedChildLabel(
+  path: string,
+  search: string,
+  brandSiteLabels: Record<string, string>
+): string {
   const activeItem = navItemForPath(path);
   const currentHref = `${path}${search}`;
   const queryModule = new URLSearchParams(search).get('module') || 'catalog';
 
   if (path === '/products') {
-    return activeItem.children.find((child) => {
-      const module = new URLSearchParams(child.href.split('?')[1] || '').get('module') || 'catalog';
-      return module === queryModule;
-    })?.label || activeItem.children[0]?.label || activeItem.desc;
+    return (
+      activeItem.children.find((child) => {
+        const module =
+          new URLSearchParams(child.href.split('?')[1] || '').get('module') || 'catalog';
+        return module === queryModule;
+      })?.label ||
+      activeItem.children[0]?.label ||
+      activeItem.desc
+    );
   }
 
   if (activeItem.key === 'brand-sites' && path.startsWith('/comfort/sites/')) {
@@ -38,7 +47,9 @@ function selectedChildLabel(path: string, search: string, brandSiteLabels: Recor
     return fallback?.label || code || activeItem.children[0]?.label || activeItem.desc;
   }
 
-  const exactChild = activeItem.children.find((child) => child.href === currentHref || child.href === path);
+  const exactChild = activeItem.children.find(
+    (child) => child.href === currentHref || child.href === path
+  );
   if (exactChild) return exactChild.label;
 
   const nestedChild = activeItem.children.find((child) => {
@@ -103,7 +114,12 @@ export default function DealerTopBar() {
       {/* 面包屑（导航定位）——页面标题由内容区 PageHeader 承担，避免一级重复表述 */}
       <nav className="dealer-topbar-crumb" aria-label="面包屑">
         <span className="crumb-section">{title}</span>
-        {showChild && <><ChevronRight size={12} /><span className="crumb-current">{childLabel}</span></>}
+        {showChild && (
+          <>
+            <ChevronRight size={12} />
+            <span className="crumb-current">{childLabel}</span>
+          </>
+        )}
       </nav>
       <div style={{ flex: 1 }} />
       <button type="button" className="dealer-topbar-icon" aria-label="通知">

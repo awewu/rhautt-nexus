@@ -14,7 +14,9 @@ import { WechatPublishingService } from './wechat-publishing.service';
   controllers: [WechatPublishingController],
   providers: [
     WechatPublishingService,
-    ...(TARGET_API_BOOT_SMOKE ? WECHAT_PUBLISHING_ENTITIES.map((entity) => bootSmokeRepositoryProvider(entity)) : []),
+    ...(TARGET_API_BOOT_SMOKE
+      ? WECHAT_PUBLISHING_ENTITIES.map((entity) => bootSmokeRepositoryProvider(entity))
+      : []),
   ],
 })
 export class WechatPublishingModule {}

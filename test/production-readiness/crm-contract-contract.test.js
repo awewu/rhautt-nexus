@@ -28,11 +28,16 @@ describe('套间二 · CRM 全端点契约收口', () => {
   });
 
   test('interactions / sign / stage 必填契约', () => {
-    const inter = spec.paths['/api/v2/crm/interactions'].post.requestBody.content['application/json'].schema;
+    const inter =
+      spec.paths['/api/v2/crm/interactions'].post.requestBody.content['application/json'].schema;
     expect(inter.required).toContain('customerId');
-    const sign = spec.paths['/api/v2/crm/opportunities/{id}/sign'].post.requestBody.content['application/json'].schema;
+    const sign =
+      spec.paths['/api/v2/crm/opportunities/{id}/sign'].post.requestBody.content['application/json']
+        .schema;
     expect(sign.required).toContain('quotationId');
-    const stage = spec.paths['/api/v2/crm/opportunities/{id}/stage'].put.requestBody.content['application/json'].schema;
+    const stage =
+      spec.paths['/api/v2/crm/opportunities/{id}/stage'].put.requestBody.content['application/json']
+        .schema;
     expect(stage.required).toContain('stage');
   });
 
@@ -56,7 +61,13 @@ describe('套间二 · CRM 全端点契约收口', () => {
   });
 
   test('生成客户端暴露 5 个新增 CRM 方法', () => {
-    for (const m of ['listCrmPipeline', 'updateCrmOpportunityStage', 'updateCrmOpportunity', 'addCrmInteraction', 'signCrmOpportunity']) {
+    for (const m of [
+      'listCrmPipeline',
+      'updateCrmOpportunityStage',
+      'updateCrmOpportunity',
+      'addCrmInteraction',
+      'signCrmOpportunity',
+    ]) {
       expect(client).toContain(`async ${m}`);
     }
   });
@@ -102,12 +113,21 @@ describe('套间二 · NestJS 电子签合同面契约收口（additive，与 le
   test('contract webhook remains a public future interface without a delivery runtime', () => {
     const webhook = spec.paths['/api/v2/contract/webhook/qiyuesuo'].post;
     expect(webhook.security).toBeUndefined();
-    expect(read('services/api/src/modules/module-boundary.ts')).toMatch(/plannedApiInterfaces[\s\S]*'delivery'/);
-    expect(fs.existsSync(path.join(ROOT, 'services/api/src/modules/delivery'))).toBe(false);
+    expect(read('services/api/src/modules/module-boundary.ts')).toMatch(
+      /plannedApiInterfaces[\s\S]*'delivery'/
+    );
+    // delivery 模块源码已随 B1/B2/B3 迁移落地（尚未装配进 AppModule）
+    expect(fs.existsSync(path.join(ROOT, 'services/api/src/modules/delivery'))).toBe(true);
+    expect(read('services/api/src/modules/app.module.ts')).not.toContain('DeliveryModule');
   });
 
   test('生成客户端暴露电子签合同关键方法', () => {
-    for (const m of ['sendContractForSignature', 'getContractSignUrl', 'signContractOffline', 'contractSignatureWebhook']) {
+    for (const m of [
+      'sendContractForSignature',
+      'getContractSignUrl',
+      'signContractOffline',
+      'contractSignatureWebhook',
+    ]) {
       expect(client).toContain(`async ${m}`);
     }
   });

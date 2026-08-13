@@ -34,7 +34,10 @@ function loadEnv(file) {
 loadEnv(join(REPO, '.env.nestjs'));
 loadEnv(join(REPO, '.env'));
 
-const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > -1 ? process.argv[i + 1] : d; };
+const arg = (k, d) => {
+  const i = process.argv.indexOf('--' + k);
+  return i > -1 ? process.argv[i + 1] : d;
+};
 const DRY = process.argv.includes('--dry');
 const CONFIRM = process.argv.includes('--confirm');
 const BASE = arg('base', process.env.EVERHOT_API_BASE || 'http://localhost:5500/api/v2');
@@ -43,7 +46,9 @@ const TENANT = arg('tenant', process.env.EVERHOT_TENANT_ID);
 const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
 if (!TENANT || !UUID_RE.test(TENANT)) {
-  console.error('✗ 门牌必须是品牌运营租户 UUID（模型B 第1律）。请配置 EVERHOT_TENANT_ID 或传 --tenant <UUID>。');
+  console.error(
+    '✗ 门牌必须是品牌运营租户 UUID（模型B 第1律）。请配置 EVERHOT_TENANT_ID 或传 --tenant <UUID>。'
+  );
   process.exit(1);
 }
 if (!DRY && !CONFIRM) {
@@ -51,10 +56,17 @@ if (!DRY && !CONFIRM) {
   process.exit(1);
 }
 const SECRET = process.env.JWT_SECRET;
-if (!SECRET) { console.error('✗ 缺少 JWT_SECRET（.env.nestjs / .env 未找到）'); process.exit(1); }
+if (!SECRET) {
+  console.error('✗ 缺少 JWT_SECRET（.env.nestjs / .env 未找到）');
+  process.exit(1);
+}
 
 const IMPORTER_USER_ID = '00000000-0000-4000-8000-000000000001';
-const token = jwt.sign({ userId: IMPORTER_USER_ID, tenantId: TENANT, role: 'brand_admin' }, SECRET, { expiresIn: '10m' });
+const token = jwt.sign(
+  { userId: IMPORTER_USER_ID, tenantId: TENANT, role: 'brand_admin' },
+  SECRET,
+  { expiresIn: '10m' }
+);
 const authHeaders = { authorization: `Bearer ${token}` };
 const jsonHeaders = { ...authHeaders, 'content-type': 'application/json' };
 
@@ -65,32 +77,44 @@ async function fetchExistingActiveProducts() {
   url.searchParams.set('status', 'active');
   url.searchParams.set('pageSize', '100');
   const res = await fetch(url, { headers: authHeaders });
-  if (!res.ok) throw new Error(`list active products HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  if (!res.ok)
+    throw new Error(`list active products HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const json = await res.json();
   return Array.isArray(json?.data?.items) ? json.data.items : [];
 }
 
 const existing = await fetchExistingActiveProducts();
-console.log(`${DRY ? '[dry] ' : ''}归档 ${BRAND} 现有 active 产品：${existing.length} 条 (tenant=${TENANT})`);
+console.log(
+  `${DRY ? '[dry] ' : ''}归档 ${BRAND} 现有 active 产品：${existing.length} 条 (tenant=${TENANT})`
+);
 
 let archived = 0;
 for (const product of existing) {
   if (!product.id) continue;
-  if (DRY) { console.log('[dry archive]', product.sku, product.name); archived++; continue; }
+  if (DRY) {
+    console.log('[dry archive]', product.sku, product.name);
+    archived++;
+    continue;
+  }
   const url = new URL(`${BASE}/product-catalog/devices/${product.id}`);
   url.searchParams.set('tenantId', TENANT);
   const res = await fetch(url, { method: 'DELETE', headers: authHeaders });
   if (!res.ok) {
     const text = (await res.text()).slice(0, 200);
-    if (res.status < 500) throw new Error(`archive ${product.sku || product.id} HTTP ${res.status}: ${text}`);
-    console.warn(`archive endpoint failed for ${product.sku || product.id}; fallback PATCH status=archived`);
+    if (res.status < 500)
+      throw new Error(`archive ${product.sku || product.id} HTTP ${res.status}: ${text}`);
+    console.warn(
+      `archive endpoint failed for ${product.sku || product.id}; fallback PATCH status=archived`
+    );
     const patchRes = await fetch(`${BASE}/product-catalog/devices/${product.id}`, {
       method: 'PATCH',
       headers: jsonHeaders,
       body: JSON.stringify({ tenantId: TENANT, status: 'archived' }),
     });
     if (!patchRes.ok) {
-      throw new Error(`archive fallback ${product.sku || product.id} HTTP ${patchRes.status}: ${(await patchRes.text()).slice(0, 200)}`);
+      throw new Error(
+        `archive fallback ${product.sku || product.id} HTTP ${patchRes.status}: ${(await patchRes.text()).slice(0, 200)}`
+      );
     }
   }
   archived++;

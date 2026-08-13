@@ -11,10 +11,10 @@ const { Client } = require('pg');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 
-const PHONE    = process.env.ADMIN_PHONE    || '13800000001';
+const PHONE = process.env.ADMIN_PHONE || '13800000001';
 const PASSWORD = process.env.ADMIN_PASSWORD || 'Rhautt@2026';
-const NAME     = process.env.ADMIN_NAME     || '平台管理员';
-const TENANT_ID = uuidv4();  // 新建默认租户
+const NAME = process.env.ADMIN_NAME || '平台管理员';
+const TENANT_ID = uuidv4(); // 新建默认租户
 
 async function run() {
   const client = new Client({
@@ -67,4 +67,7 @@ async function run() {
   await client.end();
 }
 
-run().catch(e => { console.error('❌', e.message); process.exit(1); });
+run().catch((e) => {
+  console.error('❌', e.message);
+  process.exit(1);
+});

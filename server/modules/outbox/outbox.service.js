@@ -41,12 +41,9 @@ class OutboxService {
     }
 
     const aggregateId = String(event.aggregateId);
-    const idempotencyKey = event.idempotencyKey || [
-      tenantId,
-      event.aggregateType,
-      aggregateId,
-      event.eventType
-    ].join(':');
+    const idempotencyKey =
+      event.idempotencyKey ||
+      [tenantId, event.aggregateType, aggregateId, event.eventType].join(':');
 
     const status = event.status || 'pending';
     if (!OUTBOX_STATUSES.has(status)) {
@@ -72,7 +69,7 @@ class OutboxService {
       replayedAt: event.replayedAt,
       replayReason: event.replayReason,
       traceId: event.traceId || scope.traceId,
-      requestId: event.requestId || scope.requestId
+      requestId: event.requestId || scope.requestId,
     };
   }
 
@@ -103,10 +100,11 @@ class OutboxService {
 
   findMemoryEvent(scope, eventId) {
     this.requireTenant(scope);
-    return this.memoryEvents().find(item => (
-      String(item.tenantId) === String(scope.tenantId) &&
-      this.getEventId(item) === String(eventId)
-    ));
+    return this.memoryEvents().find(
+      (item) =>
+        String(item.tenantId) === String(scope.tenantId) &&
+        this.getEventId(item) === String(eventId)
+    );
   }
 
   async publish(scope, event = {}, options = {}) {
@@ -116,10 +114,11 @@ class OutboxService {
       // 生产环境禁止写入内存（dbLayer 会抛错）
       dbLayer.requirePersistence('outbox.publish');
       const events = this.memoryEvents();
-      const existing = events.find(item => (
-        String(item.tenantId) === String(payload.tenantId) &&
-        item.idempotencyKey === payload.idempotencyKey
-      ));
+      const existing = events.find(
+        (item) =>
+          String(item.tenantId) === String(payload.tenantId) &&
+          item.idempotencyKey === payload.idempotencyKey
+      );
       if (existing) return existing;
 
       const item = {
@@ -127,13 +126,15 @@ class OutboxService {
         ...payload,
         createdAt: this.now().toISOString(),
         updatedAt: this.now().toISOString(),
-        storageMode: 'memory'
+        storageMode: 'memory',
       };
       events.push(item);
       return item;
     }
 
-    const existing = await this.outboxRepo.findOne(scope, { idempotencyKey: payload.idempotencyKey });
+    const existing = await this.outboxRepo.findOne(scope, {
+      idempotencyKey: payload.idempotencyKey,
+    });
     if (existing) return existing;
     return this.outboxRepo.create(scope, payload, options);
   }
@@ -141,7 +142,7 @@ class OutboxService {
   list(scope, query = {}, options = {}) {
     this.requireTenant(scope);
     if (this.shouldUseMemoryMode()) {
-      const items = (this.memoryDb.outboxEvents || []).filter(item => {
+      const items = (this.memoryDb.outboxEvents || []).filter((item) => {
         if (String(item.tenantId) !== String(scope.tenantId)) return false;
         if (query.eventType && item.eventType !== query.eventType) return false;
         if (query.aggregateType && item.aggregateType !== query.aggregateType) return false;
@@ -151,13 +152,13 @@ class OutboxService {
       return {
         items,
         pagination: { page: 1, limit: items.length, total: items.length, pages: 1 },
-        storageMode: 'memory'
+        storageMode: 'memory',
       };
     }
     return this.outboxRepo.list(scope, query, {
       page: options.page || query.page,
       limit: options.limit || query.limit,
-      sort: { createdAt: -1 }
+      sort: { createdAt: -1 },
     });
   }
 
@@ -185,12 +186,12 @@ class OutboxService {
 
     const query = {
       status: 'pending',
-      availableAt: { $lte: now }
+      availableAt: { $lte: now },
     };
     const result = await this.outboxRepo.list(scope, query, {
       limit,
       sort: { availableAt: 1, createdAt: 1 },
-      lean: false
+      lean: false,
     });
     const claimed = [];
     for (const event of result.items || []) {
@@ -198,13 +199,13 @@ class OutboxService {
         {
           _id: event._id,
           tenantId: scope.tenantId,
-          status: 'pending'
+          status: 'pending',
         },
         {
           status: 'delivering',
           lockedAt: now,
           workerId: options.workerId || scope.workerId,
-          updatedAt: now
+          updatedAt: now,
         },
         { new: true }
       ).lean();
@@ -237,7 +238,8 @@ class OutboxService {
   async markFailed(scope, eventId, error, options = {}) {
     this.requireTenant(scope);
     const now = this.now();
-    const message = error instanceof Error ? error.message : String(error || 'outbox delivery failed');
+    const message =
+      error instanceof Error ? error.message : String(error || 'outbox delivery failed');
     const maxAttempts = Number(options.maxAttempts || this.maxAttempts);
 
     if (this.shouldUseMemoryMode()) {
@@ -248,7 +250,8 @@ class OutboxService {
       event.attempts = attempts;
       event.status = status;
       event.lastError = message;
-      event.availableAt = status === 'pending' ? this.nextAvailableAt(attempts).toISOString() : event.availableAt;
+      event.availableAt =
+        status === 'pending' ? this.nextAvailableAt(attempts).toISOString() : event.availableAt;
       event.deadLetteredAt = status === 'dead_letter' ? now.toISOString() : event.deadLetteredAt;
       event.updatedAt = now.toISOString();
       return event;
@@ -266,7 +269,7 @@ class OutboxService {
         lastError: message,
         availableAt: status === 'pending' ? this.nextAvailableAt(attempts) : event.availableAt,
         deadLetteredAt: status === 'dead_letter' ? now : event.deadLetteredAt,
-        updatedAt: now
+        updatedAt: now,
       },
       { new: true }
     ).lean();
@@ -302,7 +305,7 @@ class OutboxService {
         replayedAt: now,
         replayReason: options.reason || 'manual-replay',
         lastError: undefined,
-        updatedAt: now
+        updatedAt: now,
       },
       { new: true }
     ).lean();

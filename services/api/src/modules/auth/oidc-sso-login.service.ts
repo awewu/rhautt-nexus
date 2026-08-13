@@ -35,7 +35,7 @@ export interface OidcSsoLoginRedirect {
 export class OidcSsoLoginService {
   constructor(
     private readonly config: ConfigService,
-    private readonly audit?: SsoAuditLogService,
+    private readonly audit?: SsoAuditLogService
   ) {}
 
   async createLoginRedirect(rawRedirect?: string | string[]): Promise<OidcSsoLoginRedirect> {
@@ -45,7 +45,10 @@ export class OidcSsoLoginService {
       const redirect = this.safeRedirect(rawRedirect);
       const state = this.createState();
       const redirectUri = this.resolveRedirectUri();
-      if (typeof discovery.authorization_endpoint !== 'string' || !discovery.authorization_endpoint) {
+      if (
+        typeof discovery.authorization_endpoint !== 'string' ||
+        !discovery.authorization_endpoint
+      ) {
         throw new ServiceUnavailableException('OIDC authorization endpoint missing');
       }
 
@@ -145,7 +148,8 @@ export class OidcSsoLoginService {
 
   safeConfiguredDefaultRedirect(): string {
     const configured = this.configValue('OIDC_POST_LOGIN_REDIRECT');
-    if (!configured || configured === DEFAULT_POST_LOGIN_REDIRECT) return DEFAULT_POST_LOGIN_REDIRECT;
+    if (!configured || configured === DEFAULT_POST_LOGIN_REDIRECT)
+      return DEFAULT_POST_LOGIN_REDIRECT;
     return this.normalizeSameSitePath(configured, DEFAULT_POST_LOGIN_REDIRECT);
   }
 

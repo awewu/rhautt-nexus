@@ -7,21 +7,21 @@
       filename: 'home-audience-residential-bg.webp',
       mimeType: 'image/webp',
       size: 9554,
-      updatedAt: '2026-07-31T00:00:00.000Z'
+      updatedAt: '2026-07-31T00:00:00.000Z',
     },
     'service-banner': {
       src: '/assets/img/site-materials/home-audience-commercial-bg.webp',
       filename: 'home-audience-commercial-bg.webp',
       mimeType: 'image/webp',
       size: 9498,
-      updatedAt: '2026-07-31T00:00:00.000Z'
+      updatedAt: '2026-07-31T00:00:00.000Z',
     },
     'footer-cert': {
       src: '/assets/img/site-materials/home-audience-professionals-bg.webp',
       filename: 'home-audience-professionals-bg.webp',
       mimeType: 'image/webp',
       size: 10358,
-      updatedAt: '2026-07-31T00:00:00.000Z'
+      updatedAt: '2026-07-31T00:00:00.000Z',
     },
     'home-audience-cards': [
       {
@@ -35,7 +35,7 @@
         secondaryLabel: '采暖制冷 Air →',
         secondaryHref: '/products/residential/heating-cooling/',
         visible: true,
-        sortOrder: 0
+        sortOrder: 0,
       },
       {
         id: 'commercial',
@@ -48,7 +48,7 @@
         secondaryLabel: '采暖制冷 Air →',
         secondaryHref: '/products/commercial/heating-cooling/',
         visible: true,
-        sortOrder: 1
+        sortOrder: 1,
       },
       {
         id: 'professionals',
@@ -61,9 +61,9 @@
         secondaryLabel: '查找经销商 →',
         secondaryHref: '/find-a-pro/',
         visible: true,
-        sortOrder: 2
-      }
-    ]
+        sortOrder: 2,
+      },
+    ],
   };
 
   var MATERIALS = {
@@ -110,7 +110,13 @@
     var value = String(src || '');
     if (!value || !API_BASE || /^(https?:|data:|blob:)/i.test(value)) return value;
     if (value.indexOf('/assets/img/site-materials/') === 0) {
-      return API_BASE + '/api/v2/site-materials/' + encodeURIComponent(SITE_CODE) + '?asset=' + encodeURIComponent(value);
+      return (
+        API_BASE +
+        '/api/v2/site-materials/' +
+        encodeURIComponent(SITE_CODE) +
+        '?asset=' +
+        encodeURIComponent(value)
+      );
     }
     return value.indexOf('/api/v2/') === 0 ? API_BASE + value : value;
   }
@@ -119,7 +125,8 @@
     var normalized = Object.assign({}, manifest && typeof manifest === 'object' ? manifest : {});
     ['home-hero', 'brand-story', 'service-banner', 'footer-cert'].forEach(function (key) {
       var asset = normalized[key];
-      if (asset && typeof asset === 'object') normalized[key] = Object.assign({}, asset, { src: remoteMaterialUrl(asset.src) });
+      if (asset && typeof asset === 'object')
+        normalized[key] = Object.assign({}, asset, { src: remoteMaterialUrl(asset.src) });
     });
     if (Array.isArray(normalized['home-hero-carousel'])) {
       normalized['home-hero-carousel'] = normalized['home-hero-carousel'].map(function (item) {
@@ -130,7 +137,11 @@
   }
 
   function applyMaterials(manifest) {
-    manifest = Object.assign({}, DEFAULT_MANIFEST, manifest && typeof manifest === 'object' ? manifest : {});
+    manifest = Object.assign(
+      {},
+      DEFAULT_MANIFEST,
+      manifest && typeof manifest === 'object' ? manifest : {}
+    );
     applyHeroCarousel(manifest['home-hero-carousel']);
     applyAudienceCards(manifest['home-audience-cards']);
     Object.keys(MATERIALS).forEach(function (key) {
@@ -180,8 +191,12 @@
     if (!hero || !media) return;
 
     var slides = items
-      .filter(function (item) { return item && item.src && item.visible !== false; })
-      .sort(function (a, b) { return Number(a.sortOrder || 0) - Number(b.sortOrder || 0); });
+      .filter(function (item) {
+        return item && item.src && item.visible !== false;
+      })
+      .sort(function (a, b) {
+        return Number(a.sortOrder || 0) - Number(b.sortOrder || 0);
+      });
     if (!slides.length) return;
 
     var video = document.getElementById('heroVideo');
@@ -242,9 +257,13 @@
       })
       .catch(function () {
         fetch('/assets/img/site-materials/manifest.json', { cache: 'no-store' })
-          .then(function (response) { return response.ok ? response.json() : null; })
+          .then(function (response) {
+            return response.ok ? response.json() : null;
+          })
           .then(applyMaterials)
-          .catch(function () { applyMaterials(DEFAULT_MANIFEST); });
+          .catch(function () {
+            applyMaterials(DEFAULT_MANIFEST);
+          });
       });
   }
 

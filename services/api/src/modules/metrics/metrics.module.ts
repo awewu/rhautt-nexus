@@ -10,7 +10,9 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 
 @Module({
   imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([MetricDailyRollupEntity, MetricChannelAttributionEntity])]),
+    ...(TARGET_API_BOOT_SMOKE
+      ? []
+      : [TypeOrmModule.forFeature([MetricDailyRollupEntity, MetricChannelAttributionEntity])]),
     AuthModule,
   ],
   controllers: [MetricsController, GtmDigestController],
@@ -18,7 +20,10 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
     MetricsService,
     GtmDigestService,
     ...(TARGET_API_BOOT_SMOKE
-      ? [bootSmokeRepositoryProvider(MetricDailyRollupEntity), bootSmokeRepositoryProvider(MetricChannelAttributionEntity)]
+      ? [
+          bootSmokeRepositoryProvider(MetricDailyRollupEntity),
+          bootSmokeRepositoryProvider(MetricChannelAttributionEntity),
+        ]
       : []),
   ],
   exports: [MetricsService],
@@ -33,11 +38,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class MetricsBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('metrics');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('metrics')
 export class MetricsBoundaryController {
   constructor(private readonly s: MetricsBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

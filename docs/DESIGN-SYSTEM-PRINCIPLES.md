@@ -18,14 +18,14 @@
 
 一个容器 = **方向 + gap + padding + 对齐 + 尺寸模式**，而非绝对坐标 / 散堆 margin。
 
-| Figma | CSS |
-|---|---|
+| Figma            | CSS                            |
+| ---------------- | ------------------------------ |
 | Auto-layout 方向 | `display:flex; flex-direction` |
-| itemSpacing | `gap`（取 `--space-*`） |
-| padding | `padding`（取 `--space-*`） |
-| Hug contents | `width:fit-content` |
-| Fill container | `flex:1` |
-| Fixed | 固定值（组件专属尺寸） |
+| itemSpacing      | `gap`（取 `--space-*`）        |
+| padding          | `padding`（取 `--space-*`）    |
+| Hug contents     | `width:fit-content`            |
+| Fill container   | `flex:1`                       |
+| Fixed            | 固定值（组件专属尺寸）         |
 
 写布局先问三问：横排还是纵排？gap 取哪级令牌？子项 hug 还是 fill？
 

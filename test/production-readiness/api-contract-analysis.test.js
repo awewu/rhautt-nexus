@@ -2,15 +2,13 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const {
-  extractApiCalls,
-  normalizeApiPath
-} = require('../../scripts/lib/apiContractAnalysis');
+const { extractApiCalls, normalizeApiPath } = require('../../scripts/lib/apiContractAnalysis');
 
 describe('API contract analysis path normalization', () => {
   test('normalizes non-API download URLs into route matching scope', () => {
-    expect(normalizeApiPath('/downloads/CNT-001/quotation.pdf'))
-      .toBe('/api/downloads/CNT-001/quotation.pdf');
+    expect(normalizeApiPath('/downloads/CNT-001/quotation.pdf')).toBe(
+      '/api/downloads/CNT-001/quotation.pdf'
+    );
     expect(normalizeApiPath('/images/ruud-logo.svg')).toBe(null);
   });
 
@@ -19,8 +17,8 @@ describe('API contract analysis path normalization', () => {
     fs.writeFileSync(file, "fetch('/downloads/CNT-001/quotation.pdf');\n", 'utf8');
 
     try {
-      expect(extractApiCalls(file).map(call => call.path)).toEqual([
-        '/api/downloads/CNT-001/quotation.pdf'
+      expect(extractApiCalls(file).map((call) => call.path)).toEqual([
+        '/api/downloads/CNT-001/quotation.pdf',
       ]);
     } finally {
       fs.unlinkSync(file);

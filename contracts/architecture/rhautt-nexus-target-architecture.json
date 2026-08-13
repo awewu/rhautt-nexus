@@ -45,10 +45,7 @@
       "alternative": null,
       "packageManagerTarget": "pnpm",
       "language": "TypeScript",
-      "frameworks": [
-        "Next.js",
-        "React"
-      ],
+      "frameworks": ["Next.js", "React"],
       "graphRequired": true,
       "affectedBuildRequired": true
     },
@@ -76,18 +73,13 @@
       {
         "id": "engines",
         "targetPath": "packages/engines",
-        "allowedConsumers": [
-          "apps/*",
-          "services/api"
-        ],
+        "allowedConsumers": ["apps/*", "services/api"],
         "purpose": "shared calculation-engine surface (Strangler chokepoint); target consumes engines via @rhautt/engines instead of deep relative requires into server/core"
       },
       {
         "id": "ui",
         "targetPath": "packages/ui",
-        "allowedConsumers": [
-          "apps/*"
-        ],
+        "allowedConsumers": ["apps/*"],
         "purpose": "shared enterprise and consumer UI components"
       },
       {
@@ -95,27 +87,19 @@
         "targetPath": "packages/contracts",
         "sourceOfTruth": "contracts/openapi/rhautt-nexus-v2.openapi.json",
         "generatedClient": "packages/generated-client/src/rhauttNexusClient.ts",
-        "allowedConsumers": [
-          "apps/*",
-          "services/api"
-        ],
+        "allowedConsumers": ["apps/*", "services/api"],
         "purpose": "OpenAPI generated client and DTO schema"
       },
       {
         "id": "domain",
         "targetPath": "packages/domain",
-        "allowedConsumers": [
-          "apps/*",
-          "services/api"
-        ],
+        "allowedConsumers": ["apps/*", "services/api"],
         "purpose": "tenant, role, brand hierarchy, product system packs, lifecycle constants"
       },
       {
         "id": "visual-system",
         "targetPath": "packages/visual-system",
-        "allowedConsumers": [
-          "apps/*"
-        ],
+        "allowedConsumers": ["apps/*"],
         "purpose": "Rhautt group portal, 瑞诺瓦 C-end, enterprise workbench, Rysnova design tokens"
       }
     ],
@@ -163,12 +147,7 @@
   "dataAndWorkflow": {
     "postgresql": {
       "role": "core relational ledger",
-      "requiredCapabilities": [
-        "RLS",
-        "tenant-aware schema",
-        "audit log",
-        "outbox events"
-      ],
+      "requiredCapabilities": ["RLS", "tenant-aware schema", "audit log", "outbox events"],
       "currentEvidence": "evidence/database/postgres-target-schema-report.json"
     },
     "mongodb": {
@@ -192,11 +171,7 @@
     "rhauttComfort": "Rhautt Comfort / 瑞合瑞德暖通科技集团 is group expression，不是软件名",
     "softwareName": "Rhautt Nexus / 瑞合数智枢纽",
     "consumerSystemBrand": "瑞诺瓦",
-    "equipmentBrands": [
-      "Rheem",
-      "Ruud",
-      "Everhot"
-    ],
+    "equipmentBrands": ["Rheem", "Ruud", "Everhot"],
     "iotBoundary": "lifecycle_handoff_only"
   },
   "requiredEvidenceBeforeProductionClaim": [

@@ -16,12 +16,20 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 
 @Module({
   imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([DiagnosisSessionEntity, DealerCollectionConfigEntity, DepositOrderEntity])]),
+    ...(TARGET_API_BOOT_SMOKE
+      ? []
+      : [
+          TypeOrmModule.forFeature([
+            DiagnosisSessionEntity,
+            DealerCollectionConfigEntity,
+            DepositOrderEntity,
+          ]),
+        ]),
     AuthModule,
     MdmModule,
     ProductCatalogModule,
     ComplianceModule,
-    CrmModule
+    CrmModule,
   ],
   controllers: [DiagnosisController],
   providers: [
@@ -29,11 +37,13 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
     DiagnosisAiService,
     DepositService,
     PublicRateLimitGuard,
-    ...(TARGET_API_BOOT_SMOKE ? [
-      bootSmokeRepositoryProvider(DiagnosisSessionEntity),
-      bootSmokeRepositoryProvider(DealerCollectionConfigEntity),
-      bootSmokeRepositoryProvider(DepositOrderEntity),
-    ] : [])
+    ...(TARGET_API_BOOT_SMOKE
+      ? [
+          bootSmokeRepositoryProvider(DiagnosisSessionEntity),
+          bootSmokeRepositoryProvider(DealerCollectionConfigEntity),
+          bootSmokeRepositoryProvider(DepositOrderEntity),
+        ]
+      : []),
   ],
 })
 export class DiagnosisModule {}
@@ -46,11 +56,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class DiagnosisBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('diagnosis');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('diagnosis')
 export class DiagnosisBoundaryController {
   constructor(private readonly s: DiagnosisBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

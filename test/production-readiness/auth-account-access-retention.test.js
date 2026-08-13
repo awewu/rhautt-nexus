@@ -25,7 +25,7 @@ describe('auth/account access retention smoke', () => {
     expect(loginPage).toContain("localStorage.setItem('user', JSON.stringify(res.user))");
     expect(loginPage).toContain('setToken(res.token)');
     expect(loginPage).toContain("new URLSearchParams(window.location.search).get('returnUrl')");
-    expect(loginPage).toContain("window.location.href = decodeURIComponent(returnUrl)");
+    expect(loginPage).toContain('window.location.href = decodeURIComponent(returnUrl)');
     expect(loginPage).toContain("'/api/v2/auth/sso/login?redirect=/cockpit'");
     expect(dealerApi).toContain("apiFetch('/api/v2/auth/login'");
   });
@@ -35,7 +35,9 @@ describe('auth/account access retention smoke', () => {
     expect(accountsPage).toContain('auth.me()');
     expect(authController).toMatch(/@Get\('me'\)\s*@UseGuards\(AuthGuard\)/);
     expect(authGuard).toContain("const NX_COOKIE_NAME = 'nx_token'");
-    expect(authGuard).toContain("auth.startsWith('Bearer ') ? auth.slice(7) : extractTokenFromCookie(req)");
+    expect(authGuard).toContain(
+      "auth.startsWith('Bearer ') ? auth.slice(7) : extractTokenFromCookie(req)"
+    );
   });
 
   test('authorized admins can discover and enter account management after module trimming', () => {

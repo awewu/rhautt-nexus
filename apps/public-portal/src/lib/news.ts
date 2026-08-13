@@ -15,7 +15,8 @@ export const NEWS: NewsArticle[] = [
     title: '瑞合瑞德获瑞美集团（Rheem）中国独家授权，Rheem · Ruud · EverHot 三品牌落地中国',
     category: '公司新闻',
     date: '2026-05-18',
-    excerpt: '瑞合瑞德正式获得瑞美集团（Rheem Manufacturing）中国区独家授权，全面运营 Rheem、Ruud、EverHot 三大品牌，覆盖热水、采暖、空气品质与水处理全线产品。',
+    excerpt:
+      '瑞合瑞德正式获得瑞美集团（Rheem Manufacturing）中国区独家授权，全面运营 Rheem、Ruud、EverHot 三大品牌，覆盖热水、采暖、空气品质与水处理全线产品。',
     body: [
       '瑞合瑞德（Rhautt）今日宣布，正式获得瑞美集团（Rheem Manufacturing Company）中国区独家授权，全面负责 Rheem、Ruud、EverHot 三大品牌在中国市场的产品运营、渠道建设与售后服务体系。',
       '瑞美集团创立于 1925 年，是全球领先的热水与空气舒适系统制造商，业务遍及全球 80 余个国家。此次授权合作，标志着瑞美集团深耕中国市场的战略升级。',
@@ -27,7 +28,8 @@ export const NEWS: NewsArticle[] = [
     title: 'Econet 智控平台发布：热水、采暖、新风、净水一屏统管',
     category: '产品发布',
     date: '2026-04-22',
-    excerpt: 'Rhautt 发布 Econet 智控平台与 EC-HUB 智控中枢，实现全系统设备统一接入、本地化场景引擎与全屋能耗看板。',
+    excerpt:
+      'Rhautt 发布 Econet 智控平台与 EC-HUB 智控中枢，实现全系统设备统一接入、本地化场景引擎与全屋能耗看板。',
     body: [
       'Rhautt 正式发布 Econet 智控平台及配套硬件 EC-HUB 智控中枢、EC-TC 智能温控器，实现热水、采暖、新风、净水设备的统一接入与联动控制。',
       'EC-HUB 支持 Wi-Fi、Zigbee、RS485 多协议接入，最多可管理 64 台设备，本地场景引擎在断网状态下仍可正常运行，响应延迟低于 100 毫秒。',
@@ -39,7 +41,8 @@ export const NEWS: NewsArticle[] = [
     title: '行业洞察：双碳目标下，热泵为何成为建筑采暖的确定性选择',
     category: '行业洞察',
     date: '2026-03-10',
-    excerpt: '在建筑电气化与双碳政策推动下，空气源热泵市场持续高增长。本文从能效、政策与全生命周期成本三个维度解析热泵的确定性趋势。',
+    excerpt:
+      '在建筑电气化与双碳政策推动下，空气源热泵市场持续高增长。本文从能效、政策与全生命周期成本三个维度解析热泵的确定性趋势。',
     body: [
       '在「双碳」目标与建筑电气化浪潮推动下，空气源热泵正从「可选项」变为建筑采暖的「确定性选择」。',
       '能效维度：以 COP 4.0 以上的变频热泵为例，相同热量输出下，电耗仅为传统电采暖的四分之一；对比燃气壁挂炉，全生命周期碳排放可降低 40% 以上。',
@@ -53,7 +56,8 @@ export const NEWS: NewsArticle[] = [
     title: '瑞合瑞德上海旗舰体验中心启幕：全场景舒适系统实景体验',
     category: '品牌活动',
     date: '2026-02-28',
-    excerpt: '位于上海浦东的 Rhautt 旗舰体验中心正式开放，1:1 实景还原热水、采暖、新风、净水全系统运行场景。',
+    excerpt:
+      '位于上海浦东的 Rhautt 旗舰体验中心正式开放，1:1 实景还原热水、采暖、新风、净水全系统运行场景。',
     body: [
       '瑞合瑞德上海旗舰体验中心于浦东新区正式启幕。体验中心以「看得见的舒适」为设计理念，1:1 实景还原家庭全系统运行场景。',
       '访客可现场体验热泵采暖的静音运行、中央热水的即开即热、全热交换新风的空气品质变化，并通过 Econet 大屏实时查看各系统的能耗数据。',
@@ -65,7 +69,8 @@ export const NEWS: NewsArticle[] = [
     title: 'Rhautt 发布可持续发展承诺：Earth Day, Every Day.',
     category: '公司新闻',
     date: '2026-01-15',
-    excerpt: '瑞合瑞德发布可持续发展承诺与首份 ESG 行动框架，将节能产品占比、碳减排贡献与绿色建筑项目纳入年度目标。',
+    excerpt:
+      '瑞合瑞德发布可持续发展承诺与首份 ESG 行动框架，将节能产品占比、碳减排贡献与绿色建筑项目纳入年度目标。',
     body: [
       '瑞合瑞德正式发布可持续发展承诺「Earth Day, Every Day.」，并公布首份 ESG 行动框架。',
       '框架围绕三大方向：产品端持续提升高能效产品（COP≥4.0 热泵、一级能效热水）销售占比；工程端优先推动绿色建筑与既有建筑节能改造项目；运营端建立供应链碳足迹追踪机制。',
@@ -75,5 +80,5 @@ export const NEWS: NewsArticle[] = [
 ];
 
 export function getArticle(slug: string): NewsArticle | undefined {
-  return NEWS.find(n => n.slug === slug);
+  return NEWS.find((n) => n.slug === slug);
 }

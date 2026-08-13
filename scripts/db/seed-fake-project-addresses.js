@@ -25,7 +25,8 @@ const path = require('path');
 const { Client } = require('pg');
 
 process.env.TS_NODE_PROJECT =
-  process.env.TS_NODE_PROJECT || path.join(__dirname, '..', '..', 'services', 'api', 'tsconfig.json');
+  process.env.TS_NODE_PROJECT ||
+  path.join(__dirname, '..', '..', 'services', 'api', 'tsconfig.json');
 require('ts-node/register/transpile-only');
 const { normalizeAddress } = require('../../services/api/src/modules/common/address');
 
@@ -40,7 +41,16 @@ if (process.env.NODE_ENV === 'production' && !FORCE_PROD) {
 }
 
 const CITIES = ['上海', '杭州', '南京', '苏州', '成都', '宁波'];
-const STREETS = ['世纪大道', '中山路', '解放路', '人民路', '和平街', '滨江道', '科技路', '文一西路'];
+const STREETS = [
+  '世纪大道',
+  '中山路',
+  '解放路',
+  '人民路',
+  '和平街',
+  '滨江道',
+  '科技路',
+  '文一西路',
+];
 const BUILDINGS = ['A栋', 'B栋', 'C栋', '1号楼', '2号楼', '3号楼'];
 
 function fakeAddress(seq) {
@@ -81,7 +91,7 @@ async function processTenant(client, tenantId, report) {
        LEFT JOIN ${SCHEMA}.customers c ON c.id = l.customer_id AND c.tenant_id = l.tenant_id
        WHERE l.tenant_id = $1
        ORDER BY l.created_at ASC NULLS LAST, l.id ASC`,
-      [tenantId],
+      [tenantId]
     );
 
     // customer → 该客户已分配地址列表（供 customers.address 取第一条）
@@ -95,7 +105,8 @@ async function processTenant(client, tenantId, report) {
       const norm = normalizeAddress(addr);
       const phone = l.phone_hash || l.cust_phone_hash || null;
 
-      if (!custFirstAddr.has(l.customer_id)) custFirstAddr.set(l.customer_id, { addr, custAddr: l.cust_address });
+      if (!custFirstAddr.has(l.customer_id))
+        custFirstAddr.set(l.customer_id, { addr, custAddr: l.cust_address });
 
       if (needAddr) report.filledAddr++;
       if (l.phone_hash == null && phone) report.filledPhone++;
@@ -107,7 +118,7 @@ async function processTenant(client, tenantId, report) {
                address_normalized = COALESCE(address_normalized, $3),
                phone_hash = COALESCE(phone_hash, $4)
            WHERE id = $1`,
-          [l.id, addr, norm || null, phone],
+          [l.id, addr, norm || null, phone]
         );
       } else if (report.samples.length < 12) {
         report.samples.push({ link: l.id, customer: l.customer_id, address: addr });
@@ -121,7 +132,7 @@ async function processTenant(client, tenantId, report) {
       if (APPLY) {
         await client.query(
           `UPDATE ${SCHEMA}.customers SET address = COALESCE(address, $2) WHERE id = $1 AND tenant_id = $3`,
-          [customerId, addr, tenantId],
+          [customerId, addr, tenantId]
         );
       }
     }
@@ -138,22 +149,36 @@ async function main() {
   await client.connect();
   try {
     const tenants = await listTenants(client);
-    const report = { tenants: tenants.length, scanned: 0, filledAddr: 0, filledPhone: 0, filledCustAddr: 0, samples: [] };
+    const report = {
+      tenants: tenants.length,
+      scanned: 0,
+      filledAddr: 0,
+      filledPhone: 0,
+      filledCustAddr: 0,
+      samples: [],
+    };
     for (const t of tenants) await processTenant(client, t, report);
 
     const line = '─'.repeat(64);
     console.log(`\n${line}`);
-    console.log(`FAKE 项目地址回填${APPLY ? '（已写入 --apply）' : '（DRY-RUN，只读预览）'} · DEV ONLY`);
+    console.log(
+      `FAKE 项目地址回填${APPLY ? '（已写入 --apply）' : '（DRY-RUN，只读预览）'} · DEV ONLY`
+    );
     console.log(line);
     console.log(`租户 ${report.tenants} · 扫描 links ${report.scanned}`);
-    console.log(`将填地址 ${report.filledAddr} · 将填 phone_hash ${report.filledPhone} · customers.address 兜底 ${report.filledCustAddr}`);
+    console.log(
+      `将填地址 ${report.filledAddr} · 将填 phone_hash ${report.filledPhone} · customers.address 兜底 ${report.filledCustAddr}`
+    );
     if (report.samples.length) {
       console.log(`\n样例（前 ${report.samples.length}）：`);
       for (const s of report.samples) console.log(`  - ${s.address}   (link ${s.link})`);
     }
     console.log(`\n${line}`);
-    console.log(APPLY ? '✅ 已写入。可重跑 npm run db:backfill-project-spine 复核。' :
-      '预览完成。加 --apply 写入。');
+    console.log(
+      APPLY
+        ? '✅ 已写入。可重跑 npm run db:backfill-project-spine 复核。'
+        : '预览完成。加 --apply 写入。'
+    );
     console.log(`${line}\n`);
   } finally {
     await client.end();

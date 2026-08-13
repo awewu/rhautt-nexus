@@ -22,7 +22,9 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 import { ProductCatalogModule } from '../product-catalog/product-catalog.module';
 import { PublicRateLimitGuard } from '../common/public-rate-limit.guard';
 import {
-  SiteProductAssignmentController, SiteProductCategoryController, SiteProductPublicController,
+  SiteProductAssignmentController,
+  SiteProductCategoryController,
+  SiteProductPublicController,
 } from './site-product-assignment.controller';
 import { SiteProductAssignmentService } from './site-product-assignment.service';
 import { SiteNewsController, SiteNewsPublicController } from './site-news.controller';
@@ -47,25 +49,39 @@ import { SiteDealerService } from './site-dealer.service';
   imports: [
     FileArtifactModule,
     ProductCatalogModule,
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([
-      BrandSiteEntity,
-      BrandSiteBasicSettingsEntity,
-      SiteProductAssignmentEntity,
-      SiteProductCategoryEntity,
-      SiteNewsArticleEntity,
-      SiteDocumentCategoryEntity,
-      SiteDocumentEntity,
-      SiteDealerEntity,
-      SiteInquiryEntity,
-      AuditLogEntity,
-    ])]),
+    ...(TARGET_API_BOOT_SMOKE
+      ? []
+      : [
+          TypeOrmModule.forFeature([
+            BrandSiteEntity,
+            BrandSiteBasicSettingsEntity,
+            SiteProductAssignmentEntity,
+            SiteProductCategoryEntity,
+            SiteNewsArticleEntity,
+            SiteDocumentCategoryEntity,
+            SiteDocumentEntity,
+            SiteDealerEntity,
+            SiteInquiryEntity,
+            AuditLogEntity,
+          ]),
+        ]),
   ],
   controllers: [
-    BrandRegistryController, BrandSiteController, SiteProductAssignmentController, SiteProductCategoryController, SiteProductPublicController,
-    SiteNewsController, SiteNewsPublicController, BrandSiteBasicSettingsController,
-    BrandSiteBasicSettingsPublicController, SiteInquiryController, SiteInquiryPublicController,
-    SiteDocumentController, SiteDocumentPublicController,
-    SiteDealerController, SiteDealerPublicController,
+    BrandRegistryController,
+    BrandSiteController,
+    SiteProductAssignmentController,
+    SiteProductCategoryController,
+    SiteProductPublicController,
+    SiteNewsController,
+    SiteNewsPublicController,
+    BrandSiteBasicSettingsController,
+    BrandSiteBasicSettingsPublicController,
+    SiteInquiryController,
+    SiteInquiryPublicController,
+    SiteDocumentController,
+    SiteDocumentPublicController,
+    SiteDealerController,
+    SiteDealerPublicController,
   ],
   providers: [
     BrandRegistryService,
@@ -78,18 +94,20 @@ import { SiteDealerService } from './site-dealer.service';
     SiteDealerService,
     SiteInquiryService,
     PublicRateLimitGuard,
-    ...(TARGET_API_BOOT_SMOKE ? [
-      bootSmokeRepositoryProvider(BrandSiteEntity),
-      bootSmokeRepositoryProvider(BrandSiteBasicSettingsEntity),
-      bootSmokeRepositoryProvider(SiteProductAssignmentEntity),
-      bootSmokeRepositoryProvider(SiteProductCategoryEntity),
-      bootSmokeRepositoryProvider(SiteNewsArticleEntity),
-      bootSmokeRepositoryProvider(SiteDocumentCategoryEntity),
-      bootSmokeRepositoryProvider(SiteDocumentEntity),
-      bootSmokeRepositoryProvider(SiteDealerEntity),
-      bootSmokeRepositoryProvider(SiteInquiryEntity),
-      bootSmokeRepositoryProvider(AuditLogEntity),
-    ] : []),
+    ...(TARGET_API_BOOT_SMOKE
+      ? [
+          bootSmokeRepositoryProvider(BrandSiteEntity),
+          bootSmokeRepositoryProvider(BrandSiteBasicSettingsEntity),
+          bootSmokeRepositoryProvider(SiteProductAssignmentEntity),
+          bootSmokeRepositoryProvider(SiteProductCategoryEntity),
+          bootSmokeRepositoryProvider(SiteNewsArticleEntity),
+          bootSmokeRepositoryProvider(SiteDocumentCategoryEntity),
+          bootSmokeRepositoryProvider(SiteDocumentEntity),
+          bootSmokeRepositoryProvider(SiteDealerEntity),
+          bootSmokeRepositoryProvider(SiteInquiryEntity),
+          bootSmokeRepositoryProvider(AuditLogEntity),
+        ]
+      : []),
   ],
   exports: [BrandRegistryService],
 })

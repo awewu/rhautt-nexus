@@ -7,7 +7,12 @@ const { Client } = require('pg');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const PREVIEW_PATH = path.join(ROOT, 'evidence', 'provenance', 'official-product-preview.json');
-const RESULT_PATH = path.join(ROOT, 'evidence', 'provenance', 'official-product-import-result.json');
+const RESULT_PATH = path.join(
+  ROOT,
+  'evidence',
+  'provenance',
+  'official-product-import-result.json'
+);
 
 dotenv.config({ path: path.join(ROOT, '.env.nestjs'), quiet: true });
 dotenv.config({ path: path.join(ROOT, '.env'), override: false, quiet: true });
@@ -15,9 +20,10 @@ dotenv.config({ path: path.join(ROOT, '.env'), override: false, quiet: true });
 const APPLY = process.argv.includes('--apply');
 const OFFICIAL_PRODUCT_IMPORTER_ID = '00000000-0000-4000-8000-000000000001';
 const BASE_ARG_INDEX = process.argv.indexOf('--base');
-const BASE = BASE_ARG_INDEX >= 0
-  ? process.argv[BASE_ARG_INDEX + 1]
-  : process.env.OFFICIAL_PRODUCT_API_BASE || 'http://localhost:5500/api/v2';
+const BASE =
+  BASE_ARG_INDEX >= 0
+    ? process.argv[BASE_ARG_INDEX + 1]
+    : process.env.OFFICIAL_PRODUCT_API_BASE || 'http://localhost:5500/api/v2';
 
 const BRAND_CONFIG = Object.freeze({
   Rheem: { code: 'rheem', domain: 'rheem.com.cn' },
@@ -38,20 +44,26 @@ function buildClientConfig() {
 }
 
 function validatePreview(payload) {
-  if (payload?.metadata?.mode !== 'dry-run-preview') throw new Error('输入不是官网产品 dry-run 预览');
-  if (payload.metadata.databaseWrites !== false) throw new Error('预览元数据的 databaseWrites 必须为 false');
+  if (payload?.metadata?.mode !== 'dry-run-preview')
+    throw new Error('输入不是官网产品 dry-run 预览');
+  if (payload.metadata.databaseWrites !== false)
+    throw new Error('预览元数据的 databaseWrites 必须为 false');
   if (payload.metadata.errors?.length) throw new Error('预览包含抓取错误，禁止导入');
-  if (!Array.isArray(payload.products) || !payload.products.length) throw new Error('预览中没有产品');
+  if (!Array.isArray(payload.products) || !payload.products.length)
+    throw new Error('预览中没有产品');
 
   const seen = new Set();
   for (const product of payload.products) {
     const config = BRAND_CONFIG[product.brand];
     if (!config) throw new Error(`未允许的品牌：${product.brand}`);
-    if (!product.sku || !product.name || seen.has(product.sku)) throw new Error(`SKU 缺失或重复：${product.sku}`);
+    if (!product.sku || !product.name || seen.has(product.sku))
+      throw new Error(`SKU 缺失或重复：${product.sku}`);
     seen.add(product.sku);
     const source = new URL(product.meta?.sourceUrl || '');
-    if (source.hostname !== config.domain) throw new Error(`${product.sku} 来源域名不合法：${source.hostname}`);
-    if (product.meta?.officialPublicSource !== true) throw new Error(`${product.sku} 缺少官网公开来源标记`);
+    if (source.hostname !== config.domain)
+      throw new Error(`${product.sku} 来源域名不合法：${source.hostname}`);
+    if (product.meta?.officialPublicSource !== true)
+      throw new Error(`${product.sku} 缺少官网公开来源标记`);
   }
   return payload.products;
 }
@@ -101,17 +113,23 @@ async function loadBrandTenants(client) {
   );
   const tenants = new Map(rows.map((row) => [row.code, row]));
   const missing = codes.filter((code) => !tenants.has(code));
-  if (missing.length) throw new Error(`缺少品牌运营租户：${missing.join(', ')}；请先应用数据库迁移`);
+  if (missing.length)
+    throw new Error(`缺少品牌运营租户：${missing.join(', ')}；请先应用数据库迁移`);
   const inactive = rows.filter((row) => row.status !== 'active');
-  if (inactive.length) throw new Error(`品牌运营租户未启用：${inactive.map((row) => row.code).join(', ')}`);
+  if (inactive.length)
+    throw new Error(`品牌运营租户未启用：${inactive.map((row) => row.code).join(', ')}`);
   return tenants;
 }
 
 function makeToken(tenantId) {
   if (!process.env.JWT_SECRET) throw new Error('缺少 JWT_SECRET，无法通过受保护产品写入接口');
-  return jwt.sign({ userId: OFFICIAL_PRODUCT_IMPORTER_ID, tenantId, role: 'platform_admin' }, process.env.JWT_SECRET, {
-    expiresIn: '20m',
-  });
+  return jwt.sign(
+    { userId: OFFICIAL_PRODUCT_IMPORTER_ID, tenantId, role: 'platform_admin' },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: '20m',
+    }
+  );
 }
 
 async function apiRequest(pathname, token, options = {}) {
@@ -131,12 +149,18 @@ async function apiRequest(pathname, token, options = {}) {
   } catch {
     payload = { raw: text.slice(0, 500) };
   }
-  if (!response.ok) throw new Error(`${options.method || 'GET'} ${pathname} -> ${response.status}: ${JSON.stringify(payload)}`);
+  if (!response.ok)
+    throw new Error(
+      `${options.method || 'GET'} ${pathname} -> ${response.status}: ${JSON.stringify(payload)}`
+    );
   return payload;
 }
 
 async function listTenantProducts(tenantId, token) {
-  const payload = await apiRequest(`/product-catalog/devices?tenantId=${encodeURIComponent(tenantId)}&pageSize=100`, token);
+  const payload = await apiRequest(
+    `/product-catalog/devices?tenantId=${encodeURIComponent(tenantId)}&pageSize=100`,
+    token
+  );
   return payload?.data?.items || [];
 }
 
@@ -159,7 +183,9 @@ async function main() {
   }));
   console.table(plan);
   if (!APPLY) {
-    console.log('Dry-run only. Pass --apply to write through the protected NestJS product-catalog API.');
+    console.log(
+      'Dry-run only. Pass --apply to write through the protected NestJS product-catalog API.'
+    );
     return;
   }
 
@@ -179,7 +205,13 @@ async function main() {
     const before = await listTenantProducts(item.tenantId, token);
     const existingBySku = new Map(before.map((product) => [product.sku, product]));
     const brandProducts = products.filter((product) => product.brand === item.brand);
-    const brandResult = { tenantId: item.tenantId, requested: brandProducts.length, created: 0, updated: 0, verified: 0 };
+    const brandResult = {
+      tenantId: item.tenantId,
+      requested: brandProducts.length,
+      created: 0,
+      updated: 0,
+      verified: 0,
+    };
 
     for (const product of brandProducts) {
       const existing = existingBySku.get(product.sku);

@@ -16,7 +16,16 @@ const vm = require('vm');
 const REPO_ROOT = path.join(__dirname, '..', '..', '..');
 const PARENT_ORG = 'Rhautt Comfort 瑞合瑞德暖通科技集团';
 const OUTWARD_TYPES = new Set(['group', 'brand-site', 'consumer-app']);
-const AI_BOTS = ['GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'PerplexityBot', 'ClaudeBot', 'Google-Extended', 'Applebot-Extended', 'Bytespider'];
+const AI_BOTS = [
+  'GPTBot',
+  'OAI-SearchBot',
+  'ChatGPT-User',
+  'PerplexityBot',
+  'ClaudeBot',
+  'Google-Extended',
+  'Applebot-Extended',
+  'Bytespider',
+];
 
 const START = '<!-- GEO:START -->';
 const END = '<!-- GEO:END -->';
@@ -26,11 +35,14 @@ let CTX = null;
 
 function loadSites() {
   const reg = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'brand-registry.json'), 'utf8'));
-  const want = (() => { const i = process.argv.indexOf('--site'); return i > -1 ? process.argv[i + 1] : null; })();
+  const want = (() => {
+    const i = process.argv.indexOf('--site');
+    return i > -1 ? process.argv[i + 1] : null;
+  })();
   return (reg.brands || [])
-    .filter(b => OUTWARD_TYPES.has(b.type))
-    .filter(b => !want || b.slug === want)
-    .map(b => ({
+    .filter((b) => OUTWARD_TYPES.has(b.type))
+    .filter((b) => !want || b.slug === want)
+    .map((b) => ({
       slug: b.slug,
       dir: path.join(REPO_ROOT, b.app, 'public'),
       base: 'https://www.' + b.domain,
@@ -77,7 +89,7 @@ function deriveDescription(html) {
   if (d) return d;
   // fall back to first hero paragraph
   const p = attr(html, /<p>([^<]{8,})<\/p>/i);
-  return p || (CTX.brand + ' — 瑞合瑞德集团旗下品牌。');
+  return p || CTX.brand + ' — 瑞合瑞德集团旗下品牌。';
 }
 
 function breadcrumb(urlPath) {
@@ -86,40 +98,56 @@ function breadcrumb(urlPath) {
   let acc = '';
   segs.forEach((s, i) => {
     acc += '/' + s;
-    items.push({ '@type': 'ListItem', position: i + 2, name: decodeURIComponent(s), item: CTX.base + acc + '/' });
+    items.push({
+      '@type': 'ListItem',
+      position: i + 2,
+      name: decodeURIComponent(s),
+      item: CTX.base + acc + '/',
+    });
   });
   return { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: items };
 }
 
 function pageSchemas(urlPath, title, desc) {
   const url = CTX.base + urlPath;
-  const BASE = CTX.base, BRAND = CTX.brand, OG_IMAGE = CTX.ogImage;
+  const BASE = CTX.base,
+    BRAND = CTX.brand,
+    OG_IMAGE = CTX.ogImage;
   const schemas = [];
   const productSlug = (/^\/products\/detail\/([^/]+)\/$/.exec(urlPath) || [])[1];
-  const product = productSlug && CTX.productsBySlug ? CTX.productsBySlug[decodeURIComponent(productSlug)] : null;
+  const product =
+    productSlug && CTX.productsBySlug ? CTX.productsBySlug[decodeURIComponent(productSlug)] : null;
 
   if (urlPath === '/') {
     schemas.push({
-      '@context': 'https://schema.org', '@type': 'Organization',
-      name: BRAND, url: BASE, logo: OG_IMAGE,
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: BRAND,
+      url: BASE,
+      logo: OG_IMAGE,
       description: desc,
       parentOrganization: { '@type': 'Organization', name: PARENT_ORG, url: 'https://rhautt.com' },
       brand: { '@type': 'Brand', name: BRAND },
       sameAs: ['https://rhautt.com'],
     });
     schemas.push({
-      '@context': 'https://schema.org', '@type': 'WebSite',
-      name: BRAND, url: BASE, inLanguage: 'zh-CN',
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: BRAND,
+      url: BASE,
+      inLanguage: 'zh-CN',
       publisher: { '@type': 'Organization', name: PARENT_ORG },
     });
   } else if (product) {
     schemas.push({
-      '@context': 'https://schema.org', '@type': 'Product',
+      '@context': 'https://schema.org',
+      '@type': 'Product',
       name: product.name || title,
       sku: product.sku || product.slug || productSlug,
       model: product.model || product.slug || productSlug,
       brand: { '@type': 'Brand', name: 'Everhot 恒热' },
-      category: product.websiteCategory || product.categoryPath || product.category || 'Everhot 产品',
+      category:
+        product.websiteCategory || product.categoryPath || product.category || 'Everhot 产品',
       description: product.summary || product.tagline || desc,
       image: product.image ? new URL(product.image, BASE).href : OG_IMAGE,
       url,
@@ -130,19 +158,32 @@ function pageSchemas(urlPath, title, desc) {
   } else if (/^\/products\//.test(urlPath)) {
     // 产品列表/类目页：CollectionPage + ItemList（满足 GEO 门 product 页要求）
     schemas.push({
-      '@context': 'https://schema.org', '@type': 'CollectionPage',
-      name: title, url, inLanguage: 'zh-CN', description: desc,
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: title,
+      url,
+      inLanguage: 'zh-CN',
+      description: desc,
       isPartOf: { '@type': 'WebSite', name: BRAND, url: BASE },
-      about: { '@type': 'ProductGroup', name: BRAND + ' 产品', brand: { '@type': 'Brand', name: BRAND } },
+      about: {
+        '@type': 'ProductGroup',
+        name: BRAND + ' 产品',
+        brand: { '@type': 'Brand', name: BRAND },
+      },
       mainEntity: {
-        '@type': 'ItemList', name: title,
+        '@type': 'ItemList',
+        name: title,
         itemListElement: [{ '@type': 'ListItem', position: 1, name: title, url }],
       },
     });
   } else {
     schemas.push({
-      '@context': 'https://schema.org', '@type': 'WebPage',
-      name: title, url, inLanguage: 'zh-CN', description: desc,
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: title,
+      url,
+      inLanguage: 'zh-CN',
+      description: desc,
       isPartOf: { '@type': 'WebSite', name: BRAND, url: BASE },
     });
   }
@@ -152,7 +193,8 @@ function pageSchemas(urlPath, title, desc) {
 
 function buildBlock(urlPath, title, desc) {
   const url = CTX.base + urlPath;
-  const BRAND = CTX.brand, OG_IMAGE = CTX.ogImage;
+  const BRAND = CTX.brand,
+    OG_IMAGE = CTX.ogImage;
   const lines = [];
   lines.push('  ' + START);
   lines.push(`  <link rel="canonical" href="${url}">`);
@@ -175,11 +217,22 @@ function buildBlock(urlPath, title, desc) {
 }
 
 function escAttr(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 function stripBlock(html) {
-  const re = new RegExp('[\\t ]*' + START.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\\s\\S]*?' + END.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\n?', 'g');
+  const re = new RegExp(
+    '[\\t ]*' +
+      START.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
+      '[\\s\\S]*?' +
+      END.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
+      '\\n?',
+    'g'
+  );
   return html.replace(re, '');
 }
 
@@ -191,10 +244,7 @@ function ensureDescription(html, desc) {
 
 function pickOgImage(site) {
   // prefer the hero poster if present, else first asset image, else a stable path
-  const candidates = [
-    'assets/img/hero-poster-desktop.webp',
-    'assets/img/og-default.webp',
-  ];
+  const candidates = ['assets/img/hero-poster-desktop.webp', 'assets/img/og-default.webp'];
   for (const c of candidates) {
     if (fs.existsSync(path.join(site.dir, c))) return site.base + '/' + c;
   }
@@ -208,7 +258,9 @@ function loadProductsBySlug(site) {
     const sandbox = { window: {} };
     vm.createContext(sandbox);
     vm.runInContext(fs.readFileSync(file, 'utf8'), sandbox, { filename: file });
-    const products = Array.isArray(sandbox.window.EVERHOT_PRODUCTS) ? sandbox.window.EVERHOT_PRODUCTS : [];
+    const products = Array.isArray(sandbox.window.EVERHOT_PRODUCTS)
+      ? sandbox.window.EVERHOT_PRODUCTS
+      : [];
     return Object.fromEntries(products.filter((p) => p && p.slug).map((p) => [String(p.slug), p]));
   } catch {
     return {};
@@ -217,10 +269,18 @@ function loadProductsBySlug(site) {
 
 function buildSite(site) {
   if (!fs.existsSync(site.dir)) {
-    console.log(`GEO build: [${site.slug}] skip — no public dir (${path.relative(REPO_ROOT, site.dir)})`);
+    console.log(
+      `GEO build: [${site.slug}] skip — no public dir (${path.relative(REPO_ROOT, site.dir)})`
+    );
     return { slug: site.slug, skipped: true };
   }
-  CTX = { dir: site.dir, base: site.base, brand: site.brand, ogImage: pickOgImage(site), productsBySlug: loadProductsBySlug(site) };
+  CTX = {
+    dir: site.dir,
+    base: site.base,
+    brand: site.brand,
+    ogImage: pickOgImage(site),
+    productsBySlug: loadProductsBySlug(site),
+  };
   const files = listHtml(site.dir);
   const urls = [];
   let injected = 0;
@@ -251,7 +311,7 @@ function buildSite(site) {
     'User-agent: *',
     'Allow: /',
     '',
-    ...AI_BOTS.flatMap(b => [`User-agent: ${b}`, 'Allow: /', '']),
+    ...AI_BOTS.flatMap((b) => [`User-agent: ${b}`, 'Allow: /', '']),
     `Sitemap: ${site.base}/sitemap.xml`,
     '',
   ].join('\n');
@@ -262,8 +322,8 @@ function buildSite(site) {
   const sm = [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-    ...urls.sort().map(u => {
-      const pri = u === '/' ? '1.0' : (u.split('/').filter(Boolean).length <= 1 ? '0.8' : '0.6');
+    ...urls.sort().map((u) => {
+      const pri = u === '/' ? '1.0' : u.split('/').filter(Boolean).length <= 1 ? '0.8' : '0.6';
       return `  <url><loc>${site.base}${u}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>${pri}</priority></url>`;
     }),
     '</urlset>',
@@ -271,13 +331,18 @@ function buildSite(site) {
   ].join('\n');
   fs.writeFileSync(path.join(site.dir, 'sitemap.xml'), sm);
 
-  console.log(`GEO build: [${site.slug}] injected ${injected} pages, robots.txt + sitemap.xml (${urls.length} urls).`);
+  console.log(
+    `GEO build: [${site.slug}] injected ${injected} pages, robots.txt + sitemap.xml (${urls.length} urls).`
+  );
   return { slug: site.slug, injected, urls: urls.length };
 }
 
 function main() {
   const sites = loadSites();
-  if (sites.length === 0) { console.log('GEO build: no outward sites matched.'); return; }
+  if (sites.length === 0) {
+    console.log('GEO build: no outward sites matched.');
+    return;
+  }
   for (const site of sites) buildSite(site);
 }
 

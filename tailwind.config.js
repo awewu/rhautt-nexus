@@ -1,10 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-    "./apps/designer-workbench/src/**/*.{js,ts,jsx,tsx}",
-    "./apps/rysnova-bim-workbench/src/**/*.{js,ts,jsx,tsx}",
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
+    './apps/designer-workbench/src/**/*.{js,ts,jsx,tsx}',
+    './apps/rysnova-bim-workbench/src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -32,7 +32,7 @@ export default {
           700: '#334155',
           800: '#1e293b',
           900: '#0f172a',
-        }
+        },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -45,33 +45,30 @@ export default {
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0', transform: 'translateY(20px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' }
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         slideUp: {
           '0%': { opacity: '0', transform: 'translateY(10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' }
-        }
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
       },
       spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
-        '128': '32rem',
+        18: '4.5rem',
+        88: '22rem',
+        128: '32rem',
       },
       maxWidth: {
         '8xl': '88rem',
         '9xl': '96rem',
       },
       zIndex: {
-        '60': '60',
-        '70': '70',
-        '80': '80',
-        '90': '90',
-        '100': '100',
-      }
+        60: '60',
+        70: '70',
+        80: '80',
+        90: '90',
+        100: '100',
+      },
     },
   },
-  plugins: [
-    require('@tailwindcss/forms'),
-    require('@tailwindcss/typography'),
-  ],
-}
+  plugins: [require('@tailwindcss/forms'), require('@tailwindcss/typography')],
+};

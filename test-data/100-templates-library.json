@@ -134,27 +134,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬冷",
-        "经济型",
-        "单身/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["刚需", "夏热冬冷", "经济型", "单身/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.696Z",
@@ -253,32 +235,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬暖",
-        "经济型",
-        "单身/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["刚需", "夏热冬暖", "经济型", "单身/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.696Z",
@@ -382,32 +342,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "寒冷",
-        "经济型",
-        "单身/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["刚需", "寒冷", "经济型", "单身/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.696Z",
@@ -539,27 +477,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬冷",
-        "经济型",
-        "单身/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["刚需", "夏热冬冷", "经济型", "单身/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.696Z",
@@ -658,32 +578,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬暖",
-        "经济型",
-        "单身/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["刚需", "夏热冬暖", "经济型", "单身/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.696Z",
@@ -787,32 +685,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "寒冷",
-        "经济型",
-        "单身/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["刚需", "寒冷", "经济型", "单身/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.696Z",
@@ -944,27 +820,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬冷",
-        "经济型",
-        "单身/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["刚需", "夏热冬冷", "经济型", "单身/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.696Z",
@@ -1063,32 +921,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬暖",
-        "经济型",
-        "单身/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["刚需", "夏热冬暖", "经济型", "单身/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.696Z",
@@ -1192,32 +1028,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "寒冷",
-        "经济型",
-        "单身/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["刚需", "寒冷", "经济型", "单身/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.696Z",
@@ -1349,27 +1163,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬冷",
-        "经济型",
-        "单身/丁克"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["刚需", "夏热冬冷", "经济型", "单身/丁克"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -1468,32 +1264,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬暖",
-        "经济型",
-        "单身/丁克"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["刚需", "夏热冬暖", "经济型", "单身/丁克"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -1597,32 +1371,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "寒冷",
-        "经济型",
-        "单身/丁克"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["刚需", "寒冷", "经济型", "单身/丁克"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -1754,27 +1506,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬冷",
-        "经济型",
-        "单身/丁克"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["刚需", "夏热冬冷", "经济型", "单身/丁克"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -1873,32 +1607,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬暖",
-        "经济型",
-        "单身/丁克"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["刚需", "夏热冬暖", "经济型", "单身/丁克"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -2002,32 +1714,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "寒冷",
-        "经济型",
-        "单身/丁克"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["刚需", "寒冷", "经济型", "单身/丁克"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -2159,27 +1849,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬冷",
-        "经济型",
-        "单身/丁克"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["刚需", "夏热冬冷", "经济型", "单身/丁克"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -2278,32 +1950,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬暖",
-        "经济型",
-        "单身/丁克"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["刚需", "夏热冬暖", "经济型", "单身/丁克"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -2407,32 +2057,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "寒冷",
-        "经济型",
-        "单身/丁克"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["刚需", "寒冷", "经济型", "单身/丁克"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -2564,27 +2192,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬冷",
-        "经济型",
-        "小三口/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["刚需", "夏热冬冷", "经济型", "小三口/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -2683,32 +2293,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬暖",
-        "经济型",
-        "小三口/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["刚需", "夏热冬暖", "经济型", "小三口/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -2812,32 +2400,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "寒冷",
-        "经济型",
-        "小三口/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["刚需", "寒冷", "经济型", "小三口/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -2969,27 +2535,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬冷",
-        "经济型",
-        "小三口/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["刚需", "夏热冬冷", "经济型", "小三口/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -3088,32 +2636,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬暖",
-        "经济型",
-        "小三口/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["刚需", "夏热冬暖", "经济型", "小三口/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -3217,32 +2743,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "首套房",
-        "小两口",
-        "出租",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "寒冷",
-        "经济型",
-        "小三口/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["首套房", "小两口", "出租", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["刚需", "寒冷", "经济型", "小三口/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -3374,27 +2878,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "刚需",
-        "夏热冬冷",
-        "经济型",
-        "小三口/年轻"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["刚需", "夏热冬冷", "经济型", "小三口/年轻"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -3526,27 +3012,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬冷",
-        "标准",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["改善", "夏热冬冷", "标准", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -3678,27 +3146,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬冷",
-        "舒适",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["改善", "夏热冬冷", "舒适", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -3834,27 +3284,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬冷",
-        "智能",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["改善", "夏热冬冷", "智能", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -3953,32 +3385,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬暖",
-        "标准",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["改善", "夏热冬暖", "标准", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -4077,32 +3487,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬暖",
-        "舒适",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["改善", "夏热冬暖", "舒适", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -4205,32 +3593,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬暖",
-        "智能",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["改善", "夏热冬暖", "智能", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -4334,32 +3700,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "寒冷",
-        "标准",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["改善", "寒冷", "标准", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -4463,32 +3807,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "寒冷",
-        "舒适",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["改善", "寒冷", "舒适", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -4596,32 +3918,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "寒冷",
-        "智能",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["改善", "寒冷", "智能", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -4725,27 +4025,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住"
-      ],
-      "targetPainPoints": [
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "严寒",
-        "标准",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住"],
+      "targetPainPoints": ["P13", "P14"],
+      "tags": ["改善", "严寒", "标准", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -4849,27 +4132,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住"
-      ],
-      "targetPainPoints": [
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "严寒",
-        "舒适",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住"],
+      "targetPainPoints": ["P13", "P14"],
+      "tags": ["改善", "严寒", "舒适", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -4977,27 +4243,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住"
-      ],
-      "targetPainPoints": [
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "严寒",
-        "智能",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住"],
+      "targetPainPoints": ["P13", "P14"],
+      "tags": ["改善", "严寒", "智能", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -5077,27 +4326,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住"
-      ],
-      "targetPainPoints": [
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "温和",
-        "标准",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住"],
+      "targetPainPoints": ["P13", "P14"],
+      "tags": ["改善", "温和", "标准", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -5177,27 +4409,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住"
-      ],
-      "targetPainPoints": [
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "温和",
-        "舒适",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住"],
+      "targetPainPoints": ["P13", "P14"],
+      "tags": ["改善", "温和", "舒适", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -5281,27 +4496,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住"
-      ],
-      "targetPainPoints": [
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "温和",
-        "智能",
-        "改善型"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住"],
+      "targetPainPoints": ["P13", "P14"],
+      "tags": ["改善", "温和", "智能", "改善型"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -5433,27 +4631,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬冷",
-        "标准",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["改善", "夏热冬冷", "标准", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -5585,27 +4765,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬冷",
-        "舒适",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["改善", "夏热冬冷", "舒适", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -5741,27 +4903,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬冷",
-        "智能",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["改善", "夏热冬冷", "智能", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -5860,32 +5004,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬暖",
-        "标准",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["改善", "夏热冬暖", "标准", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -5984,32 +5106,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬暖",
-        "舒适",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["改善", "夏热冬暖", "舒适", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -6112,32 +5212,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬暖",
-        "智能",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["改善", "夏热冬暖", "智能", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -6241,32 +5319,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "寒冷",
-        "标准",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["改善", "寒冷", "标准", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -6370,32 +5426,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "寒冷",
-        "舒适",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["改善", "寒冷", "舒适", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -6503,32 +5537,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "寒冷",
-        "智能",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["改善", "寒冷", "智能", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -6632,27 +5644,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住"
-      ],
-      "targetPainPoints": [
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "严寒",
-        "标准",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住"],
+      "targetPainPoints": ["P13", "P14"],
+      "tags": ["改善", "严寒", "标准", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -6756,27 +5751,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住"
-      ],
-      "targetPainPoints": [
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "严寒",
-        "舒适",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住"],
+      "targetPainPoints": ["P13", "P14"],
+      "tags": ["改善", "严寒", "舒适", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -6884,27 +5862,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住"
-      ],
-      "targetPainPoints": [
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "严寒",
-        "智能",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住"],
+      "targetPainPoints": ["P13", "P14"],
+      "tags": ["改善", "严寒", "智能", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -6984,27 +5945,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住"
-      ],
-      "targetPainPoints": [
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "温和",
-        "标准",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住"],
+      "targetPainPoints": ["P13", "P14"],
+      "tags": ["改善", "温和", "标准", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -7084,27 +6028,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住"
-      ],
-      "targetPainPoints": [
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "温和",
-        "舒适",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住"],
+      "targetPainPoints": ["P13", "P14"],
+      "tags": ["改善", "温和", "舒适", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -7188,27 +6115,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住"
-      ],
-      "targetPainPoints": [
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "温和",
-        "智能",
-        "改善高端"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住"],
+      "targetPainPoints": ["P13", "P14"],
+      "tags": ["改善", "温和", "智能", "改善高端"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -7340,27 +6250,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬冷",
-        "标准",
-        "多代同堂"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["改善", "夏热冬冷", "标准", "多代同堂"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -7492,27 +6384,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬冷",
-        "舒适",
-        "多代同堂"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["改善", "夏热冬冷", "舒适", "多代同堂"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -7648,27 +6522,9 @@
         "采暖需求",
         "保温节能"
       ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P01",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬冷",
-        "智能",
-        "多代同堂"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "targetPainPoints": ["P02", "P03", "P05", "P01", "P21", "P13", "P14"],
+      "tags": ["改善", "夏热冬冷", "智能", "多代同堂"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -7767,32 +6623,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬暖",
-        "标准",
-        "多代同堂"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["改善", "夏热冬暖", "标准", "多代同堂"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -7891,32 +6725,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬暖",
-        "舒适",
-        "多代同堂"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["改善", "夏热冬暖", "舒适", "多代同堂"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -8019,32 +6831,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "夏热冬暖",
-        "智能",
-        "多代同堂"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P13", "P14"],
+      "tags": ["改善", "夏热冬暖", "智能", "多代同堂"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -8148,32 +6938,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "寒冷",
-        "标准",
-        "多代同堂"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["改善", "寒冷", "标准", "多代同堂"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -8277,32 +7045,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "寒冷",
-        "舒适",
-        "多代同堂"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["改善", "寒冷", "舒适", "多代同堂"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -8410,32 +7156,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "寒冷",
-        "智能",
-        "多代同堂"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P13", "P14"],
+      "tags": ["改善", "寒冷", "智能", "多代同堂"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -8539,27 +7263,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 10
       },
-      "applicableScenarios": [
-        "换房",
-        "三口之家",
-        "老人同住"
-      ],
-      "targetPainPoints": [
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "改善",
-        "严寒",
-        "标准",
-        "多代同堂"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["换房", "三口之家", "老人同住"],
+      "targetPainPoints": ["P13", "P14"],
+      "tags": ["改善", "严寒", "标准", "多代同堂"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "10年",
       "duration": "15-25天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -8712,18 +7419,8 @@
         "P13",
         "P14"
       ],
-      "tags": [
-        "高端",
-        "夏热冬冷",
-        "豪华",
-        "高端家庭"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["高端", "夏热冬冷", "豪华", "高端家庭"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -8876,18 +7573,8 @@
         "P13",
         "P14"
       ],
-      "tags": [
-        "高端",
-        "夏热冬冷",
-        "豪华",
-        "高端改善"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["高端", "夏热冬冷", "豪华", "高端改善"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -9040,18 +7727,8 @@
         "P13",
         "P14"
       ],
-      "tags": [
-        "高端",
-        "夏热冬冷",
-        "豪华",
-        "塔尖客户"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["高端", "夏热冬冷", "豪华", "塔尖客户"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -9204,18 +7881,8 @@
         "P13",
         "P14"
       ],
-      "tags": [
-        "高端",
-        "夏热冬冷",
-        "豪华",
-        "资深成功"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["高端", "夏热冬冷", "豪华", "资深成功"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -9368,18 +8035,8 @@
         "P13",
         "P14"
       ],
-      "tags": [
-        "高端",
-        "夏热冬冷",
-        "豪华",
-        "富豪"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["高端", "夏热冬冷", "豪华", "富豪"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -9532,18 +8189,8 @@
         "P13",
         "P14"
       ],
-      "tags": [
-        "高端",
-        "夏热冬冷",
-        "豪华",
-        "高净值"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["高端", "夏热冬冷", "豪华", "高净值"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -9650,36 +8297,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "夏热冬暖",
-        "豪华",
-        "高端家庭"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "夏热冬暖", "豪华", "高端家庭"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -9786,36 +8407,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "夏热冬暖",
-        "豪华",
-        "高端改善"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "夏热冬暖", "豪华", "高端改善"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -9922,36 +8517,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "夏热冬暖",
-        "豪华",
-        "塔尖客户"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "夏热冬暖", "豪华", "塔尖客户"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -10058,36 +8627,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "夏热冬暖",
-        "豪华",
-        "资深成功"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "夏热冬暖", "豪华", "资深成功"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -10194,36 +8737,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "夏热冬暖",
-        "豪华",
-        "富豪"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "夏热冬暖", "豪华", "富豪"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -10330,36 +8847,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户",
-        "夏季舒适",
-        "潮湿应对"
-      ],
-      "targetPainPoints": [
-        "P02",
-        "P03",
-        "P05",
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "夏热冬暖",
-        "豪华",
-        "高净值"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户", "夏季舒适", "潮湿应对"],
+      "targetPainPoints": ["P02", "P03", "P05", "P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "夏热冬暖", "豪华", "高净值"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -10471,36 +8962,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "寒冷",
-        "豪华",
-        "高端家庭"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "寒冷", "豪华", "高端家庭"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -10612,36 +9077,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "寒冷",
-        "豪华",
-        "高端改善"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "寒冷", "豪华", "高端改善"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -10753,36 +9192,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "寒冷",
-        "豪华",
-        "塔尖客户"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "寒冷", "豪华", "塔尖客户"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -10894,36 +9307,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "寒冷",
-        "豪华",
-        "资深成功"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "寒冷", "豪华", "资深成功"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -11035,36 +9422,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "寒冷",
-        "豪华",
-        "富豪"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "寒冷", "豪华", "富豪"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -11176,36 +9537,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户",
-        "采暖需求",
-        "保温节能"
-      ],
-      "targetPainPoints": [
-        "P01",
-        "P03",
-        "P21",
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "寒冷",
-        "豪华",
-        "高净值"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户", "采暖需求", "保温节能"],
+      "targetPainPoints": ["P01", "P03", "P21", "P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "寒冷", "豪华", "高净值"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -11317,31 +9652,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户"
-      ],
-      "targetPainPoints": [
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "严寒",
-        "豪华",
-        "高端家庭"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户"],
+      "targetPainPoints": ["P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "严寒", "豪华", "高端家庭"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -11453,31 +9767,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户"
-      ],
-      "targetPainPoints": [
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "严寒",
-        "豪华",
-        "高端改善"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户"],
+      "targetPainPoints": ["P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "严寒", "豪华", "高端改善"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -11589,31 +9882,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户"
-      ],
-      "targetPainPoints": [
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "严寒",
-        "豪华",
-        "塔尖客户"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户"],
+      "targetPainPoints": ["P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "严寒", "豪华", "塔尖客户"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -11725,31 +9997,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户"
-      ],
-      "targetPainPoints": [
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "严寒",
-        "豪华",
-        "资深成功"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户"],
+      "targetPainPoints": ["P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "严寒", "豪华", "资深成功"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -11861,31 +10112,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户"
-      ],
-      "targetPainPoints": [
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "严寒",
-        "豪华",
-        "富豪"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户"],
+      "targetPainPoints": ["P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "严寒", "豪华", "富豪"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -11997,31 +10227,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户"
-      ],
-      "targetPainPoints": [
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "严寒",
-        "豪华",
-        "高净值"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户"],
+      "targetPainPoints": ["P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "严寒", "豪华", "高净值"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -12109,31 +10318,10 @@
         "pmv": "-0.5~+0.5",
         "ppd": 8
       },
-      "applicableScenarios": [
-        "改善升级",
-        "商务接待",
-        "塔尖客户"
-      ],
-      "targetPainPoints": [
-        "P08",
-        "P11",
-        "P20",
-        "P22",
-        "P13",
-        "P14"
-      ],
-      "tags": [
-        "高端",
-        "温和",
-        "豪华",
-        "高端家庭"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "applicableScenarios": ["改善升级", "商务接待", "塔尖客户"],
+      "targetPainPoints": ["P08", "P11", "P20", "P22", "P13", "P14"],
+      "tags": ["高端", "温和", "豪华", "高端家庭"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "15年",
       "duration": "30-45天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -12287,21 +10475,8 @@
         "P15",
         "P26"
       ],
-      "tags": [
-        "别墅",
-        "夏热冬冷",
-        "顶级",
-        "殷实家庭",
-        "五恒",
-        "DOAS",
-        "AI"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["别墅", "夏热冬冷", "顶级", "殷实家庭", "五恒", "DOAS", "AI"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "20年",
       "duration": "60-90天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -12455,21 +10630,8 @@
         "P15",
         "P26"
       ],
-      "tags": [
-        "别墅",
-        "夏热冬冷",
-        "顶级",
-        "富有家庭",
-        "五恒",
-        "DOAS",
-        "AI"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["别墅", "夏热冬冷", "顶级", "富有家庭", "五恒", "DOAS", "AI"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "20年",
       "duration": "60-90天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -12623,21 +10785,8 @@
         "P15",
         "P26"
       ],
-      "tags": [
-        "别墅",
-        "夏热冬冷",
-        "顶级",
-        "塔尖",
-        "五恒",
-        "DOAS",
-        "AI"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["别墅", "夏热冬冷", "顶级", "塔尖", "五恒", "DOAS", "AI"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "20年",
       "duration": "60-90天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -12791,21 +10940,8 @@
         "P15",
         "P26"
       ],
-      "tags": [
-        "别墅",
-        "夏热冬冷",
-        "顶级",
-        "顶级",
-        "五恒",
-        "DOAS",
-        "AI"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["别墅", "夏热冬冷", "顶级", "顶级", "五恒", "DOAS", "AI"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "20年",
       "duration": "60-90天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -12959,21 +11095,8 @@
         "P15",
         "P26"
       ],
-      "tags": [
-        "别墅",
-        "夏热冬冷",
-        "顶级",
-        "终极",
-        "五恒",
-        "DOAS",
-        "AI"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["别墅", "夏热冬冷", "顶级", "终极", "五恒", "DOAS", "AI"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "20年",
       "duration": "60-90天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -13080,12 +11203,7 @@
         "pmv": "-0.5~+0.5",
         "ppd": 5
       },
-      "applicableScenarios": [
-        "终极住宅",
-        "家族传承",
-        "夏季舒适",
-        "潮湿应对"
-      ],
+      "applicableScenarios": ["终极住宅", "家族传承", "夏季舒适", "潮湿应对"],
       "targetPainPoints": [
         "P02",
         "P03",
@@ -13099,21 +11217,8 @@
         "P15",
         "P26"
       ],
-      "tags": [
-        "别墅",
-        "夏热冬暖",
-        "顶级",
-        "殷实家庭",
-        "五恒",
-        "DOAS",
-        "AI"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["别墅", "夏热冬暖", "顶级", "殷实家庭", "五恒", "DOAS", "AI"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "20年",
       "duration": "60-90天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -13220,12 +11325,7 @@
         "pmv": "-0.5~+0.5",
         "ppd": 5
       },
-      "applicableScenarios": [
-        "终极住宅",
-        "家族传承",
-        "夏季舒适",
-        "潮湿应对"
-      ],
+      "applicableScenarios": ["终极住宅", "家族传承", "夏季舒适", "潮湿应对"],
       "targetPainPoints": [
         "P02",
         "P03",
@@ -13239,21 +11339,8 @@
         "P15",
         "P26"
       ],
-      "tags": [
-        "别墅",
-        "夏热冬暖",
-        "顶级",
-        "富有家庭",
-        "五恒",
-        "DOAS",
-        "AI"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["别墅", "夏热冬暖", "顶级", "富有家庭", "五恒", "DOAS", "AI"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "20年",
       "duration": "60-90天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -13360,12 +11447,7 @@
         "pmv": "-0.5~+0.5",
         "ppd": 5
       },
-      "applicableScenarios": [
-        "终极住宅",
-        "家族传承",
-        "夏季舒适",
-        "潮湿应对"
-      ],
+      "applicableScenarios": ["终极住宅", "家族传承", "夏季舒适", "潮湿应对"],
       "targetPainPoints": [
         "P02",
         "P03",
@@ -13379,21 +11461,8 @@
         "P15",
         "P26"
       ],
-      "tags": [
-        "别墅",
-        "夏热冬暖",
-        "顶级",
-        "塔尖",
-        "五恒",
-        "DOAS",
-        "AI"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["别墅", "夏热冬暖", "顶级", "塔尖", "五恒", "DOAS", "AI"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "20年",
       "duration": "60-90天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -13500,12 +11569,7 @@
         "pmv": "-0.5~+0.5",
         "ppd": 5
       },
-      "applicableScenarios": [
-        "终极住宅",
-        "家族传承",
-        "夏季舒适",
-        "潮湿应对"
-      ],
+      "applicableScenarios": ["终极住宅", "家族传承", "夏季舒适", "潮湿应对"],
       "targetPainPoints": [
         "P02",
         "P03",
@@ -13519,21 +11583,8 @@
         "P15",
         "P26"
       ],
-      "tags": [
-        "别墅",
-        "夏热冬暖",
-        "顶级",
-        "顶级",
-        "五恒",
-        "DOAS",
-        "AI"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["别墅", "夏热冬暖", "顶级", "顶级", "五恒", "DOAS", "AI"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "20年",
       "duration": "60-90天",
       "createdAt": "2026-04-26T06:42:53.697Z",
@@ -13640,12 +11691,7 @@
         "pmv": "-0.5~+0.5",
         "ppd": 5
       },
-      "applicableScenarios": [
-        "终极住宅",
-        "家族传承",
-        "夏季舒适",
-        "潮湿应对"
-      ],
+      "applicableScenarios": ["终极住宅", "家族传承", "夏季舒适", "潮湿应对"],
       "targetPainPoints": [
         "P02",
         "P03",
@@ -13659,21 +11705,8 @@
         "P15",
         "P26"
       ],
-      "tags": [
-        "别墅",
-        "夏热冬暖",
-        "顶级",
-        "终极",
-        "五恒",
-        "DOAS",
-        "AI"
-      ],
-      "compatibleBrands": [
-        "Rheem",
-        "Ruud",
-        "恒热",
-        "瑞诺瓦"
-      ],
+      "tags": ["别墅", "夏热冬暖", "顶级", "终极", "五恒", "DOAS", "AI"],
+      "compatibleBrands": ["Rheem", "Ruud", "恒热", "瑞诺瓦"],
       "warranty": "20年",
       "duration": "60-90天",
       "createdAt": "2026-04-26T06:42:53.697Z",

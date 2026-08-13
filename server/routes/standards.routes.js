@@ -11,7 +11,7 @@ function createStandardsRouter(engines) {
         success: true,
         data: result,
         engine: 'ProfessionalStandardsLibrary v1.0',
-        message: `热水合规检查完成 (${result.summary.complianceRate}, ${result.summary.grade}级)`
+        message: `热水合规检查完成 (${result.summary.complianceRate}, ${result.summary.grade}级)`,
       });
     } catch (error) {
       return errorResponse(res, error);
@@ -25,7 +25,7 @@ function createStandardsRouter(engines) {
         success: true,
         data: result,
         engine: 'ProfessionalStandardsLibrary v1.0',
-        message: `DOAS合规检查完成 (${result.summary.complianceRate}, ${result.summary.grade}级)`
+        message: `DOAS合规检查完成 (${result.summary.complianceRate}, ${result.summary.grade}级)`,
       });
     } catch (error) {
       return errorResponse(res, error);

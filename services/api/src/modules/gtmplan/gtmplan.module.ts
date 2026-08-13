@@ -14,7 +14,9 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
   controllers: [GtmplanController],
   providers: [
     GtmplanService,
-    ...(TARGET_API_BOOT_SMOKE ? [bootSmokeRepositoryProvider(GtmCampaignEntity), bootSmokeRepositoryProvider(GtmOkrEntity)] : []),
+    ...(TARGET_API_BOOT_SMOKE
+      ? [bootSmokeRepositoryProvider(GtmCampaignEntity), bootSmokeRepositoryProvider(GtmOkrEntity)]
+      : []),
   ],
   exports: [GtmplanService],
 })
@@ -28,11 +30,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class GtmplanBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('gtmplan');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('gtmplan')
 export class GtmplanBoundaryController {
   constructor(private readonly s: GtmplanBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

@@ -53,21 +53,21 @@
 class Hammer extends EventEmitter {
   // 配置管理
   constructor(config)
-  
+
   // 套件管理
   registerSuite(id, suite)
   registerGate(id, gate)
   registerValidator(suiteId, validator)
-  
+
   // 执行控制
   strike(options)        // 执行验证
   executeSuite(id)       // 执行单个套件
   executeValidator(v, suite)  // 执行单个验证器
-  
+
   // 门禁控制
   evaluateQualityGate()  // 评估质量门禁
   calculateSummary()     // 计算汇总
-  
+
   // 报告输出
   outputReport()         // 输出报告
   generateJUnitReport()  // 生成JUnit XML
@@ -79,19 +79,19 @@ class Hammer extends EventEmitter {
 
 ```typescript
 interface ValidationSuite {
-  id: string;                    // 唯一标识 (L1-L9)
-  name: string;                  // 显示名称
-  description: string;           // 描述
-  weight: number;                // 权重 (1-25)
-  enabled: boolean;              // 是否启用
-  validators: Validator[];        // 验证器列表
+  id: string; // 唯一标识 (L1-L9)
+  name: string; // 显示名称
+  description: string; // 描述
+  weight: number; // 权重 (1-25)
+  enabled: boolean; // 是否启用
+  validators: Validator[]; // 验证器列表
 }
 
 interface Validator {
-  id: string;                    // 唯一标识 (如 S01)
-  name: string;                  // 名称
-  weight: number;                // 权重
-  fn: () => Promise<Result>;    // 验证函数
+  id: string; // 唯一标识 (如 S01)
+  name: string; // 名称
+  weight: number; // 权重
+  fn: () => Promise<Result>; // 验证函数
 }
 
 interface ValidationResult {
@@ -110,13 +110,13 @@ interface ValidationResult {
 
 ```typescript
 interface QualityGate {
-  id: string;                    // G0-G4
+  id: string; // G0-G4
   name: string;
   description: string;
-  failOn: string[];              // 触发失败的问题级别
-  maxIssues?: number;            // 最大允许问题数
+  failOn: string[]; // 触发失败的问题级别
+  maxIssues?: number; // 最大允许问题数
   action: 'BLOCK' | 'WARN' | 'PASS';
-  notify: string[];              // 通知对象
+  notify: string[]; // 通知对象
 }
 ```
 
@@ -173,9 +173,9 @@ hammer.registerValidator('L6_FUNCTIONAL', {
       success: result.valid,
       severity: result.valid ? 'INFO' : 'HIGH',
       message: result.message,
-      fix: result.suggestion
+      fix: result.suggestion,
     };
-  }
+  },
 });
 ```
 
@@ -186,15 +186,15 @@ hammer.registerValidator('L6_FUNCTIONAL', {
 module.exports = {
   name: 'custom-validator',
   version: '1.0.0',
-  
+
   register(hammer) {
     hammer.registerSuite('L10_CUSTOM', {
       name: 'L10: Custom Validation',
       validators: [
         // 自定义验证器
-      ]
+      ],
     });
-  }
+  },
 };
 ```
 
@@ -220,7 +220,7 @@ for (const id of runtimeSuites) {
 const hammer = new Hammer({
   incremental: true,
   cacheResults: '.hammer-cache',
-  changedFiles: git.getChangedFiles()
+  changedFiles: git.getChangedFiles(),
 });
 ```
 
@@ -229,10 +229,10 @@ const hammer = new Hammer({
 ```javascript
 const hammer = new Hammer({
   timeouts: {
-    syntax: 30000,      // 30s for static analysis
-    runtime: 60000,     // 60s for runtime tests
-    performance: 300000 // 5m for load tests
-  }
+    syntax: 30000, // 30s for static analysis
+    runtime: 60000, // 60s for runtime tests
+    performance: 300000, // 5m for load tests
+  },
 });
 ```
 
@@ -273,12 +273,15 @@ if (!result.gate.passed) {
 const hammer = new Hammer({ mode: 'fast' });
 hammer.on('validator:complete', ({ validator, result }) => {
   if (!result.success) {
-    vscode.diagnostics.set(uri, [{
-      message: result.message,
-      severity: result.severity === 'CRITICAL' 
-        ? vscode.DiagnosticSeverity.Error 
-        : vscode.DiagnosticSeverity.Warning
-    }]);
+    vscode.diagnostics.set(uri, [
+      {
+        message: result.message,
+        severity:
+          result.severity === 'CRITICAL'
+            ? vscode.DiagnosticSeverity.Error
+            : vscode.DiagnosticSeverity.Warning,
+      },
+    ]);
   }
 });
 ```

@@ -24,16 +24,22 @@ const items = Array.from({ length: 24 }, (_, index) => ({
 
 async function main() {
   const executablePath = browsers.find((candidate) => fs.existsSync(candidate));
-  const browser = await chromium.launch(executablePath ? { headless: true, executablePath } : { headless: true });
+  const browser = await chromium.launch(
+    executablePath ? { headless: true, executablePath } : { headless: true }
+  );
   const page = await browser.newPage({ viewport: { width: 1600, height: 1000 } });
-  await page.route('**/api/v2/auth/**', (route) => route.fulfill({
-    contentType: 'application/json',
-    body: JSON.stringify({ data: { id: 'user-1', role: 'super_admin', permissions: [] } }),
-  }));
-  await page.route('**/api/v2/growth/copy', (route) => route.fulfill({
-    contentType: 'application/json',
-    body: JSON.stringify({ data: { items } }),
-  }));
+  await page.route('**/api/v2/auth/**', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ data: { id: 'user-1', role: 'super_admin', permissions: [] } }),
+    })
+  );
+  await page.route('**/api/v2/growth/copy', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ data: { items } }),
+    })
+  );
 
   await page.goto(`${baseUrl}/growth/copywriter`, { waitUntil: 'networkidle' });
   await page.getByRole('heading', { name: '文案库', exact: true }).waitFor({ timeout: 15_000 });
@@ -42,9 +48,12 @@ async function main() {
   const cells = table.locator('tbody tr').first().locator('td');
   const summaryBox = await cells.nth(1).boundingBox();
   const actionBox = await cells.nth(8).boundingBox();
-  if (!summaryBox || summaryBox.width < 180) throw new Error(`copy summary column too narrow: ${summaryBox?.width}`);
-  if (!actionBox || actionBox.width < 210) throw new Error(`actions column too narrow: ${actionBox?.width}`);
-  if (await table.locator('thead th').count() !== 9) throw new Error('copy table must have 9 columns');
+  if (!summaryBox || summaryBox.width < 180)
+    throw new Error(`copy summary column too narrow: ${summaryBox?.width}`);
+  if (!actionBox || actionBox.width < 210)
+    throw new Error(`actions column too narrow: ${actionBox?.width}`);
+  if ((await table.locator('thead th').count()) !== 9)
+    throw new Error('copy table must have 9 columns');
   await page.getByText('共 24 条', { exact: true }).waitFor();
   if (screenshotPath) await page.screenshot({ path: screenshotPath, fullPage: true });
 
@@ -54,9 +63,12 @@ async function main() {
     clientWidth: element.clientWidth,
     scrollWidth: element.scrollWidth,
   }));
-  if (overflow.scrollWidth <= overflow.clientWidth) throw new Error('mobile table should scroll horizontally');
+  if (overflow.scrollWidth <= overflow.clientWidth)
+    throw new Error('mobile table should scroll horizontally');
   await browser.close();
-  console.log('growth copy library smoke passed: restored 9-column layout, pagination, desktop widths and mobile scrolling');
+  console.log(
+    'growth copy library smoke passed: restored 9-column layout, pagination, desktop widths and mobile scrolling'
+  );
 }
 
 main().catch((error) => {

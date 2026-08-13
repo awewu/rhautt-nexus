@@ -102,11 +102,11 @@ Date: 2026-07-29
 
 建议字段：
 
-| 字段 | 类型 | 说明 |
-| --- | --- | --- |
-| `officialDetailHtml` | text | 官网产品详情富文本 HTML，保存图片地址和图文结构 |
-| `officialDetailUpdatedAt` | datetime | 官网详情最后更新时间 |
-| `officialDetailUpdatedBy` | string | 最后编辑人，可选 |
+| 字段                      | 类型     | 说明                                            |
+| ------------------------- | -------- | ----------------------------------------------- |
+| `officialDetailHtml`      | text     | 官网产品详情富文本 HTML，保存图片地址和图文结构 |
+| `officialDetailUpdatedAt` | datetime | 官网详情最后更新时间                            |
+| `officialDetailUpdatedBy` | string   | 最后编辑人，可选                                |
 
 如果现有系统已存在产品官网展示扩展表或 MongoDB 文档扩展字段，优先复用现有结构，不强行新建重复模型。
 

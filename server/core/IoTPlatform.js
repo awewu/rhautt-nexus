@@ -16,7 +16,7 @@ class IoTPlatform extends EventEmitter {
       totalDevices: 0,
       onlineDevices: 0,
       totalMessages: 0,
-      messagesPerSecond: 0
+      messagesPerSecond: 0,
     };
     this.initialized = false;
   }
@@ -26,16 +26,16 @@ class IoTPlatform extends EventEmitter {
    */
   async initialize() {
     console.log('[IoTPlatform] 初始化万物互联平台...');
-    
+
     // 初始化MQTT Broker (模拟)
     await this.initBroker();
-    
+
     // 启动消息处理
     this.startMessageProcessor();
-    
+
     // 启动统计
     this.startStatsCollector();
-    
+
     this.initialized = true;
     console.log('[IoTPlatform] 平台初始化完成');
     return true;
@@ -46,7 +46,7 @@ class IoTPlatform extends EventEmitter {
    */
   registerDevice(deviceInfo) {
     const { deviceId, deviceType, capabilities, metadata = {} } = deviceInfo;
-    
+
     if (this.devices.has(deviceId)) {
       throw new Error(`设备 ${deviceId} 已存在`);
     }
@@ -59,21 +59,21 @@ class IoTPlatform extends EventEmitter {
       status: 'offline',
       lastSeen: null,
       data: {},
-      registeredAt: new Date().toISOString()
+      registeredAt: new Date().toISOString(),
     };
 
     this.devices.set(deviceId, device);
     this.stats.totalDevices++;
 
     console.log(`[IoTPlatform] 设备注册成功: ${deviceId} (${deviceType})`);
-    
+
     this.emit('deviceRegistered', device);
-    
+
     return {
       success: true,
       deviceId,
       message: '设备注册成功',
-      endpoints: this.generateEndpoints(deviceId)
+      endpoints: this.generateEndpoints(deviceId),
     };
   }
 
@@ -93,14 +93,14 @@ class IoTPlatform extends EventEmitter {
     this.stats.onlineDevices++;
 
     console.log(`[IoTPlatform] 设备上线: ${deviceId}`);
-    
+
     this.emit('deviceConnected', device);
-    
+
     return {
       success: true,
       deviceId,
       status: 'online',
-      timestamp: device.lastSeen
+      timestamp: device.lastSeen,
     };
   }
 
@@ -128,7 +128,7 @@ class IoTPlatform extends EventEmitter {
       deviceType: device.deviceType,
       timestamp: device.lastSeen,
       data,
-      topic: `device/${deviceId}/data`
+      topic: `device/${deviceId}/data`,
     };
 
     // 加入消息队列
@@ -137,14 +137,14 @@ class IoTPlatform extends EventEmitter {
 
     // 触发数据处理
     this.emit('dataReceived', message);
-    
+
     // 路由到订阅者
     this.routeMessage(message);
 
     return {
       success: true,
       messageId: message.id,
-      timestamp: message.timestamp
+      timestamp: message.timestamp,
     };
   }
 
@@ -167,11 +167,11 @@ class IoTPlatform extends EventEmitter {
       type: 'command',
       command,
       timestamp: new Date().toISOString(),
-      status: 'pending'
+      status: 'pending',
     };
 
     console.log(`[IoTPlatform] 发送指令到 ${deviceId}:`, command);
-    
+
     // 模拟指令发送
     setTimeout(() => {
       controlMessage.status = 'delivered';
@@ -182,7 +182,7 @@ class IoTPlatform extends EventEmitter {
       success: true,
       commandId: controlMessage.id,
       status: 'sent',
-      estimatedDelivery: '< 100ms'
+      estimatedDelivery: '< 100ms',
     };
   }
 
@@ -191,19 +191,19 @@ class IoTPlatform extends EventEmitter {
    */
   subscribe(deviceId, callback) {
     const topic = `device/${deviceId}/data`;
-    
+
     if (!this.topics.has(topic)) {
       this.topics.set(topic, new Set());
     }
-    
+
     this.topics.get(topic).add(callback);
-    
+
     console.log(`[IoTPlatform] 订阅主题: ${topic}`);
-    
+
     return {
       success: true,
       topic,
-      subscriptionId: `sub_${Date.now()}`
+      subscriptionId: `sub_${Date.now()}`,
     };
   }
 
@@ -212,7 +212,7 @@ class IoTPlatform extends EventEmitter {
    */
   batchControl(deviceIds, command) {
     const results = [];
-    
+
     for (const deviceId of deviceIds) {
       try {
         const result = this.sendCommand(deviceId, command);
@@ -222,14 +222,14 @@ class IoTPlatform extends EventEmitter {
       }
     }
 
-    const successCount = results.filter(r => r.success).length;
-    
+    const successCount = results.filter((r) => r.success).length;
+
     return {
       success: successCount === deviceIds.length,
       total: deviceIds.length,
       successCount,
       failCount: deviceIds.length - successCount,
-      results
+      results,
     };
   }
 
@@ -247,8 +247,9 @@ class IoTPlatform extends EventEmitter {
       const lastSeen = new Date(device.lastSeen);
       const now = new Date();
       const diffMinutes = (now - lastSeen) / 1000 / 60;
-      
-      if (diffMinutes > 5) { // 5分钟无数据视为离线
+
+      if (diffMinutes > 5) {
+        // 5分钟无数据视为离线
         device.status = 'offline';
         this.stats.onlineDevices--;
       }
@@ -261,7 +262,7 @@ class IoTPlatform extends EventEmitter {
       lastSeen: device.lastSeen,
       data: device.data,
       capabilities: device.capabilities,
-      uptime: this.calculateUptime(device)
+      uptime: this.calculateUptime(device),
     };
   }
 
@@ -273,9 +274,10 @@ class IoTPlatform extends EventEmitter {
       ...this.stats,
       timestamp: new Date().toISOString(),
       deviceTypes: this.getDeviceTypeDistribution(),
-      onlineRate: this.stats.totalDevices > 0 
-        ? ((this.stats.onlineDevices / this.stats.totalDevices) * 100).toFixed(2) + '%'
-        : '0%'
+      onlineRate:
+        this.stats.totalDevices > 0
+          ? ((this.stats.onlineDevices / this.stats.totalDevices) * 100).toFixed(2) + '%'
+          : '0%',
     };
   }
 
@@ -284,18 +286,18 @@ class IoTPlatform extends EventEmitter {
    */
   async discoverDevices(networkRange) {
     console.log(`[IoTPlatform] 扫描网络 ${networkRange} 中的设备...`);
-    
+
     // 模拟设备发现
     const discoveredDevices = [
       { deviceId: 'thermo_001', deviceType: 'thermostat', ip: '192.168.1.101' },
       { deviceId: 'wh_001', deviceType: 'water_heater', ip: '192.168.1.102' },
-      { deviceId: 'ac_001', deviceType: 'air_conditioner', ip: '192.168.1.103' }
+      { deviceId: 'ac_001', deviceType: 'air_conditioner', ip: '192.168.1.103' },
     ];
 
     return {
       success: true,
       count: discoveredDevices.length,
-      devices: discoveredDevices
+      devices: discoveredDevices,
     };
   }
 
@@ -304,7 +306,7 @@ class IoTPlatform extends EventEmitter {
    */
   createSceneRule(rule) {
     const { name, trigger, actions, conditions = [] } = rule;
-    
+
     const sceneRule = {
       id: `scene_${Date.now()}`,
       name,
@@ -312,11 +314,11 @@ class IoTPlatform extends EventEmitter {
       conditions,
       actions,
       enabled: true,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     console.log(`[IoTPlatform] 创建场景规则: ${name}`);
-    
+
     // 监听触发条件
     this.on(trigger.event, (data) => {
       if (this.checkConditions(conditions, data)) {
@@ -328,7 +330,7 @@ class IoTPlatform extends EventEmitter {
     return {
       success: true,
       ruleId: sceneRule.id,
-      rule: sceneRule
+      rule: sceneRule,
     };
   }
 
@@ -337,16 +339,16 @@ class IoTPlatform extends EventEmitter {
     return {
       publish: `/api/iot/devices/${deviceId}/publish`,
       subscribe: `/api/iot/devices/${deviceId}/subscribe`,
-      command: `/api/iot/devices/${deviceId}/command`
+      command: `/api/iot/devices/${deviceId}/command`,
     };
   }
 
   routeMessage(message) {
     const topic = message.topic;
     const subscribers = this.topics.get(topic);
-    
+
     if (subscribers) {
-      subscribers.forEach(callback => {
+      subscribers.forEach((callback) => {
         try {
           callback(message);
         } catch (error) {
@@ -357,23 +359,29 @@ class IoTPlatform extends EventEmitter {
   }
 
   checkConditions(conditions, data) {
-    return conditions.every(condition => {
+    return conditions.every((condition) => {
       const { field, operator, value } = condition;
       const fieldValue = data[field];
-      
+
       switch (operator) {
-        case 'eq': return fieldValue === value;
-        case 'gt': return fieldValue > value;
-        case 'lt': return fieldValue < value;
-        case 'gte': return fieldValue >= value;
-        case 'lte': return fieldValue <= value;
-        default: return false;
+        case 'eq':
+          return fieldValue === value;
+        case 'gt':
+          return fieldValue > value;
+        case 'lt':
+          return fieldValue < value;
+        case 'gte':
+          return fieldValue >= value;
+        case 'lte':
+          return fieldValue <= value;
+        default:
+          return false;
       }
     });
   }
 
   executeActions(actions) {
-    actions.forEach(action => {
+    actions.forEach((action) => {
       if (action.type === 'device_control') {
         this.sendCommand(action.deviceId, action.command);
       } else if (action.type === 'notification') {
@@ -392,7 +400,7 @@ class IoTPlatform extends EventEmitter {
 
   getDeviceTypeDistribution() {
     const distribution = {};
-    this.devices.forEach(device => {
+    this.devices.forEach((device) => {
       distribution[device.deviceType] = (distribution[device.deviceType] || 0) + 1;
     });
     return distribution;
@@ -400,7 +408,7 @@ class IoTPlatform extends EventEmitter {
 
   async initBroker() {
     console.log('[IoTPlatform] 启动MQTT Broker...');
-    return new Promise(resolve => setTimeout(resolve, 100));
+    return new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   startMessageProcessor() {

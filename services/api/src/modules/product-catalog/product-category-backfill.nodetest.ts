@@ -16,7 +16,7 @@ test('backfill matches legacy fields to a brand-scoped category path', () => {
     [
       category('everhot-l1', 'everhot', 1, null, '商用', 'commercial'),
       category('everhot-l2', 'everhot', 2, 'everhot-l1', '热水系统', 'hot-water-system'),
-    ],
+    ]
   );
 
   assert.equal(report.scanned, 1);
@@ -32,14 +32,16 @@ test('backfill reports unmatched products without corrupting metadata', () => {
   });
   const report = planProductCategoryBackfill(
     [source],
-    [category('everhot-l2', 'everhot', 2, 'everhot-l1', '热水系统', 'hot-water-system')],
+    [category('everhot-l2', 'everhot', 2, 'everhot-l1', '热水系统', 'hot-water-system')]
   );
 
   assert.equal(report.matched.length, 0);
   assert.equal(report.unmatched.length, 1);
   assert.equal(report.unmatched[0].reason, 'unmatched');
   assert.equal(report.unmatched[0].meta, null);
-  assert.deepEqual(source.meta, { everhot: { websiteMenuCategory: '未识别菜单', system: '未知系统' } });
+  assert.deepEqual(source.meta, {
+    everhot: { websiteMenuCategory: '未识别菜单', system: '未知系统' },
+  });
 });
 
 test('backfill does not overwrite an existing valid category binding', () => {
@@ -58,7 +60,7 @@ test('backfill does not overwrite an existing valid category binding', () => {
       category('everhot-l1', 'everhot', 1, null, '商用', 'commercial'),
       category('everhot-l2', 'everhot', 2, 'everhot-l1', '热水系统', 'hot-water-system'),
       category('everhot-l2-other', 'everhot', 2, 'everhot-l1', '采暖系统', 'heating-system'),
-    ],
+    ]
   );
 
   assert.equal(report.alreadyBound.length, 1);
@@ -68,11 +70,15 @@ test('backfill does not overwrite an existing valid category binding', () => {
 
 test('backfill remains brand-scoped and reports cross-brand matches', () => {
   const report = planProductCategoryBackfill(
-    [product('p1', 'everhot', { meta: { everhot: { websiteMenuCategory: '家用', system: 'Ruud 热水系统' } } })],
+    [
+      product('p1', 'everhot', {
+        meta: { everhot: { websiteMenuCategory: '家用', system: 'Ruud 热水系统' } },
+      }),
+    ],
     [
       category('ruud-l1', 'ruud', 1, null, '家用', 'home'),
       category('ruud-l2', 'ruud', 2, 'ruud-l1', 'Ruud 热水系统', 'ruud-hot-water'),
-    ],
+    ]
   );
 
   assert.equal(report.matched.length, 0);
@@ -82,11 +88,15 @@ test('backfill remains brand-scoped and reports cross-brand matches', () => {
 
 test('backfill reports invalid existing bindings instead of rewriting them', () => {
   const report = planProductCategoryBackfill(
-    [product('p1', 'everhot', { meta: { everhot: { categoryLevel1Id: 'missing', categoryLevel2Id: 'everhot-l2' } } })],
+    [
+      product('p1', 'everhot', {
+        meta: { everhot: { categoryLevel1Id: 'missing', categoryLevel2Id: 'everhot-l2' } },
+      }),
+    ],
     [
       category('everhot-l1', 'everhot', 1, null, '商用', 'commercial'),
       category('everhot-l2', 'everhot', 2, 'everhot-l1', '热水系统', 'hot-water-system'),
-    ],
+    ]
   );
 
   assert.equal(report.invalidExistingBindings.length, 1);
@@ -101,7 +111,7 @@ test('backfill supports configured aliases when legacy text is not an exact cate
       category('everhot-l1', 'everhot', 1, null, '商用', 'commercial'),
       category('everhot-l2', 'everhot', 2, 'everhot-l1', '热水系统', 'hot-water-system'),
     ],
-    [{ brandCode: 'everhot', legacyValue: 'dhw', categoryId: 'everhot-l2' }],
+    [{ brandCode: 'everhot', legacyValue: 'dhw', categoryId: 'everhot-l2' }]
   );
 
   assert.equal(report.matched.length, 1);
@@ -114,7 +124,7 @@ function category(
   level: 1 | 2 | 3,
   parentId: string | null,
   nameCn: string,
-  code = id,
+  code = id
 ): BrandProductCategoryEntity {
   return {
     id,
@@ -134,11 +144,7 @@ function category(
   };
 }
 
-function product(
-  id: string,
-  brand: string,
-  overrides: Partial<ProductEntity> = {},
-): ProductEntity {
+function product(id: string, brand: string, overrides: Partial<ProductEntity> = {}): ProductEntity {
   return {
     id,
     tenantId: 'tenant-1',

@@ -42,17 +42,20 @@ const failures = [];
 const recoveryDebt = [];
 
 for (const testPath of REQUIRED_TESTS) {
-  if (!fs.existsSync(path.join(ROOT, testPath))) failures.push(`missing retained core-domain test: ${testPath}`);
+  if (!fs.existsSync(path.join(ROOT, testPath)))
+    failures.push(`missing retained core-domain test: ${testPath}`);
 }
 for (const testPath of REQUIRED_KERNEL_TESTS) {
-  if (!fs.existsSync(path.join(ROOT, testPath))) failures.push(`missing hvac-kernel baseline test: ${testPath}`);
+  if (!fs.existsSync(path.join(ROOT, testPath)))
+    failures.push(`missing hvac-kernel baseline test: ${testPath}`);
 }
 // 内核基准集用 Jest（与 nodetest 分属两套 runner），单独执行。
 if (!failures.length) {
-  const jest = spawnSync(process.execPath, [
-    path.join(ROOT, 'node_modules', 'jest', 'bin', 'jest.js'),
-    KERNEL_TEST_DIR, '--silent',
-  ], { cwd: ROOT, encoding: 'utf8' });
+  const jest = spawnSync(
+    process.execPath,
+    [path.join(ROOT, 'node_modules', 'jest', 'bin', 'jest.js'), KERNEL_TEST_DIR, '--silent'],
+    { cwd: ROOT, encoding: 'utf8' }
+  );
   if (jest.status !== 0) {
     failures.push('hvac-kernels 基准集未通过（专业度红线：黄金值漂移或不变量被破坏）');
   }
@@ -70,21 +73,23 @@ for (const moduleName of PRD_D4_RECOVERY) {
   }
   // 目录已在但没有 NestJS 模块声明 = 半恢复（未接线），这种不一致状态必须阻断。
   const wired = fs.readdirSync(dir).some((f) => /\.module\.ts$/.test(f));
-  if (!wired) failures.push(`PRD D4 module partially recovered but not wired (missing *.module.ts): ${moduleName}`);
+  if (!wired)
+    failures.push(
+      `PRD D4 module partially recovered but not wired (missing *.module.ts): ${moduleName}`
+    );
 }
 
 let output = '';
 if (!failures.length) {
-  const result = spawnSync(process.execPath, [
-    '-r',
-    'ts-node/register/transpile-only',
-    '--test',
-    ...REQUIRED_TESTS,
-  ], {
-    cwd: ROOT,
-    encoding: 'utf8',
-    env: { ...process.env, TS_NODE_PROJECT: 'services/api/tsconfig.json' },
-  });
+  const result = spawnSync(
+    process.execPath,
+    ['-r', 'ts-node/register/transpile-only', '--test', ...REQUIRED_TESTS],
+    {
+      cwd: ROOT,
+      encoding: 'utf8',
+      env: { ...process.env, TS_NODE_PROJECT: 'services/api/tsconfig.json' },
+    }
+  );
   output = `${result.stdout || ''}\n${result.stderr || ''}`;
   if (result.status !== 0) failures.push('retained quote-lock core-domain test failed');
 }
@@ -111,14 +116,23 @@ try {
     outstanding: recoveryDebt,
     path: 'evidence/testing/core-domain-coverage-report.json',
   });
-} catch { /* 台账不可写不应阻断域覆盖校验 */ }
+} catch {
+  /* 台账不可写不应阻断域覆盖校验 */
+}
 const evidenceDir = path.join(ROOT, 'evidence', 'testing');
 fs.mkdirSync(evidenceDir, { recursive: true });
-fs.writeFileSync(path.join(evidenceDir, 'core-domain-coverage-report.json'), `${JSON.stringify(report, null, 2)}\n`);
+fs.writeFileSync(
+  path.join(evidenceDir, 'core-domain-coverage-report.json'),
+  `${JSON.stringify(report, null, 2)}\n`
+);
 
-console.log(`Core Domain Coverage Check: failures = ${failures.length}, PRD-D4 recovery outstanding = ${recoveryDebt.length}`);
+console.log(
+  `Core Domain Coverage Check: failures = ${failures.length}, PRD-D4 recovery outstanding = ${recoveryDebt.length}`
+);
 if (recoveryDebt.length) {
-  console.warn(`⚠️  PRD §13 D4 待恢复（P2 路线图，不阻断）: ${recoveryDebt.join(', ')} —— 已记入 evidence/release-evidence.json#prdD4CoreDomainRecovery`);
+  console.warn(
+    `⚠️  PRD §13 D4 待恢复（P2 路线图，不阻断）: ${recoveryDebt.join(', ')} —— 已记入 evidence/release-evidence.json#prdD4CoreDomainRecovery`
+  );
 }
 for (const failure of failures) console.error(`- ${failure}`);
 if (failures.length) process.exit(1);

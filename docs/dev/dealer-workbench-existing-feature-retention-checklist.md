@@ -42,35 +42,35 @@ Retention checklist:
 
 ## Current route inventory
 
-| Runtime route | App route file | Current UI surface | Retention level |
-| --- | --- | --- | --- |
-| `/` | `src/app/page.tsx` | Login and SSO entry | Detailed |
-| `/dashboard` | `src/app/dashboard/page.tsx` | Workbench KPI dashboard, quick links, load calculator | Detailed |
-| `/crm` | `src/app/crm/page.tsx` | CRM funnel board, analytics, detail drawer | Listed |
-| `/projects` | `src/app/projects/page.tsx` | Project delivery kanban | Listed |
-| `/design` | `src/app/design/page.tsx` | Embedded simple 2D designer iframe | Design/BIM |
-| `/design/pro` | `src/app/design/pro/page.tsx` | Native CAD editor page | Design/BIM |
-| `/design/visualize` | `src/app/design/visualize/page.tsx` | Visualization tabs and simulations | Design/BIM |
-| `/bim` | `src/app/bim/page.tsx` | BIM project list and stage operations | Design/BIM |
-| `/bim/[id]` | `src/app/bim/[id]/page.tsx` | BIM project detail, viewer, BOM, checklist, IoT handoff | Design/BIM |
-| `/bim/artifacts` | `src/app/bim/artifacts/page.tsx` | Deepening artifact library | Design/BIM |
-| `/bim/deepen-queue` | `src/app/bim/deepen-queue/page.tsx` | Deepening project queue | Design/BIM |
-| `/bim/deepen/[projectId]` | `src/app/bim/deepen/[projectId]/page.tsx` | Deepening workbench and IFC viewer | Design/BIM |
-| `/products` | `src/app/products/page.tsx` | Product catalog/materials/base modules | Detailed |
-| `/brand` | `src/app/brand/page.tsx` | Brand operations dashboard | Listed |
-| `/comfort` and `/comfort/*` | `src/app/comfort/[[...section]]/page.tsx` | Catch-all comfort workspace; non-`sites` paths embed legacy workspace | Listed |
-| `/comfort/sites` | `src/app/comfort/[[...section]]/BrandSitesManager.tsx` | Brand-site master-data CRUD | Detailed |
-| `/comfort/sites/[code]` | `src/app/comfort/[[...section]]/BrandSiteConsoleShell.tsx` | Single brand-site console and product shelf controls | Detailed |
-| `/comfort/sites/[code]/library` | `src/app/comfort/[[...section]]/SiteProductShelfManager.tsx` | Site product assignment shelf library | Detailed |
-| `/growth`, `/growth/geo`, `/growth/copywriter`, `/growth/sentiment`, `/growth/automation`, `/growth/materials` | `src/app/growth/[[...section]]/page.tsx` | Native marketing/growth modules | Detailed |
-| `/accounts` | `src/app/accounts/page.tsx` | Admin account and role management | Detailed |
-| `/finance` | `src/app/finance/page.tsx` | Finance and receivables risk dashboard | Listed |
-| `/team` | `src/app/team/page.tsx` | Team performance leaderboard | Listed |
-| `/aftersales` | `src/app/aftersales/page.tsx` | Aftersales ticket and warranty ledger | Listed |
-| `/mobile` | `src/app/mobile/page.tsx` | Mobile quick lead and quote flow | Listed |
-| `/hub` | `src/app/hub/page.tsx` | Role-filtered launcher / SSO hub | Listed |
-| `/hub-console` | `src/app/hub-console/page.tsx` | Parent/child menu architecture preview | Listed |
-| `/analytics` | `src/app/analytics/page.tsx` | Business analytics dashboard | Listed |
+| Runtime route                                                                                                  | App route file                                               | Current UI surface                                                    | Retention level |
+| -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------- | --------------- |
+| `/`                                                                                                            | `src/app/page.tsx`                                           | Login and SSO entry                                                   | Detailed        |
+| `/dashboard`                                                                                                   | `src/app/dashboard/page.tsx`                                 | Workbench KPI dashboard, quick links, load calculator                 | Detailed        |
+| `/crm`                                                                                                         | `src/app/crm/page.tsx`                                       | CRM funnel board, analytics, detail drawer                            | Listed          |
+| `/projects`                                                                                                    | `src/app/projects/page.tsx`                                  | Project delivery kanban                                               | Listed          |
+| `/design`                                                                                                      | `src/app/design/page.tsx`                                    | Embedded simple 2D designer iframe                                    | Design/BIM      |
+| `/design/pro`                                                                                                  | `src/app/design/pro/page.tsx`                                | Native CAD editor page                                                | Design/BIM      |
+| `/design/visualize`                                                                                            | `src/app/design/visualize/page.tsx`                          | Visualization tabs and simulations                                    | Design/BIM      |
+| `/bim`                                                                                                         | `src/app/bim/page.tsx`                                       | BIM project list and stage operations                                 | Design/BIM      |
+| `/bim/[id]`                                                                                                    | `src/app/bim/[id]/page.tsx`                                  | BIM project detail, viewer, BOM, checklist, IoT handoff               | Design/BIM      |
+| `/bim/artifacts`                                                                                               | `src/app/bim/artifacts/page.tsx`                             | Deepening artifact library                                            | Design/BIM      |
+| `/bim/deepen-queue`                                                                                            | `src/app/bim/deepen-queue/page.tsx`                          | Deepening project queue                                               | Design/BIM      |
+| `/bim/deepen/[projectId]`                                                                                      | `src/app/bim/deepen/[projectId]/page.tsx`                    | Deepening workbench and IFC viewer                                    | Design/BIM      |
+| `/products`                                                                                                    | `src/app/products/page.tsx`                                  | Product catalog/materials/base modules                                | Detailed        |
+| `/brand`                                                                                                       | `src/app/brand/page.tsx`                                     | Brand operations dashboard                                            | Listed          |
+| `/comfort` and `/comfort/*`                                                                                    | `src/app/comfort/[[...section]]/page.tsx`                    | Catch-all comfort workspace; non-`sites` paths embed legacy workspace | Listed          |
+| `/comfort/sites`                                                                                               | `src/app/comfort/[[...section]]/BrandSitesManager.tsx`       | Brand-site master-data CRUD                                           | Detailed        |
+| `/comfort/sites/[code]`                                                                                        | `src/app/comfort/[[...section]]/BrandSiteConsoleShell.tsx`   | Single brand-site console and product shelf controls                  | Detailed        |
+| `/comfort/sites/[code]/library`                                                                                | `src/app/comfort/[[...section]]/SiteProductShelfManager.tsx` | Site product assignment shelf library                                 | Detailed        |
+| `/growth`, `/growth/geo`, `/growth/copywriter`, `/growth/sentiment`, `/growth/automation`, `/growth/materials` | `src/app/growth/[[...section]]/page.tsx`                     | Native marketing/growth modules                                       | Detailed        |
+| `/accounts`                                                                                                    | `src/app/accounts/page.tsx`                                  | Admin account and role management                                     | Detailed        |
+| `/finance`                                                                                                     | `src/app/finance/page.tsx`                                   | Finance and receivables risk dashboard                                | Listed          |
+| `/team`                                                                                                        | `src/app/team/page.tsx`                                      | Team performance leaderboard                                          | Listed          |
+| `/aftersales`                                                                                                  | `src/app/aftersales/page.tsx`                                | Aftersales ticket and warranty ledger                                 | Listed          |
+| `/mobile`                                                                                                      | `src/app/mobile/page.tsx`                                    | Mobile quick lead and quote flow                                      | Listed          |
+| `/hub`                                                                                                         | `src/app/hub/page.tsx`                                       | Role-filtered launcher / SSO hub                                      | Listed          |
+| `/hub-console`                                                                                                 | `src/app/hub-console/page.tsx`                               | Parent/child menu architecture preview                                | Listed          |
+| `/analytics`                                                                                                   | `src/app/analytics/page.tsx`                                 | Business analytics dashboard                                          | Listed          |
 
 ## Detailed route checklists
 

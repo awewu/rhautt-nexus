@@ -9,7 +9,7 @@ export function resolveSsoApiOrigin(env: SsoProxyEnv = process.env): string {
 export function buildSsoProxyTarget(
   pathParts: string[],
   requestUrl: string,
-  env: SsoProxyEnv = process.env,
+  env: SsoProxyEnv = process.env
 ): string {
   const safePath = pathParts.map((part) => encodeURIComponent(part)).join('/');
   const target = new URL(`${resolveSsoApiOrigin(env)}/api/v2/auth/sso/${safePath}`);

@@ -24,7 +24,10 @@ test('maps current dealer-workbench simulated products into product-catalog seed
   assert.equal(records[0].status, 'active');
   assert.equal(records[0].spec.officialModel, 'RP-16kW-INV');
   assert.equal(records[0].meta.brandMetadata.importedFrom, 'dealer-workbench-products-data');
-  assert.equal(records.some((record) => record.brand === 'ruud'), true);
+  assert.equal(
+    records.some((record) => record.brand === 'ruud'),
+    true
+  );
   assert.equal(records.filter((record) => record.brand === 'everhot').length, 6);
 });
 
@@ -52,11 +55,10 @@ test('plans idempotent create/update by tenantId plus sku and rejects duplicate 
     { tenantId: tenants.rheem, sku: 'RP-16kW-INV' },
     { tenantId: tenants.ruud, sku: 'RU-20kW' },
   ];
-  const plan = planImport(records, [{ id: 'existing-1', tenantId: tenants.rheem, sku: 'RP-16kW-INV' }]);
+  const plan = planImport(records, [
+    { id: 'existing-1', tenantId: tenants.rheem, sku: 'RP-16kW-INV' },
+  ]);
   assert.equal(plan.created, 1);
   assert.equal(plan.updated, 1);
-  assert.throws(
-    () => planImport([records[0], { ...records[0] }], []),
-    /Duplicate seed key/
-  );
+  assert.throws(() => planImport([records[0], { ...records[0] }], []), /Duplicate seed key/);
 });

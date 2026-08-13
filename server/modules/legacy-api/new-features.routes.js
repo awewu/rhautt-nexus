@@ -68,13 +68,13 @@ router.get('/pain-diagnosis/v3/pain-points', async (req, res) => {
   try {
     const dimensions = painDiagnosisV3.painDimensions;
     const sixSystems = painDiagnosisV3.sixSystems;
-    
+
     // 统计总数
     let totalCount = 0;
-    Object.values(dimensions).forEach(dim => {
+    Object.values(dimensions).forEach((dim) => {
       totalCount += dim.tags.length;
     });
-    
+
     res.json({
       success: true,
       data: {
@@ -87,9 +87,9 @@ router.get('/pain-diagnosis/v3/pain-points', async (req, res) => {
           '痛点选择无数量限制',
           'AI智能隐性痛点识别',
           '3种定制方案推荐',
-          '6大系统全覆盖'
-        ]
-      }
+          '6大系统全覆盖',
+        ],
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -100,11 +100,11 @@ router.get('/pain-diagnosis/v3/pain-points', async (req, res) => {
 router.post('/pain-diagnosis/v3/diagnose', async (req, res) => {
   try {
     const { roomProfile } = req.body;
-    
+
     if (!roomProfile) {
       return res.status(400).json({ success: false, error: '缺少roomProfile参数' });
     }
-    
+
     const result = painDiagnosisV3.diagnose(roomProfile);
     res.json(result);
   } catch (error) {
@@ -116,17 +116,17 @@ router.post('/pain-diagnosis/v3/diagnose', async (req, res) => {
 router.post('/pain-diagnosis/v3/solutions', async (req, res) => {
   try {
     const { roomProfile, selectedTags } = req.body;
-    
+
     if (!roomProfile || !selectedTags) {
       return res.status(400).json({ success: false, error: '缺少roomProfile或selectedTags参数' });
     }
-    
+
     const result = painDiagnosisV3.diagnose(roomProfile, selectedTags);
-    
+
     if (!result.success) {
       return res.status(400).json(result);
     }
-    
+
     // 格式化返回数据
     res.json({
       success: true,
@@ -134,13 +134,13 @@ router.post('/pain-diagnosis/v3/solutions', async (req, res) => {
         roomProfile: result.data.roomProfile,
         selectedPainPoints: {
           count: selectedTags.length,
-          tags: selectedTags
+          tags: selectedTags,
         },
         analysis: result.data.selectedAnalysis,
         recommendedSolutions: result.data.recommendedSolutions,
         sixSystems: painDiagnosisV3.sixSystems,
-        timestamp: result.data.timestamp
-      }
+        timestamp: result.data.timestamp,
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -160,9 +160,9 @@ router.get('/pain-diagnosis/v3/six-systems', async (req, res) => {
           heating: '地暖/暖气片，冬季温暖舒适',
           ac: '中央空调/分体空调，夏季清凉',
           freshAir: '24小时新鲜空气，除霾降醛',
-          waterPurify: '全屋净化，饮水用水更健康'
-        }
-      }
+          waterPurify: '全屋净化，饮水用水更健康',
+        },
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -173,21 +173,21 @@ router.get('/pain-diagnosis/v3/six-systems', async (req, res) => {
 router.post('/pain-diagnosis/v3/ai-recognize', async (req, res) => {
   try {
     const { roomProfile, manuallySelected = [] } = req.body;
-    
+
     if (!roomProfile) {
       return res.status(400).json({ success: false, error: '缺少roomProfile参数' });
     }
-    
+
     const aiRecommendations = painDiagnosisV3.aiRecognizePainPoints(roomProfile, manuallySelected);
-    
+
     res.json({
       success: true,
       data: {
         recommendations: aiRecommendations.recommendations,
         total: aiRecommendations.total,
         accuracy: aiRecommendations.accuracy,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

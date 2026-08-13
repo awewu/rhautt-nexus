@@ -26,16 +26,19 @@ class ThreeTierEngine {
     // 套餐按㎡定价矩阵（对标土巴兔等套餐模式）
     // 注：此处单价代表"标准套餐一口价"，含产品+系统+常规材料+基础施工+管理费
     this.PACKAGE_PRICING = options.packagePricing || {
-      basic:   { perSqm: 899,  name: '基础套餐', tag: '经济实用' },
+      basic: { perSqm: 899, name: '基础套餐', tag: '经济实用' },
       comfort: { perSqm: 1299, name: '舒适套餐', tag: '品质之选', recommended: true },
-      premium: { perSqm: 1899, name: '旗舰套餐', tag: '尊享定制' }
+      premium: { perSqm: 1899, name: '旗舰套餐', tag: '尊享定制' },
     };
 
     // 城市系数（套餐价可按城市浮动；默认全国统一，如需启用见 applyCityFactor）
     this.CITY_FACTORS = options.cityFactors || {
-      tier1: { factor: 1.10, cities: ['北京', '上海', '广州', '深圳'] },
-      tier2: { factor: 1.05, cities: ['杭州', '南京', '成都', '武汉', '西安', '重庆', '苏州', '天津'] },
-      tier3: { factor: 1.00, cities: [] } // 其他
+      tier1: { factor: 1.1, cities: ['北京', '上海', '广州', '深圳'] },
+      tier2: {
+        factor: 1.05,
+        cities: ['杭州', '南京', '成都', '武汉', '西安', '重庆', '苏州', '天津'],
+      },
+      tier3: { factor: 1.0, cities: [] }, // 其他
     };
   }
 
@@ -61,14 +64,14 @@ class ThreeTierEngine {
       input: normalized,
       analysis: consultation.analysis,
       tiers: {
-        basic:   this._normalizeTier(consultation.solutions.basic, 'basic'),
+        basic: this._normalizeTier(consultation.solutions.basic, 'basic'),
         comfort: this._normalizeTier(consultation.solutions.comfort, 'comfort'),
-        premium: this._normalizeTier(consultation.solutions.premium, 'premium')
+        premium: this._normalizeTier(consultation.solutions.premium, 'premium'),
       },
       comparison: consultation.comparison,
       recommendation: consultation.recommendation,
       packagePricing,
-      consultationSummary: consultation.consultationSummary
+      consultationSummary: consultation.consultationSummary,
     };
   }
 
@@ -85,7 +88,7 @@ class ThreeTierEngine {
       generatedAt: new Date().toISOString(),
       area,
       city,
-      packagePricing: this._calculatePackagePricing(area, city)
+      packagePricing: this._calculatePackagePricing(area, city),
     };
   }
 
@@ -109,7 +112,7 @@ class ThreeTierEngine {
       residents: params.residents || 3,
       hasElderly: !!params.hasElderly,
       hasChildren: !!params.hasChildren,
-      hasPet: !!params.hasPet
+      hasPet: !!params.hasPet,
     };
   }
 
@@ -146,9 +149,14 @@ class ThreeTierEngine {
         systems: [],
         totalPrice: 0,
         valueProposition: [],
-        roi: { energySavingsPercent: 0, annualSaveEstimate: 0, comfortScore: 0, paybackYears: 'N/A' },
+        roi: {
+          energySavingsPercent: 0,
+          annualSaveEstimate: 0,
+          comfortScore: 0,
+          paybackYears: 'N/A',
+        },
         recommended: tierKey === 'comfort',
-        unavailable: true
+        unavailable: true,
       };
     }
     return {
@@ -163,7 +171,7 @@ class ThreeTierEngine {
       budgetFit: solution.budgetFit,
       valueProposition: solution.valueProposition || [],
       roi: solution.roi || {},
-      recommended: !!solution.recommended || tierKey === 'comfort'
+      recommended: !!solution.recommended || tierKey === 'comfort',
     };
   }
 
@@ -182,7 +190,7 @@ class ThreeTierEngine {
         area,
         subtotal: Math.round(perSqm * area),
         cityFactor,
-        recommended: !!config.recommended
+        recommended: !!config.recommended,
       };
     }
     return result;

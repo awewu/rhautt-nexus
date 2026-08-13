@@ -33,7 +33,7 @@ const REQUIRED_FILES = [
   '.claude/agents/iot-lifecycle-architect.md',
   '.claude/agents/test-harness-builder.md',
   '.claude/agents/ui-vi-director.md',
-  'governance/agent-runs.json'
+  'governance/agent-runs.json',
 ];
 
 function read(relativePath) {
@@ -53,7 +53,7 @@ function pass(message, evidence = []) {
 }
 
 function checkRequiredFiles() {
-  const missing = REQUIRED_FILES.filter(file => !exists(file));
+  const missing = REQUIRED_FILES.filter((file) => !exists(file));
   return missing.length
     ? fail('AI control-plane files are missing', missing)
     : pass('AI control-plane files are present', { count: REQUIRED_FILES.length });
@@ -62,10 +62,7 @@ function checkRequiredFiles() {
 function checkClaudeMemory() {
   const claudeMemory = read('CLAUDE.md');
   const agentRules = read('AGENTS.md');
-  const claudeRequired = [
-    'Use `AGENTS.md` as the source of truth',
-    'docs/AGENT-MEMORY.md'
-  ];
+  const claudeRequired = ['Use `AGENTS.md` as the source of truth', 'docs/AGENT-MEMORY.md'];
   const agentRulesRequired = [
     'Rhautt Nexus / 瑞合数智枢纽',
     'Rhautt Comfort / 瑞合瑞德暖通科技集团',
@@ -73,11 +70,15 @@ function checkClaudeMemory() {
     'routeOwnership',
     'Lifecycle IoT',
     'China mandatory general codes',
-    'harness:consolidation'
+    'harness:consolidation',
   ];
   const missing = [
-    ...claudeRequired.filter(token => !claudeMemory.includes(token)).map(token => `CLAUDE.md: ${token}`),
-    ...agentRulesRequired.filter(token => !agentRules.includes(token)).map(token => `AGENTS.md: ${token}`)
+    ...claudeRequired
+      .filter((token) => !claudeMemory.includes(token))
+      .map((token) => `CLAUDE.md: ${token}`),
+    ...agentRulesRequired
+      .filter((token) => !agentRules.includes(token))
+      .map((token) => `AGENTS.md: ${token}`),
   ];
   return missing.length
     ? fail('Project agent memory is missing current source-of-truth tokens', missing)
@@ -85,7 +86,9 @@ function checkClaudeMemory() {
 }
 
 function checkAgents() {
-  const agents = fs.readdirSync(path.join(ROOT, '.claude/agents')).filter(file => file.endsWith('.md'));
+  const agents = fs
+    .readdirSync(path.join(ROOT, '.claude/agents'))
+    .filter((file) => file.endsWith('.md'));
   return agents.length >= 17
     ? pass('Specialized Claude cowork agents are configured', { agents: agents.length })
     : fail('Expected at least 17 specialized agents', agents);
@@ -95,7 +98,7 @@ function checkSettingsCommands() {
   const settings = JSON.parse(read('.claude/settings.json'));
   const commands = settings.slash_commands || {};
   const required = ['harness', 'prod-test'];
-  const missing = required.filter(name => !commands[name]);
+  const missing = required.filter((name) => !commands[name]);
   return missing.length
     ? fail('Claude settings are missing required slash commands', missing)
     : pass('Claude settings expose project quality commands');
@@ -120,16 +123,20 @@ function checkAgentRunLedger() {
     'iot-lifecycle-architect',
     'test-harness-builder',
     'sre-guardian',
-    'security-supply-chain'
+    'security-supply-chain',
   ];
   const runs = Array.isArray(ledger.runs) ? ledger.runs : [];
-  const owners = new Set(runs.map(run => run.owner));
-  const missing = requiredOwners.filter(owner => !owners.has(owner));
+  const owners = new Set(runs.map((run) => run.owner));
+  const missing = requiredOwners.filter((owner) => !owners.has(owner));
   const ledgerText = JSON.stringify(ledger);
   const falseClaim =
     /production[-_\s]*complete/i.test(String(ledger.status || '')) ||
-    /(true|proven|verified|completed)\s+independent\s+(multi-agent|agent|parallel)/i.test(ledgerText) ||
-    /(real|actual)\s+parallel\s+model\s+(execution|runtime)\s+(is\s+)?(proven|complete|running)/i.test(ledgerText);
+    /(true|proven|verified|completed)\s+independent\s+(multi-agent|agent|parallel)/i.test(
+      ledgerText
+    ) ||
+    /(real|actual)\s+parallel\s+model\s+(execution|runtime)\s+(is\s+)?(proven|complete|running)/i.test(
+      ledgerText
+    );
 
   if (ledger.platform !== 'Rhautt Nexus / 瑞合数智枢纽') {
     return fail('Agent run ledger has wrong platform', { platform: ledger.platform });
@@ -156,20 +163,23 @@ function main() {
     checkClaudeMemory(),
     checkAgents(),
     checkSettingsCommands(),
-    checkAgentRunLedger()
+    checkAgentRunLedger(),
   ];
-  const failed = checks.filter(check => check.status === 'fail');
+  const failed = checks.filter((check) => check.status === 'fail');
   const report = {
     generatedAt: new Date().toISOString(),
     checks,
     summary: {
       checks: checks.length,
       passed: checks.length - failed.length,
-      failed: failed.length
-    }
+      failed: failed.length,
+    },
   };
 
-  fs.writeFileSync(path.join(ROOT, 'audit/ai-control-plane-report.json'), JSON.stringify(report, null, 2));
+  fs.writeFileSync(
+    path.join(ROOT, 'audit/ai-control-plane-report.json'),
+    JSON.stringify(report, null, 2)
+  );
   console.log(`AI Control Plane Check: ${report.summary.passed}/${report.summary.checks} passed`);
   for (const check of checks) {
     console.log(`- ${check.status.toUpperCase()}: ${check.message}`);

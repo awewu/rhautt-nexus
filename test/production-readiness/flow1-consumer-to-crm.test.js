@@ -14,6 +14,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { describeIfArtifacts } = require('./helpers/local-artifacts');
 
 const ROOT = path.join(__dirname, '..', '..');
 
@@ -39,8 +40,9 @@ function extractNestRoutes(controllerSource) {
   const controllerMatch = controllerSource.match(/@Controller\(\s*['"`]([^'"`]*)['"`]\s*\)/);
   if (!controllerMatch) return [];
   const prefix = controllerMatch[1].replace(/^\/|\/$/g, '');
-  const classPublic = /@Controller\([^)]*\)\s*(?:@\w+\([^)]*\)\s*)*/.test(controllerSource)
-    && /@Public\(\)\s*(?:@\w+(\([^)]*\))?\s*)*export class/.test(controllerSource.replace(/\n/g, ' '));
+  const classPublic =
+    /@Controller\([^)]*\)\s*(?:@\w+\([^)]*\)\s*)*/.test(controllerSource) &&
+    /@Public\(\)\s*(?:@\w+(\([^)]*\))?\s*)*export class/.test(controllerSource.replace(/\n/g, ' '));
 
   const routes = [];
   // 逐个方法装饰块解析：捕获方法装饰器组（含 @Public/@UseGuards/@Post 等）
@@ -48,7 +50,9 @@ function extractNestRoutes(controllerSource) {
   let m;
   while ((m = methodRegex.exec(controllerSource))) {
     const decorators = m[1];
-    const httpMatch = decorators.match(/@(Get|Post|Put|Patch|Delete)\(\s*(?:['"`]([^'"`]*)['"`])?\s*\)/);
+    const httpMatch = decorators.match(
+      /@(Get|Post|Put|Patch|Delete)\(\s*(?:['"`]([^'"`]*)['"`])?\s*\)/
+    );
     if (!httpMatch) continue;
     const sub = (httpMatch[2] || '').replace(/^\/|\/$/g, '');
     const fullPath = '/api/v2/' + [prefix, sub].filter(Boolean).join('/');
@@ -78,7 +82,8 @@ function allNestRoutes() {
   return routes;
 }
 
-describe('Flow 1 · 问诊 → CRM 端到端契约（P1）', () => {
+// 前端页面在 archive/（.gitignore 且无生成步骤），缺失时跳过依赖它的契约断言
+describeIfArtifacts([FRONTEND_PAGE])('Flow 1 · 问诊 → CRM 端到端契约（P1 · 前端页面侧）', () => {
   const page = read(FRONTEND_PAGE);
   const frontendCalls = extractFrontendApiCalls(page);
   const nestRoutes = allNestRoutes();
@@ -107,14 +112,17 @@ describe('Flow 1 · 问诊 → CRM 端到端契约（P1）', () => {
     const missing = frontendCalls.filter((c) => !spec.paths[c]);
     expect(missing).toEqual([]);
   });
+});
 
+// 以下断言只依赖 NestJS 源码与 OpenAPI（不依赖归档前端页面），始终执行
+describe('Flow 1 · 问诊 → CRM 端到端契约（P1 · NestJS 侧）', () => {
   test('diagnosis public/ai-analyze 在 NestJS 侧存在且限流（收割自 legacy，替代 Express 主干）', () => {
     const controller = read(`${NEST_MODULES}/diagnosis/diagnosis.controller.ts`);
     const block = controller.slice(0, controller.indexOf("@Post('public/ai-analyze')"));
     const tail = block.slice(block.lastIndexOf('/**'));
     expect(controller).toContain("@Post('public/ai-analyze')");
     expect(tail + controller.slice(controller.indexOf("@Post('public/ai-analyze')"))).toMatch(
-      /@Public\(\)\s*(?:\n\s*)?@UseGuards\(PublicRateLimitGuard\)\s*(?:\n\s*)?@Post\('public\/ai-analyze'\)/,
+      /@Public\(\)\s*(?:\n\s*)?@UseGuards\(PublicRateLimitGuard\)\s*(?:\n\s*)?@Post\('public\/ai-analyze'\)/
     );
   });
 
@@ -131,7 +139,9 @@ describe('Flow 1 · 问诊 → CRM 端到端契约（P1）', () => {
     expect(svc).toMatch(/recordConsentInTx/);
     expect(svc).toMatch(/lead\.captured/);
     // PIPL 硬闸：无同意不留资
-    expect(svc).toMatch(/consent !== true.*BadRequestException|BadRequestException\('PIPL consent required'\)/s);
+    expect(svc).toMatch(
+      /consent !== true.*BadRequestException|BadRequestException\('PIPL consent required'\)/s
+    );
   });
 
   test('公开问诊完成在 Nest/PostgreSQL 事务内创建线索、保存报告并发出 diagnosis.completed', () => {

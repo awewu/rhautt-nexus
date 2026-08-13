@@ -5,11 +5,26 @@ const test = require('node:test');
 
 const root = path.join(__dirname, '..', '..', '..');
 const shell = fs.readFileSync(
-  path.join(root, 'apps', 'dealer-workbench', 'src', 'app', 'comfort', '[[...section]]', 'BrandSiteConsoleShell.tsx'),
+  path.join(
+    root,
+    'apps',
+    'dealer-workbench',
+    'src',
+    'app',
+    'comfort',
+    '[[...section]]',
+    'BrandSiteConsoleShell.tsx'
+  ),
   'utf8'
 );
-const everhotNav = fs.readFileSync(path.join(root, 'apps', 'everhot-cn', 'public', 'js', 'nav.js'), 'utf8');
-const everhotCss = fs.readFileSync(path.join(root, 'apps', 'everhot-cn', 'public', 'css', 'everhot.css'), 'utf8');
+const everhotNav = fs.readFileSync(
+  path.join(root, 'apps', 'everhot-cn', 'public', 'js', 'nav.js'),
+  'utf8'
+);
+const everhotCss = fs.readFileSync(
+  path.join(root, 'apps', 'everhot-cn', 'public', 'css', 'everhot.css'),
+  'utf8'
+);
 
 test('brand console has a fixed icon button that returns to page top', () => {
   assert.match(shell, /const backTopButtonRef = useRef<HTMLButtonElement \| null>\(null\);/);
@@ -24,7 +39,10 @@ test('brand console has a fixed icon button that returns to page top', () => {
   assert.match(shell, /button\.dataset\.bound === 'true'/);
   assert.match(shell, /button\.classList\.toggle\('is-visible', visible\)/);
   assert.match(shell, /button\.addEventListener\('click', backTop\)/);
-  assert.match(shell, /document\.addEventListener\('scroll', updateBackTopVisibility, \{ passive: true, capture: true \}\)/);
+  assert.match(
+    shell,
+    /document\.addEventListener\('scroll', updateBackTopVisibility, \{ passive: true, capture: true \}\)/
+  );
   assert.match(shell, /window\.setInterval\(updateBackTopVisibility, 160\)/);
   assert.match(shell, /window\.clearInterval\(visibilityTimer\)/);
   assert.ok(shell.includes("document.querySelector('.content')"));

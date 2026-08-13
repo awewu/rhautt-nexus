@@ -12,7 +12,8 @@ import { BadRequestException } from '@nestjs/common';
  */
 
 function assertPlainObject(v: unknown, field: string): Record<string, unknown> {
-  if (!v || typeof v !== 'object' || Array.isArray(v)) throw new BadRequestException(`${field} 必须是对象`);
+  if (!v || typeof v !== 'object' || Array.isArray(v))
+    throw new BadRequestException(`${field} 必须是对象`);
   return v as Record<string, unknown>;
 }
 
@@ -37,12 +38,13 @@ function assertOptionalString(v: unknown, field: string): void {
 }
 
 function assertRequiredString(v: unknown, field: string): string {
-  if (typeof v !== 'string' || !v.trim()) throw new BadRequestException(`${field} 必填且必须是非空字符串`);
+  if (typeof v !== 'string' || !v.trim())
+    throw new BadRequestException(`${field} 必填且必须是非空字符串`);
   return v.trim();
 }
 
 function toFiniteNumber(v: unknown): number {
-  return typeof v === 'number' ? v : (typeof v === 'string' && v.trim() !== '' ? Number(v) : NaN);
+  return typeof v === 'number' ? v : typeof v === 'string' && v.trim() !== '' ? Number(v) : NaN;
 }
 
 function assertOptionalFiniteNumber(v: unknown, field: string): void {

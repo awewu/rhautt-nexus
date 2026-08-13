@@ -205,7 +205,7 @@ runProbeJob
     provider: string;
     baseUrl: string;
     capturedAt: string;
-  };
+  }
 }
 ```
 
@@ -351,13 +351,13 @@ Hermes 返回原文进入：
 
 ## 9. 风险和处理
 
-| 风险 | 影响 | 今日处理 |
-| --- | --- | --- |
-| Hermes `/api/llm-stream` 被 middleware 拦截 | 无法调用模型 | 支持配置 Authorization；错误明确暴露 |
-| Hermes provider 未注册 | 返回空或错误 | 通过 `/api/llm-health` 先确认 provider |
-| Hermes 不具备联网能力 | 结果只是模型回答，不是搜索结果 | UI 和 rawResponse 标明来源为 Hermes 中心 AI |
-| SSE 解析失败 | 无法拿到回答 | 后端按行解析 `data:`，失败进入任务错误 |
-| 多引擎 API Key 不齐 | 无法覆盖豆包/Kimi 等 | 今日只接 Hermes，后续通过 Hermes gateway 扩展 |
+| 风险                                        | 影响                           | 今日处理                                      |
+| ------------------------------------------- | ------------------------------ | --------------------------------------------- |
+| Hermes `/api/llm-stream` 被 middleware 拦截 | 无法调用模型                   | 支持配置 Authorization；错误明确暴露          |
+| Hermes provider 未注册                      | 返回空或错误                   | 通过 `/api/llm-health` 先确认 provider        |
+| Hermes 不具备联网能力                       | 结果只是模型回答，不是搜索结果 | UI 和 rawResponse 标明来源为 Hermes 中心 AI   |
+| SSE 解析失败                                | 无法拿到回答                   | 后端按行解析 `data:`，失败进入任务错误        |
+| 多引擎 API Key 不齐                         | 无法覆盖豆包/Kimi 等           | 今日只接 Hermes，后续通过 Hermes gateway 扩展 |
 
 ## 10. 后续版本
 

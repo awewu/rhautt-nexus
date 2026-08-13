@@ -10,17 +10,21 @@ import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smok
 
 @Module({
   imports: [
-    ...(TARGET_API_BOOT_SMOKE ? [] : [TypeOrmModule.forFeature([FileArtifactEntity, ObjectStorageEvidenceEntity])]),
-    AuthModule
+    ...(TARGET_API_BOOT_SMOKE
+      ? []
+      : [TypeOrmModule.forFeature([FileArtifactEntity, ObjectStorageEvidenceEntity])]),
+    AuthModule,
   ],
   controllers: [FileArtifactController],
   providers: [
     FileArtifactService,
     ObjectStorageEvidenceService,
-    ...(TARGET_API_BOOT_SMOKE ? [
-      bootSmokeRepositoryProvider(FileArtifactEntity),
-      bootSmokeRepositoryProvider(ObjectStorageEvidenceEntity),
-    ] : [])
+    ...(TARGET_API_BOOT_SMOKE
+      ? [
+          bootSmokeRepositoryProvider(FileArtifactEntity),
+          bootSmokeRepositoryProvider(ObjectStorageEvidenceEntity),
+        ]
+      : []),
   ],
   exports: [FileArtifactService, ObjectStorageEvidenceService],
 })
@@ -34,11 +38,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class FileArtifactBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('file-artifact');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('file-artifact')
 export class FileArtifactBoundaryController {
   constructor(private readonly s: FileArtifactBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

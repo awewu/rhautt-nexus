@@ -3,7 +3,7 @@ const AnalyticsService = require('../../server/modules/analytics/analytics.servi
 function modelMock({ count = 0, aggregate = [] } = {}) {
   return {
     countDocuments: jest.fn().mockResolvedValue(count),
-    aggregate: jest.fn().mockResolvedValue(aggregate)
+    aggregate: jest.fn().mockResolvedValue(aggregate),
   };
 }
 
@@ -12,28 +12,28 @@ describe('analytics multitenant service', () => {
     const opportunityModel = modelMock({
       aggregate: [
         { _id: 'quoted', count: 4, amount: 800000 },
-        { _id: 'won', count: 2, amount: 500000 }
-      ]
+        { _id: 'won', count: 2, amount: 500000 },
+      ],
     });
     const service = new AnalyticsService({
       dealerModel: modelMock({ count: 12 }),
       storeModel: modelMock({ count: 30 }),
       userModel: modelMock({ count: 120 }),
       customerModel: modelMock({ count: 900 }),
-      opportunityModel
+      opportunityModel,
     });
 
     const result = await service.getOverview({
       tenantId: 'tenant-1',
-      role: 'hq_admin'
+      role: 'hq_admin',
     });
 
     expect(result.scope.visibility).toBe('tenant-wide');
     expect(result.totals.dealers).toBe(12);
     expect(result.totals.pipeline).toBe(1300000);
-    expect(opportunityModel.aggregate).toHaveBeenCalledWith(expect.arrayContaining([
-      { $match: { tenantId: 'tenant-1' } }
-    ]));
+    expect(opportunityModel.aggregate).toHaveBeenCalledWith(
+      expect.arrayContaining([{ $match: { tenantId: 'tenant-1' } }])
+    );
   });
 
   test('dealer scope is automatically constrained to its own dealer id', async () => {
@@ -43,20 +43,23 @@ describe('analytics multitenant service', () => {
       storeModel: modelMock(),
       userModel: modelMock(),
       customerModel: modelMock(),
-      opportunityModel
+      opportunityModel,
     });
 
-    await service.getOverview({
-      tenantId: 'tenant-1',
-      dealerId: 'dealer-a',
-      role: 'dealer_admin'
-    }, {
-      dealerId: 'dealer-b'
-    });
+    await service.getOverview(
+      {
+        tenantId: 'tenant-1',
+        dealerId: 'dealer-a',
+        role: 'dealer_admin',
+      },
+      {
+        dealerId: 'dealer-b',
+      }
+    );
 
-    expect(opportunityModel.aggregate).toHaveBeenCalledWith(expect.arrayContaining([
-      { $match: { tenantId: 'tenant-1', dealerId: 'dealer-a' } }
-    ]));
+    expect(opportunityModel.aggregate).toHaveBeenCalledWith(
+      expect.arrayContaining([{ $match: { tenantId: 'tenant-1', dealerId: 'dealer-a' } }])
+    );
   });
 
   test('analytics queries reject missing tenant scope', async () => {
@@ -65,7 +68,7 @@ describe('analytics multitenant service', () => {
       storeModel: modelMock(),
       userModel: modelMock(),
       customerModel: modelMock(),
-      opportunityModel: modelMock()
+      opportunityModel: modelMock(),
     });
 
     await expect(service.getOverview({ role: 'hq_admin' })).rejects.toThrow('tenantId is required');

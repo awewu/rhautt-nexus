@@ -3,9 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const {
-  updateReleaseEvidence
-} = require('../release/evidence-utils');
+const { updateReleaseEvidence } = require('../release/evidence-utils');
 
 const ROOT = path.join(__dirname, '..', '..');
 const MIGRATION_PATH = 'database/postgres/migrations/001_rhautt_nexus_core_ledger.sql';
@@ -57,7 +55,7 @@ function createLedger() {
     audit_logs: [],
     outbox_events: [],
     workflow_instances: [],
-    workflow_steps: []
+    workflow_steps: [],
   };
 }
 
@@ -71,7 +69,8 @@ function applySnapshot(target, snapshot) {
 }
 
 function requireTenant(scope = {}) {
-  if (!scope.tenantId) throw new Error('app.tenant_id is required for target PostgreSQL transaction');
+  if (!scope.tenantId)
+    throw new Error('app.tenant_id is required for target PostgreSQL transaction');
 }
 
 function tenantWrite(scope, table, row) {
@@ -83,7 +82,7 @@ function tenantWrite(scope, table, row) {
     ...row,
     tenant_id: scope.tenantId,
     created_at: row.created_at || '2026-06-06T00:00:00.000Z',
-    updated_at: row.updated_at || '2026-06-06T00:00:00.000Z'
+    updated_at: row.updated_at || '2026-06-06T00:00:00.000Z',
   };
 }
 
@@ -98,12 +97,11 @@ function insertUniqueOutbox(ledger, scope, event) {
     idempotency_key: event.idempotency_key,
     status: event.status || 'pending',
     available_at: '2026-06-06T00:00:00.000Z',
-    attempts: 0
+    attempts: 0,
   });
-  const duplicate = ledger.outbox_events.find(item => (
-    item.tenant_id === row.tenant_id &&
-    item.idempotency_key === row.idempotency_key
-  ));
+  const duplicate = ledger.outbox_events.find(
+    (item) => item.tenant_id === row.tenant_id && item.idempotency_key === row.idempotency_key
+  );
   if (duplicate) return duplicate;
   ledger.outbox_events.push(row);
   return row;
@@ -120,7 +118,7 @@ function runTransaction(ledger, scope, operations) {
         target.push(next);
         return next;
       },
-      outbox: event => insertUniqueOutbox(ledger, scope, event)
+      outbox: (event) => insertUniqueOutbox(ledger, scope, event),
     });
     return { committed: true, result };
   } catch (error) {
@@ -140,7 +138,7 @@ function quoteApprovalWrite(tx, scope, aggregateId) {
     cost_snapshot: {},
     price_snapshot: {},
     margin_snapshot: {},
-    approval_state: { approved: true }
+    approval_state: { approved: true },
   });
   tx.insert('audit_logs', {
     id: 'audit-quote-1',
@@ -150,7 +148,7 @@ function quoteApprovalWrite(tx, scope, aggregateId) {
     resource_id: aggregateId,
     after_state: { status: 'approved' },
     request_id: scope.requestId,
-    trace_id: scope.traceId
+    trace_id: scope.traceId,
   });
   tx.insert('workflow_instances', {
     id: 'workflow-quote-1',
@@ -161,7 +159,7 @@ function quoteApprovalWrite(tx, scope, aggregateId) {
     status: 'running',
     input: { quotationId: aggregateId },
     state: { step: 'emit-outbox' },
-    started_at: '2026-06-06T00:00:00.000Z'
+    started_at: '2026-06-06T00:00:00.000Z',
   });
   tx.insert('workflow_steps', {
     id: 'workflow-step-quote-1',
@@ -170,7 +168,7 @@ function quoteApprovalWrite(tx, scope, aggregateId) {
     status: 'completed',
     attempt: 1,
     input: {},
-    output: {}
+    output: {},
   });
   const outbox = tx.outbox({
     id: 'outbox-quote-1',
@@ -178,7 +176,7 @@ function quoteApprovalWrite(tx, scope, aggregateId) {
     aggregate_id: aggregateId,
     event_type: 'quote.approved',
     idempotency_key: `${scope.tenantId}:quote-approval-workflow:${aggregateId}:quote.approved`,
-    payload: { quotationId: quote.id, workflowType: 'quote-approval-workflow' }
+    payload: { quotationId: quote.id, workflowType: 'quote-approval-workflow' },
   });
   return { quote, outbox };
 }
@@ -197,8 +195,8 @@ function lifecycleHandoffWrite(tx, scope, aggregateId) {
     iot: {
       boundary: 'lifecycle_handoff_only',
       controlBoundary: 'lifecycle_handoff_only',
-      realtimeControl: false
-    }
+      realtimeControl: false,
+    },
   });
   tx.insert('audit_logs', {
     id: 'audit-life-1',
@@ -208,7 +206,7 @@ function lifecycleHandoffWrite(tx, scope, aggregateId) {
     resource_id: aggregateId,
     after_state: { handoff_status: 'ready', boundary: 'lifecycle_handoff_only' },
     request_id: scope.requestId,
-    trace_id: scope.traceId
+    trace_id: scope.traceId,
   });
   tx.outbox({
     id: 'outbox-life-1',
@@ -219,8 +217,8 @@ function lifecycleHandoffWrite(tx, scope, aggregateId) {
     payload: {
       lifecycleId: lifecycle.id,
       handoffBoundary: 'lifecycle_handoff_only',
-      controlBoundary: 'lifecycle_handoff_only'
-    }
+      controlBoundary: 'lifecycle_handoff_only',
+    },
   });
   return lifecycle;
 }
@@ -244,7 +242,7 @@ function inspect() {
     tenantId: tenantA,
     actorId: '00000000-0000-0000-0000-000000001001',
     requestId: 'req-postgres-transaction-outbox',
-    traceId: 'trace-postgres-transaction-outbox'
+    traceId: 'trace-postgres-transaction-outbox',
   };
 
   const report = {
@@ -262,33 +260,85 @@ function inspect() {
       businessRows: 0,
       auditRows: 0,
       outboxRows: 0,
-      workflowRows: 0
+      workflowRows: 0,
     },
-    checks: []
+    checks: [],
   };
 
-  check(report, 'migration-has-outbox-table', /CREATE TABLE IF NOT EXISTS rhautt_nexus\.outbox_events/i.test(migration), 'migration must define outbox_events');
-  check(report, 'migration-has-workflow-instance-table', /CREATE TABLE IF NOT EXISTS rhautt_nexus\.workflow_instances/i.test(migration), 'migration must define workflow_instances');
-  check(report, 'migration-has-workflow-step-table', /CREATE TABLE IF NOT EXISTS rhautt_nexus\.workflow_steps/i.test(migration), 'migration must define workflow_steps');
-  check(report, 'migration-has-tenant-idempotency-unique-key', /UNIQUE\s*\(\s*tenant_id\s*,\s*idempotency_key\s*\)/i.test(migration), 'outbox_events must have tenant_id + idempotency_key unique key');
-  check(report, 'migration-has-dead-letter-status', /'dead_letter'/i.test(migration), 'outbox_events must support dead_letter status');
+  check(
+    report,
+    'migration-has-outbox-table',
+    /CREATE TABLE IF NOT EXISTS rhautt_nexus\.outbox_events/i.test(migration),
+    'migration must define outbox_events'
+  );
+  check(
+    report,
+    'migration-has-workflow-instance-table',
+    /CREATE TABLE IF NOT EXISTS rhautt_nexus\.workflow_instances/i.test(migration),
+    'migration must define workflow_instances'
+  );
+  check(
+    report,
+    'migration-has-workflow-step-table',
+    /CREATE TABLE IF NOT EXISTS rhautt_nexus\.workflow_steps/i.test(migration),
+    'migration must define workflow_steps'
+  );
+  check(
+    report,
+    'migration-has-tenant-idempotency-unique-key',
+    /UNIQUE\s*\(\s*tenant_id\s*,\s*idempotency_key\s*\)/i.test(migration),
+    'outbox_events must have tenant_id + idempotency_key unique key'
+  );
+  check(
+    report,
+    'migration-has-dead-letter-status',
+    /'dead_letter'/i.test(migration),
+    'outbox_events must support dead_letter status'
+  );
 
-  const success = runTransaction(ledger, scopeA, tx => quoteApprovalWrite(tx, scopeA, 'quote-atomic-1'));
+  const success = runTransaction(ledger, scopeA, (tx) =>
+    quoteApprovalWrite(tx, scopeA, 'quote-atomic-1')
+  );
   if (success.committed) report.summary.committedTransactions += 1;
-  check(report, 'commit-business-audit-workflow-outbox', success.committed, 'quote approval transaction must commit');
-  check(report, 'commit-created-business-row', ledger.quotations.length === 1, 'committed transaction must write quotation');
-  check(report, 'commit-created-audit-row', ledger.audit_logs.length === 1, 'committed transaction must write audit log');
-  check(report, 'commit-created-workflow-rows', ledger.workflow_instances.length === 1 && ledger.workflow_steps.length === 1, 'committed transaction must write workflow rows');
-  check(report, 'commit-created-outbox-row', ledger.outbox_events.length === 1, 'committed transaction must write outbox event');
+  check(
+    report,
+    'commit-business-audit-workflow-outbox',
+    success.committed,
+    'quote approval transaction must commit'
+  );
+  check(
+    report,
+    'commit-created-business-row',
+    ledger.quotations.length === 1,
+    'committed transaction must write quotation'
+  );
+  check(
+    report,
+    'commit-created-audit-row',
+    ledger.audit_logs.length === 1,
+    'committed transaction must write audit log'
+  );
+  check(
+    report,
+    'commit-created-workflow-rows',
+    ledger.workflow_instances.length === 1 && ledger.workflow_steps.length === 1,
+    'committed transaction must write workflow rows'
+  );
+  check(
+    report,
+    'commit-created-outbox-row',
+    ledger.outbox_events.length === 1,
+    'committed transaction must write outbox event'
+  );
 
   const beforeRollback = cloneLedger(ledger);
-  const failed = runTransaction(ledger, scopeA, tx => {
+  const failed = runTransaction(ledger, scopeA, (tx) => {
     tx.insert('quotations', {
       id: 'quote-rollback-1',
       customer_id: 'customer-1',
       quotation_no: 'Q-ROLLBACK-001',
       version: 1,
-      status: 'approved'
+      status: 'approved',
     });
     tx.outbox({
       id: 'outbox-cross-tenant',
@@ -297,44 +347,104 @@ function inspect() {
       aggregate_id: 'quote-rollback-1',
       event_type: 'quote.approved',
       idempotency_key: `${tenantB}:quote-rollback-1:quote.approved`,
-      payload: {}
+      payload: {},
     });
   });
   if (!failed.committed) report.summary.rolledBackTransactions += 1;
-  check(report, 'rollback-cross-tenant-outbox-write', failed.committed === false && failed.error.includes('RLS WITH CHECK'), 'cross-tenant outbox write must roll back the whole transaction');
-  check(report, 'rollback-no-partial-business-row', JSON.stringify(ledger) === JSON.stringify(beforeRollback), 'failed transaction must leave no partial business/audit/outbox rows');
+  check(
+    report,
+    'rollback-cross-tenant-outbox-write',
+    failed.committed === false && failed.error.includes('RLS WITH CHECK'),
+    'cross-tenant outbox write must roll back the whole transaction'
+  );
+  check(
+    report,
+    'rollback-no-partial-business-row',
+    JSON.stringify(ledger) === JSON.stringify(beforeRollback),
+    'failed transaction must leave no partial business/audit/outbox rows'
+  );
 
-  const duplicate = runTransaction(ledger, scopeA, tx => {
+  const duplicate = runTransaction(ledger, scopeA, (tx) => {
     tx.outbox({
       id: 'outbox-quote-duplicate',
       aggregate_type: 'quotation',
       aggregate_id: 'quote-atomic-1',
       event_type: 'quote.approved',
       idempotency_key: `${scopeA.tenantId}:quote-approval-workflow:quote-atomic-1:quote.approved`,
-      payload: { duplicate: true }
+      payload: { duplicate: true },
     });
   });
   if (duplicate.committed) report.summary.committedTransactions += 1;
-  check(report, 'idempotency-prevents-duplicate-outbox', duplicate.committed && ledger.outbox_events.length === 1, 'duplicate idempotency key must not create another outbox row');
+  check(
+    report,
+    'idempotency-prevents-duplicate-outbox',
+    duplicate.committed && ledger.outbox_events.length === 1,
+    'duplicate idempotency key must not create another outbox row'
+  );
 
-  const lifecycle = runTransaction(ledger, scopeA, tx => lifecycleHandoffWrite(tx, scopeA, 'life-atomic-1'));
+  const lifecycle = runTransaction(ledger, scopeA, (tx) =>
+    lifecycleHandoffWrite(tx, scopeA, 'life-atomic-1')
+  );
   if (lifecycle.committed) report.summary.committedTransactions += 1;
-  check(report, 'lifecycle-handoff-transaction-commits', lifecycle.committed, 'lifecycle handoff transaction must commit');
-  check(report, 'lifecycle-handoff-outbox-created', ledger.project_lifecycle.length === 1 && ledger.outbox_events.length === 2, 'lifecycle handoff must write business row and outbox event');
-  check(report, 'lifecycle-handoff-boundary', ledger.project_lifecycle.every(row => row.iot?.boundary === 'lifecycle_handoff_only' && row.iot?.realtimeControl === false), 'lifecycle rows must remain lifecycle_handoff_only');
-  check(report, 'outbox-handoff-boundary', ledger.outbox_events.every(row => !row.payload?.controlCommand), 'outbox payloads must not include real-time IoT control commands');
+  check(
+    report,
+    'lifecycle-handoff-transaction-commits',
+    lifecycle.committed,
+    'lifecycle handoff transaction must commit'
+  );
+  check(
+    report,
+    'lifecycle-handoff-outbox-created',
+    ledger.project_lifecycle.length === 1 && ledger.outbox_events.length === 2,
+    'lifecycle handoff must write business row and outbox event'
+  );
+  check(
+    report,
+    'lifecycle-handoff-boundary',
+    ledger.project_lifecycle.every(
+      (row) => row.iot?.boundary === 'lifecycle_handoff_only' && row.iot?.realtimeControl === false
+    ),
+    'lifecycle rows must remain lifecycle_handoff_only'
+  );
+  check(
+    report,
+    'outbox-handoff-boundary',
+    ledger.outbox_events.every((row) => !row.payload?.controlCommand),
+    'outbox payloads must not include real-time IoT control commands'
+  );
 
   const releaseRecord = release.requiredEvidence?.postgresTransactionOutbox;
-  check(report, 'release-evidence-key', Boolean(releaseRecord), 'release evidence missing postgresTransactionOutbox');
+  check(
+    report,
+    'release-evidence-key',
+    Boolean(releaseRecord),
+    'release evidence missing postgresTransactionOutbox'
+  );
   if (releaseRecord) {
-    check(report, 'release-status', releaseRecord.status === 'target-transaction-simulated', 'postgresTransactionOutbox status must be target-transaction-simulated');
-    check(report, 'release-final-proof', releaseRecord.finalLaunchDatabaseProof === false, 'postgresTransactionOutbox must not claim final launch database proof');
-    check(report, 'release-command', releaseRecord.command === 'npm run guard:postgres-transaction-outbox', 'postgresTransactionOutbox command must be npm run guard:postgres-transaction-outbox');
+    check(
+      report,
+      'release-status',
+      releaseRecord.status === 'target-transaction-simulated',
+      'postgresTransactionOutbox status must be target-transaction-simulated'
+    );
+    check(
+      report,
+      'release-final-proof',
+      releaseRecord.finalLaunchDatabaseProof === false,
+      'postgresTransactionOutbox must not claim final launch database proof'
+    );
+    check(
+      report,
+      'release-command',
+      releaseRecord.command === 'npm run guard:postgres-transaction-outbox',
+      'postgresTransactionOutbox command must be npm run guard:postgres-transaction-outbox'
+    );
   }
 
   report.summary.checks = report.checks.length;
   report.summary.failures = failures.length;
-  report.summary.businessRows = ledger.quotations.length + ledger.project_lifecycle.length + ledger.file_artifacts.length;
+  report.summary.businessRows =
+    ledger.quotations.length + ledger.project_lifecycle.length + ledger.file_artifacts.length;
   report.summary.auditRows = ledger.audit_logs.length;
   report.summary.outboxRows = ledger.outbox_events.length;
   report.summary.workflowRows = ledger.workflow_instances.length + ledger.workflow_steps.length;
@@ -355,10 +465,12 @@ function renderMarkdown(report) {
     `Final launch database proof: ${report.finalLaunchDatabaseProof ? 'yes' : 'no'}`,
     '',
     '| Check | Result | Details |',
-    '|---|---:|---|'
+    '|---|---:|---|',
   ];
   for (const item of report.checks) {
-    lines.push(`| ${item.name} | ${item.passed ? 'pass' : 'fail'} | ${String(item.details || '').replace(/\|/g, '/')} |`);
+    lines.push(
+      `| ${item.name} | ${item.passed ? 'pass' : 'fail'} | ${String(item.details || '').replace(/\|/g, '/')} |`
+    );
   }
   return lines.join('\n');
 }
@@ -376,10 +488,10 @@ function recordEvidence() {
       'tenantScopedIdempotencyKey',
       'crossTenantWithCheckRejects',
       'auditAndWorkflowRowsInTransaction',
-      'lifecycleHandoffOnlyBoundary'
+      'lifecycleHandoffOnlyBoundary',
     ],
     finalLaunchDatabaseProof: false,
-    note: 'Local deterministic simulation for target PostgreSQL transaction and outbox atomicity. This is not staging-applied PostgreSQL transaction proof.'
+    note: 'Local deterministic simulation for target PostgreSQL transaction and outbox atomicity. This is not staging-applied PostgreSQL transaction proof.',
   });
 }
 

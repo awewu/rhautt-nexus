@@ -15,14 +15,28 @@ export default function EmptyState({ title, description, action, icon }: EmptySt
   return (
     <div
       style={{
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        textAlign: 'center', padding: '48px 24px', gap: 8,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+        padding: '48px 24px',
+        gap: 8,
       }}
     >
       {icon && <div style={{ color: 'var(--ink-4, #9CA3AF)', marginBottom: 4 }}>{icon}</div>}
-      <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--t-strong, #111827)' }}>{title}</div>
+      <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--t-strong, #111827)' }}>
+        {title}
+      </div>
       {description && (
-        <div style={{ fontSize: 13, color: 'var(--t-secondary, #6B7280)', maxWidth: 360, lineHeight: 1.5 }}>
+        <div
+          style={{
+            fontSize: 13,
+            color: 'var(--t-secondary, #6B7280)',
+            maxWidth: 360,
+            lineHeight: 1.5,
+          }}
+        >
           {description}
         </div>
       )}

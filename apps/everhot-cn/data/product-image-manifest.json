@@ -8,19 +8,82 @@
   "_image_dir": "apps/everhot-cn/public/assets/img/products",
   "_output_map": "apps/everhot-cn/public/js/product-images.js",
   "products": {
-    "everwarm-c26": { "image": "https://www.rheem.com.cn/upload/ueditor/image/20210519/1621408453892701.jpg", "pages": ["https://www.rheem.com.cn/product/9/40.html"], "alt": "EverWarm 冷凝壁挂炉", "note": "来源:瑞美双冷凝炉 XCLUSIVE 产品主图；集团品牌" },
-    "everwarm-pro": { "image": "https://www.rheem.com.cn/upload/ueditor/image/20210519/1621408453892701.jpg", "pages": ["https://www.rheem.com.cn/product/9/40.html"], "alt": "EverWarm Pro 纯采暖壁挂炉", "note": "来源:瑞美双冷凝炉；集团品牌" },
-    "everduo-x12": { "image": "https://www.rheem.com.cn/upload/ueditor/image/20230628/1687889097793191.jpg", "pages": ["https://www.rheem.com.cn/product/9/64.html"], "alt": "EverDuo 采暖热水一体机", "note": "来源:瑞美 X-pro 采暖热水两用炉产品主图；集团品牌" },
-    "everair-r200": { "image": "https://www.rheem.com.cn/upload/ueditor/image/20221014/1665739789822812.jpg", "pages": ["https://www.rheem.com.cn/product/9/62.html"], "alt": "EverAir 家用空气能热水器", "note": "来源:瑞美维拉 Vela 零冷水空气能；集团品牌" },
-    "everair-pro": { "image": "https://www.rheem.com.cn/upload/ueditor/image/20220921/1663748391403835.jpg", "pages": ["https://www.rheem.com.cn/product/9/49.html"], "alt": "EverAir Pro 商用空气能机组", "note": "来源:瑞美奥丁 Odin 一体式空气能产品主图；集团品牌" },
-    "evertank-v100": { "image": "https://www.rheem.com.cn/upload/ueditor/image/20210409/1617964964682948.jpg", "pages": ["https://www.rheem.com.cn/product/9/31.html"], "alt": "EverTank 容积式燃气热水器", "note": "来源:瑞美 RGS-PDV 燃气容积式产品主图；集团品牌" },
-    "evertank-max": { "image": "https://www.rheem.com.cn/upload/ueditor/image/20210409/1617964571120764.jpg", "pages": ["https://www.rheem.com.cn/product/9/28.html"], "alt": "EverTank Max 大容积储热水箱", "note": "来源:瑞美 RGS-PV 燃气容积式产品主图；集团品牌" },
-    "everflow-z16": { "pages": ["https://www.rheem.com.cn/product/9/87.html"], "alt": "EverFlow 零冷水燃气热水器", "note": "来源:瑞美 GTD 静音小鲸鱼 水气双核 恒温±0.5℃；恒热(四川)同集团运营，设计占位，后台可替换" },
-    "everelec-80": { "pages": ["https://www.rheem.com.cn/product/9/86.html"], "alt": "EverElec 速热电热水器", "note": "来源:瑞美 小蓝星活水电热水器 CSFH080；同集团，设计占位" },
-    "evermax-c500": { "pages": ["https://www.rheem.com.cn/product/10/12.html"], "alt": "EverMax 商用燃气热水炉", "note": "来源:瑞美 Triton 商用冷凝燃气容积式；同集团，设计占位" },
-    "everstation": { "pages": ["https://www.rheem.com.cn/product/10/14.html"], "alt": "EverStation 楼宇集中热水站", "note": "来源:瑞美 G100-C 商用燃气容积式；同集团，设计占位" },
-    "everheat-pro": { "pages": ["https://www.rheem.com.cn/product/10/92.html"], "alt": "EverHeat Pro 商用风冷热泵机组", "note": "来源:瑞美 RHPC-LV 商用变频热泵；同集团，设计占位" },
-    "everboiler": { "pages": ["https://www.rheem.com.cn/product/10/90.html"], "alt": "EverBoiler 商用燃气采暖炉", "note": "来源:瑞美 CBD-99kW 商用壁挂炉；同集团，设计占位" },
-    "everguard": { "pages": ["https://www.rheem.com.cn/product/10/69.html"], "alt": "EverGuard 串联备用系统", "note": "来源:瑞美 GHE-R 商用冷凝低氮容积式；同集团，设计占位" }
+    "everwarm-c26": {
+      "image": "https://www.rheem.com.cn/upload/ueditor/image/20210519/1621408453892701.jpg",
+      "pages": ["https://www.rheem.com.cn/product/9/40.html"],
+      "alt": "EverWarm 冷凝壁挂炉",
+      "note": "来源:瑞美双冷凝炉 XCLUSIVE 产品主图；集团品牌"
+    },
+    "everwarm-pro": {
+      "image": "https://www.rheem.com.cn/upload/ueditor/image/20210519/1621408453892701.jpg",
+      "pages": ["https://www.rheem.com.cn/product/9/40.html"],
+      "alt": "EverWarm Pro 纯采暖壁挂炉",
+      "note": "来源:瑞美双冷凝炉；集团品牌"
+    },
+    "everduo-x12": {
+      "image": "https://www.rheem.com.cn/upload/ueditor/image/20230628/1687889097793191.jpg",
+      "pages": ["https://www.rheem.com.cn/product/9/64.html"],
+      "alt": "EverDuo 采暖热水一体机",
+      "note": "来源:瑞美 X-pro 采暖热水两用炉产品主图；集团品牌"
+    },
+    "everair-r200": {
+      "image": "https://www.rheem.com.cn/upload/ueditor/image/20221014/1665739789822812.jpg",
+      "pages": ["https://www.rheem.com.cn/product/9/62.html"],
+      "alt": "EverAir 家用空气能热水器",
+      "note": "来源:瑞美维拉 Vela 零冷水空气能；集团品牌"
+    },
+    "everair-pro": {
+      "image": "https://www.rheem.com.cn/upload/ueditor/image/20220921/1663748391403835.jpg",
+      "pages": ["https://www.rheem.com.cn/product/9/49.html"],
+      "alt": "EverAir Pro 商用空气能机组",
+      "note": "来源:瑞美奥丁 Odin 一体式空气能产品主图；集团品牌"
+    },
+    "evertank-v100": {
+      "image": "https://www.rheem.com.cn/upload/ueditor/image/20210409/1617964964682948.jpg",
+      "pages": ["https://www.rheem.com.cn/product/9/31.html"],
+      "alt": "EverTank 容积式燃气热水器",
+      "note": "来源:瑞美 RGS-PDV 燃气容积式产品主图；集团品牌"
+    },
+    "evertank-max": {
+      "image": "https://www.rheem.com.cn/upload/ueditor/image/20210409/1617964571120764.jpg",
+      "pages": ["https://www.rheem.com.cn/product/9/28.html"],
+      "alt": "EverTank Max 大容积储热水箱",
+      "note": "来源:瑞美 RGS-PV 燃气容积式产品主图；集团品牌"
+    },
+    "everflow-z16": {
+      "pages": ["https://www.rheem.com.cn/product/9/87.html"],
+      "alt": "EverFlow 零冷水燃气热水器",
+      "note": "来源:瑞美 GTD 静音小鲸鱼 水气双核 恒温±0.5℃；恒热(四川)同集团运营，设计占位，后台可替换"
+    },
+    "everelec-80": {
+      "pages": ["https://www.rheem.com.cn/product/9/86.html"],
+      "alt": "EverElec 速热电热水器",
+      "note": "来源:瑞美 小蓝星活水电热水器 CSFH080；同集团，设计占位"
+    },
+    "evermax-c500": {
+      "pages": ["https://www.rheem.com.cn/product/10/12.html"],
+      "alt": "EverMax 商用燃气热水炉",
+      "note": "来源:瑞美 Triton 商用冷凝燃气容积式；同集团，设计占位"
+    },
+    "everstation": {
+      "pages": ["https://www.rheem.com.cn/product/10/14.html"],
+      "alt": "EverStation 楼宇集中热水站",
+      "note": "来源:瑞美 G100-C 商用燃气容积式；同集团，设计占位"
+    },
+    "everheat-pro": {
+      "pages": ["https://www.rheem.com.cn/product/10/92.html"],
+      "alt": "EverHeat Pro 商用风冷热泵机组",
+      "note": "来源:瑞美 RHPC-LV 商用变频热泵；同集团，设计占位"
+    },
+    "everboiler": {
+      "pages": ["https://www.rheem.com.cn/product/10/90.html"],
+      "alt": "EverBoiler 商用燃气采暖炉",
+      "note": "来源:瑞美 CBD-99kW 商用壁挂炉；同集团，设计占位"
+    },
+    "everguard": {
+      "pages": ["https://www.rheem.com.cn/product/10/69.html"],
+      "alt": "EverGuard 串联备用系统",
+      "note": "来源:瑞美 GHE-R 商用冷凝低氮容积式；同集团，设计占位"
+    }
   }
 }

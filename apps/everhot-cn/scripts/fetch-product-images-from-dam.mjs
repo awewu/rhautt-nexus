@@ -36,7 +36,10 @@ function loadEnv(file) {
 loadEnv(join(REPO, '.env.nestjs'));
 loadEnv(join(REPO, '.env'));
 
-const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > -1 ? process.argv[i + 1] : d; };
+const arg = (k, d) => {
+  const i = process.argv.indexOf('--' + k);
+  return i > -1 ? process.argv[i + 1] : d;
+};
 const BASE = arg('base', process.env.EVERHOT_API_BASE || 'http://localhost:5500/api/v2');
 const TENANT = arg('tenant', 'rhautt_shared');
 const SECRET = process.env.JWT_SECRET;
@@ -49,13 +52,19 @@ if (!SECRET) bail('缺少 JWT_SECRET');
 
 function imageRef(product) {
   const refs = Array.isArray(product.assetRefs) ? product.assetRefs : [];
-  return refs.find((r) => r?.role === 'main')
-    || refs.find((r) => r?.role === 'card')
-    || refs.find((r) => r?.role === 'spec')
-    || (product.meta?.imageArtifactId ? { role: product.meta.imageRole || 'main', artifactId: product.meta.imageArtifactId } : null);
+  return (
+    refs.find((r) => r?.role === 'main') ||
+    refs.find((r) => r?.role === 'card') ||
+    refs.find((r) => r?.role === 'spec') ||
+    (product.meta?.imageArtifactId
+      ? { role: product.meta.imageRole || 'main', artifactId: product.meta.imageArtifactId }
+      : null)
+  );
 }
 
-const token = jwt.sign({ userId: 'everhot-image-fetcher', tenantId: TENANT }, SECRET, { expiresIn: '15m' });
+const token = jwt.sign({ userId: 'everhot-image-fetcher', tenantId: TENANT }, SECRET, {
+  expiresIn: '15m',
+});
 const authH = { authorization: `Bearer ${token}` };
 
 let products;
@@ -66,19 +75,28 @@ try {
     .filter((p) => p.brand === 'everhot')
     .map((p) => ({ ...p, _imageRef: imageRef(p) }))
     .filter((p) => p._imageRef);
-} catch (e) { bail(`无法连接后台：${e.message}`); }
+} catch (e) {
+  bail(`无法连接后台：${e.message}`);
+}
 
 if (!products.length) bail('后台无带图产品（meta.imageArtifactId 为空）');
 
-const cards = {}, specs = {};
+const cards = {},
+  specs = {};
 let wrote = 0;
 for (const p of products) {
   try {
     const ref = p._imageRef;
     const res = await fetch(`${BASE}/file-artifact/${ref.artifactId}/base64`, { headers: authH });
-    if (!res.ok) { console.warn(`- ${p.sku}：DAM 拉取 HTTP ${res.status}，跳过`); continue; }
+    if (!res.ok) {
+      console.warn(`- ${p.sku}：DAM 拉取 HTTP ${res.status}，跳过`);
+      continue;
+    }
     const j = await res.json();
-    if (!j.success) { console.warn(`- ${p.sku}：${j.error}，跳过`); continue; }
+    if (!j.success) {
+      console.warn(`- ${p.sku}：${j.error}，跳过`);
+      continue;
+    }
     // 统一输出优化 WebP（限宽 1200 · q80），降低 LCP/带宽
     const img = sharp(Buffer.from(j.data.dataBase64, 'base64'));
     const meta = await img.metadata();
@@ -87,13 +105,18 @@ for (const p of products) {
     const url = `${WEB_PREFIX}/${p.sku}.webp`;
     (ref.role === 'spec' ? specs : cards)[p.sku] = url;
     wrote++;
-  } catch (e) { console.warn(`- ${p.sku}：${e.message}，跳过`); }
+  } catch (e) {
+    console.warn(`- ${p.sku}：${e.message}，跳过`);
+  }
 }
 if (!wrote) bail('没有成功拉取任何图片');
 
-const dump = (obj) => Object.keys(obj).sort().map((k) => `  ${JSON.stringify(k)}: ${JSON.stringify(obj[k])}`).join(',\n');
-const out =
-`/* 产品图映射：slug → 图片 URL。渲染端 catalog.js 的 imgSrc() 优先用此映射。
+const dump = (obj) =>
+  Object.keys(obj)
+    .sort()
+    .map((k) => `  ${JSON.stringify(k)}: ${JSON.stringify(obj[k])}`)
+    .join(',\n');
+const out = `/* 产品图映射：slug → 图片 URL。渲染端 catalog.js 的 imgSrc() 优先用此映射。
    AUTO-GENERATED 自 Nexus DAM（file-artifact）${new Date().toISOString()}；勿手改，
    改图请更新 DAM 后重跑 fetch-product-images-from-dam.mjs。
    替换为正规白底图：把授权图入 DAM（sync-product-images-to-dam.mjs）即可，无需改渲染代码。 */
@@ -108,4 +131,6 @@ ${dump(specs)}
 };
 `;
 writeFileSync(OUT, out, 'utf8');
-console.log(`✓ 从 DAM 拉回 ${wrote} 张图；卡片 ${Object.keys(cards).length} / 参数图 ${Object.keys(specs).length} → product-images.js`);
+console.log(
+  `✓ 从 DAM 拉回 ${wrote} 张图；卡片 ${Object.keys(cards).length} / 参数图 ${Object.keys(specs).length} → product-images.js`
+);

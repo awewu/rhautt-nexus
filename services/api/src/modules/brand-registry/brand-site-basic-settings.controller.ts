@@ -9,7 +9,9 @@ import {
   BrandSiteBasicSettingsService,
 } from './brand-site-basic-settings.service';
 
-interface AuthRequest { user: JwtPayload; }
+interface AuthRequest {
+  user: JwtPayload;
+}
 
 @Controller('brand-sites/:siteCode/basic-settings')
 export class BrandSiteBasicSettingsController {
@@ -27,7 +29,7 @@ export class BrandSiteBasicSettingsController {
   update(
     @Req() req: AuthRequest,
     @Param('siteCode') siteCode: string,
-    @Body() body: BrandSiteBasicSettingsInput,
+    @Body() body: BrandSiteBasicSettingsInput
   ) {
     return this.service.update(req.user, siteCode, body);
   }
@@ -39,7 +41,7 @@ export class BrandSiteBasicSettingsController {
     @Req() req: AuthRequest,
     @Param('siteCode') siteCode: string,
     @Param('section') section: string,
-    @Body() body: Record<string, unknown>,
+    @Body() body: Record<string, unknown>
   ) {
     return this.service.updateSection(req.user, siteCode, section, body);
   }

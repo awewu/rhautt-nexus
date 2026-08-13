@@ -56,7 +56,12 @@ function fmtDate(value?: string | null) {
 export default function GrowthCampaignWorkspace() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [board, setBoard] = useState<BoardRow[]>([]);
-  const [portfolio, setPortfolio] = useState<{ spend?: number; leads?: number; signed?: number; blendedCac?: number }>({});
+  const [portfolio, setPortfolio] = useState<{
+    spend?: number;
+    leads?: number;
+    signed?: number;
+    blendedCac?: number;
+  }>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -125,7 +130,10 @@ export default function GrowthCampaignWorkspace() {
         budget: Number(campaignForm.budget || 0),
         utm: { campaign: campaignForm.utmCampaign.trim() || campaignForm.name.trim() },
       });
-      setMetricForm((current) => ({ ...current, campaignId: result?.campaign?.id || current.campaignId }));
+      setMetricForm((current) => ({
+        ...current,
+        campaignId: result?.campaign?.id || current.campaignId,
+      }));
       setMessage('战役已创建，可开始录入指标或等待 lead.captured 自动归因');
       await load();
     } catch (err) {
@@ -163,13 +171,28 @@ export default function GrowthCampaignWorkspace() {
 
   return (
     <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          gap: 12,
+          alignItems: 'flex-start',
+        }}
+      >
         <div>
           <p className="t-label">E4 营销自动化</p>
-          <h2 className="t-headline" style={{ marginTop: 4 }}>战役归因与 ROI 看板</h2>
-          <p style={{ color: 'var(--t-secondary)', fontSize: 13, marginTop: 4 }}>先把 UTM 战役、手工指标和 lead.captured 自动归因接起来，形成可复盘的 CAC/CPL。</p>
+          <h2 className="t-headline" style={{ marginTop: 4 }}>
+            战役归因与 ROI 看板
+          </h2>
+          <p style={{ color: 'var(--t-secondary)', fontSize: 13, marginTop: 4 }}>
+            先把 UTM 战役、手工指标和 lead.captured 自动归因接起来，形成可复盘的 CAC/CPL。
+          </p>
         </div>
-        <button className="btn btn-outline btn-sm" onClick={() => void load()} disabled={loading || busy}>
+        <button
+          className="btn btn-outline btn-sm"
+          onClick={() => void load()}
+          disabled={loading || busy}
+        >
           {loading ? <Loader2 size={14} className="spin" /> : <RefreshCw size={14} />}
           刷新
         </button>
@@ -189,13 +212,45 @@ export default function GrowthCampaignWorkspace() {
         <Metric label="组合 CAC" value={fmtMoney(portfolio.blendedCac)} />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gap: 14,
+        }}
+      >
         <div className="inset" style={{ display: 'grid', gap: 10 }}>
           <span className="t-label">新建战役</span>
-          <input className="input" value={campaignForm.name} onChange={(event) => setCampaignForm({ ...campaignForm, name: event.target.value })} placeholder="战役名称" />
-          <input className="input" value={campaignForm.channel} onChange={(event) => setCampaignForm({ ...campaignForm, channel: event.target.value })} placeholder="渠道" />
-          <input className="input" type="number" min={0} value={campaignForm.budget} onChange={(event) => setCampaignForm({ ...campaignForm, budget: Number(event.target.value) || 0 })} placeholder="预算" />
-          <input className="input" value={campaignForm.utmCampaign} onChange={(event) => setCampaignForm({ ...campaignForm, utmCampaign: event.target.value })} placeholder="utm_campaign" />
+          <input
+            className="input"
+            value={campaignForm.name}
+            onChange={(event) => setCampaignForm({ ...campaignForm, name: event.target.value })}
+            placeholder="战役名称"
+          />
+          <input
+            className="input"
+            value={campaignForm.channel}
+            onChange={(event) => setCampaignForm({ ...campaignForm, channel: event.target.value })}
+            placeholder="渠道"
+          />
+          <input
+            className="input"
+            type="number"
+            min={0}
+            value={campaignForm.budget}
+            onChange={(event) =>
+              setCampaignForm({ ...campaignForm, budget: Number(event.target.value) || 0 })
+            }
+            placeholder="预算"
+          />
+          <input
+            className="input"
+            value={campaignForm.utmCampaign}
+            onChange={(event) =>
+              setCampaignForm({ ...campaignForm, utmCampaign: event.target.value })
+            }
+            placeholder="utm_campaign"
+          />
           <button className="btn btn-brand" onClick={() => void createCampaign()} disabled={busy}>
             {busy ? <Loader2 size={15} className="spin" /> : <Plus size={15} />}
             创建战役
@@ -204,20 +259,73 @@ export default function GrowthCampaignWorkspace() {
 
         <div className="inset" style={{ display: 'grid', gap: 10 }}>
           <span className="t-label">录入指标</span>
-          <select className="input" value={metricForm.campaignId} onChange={(event) => setMetricForm({ ...metricForm, campaignId: event.target.value })}>
+          <select
+            className="input"
+            value={metricForm.campaignId}
+            onChange={(event) => setMetricForm({ ...metricForm, campaignId: event.target.value })}
+          >
             <option value="">选择战役</option>
             {campaigns.map((item) => (
-              <option key={item.id} value={item.id}>{item.name} · {item.channel}</option>
+              <option key={item.id} value={item.id}>
+                {item.name} · {item.channel}
+              </option>
             ))}
           </select>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}>
-            <input className="input" type="number" min={0} value={metricForm.impressions} onChange={(event) => setMetricForm({ ...metricForm, impressions: Number(event.target.value) || 0 })} placeholder="曝光" />
-            <input className="input" type="number" min={0} value={metricForm.clicks} onChange={(event) => setMetricForm({ ...metricForm, clicks: Number(event.target.value) || 0 })} placeholder="点击" />
-            <input className="input" type="number" min={0} value={metricForm.leads} onChange={(event) => setMetricForm({ ...metricForm, leads: Number(event.target.value) || 0 })} placeholder="线索" />
-            <input className="input" type="number" min={0} value={metricForm.signed} onChange={(event) => setMetricForm({ ...metricForm, signed: Number(event.target.value) || 0 })} placeholder="成交" />
+          <div
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}
+          >
+            <input
+              className="input"
+              type="number"
+              min={0}
+              value={metricForm.impressions}
+              onChange={(event) =>
+                setMetricForm({ ...metricForm, impressions: Number(event.target.value) || 0 })
+              }
+              placeholder="曝光"
+            />
+            <input
+              className="input"
+              type="number"
+              min={0}
+              value={metricForm.clicks}
+              onChange={(event) =>
+                setMetricForm({ ...metricForm, clicks: Number(event.target.value) || 0 })
+              }
+              placeholder="点击"
+            />
+            <input
+              className="input"
+              type="number"
+              min={0}
+              value={metricForm.leads}
+              onChange={(event) =>
+                setMetricForm({ ...metricForm, leads: Number(event.target.value) || 0 })
+              }
+              placeholder="线索"
+            />
+            <input
+              className="input"
+              type="number"
+              min={0}
+              value={metricForm.signed}
+              onChange={(event) =>
+                setMetricForm({ ...metricForm, signed: Number(event.target.value) || 0 })
+              }
+              placeholder="成交"
+            />
           </div>
-          <input className="input" value={metricForm.period} onChange={(event) => setMetricForm({ ...metricForm, period: event.target.value })} placeholder="周期，如 week / 2026-W31" />
-          <button className="btn btn-outline" onClick={() => void recordMetric()} disabled={busy || !campaigns.length}>
+          <input
+            className="input"
+            value={metricForm.period}
+            onChange={(event) => setMetricForm({ ...metricForm, period: event.target.value })}
+            placeholder="周期，如 week / 2026-W31"
+          />
+          <button
+            className="btn btn-outline"
+            onClick={() => void recordMetric()}
+            disabled={busy || !campaigns.length}
+          >
             {busy ? <Loader2 size={15} className="spin" /> : <BarChart3 size={15} />}
             记录指标
           </button>
@@ -227,7 +335,16 @@ export default function GrowthCampaignWorkspace() {
       <div className="table-shell">
         <table className="table">
           <thead>
-            <tr><th>战役</th><th>渠道</th><th>预算</th><th>曝光/点击</th><th>线索/成交</th><th>CPL</th><th>CAC</th><th>预警</th></tr>
+            <tr>
+              <th>战役</th>
+              <th>渠道</th>
+              <th>预算</th>
+              <th>曝光/点击</th>
+              <th>线索/成交</th>
+              <th>CPL</th>
+              <th>CAC</th>
+              <th>预警</th>
+            </tr>
           </thead>
           <tbody>
             {board.map((item) => (
@@ -235,28 +352,56 @@ export default function GrowthCampaignWorkspace() {
                 <td style={{ fontWeight: 700 }}>{item.name}</td>
                 <td>{item.channel}</td>
                 <td>{fmtMoney(item.spend)}</td>
-                <td>{item.impressions} / {item.clicks}<br /><span style={{ color: 'var(--t-tertiary)' }}>CTR {pct(item.ctr)}</span></td>
-                <td>{item.leads} / {item.signed}<br /><span style={{ color: 'var(--t-tertiary)' }}>留资 {pct(item.leadRate)}</span></td>
+                <td>
+                  {item.impressions} / {item.clicks}
+                  <br />
+                  <span style={{ color: 'var(--t-tertiary)' }}>CTR {pct(item.ctr)}</span>
+                </td>
+                <td>
+                  {item.leads} / {item.signed}
+                  <br />
+                  <span style={{ color: 'var(--t-tertiary)' }}>留资 {pct(item.leadRate)}</span>
+                </td>
                 <td>{fmtMoney(item.cpl)}</td>
                 <td>{fmtMoney(item.cac)}</td>
                 <td>
                   <div style={{ display: 'grid', gap: 4 }}>
                     {(item.alerts || []).map((alert) => (
-                      <span key={`${item.campaignId}-${alert.kind}`} className={alert.level === 'crit' ? 'badge badge-danger' : 'badge badge-warning'}>{alert.message}</span>
+                      <span
+                        key={`${item.campaignId}-${alert.kind}`}
+                        className={
+                          alert.level === 'crit' ? 'badge badge-danger' : 'badge badge-warning'
+                        }
+                      >
+                        {alert.message}
+                      </span>
                     ))}
-                    {!(item.alerts || []).length && <span className="badge badge-success">正常</span>}
+                    {!(item.alerts || []).length && (
+                      <span className="badge badge-success">正常</span>
+                    )}
                   </div>
                 </td>
               </tr>
             ))}
             {!board.length && (
-              <tr><td colSpan={8} style={{ textAlign: 'center', color: 'var(--t-tertiary)' }}>暂无战役，先创建一个 UTM 战役。</td></tr>
+              <tr>
+                <td colSpan={8} style={{ textAlign: 'center', color: 'var(--t-tertiary)' }}>
+                  暂无战役，先创建一个 UTM 战役。
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      <div className="inset" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
+      <div
+        className="inset"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+          gap: 12,
+        }}
+      >
         <Metric label="累计曝光" value={String(totals.impressions)} />
         <Metric label="累计点击" value={String(totals.clicks)} />
         <Metric label="看板预警" value={String(totals.alerts)} />
@@ -266,21 +411,34 @@ export default function GrowthCampaignWorkspace() {
       <div className="table-shell">
         <table className="table">
           <thead>
-            <tr><th>战役</th><th>渠道</th><th>状态</th><th>预算</th><th>UTM</th><th>创建时间</th></tr>
+            <tr>
+              <th>战役</th>
+              <th>渠道</th>
+              <th>状态</th>
+              <th>预算</th>
+              <th>UTM</th>
+              <th>创建时间</th>
+            </tr>
           </thead>
           <tbody>
             {campaigns.map((item) => (
               <tr key={item.id}>
                 <td style={{ fontWeight: 700 }}>{item.name}</td>
                 <td>{item.channel}</td>
-                <td><span className="badge badge-info">{item.status}</span></td>
+                <td>
+                  <span className="badge badge-info">{item.status}</span>
+                </td>
                 <td>{fmtMoney(item.budget)}</td>
                 <td>{String(item.utm?.campaign || '-')}</td>
                 <td>{fmtDate(item.createdAt)}</td>
               </tr>
             ))}
             {!campaigns.length && (
-              <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--t-tertiary)' }}>暂无战役。</td></tr>
+              <tr>
+                <td colSpan={6} style={{ textAlign: 'center', color: 'var(--t-tertiary)' }}>
+                  暂无战役。
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
@@ -293,7 +451,17 @@ function Metric({ label, value }: { label: string; value: string }) {
   return (
     <article className="inset" style={{ padding: 14 }}>
       <p className="t-label">{label}</p>
-      <div style={{ marginTop: 6, fontSize: 28, fontWeight: 800, color: 'var(--brand)', fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+      <div
+        style={{
+          marginTop: 6,
+          fontSize: 28,
+          fontWeight: 800,
+          color: 'var(--brand)',
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {value}
+      </div>
     </article>
   );
 }

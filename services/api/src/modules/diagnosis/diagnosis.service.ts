@@ -1,4 +1,9 @@
-import { Injectable, ForbiddenException, Logger, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { DiagnosisSessionEntity } from './diagnosis.entity';
@@ -10,12 +15,21 @@ import { CrmService } from '../crm/crm.service';
 import { hashPII } from '../compliance/compliance.pii';
 import { buildRecommendCriteria, resolveDiagnosisBrandTenants } from './diagnosis-recommend-map';
 import {
-  normalizeCustomer, normalizePainPoints, inferSystems,
-  issueShareToken, hashShareToken, newReportId, SYSTEM_LABELS,
+  normalizeCustomer,
+  normalizePainPoints,
+  inferSystems,
+  issueShareToken,
+  hashShareToken,
+  newReportId,
+  SYSTEM_LABELS,
 } from './diagnosis-engine';
 import {
-  primaryPainPoints, secondaryPainPointsByDimension, countPainPoints,
-  autoDetectPainPoints, inferImplicitPainPoints, painPointsToGeoQuestions,
+  primaryPainPoints,
+  secondaryPainPointsByDimension,
+  countPainPoints,
+  autoDetectPainPoints,
+  inferImplicitPainPoints,
+  painPointsToGeoQuestions,
 } from './diagnosis-painpoints';
 import { DiagnosisAiService } from './diagnosis-ai.service';
 import { composeIndicativeQuote, SYSTEM_QUOTE_KEYWORDS } from './diagnosis-quote';
@@ -35,7 +49,7 @@ export class DiagnosisService {
     private readonly catalog: ProductCatalogService,
     private readonly compliance: ComplianceService,
     private readonly crm: CrmService,
-    private readonly ai: DiagnosisAiService,
+    private readonly ai: DiagnosisAiService
   ) {}
 
   /**
@@ -46,11 +60,15 @@ export class DiagnosisService {
   private resolvePublicScope(): JwtPayload | null {
     const tenantId = process.env.PUBLIC_DIAGNOSIS_TENANT_ID;
     const base = {
-      userId: 'public-consumer', customerId: null, role: 'public_consumer', permissions: [],
+      userId: 'public-consumer',
+      customerId: null,
+      role: 'public_consumer',
+      permissions: [],
     };
     if (tenantId) {
       return {
-        ...base, tenantId,
+        ...base,
+        tenantId,
         dealerId: process.env.PUBLIC_DIAGNOSIS_DEALER_ID || null,
         storeId: process.env.PUBLIC_DIAGNOSIS_STORE_ID || null,
       } as JwtPayload;
@@ -85,15 +103,22 @@ export class DiagnosisService {
     const phone = body?.contact?.phone || body?.phone || '';
     const subjectId = phone ? hashPII(String(phone)) : `anon:${Date.now()}`;
     const consent = await this.compliance.recordConsent({
-      tenantId: scope.tenantId, subjectId, subjectType: 'consumer',
-      purpose: 'diagnosis_intake', policyVersion: String(policyVersion), granted: true,
-      channel: 'web', ip: meta.ip, userAgent: meta.userAgent, ttlDays: 365,
+      tenantId: scope.tenantId,
+      subjectId,
+      subjectType: 'consumer',
+      purpose: 'diagnosis_intake',
+      policyVersion: String(policyVersion),
+      granted: true,
+      channel: 'web',
+      ip: meta.ip,
+      userAgent: meta.userAgent,
+      ttlDays: 365,
     });
 
     return this.completeDiagnosis(
       scope,
       { ...body, sourceSurface: body?.sourceSurface || 'consumer-diagnosis' },
-      consent.id,
+      consent.id
     );
   }
 
@@ -132,38 +157,49 @@ export class DiagnosisService {
     const criteria = buildRecommendCriteria(body, result);
     const brandInput = body?.brands || body?.brand;
     const scopes = resolveDiagnosisBrandTenants(brandInput);
-    const perBrandLimit = Math.max(1, Math.ceil(Number(criteria.limit || 6) / Math.max(scopes.length, 1)));
-    const results = await Promise.all(scopes.map(async (scope) => {
-      try {
-        const rec = await this.catalog.recommend({
-          ...criteria,
-          tenantId: scope.tenantId,
-          brand: scope.brand,
-          limit: perBrandLimit,
-        });
-        return (rec?.data?.items ?? []).map((item: any) => ({
-          ...item,
-          brand: item?.brand || scope.brand,
-          tenantId: item?.tenantId || scope.tenantId,
-          recommendationScope: 'open_product_catalog',
-        }));
-      } catch {
-        return [];
-      }
-    }));
+    const perBrandLimit = Math.max(
+      1,
+      Math.ceil(Number(criteria.limit || 6) / Math.max(scopes.length, 1))
+    );
+    const results = await Promise.all(
+      scopes.map(async (scope) => {
+        try {
+          const rec = await this.catalog.recommend({
+            ...criteria,
+            tenantId: scope.tenantId,
+            brand: scope.brand,
+            limit: perBrandLimit,
+          });
+          return (rec?.data?.items ?? []).map((item: any) => ({
+            ...item,
+            brand: item?.brand || scope.brand,
+            tenantId: item?.tenantId || scope.tenantId,
+            recommendationScope: 'open_product_catalog',
+          }));
+        } catch {
+          return [];
+        }
+      })
+    );
     const items = results
       .flat()
       .sort((a: any, b: any) => Number(b.matchScore || 0) - Number(a.matchScore || 0))
       .slice(0, Number(criteria.limit || 6));
-    this.logger.log(JSON.stringify({
-      event: 'diagnosis.product_recommendation.completed',
-      brands: scopes.map((scope) => scope.brand),
-      systems: criteria.systems || [],
-      painPointCount: (criteria.painPoints || []).length,
-      returned: items.length,
-      productSkus: items.map((item: any) => item.sku).filter(Boolean).slice(0, 12),
-      fallbackUsed: items.length > 0 && items.every((item: any) => Number(item.matchScore || 0) === 0),
-    }));
+    this.logger.log(
+      JSON.stringify({
+        event: 'diagnosis.product_recommendation.completed',
+        brands: scopes.map((scope) => scope.brand),
+        systems: criteria.systems || [],
+        painPointCount: (criteria.painPoints || []).length,
+        returned: items.length,
+        productSkus: items
+          .map((item: any) => item.sku)
+          .filter(Boolean)
+          .slice(0, 12),
+        fallbackUsed:
+          items.length > 0 && items.every((item: any) => Number(item.matchScore || 0) === 0),
+      })
+    );
     return items;
   }
 
@@ -179,7 +215,10 @@ export class DiagnosisService {
       selected: Array.isArray(body?.selected) ? body.selected : [],
     });
     const recommendedProducts = await this.recommendFromOpenBrandCatalog(body, {
-      diagnosis: { painPoints: advice.mappedPainIds || body?.painPoints || [], systems: advice.systems || [] },
+      diagnosis: {
+        painPoints: advice.mappedPainIds || body?.painPoints || [],
+        systems: advice.systems || [],
+      },
     });
     return { success: true, data: { ...advice, recommendedProducts } };
   }
@@ -191,27 +230,37 @@ export class DiagnosisService {
    */
   async indicativeQuote(body: any = {}) {
     const systemCodes: string[] = (() => {
-      const sel = Array.isArray(body?.systems) ? body.systems.filter((s: any) => SYSTEM_LABELS[s]) : [];
+      const sel = Array.isArray(body?.systems)
+        ? body.systems.filter((s: any) => SYSTEM_LABELS[s])
+        : [];
       if (sel.length) return [...new Set<string>(sel)];
       // 未显式给系统：由痛点/画像推断（复用引擎口径）。
       return inferSystems(body);
     })();
     const systems = systemCodes.map((code) => ({
-      code, label: SYSTEM_LABELS[code], keywords: SYSTEM_QUOTE_KEYWORDS[code] || [SYSTEM_LABELS[code]],
+      code,
+      label: SYSTEM_LABELS[code],
+      keywords: SYSTEM_QUOTE_KEYWORDS[code] || [SYSTEM_LABELS[code]],
     }));
     try {
       const brand = body?.brand ? String(body.brand) : undefined;
       const tenantId = process.env.EVERHOT_TENANT_ID || undefined;
       const res = await this.catalog.priceBandsForSystems({ tenantId, brand }, systems);
       const quote = composeIndicativeQuote(res.data.bands as any);
-      return { success: true, data: { systems: systems.map((s) => ({ code: s.code, label: s.label })), quote } };
+      return {
+        success: true,
+        data: { systems: systems.map((s) => ({ code: s.code, label: s.label })), quote },
+      };
     } catch {
       return {
         success: true,
         data: {
           systems: systems.map((s) => ({ code: s.code, label: s.label })),
           quote: {
-            available: false, currency: 'CNY', tiers: [], pricedSystems: [],
+            available: false,
+            currency: 'CNY',
+            tiers: [],
+            pricedSystems: [],
             unpricedSystems: systems.map((s) => ({ code: s.code, label: s.label })),
             coverage: { priced: 0, total: systems.length },
             disclaimer: '目录暂不可用，初步报价将在现场勘测后提供。',
@@ -223,7 +272,9 @@ export class DiagnosisService {
 
   /** 由请求体解析系统 code（显式 systems 优先，否则由痛点/画像推断）。两处报价/图共用。 */
   private resolveSystemCodes(body: any = {}): string[] {
-    const sel = Array.isArray(body?.systems) ? body.systems.filter((s: any) => SYSTEM_LABELS[s]) : [];
+    const sel = Array.isArray(body?.systems)
+      ? body.systems.filter((s: any) => SYSTEM_LABELS[s])
+      : [];
     if (sel.length) return [...new Set<string>(sel)];
     return inferSystems(body);
   }
@@ -282,53 +333,88 @@ export class DiagnosisService {
     const shareTokenHash = hashShareToken(shareToken);
     const isPublic = user.role === 'public_consumer';
 
-    const persisted = await withRlsTransaction(this.ds, async (em) => {
-      // 原生建线索（同事务：客户+商机+生命周期起点+lead.created 事件）
-      const lead = await this.crm.createLeadInTx(em, {
-        tenantId: user.tenantId, phone: customer.phone, name: customer.name,
-        source: 'rysnova-diagnosis', city: customer.city ?? null, address: customer.address ?? null,
-        dealerId: user.dealerId ?? null, storeId: user.storeId ?? null,
-        ownerUserId: isPublic ? null : (user.userId ?? null),
-        profile: { ...(body.home || body.profile || {}), painPoints, systems, address: customer.address },
-        tags: ['aiReport'],
-      });
-      const customerId = lead.customer.id;
-      const opportunityId = lead.opportunity?.id ?? null;
+    const persisted = await withRlsTransaction(
+      this.ds,
+      async (em) => {
+        // 原生建线索（同事务：客户+商机+生命周期起点+lead.created 事件）
+        const lead = await this.crm.createLeadInTx(em, {
+          tenantId: user.tenantId,
+          phone: customer.phone,
+          name: customer.name,
+          source: 'rysnova-diagnosis',
+          city: customer.city ?? null,
+          address: customer.address ?? null,
+          dealerId: user.dealerId ?? null,
+          storeId: user.storeId ?? null,
+          ownerUserId: isPublic ? null : (user.userId ?? null),
+          profile: {
+            ...(body.home || body.profile || {}),
+            painPoints,
+            systems,
+            address: customer.address,
+          },
+          tags: ['aiReport'],
+        });
+        const customerId = lead.customer.id;
+        const opportunityId = lead.opportunity?.id ?? null;
 
-      const sessions = em.getRepository(DiagnosisSessionEntity);
-      const session = await sessions.save(sessions.create({
-        tenantId: user.tenantId, dealerId: user.dealerId ?? null,
-        customerId, opportunityId, projectId: null, reportId,
-        pain_points: painPoints, systems,
-        recommendedTier: null, // 不臆造档位：由 quote 域按真实价生成
-        solutions: { systems, systemLabels }, // 诚实画像：仅系统建议，无 ROI/预算
-        aiReasoning: (body as any).aiReasoning ?? null,
-        shareTokenHash, consentId,
-        sourceSurface: (body as any).sourceSurface ?? 'consumer-diagnosis',
-      }));
+        const sessions = em.getRepository(DiagnosisSessionEntity);
+        const session = await sessions.save(
+          sessions.create({
+            tenantId: user.tenantId,
+            dealerId: user.dealerId ?? null,
+            customerId,
+            opportunityId,
+            projectId: null,
+            reportId,
+            pain_points: painPoints,
+            systems,
+            recommendedTier: null, // 不臆造档位：由 quote 域按真实价生成
+            solutions: { systems, systemLabels }, // 诚实画像：仅系统建议，无 ROI/预算
+            aiReasoning: (body as any).aiReasoning ?? null,
+            shareTokenHash,
+            consentId,
+            sourceSurface: (body as any).sourceSurface ?? 'consumer-diagnosis',
+          })
+        );
 
-      // 同事务发射：诊断完成 → 线索回流信号（供 CRM/lifecycle/dispatch 消费）。
-      // 附带迭代 hook（discoveredPains：模型发现的词表外新痛点，供人工审核并入词库）
-      // 与 GEO 打通（geoSeeds：痛点→AI 搜索选题，供增长中枢 E3 回流内容）。
-      const discoveredPains: string[] = Array.isArray((body as any).discoveredPains)
-        ? (body as any).discoveredPains.map((s: any) => String(s).trim()).filter(Boolean).slice(0, 8) : [];
-      await this.eventBus.publishInTx(em, {
-        tenantId: user.tenantId, eventType: 'diagnosis.completed',
-        aggregateType: 'diagnosis_session', aggregateId: session.id,
-        payload: {
-          sessionId: session.id, customerId, opportunityId, reportId,
-          painPoints, systems, sourceSurface: session.sourceSurface,
-          discoveredPains,
-          geoSeeds: painPointsToGeoQuestions(painPoints),
-        },
-      });
-      return { session, customerId, opportunityId, duplicate: lead.duplicate };
-    }, this.rls(user));
+        // 同事务发射：诊断完成 → 线索回流信号（供 CRM/lifecycle/dispatch 消费）。
+        // 附带迭代 hook（discoveredPains：模型发现的词表外新痛点，供人工审核并入词库）
+        // 与 GEO 打通（geoSeeds：痛点→AI 搜索选题，供增长中枢 E3 回流内容）。
+        const discoveredPains: string[] = Array.isArray((body as any).discoveredPains)
+          ? (body as any).discoveredPains
+              .map((s: any) => String(s).trim())
+              .filter(Boolean)
+              .slice(0, 8)
+          : [];
+        await this.eventBus.publishInTx(em, {
+          tenantId: user.tenantId,
+          eventType: 'diagnosis.completed',
+          aggregateType: 'diagnosis_session',
+          aggregateId: session.id,
+          payload: {
+            sessionId: session.id,
+            customerId,
+            opportunityId,
+            reportId,
+            painPoints,
+            systems,
+            sourceSurface: session.sourceSurface,
+            discoveredPains,
+            geoSeeds: painPointsToGeoQuestions(painPoints),
+          },
+        });
+        return { session, customerId, opportunityId, duplicate: lead.duplicate };
+      },
+      this.rls(user)
+    );
 
     // 真实产品推荐（来自产品目录，非臆造）；fail-soft 不阻断主流程。
     let recommendedProducts: unknown[] = [];
     try {
-      recommendedProducts = await this.recommendFromOpenBrandCatalog(body, { diagnosis: { painPoints, systems } });
+      recommendedProducts = await this.recommendFromOpenBrandCatalog(body, {
+        diagnosis: { painPoints, systems },
+      });
     } catch {
       recommendedProducts = [];
     }
@@ -337,8 +423,11 @@ export class DiagnosisService {
     return {
       success: true,
       data: {
-        reportId, shareUrl, shareToken,
-        customerId: persisted.customerId, opportunityId: persisted.opportunityId,
+        reportId,
+        shareUrl,
+        shareToken,
+        customerId: persisted.customerId,
+        opportunityId: persisted.opportunityId,
         duplicate: persisted.duplicate,
         diagnosis: { painPoints, systems, systemLabels, completedAt: new Date().toISOString() },
         recommendedProducts,
@@ -348,20 +437,31 @@ export class DiagnosisService {
   }
 
   async listSessions(user: JwtPayload) {
-    return withRlsTransaction(this.ds, async (em) => {
-      const items = await em.getRepository(DiagnosisSessionEntity).find({
-        where: { tenantId: user.tenantId, ...ownershipScope(user) },
-        order: { createdAt: 'DESC' }, take: 100,
-      });
-      return { success: true, data: { items } };
-    }, this.rls(user));
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        const items = await em.getRepository(DiagnosisSessionEntity).find({
+          where: { tenantId: user.tenantId, ...ownershipScope(user) },
+          order: { createdAt: 'DESC' },
+          take: 100,
+        });
+        return { success: true, data: { items } };
+      },
+      this.rls(user)
+    );
   }
 
   async getReport(user: JwtPayload, reportId: string) {
-    return withRlsTransaction(this.ds, async (em) => {
-      const session = await em.getRepository(DiagnosisSessionEntity).findOne({ where: { tenantId: user.tenantId, reportId, ...ownershipScope(user) } });
-      return { success: true, data: session };
-    }, this.rls(user));
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        const session = await em
+          .getRepository(DiagnosisSessionEntity)
+          .findOne({ where: { tenantId: user.tenantId, reportId, ...ownershipScope(user) } });
+        return { success: true, data: session };
+      },
+      this.rls(user)
+    );
   }
 
   async getShareView(reportId: string, shareToken: string) {
@@ -369,12 +469,16 @@ export class DiagnosisService {
     if (!scope) throw new ServiceUnavailableException('公开问诊入口未配置租户上下文');
     if (!reportId || !shareToken) return { success: true, data: null };
     const shareTokenHash = hashShareToken(shareToken);
-    return withRlsTransaction(this.ds, async (em) => {
-      const session = await em.getRepository(DiagnosisSessionEntity).findOne({
-        where: { tenantId: scope.tenantId, reportId, shareTokenHash, status: 'active' },
-      });
-      return { success: true, data: session ? this.toPublicReport(session, shareToken) : null };
-    }, this.rls(scope));
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        const session = await em.getRepository(DiagnosisSessionEntity).findOne({
+          where: { tenantId: scope.tenantId, reportId, shareTokenHash, status: 'active' },
+        });
+        return { success: true, data: session ? this.toPublicReport(session, shareToken) : null };
+      },
+      this.rls(scope)
+    );
   }
 
   /** 会话行 → 诚实公开报告投影（仅需求画像+系统建议，无编造 ROI/预算/档位）。 */
@@ -397,9 +501,17 @@ export class DiagnosisService {
   }
 
   async revokeReport(user: JwtPayload, reportId: string) {
-    await withRlsTransaction(this.ds, (em) =>
-      em.getRepository(DiagnosisSessionEntity).update({ tenantId: user.tenantId, reportId, ...ownershipScope(user) }, { status: 'revoked' }),
-    this.rls(user));
+    await withRlsTransaction(
+      this.ds,
+      (em) =>
+        em
+          .getRepository(DiagnosisSessionEntity)
+          .update(
+            { tenantId: user.tenantId, reportId, ...ownershipScope(user) },
+            { status: 'revoked' }
+          ),
+      this.rls(user)
+    );
     return { success: true };
   }
 }

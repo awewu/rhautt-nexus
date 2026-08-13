@@ -19,7 +19,8 @@ async function main() {
   const page = await browser.newPage();
   const observedRequests = [];
   page.on('request', (request) => {
-    if (request.url().includes('/api/')) observedRequests.push(`${request.method()} ${request.url()}`);
+    if (request.url().includes('/api/'))
+      observedRequests.push(`${request.method()} ${request.url()}`);
   });
   let role = 'brand_admin';
   let publishMode = 'success';
@@ -39,19 +40,36 @@ async function main() {
   };
   const sites = [
     {
-      id: 'site-everhot', code: 'everhot', nameCn: '恒热', nameEn: 'Everhot',
-      appKey: 'everhot-cn', deliveryType: 'self_hosted', status: 'active',
-      sortOrder: 30, deletedAt: null, publishCapability: supported,
+      id: 'site-everhot',
+      code: 'everhot',
+      nameCn: '恒热',
+      nameEn: 'Everhot',
+      appKey: 'everhot-cn',
+      deliveryType: 'self_hosted',
+      status: 'active',
+      sortOrder: 30,
+      deletedAt: null,
+      publishCapability: supported,
     },
     {
-      id: 'site-rheem', code: 'rheem', nameCn: '瑞美', nameEn: 'Rheem',
-      appKey: 'rheem-cn', deliveryType: 'self_hosted', status: 'active',
-      sortOrder: 10, deletedAt: null, publishCapability: unsupported,
+      id: 'site-rheem',
+      code: 'rheem',
+      nameCn: '瑞美',
+      nameEn: 'Rheem',
+      appKey: 'rheem-cn',
+      deliveryType: 'self_hosted',
+      status: 'active',
+      sortOrder: 10,
+      deletedAt: null,
+      publishCapability: unsupported,
     },
   ];
 
   await page.route('**/api/v2/auth/me', (route) =>
-    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ role, permissions: [] }) })
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ role, permissions: [] }),
+    })
   );
   await page.route('**/api/v2/brand-sites**', async (route) => {
     const request = route.request();
@@ -97,10 +115,16 @@ async function main() {
     route.fulfill({ contentType: 'application/json', body: JSON.stringify({ categories: [] }) })
   );
   await page.route('**/api/v2/product-catalog/devices**', (route) =>
-    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: [], total: 0 }) })
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [], total: 0 }),
+    })
   );
   await page.route('**/api/v2/sites/**', (route) =>
-    route.fulfill({ contentType: 'application/json', body: JSON.stringify({ items: [], total: 0 }) })
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ items: [], total: 0 }),
+    })
   );
 
   await page.goto(`${baseUrl}/comfort/sites/everhot`, { waitUntil: 'networkidle' });
@@ -108,7 +132,9 @@ async function main() {
   try {
     await publishButton.waitFor({ timeout: 8000 });
   } catch (error) {
-    throw new Error(`${error.message}\nRequests:\n${observedRequests.join('\n')}\nRendered body:\n${await page.locator('body').innerText()}`);
+    throw new Error(
+      `${error.message}\nRequests:\n${observedRequests.join('\n')}\nRendered body:\n${await page.locator('body').innerText()}`
+    );
   }
   await publishButton.click();
   await page.getByText('静态备份完成', { exact: true }).waitFor();
@@ -124,7 +150,9 @@ async function main() {
   const unsupportedButton = page.getByRole('button', { name: '暂不支持发布', exact: true });
   await unsupportedButton.waitFor();
   const unsupportedDisabled = await unsupportedButton.isDisabled();
-  const unsupportedReasonVisible = await page.getByText(unsupported.reason, { exact: true }).isVisible();
+  const unsupportedReasonVisible = await page
+    .getByText(unsupported.reason, { exact: true })
+    .isVisible();
   const unsupportedDidNotPublish = publishRequests === requestsBeforeUnsupported;
 
   role = 'brand_viewer';
@@ -142,25 +170,29 @@ async function main() {
 
   await browser.close();
   if (
-    !unsupportedDisabled
-    || !unsupportedReasonVisible
-    || !unsupportedDidNotPublish
-    || readOnlyPublishButtons !== 0
-    || unauthorizedStatus !== 403
-    || iframeCount !== 0
+    !unsupportedDisabled ||
+    !unsupportedReasonVisible ||
+    !unsupportedDidNotPublish ||
+    readOnlyPublishButtons !== 0 ||
+    unauthorizedStatus !== 403 ||
+    iframeCount !== 0
   ) {
-    throw new Error(JSON.stringify({
-      unsupportedDisabled,
-      unsupportedReasonVisible,
-      unsupportedDidNotPublish,
-      readOnlyPublishButtons,
-      unauthorizedStatus,
-      iframeCount,
-      publishRequests,
-    }));
+    throw new Error(
+      JSON.stringify({
+        unsupportedDisabled,
+        unsupportedReasonVisible,
+        unsupportedDidNotPublish,
+        readOnlyPublishButtons,
+        unauthorizedStatus,
+        iframeCount,
+        publishRequests,
+      })
+    );
   }
 
-  console.log('brand publish smoke passed: writer action, unsupported state, success/failure logs, RBAC and no iframe');
+  console.log(
+    'brand publish smoke passed: writer action, unsupported state, success/failure logs, RBAC and no iframe'
+  );
 }
 
 main().catch((error) => {

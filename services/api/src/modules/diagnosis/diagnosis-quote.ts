@@ -41,7 +41,8 @@ export interface IndicativeQuote {
   disclaimer: string;
 }
 
-const DISCLAIMER = '初步预估，基于产品目录牌价按系统区间测算，仅供参考；精确选型与最终报价以现场勘测和设计为准。';
+const DISCLAIMER =
+  '初步预估，基于产品目录牌价按系统区间测算，仅供参考；精确选型与最终报价以现场勘测和设计为准。';
 
 function median(sorted: number[]): number {
   if (!sorted.length) return 0;
@@ -63,12 +64,17 @@ export function composeIndicativeQuote(bands: SystemPriceBand[]): IndicativeQuot
   const priced = bands.filter((b) => b.priced && (b.prices?.length ?? 0) > 0);
   const currency = bands.find((b) => b.currency)?.currency || 'CNY';
   const pricedSystems = priced.map((b) => ({ code: b.code, label: b.label }));
-  const unpricedSystems = bands.filter((b) => !b.priced).map((b) => ({ code: b.code, label: b.label }));
+  const unpricedSystems = bands
+    .filter((b) => !b.priced)
+    .map((b) => ({ code: b.code, label: b.label }));
 
   if (!priced.length) {
     return {
-      available: false, currency, tiers: [],
-      pricedSystems, unpricedSystems,
+      available: false,
+      currency,
+      tiers: [],
+      pricedSystems,
+      unpricedSystems,
       coverage: { priced: 0, total: bands.length },
       disclaimer: '所选系统暂无可用目录价，初步报价将在现场勘测与选型后提供。',
     };
@@ -84,12 +90,21 @@ export function composeIndicativeQuote(bands: SystemPriceBand[]): IndicativeQuot
   const tiers: QuoteTier[] = [
     { id: 'essential', label: '基础舒适', low: r(sumMin), high: r(sumMed), pricedSystems: ids },
     { id: 'balanced', label: '均衡推荐', low: r(sumMed), high: sumUpperMid, pricedSystems: ids },
-    { id: 'premium', label: '高阶全生命周期', low: sumUpperMid, high: r(sumMax), pricedSystems: ids },
+    {
+      id: 'premium',
+      label: '高阶全生命周期',
+      low: sumUpperMid,
+      high: r(sumMax),
+      pricedSystems: ids,
+    },
   ];
 
   return {
-    available: true, currency, tiers,
-    pricedSystems, unpricedSystems,
+    available: true,
+    currency,
+    tiers,
+    pricedSystems,
+    unpricedSystems,
     coverage: { priced: priced.length, total: bands.length },
     disclaimer: DISCLAIMER,
   };

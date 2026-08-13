@@ -4,7 +4,7 @@ export const productBoundaries = {
   groupExpressionBoundary: '不是软件名',
   consumerSystemBrand: '瑞诺瓦',
   equipmentBrands: ['Rheem', 'Ruud', 'Everhot'],
-  iotBoundary: 'lifecycle_handoff_only'
+  iotBoundary: 'lifecycle_handoff_only',
 } as const;
 
 export const targetBackendModules = [
@@ -22,7 +22,7 @@ export const targetBackendModules = [
   'governance',
   'file-artifact',
   'notification',
-  'workflow'
+  'workflow',
 ] as const;
 
 /**
@@ -39,5 +39,5 @@ export const hvacKernels = [
   'fresh-air',
   'load-calculation',
   'hydraulic',
-  'quotation'
+  'quotation',
 ] as const;

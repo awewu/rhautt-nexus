@@ -18,7 +18,12 @@
       "aggregateType": "customer",
       "producer": "A/ingress（公域留资，PII 落库后发 PII-free 事件）",
       "consumers": ["C/dispatch（地域+品类+负载打分派单）", "A/growth（归因入账）"],
-      "payload": { "customerId": "string", "audience": "string", "source": "string", "campaign": "string|null" },
+      "payload": {
+        "customerId": "string",
+        "audience": "string",
+        "source": "string",
+        "campaign": "string|null"
+      },
       "purpose": "公域获客→系统态智能派单给经销商 + 营销归因（飞轮 A→分配 缝）"
     },
     {
@@ -68,7 +73,12 @@
       "aggregateType": "opportunity",
       "producer": "B/crm",
       "consumers": ["C/notification（通知负责人）", "B/bim（承接工程）"],
-      "payload": { "opportunityId": "string", "quotationId": "string", "customerId": "string", "ownerUserId": "string" },
+      "payload": {
+        "opportunityId": "string",
+        "quotationId": "string",
+        "customerId": "string",
+        "ownerUserId": "string"
+      },
       "purpose": "签单→站内通知 + BIM/交付承接"
     },
     {
@@ -77,7 +87,12 @@
       "aggregateType": "opportunity",
       "producer": "B/crm（金额取 opportunity.estimatedValue，避免跨域读报价 OLTP）",
       "consumers": ["A/cockpit（北极星+经销商成功度+AARRR 签约，经 dealer_deal_inbox 幂等求和）"],
-      "payload": { "opportunityId": "string", "dealerId": "string|null", "amount": "number", "signedAt": "string(iso)" },
+      "payload": {
+        "opportunityId": "string",
+        "dealerId": "string|null",
+        "amount": "number",
+        "signedAt": "string(iso)"
+      },
       "purpose": "成交→活跃盈利经销商数/网络GMV（北极星）+ 漏斗「签约」"
     },
     {
@@ -94,8 +109,18 @@
       "status": "implemented",
       "aggregateType": "geo_probe",
       "producer": "A/geo（探测答案中我方被引）",
-      "consumers": ["A/cockpit（AARRR 触达阶段，幂等 by probe.id）", "A/insight（我方 ai_sov 对称入账 is_self=true，补齐竞争格局参照系）"],
-      "payload": { "probeId": "string", "engine": "string", "aivs": "number", "question": "string", "brandSlug": "string|null", "category": "string|null" },
+      "consumers": [
+        "A/cockpit（AARRR 触达阶段，幂等 by probe.id）",
+        "A/insight（我方 ai_sov 对称入账 is_self=true，补齐竞争格局参照系）"
+      ],
+      "payload": {
+        "probeId": "string",
+        "engine": "string",
+        "aivs": "number",
+        "question": "string",
+        "brandSlug": "string|null",
+        "category": "string|null"
+      },
       "purpose": "被 AI 引用=品牌触达→漏斗顶端 + 抬升品牌健康度（A 造需求可归因起点）；并与 geo.competitor.cited 对称入账，使份额/头部差距有正确 universe"
     },
     {
@@ -104,7 +129,13 @@
       "aggregateType": "geo_probe",
       "producer": "A/geo（探测未被引=可见度缺口）",
       "consumers": ["A/studio（内容闭环待办：缺口→生成→审核→发布→复测）"],
-      "payload": { "probeId": "string", "engine": "string", "question": "string", "brandSlug": "string|null", "category": "string|null" },
+      "payload": {
+        "probeId": "string",
+        "engine": "string",
+        "question": "string",
+        "brandSlug": "string|null",
+        "category": "string|null"
+      },
       "purpose": "可见度缺口→驱动 GEO 内容生产补位（取代早期设计名 growth.geo.gap_detected）"
     },
     {
@@ -113,7 +144,13 @@
       "aggregateType": "geo_probe",
       "producer": "A/geo（探测答案中命中竞品）",
       "consumers": ["A/insight（竞品 AI 声量 ai_sov 自动入账，替代手工录入）"],
-      "payload": { "probeId": "string", "engine": "string", "category": "string|null", "brandSlug": "string|null", "competitors": "string[]" },
+      "payload": {
+        "probeId": "string",
+        "engine": "string",
+        "category": "string|null",
+        "brandSlug": "string|null",
+        "competitors": "string[]"
+      },
       "purpose": "竞品被 AI 引用→自动喂竞品情报 SoV 时序（打通 GEO 探测与 insight，去手工台账）"
     },
     {
@@ -122,7 +159,13 @@
       "aggregateType": "lead",
       "producer": "A/growth（消费 lead.captured 做归因入账）",
       "consumers": ["B/crm", "A/cockpit"],
-      "payload": { "leadId": "string", "tenantId": "string", "source": "string", "utm": "object", "attributedAt": "string(iso)" },
+      "payload": {
+        "leadId": "string",
+        "tenantId": "string",
+        "source": "string",
+        "utm": "object",
+        "attributedAt": "string(iso)"
+      },
       "purpose": "A 造需求→归因到战役/渠道（幂等：source_event_id 部分唯一索引）"
     },
     {
@@ -131,7 +174,12 @@
       "aggregateType": "copy_asset",
       "producer": "A/studio",
       "consumers": ["A/channel（分发）", "C/file-artifact（归档）"],
-      "payload": { "copyId": "string", "channel": "string", "reviewer": "string", "approvedAt": "string(iso)" },
+      "payload": {
+        "copyId": "string",
+        "channel": "string",
+        "reviewer": "string",
+        "approvedAt": "string(iso)"
+      },
       "purpose": "文案核准→分发/归档（AI 内容必经 draft→核准闸）"
     },
     {
@@ -176,7 +224,12 @@
       "aggregateType": "growth_opinion_alert",
       "producer": "A/growth(opinion)（舆情分级命中 P0/P1 → 开危机预警）",
       "consumers": ["A/cockpit（品牌健康度/告警）", "A/studio（危机话术草稿，须核准）"],
-      "payload": { "alertId": "string", "mentionId": "string", "severity": "string", "source": "string" },
+      "payload": {
+        "alertId": "string",
+        "mentionId": "string",
+        "severity": "string",
+        "source": "string"
+      },
       "purpose": "舆情危机检出→告警 + 生成待核准处置话术（品牌健康度负向领先指标）"
     },
     {
@@ -213,7 +266,12 @@
       "aggregateType": "geo_content",
       "producer": "A/channel",
       "consumers": ["A/geo（触发复测验证 lift）"],
-      "payload": { "contentId": "string", "url": "string", "channel": "string", "publishedAt": "string(iso)" },
+      "payload": {
+        "contentId": "string",
+        "url": "string",
+        "channel": "string",
+        "publishedAt": "string(iso)"
+      },
       "purpose": "GEO 内容发布→复测被引，量化内容闭环 lift"
     },
     {
@@ -222,7 +280,13 @@
       "aggregateType": "social_post",
       "producer": "A/channel(social)",
       "consumers": ["A/geo", "A/campaign"],
-      "payload": { "postId": "string", "platform": "string", "accountId": "string", "externalRef": "string", "publishedAt": "string(iso)" },
+      "payload": {
+        "postId": "string",
+        "platform": "string",
+        "accountId": "string",
+        "externalRef": "string",
+        "publishedAt": "string(iso)"
+      },
       "purpose": "社媒发布→GEO 复测/归因"
     },
     {
@@ -231,7 +295,12 @@
       "aggregateType": "competitor_alert",
       "producer": "A/intel",
       "consumers": ["A/cockpit", "A/studio"],
-      "payload": { "alertId": "string", "competitorId": "string", "questionId": "string", "severity": "string" },
+      "payload": {
+        "alertId": "string",
+        "competitorId": "string",
+        "questionId": "string",
+        "severity": "string"
+      },
       "purpose": "竞品突袭占位→告警+回流反制内容"
     },
     {
@@ -268,7 +337,14 @@
       "aggregateType": "dealer_success",
       "producer": "C/analytics",
       "consumers": ["A/cockpit"],
-      "payload": { "dealerId": "string", "active": "boolean", "profitProxy": "number", "profitActual": "number|null", "gmv": "number", "period": "string" },
+      "payload": {
+        "dealerId": "string",
+        "active": "boolean",
+        "profitProxy": "number",
+        "profitActual": "number|null",
+        "gmv": "number",
+        "period": "string"
+      },
       "purpose": "经销商成功度重算→北极星驾驶舱"
     }
   ]

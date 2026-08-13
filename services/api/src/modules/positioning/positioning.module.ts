@@ -28,11 +28,17 @@ import { getApiModuleBoundary } from '../module-boundary';
 export class PositioningBoundaryService {
   boundary() {
     const spec = getApiModuleBoundary('positioning');
-    return { tenantScope: spec.requiresTenantScope, auditLog: spec.requiresAuditLog, openApiContract: spec.requiresOpenApiContract };
+    return {
+      tenantScope: spec.requiresTenantScope,
+      auditLog: spec.requiresAuditLog,
+      openApiContract: spec.requiresOpenApiContract,
+    };
   }
 }
 @Controller('positioning')
 export class PositioningBoundaryController {
   constructor(private readonly s: PositioningBoundaryService) {}
-  @Get('boundary') boundary() { return this.s.boundary(); }
+  @Get('boundary') boundary() {
+    return this.s.boundary();
+  }
 }

@@ -35,7 +35,8 @@ import ContentReviewWorkspace from '../../../components/ContentReviewWorkspace';
 
 type GrowthSection = 'geo' | 'copywriter' | 'sentiment' | 'automation' | 'materials';
 type WechatSection = 'wechat-accounts' | 'wechat-review' | 'wechat-drafts';
-type StatusKind = 'running' | 'review' | 'risk' | 'config' | 'download' | 'success' | 'warning' | 'neutral';
+type StatusKind =
+  'running' | 'review' | 'risk' | 'config' | 'download' | 'success' | 'warning' | 'neutral';
 
 type SectionConfig = {
   title: string;
@@ -107,7 +108,8 @@ const SECTION_LINKS: Array<{ key: GrowthSection; href: string }> = [
 
 function sectionFromParams(section?: string[]): GrowthSection {
   const key = section?.[0];
-  if (key === 'copywriter' || key === 'sentiment' || key === 'automation' || key === 'materials') return key;
+  if (key === 'copywriter' || key === 'sentiment' || key === 'automation' || key === 'materials')
+    return key;
   return 'geo';
 }
 
@@ -133,15 +135,27 @@ export default async function GrowthWorkspacePage({
   const ActiveIcon = active.icon;
 
   return (
-    <div style={{ background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)', minHeight: '100%' }}>
-      <div className="page-container" style={{ display: 'grid', gap: 20, maxWidth: 'none', width: '100%' }}>
+    <div
+      style={{
+        background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)',
+        minHeight: '100%',
+      }}
+    >
+      <div
+        className="page-container"
+        style={{ display: 'grid', gap: 20, maxWidth: 'none', width: '100%' }}
+      >
         <PageHeader
           title="市场增长"
           subtitle="GEO 可见度 · 文案 Copilot · 舆情雷达 · 营销自动化 · 营销物料库"
           actions={<StatusPill kind={active.statusKind}>{active.status}</StatusPill>}
         />
 
-        <nav className="card-elevated" aria-label="市场增长模块" style={{ padding: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+        <nav
+          className="card-elevated"
+          aria-label="市场增长模块"
+          style={{ padding: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}
+        >
           {SECTION_LINKS.map((item) => {
             const config = SECTIONS[item.key];
             const Icon = config.icon;
@@ -171,13 +185,36 @@ export default async function GrowthWorkspacePage({
           }}
         >
           <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', minWidth: 0 }}>
-            <div style={{ width: 48, height: 48, borderRadius: 'var(--r-xl)', display: 'grid', placeItems: 'center', background: 'var(--brand-tint)', color: 'var(--brand-700)', flexShrink: 0 }}>
+            <div
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 'var(--r-xl)',
+                display: 'grid',
+                placeItems: 'center',
+                background: 'var(--brand-tint)',
+                color: 'var(--brand-700)',
+                flexShrink: 0,
+              }}
+            >
               <ActiveIcon size={22} />
             </div>
             <div style={{ minWidth: 0 }}>
               <p className="t-label">增长引擎</p>
-              <h1 style={{ marginTop: 4, fontSize: 24, lineHeight: 1.22, letterSpacing: 0, color: 'var(--t-strong)' }}>{active.title}</h1>
-              <p style={{ marginTop: 8, color: 'var(--t-secondary)', fontSize: 14 }}>{active.subtitle}</p>
+              <h1
+                style={{
+                  marginTop: 4,
+                  fontSize: 24,
+                  lineHeight: 1.22,
+                  letterSpacing: 0,
+                  color: 'var(--t-strong)',
+                }}
+              >
+                {active.title}
+              </h1>
+              <p style={{ marginTop: 8, color: 'var(--t-secondary)', fontSize: 14 }}>
+                {active.subtitle}
+              </p>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
                 <span className="pill-neutral">营销面板</span>
                 <span className="pill-neutral">审核状态清晰</span>
@@ -243,7 +280,6 @@ function NativePanel({ activeKey }: { activeKey: GrowthSection }) {
     return <CampaignRoiPanel />;
   }
 
-
   // 安全兜底：activeKey 恒在枚举内（sectionFromParams 默认 'geo'），正常到不了这里。
   // 一旦到达也不回落假数据，而是显示真实 GEO 工作区。
   return (
@@ -255,16 +291,46 @@ function NativePanel({ activeKey }: { activeKey: GrowthSection }) {
   );
 }
 
-function PanelShell({ icon: Icon, title, desc, children }: { icon: LucideIcon; title: string; desc: string; children: React.ReactNode }) {
+function PanelShell({
+  icon: Icon,
+  title,
+  desc,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  desc: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="card-elevated" style={{ padding: 18 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14, alignItems: 'flex-start', marginBottom: 14 }}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          gap: 14,
+          alignItems: 'flex-start',
+          marginBottom: 14,
+        }}
+      >
         <div>
           <p className="t-label">营销模块</p>
-          <h2 className="t-headline" style={{ marginTop: 4 }}>{title}</h2>
+          <h2 className="t-headline" style={{ marginTop: 4 }}>
+            {title}
+          </h2>
           <p style={{ marginTop: 4, color: 'var(--t-secondary)', fontSize: 13 }}>{desc}</p>
         </div>
-        <div style={{ width: 38, height: 38, borderRadius: 'var(--r-lg)', display: 'grid', placeItems: 'center', background: 'var(--surface-2)', color: 'var(--brand)' }}>
+        <div
+          style={{
+            width: 38,
+            height: 38,
+            borderRadius: 'var(--r-lg)',
+            display: 'grid',
+            placeItems: 'center',
+            background: 'var(--surface-2)',
+            color: 'var(--brand)',
+          }}
+        >
           <Icon size={18} />
         </div>
       </div>
@@ -280,24 +346,58 @@ function StatePreview() {
         <div>
           <p className="workbench-section-header__eyebrow">页面状态</p>
           <h2 className="workbench-section-header__title">加载 / 空 / 错误状态</h2>
-          <p className="workbench-section-header__description">用于检查营销增长数据在不同状态下的展示效果。</p>
+          <p className="workbench-section-header__description">
+            用于检查营销增长数据在不同状态下的展示效果。
+          </p>
         </div>
       </div>
       <div className="g3">
         <StateTile icon={Loader2} title="加载中" desc="正在同步营销增长数据" tone="loading" />
-        <StateTile icon={FolderOpen} title="暂无数据" desc="筛选条件下没有可展示项目" tone="empty" />
-        <StateTile icon={AlertCircle} title="加载失败" desc="请刷新后重试或联系管理员" tone="error" />
+        <StateTile
+          icon={FolderOpen}
+          title="暂无数据"
+          desc="筛选条件下没有可展示项目"
+          tone="empty"
+        />
+        <StateTile
+          icon={AlertCircle}
+          title="加载失败"
+          desc="请刷新后重试或联系管理员"
+          tone="error"
+        />
       </div>
     </section>
   );
 }
 
-function StateTile({ icon: Icon, title, desc, tone }: { icon: LucideIcon; title: string; desc: string; tone: 'loading' | 'empty' | 'error' }) {
-  const color = tone === 'error' ? 'var(--danger)' : tone === 'loading' ? 'var(--brand)' : 'var(--t-secondary)';
+function StateTile({
+  icon: Icon,
+  title,
+  desc,
+  tone,
+}: {
+  icon: LucideIcon;
+  title: string;
+  desc: string;
+  tone: 'loading' | 'empty' | 'error';
+}) {
+  const color =
+    tone === 'error' ? 'var(--danger)' : tone === 'loading' ? 'var(--brand)' : 'var(--t-secondary)';
   return (
-    <div className="inset" style={{ minHeight: 116, display: 'grid', placeItems: 'center', textAlign: 'center', gap: 6 }}>
-      <Icon size={20} className={tone === 'loading' ? 'animate-spin' : undefined} style={{ color }} />
-      <strong style={{ fontSize: 13, color: tone === 'error' ? 'var(--danger)' : 'var(--t-primary)' }}>{title}</strong>
+    <div
+      className="inset"
+      style={{ minHeight: 116, display: 'grid', placeItems: 'center', textAlign: 'center', gap: 6 }}
+    >
+      <Icon
+        size={20}
+        className={tone === 'loading' ? 'animate-spin' : undefined}
+        style={{ color }}
+      />
+      <strong
+        style={{ fontSize: 13, color: tone === 'error' ? 'var(--danger)' : 'var(--t-primary)' }}
+      >
+        {title}
+      </strong>
       <p style={{ fontSize: 12, color: 'var(--t-secondary)' }}>{desc}</p>
     </div>
   );
@@ -318,10 +418,16 @@ function SideQueue() {
         {items.map((item) => {
           const Icon = item.icon;
           return (
-            <div key={item.label} className="inset" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div
+              key={item.label}
+              className="inset"
+              style={{ display: 'flex', alignItems: 'center', gap: 10 }}
+            >
               <Icon size={16} style={{ color: 'var(--brand)' }} />
               <div>
-                <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--t-primary)' }}>{item.label}</p>
+                <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--t-primary)' }}>
+                  {item.label}
+                </p>
                 <p style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>{item.value}</p>
               </div>
             </div>
@@ -337,7 +443,9 @@ function PublishQueue() {
 
   return (
     <div className="card-elevated" style={{ padding: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+      <div
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}
+      >
         <p className="t-label">发布队列</p>
         <a className="btn btn-outline btn-sm" href="/brand">
           <RefreshCw size={13} />
@@ -346,7 +454,16 @@ function PublishQueue() {
       </div>
       <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
         {queue.map((item) => (
-          <div key={item} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, paddingBottom: 8, borderBottom: '1px solid var(--border)' }}>
+          <div
+            key={item}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: 10,
+              paddingBottom: 8,
+              borderBottom: '1px solid var(--border)',
+            }}
+          >
             <span style={{ fontSize: 13, color: 'var(--t-primary)' }}>{item}</span>
             <StatusPill kind="review">待审</StatusPill>
           </div>
@@ -359,8 +476,20 @@ function PublishQueue() {
 function Meta({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="t-label" style={{ marginBottom: 2 }}>{label}</p>
-      <p style={{ fontSize: 12, color: 'var(--t-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</p>
+      <p className="t-label" style={{ marginBottom: 2 }}>
+        {label}
+      </p>
+      <p
+        style={{
+          fontSize: 12,
+          color: 'var(--t-secondary)',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {value}
+      </p>
     </div>
   );
 }

@@ -8,7 +8,10 @@ describe('quotation v2 persistence service', () => {
         created.push({ scope, payload });
         return { _id: 'quote-v2-id', ...payload };
       }),
-      list: jest.fn(async (scope, query) => ({ items: [{ scope, query }], pagination: { total: 1 } }))
+      list: jest.fn(async (scope, query) => ({
+        items: [{ scope, query }],
+        pagination: { total: 1 },
+      })),
     };
     const engine = {
       generateQuoteFromBOM: jest.fn(() => ({
@@ -27,20 +30,20 @@ describe('quotation v2 persistence service', () => {
           taxAmount: 4140,
           customerTotal: 73140,
           dealerMargin: 15500,
-          monthlyPayment: 2200
+          monthlyPayment: 2200,
         },
         marginGuard: {
           status: 'pass',
           minMarginRate: 0.15,
           targetMarginRate: 0.2,
           quoteFloor: 62941,
-          adjustment: 0
+          adjustment: 0,
         },
-        assumptions: ['后端成本模型']
-      }))
+        assumptions: ['后端成本模型'],
+      })),
     };
     const outboxService = {
-      publish: jest.fn(async (scope, event) => ({ _id: 'outbox-1', ...event }))
+      publish: jest.fn(async (scope, event) => ({ _id: 'outbox-1', ...event })),
     };
 
     return {
@@ -49,12 +52,12 @@ describe('quotation v2 persistence service', () => {
         engine,
         outboxService,
         now: () => new Date('2026-06-05T12:00:00.000Z'),
-        ...overrides
+        ...overrides,
       }),
       quoteRepo,
       engine,
       outboxService,
-      created
+      created,
     };
   }
 
@@ -64,20 +67,44 @@ describe('quotation v2 persistence service', () => {
       tenantId: '665f10000000000000000001',
       dealerId: '665f10000000000000000002',
       storeId: '665f10000000000000000003',
-      userId: '665f10000000000000000004'
+      userId: '665f10000000000000000004',
     };
 
     const result = await service.persistFromBOM(scope, {
       customerId: '665f10000000000000000005',
       project: { name: '上海中央热水+全空气', city: '上海', area: 140 },
       items: [
-        { id: 'rheem-water', name: '中央热水主机', category: 'hotwater', qty: 1, unit: '台', unitPrice: 38000, total: 38000 },
-        { id: 'ruud-air', name: 'Ruud 全空气系统', category: 'hvac', qty: 1, unit: '套', unitPrice: 42000, total: 42000 },
-        { id: 'iot', name: 'IoT 控制网关', category: 'control', qty: 1, unit: '套', unitPrice: 2800, total: 2800 }
+        {
+          id: 'rheem-water',
+          name: '中央热水主机',
+          category: 'hotwater',
+          qty: 1,
+          unit: '台',
+          unitPrice: 38000,
+          total: 38000,
+        },
+        {
+          id: 'ruud-air',
+          name: 'Ruud 全空气系统',
+          category: 'hvac',
+          qty: 1,
+          unit: '套',
+          unitPrice: 42000,
+          total: 42000,
+        },
+        {
+          id: 'iot',
+          name: 'IoT 控制网关',
+          category: 'control',
+          qty: 1,
+          unit: '套',
+          unitPrice: 2800,
+          total: 2800,
+        },
       ],
       productModuleId: 'rysnova-consumer-system',
       productDeploymentMode: 'rhautt-portal-embedded',
-      lifecycleHandoff: { iotBridgeKey: 'bridge-001', servicePlanCode: 'CARE-5Y' }
+      lifecycleHandoff: { iotBridgeKey: 'bridge-001', servicePlanCode: 'CARE-5Y' },
     });
 
     expect(result.persisted).toBe(true);
@@ -97,16 +124,16 @@ describe('quotation v2 persistence service', () => {
         lifecycleHandoff: expect.objectContaining({
           status: 'ready',
           iotBridgeKey: 'bridge-001',
-          servicePlanCode: 'CARE-5Y'
+          servicePlanCode: 'CARE-5Y',
         }),
         costBreakdown: expect.objectContaining({
           directCost: 53500,
-          customerTotal: 73140
+          customerTotal: 73140,
         }),
         marginGuard: expect.objectContaining({
           status: 'pass',
-          quoteFloor: 62941
-        })
+          quoteFloor: 62941,
+        }),
       }),
       {}
     );
@@ -124,8 +151,8 @@ describe('quotation v2 persistence service', () => {
           productDeploymentMode: 'rhautt-portal-embedded',
           productNamespace: 'rysnova',
           productDataNamespace: 'rysnova',
-          systemFamilies: expect.arrayContaining(['hot_water', 'air', 'smart_control'])
-        })
+          systemFamilies: expect.arrayContaining(['hot_water', 'air', 'smart_control']),
+        }),
       }),
       {}
     );
@@ -134,10 +161,12 @@ describe('quotation v2 persistence service', () => {
   test('rejects persistence without tenant or customer scope', async () => {
     const { service } = makeService();
 
-    await expect(service.persistFromBOM({}, { customerId: 'c1', items: [{ name: '设备', total: 1 }] }))
-      .rejects.toThrow('tenantId is required');
-    await expect(service.persistFromBOM({ tenantId: 't1' }, { items: [{ name: '设备', total: 1 }] }))
-      .rejects.toThrow('customerId is required');
+    await expect(
+      service.persistFromBOM({}, { customerId: 'c1', items: [{ name: '设备', total: 1 }] })
+    ).rejects.toThrow('tenantId is required');
+    await expect(
+      service.persistFromBOM({ tenantId: 't1' }, { items: [{ name: '设备', total: 1 }] })
+    ).rejects.toThrow('customerId is required');
   });
 
   test('list always applies tenant scope through repository', async () => {
@@ -159,9 +188,9 @@ describe('quotation v2 persistence service', () => {
       design: { area: 120 },
       devices: [
         { name: '中央热水主机', price: 38000, quantity: 1 },
-        { name: '全空气系统', price: 42000, quantity: 1 }
+        { name: '全空气系统', price: 42000, quantity: 1 },
       ],
-      services: ['design', 'maintenance_1y', 'unknown_service']
+      services: ['design', 'maintenance_1y', 'unknown_service'],
     });
 
     expect(quote.quoteId).toBe('QT1780660800000');
@@ -170,12 +199,12 @@ describe('quotation v2 persistence service', () => {
       subtotal: 104000,
       tax: 13520,
       total: 117520,
-      currency: 'CNY'
+      currency: 'CNY',
     });
     expect(quote.details.devices.total).toBe(80000);
     expect(quote.details.installation).toEqual({
       description: '标准安装',
-      total: 18000
+      total: 18000,
     });
     expect(quote.details.services.total).toBe(6000);
     expect(quote.validUntil).toBe('2026-07-05T12:00:00.000Z');
@@ -185,21 +214,25 @@ describe('quotation v2 persistence service', () => {
   test('normalizes engine summary tax into persisted cost breakdown', async () => {
     const { service } = makeService();
 
-    expect(service.normalizeCostBreakdown({
-      summary: {
+    expect(
+      service.normalizeCostBreakdown({
+        summary: {
+          materialSubtotal: 100000,
+          directCost: 76000,
+          targetBeforeTax: 98000,
+          tax: 5880,
+          customerTotal: 103880,
+        },
+      })
+    ).toEqual(
+      expect.objectContaining({
         materialSubtotal: 100000,
         directCost: 76000,
         targetBeforeTax: 98000,
-        tax: 5880,
-        customerTotal: 103880
-      }
-    })).toEqual(expect.objectContaining({
-      materialSubtotal: 100000,
-      directCost: 76000,
-      targetBeforeTax: 98000,
-      taxAmount: 5880,
-      customerTotal: 103880
-    }));
+        taxAmount: 5880,
+        customerTotal: 103880,
+      })
+    );
   });
 
   test('migrates commercial tax calculation into quotation service target module', async () => {
@@ -219,18 +252,18 @@ describe('quotation v2 persistence service', () => {
             directCost: 155000,
             targetBeforeTax: 200000,
             tax: 0,
-            customerTotal: 212000
+            customerTotal: 212000,
           },
           marginGuard: { status: 'pass' },
-          assumptions: ['后端成本模型']
-        }))
-      }
+          assumptions: ['后端成本模型'],
+        })),
+      },
     });
     const scope = {
       tenantId: '665f10000000000000000001',
       dealerId: '665f10000000000000000002',
       storeId: '665f10000000000000000003',
-      userId: '665f10000000000000000004'
+      userId: '665f10000000000000000004',
     };
 
     const tax = service.calculateCommercialTax({
@@ -238,7 +271,7 @@ describe('quotation v2 persistence service', () => {
       installationAmount: 50000,
       designAmount: 10000,
       taxpayerType: 'general',
-      cityTier: '1'
+      cityTier: '1',
     });
 
     expect(tax.tax.vat.totalVAT).toBe(21400);
@@ -251,7 +284,14 @@ describe('quotation v2 persistence service', () => {
       customerId: '665f10000000000000000005',
       project: { city: '上海', area: 260 },
       items: [
-        { id: 'equipment', name: '商用中央热水设备', category: 'hotwater', qty: 1, unitPrice: 120000, total: 120000 }
+        {
+          id: 'equipment',
+          name: '商用中央热水设备',
+          category: 'hotwater',
+          qty: 1,
+          unitPrice: 120000,
+          total: 120000,
+        },
       ],
       options: {
         taxMode: 'commercial',
@@ -259,19 +299,19 @@ describe('quotation v2 persistence service', () => {
         equipmentAmount: 120000,
         installationAmount: 50000,
         designAmount: 10000,
-        cityTier: '1'
-      }
+        cityTier: '1',
+      },
     });
 
     expect(quoteRepo.create).toHaveBeenCalledWith(
       scope,
       expect.objectContaining({
         costBreakdown: expect.objectContaining({
-          taxAmount: 24022
+          taxAmount: 24022,
         }),
         assumptions: expect.arrayContaining([
-          expect.stringContaining('商用税费由 quotation service')
-        ])
+          expect.stringContaining('商用税费由 quotation service'),
+        ]),
       }),
       {}
     );
@@ -281,9 +321,9 @@ describe('quotation v2 persistence service', () => {
         payload: expect.objectContaining({
           taxProfile: expect.objectContaining({
             mode: 'commercial',
-            amount: 24022
-          })
-        })
+            amount: 24022,
+          }),
+        }),
       }),
       {}
     );

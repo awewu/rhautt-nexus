@@ -15,7 +15,14 @@ interface ScoredCandidate {
   city: string | null;
   province: string | null;
   score: number;
-  breakdown: { city: number; province: number; category: number; contract: number; loadPenalty: number; categoryOverlap: number };
+  breakdown: {
+    city: number;
+    province: number;
+    category: number;
+    contract: number;
+    loadPenalty: number;
+    categoryOverlap: number;
+  };
   routable: boolean;
 }
 
@@ -34,15 +41,21 @@ export class DispatchService {
   constructor(@InjectDataSource() private readonly ds: DataSource) {}
 
   /** 事务内派单——供 event-consumers 在 lead.captured 的 RLS 事务里调用。 */
-  async routeCapturedLeadInTx(em: EntityManager, args: { tenantId: string; customerId: string }): Promise<RoutingDecisionEntity | null> {
+  async routeCapturedLeadInTx(
+    em: EntityManager,
+    args: { tenantId: string; customerId: string }
+  ): Promise<RoutingDecisionEntity | null> {
     const { tenantId, customerId } = args;
-    const customer = await em.getRepository(CustomerEntity).findOne({ where: { id: customerId, tenantId } });
+    const customer = await em
+      .getRepository(CustomerEntity)
+      .findOne({ where: { id: customerId, tenantId } });
     if (!customer) return null;
     // B 路径（已归属客户的问诊）不重复派单
     if (customer.dealerId) return null;
 
     const opp = await em.getRepository(OpportunityEntity).findOne({
-      where: { customerId, tenantId }, order: { createdAt: 'DESC' },
+      where: { customerId, tenantId },
+      order: { createdAt: 'DESC' },
     });
 
     const profile = (customer.profile || {}) as Record<string, unknown>;
@@ -73,32 +86,40 @@ export class DispatchService {
       candidates: scored.slice(0, 5),
       reason: chosen
         ? `命中 ${chosen.name}（city=${chosen.breakdown.city} province=${chosen.breakdown.province} category=${chosen.breakdown.category} contract=${chosen.breakdown.contract} load=-${chosen.breakdown.loadPenalty}）`
-        : (candidates.length === 0 ? '目录无可派经销商' : '无经销商可服务所需品类/地域'),
+        : candidates.length === 0
+          ? '目录无可派经销商'
+          : '无经销商可服务所需品类/地域',
       status: chosen ? 'routed' : 'unrouted',
     });
     const saved = await decisionRepo.save(decision);
 
     if (chosen) {
       // stamp 归属（本切片：lead 仍留 pool，stamp dealer/store + 记录真实租户，供后续系统态迁移落库）
-      await em.getRepository(CustomerEntity).update(
-        { id: customerId, tenantId },
-        { dealerId: chosen.dealerId, storeId: chosen.storeId },
-      );
-      if (opp) {
-        await em.getRepository(OpportunityEntity).update(
-          { id: opp.id, tenantId },
-          { dealerId: chosen.dealerId, storeId: chosen.storeId },
+      await em
+        .getRepository(CustomerEntity)
+        .update(
+          { id: customerId, tenantId },
+          { dealerId: chosen.dealerId, storeId: chosen.storeId }
         );
+      if (opp) {
+        await em
+          .getRepository(OpportunityEntity)
+          .update({ id: opp.id, tenantId }, { dealerId: chosen.dealerId, storeId: chosen.storeId });
       }
       // 负载自增（foundation 行 tenant_id NULL，WITH CHECK 允许）
       await dirRepo.increment({ dealerId: chosen.dealerId }, 'activeLoad', 1);
     }
 
-    this.logger.log(`lead.captured → dispatch status=${decision.status} dealer=${chosen?.dealerId ?? '-'} customer=${customerId} tenant=${tenantId}`);
+    this.logger.log(
+      `lead.captured → dispatch status=${decision.status} dealer=${chosen?.dealerId ?? '-'} customer=${customerId} tenant=${tenantId}`
+    );
     return saved;
   }
 
-  private score(c: DealerDirectoryEntity, ctx: { city: string | null; province: string | null; requested: string[] }): ScoredCandidate {
+  private score(
+    c: DealerDirectoryEntity,
+    ctx: { city: string | null; province: string | null; requested: string[] }
+  ): ScoredCandidate {
     const cityMatch = c.city && ctx.city && c.city === ctx.city ? 40 : 0;
     const provinceMatch = c.province && ctx.province && c.province === ctx.province ? 15 : 0;
     const overlap = ctx.requested.filter((r) => (c.categories || []).includes(r)).length;
@@ -109,25 +130,46 @@ export class DispatchService {
     // 可派：须能服务至少一个所需品类；若问诊未选品类，则退化为地域可达即可派
     const routable = categoryScore > 0 || (ctx.requested.length === 0 && cityMatch > 0);
     return {
-      dealerId: c.dealerId, dealerTenantId: c.dealerTenantId, storeId: c.storeId,
-      name: c.name, city: c.city, province: c.province,
-      score, routable,
-      breakdown: { city: cityMatch, province: provinceMatch, category: categoryScore, contract: contractScore, loadPenalty, categoryOverlap: overlap },
+      dealerId: c.dealerId,
+      dealerTenantId: c.dealerTenantId,
+      storeId: c.storeId,
+      name: c.name,
+      city: c.city,
+      province: c.province,
+      score,
+      routable,
+      breakdown: {
+        city: cityMatch,
+        province: provinceMatch,
+        category: categoryScore,
+        contract: contractScore,
+        loadPenalty,
+        categoryOverlap: overlap,
+      },
     };
   }
 
   // ── 只读/维护 API（控制器） ─────────────────────────────────────────────
   listDecisions(user: JwtPayload, limit = 50) {
-    return withRlsTransaction(this.ds, (em) =>
-      em.getRepository(RoutingDecisionEntity).find({
-        where: { tenantId: user.tenantId! }, order: { createdAt: 'DESC' }, take: Math.min(limit, 200),
-      }), this.rls(user));
+    return withRlsTransaction(
+      this.ds,
+      (em) =>
+        em.getRepository(RoutingDecisionEntity).find({
+          where: { tenantId: user.tenantId! },
+          order: { createdAt: 'DESC' },
+          take: Math.min(limit, 200),
+        }),
+      this.rls(user)
+    );
   }
 
   listDirectory(user: JwtPayload) {
     // foundation 行（tenant_id NULL）+ 本租户行；RLS policy 已放行 NULL 行
-    return withRlsTransaction(this.ds, (em) =>
-      em.getRepository(DealerDirectoryEntity).find({ order: { city: 'ASC' } }), this.rls(user));
+    return withRlsTransaction(
+      this.ds,
+      (em) => em.getRepository(DealerDirectoryEntity).find({ order: { city: 'ASC' } }),
+      this.rls(user)
+    );
   }
 
   private rls(user: JwtPayload): TenantScope {

@@ -40,10 +40,18 @@ function text(value: unknown, max = 500): string {
 }
 
 function textArray(value: unknown, maxItem = 80): string[] {
-  if (Array.isArray(value)) return [...new Set(value.map((item) => text(item, maxItem)).filter(Boolean))];
+  if (Array.isArray(value))
+    return [...new Set(value.map((item) => text(item, maxItem)).filter(Boolean))];
   const raw = text(value, 1000);
   if (!raw) return [];
-  return [...new Set(raw.split(/[,，、\n]/).map((item) => text(item, maxItem)).filter(Boolean))];
+  return [
+    ...new Set(
+      raw
+        .split(/[,，、\n]/)
+        .map((item) => text(item, maxItem))
+        .filter(Boolean)
+    ),
+  ];
 }
 
 function numberValue(value: unknown, min: number, max: number): number | null {
@@ -97,10 +105,19 @@ export class SiteDealerService {
         const qb = this.filteredQuery(em, user.tenantId, site.id, query);
         const page = Math.max(Number(query.page) || 1, 1);
         const pageSize = Math.min(Math.max(Number(query.pageSize) || 20, 1), 100);
-        const [rows, total] = await qb.skip((page - 1) * pageSize).take(pageSize).getManyAndCount();
-        return { items: rows.map(siteDealerView), total, page, pageSize, pages: Math.max(Math.ceil(total / pageSize), 1) };
+        const [rows, total] = await qb
+          .skip((page - 1) * pageSize)
+          .take(pageSize)
+          .getManyAndCount();
+        return {
+          items: rows.map(siteDealerView),
+          total,
+          page,
+          pageSize,
+          pages: Math.max(Math.ceil(total / pageSize), 1),
+        };
       },
-      this.scope(user),
+      this.scope(user)
     );
   }
 
@@ -108,7 +125,7 @@ export class SiteDealerService {
     return withRlsTransaction(
       this.ds,
       async (em) => siteDealerView(await this.findDealer(em, user.tenantId, siteCode, id)),
-      this.scope(user),
+      this.scope(user)
     );
   }
 
@@ -126,12 +143,12 @@ export class SiteDealerService {
             ...this.patch(input, true),
             createdBy: user.userId,
             updatedBy: user.userId,
-          }),
+          })
         );
         await this.audit(em, user, 'site-dealer.create', saved.id, null, { ...saved });
         return siteDealerView(saved);
       },
-      this.scope(user),
+      this.scope(user)
     );
   }
 
@@ -146,7 +163,7 @@ export class SiteDealerService {
         await this.audit(em, user, 'site-dealer.update', saved.id, before, { ...saved });
         return siteDealerView(saved);
       },
-      this.scope(user),
+      this.scope(user)
     );
   }
 
@@ -163,7 +180,7 @@ export class SiteDealerService {
         await this.audit(em, user, 'site-dealer.archive', row.id, before, { ...row });
         return { ok: true, id };
       },
-      this.scope(user),
+      this.scope(user)
     );
   }
 
@@ -178,17 +195,31 @@ export class SiteDealerService {
         const qb = this.filteredQuery(em, tenantId, site.id, { ...query, status: 'active' });
         const page = Math.max(Number(query.page) || 1, 1);
         const pageSize = Math.min(Math.max(Number(query.pageSize || query.limit) || 50, 1), 200);
-        const [rows, total] = await qb.skip((page - 1) * pageSize).take(pageSize).getManyAndCount();
+        const [rows, total] = await qb
+          .skip((page - 1) * pageSize)
+          .take(pageSize)
+          .getManyAndCount();
         return {
           success: true,
-          data: { items: rows.map(siteDealerView), total, page, pageSize, pages: Math.max(Math.ceil(total / pageSize), 1) },
+          data: {
+            items: rows.map(siteDealerView),
+            total,
+            page,
+            pageSize,
+            pages: Math.max(Math.ceil(total / pageSize), 1),
+          },
         };
       },
-      { tenantId },
+      { tenantId }
     );
   }
 
-  private filteredQuery(em: EntityManager, tenantId: string, siteId: string, query: Record<string, unknown>) {
+  private filteredQuery(
+    em: EntityManager,
+    tenantId: string,
+    siteId: string,
+    query: Record<string, unknown>
+  ) {
     const qb = em
       .getRepository(SiteDealerEntity)
       .createQueryBuilder('dealer')
@@ -200,7 +231,8 @@ export class SiteDealerService {
     const province = text(query.province, 80);
     if (province) qb.andWhere('dealer.province = :province', { province });
     const service = text(query.service, 80);
-    if (service) qb.andWhere('dealer.services @> :service::jsonb', { service: JSON.stringify([service]) });
+    if (service)
+      qb.andWhere('dealer.services @> :service::jsonb', { service: JSON.stringify([service]) });
     const keyword = text(query.q || query.keyword, 100).toLowerCase();
     if (keyword) {
       qb.andWhere(
@@ -213,10 +245,13 @@ export class SiteDealerService {
           lower(coalesce(dealer.phone, '')) LIKE :keyword OR
           lower(coalesce(dealer.dealerType, '')) LIKE :keyword
         )`,
-        { keyword: `%${keyword}%` },
+        { keyword: `%${keyword}%` }
       );
     }
-    return qb.orderBy('dealer.sortOrder', 'ASC').addOrderBy('dealer.updatedAt', 'DESC').addOrderBy('dealer.createdAt', 'DESC');
+    return qb
+      .orderBy('dealer.sortOrder', 'ASC')
+      .addOrderBy('dealer.updatedAt', 'DESC')
+      .addOrderBy('dealer.createdAt', 'DESC');
   }
 
   private patch(input: SiteDealerInput, creating: boolean): Partial<SiteDealerEntity> {
@@ -296,7 +331,7 @@ export class SiteDealerService {
     action: string,
     id: string,
     before: Record<string, unknown> | null,
-    after: Record<string, unknown>,
+    after: Record<string, unknown>
   ) {
     const repo = em.getRepository(AuditLogEntity);
     await repo.save(
@@ -311,7 +346,7 @@ export class SiteDealerService {
         requestId: null,
         traceId: null,
         ipHash: null,
-      }),
+      })
     );
   }
 }

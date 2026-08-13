@@ -181,3 +181,6 @@ src-tauri/gen/
 .scratch/
 backups/
 release-runtime/
+
+# stale submodule gitlink removed (no .gitmodules url)
+vendor/paperclip/

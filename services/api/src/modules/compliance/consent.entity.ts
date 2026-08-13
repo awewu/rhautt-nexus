@@ -1,6 +1,10 @@
 import {
-  Column, CreateDateColumn, Entity, Index,
-  PrimaryGeneratedColumn, UpdateDateColumn
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 /**
@@ -9,11 +13,11 @@ import {
  * 法律依据：PIPL 第13/14条（同意须自愿、明确、可撤回、可追溯）。
  */
 export type ConsentPurpose =
-  | 'diagnosis_intake'      // 问诊需求采集
-  | 'lead_to_dealer'        // 留资分发给经销商
-  | 'marketing'             // 营销触达
-  | 'service_followup'      // 售后回访
-  | 'data_cross_border';    // 个人信息出境
+  | 'diagnosis_intake' // 问诊需求采集
+  | 'lead_to_dealer' // 留资分发给经销商
+  | 'marketing' // 营销触达
+  | 'service_followup' // 售后回访
+  | 'data_cross_border'; // 个人信息出境
 
 export type SubjectType = 'consumer' | 'customer' | 'dealer_staff';
 
@@ -30,7 +34,7 @@ export class ConsentEntity {
   @Column({ name: 'subject_type', default: 'consumer' }) subjectType: SubjectType;
 
   @Column() purpose: ConsentPurpose;
-  @Column({ name: 'policy_version' }) policyVersion: string;   // 隐私政策版本，撤回与重授权追溯
+  @Column({ name: 'policy_version' }) policyVersion: string; // 隐私政策版本，撤回与重授权追溯
   @Column({ default: true }) granted: boolean;
 
   // 采集证据（PIPL 可追溯要求）：渠道 + 来源 IP 哈希（不存明文 IP）+ UA

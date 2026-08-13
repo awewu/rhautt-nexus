@@ -1,8 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  deriveTopics, scoreTopic, SCENARIO_TEMPLATES,
-  resolveVocabulary, planSeedScenarios, DEFAULT_VOCABULARY,
+  deriveTopics,
+  scoreTopic,
+  SCENARIO_TEMPLATES,
+  resolveVocabulary,
+  planSeedScenarios,
+  DEFAULT_VOCABULARY,
 } from './geo-scenarios';
 
 const base = {
@@ -26,8 +30,14 @@ test('补齐房型与气候区后，派生问题数量增加且填充正确', ()
   const few = deriveTopics({ ...base });
   const many = deriveTopics({ ...base, houseType: '老房', climateZone: '寒冷' });
   assert.ok(many.length > few.length, '字段更全应派生出更多问题');
-  assert.ok(many.some((t) => t.question.includes('老房')), '应把房型填入问句');
-  assert.ok(many.some((t) => t.question.includes('寒冷')), '应把气候区填入问句');
+  assert.ok(
+    many.some((t) => t.question.includes('老房')),
+    '应把房型填入问句'
+  );
+  assert.ok(
+    many.some((t) => t.question.includes('寒冷')),
+    '应把气候区填入问句'
+  );
 });
 
 test('priority 方向正确：商业价值越高，priority 数字越小（与问题库 ASC 排序一致）', () => {
@@ -42,18 +52,28 @@ test('具体度与胜算提升分数，且分数封顶 100', () => {
   const plain = scoreTopic({ intent: 'compare' });
   const specific = scoreTopic({ intent: 'compare', hasHouseType: true, hasClimateZone: true });
   assert.ok(specific.score > plain.score, '更具体的问题应得分更高');
-  const maxed = scoreTopic({ intent: 'decide', hasHouseType: true, hasClimateZone: true, winnability: 999 });
+  const maxed = scoreTopic({
+    intent: 'decide',
+    hasHouseType: true,
+    hasClimateZone: true,
+    winnability: 999,
+  });
   assert.equal(maxed.score, 100, '分数应封顶 100');
   assert.ok(maxed.factors.winnability <= 20, '胜算因子应被夹到 0-20');
 });
 
 test('角色专属模板只对相应角色生效', () => {
-  const installerOnly = SCENARIO_TEMPLATES.find((t) => t.audiences?.includes('installer') && t.audiences.length === 1);
+  const installerOnly = SCENARIO_TEMPLATES.find(
+    (t) => t.audiences?.includes('installer') && t.audiences.length === 1
+  );
   assert.ok(installerOnly, '应存在仅安装工可见的模板');
   const owner = deriveTopics({ ...base, audience: 'owner' });
   const installer = deriveTopics({ ...base, audience: 'installer' });
   assert.ok(!owner.some((t) => t.templateId === installerOnly!.id), '业主不应看到安装工专属问题');
-  assert.ok(installer.some((t) => t.templateId === installerOnly!.id), '安装工应看到其专属问题');
+  assert.ok(
+    installer.some((t) => t.templateId === installerOnly!.id),
+    '安装工应看到其专属问题'
+  );
 });
 
 // ── 播种器 ──
@@ -95,7 +115,10 @@ test('播种覆盖多个痛点并轮转意向层级（覆盖全漏斗）', () =>
 test('多角色播种时各角色均被覆盖', () => {
   const vocabulary = resolveVocabulary('空调')!;
   const seeds = planSeedScenarios({
-    category: '空调', vocabulary, audiences: ['owner', 'installer'], maxScenarios: 8,
+    category: '空调',
+    vocabulary,
+    audiences: ['owner', 'installer'],
+    maxScenarios: 8,
   });
   const roles = new Set(seeds.map((s) => s.audience));
   assert.ok(roles.has('owner') && roles.has('installer'), '两个角色都应出现');
