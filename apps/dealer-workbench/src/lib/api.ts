@@ -1224,6 +1224,42 @@ export const productMgmt = {
       method: 'POST',
       body: JSON.stringify({ decision, note }),
     }),
+  // ── 主销产品（策略声明·三闸：毛利/生命周期/卖点证据）──
+  focusEligibility: (productId: string) =>
+    apiFetch(
+      `/api/v2/product-catalog/focus-products/eligibility?productId=${encodeURIComponent(productId)}`
+    ),
+  declareFocus: (data: Record<string, unknown>) =>
+    apiFetch('/api/v2/product-catalog/focus-products', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  listFocus: (q: { brandSlug?: string; category?: string; includeInactive?: boolean } = {}) =>
+    apiFetch(
+      '/api/v2/product-catalog/focus-products?' +
+        new URLSearchParams(
+          Object.fromEntries(Object.entries(q).filter(([, v]) => v != null)) as Record<
+            string,
+            string
+          >
+        ).toString()
+    ),
+  revokeFocus: (id: string, reason?: string) =>
+    apiFetch(`/api/v2/product-catalog/focus-products/${encodeURIComponent(id)}/revoke`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    }),
+  focusRealityCheck: (brandSlug: string, category?: string) =>
+    apiFetch(
+      `/api/v2/product-catalog/focus-products/reality-check?brandSlug=${encodeURIComponent(brandSlug)}` +
+        (category ? `&category=${encodeURIComponent(category)}` : '')
+    ),
+  // 主销 → 型号级 GEO 选题（growth 域路由）
+  deriveFocusTopics: (data: { brandSlug: string; category?: string; dryRun?: boolean }) =>
+    apiFetch('/api/v2/growth/geo/focus-products/derive-topics', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };
 
 // 内容工厂（模块8）

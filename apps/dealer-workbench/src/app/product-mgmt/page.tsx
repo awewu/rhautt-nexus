@@ -7,6 +7,7 @@ import { PageHeader, AsyncBoundary, useToast, type AsyncStatus } from '@rhautt/u
 import { productMgmt } from '../../lib/api';
 import { useListView, exportCsv } from '../../lib/useListView';
 import ListToolbar from '../../components/ListToolbar';
+import FocusProductsPanel from '../../components/FocusProductsPanel';
 
 function statusOf(isLoading: boolean, error: unknown, empty: boolean): AsyncStatus {
   if (isLoading) return 'loading';
@@ -91,8 +92,10 @@ export default function ProductMgmtPage() {
     <div className="page-container">
       <PageHeader
         title="产品管理"
-        subtitle="生命周期 · 新品上市 NPI · 卖点体系 · 定价审批（毛利闸·基座3）"
+        subtitle="生命周期 · 新品上市 NPI · 卖点体系 · 定价审批（毛利闸·基座3）· 主销声明与后验镜子"
       />
+
+      <FocusProductsPanel />
 
       <div className="card" style={{ padding: 20, marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
