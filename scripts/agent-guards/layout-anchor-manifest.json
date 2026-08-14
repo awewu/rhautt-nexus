@@ -1,0 +1,65 @@
+{
+  "_comment": "布局锚定清单：position:fixed/sticky 的定位值是隐式契约。anchoredTo 必须写清锚定对象——删布局元素前先查这张账。",
+  "updatedAt": "2026-08-14",
+  "anchors": [
+    {
+      "selector": ".account-menu",
+      "position": "fixed",
+      "props": {
+        "left": "52px",
+        "bottom": "14px"
+      },
+      "anchoredTo": "锚定侧栏（64px 宽）：left=52 悬于侧栏右缘、bottom=14 对齐账户头像"
+    },
+    {
+      "selector": ".content-factory-aside",
+      "position": "sticky",
+      "props": {
+        "top": "12px"
+      },
+      "anchoredTo": "内容工厂右栏：sticky 于滚动容器顶 12px（无外部依赖）"
+    },
+    {
+      "selector": ".content-factory-modal",
+      "position": "fixed",
+      "props": {},
+      "anchoredTo": "全屏遮罩：无定位值，铺满视口"
+    },
+    {
+      "selector": ".growth-copy-bulkbar",
+      "position": "sticky",
+      "props": {
+        "top": "calc(44px + var(--s3))"
+      },
+      "anchoredTo": "锚定 44px 二级 tab 栏：top=44px+间距（tab 栏高度变了要跟着改）"
+    },
+    {
+      "selector": ".growth-copy-modal",
+      "position": "fixed",
+      "props": {},
+      "anchoredTo": "全屏遮罩：无定位值，铺满视口"
+    },
+    {
+      "selector": ".workbench-subnav",
+      "position": "fixed",
+      "props": {
+        "top": "0",
+        "left": "64px",
+        "bottom": "auto",
+        "height": "100vh"
+      },
+      "anchoredTo": "锚定视口顶+64px 侧栏：2026-08 顶栏删除后 top 由 48 改 0（该组件当前未启用）"
+    },
+    {
+      "selector": ".workbench-tabbar",
+      "position": "fixed",
+      "props": {
+        "top": "0",
+        "left": "64px",
+        "right": "0",
+        "height": "44px"
+      },
+      "anchoredTo": "锚定视口顶+64px 侧栏：2026-08 顶栏删除后 top 由 48 改 0；高 44px 是 bulkbar/content padding 的上游契约"
+    }
+  ]
+}

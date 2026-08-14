@@ -4,7 +4,12 @@
     "role": "品牌基础要素唯一事实源(品牌管理中心)。各 app 必须消费此处 + packages/tokens/<slug>.css，禁止硬编码品牌色/命名/NAP。",
     "viStylingArtifact": "packages/tokens/<slug>.css（styling 事实源；须与本表 vi 值一致）",
     "damStore": "市场物料库走 file-artifact；logo/手册/海报等 damKey 指向 DAM",
-    "consumers": ["apps/public-portal", "apps/everhot-cn", "product-catalog", "营销/SEO 元数据"],
+    "consumers": [
+      "apps/public-portal",
+      "apps/everhot-cn",
+      "product-catalog",
+      "营销/SEO 元数据"
+    ],
     "todoConvention": "值形如 __TODO(...)__ 表示待业务/法务提供；下游应渲染占位而非杜撰",
     "brandRelationship": {
       "_decidedAt": "2026-07-02 用户裁定",
@@ -37,7 +42,12 @@
     {
       "slug": "rhautt",
       "fundamentals": {
-        "naming": { "short_cn": "瑞合瑞德", "deprecatedAka": ["瑞豪特"] },
+        "naming": {
+          "short_cn": "瑞合瑞德",
+          "deprecatedAka": [
+            "瑞豪特"
+          ]
+        },
         "vi": {
           "tokenCss": "packages/tokens/rhautt.css",
           "primary": "#E4002B",
@@ -49,7 +59,10 @@
           "font": "Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif",
           "radius": "4px"
         },
-        "logo": { "damKey": null, "note": "待上传 DAM(市场物料库)" },
+        "logo": {
+          "damKey": null,
+          "note": "待上传 DAM(市场物料库)"
+        },
         "taglineEn": "Reliable · Sustainable · Intelligent",
         "contact": {
           "hotline": "400-886-9119",
@@ -74,7 +87,11 @@
       "token": "packages/tokens/rhautt.css",
       "app": "apps/public-portal",
       "crossLinks": {
-        "equipmentBrandSites": ["apps/rheem-cn", "apps/ruud-cn", "apps/everhot-cn"],
+        "equipmentBrandSites": [
+          "apps/rheem-cn",
+          "apps/ruud-cn",
+          "apps/everhot-cn"
+        ],
         "consumerSystem": "apps/consumer-diagnosis",
         "technicalSupport": "apps/lithnova-workbench"
       }
@@ -94,6 +111,9 @@
           "border": "#DFE2E4",
           "font": "Rheem Sans, Helvetica, Arial, sans-serif",
           "radius": "4px"
+        },
+        "naming": {
+          "short_cn": "瑞美"
         }
       },
       "name_cn": "Rheem 中国",
@@ -109,7 +129,10 @@
       "crossLinks": {
         "groupPortal": "apps/public-portal",
         "consumerSystem": "apps/consumer-diagnosis",
-        "siblingBrandSites": ["apps/ruud-cn", "apps/everhot-cn"]
+        "siblingBrandSites": [
+          "apps/ruud-cn",
+          "apps/everhot-cn"
+        ]
       },
       "standaloneLaunchable": true,
       "embeddedInRhauttPortal": true
@@ -130,6 +153,9 @@
           "border": "#E0E0E0",
           "font": "Microsoft YaHei, PingFang SC, Helvetica, Arial, sans-serif",
           "radius": "2px"
+        },
+        "naming": {
+          "short_cn": "瑞德"
         }
       },
       "name_cn": "Ruud 中国",
@@ -145,7 +171,10 @@
       "crossLinks": {
         "groupPortal": "apps/public-portal",
         "consumerSystem": "apps/consumer-diagnosis",
-        "siblingBrandSites": ["apps/rheem-cn", "apps/everhot-cn"]
+        "siblingBrandSites": [
+          "apps/rheem-cn",
+          "apps/everhot-cn"
+        ]
       },
       "standaloneLaunchable": true,
       "embeddedInRhauttPortal": true
@@ -164,9 +193,17 @@
           "radius": "4px",
           "note": "站点现用 #C8102E，token 定 #E4002B；待用户最终裁定(见 _openDecisions)"
         },
-        "logo": { "damKey": null, "note": "待上传 DAM" },
+        "logo": {
+          "damKey": null,
+          "note": "待上传 DAM"
+        },
         "relationshipToGroup": "瑞美集团(Rheem)品牌，瑞合瑞德集团中国独家运营（集团自建站）",
-        "legal": { "copyrightHolder": "瑞合瑞德暖通科技集团(运营)" }
+        "legal": {
+          "copyrightHolder": "瑞合瑞德暖通科技集团(运营)"
+        },
+        "naming": {
+          "short_cn": "恒热"
+        }
       },
       "name_cn": "Everhot 中国",
       "name_en": "Everhot China",
@@ -181,7 +218,10 @@
       "crossLinks": {
         "groupPortal": "apps/public-portal",
         "consumerSystem": "apps/consumer-diagnosis",
-        "siblingBrandSites": ["apps/rheem-cn", "apps/ruud-cn"]
+        "siblingBrandSites": [
+          "apps/rheem-cn",
+          "apps/ruud-cn"
+        ]
       },
       "standaloneLaunchable": true,
       "embeddedInRhauttPortal": true
@@ -228,9 +268,14 @@
           "radius": "6px",
           "note": "储能/新能源调性（绿），token 待市场最终裁定"
         },
-        "logo": { "damKey": null, "note": "待上传 DAM" },
+        "logo": {
+          "damKey": null,
+          "note": "待上传 DAM"
+        },
         "relationshipToGroup": "瑞合瑞德孵化的独立设备品牌，聚焦新能源储能产品系列（与 Everhot 同构自建站）",
-        "legal": { "copyrightHolder": "瑞合瑞德暖通科技集团(运营)" }
+        "legal": {
+          "copyrightHolder": "瑞合瑞德暖通科技集团(运营)"
+        }
       },
       "name_cn": "瓦瑞节能",
       "name_en": "Lithnova",
@@ -246,7 +291,11 @@
       "crossLinks": {
         "groupPortal": "apps/public-portal",
         "consumerSystem": "apps/consumer-diagnosis",
-        "siblingBrandSites": ["apps/rheem-cn", "apps/ruud-cn", "apps/everhot-cn"]
+        "siblingBrandSites": [
+          "apps/rheem-cn",
+          "apps/ruud-cn",
+          "apps/everhot-cn"
+        ]
       },
       "standaloneLaunchable": true,
       "embeddedInRhauttPortal": true,
@@ -257,7 +306,10 @@
       "slug": "dealer",
       "fundamentals": {
         "audience": "经销商/内部(板块二赋能平台)",
-        "vi": { "tokenCss": "packages/tokens/rhautt.css", "note": "复用集团 VI" }
+        "vi": {
+          "tokenCss": "packages/tokens/rhautt.css",
+          "note": "复用集团 VI"
+        }
       },
       "name_cn": "经销商赋能平台",
       "name_en": "Dealer Workbench",
@@ -265,7 +317,11 @@
       "type": "platform",
       "token": "packages/tokens/rhautt.css",
       "app": "apps/dealer-workbench",
-      "modules": ["quotation", "crm", "brand-assets"]
+      "modules": [
+        "quotation",
+        "crm",
+        "brand-assets"
+      ]
     }
   ]
 }
