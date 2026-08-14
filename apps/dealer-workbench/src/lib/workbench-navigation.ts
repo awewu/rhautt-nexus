@@ -1,5 +1,6 @@
 import {
   BadgeCheck,
+  BatteryCharging,
   Boxes,
   FileText,
   Flame,
@@ -88,6 +89,12 @@ export const WORKBENCH_NAV: WorkbenchNavItem[] = [
       { key: 'site-rheem', label: '瑞美 Rheem', href: '/comfort/sites/rheem', icon: BadgeCheck },
       { key: 'site-ruud', label: '瑞德 Ruud', href: '/comfort/sites/ruud', icon: Shield },
       { key: 'site-everhot', label: '恒热 Everhot', href: '/comfort/sites/everhot', icon: Flame },
+      {
+        key: 'site-lithnova',
+        label: '瓦瑞节能 Lithnova',
+        href: '/comfort/sites/lithnova',
+        icon: BatteryCharging,
+      },
       { key: 'brand-operations', label: '品牌运营', href: '/brand', icon: Megaphone },
       {
         key: 'positioning',

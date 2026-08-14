@@ -229,6 +229,12 @@ export default function DealerNav() {
 
   if (path === '/') return null;
 
+  // 静态配置里的 site-* 子项按 code 建索引：动态站点复用各自图标（此前全部退化成同一个地球）
+  const staticSiteChildren = activeItem.children.filter((c) => c.key.startsWith('site-'));
+  const staticSiteByCode = new Map(staticSiteChildren.map((c) => [c.key.replace(/^site-/, ''), c]));
+  const nonSiteTail = activeItem.children.filter(
+    (c, i) => i > 0 && !c.key.startsWith('site-')
+  );
   const activeChildren: WorkbenchChild[] =
     activeItem.key === 'brand-sites'
       ? [
@@ -238,10 +244,10 @@ export default function DealerNav() {
                 key: `site-${site.code}`,
                 label: `${site.nameCn || site.nameEn} ${site.nameEn || ''}`.trim(),
                 href: `/comfort/sites/${encodeURIComponent(site.code)}`,
-                icon: activeItem.children[0].icon,
+                icon: staticSiteByCode.get(site.code)?.icon ?? activeItem.children[0].icon,
               }))
-            : activeItem.children.slice(1, 4)),
-          ...activeItem.children.slice(4),
+            : staticSiteChildren),
+          ...nonSiteTail,
         ]
       : activeItem.children;
 
