@@ -93,6 +93,43 @@ export class ProductCatalogController {
     return this.mgmt.decidePricingPolicy(req.user, id, b?.decision, b?.note);
   }
 
+  // ── 主销产品声明（品牌 × 品类 × 时间窗）· 三闸：毛利/生命周期/卖点证据 ──
+  // 主销是策略声明而非市场事实；过闸只防"推了自伤"，不代表该型号真好卖。
+
+  /** 预检：先看能不能过闸、卡在哪一闸（只读，不落库）。 */
+  @Get('focus-products/eligibility')
+  @Permissions('product.catalog.read')
+  focusEligibility(@Req() req: AuthRequest, @Query('productId') productId: string) {
+    return this.mgmt.checkFocusEligibility(req.user, productId);
+  }
+
+  @Post('focus-products')
+  @Permissions('product.catalog.update')
+  declareFocus(@Req() req: AuthRequest, @Body() b: any) {
+    return this.mgmt.declareFocusProduct(req.user, b);
+  }
+
+  @Get('focus-products')
+  @Permissions('product.catalog.read')
+  listFocus(
+    @Req() req: AuthRequest,
+    @Query('brandSlug') brandSlug?: string,
+    @Query('category') category?: string,
+    @Query('includeInactive') includeInactive?: string
+  ) {
+    return this.mgmt.listFocusProducts(req.user, {
+      brandSlug,
+      category,
+      includeInactive: includeInactive === 'true',
+    });
+  }
+
+  @Post('focus-products/:id/revoke')
+  @Permissions('product.catalog.update')
+  revokeFocus(@Req() req: AuthRequest, @Param('id') id: string, @Body('reason') reason?: string) {
+    return this.mgmt.revokeFocusProduct(req.user, id, reason);
+  }
+
   @Get('taxonomy')
   @Permissions('product.catalog.read')
   taxonomy() {

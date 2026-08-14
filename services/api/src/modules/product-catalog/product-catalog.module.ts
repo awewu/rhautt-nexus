@@ -21,6 +21,7 @@ import {
   ProductLaunchEntity,
   ProductSellingPointEntity,
   PricingPolicyEntity,
+  ProductFocusDeclarationEntity,
 } from './product-mgmt.entity';
 import { PublicRateLimitGuard } from '../common/public-rate-limit.guard';
 import { TARGET_API_BOOT_SMOKE, bootSmokeRepositoryProvider } from '../boot-smoke';
@@ -45,6 +46,7 @@ import { FileArtifactModule } from '../file-artifact/file-artifact.module';
             ProductLaunchEntity,
             ProductSellingPointEntity,
             PricingPolicyEntity,
+            ProductFocusDeclarationEntity,
           ]),
         ]),
     AuthModule,
@@ -70,6 +72,7 @@ import { FileArtifactModule } from '../file-artifact/file-artifact.module';
           bootSmokeRepositoryProvider(ProductLaunchEntity),
           bootSmokeRepositoryProvider(ProductSellingPointEntity),
           bootSmokeRepositoryProvider(PricingPolicyEntity),
+          bootSmokeRepositoryProvider(ProductFocusDeclarationEntity),
         ]
       : []),
   ],
