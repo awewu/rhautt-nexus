@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ProductCategoryManagerCrudView } from '../../products/page';
+import { ProductCategoryManagerCrudView } from '../../products/category-manager';
 import { auth } from '../../../lib/api';
 import {
   getBrandProductPermissions,
