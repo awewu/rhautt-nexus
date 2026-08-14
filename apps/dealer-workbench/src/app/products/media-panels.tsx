@@ -1,6 +1,7 @@
 'use client';
 // 图片/PDF 媒体簇（图片预览/灯箱/手册上传）
 // 2026-08 从 products/page.tsx 机械化拆出：逻辑零改动，只做搬迁。
+// 2026-08 全页 UX 重构三期 · WorkspaceKit 化
 
 import {
   Suspense,
@@ -83,18 +84,8 @@ export function ProductCatalogImagePreview({ src, alt }: { src: string; alt: str
   if (!src || failed) {
     return (
       <div
-        className="product-catalog-image-preview"
+        className="product-catalog-image-preview grid h-[38px] w-[44px] place-items-center rounded-[var(--r-sm)] border bg-secondary text-[var(--t-tertiary)]"
         title={src ? '图片加载失败' : '暂无产品图片'}
-        style={{
-          width: 44,
-          height: 38,
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--r-sm)',
-          background: 'var(--surface-2)',
-          display: 'grid',
-          placeItems: 'center',
-          color: 'var(--t-tertiary)',
-        }}
       >
         <Package size={16} />
       </div>
@@ -105,28 +96,16 @@ export function ProductCatalogImagePreview({ src, alt }: { src: string; alt: str
     <>
       <button
         type="button"
-        className="product-catalog-image-preview"
+        className="product-catalog-image-preview grid h-[38px] w-[44px] cursor-zoom-in place-items-center overflow-hidden rounded-[var(--r-sm)] border bg-secondary p-0"
         onClick={() => setPreviewOpen(true)}
         title="点击查看大图"
-        style={{
-          width: 44,
-          height: 38,
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--r-sm)',
-          background: 'var(--surface-2)',
-          display: 'grid',
-          placeItems: 'center',
-          overflow: 'hidden',
-          padding: 0,
-          cursor: 'zoom-in',
-        }}
       >
         <img
           src={src}
           alt={alt}
           loading="lazy"
           onError={() => setFailed(true)}
-          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          className="h-full w-full object-contain"
         />
       </button>
       {previewOpen && (
@@ -162,54 +141,23 @@ function ProductCatalogImageLightbox({
       aria-modal="true"
       aria-label={alt}
       onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 1000,
-        padding: 24,
-        background: 'rgba(0, 0, 0, 0.72)',
-        display: 'grid',
-        placeItems: 'center',
-      }}
+      className="fixed inset-0 z-[1000] grid place-items-center bg-[rgba(0,0,0,0.72)] p-6"
     >
       <button
         type="button"
-        className="btn btn-ghost btn-sm"
+        className="btn btn-ghost btn-sm fixed top-[18px] right-[18px] border-[rgba(255,255,255,0.2)]! bg-[rgba(255,255,255,0.12)]! text-white!"
         onClick={onClose}
         aria-label="关闭图片预览"
-        style={{
-          position: 'fixed',
-          top: 18,
-          right: 18,
-          color: '#fff',
-          background: 'rgba(255, 255, 255, 0.12)',
-          borderColor: 'rgba(255, 255, 255, 0.2)',
-        }}
       >
         <X size={16} />
         关闭
       </button>
       <div
         onClick={(event) => event.stopPropagation()}
-        style={{
-          maxWidth: 'min(920px, 92vw)',
-          maxHeight: '86vh',
-          padding: 12,
-          borderRadius: 'var(--r-xl)',
-          background: '#fff',
-          boxShadow: '0 24px 80px rgba(0, 0, 0, 0.32)',
-        }}
+        className="max-h-[86vh] max-w-[min(920px,92vw)] rounded-[var(--r-xl)] bg-white p-3 shadow-[0_24px_80px_rgba(0,0,0,0.32)]"
       >
         {failed ? (
-          <div
-            style={{
-              width: 520,
-              maxWidth: '80vw',
-              padding: 32,
-              color: 'var(--t-secondary)',
-              textAlign: 'center',
-            }}
-          >
+          <div className="w-[520px] max-w-[80vw] p-8 text-center text-muted-foreground">
             图片加载失败
           </div>
         ) : (
@@ -217,12 +165,7 @@ function ProductCatalogImageLightbox({
             src={src}
             alt={alt}
             onError={() => setFailed(true)}
-            style={{
-              maxWidth: 'calc(92vw - 48px)',
-              maxHeight: 'calc(86vh - 24px)',
-              objectFit: 'contain',
-              display: 'block',
-            }}
+            className="block max-h-[calc(86vh-24px)] max-w-[calc(92vw-48px)] object-contain"
           />
         )}
       </div>
@@ -284,7 +227,7 @@ export function ProductManualPdfUploader({
           type="file"
           accept="application/pdf,.pdf"
           multiple
-          style={{ display: 'none' }}
+          className="hidden"
           onChange={(event) => {
             addFiles(event.target.files);
             event.currentTarget.value = '';

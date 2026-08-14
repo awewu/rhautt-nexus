@@ -1,5 +1,7 @@
 'use client';
 
+/** 2026-08 全页 UX 重构三期 · WorkspaceKit 化：渲染层去内联样式（只动样式层；extractability 可抽取性展示区文案与逻辑原样）。 */
+
 import {
   type Dispatch,
   type SetStateAction,
@@ -234,9 +236,7 @@ function channelLabel(value?: string | null) {
 function statusBadge(status: string) {
   const config = STATUS_CONFIG[status] || { label: status, className: 'badge badge-grey' };
   return (
-    <span className={config.className} style={{ display: 'inline-flex', whiteSpace: 'nowrap' }}>
-      {config.label}
-    </span>
+    <span className={`${config.className} inline-flex whitespace-nowrap`}>{config.label}</span>
   );
 }
 
@@ -845,8 +845,7 @@ export default function GrowthCopyTable() {
   }
 
   function sortIcon(column: SortBy) {
-    if (sortBy !== column)
-      return <ChevronsUpDown size={12} style={{ color: 'var(--t-tertiary)' }} />;
+    if (sortBy !== column) return <ChevronsUpDown size={12} className="text-muted-foreground/70" />;
     return sortOrder === 'ASC' ? <ChevronUp size={12} /> : <ChevronDown size={12} />;
   }
 
@@ -1251,10 +1250,8 @@ export default function GrowthCopyTable() {
       <div className="growth-copy-workbench__header">
         <div>
           <p className="t-label">文案管理</p>
-          <h2 className="t-headline" style={{ marginTop: 4 }}>
-            文案生成与审核
-          </h2>
-          <p style={{ marginTop: 4, color: 'var(--t-secondary)', fontSize: 13 }}>
+          <h2 className="t-headline mt-1">文案生成与审核</h2>
+          <p className="mt-1 text-[13px] text-muted-foreground">
             聚焦 AI 草稿生成、合规命中处理和审核流转；内容工厂总控请在“内容工厂”入口处理。
           </p>
         </div>
@@ -1301,7 +1298,7 @@ export default function GrowthCopyTable() {
           aria-expanded={generatorOpen}
         >
           <span>
-            <Sparkles size={16} style={{ color: 'var(--brand)' }} />
+            <Sparkles size={16} className="text-primary" />
             <span className="t-label">AI 生成文案</span>
           </span>
           <span className="growth-copy-generator__hint">
@@ -1635,33 +1632,24 @@ export default function GrowthCopyTable() {
                 </label>
               </div>
               <textarea
-                className="input"
+                className="input mt-2 resize-y"
                 rows={2}
                 value={generateForm.prompt}
                 onChange={(event) =>
                   patchGenerateForm({ prompt: event.target.value, promptTemplateId: '' })
                 }
                 placeholder="高级：仅在需要完全覆盖上方 brief 时填写；留空则自动按运营 brief 生成"
-                style={{ resize: 'vertical', marginTop: 8 }}
                 tabIndex={generatorOpen ? undefined : -1}
               />
             </details>
-            <div
-              style={{
-                display: 'flex',
-                gap: 8,
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                minHeight: message || error ? undefined : 0,
-              }}
-            >
+            <div className="flex min-h-0 flex-wrap items-center gap-2">
               {message && <span className="badge badge-success">{message}</span>}
               {error && <span className="badge badge-warning">{error}</span>}
             </div>
           </div>
         </div>
         {!generatorOpen && (message || error) ? (
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="flex flex-wrap gap-2">
             {message && <span className="badge badge-success">{message}</span>}
             {error && <span className="badge badge-warning">{error}</span>}
           </div>
@@ -1670,7 +1658,7 @@ export default function GrowthCopyTable() {
 
       <div className="growth-copy-filterbar">
         <div className="growth-copy-filterbar__search">
-          <Search size={16} style={{ color: 'var(--t-tertiary)' }} />
+          <Search size={16} className="text-muted-foreground/70" />
           <input
             className="input"
             value={keyword}
@@ -1679,13 +1667,12 @@ export default function GrowthCopyTable() {
           />
         </div>
         <select
-          className="input"
+          className="input w-[150px]"
           value={channelFilter}
           onChange={(event) => {
             setChannelFilter(event.target.value);
             setPage(1);
           }}
-          style={{ width: 150 }}
         >
           <option value="all">全部渠道</option>
           {CHANNELS.map((item) => (
@@ -1695,13 +1682,12 @@ export default function GrowthCopyTable() {
           ))}
         </select>
         <select
-          className="input"
+          className="input w-[140px]"
           value={brandFilter}
           onChange={(event) => {
             setBrandFilter(event.target.value);
             setPage(1);
           }}
-          style={{ width: 140 }}
         >
           <option value="all">全部品牌</option>
           {brandOptions.map((brand) => (
@@ -1712,13 +1698,12 @@ export default function GrowthCopyTable() {
           <option value="">未指定品牌</option>
         </select>
         <select
-          className="input"
+          className="input w-[140px]"
           value={statusFilter}
           onChange={(event) => {
             setStatusFilter(event.target.value);
             setPage(1);
           }}
-          style={{ width: 140 }}
         >
           <option value="all">全部状态</option>
           <option value="draft">草稿</option>
@@ -1733,7 +1718,7 @@ export default function GrowthCopyTable() {
           <strong>
             已选 {selectedIds.length} 条文案，{selectedDraftCount} 条可进入审核动作
           </strong>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="flex flex-wrap gap-2">
             <button
               className="btn btn-success btn-sm"
               onClick={bulkApprove}
@@ -1776,19 +1761,9 @@ export default function GrowthCopyTable() {
                 <button
                   onClick={() => toggleSort('channel')}
                   aria-label="按发布对象排序"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    padding: 0,
-                    border: 0,
-                    background: 'none',
-                    color:
-                      sortBy === 'channel' || sortBy === 'brandSlug' ? 'var(--brand)' : 'inherit',
-                    font: 'inherit',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                  }}
+                  className={`inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 whitespace-nowrap [font:inherit] ${
+                    sortBy === 'channel' || sortBy === 'brandSlug' ? 'text-primary' : 'text-inherit'
+                  }`}
                 >
                   发布对象
                   {sortBy === 'channel' || sortBy === 'brandSlug'
@@ -1800,18 +1775,9 @@ export default function GrowthCopyTable() {
                 <button
                   onClick={() => toggleSort('status')}
                   aria-label="按审核状态排序"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    padding: 0,
-                    border: 0,
-                    background: 'none',
-                    color: sortBy === 'status' ? 'var(--brand)' : 'inherit',
-                    font: 'inherit',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                  }}
+                  className={`inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 whitespace-nowrap [font:inherit] ${
+                    sortBy === 'status' ? 'text-primary' : 'text-inherit'
+                  }`}
                 >
                   审核状态{sortIcon('status')}
                 </button>
@@ -1820,18 +1786,9 @@ export default function GrowthCopyTable() {
                 <button
                   onClick={() => toggleSort('createdAt')}
                   aria-label="按创建时间排序"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    padding: 0,
-                    border: 0,
-                    background: 'none',
-                    color: sortBy === 'createdAt' ? 'var(--brand)' : 'inherit',
-                    font: 'inherit',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                  }}
+                  className={`inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 whitespace-nowrap [font:inherit] ${
+                    sortBy === 'createdAt' ? 'text-primary' : 'text-inherit'
+                  }`}
                 >
                   创建时间{sortIcon('createdAt')}
                 </button>
@@ -1853,7 +1810,7 @@ export default function GrowthCopyTable() {
                     ? 'btn btn-warning btn-sm growth-copy-row-action'
                     : 'btn btn-outline btn-sm growth-copy-row-action';
               return (
-                <tr key={item.id} style={selected ? { background: 'var(--brand-50)' } : undefined}>
+                <tr key={item.id} className={selected ? 'bg-[var(--brand-50)]' : undefined}>
                   <td>
                     <input
                       type="checkbox"
@@ -1916,23 +1873,16 @@ export default function GrowthCopyTable() {
             })}
             {!busy && !items.length && (
               <tr>
-                <td
-                  colSpan={6}
-                  style={{ textAlign: 'center', padding: 28, color: 'var(--t-secondary)' }}
-                >
+                <td colSpan={6} className="p-7 text-center text-muted-foreground">
                   暂无文案，请先生成一条草稿。
                 </td>
               </tr>
             )}
             {busy && (
               <tr>
-                <td colSpan={6} style={{ textAlign: 'center', padding: 28 }}>
-                  <Loader2
-                    size={18}
-                    className="animate-spin"
-                    style={{ color: 'var(--brand)', verticalAlign: 'middle' }}
-                  />
-                  <span style={{ marginLeft: 8 }}>加载中</span>
+                <td colSpan={6} className="p-7 text-center">
+                  <Loader2 size={18} className="animate-spin align-middle text-primary" />
+                  <span className="ml-2">加载中</span>
                 </td>
               </tr>
             )}
@@ -2215,29 +2165,14 @@ export default function GrowthCopyTable() {
 
             {wechatSubmitOpen && previewItem && (
               <div className="inset growth-copy-wechat-submit-panel">
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    gap: 10,
-                    alignItems: 'center',
-                  }}
-                >
+                <div className="flex items-center justify-between gap-2.5">
                   <span className="t-label">
                     {'\u5fae\u4fe1\u516c\u4f17\u53f7\u5ba1\u6838\u76ee\u6807'}
                   </span>
-                  {wechatBusy ? (
-                    <Loader2 size={14} className="animate-spin" style={{ color: 'var(--brand)' }} />
-                  ) : null}
+                  {wechatBusy ? <Loader2 size={14} className="animate-spin text-primary" /> : null}
                 </div>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-                    gap: 10,
-                  }}
-                >
-                  <label style={{ display: 'grid', gap: 6 }}>
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2.5">
+                  <label className="grid gap-1.5">
                     <span className="t-label">{'\u54c1\u724c'}</span>
                     <select
                       className="input"
@@ -2255,7 +2190,7 @@ export default function GrowthCopyTable() {
                       ))}
                     </select>
                   </label>
-                  <label style={{ display: 'grid', gap: 6 }}>
+                  <label className="grid gap-1.5">
                     <span className="t-label">{'\u539f\u6587\u94fe\u63a5'}</span>
                     <input
                       className="input"
@@ -2338,17 +2273,9 @@ export default function GrowthCopyTable() {
                     </span>
                   ) : null}
                 </div>
-                <div style={{ display: 'grid', gap: 8 }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 8,
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+                <div className="grid gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-xs text-muted-foreground">
                       {
                         '\u8be5\u54c1\u724c\u4e0b\u53ef\u7528\u516c\u4f17\u53f7\uff0c\u652f\u6301\u5355\u9009\u6216\u5168\u9009'
                       }
@@ -2373,26 +2300,15 @@ export default function GrowthCopyTable() {
                         : '\u5168\u9009'}
                     </button>
                   </div>
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                      gap: 8,
-                    }}
-                  >
+                  <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-2">
                     {wechatAccounts.map((account) => {
                       const checked = wechatForm.accountIds.includes(account.id);
                       return (
                         <label
                           key={account.id}
-                          className="inset"
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 10,
-                            padding: 10,
-                            borderColor: checked ? 'var(--brand)' : 'var(--border)',
-                          }}
+                          className={`inset flex items-center gap-2.5 p-2.5 ${
+                            checked ? 'border-[var(--brand)]' : 'border-[var(--border)]'
+                          }`}
                         >
                           <input
                             type="checkbox"
@@ -2406,9 +2322,9 @@ export default function GrowthCopyTable() {
                               })
                             }
                           />
-                          <span style={{ display: 'grid', gap: 2 }}>
-                            <strong style={{ fontSize: 13 }}>{account.displayName}</strong>
-                            <span style={{ color: 'var(--t-tertiary)', fontSize: 11 }}>
+                          <span className="grid gap-0.5">
+                            <strong className="text-[13px]">{account.displayName}</strong>
+                            <span className="text-[11px] text-muted-foreground/70">
                               {account.appIdMasked}
                             </span>
                           </span>
@@ -2416,10 +2332,7 @@ export default function GrowthCopyTable() {
                       );
                     })}
                     {!wechatBusy && !wechatAccounts.length ? (
-                      <div
-                        className="inset"
-                        style={{ padding: 10, color: 'var(--danger)', fontSize: 12 }}
-                      >
+                      <div className="inset p-2.5 text-xs text-destructive">
                         {
                           '\u5f53\u524d\u54c1\u724c\u6ca1\u6709\u5df2\u542f\u7528\u4e14\u8fde\u63a5\u6b63\u5e38\u7684\u516c\u4f17\u53f7\uff0c\u8bf7\u5148\u5230\u201c\u53d1\u5e03\u8d26\u53f7\u914d\u7f6e\u201d\u5b8c\u6210\u6d4b\u8bd5\u5e76\u542f\u7528\u3002'
                         }
@@ -2464,15 +2377,7 @@ export default function GrowthCopyTable() {
                     ))}
                   </div>
                 ) : null}
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    gap: 8,
-                    flexWrap: 'wrap',
-                  }}
-                >
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <span
                     className={
                       wechatSubmitMissingReason(wechatForm)

@@ -19,13 +19,14 @@ const STAGE_LABEL: Record<string, string> = {
   signed: '已成交',
   lost: '流失',
 };
-const STAGE_TONE: Record<string, string> = {
-  lead: 'var(--t-secondary)',
-  contacted: 'var(--brand)',
-  proposal: 'var(--warning)',
-  negotiation: 'var(--warning)',
-  signed: 'var(--success)',
-  lost: 'var(--danger)',
+/** 阶段色改语义类映射（原 CSS 变量内联色，2026-08 三期收编） */
+const STAGE_TONE_CLASS: Record<string, string> = {
+  lead: 'text-muted-foreground border-muted-foreground/40',
+  contacted: 'text-primary border-primary/50',
+  proposal: 'text-warning border-warning/50',
+  negotiation: 'text-warning border-warning/50',
+  signed: 'text-success border-success/50',
+  lost: 'text-destructive border-destructive/50',
 };
 const yuan = (n: number) => `¥${(Number(n) || 0).toLocaleString('zh-CN')}`;
 const fmtDate = (s?: string) =>
@@ -153,9 +154,9 @@ export function DealerCockpit() {
   };
 
   return (
-    <div style={{ display: 'grid', gap: 16 }}>
+    <div className="grid gap-4">
       {/* 我的业绩 */}
-      <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
+      <section className="card-elevated grid gap-4 p-4.5">
         <div className="workbench-section-header">
           <div>
             <p className="workbench-section-header__eyebrow">经销商工作台 · 我的视角</p>
@@ -169,11 +170,11 @@ export function DealerCockpit() {
           </button>
         </div>
         {error ? (
-          <div className="inset" style={{ color: 'var(--danger)', fontSize: 13 }}>
+          <div className="inset text-[13px] text-destructive">
             {error}
           </div>
         ) : null}
-        <div className="g4" style={{ gap: 12 }}>
+        <div className="g4 gap-3">
           <Stat icon={Users} label="活跃线索" value={String(stats.active)} />
           <Stat icon={TrendingUp} label="在途金额" value={yuan(stats.pipeline)} />
           <Stat icon={UserRound} label="我的客户" value={String(customers.length)} />
@@ -187,7 +188,7 @@ export function DealerCockpit() {
       </section>
 
       {/* 我的线索管道（可改阶段） */}
-      <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 14 }}>
+      <section className="card-elevated grid gap-3.5 p-4.5">
         <div className="workbench-section-header">
           <div>
             <p className="workbench-section-header__eyebrow">线索管道</p>
@@ -209,12 +210,9 @@ export function DealerCockpit() {
             <tbody>
               {opps.map((o) => (
                 <tr key={o.id}>
-                  <td style={{ fontWeight: 700 }}>{o.customer?.name || custName(o.customerId)}</td>
+                  <td className="font-bold">{o.customer?.name || custName(o.customerId)}</td>
                   <td>
-                    <span
-                      className="badge"
-                      style={{ color: STAGE_TONE[o.stage], borderColor: STAGE_TONE[o.stage] }}
-                    >
+                    <span className={`badge ${STAGE_TONE_CLASS[o.stage] || ''}`}>
                       {STAGE_LABEL[o.stage] || o.stage}
                     </span>
                   </td>
@@ -226,13 +224,7 @@ export function DealerCockpit() {
                       value={o.stage}
                       disabled={busyOpp === o.id}
                       onChange={(e) => changeStage(o, e.target.value)}
-                      style={{
-                        padding: '4px 8px',
-                        borderRadius: 6,
-                        border: '1px solid var(--surface-3)',
-                        background: 'var(--surface-1)',
-                        fontSize: 12,
-                      }}
+                      className="rounded-md border bg-background px-2 py-1 text-xs"
                     >
                       {STAGES.map((s) => (
                         <option key={s} value={s}>
@@ -247,7 +239,7 @@ export function DealerCockpit() {
                 <tr>
                   <td
                     colSpan={6}
-                    style={{ textAlign: 'center', padding: 24, color: 'var(--t-tertiary)' }}
+                    className="p-6 text-center text-muted-foreground/80"
                   >
                     {loading ? '加载中…' : '暂无线索。总部转派或官网询盘进来后在此跟进。'}
                   </td>
@@ -259,11 +251,11 @@ export function DealerCockpit() {
       </section>
 
       {/* 我的客户 + 报价历史 */}
-      <div className="g2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 12 }}>
+      <div className="g2 grid grid-cols-2 gap-4">
+        <section className="card-elevated grid gap-3 p-4.5">
           <div className="workbench-section-header">
             <div>
-              <h2 className="workbench-section-header__title" style={{ fontSize: 16 }}>
+              <h2 className="workbench-section-header__title text-base">
                 我的客户
               </h2>
             </div>
@@ -281,7 +273,7 @@ export function DealerCockpit() {
               <tbody>
                 {customers.slice(0, 12).map((c) => (
                   <tr key={c.id}>
-                    <td style={{ fontWeight: 700 }}>{c.name}</td>
+                    <td className="font-bold">{c.name}</td>
                     <td>{c.city || '—'}</td>
                     <td>{c.source || '—'}</td>
                     <td>
@@ -293,7 +285,7 @@ export function DealerCockpit() {
                   <tr>
                     <td
                       colSpan={4}
-                      style={{ textAlign: 'center', padding: 20, color: 'var(--t-tertiary)' }}
+                      className="p-5 text-center text-muted-foreground/80"
                     >
                       暂无客户
                     </td>
@@ -304,10 +296,10 @@ export function DealerCockpit() {
           </div>
         </section>
 
-        <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 12 }}>
+        <section className="card-elevated grid gap-3 p-4.5">
           <div className="workbench-section-header">
             <div>
-              <h2 className="workbench-section-header__title" style={{ fontSize: 16 }}>
+              <h2 className="workbench-section-header__title text-base">
                 我的报价历史
               </h2>
             </div>
@@ -326,7 +318,7 @@ export function DealerCockpit() {
               <tbody>
                 {quotes.map((q) => (
                   <tr key={q.id}>
-                    <td style={{ fontWeight: 700 }}>{q.quotationNo || q.id.slice(0, 8)}</td>
+                    <td className="font-bold">{q.quotationNo || q.id.slice(0, 8)}</td>
                     <td>{custName(q.customerId)}</td>
                     <td>
                       <span className="badge">{q.status}</span>
@@ -352,7 +344,7 @@ export function DealerCockpit() {
                   <tr>
                     <td
                       colSpan={5}
-                      style={{ textAlign: 'center', padding: 20, color: 'var(--t-tertiary)' }}
+                      className="p-5 text-center text-muted-foreground/80"
                     >
                       暂无报价。在售前工作台生成报价后在此归档。
                     </td>
@@ -379,8 +371,8 @@ function Stat({
   tone?: string;
 }) {
   return (
-    <article className="inset" style={{ padding: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <article className="inset p-3.5">
+      <div className="flex items-center justify-between">
         <span className="t-label">{label}</span>
         <Icon size={15} style={{ color: tone || 'var(--brand)' }} />
       </div>

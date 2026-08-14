@@ -1,6 +1,7 @@
 'use client';
 // 产品目录外壳
 // 2026-08 从 products/page.tsx 机械化拆出：逻辑零改动，只做搬迁。
+// 2026-08 全页 UX 重构三期 · WorkspaceKit 化：渲染层去内联样式，静态布局全走 Tailwind 语义 token。
 
 import {
   Suspense,
@@ -352,19 +353,9 @@ export function ProductCatalogShell({
       {pilotSummary ? (
         <div
           role="status"
-          style={{
-            padding: '10px 18px',
-            borderBottom: '1px solid var(--border)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 18,
-            flexWrap: 'wrap',
-            background: 'var(--surface-2)',
-            color: 'var(--t-secondary)',
-            fontSize: 12,
-          }}
+          className="flex flex-wrap items-center gap-[18px] border-b bg-secondary px-[18px] py-2.5 text-xs text-muted-foreground tabular-nums"
         >
-          <strong style={{ color: 'var(--t-primary)' }}>
+          <strong className="text-foreground">
             {pilotSummary.products} 个试导入产品
           </strong>
           <span>{pilotSummary.categories} 个品类</span>
@@ -435,21 +426,12 @@ export function ProductCatalogShell({
           {canPublishProduct && selectedItems.length ? (
             <div
               role="status"
-              style={{
-                padding: '10px 18px',
-                borderBottom: '1px solid var(--border)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-                flexWrap: 'wrap',
-                background: 'rgba(200, 32, 44, 0.04)',
-              }}
+              className="flex flex-wrap items-center justify-between gap-3 border-b bg-primary/[0.04] px-[18px] py-2.5"
             >
-              <span style={{ fontSize: 12, fontWeight: 800 }}>
+              <span className="text-xs font-extrabold tabular-nums">
                 已选 {selectedItems.length} 个产品库产品
               </span>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   className="btn btn-brand btn-sm"
@@ -479,15 +461,14 @@ export function ProductCatalogShell({
               </div>
             </div>
           ) : null}
-          <div style={{ overflowX: 'auto' }}>
+          <div className="overflow-x-auto">
             <table
-              className="table product-catalog-table"
-              style={{ minWidth: showProductActionColumn ? 1560 : 1440 }}
+              className={`table product-catalog-table ${showProductActionColumn ? 'min-w-[1560px]' : 'min-w-[1440px]'}`}
             >
               <thead>
                 <tr>
                   {showSelectionColumn ? (
-                    <th style={{ width: 44 }}>
+                    <th className="w-11">
                       <input
                         type="checkbox"
                         checked={allVisibleSelected}
@@ -509,7 +490,7 @@ export function ProductCatalogShell({
                   <th>图片</th>
                   <th>产品库状态</th>
                   <th>官网展示健康</th>
-                  {showProductActionColumn ? <th style={{ textAlign: 'right' }}>操作</th> : null}
+                  {showProductActionColumn ? <th className="text-right">操作</th> : null}
                 </tr>
               </thead>
               <tbody>

@@ -22,11 +22,12 @@ interface CopyAsset {
   createdAt: string;
 }
 
+/** tone 语义映射（原 CSS 变量动态色，2026-08 三期收编为类名） */
 const STATUS_META: Record<string, { label: string; tone: string }> = {
-  draft: { label: '待审核', tone: 'var(--warning)' },
-  approved: { label: '已核准', tone: 'var(--success)' },
-  published: { label: '已发布', tone: 'var(--brand)' },
-  rejected: { label: '已驳回', tone: 'var(--danger)' },
+  draft: { label: '待审核', tone: 'text-warning border-warning/50' },
+  approved: { label: '已核准', tone: 'text-success border-success/50' },
+  published: { label: '已发布', tone: 'text-primary border-primary/50' },
+  rejected: { label: '已驳回', tone: 'text-destructive border-destructive/50' },
 };
 const fmtDate = (s?: string) =>
   s ? new Date(s).toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }) : '—';
@@ -53,7 +54,7 @@ export function CopyAssetsPanel() {
   }, [load]);
 
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
+    <section className="card-elevated grid gap-4 p-4.5">
       <div className="workbench-section-header">
         <div>
           <p className="workbench-section-header__eyebrow">文案 Copilot</p>
@@ -68,56 +69,34 @@ export function CopyAssetsPanel() {
       </div>
 
       {error ? (
-        <div className="inset" style={{ color: 'var(--danger)', fontSize: 13 }}>
+        <div className="inset text-[13px] text-destructive">
           {error}
         </div>
       ) : null}
 
-      <div style={{ display: 'grid', gap: 10 }}>
+      <div className="grid gap-2.5">
         {items.map((c) => {
-          const sm = STATUS_META[c.status] || { label: c.status, tone: 'var(--t-secondary)' };
+          const sm = STATUS_META[c.status] || { label: c.status, tone: 'text-muted-foreground' };
           return (
-            <article key={c.id} className="inset" style={{ display: 'grid', gap: 8, padding: 14 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 12,
-                  alignItems: 'flex-start',
-                }}
-              >
-                <strong style={{ fontSize: 14, color: 'var(--t-strong)' }}>
-                  {c.question || c.channel}
-                </strong>
-                <span
-                  className="badge"
-                  style={{ color: sm.tone, borderColor: sm.tone, whiteSpace: 'nowrap' }}
-                >
-                  {sm.label}
-                </span>
+            <article key={c.id} className="inset grid gap-2 p-3.5">
+              <div className="flex items-start justify-between gap-3">
+                <strong className="text-sm text-foreground">{c.question || c.channel}</strong>
+                <span className={`badge whitespace-nowrap ${sm.tone}`}>{sm.label}</span>
               </div>
               {c.draft ? (
-                <p
-                  style={{
-                    fontSize: 13,
-                    color: 'var(--t-secondary)',
-                    lineHeight: 1.6,
-                    maxHeight: 60,
-                    overflow: 'hidden',
-                  }}
-                >
+                <p className="max-h-[60px] overflow-hidden text-[13px] leading-relaxed text-muted-foreground">
                   {c.draft.slice(0, 160)}
                 </p>
               ) : null}
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+              <div className="flex flex-wrap items-center gap-1.5">
                 <span className="badge">{c.channel}</span>
                 {c.brandSlug ? <span className="badge">{c.brandSlug}</span> : null}
                 {(c.strategyKeys || []).map((k) => (
-                  <span key={k} className="badge" style={{ fontSize: 11, color: 'var(--brand)' }}>
+                  <span key={k} className="badge text-[11px] text-primary">
                     {k}
                   </span>
                 ))}
-                <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--t-tertiary)' }}>
+                <span className="ml-auto text-xs text-muted-foreground/80">
                   {c.model || ''} · {fmtDate(c.createdAt)}
                 </span>
               </div>
@@ -125,12 +104,9 @@ export function CopyAssetsPanel() {
           );
         })}
         {!items.length ? (
-          <div
-            className="inset"
-            style={{ textAlign: 'center', padding: 28, color: 'var(--t-tertiary)' }}
-          >
-            <PenTool size={24} style={{ marginBottom: 8 }} />
-            <p style={{ fontSize: 13 }}>
+          <div className="inset p-7 text-center text-muted-foreground/80">
+            <PenTool size={24} className="mb-2" />
+            <p className="text-[13px]">
               {loading ? '加载中…' : '暂无文案资产。在 GEO 面板对缺口问题"生成建议"即可产出文案。'}
             </p>
           </div>

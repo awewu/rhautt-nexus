@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * 营销物料管理（2026-08 全页 UX 重构三期 · WorkspaceKit 化）。
+ * 仅重构 JSX 渲染层：95 处内联样式清零，静态布局全走 Tailwind（v4 + shadcn token），
+ * 外层卡壳换 WorkspaceSection；hooks/事件/上传/导出逻辑保持不变。
+ */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Archive,
@@ -22,6 +28,7 @@ import {
   Upload,
   X,
 } from 'lucide-react';
+import { WorkspaceSection } from '@/components/WorkspaceKit';
 import { WorkbenchPaginationFooter } from './WorkbenchCore';
 import { fileArtifacts, growthMaterials } from '../lib/api';
 
@@ -549,12 +556,11 @@ export default function GrowthMaterialsTable() {
   }
 
   const sortIcon = (column: SortBy) => {
-    if (sortBy !== column)
-      return <ChevronsUpDown size={12} style={{ color: 'var(--t-tertiary)' }} />;
+    if (sortBy !== column) return <ChevronsUpDown size={12} className="text-muted-foreground/70" />;
     return sortOrder === 'ASC' ? (
-      <ChevronUp size={12} style={{ color: 'var(--brand)' }} />
+      <ChevronUp size={12} className="text-primary" />
     ) : (
-      <ChevronDown size={12} style={{ color: 'var(--brand)' }} />
+      <ChevronDown size={12} className="text-primary" />
     );
   };
 
@@ -585,27 +591,11 @@ export default function GrowthMaterialsTable() {
   }
 
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
-      {/* 标题区 */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 14,
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-        }}
-      >
-        <div>
-          <p className="t-label">营销物料管理</p>
-          <h2 className="t-headline" style={{ marginTop: 4 }}>
-            基础物料库
-          </h2>
-          <p style={{ marginTop: 4, color: 'var(--t-secondary)', fontSize: 13 }}>
-            维护物料名称、分类、品牌、适用场景、格式、版本和标签。支持分页、排序、批量操作与文件预览。
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+    <WorkspaceSection
+      icon={<FolderOpen size={16} />}
+      title="基础物料库"
+      aside={
+        <span className="inline-flex flex-wrap justify-end gap-2">
           <button className="btn btn-brand btn-sm" onClick={openCreateForm} disabled={busy}>
             <Plus size={13} />
             新增物料
@@ -622,869 +612,597 @@ export default function GrowthMaterialsTable() {
             <RefreshCw size={13} />
             刷新
           </button>
+        </span>
+      }
+    >
+      <div className="grid gap-4">
+        {/* 标题区 */}
+        <div>
+          <p className="t-label">营销物料管理</p>
+          <p className="mt-1 text-[13px] text-muted-foreground">
+            维护物料名称、分类、品牌、适用场景、格式、版本和标签。支持分页、排序、批量操作与文件预览。
+          </p>
         </div>
-      </div>
 
-      {(message || error) && (
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          {message && <span className="badge badge-success">{message}</span>}
-          {error && <span className="badge badge-warning">{error}</span>}
-        </div>
-      )}
+        {(message || error) && (
+          <div className="flex flex-wrap items-center gap-2">
+            {message && <span className="badge badge-success">{message}</span>}
+            {error && <span className="badge badge-warning">{error}</span>}
+          </div>
+        )}
 
-      {/* 多模态生成：AI 文生图 */}
-      {aiOpen ? (
-        <div
-          className="inset"
-          style={{ display: 'grid', gap: 12, padding: 16, borderLeft: '3px solid var(--brand)' }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Sparkles size={16} style={{ color: 'var(--brand)' }} />
-            <strong style={{ fontSize: 14, color: 'var(--t-strong)' }}>AI 生成营销图</strong>
-            <span style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>
-              经 Tandem 图像网关，生成图自动入库为物料
-            </span>
-          </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 140px auto',
-              gap: 10,
-              alignItems: 'end',
-            }}
-          >
-            <label style={{ display: 'grid', gap: 6 }}>
-              <span className="t-label">图片描述（prompt）</span>
-              <input
-                className="input"
-                value={aiPrompt}
-                onChange={(e) => setAiPrompt(e.target.value)}
-                placeholder="例：瑞美空气源热泵热水器 产品海报 简洁科技风 红白配色"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !aiBusy) handleGenerateImage();
-                }}
-              />
-            </label>
-            <label style={{ display: 'grid', gap: 6 }}>
-              <span className="t-label">品牌</span>
-              <input
-                className="input"
-                value={aiBrand}
-                onChange={(e) => setAiBrand(e.target.value)}
-                placeholder="rheem"
-              />
-            </label>
-            <button
-              className="btn btn-brand"
-              onClick={handleGenerateImage}
-              disabled={aiBusy || !aiPrompt.trim()}
-            >
-              {aiBusy ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}生成
-            </button>
-          </div>
-          {aiPreview ? (
-            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-              <img
-                src={aiPreview}
-                alt="AI 生成预览"
-                style={{
-                  width: 120,
-                  height: 120,
-                  objectFit: 'cover',
-                  borderRadius: 8,
-                  border: '1px solid var(--surface-3)',
-                }}
-              />
-              <div style={{ fontSize: 13, color: 'var(--success)' }}>
-                已生成并入库，可在下方物料列表查看。
-              </div>
+        {/* 多模态生成：AI 文生图 */}
+        {aiOpen ? (
+          <div className="inset grid gap-3 border-l-[3px] border-l-primary p-4">
+            <div className="flex items-center gap-2">
+              <Sparkles size={16} className="text-primary" />
+              <strong className="text-sm text-foreground">AI 生成营销图</strong>
+              <span className="text-xs text-muted-foreground/70">
+                经 Tandem 图像网关，生成图自动入库为物料
+              </span>
             </div>
-          ) : null}
-        </div>
-      ) : null}
+            <div className="grid items-end gap-2.5 md:grid-cols-[1fr_140px_auto]">
+              <label className="grid gap-1.5">
+                <span className="t-label">图片描述（prompt）</span>
+                <input
+                  className="input"
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  placeholder="例：瑞美空气源热泵热水器 产品海报 简洁科技风 红白配色"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !aiBusy) handleGenerateImage();
+                  }}
+                />
+              </label>
+              <label className="grid gap-1.5">
+                <span className="t-label">品牌</span>
+                <input
+                  className="input"
+                  value={aiBrand}
+                  onChange={(e) => setAiBrand(e.target.value)}
+                  placeholder="rheem"
+                />
+              </label>
+              <button
+                className="btn btn-brand"
+                onClick={handleGenerateImage}
+                disabled={aiBusy || !aiPrompt.trim()}
+              >
+                {aiBusy ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                生成
+              </button>
+            </div>
+            {aiPreview ? (
+              <div className="flex items-center gap-3">
+                <img
+                  src={aiPreview}
+                  alt="AI 生成预览"
+                  className="size-30 rounded-lg border object-cover"
+                />
+                <div className="text-[13px] text-success">已生成并入库，可在下方物料列表查看。</div>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
-      {/* 筛选与搜索 */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-        <Search size={16} style={{ color: 'var(--t-tertiary)' }} />
-        <input
-          className="input"
-          value={keyword}
-          onChange={(event) => setKeyword(event.target.value)}
-          placeholder="搜索物料名称或备注"
-          style={{ width: 240 }}
-        />
-        <select
-          className="input"
-          value={categoryFilter}
-          onChange={(event) => {
-            setCategoryFilter(event.target.value);
-            setPage(1);
-          }}
-          style={{ width: 180 }}
-        >
-          <option value="all">全部分类</option>
-          {categories.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-        <label
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            fontSize: 13,
-            color: 'var(--t-secondary)',
-            cursor: 'pointer',
-          }}
-        >
+        {/* 筛选与搜索 */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Search size={16} className="text-muted-foreground/70" />
           <input
-            type="checkbox"
-            checked={includeArchived}
+            className="input w-60"
+            value={keyword}
+            onChange={(event) => setKeyword(event.target.value)}
+            placeholder="搜索物料名称或备注"
+          />
+          <select
+            className="input w-45"
+            value={categoryFilter}
             onChange={(event) => {
-              setIncludeArchived(event.target.checked);
+              setCategoryFilter(event.target.value);
               setPage(1);
             }}
-            style={{ accentColor: 'var(--brand)', width: 16, height: 16, cursor: 'pointer' }}
-          />
-          <ArchiveRestore size={14} />
-          查看已归档
-        </label>
-      </div>
-
-      {/* 批量操作栏 */}
-      {selectedIds.length > 0 && (
-        <div
-          role="status"
-          style={{
-            padding: '10px 18px',
-            borderBottom: '1px solid var(--border)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-            flexWrap: 'wrap',
-            background: 'color-mix(in srgb, var(--brand-50) 42%, var(--surface-1) 58%)',
-            borderRadius: 'var(--r-lg)',
-          }}
-        >
-          <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--t-primary)' }}>
-            已选 {selectedIds.length} 个物料
-          </span>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <button
-              className="btn btn-outline btn-sm"
-              onClick={bulkArchive}
-              disabled={bulkBusy || busy}
-            >
-              <Archive size={13} />
-              {bulkBusy ? '批量归档中' : '批量归档'}
-            </button>
-            <button
-              className="btn btn-outline btn-sm"
-              onClick={bulkDownload}
-              disabled={bulkBusy || busy}
-            >
-              <Download size={13} />
-              {bulkBusy ? '批量下载中' : '批量下载'}
-            </button>
+          >
+            <option value="all">全部分类</option>
+            {categories.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+          <label className="flex cursor-pointer items-center gap-1.5 text-[13px] text-muted-foreground">
             <input
-              className="input"
-              style={{ width: 200 }}
-              value={bulkTagInput}
-              onChange={(event) => setBulkTagInput(event.target.value)}
-              placeholder="输入标签，逗号分隔"
+              type="checkbox"
+              checked={includeArchived}
+              onChange={(event) => {
+                setIncludeArchived(event.target.checked);
+                setPage(1);
+              }}
+              className="size-4 cursor-pointer accent-primary"
             />
-            <button
-              className="btn btn-brand btn-sm"
-              onClick={bulkTag}
-              disabled={bulkBusy || busy || !bulkTagInput.trim()}
-            >
-              <Tag size={13} />
-              {bulkBusy ? '批量打标中' : '批量打标'}
-            </button>
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={() => setSelectedIds([])}
-              disabled={bulkBusy || busy}
-            >
-              取消选择
-            </button>
-          </div>
+            <ArchiveRestore size={14} />
+            查看已归档
+          </label>
         </div>
-      )}
 
-      {/* 数据表格 */}
-      <div className="table-shell">
-        <table className="table">
-          <thead>
-            <tr>
-              <th style={{ width: 44 }}>
-                <input
-                  ref={headerCheckboxRef}
-                  type="checkbox"
-                  checked={allVisibleSelected}
-                  disabled={!visibleIds.length || busy}
-                  onChange={(event) => toggleVisibleSelection(event.target.checked)}
-                  style={{ accentColor: 'var(--brand)', width: 16, height: 16, cursor: 'pointer' }}
-                  aria-label="选择当前页全部物料"
-                />
-              </th>
-              {SORTABLE_COLUMNS.map((col) => (
-                <th key={col.key}>
-                  <button
-                    onClick={() => toggleSort(col.key)}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 4,
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      font: 'inherit',
-                      color: sortBy === col.key ? 'var(--brand)' : 'var(--t-tertiary)',
-                      padding: 0,
-                      textTransform: 'inherit',
-                      letterSpacing: 'inherit',
-                    }}
-                  >
-                    {col.label}
-                    {sortIcon(col.key)}
-                  </button>
+        {/* 批量操作栏 */}
+        {selectedIds.length > 0 && (
+          <div
+            role="status"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-lg border-b bg-primary/5 px-4.5 py-2.5"
+          >
+            <span className="text-xs font-extrabold text-foreground tabular-nums">
+              已选 {selectedIds.length} 个物料
+            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                className="btn btn-outline btn-sm"
+                onClick={bulkArchive}
+                disabled={bulkBusy || busy}
+              >
+                <Archive size={13} />
+                {bulkBusy ? '批量归档中' : '批量归档'}
+              </button>
+              <button
+                className="btn btn-outline btn-sm"
+                onClick={bulkDownload}
+                disabled={bulkBusy || busy}
+              >
+                <Download size={13} />
+                {bulkBusy ? '批量下载中' : '批量下载'}
+              </button>
+              <input
+                className="input w-50"
+                value={bulkTagInput}
+                onChange={(event) => setBulkTagInput(event.target.value)}
+                placeholder="输入标签，逗号分隔"
+              />
+              <button
+                className="btn btn-brand btn-sm"
+                onClick={bulkTag}
+                disabled={bulkBusy || busy || !bulkTagInput.trim()}
+              >
+                <Tag size={13} />
+                {bulkBusy ? '批量打标中' : '批量打标'}
+              </button>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => setSelectedIds([])}
+                disabled={bulkBusy || busy}
+              >
+                取消选择
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 数据表格 */}
+        <div className="table-shell">
+          <table className="table">
+            <thead>
+              <tr>
+                <th className="w-11">
+                  <input
+                    ref={headerCheckboxRef}
+                    type="checkbox"
+                    checked={allVisibleSelected}
+                    disabled={!visibleIds.length || busy}
+                    onChange={(event) => toggleVisibleSelection(event.target.checked)}
+                    className="size-4 cursor-pointer accent-primary"
+                    aria-label="选择当前页全部物料"
+                  />
                 </th>
-              ))}
-              <th>标签</th>
-              <th>状态</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => {
-              const isRowSelected = selectedIds.includes(item.id);
-              const hasFile = Boolean(item.fileArtifactId);
-              const rowStyle = isRowSelected
-                ? { background: 'color-mix(in srgb, var(--brand-50) 48%, var(--surface-1) 52%)' }
-                : undefined;
-              return (
-                <tr key={item.id} style={rowStyle}>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={isRowSelected}
-                      disabled={busy}
-                      onChange={(event) => toggleRowSelection(item.id, event.target.checked)}
-                      style={{
-                        accentColor: 'var(--brand)',
-                        width: 16,
-                        height: 16,
-                        cursor: 'pointer',
-                      }}
-                      aria-label={`选择${item.title}`}
-                    />
-                  </td>
-                  <td>
-                    <div style={{ display: 'grid', gap: 3 }}>
-                      <strong style={{ color: 'var(--t-primary)' }}>{item.title}</strong>
-                      {item.summary && (
-                        <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
-                          {item.summary}
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td>
-                    <span className="badge badge-info">{item.materialType}</span>
-                  </td>
-                  <td>{item.brandSlug || '-'}</td>
-                  <td>{item.fileFormat || '-'}</td>
-                  <td>{item.versionLabel || 'v1'}</td>
-                  <td>{formatDate(item.updatedAt)}</td>
-                  <td
-                    style={{
-                      fontWeight: 700,
-                      color: 'var(--brand)',
-                      fontVariantNumeric: 'tabular-nums',
-                    }}
-                  >
-                    {item.downloadCount || 0}
-                  </td>
-                  <td>{(item.tags || []).length ? item.tags.join(' / ') : '-'}</td>
-                  <td>
-                    {item.archivedAt ? (
-                      <span className="badge badge-grey">已归档</span>
-                    ) : (
-                      <span className="badge badge-success">活跃</span>
-                    )}
-                  </td>
-                  <td>
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: 6,
-                        flexWrap: 'wrap',
-                        justifyContent: 'center',
-                      }}
+                {SORTABLE_COLUMNS.map((col) => (
+                  <th key={col.key}>
+                    <button
+                      onClick={() => toggleSort(col.key)}
+                      className={`inline-flex cursor-pointer items-center gap-1 border-0 bg-transparent p-0 [font:inherit] tracking-[inherit] [text-transform:inherit] ${
+                        sortBy === col.key ? 'text-primary' : 'text-muted-foreground/70'
+                      }`}
                     >
-                      <button
-                        className="btn btn-outline btn-sm"
-                        onClick={() => edit(item)}
+                      {col.label}
+                      {sortIcon(col.key)}
+                    </button>
+                  </th>
+                ))}
+                <th>标签</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => {
+                const isRowSelected = selectedIds.includes(item.id);
+                const hasFile = Boolean(item.fileArtifactId);
+                return (
+                  <tr key={item.id} className={isRowSelected ? 'bg-primary/5' : undefined}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={isRowSelected}
                         disabled={busy}
-                      >
-                        <Edit3 size={13} />
-                        编辑
-                      </button>
-                      <button
-                        className="btn btn-outline btn-sm"
-                        onClick={() => openPreview(item)}
-                        disabled={busy || !hasFile}
-                      >
-                        <Eye size={13} />
-                        预览
-                      </button>
-                      <button
-                        className="btn btn-outline btn-sm"
-                        onClick={() => download(item)}
-                        disabled={busy || !hasFile}
-                      >
-                        <Download size={13} />
-                        下载
-                      </button>
-                      {!item.archivedAt && (
+                        onChange={(event) => toggleRowSelection(item.id, event.target.checked)}
+                        className="size-4 cursor-pointer accent-primary"
+                        aria-label={`选择${item.title}`}
+                      />
+                    </td>
+                    <td>
+                      <div className="grid gap-0.75">
+                        <strong className="text-foreground">{item.title}</strong>
+                        {item.summary && (
+                          <span className="text-xs text-muted-foreground/70">{item.summary}</span>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <span className="badge badge-info">{item.materialType}</span>
+                    </td>
+                    <td>{item.brandSlug || '-'}</td>
+                    <td>{item.fileFormat || '-'}</td>
+                    <td>{item.versionLabel || 'v1'}</td>
+                    <td>{formatDate(item.updatedAt)}</td>
+                    <td className="font-bold text-primary tabular-nums">
+                      {item.downloadCount || 0}
+                    </td>
+                    <td>{(item.tags || []).length ? item.tags.join(' / ') : '-'}</td>
+                    <td>
+                      {item.archivedAt ? (
+                        <span className="badge badge-grey">已归档</span>
+                      ) : (
+                        <span className="badge badge-success">活跃</span>
+                      )}
+                    </td>
+                    <td>
+                      <div className="flex flex-wrap justify-center gap-1.5">
                         <button
                           className="btn btn-outline btn-sm"
-                          onClick={() => archive(item.id)}
+                          onClick={() => edit(item)}
                           disabled={busy}
                         >
-                          <Archive size={13} />
-                          归档
+                          <Edit3 size={13} />
+                          编辑
                         </button>
-                      )}
-                    </div>
+                        <button
+                          className="btn btn-outline btn-sm"
+                          onClick={() => openPreview(item)}
+                          disabled={busy || !hasFile}
+                        >
+                          <Eye size={13} />
+                          预览
+                        </button>
+                        <button
+                          className="btn btn-outline btn-sm"
+                          onClick={() => download(item)}
+                          disabled={busy || !hasFile}
+                        >
+                          <Download size={13} />
+                          下载
+                        </button>
+                        {!item.archivedAt && (
+                          <button
+                            className="btn btn-outline btn-sm"
+                            onClick={() => archive(item.id)}
+                            disabled={busy}
+                          >
+                            <Archive size={13} />
+                            归档
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+              {!busy && !items.length && (
+                <tr>
+                  <td colSpan={11} className="p-7 text-center text-muted-foreground">
+                    <FolderOpen size={20} className="mr-2 inline align-middle text-primary" />
+                    {includeArchived
+                      ? '暂无物料（含已归档）'
+                      : '暂无物料，先新增一条基础物料，或开启「查看已归档」'}
                   </td>
                 </tr>
-              );
-            })}
-            {!busy && !items.length && (
-              <tr>
-                <td
-                  colSpan={11}
-                  style={{ textAlign: 'center', color: 'var(--t-secondary)', padding: 28 }}
-                >
-                  <FolderOpen
-                    size={20}
-                    style={{ color: 'var(--brand)', verticalAlign: 'middle', marginRight: 8 }}
-                  />
-                  {includeArchived
-                    ? '暂无物料（含已归档）'
-                    : '暂无物料，先新增一条基础物料，或开启「查看已归档」'}
-                </td>
-              </tr>
-            )}
-            {busy && (
-              <tr>
-                <td colSpan={11} style={{ textAlign: 'center', padding: 28 }}>
-                  <Loader2
-                    size={18}
-                    className="animate-spin"
-                    style={{ color: 'var(--brand)', verticalAlign: 'middle' }}
-                  />
-                  <span style={{ marginLeft: 8, color: 'var(--t-secondary)', fontSize: 13 }}>
-                    加载中
-                  </span>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              )}
+              {busy && (
+                <tr>
+                  <td colSpan={11} className="p-7 text-center">
+                    <Loader2 size={18} className="inline animate-spin align-middle text-primary" />
+                    <span className="ml-2 text-[13px] text-muted-foreground">加载中</span>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      {/* 分页 */}
-      <WorkbenchPaginationFooter
-        currentPage={page}
-        totalPages={totalPages}
-        totalItems={total}
-        pageSize={pageSize}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
-        onPageSizeChange={(size) => {
-          setPageSize(size);
-          setPage(1);
-        }}
-        onPageChange={busy ? undefined : setPage}
-        onPrevious={busy || page <= 1 ? undefined : () => setPage(Math.max(page - 1, 1))}
-        onNext={busy || page >= totalPages ? undefined : () => setPage(page + 1)}
-      />
-
-      {/* 新增/编辑表单弹层 */}
-      {formOpen && (
-        <div
-          onClick={requestCloseForm}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(15,23,42,0.42)',
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'center',
-            zIndex: 50,
-            padding: '8vh 24px 24px',
+        {/* 分页 */}
+        <WorkbenchPaginationFooter
+          currentPage={page}
+          totalPages={totalPages}
+          totalItems={total}
+          pageSize={pageSize}
+          pageSizeOptions={PAGE_SIZE_OPTIONS}
+          onPageSizeChange={(size) => {
+            setPageSize(size);
+            setPage(1);
           }}
-        >
+          onPageChange={busy ? undefined : setPage}
+          onPrevious={busy || page <= 1 ? undefined : () => setPage(Math.max(page - 1, 1))}
+          onNext={busy || page >= totalPages ? undefined : () => setPage(page + 1)}
+        />
+
+        {/* 新增/编辑表单弹层 */}
+        {formOpen && (
           <div
-            onClick={(event) => event.stopPropagation()}
-            className="card-elevated"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="growth-material-form-title"
-            style={{
-              width: 'min(100%, 920px)',
-              maxHeight: '84vh',
-              background: 'var(--surface-1)',
-              boxShadow: 'var(--sh-modal)',
-              display: 'grid',
-              gridTemplateRows: 'auto 1fr auto',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--r-lg)',
-              overflow: 'hidden',
-            }}
+            onClick={requestCloseForm}
+            className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/40 px-6 pt-[8vh] pb-6"
           >
             <div
-              style={{
-                padding: '20px 24px 18px',
-                borderBottom: '1px solid var(--border)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                gap: 16,
-                background: 'var(--surface-1)',
-              }}
+              onClick={(event) => event.stopPropagation()}
+              className="card-elevated grid max-h-[84vh] w-full max-w-[920px] grid-rows-[auto_1fr_auto] overflow-hidden rounded-lg border bg-background shadow-[var(--sh-modal)]"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="growth-material-form-title"
             >
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                  <span
-                    style={{
-                      width: 4,
-                      height: 16,
-                      borderRadius: 999,
-                      background: 'var(--brand)',
-                      display: 'inline-block',
-                    }}
-                  />
-                  <p className="t-label">{editingId ? '编辑物料' : '新增物料'}</p>
-                </div>
-                <h3 id="growth-material-form-title" className="t-headline" style={{ marginTop: 0 }}>
-                  {editingId ? '修改营销物料信息' : '录入营销物料'}
-                </h3>
-                <p style={{ fontSize: 12, color: 'var(--t-tertiary)', marginTop: 4 }}>
-                  维护物料分类、品牌归属、适用场景、版本与文件附件。
-                </p>
-              </div>
-              <button
-                className="btn btn-ghost btn-sm icon-only"
-                onClick={requestCloseForm}
-                aria-label="关闭表单"
-                disabled={busy}
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div
-              style={{
-                overflow: 'auto',
-                padding: 24,
-                display: 'grid',
-                gap: 18,
-                alignContent: 'start',
-                background: 'var(--surface-2)',
-              }}
-            >
-              <section
-                style={{
-                  background: 'var(--surface-1)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--r-lg)',
-                  padding: 18,
-                  display: 'grid',
-                  gap: 14,
-                }}
-              >
+              <div className="flex items-start justify-between gap-4 border-b bg-background px-6 pt-5 pb-4.5">
                 <div>
-                  <h4 style={{ margin: 0, color: 'var(--t-strong)', fontSize: 14 }}>基础信息</h4>
-                  <p style={{ margin: '4px 0 0', color: 'var(--t-tertiary)', fontSize: 12 }}>
-                    用于列表检索、分类筛选和后台归档。
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="inline-block h-4 w-1 rounded-full bg-primary" />
+                    <p className="t-label">{editingId ? '编辑物料' : '新增物料'}</p>
+                  </div>
+                  <h3 id="growth-material-form-title" className="t-headline mt-0">
+                    {editingId ? '修改营销物料信息' : '录入营销物料'}
+                  </h3>
+                  <p className="mt-1 text-xs text-muted-foreground/70">
+                    维护物料分类、品牌归属、适用场景、版本与文件附件。
                   </p>
                 </div>
-                <label style={{ display: 'grid', gap: 6 }}>
-                  <span className="t-label">
-                    物料名称 <span style={{ color: 'var(--brand)' }}>*</span>
-                  </span>
-                  <input
-                    className="input"
-                    value={form.title}
-                    onChange={(event) => patchForm({ title: event.target.value })}
-                    placeholder="例如：夏季活动海报"
-                  />
-                </label>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                    gap: 12,
-                  }}
+                <button
+                  className="btn btn-ghost btn-sm icon-only"
+                  onClick={requestCloseForm}
+                  aria-label="关闭表单"
+                  disabled={busy}
                 >
-                  <label style={{ display: 'grid', gap: 6 }}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="grid content-start gap-4.5 overflow-auto bg-secondary p-6">
+                <section className="grid gap-3.5 rounded-lg border bg-background p-4.5">
+                  <div>
+                    <h4 className="m-0 text-sm font-semibold text-foreground">基础信息</h4>
+                    <p className="mt-1 mb-0 text-xs text-muted-foreground/70">
+                      用于列表检索、分类筛选和后台归档。
+                    </p>
+                  </div>
+                  <label className="grid gap-1.5">
                     <span className="t-label">
-                      分类 <span style={{ color: 'var(--brand)' }}>*</span>
+                      物料名称 <span className="text-primary">*</span>
                     </span>
-                    <select
-                      className="input"
-                      value={form.materialType}
-                      onChange={(event) => patchForm({ materialType: event.target.value })}
-                    >
-                      {categories.map((item) => (
-                        <option key={item} value={item} />
-                      ))}
-                    </select>
-                  </label>
-                  <label style={{ display: 'grid', gap: 6 }}>
-                    <span className="t-label">品牌</span>
                     <input
                       className="input"
-                      value={form.brandSlug}
-                      onChange={(event) => patchForm({ brandSlug: event.target.value })}
-                      placeholder="Rheem / Ruud / Everhot"
+                      value={form.title}
+                      onChange={(event) => patchForm({ title: event.target.value })}
+                      placeholder="例如：夏季活动海报"
                     />
                   </label>
-                </div>
-                <label style={{ display: 'grid', gap: 6 }}>
-                  <span className="t-label">适用场景</span>
-                  <input
-                    className="input"
-                    value={form.channel}
-                    onChange={(event) => patchForm({ channel: event.target.value })}
-                    placeholder="官网 / 门店 / 朋友圈 / 培训"
-                  />
-                </label>
-              </section>
+                  <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3">
+                    <label className="grid gap-1.5">
+                      <span className="t-label">
+                        分类 <span className="text-primary">*</span>
+                      </span>
+                      <select
+                        className="input"
+                        value={form.materialType}
+                        onChange={(event) => patchForm({ materialType: event.target.value })}
+                      >
+                        {categories.map((item) => (
+                          <option key={item} value={item} />
+                        ))}
+                      </select>
+                    </label>
+                    <label className="grid gap-1.5">
+                      <span className="t-label">品牌</span>
+                      <input
+                        className="input"
+                        value={form.brandSlug}
+                        onChange={(event) => patchForm({ brandSlug: event.target.value })}
+                        placeholder="Rheem / Ruud / Everhot"
+                      />
+                    </label>
+                  </div>
+                  <label className="grid gap-1.5">
+                    <span className="t-label">适用场景</span>
+                    <input
+                      className="input"
+                      value={form.channel}
+                      onChange={(event) => patchForm({ channel: event.target.value })}
+                      placeholder="官网 / 门店 / 朋友圈 / 培训"
+                    />
+                  </label>
+                </section>
 
-              <section
-                style={{
-                  background: 'var(--surface-1)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--r-lg)',
-                  padding: 18,
-                  display: 'grid',
-                  gap: 14,
-                }}
-              >
-                <div>
-                  <h4 style={{ margin: 0, color: 'var(--t-strong)', fontSize: 14 }}>文件与版本</h4>
-                  <p style={{ margin: '4px 0 0', color: 'var(--t-tertiary)', fontSize: 12 }}>
-                    支持上传 PDF、图片、PPT 等营销物料文件。
-                  </p>
-                </div>
-                <label
-                  style={{
-                    minHeight: 92,
-                    border: '1px dashed var(--border-2)',
-                    borderRadius: 'var(--r-lg)',
-                    background: 'color-mix(in srgb, var(--brand-50) 22%, var(--surface-1) 78%)',
-                    display: 'grid',
-                    gridTemplateColumns: '44px minmax(0, 1fr) auto',
-                    gap: 12,
-                    alignItems: 'center',
-                    padding: 16,
-                    cursor: 'pointer',
-                  }}
-                >
-                  <input
-                    type="file"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0] || null;
-                      setSelectedFile(file);
-                      if (file) patchForm({ fileFormat: extensionLabel(file) });
-                    }}
-                    style={{ display: 'none' }}
-                  />
-                  <span
-                    style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 'var(--r-lg)',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      background: 'var(--surface-1)',
-                      border: '1px solid var(--border)',
-                      color: 'var(--brand)',
-                    }}
-                  >
-                    <Upload size={20} />
-                  </span>
-                  <span style={{ minWidth: 0 }}>
-                    <strong
-                      style={{
-                        display: 'block',
-                        color: 'var(--t-primary)',
-                        fontSize: 14,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
+                <section className="grid gap-3.5 rounded-lg border bg-background p-4.5">
+                  <div>
+                    <h4 className="m-0 text-sm font-semibold text-foreground">文件与版本</h4>
+                    <p className="mt-1 mb-0 text-xs text-muted-foreground/70">
+                      支持上传 PDF、图片、PPT 等营销物料文件。
+                    </p>
+                  </div>
+                  <label className="grid min-h-23 cursor-pointer grid-cols-[44px_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border border-dashed bg-primary/5 p-4">
+                    <input
+                      type="file"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0] || null;
+                        setSelectedFile(file);
+                        if (file) patchForm({ fileFormat: extensionLabel(file) });
                       }}
-                    >
-                      {selectedFile?.name ||
-                        (form.fileArtifactId ? '已上传文件，可重新选择' : '点击选择上传文件')}
-                    </strong>
-                    <span
-                      style={{
-                        display: 'block',
-                        color: 'var(--t-tertiary)',
-                        fontSize: 12,
-                        marginTop: 4,
-                      }}
-                    >
-                      文件会作为该物料的下载与预览附件保存。
+                      className="hidden"
+                    />
+                    <span className="inline-flex size-11 items-center justify-center rounded-lg border bg-background text-primary">
+                      <Upload size={20} />
                     </span>
-                  </span>
-                  <span className="btn btn-outline btn-sm" aria-hidden="true">
-                    选择文件
-                  </span>
-                </label>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-                    gap: 12,
-                  }}
+                    <span className="min-w-0">
+                      <strong className="block truncate text-sm text-foreground">
+                        {selectedFile?.name ||
+                          (form.fileArtifactId ? '已上传文件，可重新选择' : '点击选择上传文件')}
+                      </strong>
+                      <span className="mt-1 block text-xs text-muted-foreground/70">
+                        文件会作为该物料的下载与预览附件保存。
+                      </span>
+                    </span>
+                    <span className="btn btn-outline btn-sm" aria-hidden="true">
+                      选择文件
+                    </span>
+                  </label>
+                  <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3">
+                    <label className="grid gap-1.5">
+                      <span className="t-label">格式</span>
+                      <select
+                        className="input"
+                        value={
+                          FILE_FORMAT_OPTIONS.includes(form.fileFormat) ? form.fileFormat : '其他'
+                        }
+                        onChange={(event) => patchForm({ fileFormat: event.target.value })}
+                      >
+                        {FILE_FORMAT_OPTIONS.map((item) => (
+                          <option key={item} value={item}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="grid gap-1.5">
+                      <span className="t-label">版本</span>
+                      <input
+                        className="input"
+                        value={form.versionLabel}
+                        onChange={(event) => patchForm({ versionLabel: event.target.value })}
+                        placeholder="v1"
+                      />
+                    </label>
+                    <label className="grid gap-1.5">
+                      <span className="t-label">标签</span>
+                      <input
+                        className="input"
+                        value={form.tags}
+                        onChange={(event) => patchForm({ tags: event.target.value })}
+                        placeholder="逗号分隔"
+                      />
+                    </label>
+                  </div>
+                </section>
+
+                <section className="grid gap-2.5 rounded-lg border bg-background p-4.5">
+                  <div>
+                    <h4 className="m-0 text-sm font-semibold text-foreground">备注说明</h4>
+                    <p className="mt-1 mb-0 text-xs text-muted-foreground/70">
+                      记录使用说明、适配渠道或版本变更信息。
+                    </p>
+                  </div>
+                  <textarea
+                    className="input resize-y"
+                    rows={4}
+                    value={form.summary}
+                    onChange={(event) => patchForm({ summary: event.target.value })}
+                    placeholder="备注说明"
+                  />
+                </section>
+
+                {error && <span className="badge badge-warning justify-self-start">{error}</span>}
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 border-t bg-background px-6 py-3.5">
+                <button
+                  className="btn btn-outline btn-sm"
+                  onClick={requestCloseForm}
+                  disabled={busy}
                 >
-                  <label style={{ display: 'grid', gap: 6 }}>
-                    <span className="t-label">格式</span>
-                    <select
-                      className="input"
-                      value={
-                        FILE_FORMAT_OPTIONS.includes(form.fileFormat) ? form.fileFormat : '其他'
-                      }
-                      onChange={(event) => patchForm({ fileFormat: event.target.value })}
-                    >
-                      {FILE_FORMAT_OPTIONS.map((item) => (
-                        <option key={item} value={item}>
-                          {item}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label style={{ display: 'grid', gap: 6 }}>
-                    <span className="t-label">版本</span>
-                    <input
-                      className="input"
-                      value={form.versionLabel}
-                      onChange={(event) => patchForm({ versionLabel: event.target.value })}
-                      placeholder="v1"
-                    />
-                  </label>
-                  <label style={{ display: 'grid', gap: 6 }}>
-                    <span className="t-label">标签</span>
-                    <input
-                      className="input"
-                      value={form.tags}
-                      onChange={(event) => patchForm({ tags: event.target.value })}
-                      placeholder="逗号分隔"
-                    />
-                  </label>
-                </div>
-              </section>
-
-              <section
-                style={{
-                  background: 'var(--surface-1)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--r-lg)',
-                  padding: 18,
-                  display: 'grid',
-                  gap: 10,
-                }}
-              >
-                <div>
-                  <h4 style={{ margin: 0, color: 'var(--t-strong)', fontSize: 14 }}>备注说明</h4>
-                  <p style={{ margin: '4px 0 0', color: 'var(--t-tertiary)', fontSize: 12 }}>
-                    记录使用说明、适配渠道或版本变更信息。
-                  </p>
-                </div>
-                <textarea
-                  className="input"
-                  rows={4}
-                  value={form.summary}
-                  onChange={(event) => patchForm({ summary: event.target.value })}
-                  placeholder="备注说明"
-                  style={{ resize: 'vertical' }}
-                />
-              </section>
-
-              {error && (
-                <span className="badge badge-warning" style={{ justifySelf: 'start' }}>
-                  {error}
-                </span>
-              )}
-            </div>
-
-            <div
-              style={{
-                padding: '14px 24px',
-                borderTop: '1px solid var(--border)',
-                background: 'var(--surface-1)',
-                display: 'flex',
-                gap: 10,
-                alignItems: 'center',
-                justifyContent: 'flex-end',
-              }}
-            >
-              <button className="btn btn-outline btn-sm" onClick={requestCloseForm} disabled={busy}>
-                取消
-              </button>
-              <button className="btn btn-brand btn-sm" onClick={save} disabled={busy}>
-                {busy ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : editingId ? (
-                  <Edit3 size={14} />
-                ) : (
-                  <Plus size={14} />
-                )}
-                {editingId ? '保存修改' : '新增物料'}
-              </button>
+                  取消
+                </button>
+                <button className="btn btn-brand btn-sm" onClick={save} disabled={busy}>
+                  {busy ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : editingId ? (
+                    <Edit3 size={14} />
+                  ) : (
+                    <Plus size={14} />
+                  )}
+                  {editingId ? '保存修改' : '新增物料'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* 文件预览弹层 */}
-      {previewItem && (
-        <div
-          onClick={closePreview}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(17,24,39,0.46)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 50,
-            padding: 20,
-          }}
-        >
+        {/* 文件预览弹层 */}
+        {previewItem && (
           <div
-            onClick={(event) => event.stopPropagation()}
-            className="card-elevated"
-            style={{
-              padding: 16,
-              width: 'min(100%, 960px)',
-              maxHeight: 'min(92vh, 820px)',
-              overflow: 'auto',
-              display: 'grid',
-              gap: 12,
-              boxShadow: 'var(--sh-modal)',
-            }}
+            onClick={closePreview}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-5"
           >
             <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 12,
-              }}
+              onClick={(event) => event.stopPropagation()}
+              className="card-elevated grid max-h-[min(92vh,820px)] w-full max-w-[960px] gap-3 overflow-auto p-4 shadow-[var(--sh-modal)]"
             >
-              <div>
-                <p className="t-label">文件预览</p>
-                <h3 className="t-headline" style={{ marginTop: 4 }}>
-                  {previewItem.title}
-                </h3>
-                <p style={{ fontSize: 12, color: 'var(--t-tertiary)', marginTop: 4 }}>
-                  {previewItem.fileFormat || '-'} · {previewItem.brandSlug || '-'} · v
-                  {previewItem.versionLabel}
-                </p>
-              </div>
-              <button
-                className="btn btn-ghost btn-sm icon-only"
-                onClick={closePreview}
-                aria-label="关闭预览"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                placeItems: 'center',
-                minHeight: 240,
-                maxHeight: 'calc(88vh - 120px)',
-                overflow: 'auto',
-                borderRadius: 'var(--r-lg)',
-                border: '1px solid var(--border)',
-                background: 'var(--surface-2)',
-              }}
-            >
-              {previewBusy ? (
-                <Loader2 size={24} className="animate-spin" style={{ color: 'var(--brand)' }} />
-              ) : previewKind === 'image' && previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt={previewItem.title}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: 'calc(88vh - 120px)',
-                    objectFit: 'contain',
-                  }}
-                />
-              ) : previewKind === 'pdf' && previewUrl ? (
-                <iframe
-                  src={previewUrl}
-                  title={previewItem.title}
-                  style={{
-                    width: '100%',
-                    height: 'calc(88vh - 120px)',
-                    border: 'none',
-                    borderRadius: 'var(--r-lg)',
-                  }}
-                />
-              ) : (
-                <div
-                  style={{
-                    textAlign: 'center',
-                    padding: 32,
-                    display: 'grid',
-                    gap: 10,
-                    placeContent: 'center',
-                  }}
-                >
-                  <FileText
-                    size={32}
-                    style={{ color: 'var(--t-tertiary)', justifySelf: 'center' }}
-                  />
-                  <p style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
-                    该格式暂不支持在线预览
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="t-label">文件预览</p>
+                  <h3 className="t-headline mt-1">{previewItem.title}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground/70">
+                    {previewItem.fileFormat || '-'} · {previewItem.brandSlug || '-'} · v
+                    {previewItem.versionLabel}
                   </p>
-                  <button
-                    className="btn btn-outline btn-sm"
-                    onClick={() => download(previewItem)}
-                    disabled={busy}
-                  >
-                    <Download size={13} />
-                    下载文件
-                  </button>
                 </div>
+                <button
+                  className="btn btn-ghost btn-sm icon-only"
+                  onClick={closePreview}
+                  aria-label="关闭预览"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="grid max-h-[calc(88vh-120px)] min-h-60 place-items-center overflow-auto rounded-lg border bg-secondary">
+                {previewBusy ? (
+                  <Loader2 size={24} className="animate-spin text-primary" />
+                ) : previewKind === 'image' && previewUrl ? (
+                  <img
+                    src={previewUrl}
+                    alt={previewItem.title}
+                    className="max-h-[calc(88vh-120px)] max-w-full object-contain"
+                  />
+                ) : previewKind === 'pdf' && previewUrl ? (
+                  <iframe
+                    src={previewUrl}
+                    title={previewItem.title}
+                    className="h-[calc(88vh-120px)] w-full rounded-lg border-0"
+                  />
+                ) : (
+                  <div className="grid place-content-center gap-2.5 p-8 text-center">
+                    <FileText size={32} className="justify-self-center text-muted-foreground/70" />
+                    <p className="text-[13px] text-muted-foreground">该格式暂不支持在线预览</p>
+                    <button
+                      className="btn btn-outline btn-sm"
+                      onClick={() => download(previewItem)}
+                      disabled={busy}
+                    >
+                      <Download size={13} />
+                      下载文件
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {previewUrl && previewKind === 'pdf' && (
+                <p className="text-center text-xs text-muted-foreground/70">
+                  <FileImage size={12} className="mr-1 inline align-middle" />
+                  PDF 预览依赖浏览器内置阅读器
+                </p>
               )}
             </div>
-
-            {previewUrl && previewKind === 'pdf' && (
-              <p style={{ fontSize: 11, color: 'var(--t-tertiary)', textAlign: 'center' }}>
-                <FileImage size={12} style={{ verticalAlign: 'middle', marginRight: 4 }} />
-                PDF 预览依赖浏览器内置阅读器
-              </p>
-            )}
           </div>
-        </div>
-      )}
-    </section>
+        )}
+      </div>
+    </WorkspaceSection>
   );
 }

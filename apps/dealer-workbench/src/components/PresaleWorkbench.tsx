@@ -93,7 +93,7 @@ export function PresaleWorkbench() {
   const gatePass = gate?.pass === true;
 
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
+    <section className="card-elevated grid gap-4 p-4.5">
       <div className="workbench-section-header">
         <div>
           <p className="workbench-section-header__eyebrow">L4 客户赋能 · 售前专业度</p>
@@ -105,30 +105,22 @@ export function PresaleWorkbench() {
       </div>
 
       {/* 输入 */}
-      <div className="inset" style={{ display: 'grid', gap: 12, padding: 16 }}>
-        <label style={{ display: 'grid', gap: 6 }}>
+      <div className="inset grid gap-3 p-4">
+        <label className="grid gap-1.5">
           <span className="t-label">客户需求描述</span>
           <textarea
-            className="input"
+            className="input resize-y"
             rows={2}
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
-            style={{ resize: 'vertical' }}
           />
         </label>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr auto',
-            gap: 10,
-            alignItems: 'end',
-          }}
-        >
-          <label style={{ display: 'grid', gap: 6 }}>
+        <div className="grid grid-cols-[1fr_1fr_auto] items-end gap-2.5">
+          <label className="grid gap-1.5">
             <span className="t-label">城市</span>
             <input className="input" value={city} onChange={(e) => setCity(e.target.value)} />
           </label>
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label className="grid gap-1.5">
             <span className="t-label">面积 (m²)</span>
             <input
               className="input"
@@ -145,13 +137,13 @@ export function PresaleWorkbench() {
       </div>
 
       {error ? (
-        <div className="inset" style={{ color: 'var(--danger)', fontSize: 13 }}>
+        <div className="inset text-[13px] text-destructive">
           {error}
         </div>
       ) : null}
 
       {/* 步骤时间线 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+      <div className="grid grid-cols-3 gap-3">
         <StepCard
           n={1}
           icon={ClipboardList}
@@ -160,18 +152,18 @@ export function PresaleWorkbench() {
           busy={busy && step === 1}
         >
           {painpoints ? (
-            <div style={{ fontSize: 12.5, color: 'var(--t-secondary)' }}>
+            <div className="text-[12.5px] text-muted-foreground">
               自动识别 {(painpoints.autoDetected || []).length} 项 · 隐性{' '}
               {(painpoints.implicit || []).length} 项
               {(painpoints.autoDetected || []).length === 0 &&
               (painpoints.implicit || []).length === 0 ? (
-                <div style={{ color: 'var(--t-tertiary)', marginTop: 4 }}>
+                <div className="mt-1 text-muted-foreground/80">
                   （当前痛点库无匹配，需补充痛点规则）
                 </div>
               ) : null}
             </div>
           ) : (
-            <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>待执行</span>
+            <span className="text-xs text-muted-foreground/80">待执行</span>
           )}
         </StepCard>
 
@@ -183,38 +175,32 @@ export function PresaleWorkbench() {
           busy={busy && step === 2}
         >
           {gate ? (
-            <div style={{ fontSize: 12.5 }}>
+            <div className="text-[12.5px]">
               <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  color: gatePass ? 'var(--success)' : 'var(--danger)',
-                  fontWeight: 700,
-                }}
+                className={`flex items-center gap-1.5 font-bold ${gatePass ? 'text-success' : 'text-destructive'}`}
               >
                 {gatePass ? <CheckCircle2 size={14} /> : <XCircle size={14} />}
                 {gatePass ? '合规通过' : '已阻断'}
               </div>
-              <div style={{ color: 'var(--t-secondary)', marginTop: 4 }}>
+              <div className="mt-1 text-muted-foreground">
                 内核覆盖 {coverage?.computed}/{coverage?.expected}
                 {coverage?.failed?.length ? ` · 失败: ${coverage.failed.join(',')}` : ''}
               </div>
               {gate.reason ? (
-                <div style={{ color: 'var(--danger)', marginTop: 2 }}>{gate.reason}</div>
+                <div className="mt-0.5 text-destructive">{gate.reason}</div>
               ) : null}
             </div>
           ) : (
-            <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>待执行</span>
+            <span className="text-xs text-muted-foreground/80">待执行</span>
           )}
         </StepCard>
 
         <StepCard n={3} icon={FileText} title="报价" active={step >= 3} busy={busy && step === 3}>
           {quote ? (
-            <div style={{ fontSize: 12.5, color: 'var(--t-secondary)' }}>
+            <div className="text-[12.5px] text-muted-foreground">
               报价单 {quote.quoteId ? '#' + String(quote.quoteId).slice(0, 8) : ''} 已生成
               {quote.summary ? (
-                <div style={{ marginTop: 4 }}>
+                <div className="mt-1">
                   {typeof quote.summary === 'string'
                     ? quote.summary.slice(0, 80)
                     : JSON.stringify(quote.summary).slice(0, 80)}
@@ -222,11 +208,11 @@ export function PresaleWorkbench() {
               ) : null}
             </div>
           ) : step >= 3 && !gatePass ? (
-            <span style={{ color: 'var(--warning)', fontSize: 12 }}>
+            <span className="text-xs text-warning">
               合规闸未通过，不出报价（专业度红线）
             </span>
           ) : (
-            <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>待执行</span>
+            <span className="text-xs text-muted-foreground/80">待执行</span>
           )}
         </StepCard>
       </div>
@@ -251,39 +237,18 @@ function StepCard({
 }) {
   return (
     <div
-      className="inset"
-      style={{
-        padding: 14,
-        display: 'grid',
-        gap: 8,
-        opacity: active ? 1 : 0.55,
-        borderLeft: active ? '3px solid var(--brand)' : '3px solid transparent',
-      }}
+      className={`inset grid gap-2 border-l-[3px] p-3.5 ${active ? 'border-l-primary' : 'border-l-transparent opacity-55'}`}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div className="flex items-center gap-2">
         <div
-          style={{
-            width: 22,
-            height: 22,
-            borderRadius: '50%',
-            background: active ? 'var(--brand)' : 'var(--surface-3)',
-            color: '#fff',
-            display: 'grid',
-            placeItems: 'center',
-            fontSize: 12,
-            fontWeight: 700,
-          }}
+          className={`grid h-[22px] w-[22px] place-items-center rounded-full text-xs font-bold text-white ${active ? 'bg-primary' : 'bg-muted-foreground/40'}`}
         >
           {n}
         </div>
-        <Icon size={15} style={{ color: 'var(--brand)' }} />
-        <strong style={{ fontSize: 13, color: 'var(--t-strong)' }}>{title}</strong>
+        <Icon size={15} className="text-primary" />
+        <strong className="text-[13px] text-foreground">{title}</strong>
         {busy ? (
-          <Loader2
-            size={13}
-            className="animate-spin"
-            style={{ marginLeft: 'auto', color: 'var(--brand)' }}
-          />
+          <Loader2 size={13} className="ml-auto animate-spin text-primary" />
         ) : null}
       </div>
       {children}

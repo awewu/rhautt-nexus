@@ -1,6 +1,8 @@
 'use client';
 
-import { type CSSProperties, useCallback, useEffect, useMemo, useState } from 'react';
+/** 2026-08 全页 UX 重构三期 · WorkspaceKit 化：渲染层去内联样式（业务逻辑/审核流不动，静态布局全走 Tailwind）。 */
+
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   CheckCircle2,
   Clock3,
@@ -454,13 +456,8 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
   }, [reviews, reviewBrandFilter]);
 
   return (
-    <div
-      style={{
-        background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)',
-        minHeight: '100%',
-      }}
-    >
-      <div className="page-container growth-copywriter-page" style={{ display: 'grid', gap: 20 }}>
+    <div className="min-h-full bg-[linear-gradient(to_bottom,var(--surface-1)_0%,var(--surface-2)_100%)]">
+      <div className="page-container growth-copywriter-page grid gap-5">
         <PageHeader
           title={header.title}
           subtitle={header.subtitle}
@@ -476,21 +473,11 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
 
         {mode === 'accounts' ? (
           <>
-            <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 14 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 12,
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                }}
-              >
-                <div style={{ display: 'grid', gap: 4 }}>
+            <section className="card-elevated grid gap-3.5 p-4.5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="grid gap-1">
                   <p className="t-label">公众号账号管理</p>
-                  <h2 className="t-headline" style={{ margin: 0 }}>
-                    账号列表
-                  </h2>
+                  <h2 className="t-headline m-0">账号列表</h2>
                 </div>
                 <div className="table-row-actions">
                   <button className="btn btn-outline btn-sm" onClick={load} disabled={busy}>
@@ -514,13 +501,7 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
                   </button>
                 </div>
               </div>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'minmax(220px, 1.5fr) repeat(3, minmax(150px, 1fr))',
-                  gap: 10,
-                }}
-              >
+              <div className="grid grid-cols-[minmax(220px,1.5fr)_repeat(3,minmax(150px,1fr))] gap-2.5">
                 <input
                   className="input"
                   placeholder="搜索公众号 / AppID / 原始 ID"
@@ -570,40 +551,24 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
                   <option value="temporary_error">临时异常</option>
                 </select>
               </div>
-              <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+              <span className="text-xs text-muted-foreground">
                 共 {accounts.length} 个账号，当前显示 {filteredAccounts.length}{' '}
                 个。新增账号会在弹窗中填写 AppID、AppSecret 和品牌绑定。
               </span>
             </section>
-            <section className="card-elevated" style={{ padding: 18, display: 'none', gap: 14 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 12,
-                  flexWrap: 'wrap',
-                }}
-              >
+            <section className="card-elevated hidden gap-3.5 p-4.5">
+              <div className="flex flex-wrap justify-between gap-3">
                 <div>
                   <p className="t-label">新增公众号</p>
-                  <h2 className="t-headline" style={{ marginTop: 4 }}>
-                    账号配置
-                  </h2>
+                  <h2 className="t-headline mt-1">账号配置</h2>
                 </div>
                 <button className="btn btn-outline btn-sm" onClick={load} disabled={busy}>
                   <RefreshCw size={13} />
                   刷新
                 </button>
               </div>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
-                  gap: 12,
-                  alignItems: 'end',
-                }}
-              >
-                <label style={{ display: 'grid', gap: 6 }}>
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] items-end gap-3">
+                <label className="grid gap-1.5">
                   <span className="t-label">公众号显示名称</span>
                   <input
                     className="input"
@@ -613,11 +578,11 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
                       setAccountForm({ ...accountForm, displayName: event.target.value })
                     }
                   />
-                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+                  <span className="text-xs text-muted-foreground">
                     用于系统内识别账号，提交审核时显示给运营选择。
                   </span>
                 </label>
-                <label style={{ display: 'grid', gap: 6 }}>
+                <label className="grid gap-1.5">
                   <span className="t-label">绑定品牌</span>
                   <select
                     className="input"
@@ -632,11 +597,11 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
                       </option>
                     ))}
                   </select>
-                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+                  <span className="text-xs text-muted-foreground">
                     决定哪些品牌文案可以提交到这个公众号。
                   </span>
                 </label>
-                <label style={{ display: 'grid', gap: 6 }}>
+                <label className="grid gap-1.5">
                   <span className="t-label">AppID</span>
                   <input
                     className="input"
@@ -646,11 +611,11 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
                       setAccountForm({ ...accountForm, appId: event.target.value })
                     }
                   />
-                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+                  <span className="text-xs text-muted-foreground">
                     用于后端调用微信接口获取 access_token。
                   </span>
                 </label>
-                <label style={{ display: 'grid', gap: 6 }}>
+                <label className="grid gap-1.5">
                   <span className="t-label">原始 ID</span>
                   <input
                     className="input"
@@ -660,11 +625,11 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
                       setAccountForm({ ...accountForm, originalId: event.target.value })
                     }
                   />
-                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+                  <span className="text-xs text-muted-foreground">
                     用于核对公众号身份；不参与接口鉴权。
                   </span>
                 </label>
-                <label style={{ display: 'grid', gap: 6 }}>
+                <label className="grid gap-1.5">
                   <span className="t-label">AppSecret</span>
                   <input
                     className="input"
@@ -675,21 +640,16 @@ export default function WechatPublishingWorkspace({ mode }: { mode: Mode }) {
                       setAccountForm({ ...accountForm, appSecret: event.target.value })
                     }
                   />
-                  <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+                  <span className="text-xs text-muted-foreground">
                     用于连接测试和写入草稿箱，保存后列表只显示已配置。
                   </span>
                 </label>
-                <button
-                  className="btn btn-brand"
-                  onClick={createAccount}
-                  disabled={busy}
-                  style={{ minHeight: 40 }}
-                >
+                <button className="btn btn-brand min-h-10" onClick={createAccount} disabled={busy}>
                   <Plus size={14} />
                   保存账号配置
                 </button>
               </div>
-              <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+              <span className="text-xs text-muted-foreground">
                 AppSecret
                 只在提交时发送给后端保存，列表不会明文展示。测试连接前请先在微信开发者平台配置当前后端公网
                 IP 到 API IP 白名单。
@@ -821,10 +781,10 @@ function AccountsTable({
               </td>
               <td>{statusBadge(item.status)}</td>
               <td>
-                <div style={{ display: 'grid', gap: 4 }}>
+                <div className="grid gap-1">
                   {statusBadge(item.connectionStatus)}
                   {item.connectionErrorSummary ? (
-                    <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+                    <span className="text-xs text-muted-foreground">
                       {item.connectionErrorSummary}
                     </span>
                   ) : null}
@@ -937,47 +897,25 @@ function AccountCreateDialog({
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !busy) onClose();
       }}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 80,
-        display: 'grid',
-        placeItems: 'center',
-        padding: 20,
-        background: 'rgba(17,24,39,0.46)',
-      }}
+      className="fixed inset-0 z-[80] grid place-items-center bg-[rgba(17,24,39,0.46)] p-5"
     >
       <form
         role="dialog"
         aria-modal="true"
         aria-labelledby="wechat-account-dialog-title"
-        className="card-elevated"
+        className="card-elevated grid w-full max-w-[880px] gap-4.5 p-5 shadow-[var(--sh-modal)]"
         onSubmit={(event) => {
           event.preventDefault();
           onSubmit();
         }}
-        style={{
-          width: 'min(100%, 880px)',
-          padding: 20,
-          display: 'grid',
-          gap: 18,
-          boxShadow: 'var(--sh-modal)',
-        }}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            gap: 16,
-          }}
-        >
-          <div style={{ display: 'grid', gap: 5 }}>
+        <div className="flex items-start justify-between gap-4">
+          <div className="grid gap-1.25">
             <span className="t-label">新增公众号</span>
             <h2 id="wechat-account-dialog-title" className="t-headline">
               保存账号配置
             </h2>
-            <span style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
+            <span className="text-[13px] text-muted-foreground">
               填写微信开发者平台中的 AppID、AppSecret，并绑定到业务品牌。
             </span>
           </div>
@@ -993,10 +931,8 @@ function AccountCreateDialog({
           </button>
         </div>
 
-        <div
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(240px, 1fr))', gap: 14 }}
-        >
-          <label style={{ display: 'grid', gap: 7 }}>
+        <div className="grid grid-cols-[repeat(2,minmax(240px,1fr))] gap-3.5">
+          <label className="grid gap-1.75">
             <span className="t-label">公众号显示名称</span>
             <input
               className="input"
@@ -1005,11 +941,11 @@ function AccountCreateDialog({
               onChange={(event) => onChange({ ...form, displayName: event.target.value })}
               disabled={busy}
             />
-            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+            <span className="text-xs text-muted-foreground">
               用于系统内识别账号，提交审核时显示给运营选择。
             </span>
           </label>
-          <label style={{ display: 'grid', gap: 7 }}>
+          <label className="grid gap-1.75">
             <span className="t-label">绑定品牌</span>
             <select
               className="input"
@@ -1023,11 +959,11 @@ function AccountCreateDialog({
                 </option>
               ))}
             </select>
-            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+            <span className="text-xs text-muted-foreground">
               决定哪些品牌文案可以提交到这个公众号。
             </span>
           </label>
-          <label style={{ display: 'grid', gap: 7 }}>
+          <label className="grid gap-1.75">
             <span className="t-label">AppID</span>
             <input
               className="input"
@@ -1036,11 +972,11 @@ function AccountCreateDialog({
               onChange={(event) => onChange({ ...form, appId: event.target.value })}
               disabled={busy}
             />
-            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+            <span className="text-xs text-muted-foreground">
               用于后端调用微信接口获取 access_token。
             </span>
           </label>
-          <label style={{ display: 'grid', gap: 7 }}>
+          <label className="grid gap-1.75">
             <span className="t-label">原始 ID</span>
             <input
               className="input"
@@ -1049,11 +985,11 @@ function AccountCreateDialog({
               onChange={(event) => onChange({ ...form, originalId: event.target.value })}
               disabled={busy}
             />
-            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+            <span className="text-xs text-muted-foreground">
               用于核对公众号身份；不参与接口鉴权。
             </span>
           </label>
-          <label style={{ display: 'grid', gap: 7, gridColumn: '1 / -1' }}>
+          <label className="col-span-full grid gap-1.75">
             <span className="t-label">AppSecret</span>
             <input
               className="input"
@@ -1064,14 +1000,14 @@ function AccountCreateDialog({
               onChange={(event) => onChange({ ...form, appSecret: event.target.value })}
               disabled={busy}
             />
-            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+            <span className="text-xs text-muted-foreground">
               用于连接测试和写入草稿箱，保存后列表只显示已配置。测试连接前请先在微信开发者平台配置当前后端公网
               IP 到 API IP 白名单。
             </span>
           </label>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+        <div className="flex justify-end gap-2.5">
           <button type="button" className="btn btn-outline" onClick={onClose} disabled={busy}>
             取消
           </button>
@@ -1119,47 +1055,25 @@ function SecretUpdateDialog({
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !busy) onClose();
       }}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 80,
-        display: 'grid',
-        placeItems: 'center',
-        padding: 20,
-        background: 'rgba(17,24,39,0.46)',
-      }}
+      className="fixed inset-0 z-[80] grid place-items-center bg-[rgba(17,24,39,0.46)] p-5"
     >
       <form
         role="dialog"
         aria-modal="true"
         aria-labelledby="wechat-secret-dialog-title"
-        className="card-elevated"
+        className="card-elevated grid w-full max-w-[480px] gap-4.5 p-5 shadow-[var(--sh-modal)]"
         onSubmit={(event) => {
           event.preventDefault();
           onSubmit();
         }}
-        style={{
-          width: 'min(100%, 480px)',
-          padding: 20,
-          display: 'grid',
-          gap: 18,
-          boxShadow: 'var(--sh-modal)',
-        }}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            gap: 16,
-          }}
-        >
-          <div style={{ display: 'grid', gap: 5 }}>
+        <div className="flex items-start justify-between gap-4">
+          <div className="grid gap-1.25">
             <span className="t-label">敏感凭证</span>
             <h2 id="wechat-secret-dialog-title" className="t-headline">
               更新 AppSecret
             </h2>
-            <span style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
+            <span className="text-[13px] text-muted-foreground">
               {account.displayName} · {account.appIdMasked}
             </span>
           </div>
@@ -1175,10 +1089,8 @@ function SecretUpdateDialog({
           </button>
         </div>
 
-        <label style={{ display: 'grid', gap: 7 }}>
-          <span style={{ color: 'var(--t-primary)', fontSize: 13, fontWeight: 700 }}>
-            新的 AppSecret
-          </span>
+        <label className="grid gap-1.75">
+          <span className="text-[13px] font-bold text-foreground">新的 AppSecret</span>
           <input
             className="input"
             type="password"
@@ -1191,11 +1103,11 @@ function SecretUpdateDialog({
           />
         </label>
 
-        <p style={{ margin: 0, color: 'var(--t-secondary)', fontSize: 12, lineHeight: 1.6 }}>
+        <p className="m-0 text-xs leading-[1.6] text-muted-foreground">
           系统不会展示或回显已保存的密钥。更新后账号连接状态将重置，请重新执行连接测试。
         </p>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+        <div className="flex justify-end gap-2.5">
           <button type="button" className="btn btn-outline" onClick={onClose} disabled={busy}>
             取消
           </button>
@@ -1235,14 +1147,13 @@ function ReviewTable({
   onReject: (id: string, action: 'request' | 'void') => void;
 }) {
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 14 }}>
+    <section className="card-elevated grid gap-3.5 p-4.5">
       <div className="toolbar">
-        <FileText size={16} style={{ color: 'var(--brand)' }} />
+        <FileText size={16} className="text-primary" />
         <select
-          className="input"
+          className="input w-[180px]"
           value={brandFilter}
           onChange={(event) => setBrandFilter(event.target.value)}
-          style={{ width: 180 }}
         >
           <option value="all">全部品牌</option>
           {brandOptions.map((brand) => (
@@ -1251,29 +1162,28 @@ function ReviewTable({
             </option>
           ))}
         </select>
-        <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+        <span className="text-xs text-muted-foreground">
           显示 {items.length} / {totalCount}
         </span>
         <span className="t-label">租户共享待审核池</span>
         <input
-          className="input"
+          className="input min-w-[260px]"
           placeholder="审核通过意见（可选）"
           value={reviewComment}
           onChange={(event) => setReviewComment(event.target.value)}
-          style={{ minWidth: 260 }}
         />
       </div>
       <WorkbenchTableShell>
         <table className="table wechat-review-table">
           <colgroup>
             <col />
-            <col style={{ width: 96 }} />
-            <col style={{ width: 112 }} />
-            <col style={{ width: 56 }} />
-            <col style={{ width: 92 }} />
-            <col style={{ width: 126 }} />
-            <col style={{ width: 88 }} />
-            <col style={{ width: 260 }} />
+            <col className="w-[96px]" />
+            <col className="w-[112px]" />
+            <col className="w-[56px]" />
+            <col className="w-[92px]" />
+            <col className="w-[126px]" />
+            <col className="w-[88px]" />
+            <col className="w-[260px]" />
           </colgroup>
           <thead>
             <tr>
@@ -1379,13 +1289,9 @@ function DraftTasksTable({
   onRefresh: () => void;
 }) {
   const labelByBrand = new Map(brandOptions.map((brand) => [brand.id, brand.label]));
-  const oneLine: CSSProperties = {
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  };
+  const oneLine = 'truncate';
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 14 }}>
+    <section className="card-elevated grid gap-3.5 p-4.5">
       <div className="toolbar">
         <button className="btn btn-outline btn-sm" onClick={onRefresh} disabled={busy}>
           <RefreshCw size={13} />
@@ -1395,97 +1301,82 @@ function DraftTasksTable({
           <Loader2 size={13} />
           执行同步扫描
         </button>
-        <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+        <span className="text-xs text-muted-foreground">
           执行后会上传封面素材并创建微信公众平台草稿
         </span>
       </div>
       <WorkbenchTableShell>
-        <table className="table" style={{ tableLayout: 'fixed', width: '100%' }}>
+        <table className="table w-full table-fixed">
           <colgroup>
-            <col style={{ width: '34%' }} />
-            <col style={{ width: '12%' }} />
-            <col style={{ width: '10%' }} />
-            <col style={{ width: '23%' }} />
-            <col style={{ width: '10%' }} />
-            <col style={{ width: '8%' }} />
-            <col style={{ width: '8%' }} />
-            <col style={{ width: '5%' }} />
+            <col className="w-[34%]" />
+            <col className="w-[12%]" />
+            <col className="w-[10%]" />
+            <col className="w-[23%]" />
+            <col className="w-[10%]" />
+            <col className="w-[8%]" />
+            <col className="w-[8%]" />
+            <col className="w-[5%]" />
           </colgroup>
           <thead>
             <tr>
-              <th style={oneLine}>文案</th>
-              <th style={oneLine}>品牌/公众号</th>
-              <th style={oneLine}>同步状态</th>
-              <th style={oneLine}>微信草稿标识</th>
-              <th style={oneLine}>失败原因</th>
-              <th style={oneLine}>同步时间</th>
-              <th style={oneLine}>人工备注</th>
-              <th style={oneLine}>操作</th>
+              <th className={oneLine}>文案</th>
+              <th className={oneLine}>品牌/公众号</th>
+              <th className={oneLine}>同步状态</th>
+              <th className={oneLine}>微信草稿标识</th>
+              <th className={oneLine}>失败原因</th>
+              <th className={oneLine}>同步时间</th>
+              <th className={oneLine}>人工备注</th>
+              <th className={oneLine}>操作</th>
             </tr>
           </thead>
           <tbody>
             {items.map((item) => (
               <tr key={item.id}>
                 <td title={`${item.title || item.reviewVersionId} v${item.versionNo || '-'}`}>
-                  <div style={oneLine}>
+                  <div className={oneLine}>
                     <strong>{item.title || item.reviewVersionId.slice(0, 8)}</strong>
                   </div>
-                  <span
-                    style={{
-                      ...oneLine,
-                      display: 'block',
-                      color: 'var(--t-secondary)',
-                      fontSize: 12,
-                    }}
-                  >
+                  <span className="block truncate text-xs text-muted-foreground">
                     v{item.versionNo || '-'}
                   </span>
                 </td>
                 <td
                   title={`${item.targetSnapshot?.brandName || labelByBrand.get(String(item.targetSnapshot?.brandId || '')) || brandLabel(item.targetSnapshot?.brandId)} / ${item.targetSnapshot?.accountName || item.accountId}`}
                 >
-                  <div style={oneLine}>
+                  <div className={oneLine}>
                     {item.targetSnapshot?.brandName ||
                       labelByBrand.get(String(item.targetSnapshot?.brandId || '')) ||
                       brandLabel(item.targetSnapshot?.brandId)}
                   </div>
-                  <span
-                    style={{
-                      ...oneLine,
-                      display: 'block',
-                      color: 'var(--t-secondary)',
-                      fontSize: 12,
-                    }}
-                  >
+                  <span className="block truncate text-xs text-muted-foreground">
                     {item.targetSnapshot?.accountName || item.accountId.slice(0, 8)}
                   </span>
                 </td>
-                <td style={{ whiteSpace: 'nowrap' }}>{statusBadge(item.syncStatus)}</td>
-                <td title={item.wechatDraftId || '-'} style={oneLine}>
+                <td className="whitespace-nowrap">{statusBadge(item.syncStatus)}</td>
+                <td title={item.wechatDraftId || '-'} className={oneLine}>
                   {item.wechatDraftId || '-'}
                 </td>
-                <td title={item.errorSummary || '-'} style={oneLine}>
+                <td title={item.errorSummary || '-'} className={oneLine}>
                   {item.errorSummary || '-'}
                 </td>
-                <td style={oneLine} title={formatDate(item.finishedAt || item.createdAt)}>
+                <td className={oneLine} title={formatDate(item.finishedAt || item.createdAt)}>
                   {formatDate(item.finishedAt || item.createdAt)}
                 </td>
-                <td style={{ whiteSpace: 'nowrap' }}>
+                <td className="whitespace-nowrap">
                   {['failed', 'unconfirmed'].includes(item.syncStatus) ? (
                     <input
-                      className="input"
+                      className="input w-full min-w-0"
                       placeholder={item.manualNote || '记录人工处理备注'}
                       value={noteByTask[item.id] || ''}
                       onChange={(event) =>
                         setNoteByTask({ ...noteByTask, [item.id]: event.target.value })
                       }
-                      style={{ width: '100%', minWidth: 0 }}
                     />
                   ) : (
                     item.manualNote || '-'
                   )}
                 </td>
-                <td style={{ whiteSpace: 'nowrap' }}>
+                <td className="whitespace-nowrap">
                   {['failed', 'unconfirmed'].includes(item.syncStatus) ? (
                     <button
                       className="btn btn-outline btn-sm"
@@ -1495,7 +1386,7 @@ function DraftTasksTable({
                       保存备注
                     </button>
                   ) : (
-                    <span style={{ color: 'var(--t-tertiary)' }}>-</span>
+                    <span className="text-muted-foreground/70">-</span>
                   )}
                 </td>
               </tr>

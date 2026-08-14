@@ -1,6 +1,8 @@
 'use client';
 // 品类管理簇（管理视图/树/CRUD 面板/编辑器）
 // 2026-08 从 products/page.tsx（12538 行）机械化拆出：逻辑零改动，只做搬迁。
+// 2026-08 全页 UX 重构三期 · WorkspaceKit 化：渲染层去内联样式，静态布局全 Tailwind；
+// 仅保留树形缩进等动态计算值为合法内联例外（逐处注释）。
 
 import {
   Suspense,
@@ -94,36 +96,21 @@ function ProductCategoryManagerView() {
   const levelCounts = [1, 2, 3].map((level) => flat.filter((item) => item.level === level).length);
 
   return (
-    <div style={{ display: 'grid', gap: 16 }}>
-      <section className="card-elevated" style={{ padding: 18 }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            gap: 16,
-            flexWrap: 'wrap',
-          }}
-        >
-          <div style={{ flex: '1 1 320px', minWidth: 0 }}>
+    <div className="grid gap-4">
+      <section className="card-elevated p-4.5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0 flex-[1_1_320px]">
             <p className="t-label">Product Category Manager</p>
-            <h2 className="t-headline" style={{ marginTop: 4 }}>
+            <h2 className="t-headline mt-1">
               产品分类
             </h2>
-            <p
-              style={{
-                marginTop: 6,
-                color: 'var(--t-secondary)',
-                fontSize: 13,
-                overflowWrap: 'anywhere',
-              }}
-            >
+            <p className="mt-1.5 text-[13px] text-muted-foreground [overflow-wrap:anywhere]">
               按品牌查看独立分类树。本页仅提供管理入口和树形展示，新增、编辑、停用、删除会在后续
               CRUD issue 中接入。
             </p>
           </div>
           <span
-            className={
+            className={`${
               error
                 ? 'badge badge-warning'
                 : data?.apiUnavailable
@@ -131,9 +118,8 @@ function ProductCategoryManagerView() {
                   : isLoading
                     ? 'badge badge-grey'
                     : 'badge badge-success'
-            }
+            } max-w-full [overflow-wrap:anywhere]`}
             title={error ? String((error as Error)?.message || error) : undefined}
-            style={{ maxWidth: '100%', overflowWrap: 'anywhere' }}
           >
             {error
               ? '分类加载失败'
@@ -145,12 +131,8 @@ function ProductCategoryManagerView() {
           </span>
         </div>
 
-        <div
-          style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 16 }}
-        >
-          <span
-            style={{ color: 'var(--t-secondary)', fontSize: 12, fontWeight: 600, marginRight: 2 }}
-          >
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span className="mr-0.5 text-xs font-semibold text-muted-foreground">
             品牌
           </span>
           {DEFAULT_CREATE_BRAND_OPTIONS.map((item) => (
@@ -165,17 +147,17 @@ function ProductCategoryManagerView() {
         </div>
       </section>
 
-      <section className="g4" style={{ gap: 12 }}>
+      <section className="g4 gap-3">
         <Metric label="一级分类" value={String(levelCounts[0])} hint="品牌顶层菜单" />
         <Metric label="二级分类" value={String(levelCounts[1])} hint="系统或菜单分组" />
         <Metric label="三级分类" value={String(levelCounts[2])} hint="可选细分层级" />
         <Metric label="启用分类" value={String(activeCount)} hint="当前可用于后续绑定" />
       </section>
 
-      <section className="card-elevated" style={{ overflow: 'hidden' }}>
-        <div style={{ padding: 18, borderBottom: '1px solid var(--border)' }}>
+      <section className="card-elevated overflow-hidden">
+        <div className="border-b p-4.5">
           <p className="t-label">{displayBrand(brandCode)}</p>
-          <h3 className="t-headline" style={{ marginTop: 4 }}>
+          <h3 className="t-headline mt-1">
             分类树
           </h3>
         </div>
@@ -224,17 +206,8 @@ export function activeCategoryOptions(
 
 function CategoryTreeSurface({ tree }: { tree: ProductCategoryNode[] }) {
   return (
-    <div style={{ display: 'grid', gap: 10, padding: 16 }}>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(180px, 1.1fr) minmax(160px, 1fr) minmax(160px, 1fr)',
-          gap: 10,
-          color: 'var(--t-tertiary)',
-          fontSize: 12,
-          fontWeight: 700,
-        }}
-      >
+    <div className="grid gap-2.5 p-4">
+      <div className="grid grid-cols-[minmax(180px,1.1fr)_minmax(160px,1fr)_minmax(160px,1fr)] gap-2.5 text-xs font-bold text-muted-foreground/70">
         <span>Level 1 · 一级</span>
         <span>Level 2 · 二级</span>
         <span>Level 3 · 三级</span>
@@ -250,24 +223,16 @@ function CategoryTreeSurface({ tree }: { tree: ProductCategoryNode[] }) {
 function CategoryTreeRow({ node }: { node: ProductCategoryNode }) {
   const secondLevel = node.children.length ? node.children : [];
   return (
-    <div
-      className="inset"
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'minmax(180px, 1.1fr) minmax(160px, 1fr) minmax(160px, 1fr)',
-        gap: 10,
-        alignItems: 'stretch',
-      }}
-    >
+    <div className="inset grid grid-cols-[minmax(180px,1.1fr)_minmax(160px,1fr)_minmax(160px,1fr)] items-stretch gap-2.5">
       <CategoryNodeCard node={node} />
-      <div style={{ display: 'grid', gap: 8 }}>
+      <div className="grid gap-2">
         {secondLevel.length ? (
           secondLevel.map((child) => <CategoryNodeCard key={child.id} node={child} />)
         ) : (
           <CategoryLevelPlaceholder label="未设置二级分类" />
         )}
       </div>
-      <div style={{ display: 'grid', gap: 8 }}>
+      <div className="grid gap-2">
         {secondLevel.some((child) => child.children.length) ? (
           secondLevel.flatMap((child) =>
             child.children.map((grandchild) => (
@@ -291,30 +256,14 @@ function CategoryNodeCard({
   parentName?: string;
 }) {
   return (
-    <div
-      style={{
-        minWidth: 0,
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--r-lg)',
-        background: 'var(--surface-1)',
-        padding: '10px 12px',
-        boxShadow: 'var(--sh-xs)',
-      }}
-    >
+    <div className="min-w-0 rounded-lg border bg-background px-3 py-2.5 shadow-xs">
       {parentName ? (
-        <p style={{ color: 'var(--t-tertiary)', fontSize: 11, overflowWrap: 'anywhere' }}>
+        <p className="text-[11px] text-muted-foreground/70 [overflow-wrap:anywhere]">
           {parentName}
         </p>
       ) : null}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          gap: 8,
-        }}
-      >
-        <strong style={{ minWidth: 0, overflowWrap: 'anywhere', fontSize: 13 }}>
+      <div className="flex items-start justify-between gap-2">
+        <strong className="min-w-0 text-[13px] [overflow-wrap:anywhere]">
           {node.name || node.code}
         </strong>
         <StatusPill tone={node.status === 'inactive' ? 'warning' : 'success'}>
@@ -324,9 +273,7 @@ function CategoryNodeCard({
           {node.showOnWebsite ? '允许官网映射' : '不参与官网映射'}
         </StatusPill>
       </div>
-      <p
-        style={{ marginTop: 5, color: 'var(--t-tertiary)', fontSize: 11, overflowWrap: 'anywhere' }}
-      >
+      <p className="mt-[5px] text-[11px] text-muted-foreground/70 tabular-nums [overflow-wrap:anywhere]">
         {node.code || '未设置编码'} · 排序 {node.sortOrder}
       </p>
     </div>
@@ -336,21 +283,7 @@ function CategoryNodeCard({
 
 function CategoryLevelPlaceholder({ label }: { label: string }) {
   return (
-    <div
-      style={{
-        minHeight: 60,
-        border: '1px dashed var(--border-2)',
-        borderRadius: 'var(--r-lg)',
-        color: 'var(--t-tertiary)',
-        background: 'var(--surface-2)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 10,
-        fontSize: 12,
-        textAlign: 'center',
-      }}
-    >
+    <div className="flex min-h-[60px] items-center justify-center rounded-lg border border-dashed bg-secondary p-2.5 text-center text-xs text-muted-foreground/70">
       {label}
     </div>
   );
@@ -664,30 +597,15 @@ export function ProductCategoryManagerCrudView({
   }
 
   return (
-    <div style={{ display: 'grid', gap: 16 }}>
-      <section className="card-elevated" style={{ padding: 18, borderRadius: 'var(--r-lg)' }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            gap: 16,
-            flexWrap: 'wrap',
-          }}
-        >
-          <div style={{ flex: '1 1 320px', minWidth: 0 }}>
+    <div className="grid gap-4">
+      <section className="card-elevated rounded-lg p-4.5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0 flex-[1_1_320px]">
             <p className="t-label">基础资料 / 产品分类</p>
-            <h2 className="t-headline" style={{ marginTop: 4 }}>
+            <h2 className="t-headline mt-1">
               公共产品分类与官网目录管理
             </h2>
-            <p
-              style={{
-                marginTop: 6,
-                color: 'var(--t-secondary)',
-                fontSize: 13,
-                overflowWrap: 'anywhere',
-              }}
-            >
+            <p className="mt-1.5 text-[13px] text-muted-foreground [overflow-wrap:anywhere]">
               这里维护的是公共产品库的事实分类，用于产品录入、导入、筛选和经销商 API
               输出；不是官网栏目。
               官网目录用于给产品库提供官网栏目选项；产品归属、URL、推荐、官网文案和图片都在产品库维护。
@@ -701,77 +619,51 @@ export function ProductCategoryManagerCrudView({
             {error ? '加载失败' : isLoading ? '同步中' : '已同步'}
           </span>
         </div>
-        <div
-          style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 16 }}
-        >
-          <span
-            style={{ color: 'var(--t-secondary)', fontSize: 12, fontWeight: 600, marginRight: 2 }}
-          >
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span className="mr-0.5 text-xs font-semibold text-muted-foreground">
             当前基座
           </span>
           <span className="badge badge-info">公共产品库</span>
-          <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+          <span className="text-xs text-muted-foreground/70">
             所有品牌产品录入、导入、筛选共用这一套分类。
           </span>
         </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-            gap: 10,
-            marginTop: 14,
-          }}
-        >
-          <div className="inset" style={{ padding: 12 }}>
-            <strong style={{ display: 'block', fontSize: 13 }}>先建分类，再录产品</strong>
-            <p style={{ margin: '4px 0 0', color: 'var(--t-secondary)', fontSize: 12 }}>
+        <div className="mt-3.5 grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-2.5">
+          <div className="inset p-3">
+            <strong className="block text-[13px]">先建分类，再录产品</strong>
+            <p className="mt-1 text-xs text-muted-foreground">
               产品录入页会直接读取这里的分类树，运营人员不用手工重复输入分类名称。
             </p>
           </div>
-          <div className="inset" style={{ padding: 12 }}>
-            <strong style={{ display: 'block', fontSize: 13 }}>停用不破坏历史数据</strong>
-            <p style={{ margin: '4px 0 0', color: 'var(--t-secondary)', fontSize: 12 }}>
+          <div className="inset p-3">
+            <strong className="block text-[13px]">停用不破坏历史数据</strong>
+            <p className="mt-1 text-xs text-muted-foreground">
               分类停用后，历史产品仍保留绑定；新产品录入时不再推荐使用。
             </p>
           </div>
-          <div className="inset" style={{ padding: 12 }}>
-            <strong style={{ display: 'block', fontSize: 13 }}>官网目录只搭骨架</strong>
-            <p style={{ margin: '4px 0 0', color: 'var(--t-secondary)', fontSize: 12 }}>
+          <div className="inset p-3">
+            <strong className="block text-[13px]">官网目录只搭骨架</strong>
+            <p className="mt-1 text-xs text-muted-foreground">
               这里只维护官网目录树；产品选择哪个官网目录，回到产品库或上架配置中完成。
             </p>
           </div>
         </div>
       </section>
 
-      <section
-        className="card-elevated"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-          flexWrap: 'wrap',
-          padding: '12px 16px',
-          borderRadius: 'var(--r-lg)',
-        }}
-      >
+      <section className="card-elevated flex flex-wrap items-center justify-between gap-3 rounded-lg px-4 py-3">
         <div>
           <p className="t-label">当前产品基座分类</p>
-          <strong style={{ display: 'block', marginTop: 3 }}>公共产品库</strong>
+          <strong className="mt-[3px] block">公共产品库</strong>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div className="flex flex-wrap gap-2">
           <CategoryCountPill label="已加载" value={loadedCount} />
           <CategoryCountPill label="根节点" value={tree.length} />
           <CategoryCountPill label="启用" value={activeCount} tone="success" />
         </div>
       </section>
 
-      <section className="card-elevated" style={{ padding: 14, borderRadius: 'var(--r-lg)' }}>
-        <div
-          role="tablist"
-          aria-label="产品分类管理范围"
-          style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}
-        >
+      <section className="card-elevated rounded-lg p-3.5">
+        <div role="tablist" aria-label="产品分类管理范围" className="flex flex-wrap gap-2">
           <button
             type="button"
             role="tab"
@@ -795,33 +687,23 @@ export function ProductCategoryManagerCrudView({
             官网目录管理
           </button>
         </div>
-        <p
-          style={{
-            margin: '10px 0 0',
-            color: 'var(--t-secondary)',
-            fontSize: 12,
-            overflowWrap: 'anywhere',
-          }}
-        >
+        <p className="mt-2.5 text-xs text-muted-foreground [overflow-wrap:anywhere]">
           产品基座分类是全产品库统一事实分类；官网目录管理只维护每个官网的栏目树，作为产品库发布配置的可选目录。
         </p>
       </section>
 
       {notice ? (
-        <span className="badge badge-success" style={{ justifySelf: 'start' }}>
+        <span className="badge badge-success justify-self-start">
           {notice}
         </span>
       ) : null}
       {actionError ? (
-        <span
-          className="badge badge-warning"
-          style={{ justifySelf: 'start', overflowWrap: 'anywhere' }}
-        >
+        <span className="badge badge-warning justify-self-start [overflow-wrap:anywhere]">
           {actionError}
         </span>
       ) : null}
 
-      <section style={{ display: 'grid', gap: 16, alignItems: 'start' }}>
+      <section className="grid items-start gap-4">
         {editorOpen ? (
           <div
             role="presentation"
@@ -834,23 +716,13 @@ export function ProductCategoryManagerCrudView({
                 setActionError('');
               }
             }}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 80,
-              display: 'grid',
-              alignItems: 'center',
-              justifyItems: 'center',
-              padding: 24,
-              background: 'rgba(15, 23, 42, 0.28)',
-              overflow: 'auto',
-            }}
+            className="fixed inset-0 z-[80] grid items-center justify-items-center overflow-auto bg-[rgba(15,23,42,0.28)] p-6"
           >
             <div
               role="dialog"
               aria-modal="true"
               onClick={(event) => event.stopPropagation()}
-              style={{ width: 'min(100%, 640px)' }}
+              className="w-full max-w-[640px]"
             >
               <CategoryCrudEditor
                 mode={mode}
@@ -880,28 +752,11 @@ export function ProductCategoryManagerCrudView({
         ) : null}
 
         {activeCategoryTab === 'base' ? (
-          <div
-            className="card-elevated"
-            style={{
-              overflow: 'hidden',
-              borderRadius: 'var(--r-lg)',
-              width: '100%',
-              justifySelf: 'stretch',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-                padding: 18,
-                borderBottom: '1px solid var(--border)',
-              }}
-            >
+          <div className="card-elevated w-full justify-self-stretch overflow-hidden rounded-lg">
+            <div className="flex items-center justify-between gap-3 border-b p-4.5">
               <div>
                 <p className="t-label">{displayBrand(brandCode)}</p>
-                <h3 className="t-headline" style={{ marginTop: 4 }}>
+                <h3 className="t-headline mt-1">
                   产品基座分类树
                 </h3>
               </div>
@@ -1204,36 +1059,18 @@ function SiteProductCategoryCrudPanel({
   }
 
   return (
-    <div
-      className="card-elevated"
-      style={{ padding: 18, borderRadius: 'var(--r-lg)', width: '100%', justifySelf: 'stretch' }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          gap: 12,
-          flexWrap: 'wrap',
-        }}
-      >
-        <div style={{ minWidth: 0, flex: '1 1 320px' }}>
+    <div className="card-elevated w-full justify-self-stretch rounded-lg p-4.5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-[1_1_320px]">
           <p className="t-label">官网目录管理 / {brandLabel}</p>
-          <h3 className="t-headline" style={{ marginTop: 4 }}>
+          <h3 className="t-headline mt-1">
             官网产品目录树
           </h3>
-          <p
-            style={{
-              marginTop: 8,
-              color: 'var(--t-secondary)',
-              fontSize: 13,
-              overflowWrap: 'anywhere',
-            }}
-          >
+          <p className="mt-2 text-[13px] text-muted-foreground [overflow-wrap:anywhere]">
             这里只维护官网前台产品目录骨架。产品归属、URL、编码、推荐、官网售价、官网文案和图片，请回到产品库维护。
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+        <div className="flex flex-wrap justify-end gap-2">
           <button
             type="button"
             className="btn btn-outline btn-sm"
@@ -1260,10 +1097,8 @@ function SiteProductCategoryCrudPanel({
         </div>
       </div>
 
-      <div
-        style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 14 }}
-      >
-        <span style={{ color: 'var(--t-secondary)', fontSize: 12, fontWeight: 700 }}>官网</span>
+      <div className="mt-3.5 flex flex-wrap items-center gap-2">
+        <span className="text-xs font-bold text-muted-foreground">官网</span>
         {DEFAULT_CREATE_BRAND_OPTIONS.map((item) => (
           <CategoryChip
             key={item.value}
@@ -1275,7 +1110,7 @@ function SiteProductCategoryCrudPanel({
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
+      <div className="mt-3.5 flex flex-wrap gap-2">
         <CategoryCountPill label="目录数" value={rows.length} />
         <CategoryCountPill label="一级目录" value={websiteTree.length} />
         <CategoryCountPill
@@ -1286,46 +1121,24 @@ function SiteProductCategoryCrudPanel({
       </div>
 
       {notice ? (
-        <span className="badge badge-success" style={{ display: 'inline-flex', marginTop: 12 }}>
+        <span className="badge badge-success mt-3 inline-flex">
           {notice}
         </span>
       ) : null}
       {actionError ? (
-        <span
-          className="badge badge-warning"
-          style={{ display: 'inline-flex', marginTop: 12, overflowWrap: 'anywhere' }}
-        >
+        <span className="badge badge-warning mt-3 inline-flex [overflow-wrap:anywhere]">
           {actionError}
         </span>
       ) : null}
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(min(100%, 520px), 1.12fr) minmax(min(100%, 360px), 0.88fr)',
-          gap: 14,
-          alignItems: 'start',
-          marginTop: 14,
-        }}
-      >
-        <div
-          className="inset"
-          style={{ padding: 12, borderRadius: 'var(--r-lg)', background: 'var(--surface-1)' }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              gap: 10,
-              marginBottom: 10,
-            }}
-          >
+      <div className="mt-3.5 grid grid-cols-[minmax(min(100%,520px),1.12fr)_minmax(min(100%,360px),0.88fr)] items-start gap-3.5">
+        <div className="inset rounded-lg bg-background p-3">
+          <div className="mb-2.5 flex items-center justify-between gap-2.5">
             <div>
               <p className="t-label">分类树</p>
-              <strong style={{ display: 'block', marginTop: 3 }}>{brandLabel} 产品目录</strong>
+              <strong className="mt-[3px] block">{brandLabel} 产品目录</strong>
             </div>
-            <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>点击“编辑”在右侧维护</span>
+            <span className="text-xs text-muted-foreground/70">点击“编辑”在右侧维护</span>
           </div>
           {loading ? (
             <WorkbenchTableState
@@ -1376,22 +1189,19 @@ function SiteProductCategoryCrudPanel({
           )}
         </div>
 
-        <aside
-          className="card-elevated"
-          style={{ padding: 14, borderRadius: 'var(--r-lg)', position: 'sticky', top: 12 }}
-        >
+        <aside className="card-elevated sticky top-3 rounded-lg p-3.5">
           {editing || mode === 'create' ? (
-            <form onSubmit={saveCategory} style={{ display: 'grid', gap: 12 }}>
+            <form onSubmit={saveCategory} className="grid gap-3">
               <div>
                 <p className="t-label">{mode === 'create' ? '新增官网目录' : '编辑官网目录'}</p>
-                <h4 className="t-headline" style={{ marginTop: 4, fontSize: 16 }}>
+                <h4 className="t-headline mt-1 text-base">
                   {editingTitle}
                 </h4>
-                <p style={{ margin: '6px 0 0', color: 'var(--t-secondary)', fontSize: 12 }}>
+                <p className="mt-1.5 text-xs text-muted-foreground">
                   这里只改目录名称、上下级、排序和启停。产品挂到哪个目录，请在产品库维护。
                 </p>
               </div>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">目录名称 *</span>
                 <input
                   className="input"
@@ -1404,7 +1214,7 @@ function SiteProductCategoryCrudPanel({
                   placeholder="如：家用热水"
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">上级目录</span>
                 <select
                   className="input"
@@ -1422,18 +1232,12 @@ function SiteProductCategoryCrudPanel({
                     </option>
                   ))}
                 </select>
-                <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+                <span className="text-xs text-muted-foreground/70">
                   选择“无”就是一级目录；选择某个目录后会成为它的下级目录。
                 </span>
               </label>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))',
-                  gap: 10,
-                }}
-              >
-                <label style={{ display: 'grid', gap: 6 }}>
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,160px),1fr))] gap-2.5">
+                <label className="grid gap-1.5">
                   <span className="t-label">排序</span>
                   <input
                     className="input"
@@ -1446,7 +1250,7 @@ function SiteProductCategoryCrudPanel({
                     }
                   />
                 </label>
-                <label style={{ display: 'grid', gap: 6 }}>
+                <label className="grid gap-1.5">
                   <span className="t-label">状态</span>
                   <select
                     className="input"
@@ -1461,10 +1265,8 @@ function SiteProductCategoryCrudPanel({
                   </select>
                 </label>
               </div>
-              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <label
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 8, minHeight: 44 }}
-                >
+              <div className="flex flex-wrap gap-3">
+                <label className="inline-flex min-h-11 items-center gap-2">
                   <input
                     type="checkbox"
                     checked={draft.isVisible}
@@ -1473,10 +1275,10 @@ function SiteProductCategoryCrudPanel({
                       setDraft((current) => ({ ...current, isVisible: event.target.checked }))
                     }
                   />
-                  <span style={{ fontSize: 13 }}>官网显示</span>
+                  <span className="text-[13px]">官网显示</span>
                 </label>
               </div>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">运营说明</span>
                 <textarea
                   className="input"
@@ -1489,14 +1291,7 @@ function SiteProductCategoryCrudPanel({
                   placeholder="给运营人员看的备注，可说明这个栏目放什么产品。"
                 />
               </label>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 10,
-                  flexWrap: 'wrap',
-                }}
-              >
+              <div className="flex flex-wrap justify-between gap-2.5">
                 <button
                   type="button"
                   className="btn btn-danger btn-sm"
@@ -1506,7 +1301,7 @@ function SiteProductCategoryCrudPanel({
                   <Archive size={14} />
                   删除目录
                 </button>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     className="btn btn-ghost btn-sm"
@@ -1531,13 +1326,13 @@ function SiteProductCategoryCrudPanel({
               </div>
             </form>
           ) : (
-            <div style={{ display: 'grid', gap: 12 }}>
+            <div className="grid gap-3">
               <div>
                 <p className="t-label">操作区</p>
-                <h4 className="t-headline" style={{ marginTop: 4, fontSize: 16 }}>
+                <h4 className="t-headline mt-1 text-base">
                   先选择左侧分类
                 </h4>
-                <p style={{ margin: '6px 0 0', color: 'var(--t-secondary)', fontSize: 13 }}>
+                <p className="mt-1.5 text-[13px] text-muted-foreground">
                   点击左侧“编辑”即可维护目录名称、上级目录、排序、启停和运营备注。产品归属、推荐和
                   URL 请到产品库维护。
                 </p>
@@ -1628,20 +1423,8 @@ function SiteProductCategoryTreePanel({
   onAddChild: (row: SiteProductCategoryTreeNode) => void;
 }) {
   return (
-    <div
-      style={{
-        marginTop: 14,
-        padding: 10,
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--r-lg)',
-        background: 'var(--surface-1)',
-      }}
-    >
-      <div
-        role="tree"
-        aria-label="官网产品目录树"
-        style={{ display: 'grid', gap: 2, minHeight: 120 }}
-      >
+    <div className="mt-3.5 rounded-lg border bg-background p-2.5">
+      <div role="tree" aria-label="官网产品目录树" className="grid min-h-[120px] gap-0.5">
         {rows.map((node, index) => {
           const expandable = node.children.length > 0;
           const expanded = expandedPaths.has(node.path);
@@ -1652,78 +1435,46 @@ function SiteProductCategoryTreePanel({
               role="treeitem"
               aria-expanded={expandable ? expanded : undefined}
               aria-selected={selectedId === node.id}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'minmax(240px, 1fr) auto',
-                alignItems: 'center',
-                gap: 10,
-                minHeight: 44,
-                padding: '6px 8px',
-                paddingLeft: 8 + Math.max(0, node.level - 1) * 24,
-                borderRadius: 8,
-                background:
-                  selectedId === node.id
-                    ? 'var(--brand-50)'
-                    : editable
-                      ? 'transparent'
-                      : 'var(--surface-2)',
-              }}
+              className={`grid min-h-11 grid-cols-[minmax(240px,1fr)_auto] items-center gap-2.5 rounded-lg py-1.5 pr-2 ${
+                selectedId === node.id
+                  ? 'bg-primary/10'
+                  : editable
+                    ? 'bg-transparent'
+                    : 'bg-secondary'
+              }`}
+              /* 树形缩进为动态计算值：合法内联例外 */
+              style={{ paddingLeft: 8 + Math.max(0, node.level - 1) * 24 }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+              <div className="flex min-w-0 items-center gap-2">
                 <button
                   type="button"
                   onClick={() => onToggle(node)}
                   disabled={!expandable}
                   aria-label={expanded ? '收起官网分类' : '展开官网分类'}
-                  style={{
-                    width: 24,
-                    height: 24,
-                    border: 0,
-                    padding: 0,
-                    background: 'transparent',
-                    color: expandable ? 'var(--t-secondary)' : 'var(--t-tertiary)',
-                    cursor: expandable ? 'pointer' : 'default',
-                    fontSize: 12,
-                    lineHeight: '24px',
-                    flex: '0 0 24px',
-                  }}
+                  className={`h-6 w-6 flex-[0_0_24px] border-0 bg-transparent p-0 text-xs leading-6 ${
+                    expandable
+                      ? 'cursor-pointer text-muted-foreground'
+                      : 'cursor-default text-muted-foreground/70'
+                  }`}
                 >
                   {expandable ? (expanded ? '▾' : '▸') : ''}
                 </button>
-                <div style={{ minWidth: 0 }}>
+                <div className="min-w-0">
                   <strong
-                    style={{
-                      display: 'block',
-                      fontSize: 13,
-                      overflowWrap: 'anywhere',
-                      fontWeight: node.level === 1 ? 800 : 650,
-                    }}
+                    className={`block text-[13px] [overflow-wrap:anywhere] ${
+                      node.level === 1 ? 'font-extrabold' : 'font-semibold'
+                    }`}
                   >
                     {node.name}
                   </strong>
-                  <span
-                    style={{
-                      display: 'block',
-                      marginTop: 2,
-                      color: 'var(--t-tertiary)',
-                      fontSize: 12,
-                    }}
-                  >
+                  <span className="mt-0.5 block text-xs text-muted-foreground/70 tabular-nums">
                     {node.level} 级目录 · 排序 {node.sortOrder ?? node.displayOrder ?? 0} ·{' '}
                     {node.status === 'inactive' ? '停用' : '启用'}
                     {node.isVisible === false ? ' · 官网隐藏' : ''}
                   </span>
                 </div>
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  gap: 8,
-                  flexWrap: 'wrap',
-                }}
-              >
+              <div className="flex flex-wrap items-center justify-end gap-2">
                 <StatusPill tone={node.status === 'inactive' ? 'warning' : 'success'}>
                   {node.status === 'inactive' ? '停用' : '启用'}
                 </StatusPill>
@@ -1783,20 +1534,11 @@ function CategoryCrudTreePanel({
   onDelete: (node: ProductCategoryNode) => void;
 }) {
   return (
-    <div style={{ padding: 10 }}>
+    <div className="p-2.5">
       <div
         role="tree"
         aria-label="产品基座分类树"
-        style={{
-          display: 'grid',
-          alignContent: 'start',
-          gap: 2,
-          minHeight: 120,
-          padding: '8px 8px',
-          border: '1px solid var(--border)',
-          borderRadius: 8,
-          background: 'var(--surface-1)',
-        }}
+        className="grid min-h-[120px] content-start gap-0.5 rounded-lg border bg-background p-2"
       >
         {rows.map((node) => {
           const expandable =
@@ -1809,66 +1551,40 @@ function CategoryCrudTreePanel({
               role="treeitem"
               aria-expanded={expandable ? expanded : undefined}
               aria-selected={selectedId === node.id}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'minmax(260px, 1fr) auto',
-                alignItems: 'center',
-                gap: 10,
-                minHeight: 30,
-                padding: '2px 8px',
-                paddingLeft: 8 + Math.max(0, node.level - 1) * 22,
-                borderRadius: 6,
-                background: selectedId === node.id ? 'var(--brand-50)' : 'transparent',
-              }}
+              className={`grid min-h-[30px] grid-cols-[minmax(260px,1fr)_auto] items-center gap-2.5 rounded-md py-0.5 pr-2 ${
+                selectedId === node.id ? 'bg-primary/10' : 'bg-transparent'
+              }`}
+              /* 树形缩进为动态计算值：合法内联例外 */
+              style={{ paddingLeft: 8 + Math.max(0, node.level - 1) * 22 }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+              <div className="flex min-w-0 items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => onToggleExpand(node)}
                   disabled={!expandable || loadingChildren[node.id]}
                   aria-label={expanded ? '收起分类' : '展开分类'}
                   title={expandable ? (expanded ? '收起下级目录' : '展开下级目录') : '暂无下级目录'}
-                  style={{
-                    width: 18,
-                    height: 18,
-                    border: 0,
-                    padding: 0,
-                    background: 'transparent',
-                    color: expandable ? 'var(--t-secondary)' : 'var(--t-tertiary)',
-                    cursor: expandable ? 'pointer' : 'default',
-                    fontSize: 12,
-                    lineHeight: '18px',
-                    flex: '0 0 18px',
-                  }}
+                  className={`h-[18px] w-[18px] flex-[0_0_18px] border-0 bg-transparent p-0 text-xs leading-[18px] ${
+                    expandable
+                      ? 'cursor-pointer text-muted-foreground'
+                      : 'cursor-default text-muted-foreground/70'
+                  }`}
                 >
                   {loadingChildren[node.id] ? '...' : expandable ? (expanded ? '▾' : '▸') : ''}
                 </button>
                 <button
                   type="button"
                   onClick={() => onSelect(node)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    minWidth: 0,
-                    border: 0,
-                    background: 'transparent',
-                    padding: 0,
-                    color: 'var(--t-primary)',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                  }}
+                  className="flex min-w-0 cursor-pointer items-center gap-2 border-0 bg-transparent p-0 text-left text-foreground"
                 >
                   <span
-                    style={{
-                      overflowWrap: 'anywhere',
-                      fontWeight: node.level === 1 ? 800 : 650,
-                      lineHeight: 1.25,
-                    }}
+                    className={`leading-tight [overflow-wrap:anywhere] ${
+                      node.level === 1 ? 'font-extrabold' : 'font-semibold'
+                    }`}
                   >
                     {node.name || node.code}
                   </span>
-                  <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+                  <span className="text-xs text-muted-foreground/70">
                     Level {node.level}
                   </span>
                   <StatusPill tone={node.status === 'inactive' ? 'warning' : 'success'}>
@@ -1877,47 +1593,36 @@ function CategoryCrudTreePanel({
                   <StatusPill tone={node.showOnWebsite ? 'info' : 'neutral'}>
                     {node.showOnWebsite ? '允许官网映射' : '不参与官网映射'}
                   </StatusPill>
-                  <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>{node.code}</span>
+                  <span className="text-xs text-muted-foreground/70">{node.code}</span>
                 </button>
               </div>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  gap: 8,
-                  flexWrap: 'nowrap',
-                }}
-              >
-                <span style={{ color: 'var(--t-tertiary)', fontSize: 12, whiteSpace: 'nowrap' }}>
+              <div className="flex flex-nowrap items-center justify-end gap-2">
+                <span className="text-xs whitespace-nowrap text-muted-foreground/70 tabular-nums">
                   下级 {childCount} / 产品 {node.directProductCount}
                 </span>
                 <button
                   type="button"
-                  className="btn btn-secondary btn-sm"
+                  className="btn btn-secondary btn-sm shrink-0"
                   onClick={() => onAddChild(node)}
                   disabled={!canWrite || saving}
-                  style={{ flexShrink: 0 }}
                 >
                   <Plus size={14} />
                   新增
                 </button>
                 <button
                   type="button"
-                  className="btn btn-outline btn-sm"
+                  className="btn btn-outline btn-sm shrink-0"
                   onClick={() => onSelect(node)}
                   disabled={saving}
-                  style={{ flexShrink: 0 }}
                 >
                   <Edit3 size={14} />
                   修改
                 </button>
                 <button
                   type="button"
-                  className="btn btn-danger btn-sm"
+                  className="btn btn-danger btn-sm shrink-0"
                   onClick={() => onDelete(node)}
                   disabled={!canWrite || saving}
-                  style={{ flexShrink: 0 }}
                 >
                   <Archive size={14} />
                   删除
@@ -1957,16 +1662,16 @@ function CategoryCrudTreeTable({
 }) {
   return (
     <WorkbenchTableShell>
-      <table className="table" style={{ width: '100%', minWidth: 1360, tableLayout: 'fixed' }}>
+      <table className="table w-full min-w-[1360px] table-fixed">
         <colgroup>
-          <col style={{ width: '22%' }} />
-          <col style={{ width: '12%' }} />
-          <col style={{ width: '12%' }} />
-          <col style={{ width: '6%' }} />
-          <col style={{ width: '8%' }} />
-          <col style={{ width: '12%' }} />
-          <col style={{ width: '10%' }} />
-          <col style={{ width: '18%' }} />
+          <col className="w-[22%]" />
+          <col className="w-[12%]" />
+          <col className="w-[12%]" />
+          <col className="w-[6%]" />
+          <col className="w-[8%]" />
+          <col className="w-[12%]" />
+          <col className="w-[10%]" />
+          <col className="w-[18%]" />
         </colgroup>
         <thead>
           <tr>
@@ -1987,25 +1692,25 @@ function CategoryCrudTreeTable({
             return (
               <tr
                 key={node.id}
-                className={
+                className={`${
                   node.level > 1
                     ? 'category-tree-row category-tree-row--child'
                     : 'category-tree-row'
-                }
-                style={{ background: selectedId === node.id ? 'var(--brand-50)' : undefined }}
+                }${selectedId === node.id ? ' bg-primary/10' : ''}`}
               >
                 <td>
                   <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                      paddingLeft: Math.max(0, node.level - 1) * 18,
-                    }}
+                    className="flex items-center gap-2"
+                    /* 树形缩进为动态计算值：合法内联例外 */
+                    style={{ paddingLeft: Math.max(0, node.level - 1) * 18 }}
                   >
                     <button
                       type="button"
-                      className="btn btn-ghost btn-sm"
+                      className={`btn btn-ghost btn-sm h-[30px] w-[30px] flex-[0_0_30px] p-0 transition-[background,border-color,color,transform] duration-150 ease-out ${
+                        expandable
+                          ? 'border border-border bg-background text-foreground'
+                          : 'border border-transparent bg-transparent text-muted-foreground/70'
+                      } ${expanded ? 'rotate-180' : 'rotate-0'}`}
                       onClick={() => onToggleExpand(node)}
                       disabled={!expandable || loadingChildren[node.id]}
                       aria-label={expanded ? '收起分类' : '展开分类'}
@@ -2016,57 +1721,37 @@ function CategoryCrudTreeTable({
                             : '打开下级目录'
                           : '暂无下级目录，可点击右侧新增'
                       }
-                      style={{
-                        width: 30,
-                        height: 30,
-                        padding: 0,
-                        flex: '0 0 30px',
-                        border: expandable ? '1px solid var(--border)' : '1px solid transparent',
-                        background: expandable ? 'var(--surface-1)' : 'transparent',
-                        color: expandable ? 'var(--t-primary)' : 'var(--t-tertiary)',
-                        transition:
-                          'background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease',
-                        transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                      }}
                     >
                       {loadingChildren[node.id] ? '...' : expandable ? (expanded ? '-' : '+') : '·'}
                     </button>
                     <button
                       type="button"
                       onClick={() => onSelect(node)}
-                      style={{
-                        border: 0,
-                        background: 'transparent',
-                        padding: 0,
-                        textAlign: 'left',
-                        color: 'var(--t-primary)',
-                        minWidth: 0,
-                      }}
+                      className="min-w-0 border-0 bg-transparent p-0 text-left text-foreground"
                     >
-                      <strong style={{ display: 'block', overflowWrap: 'anywhere' }}>
+                      <strong className="block [overflow-wrap:anywhere]">
                         {node.name || node.code}
                       </strong>
-                      <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+                      <span className="text-xs text-muted-foreground/70">
                         Level {node.level}
                       </span>
                     </button>
                   </div>
                 </td>
                 <td
-                  style={{
-                    color: node.description ? 'var(--t-secondary)' : 'var(--t-tertiary)',
-                    overflowWrap: 'anywhere',
-                  }}
+                  className={`[overflow-wrap:anywhere] ${
+                    node.description ? 'text-muted-foreground' : 'text-muted-foreground/70'
+                  }`}
                 >
                   {node.description || '暂无备注'}
                 </td>
-                <td style={{ overflowWrap: 'anywhere' }}>{node.code}</td>
+                <td className="[overflow-wrap:anywhere]">{node.code}</td>
                 <td>{node.sortOrder}</td>
                 <td>
                   <StatusPill tone={node.status === 'inactive' ? 'warning' : 'success'}>
                     {node.status === 'inactive' ? '停用' : '启用'}
                   </StatusPill>
-                  <div style={{ marginTop: 6 }}>
+                  <div className="mt-1.5">
                     <StatusPill tone={node.showOnWebsite ? 'info' : 'neutral'}>
                       {node.showOnWebsite ? '允许官网映射' : '不参与官网映射'}
                     </StatusPill>
@@ -2075,35 +1760,30 @@ function CategoryCrudTreeTable({
                 <td>{node.descendantProductCount}</td>
                 <td>{node.directProductCount}</td>
                 <td>
-                  <div
-                    style={{ display: 'flex', gap: 8, flexWrap: 'nowrap', alignItems: 'center' }}
-                  >
+                  <div className="flex flex-nowrap items-center gap-2">
                     <button
                       type="button"
-                      className="btn btn-secondary btn-sm"
+                      className="btn btn-secondary btn-sm shrink-0"
                       onClick={() => onAddChild(node)}
                       disabled={!canWrite || saving}
-                      style={{ flexShrink: 0 }}
                     >
                       <Plus size={14} />
                       新增
                     </button>
                     <button
                       type="button"
-                      className="btn btn-outline btn-sm"
+                      className="btn btn-outline btn-sm shrink-0"
                       onClick={() => onSelect(node)}
                       disabled={saving}
-                      style={{ flexShrink: 0 }}
                     >
                       <Edit3 size={14} />
                       修改
                     </button>
                     <button
                       type="button"
-                      className="btn btn-danger btn-sm"
+                      className="btn btn-danger btn-sm shrink-0"
                       onClick={() => onDelete(node)}
                       disabled={!canWrite || saving}
-                      style={{ flexShrink: 0 }}
                     >
                       <Archive size={14} />
                       删除
@@ -2136,7 +1816,7 @@ function CategoryCrudTree({
   onAddChild: (node: ProductCategoryNode) => void;
 }) {
   return (
-    <div style={{ display: 'grid', gap: 10, padding: 16 }}>
+    <div className="grid gap-2.5 p-4">
       {tree.map((node) => (
         <CategoryCrudTreeRow
           key={node.id}
@@ -2169,7 +1849,7 @@ function CategoryCrudTreeRow({
   onAddChild: (node: ProductCategoryNode) => void;
 }) {
   return (
-    <div style={{ display: 'grid', gap: 8 }}>
+    <div className="grid gap-2">
       <CategoryCrudNodeCard
         node={node}
         active={selectedId === node.id}
@@ -2180,13 +1860,9 @@ function CategoryCrudTreeRow({
       />
       {node.children.length ? (
         <div
-          style={{
-            display: 'grid',
-            gap: 8,
-            paddingLeft: Math.min(node.level, 2) * 18,
-            borderLeft: '1px solid var(--border)',
-            marginLeft: 12,
-          }}
+          className="ml-3 grid gap-2 border-l"
+          /* 树形缩进为动态计算值：合法内联例外 */
+          style={{ paddingLeft: Math.min(node.level, 2) * 18 }}
         >
           {node.children.map((child) => (
             <CategoryCrudTreeRow
@@ -2225,48 +1901,23 @@ function CategoryCrudNodeCard({
   const levelLabel = `Level ${node.level}`;
   return (
     <div
-      style={{
-        minWidth: 0,
-        border: active ? '1px solid var(--brand)' : '1px solid var(--border)',
-        borderRadius: 'var(--r-md)',
-        background: active ? 'var(--brand-50)' : 'var(--surface-1)',
-        padding: node.level === 1 ? '12px 14px' : '10px 12px',
-        boxShadow: active ? 'var(--sh-glow)' : 'var(--sh-xs)',
-      }}
+      className={`min-w-0 rounded-md border ${
+        active ? 'border-primary bg-primary/10 ring-4 ring-primary/15' : 'bg-background shadow-xs'
+      } ${node.level === 1 ? 'px-3.5 py-3' : 'px-3 py-2.5'}`}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          gap: 8,
-        }}
-      >
+      <div className="flex items-start justify-between gap-2">
         <button
           type="button"
           onClick={onSelect}
-          style={{
-            border: 0,
-            background: 'transparent',
-            color: 'var(--t-primary)',
-            textAlign: 'left',
-            minWidth: 0,
-            padding: 0,
-            fontWeight: 700,
-            overflowWrap: 'anywhere',
-          }}
+          className="min-w-0 border-0 bg-transparent p-0 text-left font-bold text-foreground [overflow-wrap:anywhere]"
         >
-          <span
-            style={{ display: 'block', color: 'var(--t-tertiary)', fontSize: 11, marginBottom: 3 }}
-          >
+          <span className="mb-[3px] block text-[11px] text-muted-foreground/70">
             {levelLabel}
           </span>
-          <span style={{ display: 'block', fontSize: node.level === 1 ? 15 : 13 }}>
+          <span className={`block ${node.level === 1 ? 'text-[15px]' : 'text-[13px]'}`}>
             {node.name || node.code}
           </span>
-          <span
-            style={{ display: 'block', marginTop: 3, color: 'var(--t-tertiary)', fontSize: 11 }}
-          >
+          <span className="mt-[3px] block text-[11px] text-muted-foreground/70 tabular-nums">
             {node.code || '未设置编码'} · 排序 {node.sortOrder}
           </span>
         </button>
@@ -2274,15 +1925,7 @@ function CategoryCrudNodeCard({
           {node.status === 'inactive' ? '停用' : '启用'}
         </StatusPill>
       </div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 8,
-          flexWrap: 'wrap',
-          marginTop: 8,
-        }}
-      >
+      <div className="mt-2 flex flex-wrap justify-between gap-2">
         <button
           type="button"
           className="btn btn-outline btn-sm"
@@ -2353,32 +1996,18 @@ function CategoryCrudEditor({
   const disabled = !canWrite || saving || (mode === 'edit' && !selected);
 
   return (
-    <section className="card-elevated" style={{ padding: 18, borderRadius: 'var(--r-lg)' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 12,
-          alignItems: 'flex-start',
-        }}
-      >
+    <section className="card-elevated rounded-lg p-4.5">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <p className="t-label">分类详情</p>
-          <h3 className="t-headline" style={{ marginTop: 4 }}>
+          <h3 className="t-headline mt-1">
             {title}
           </h3>
-          <p
-            style={{
-              marginTop: 4,
-              color: 'var(--t-secondary)',
-              fontSize: 12,
-              overflowWrap: 'anywhere',
-            }}
-          >
+          <p className="mt-1 text-xs text-muted-foreground [overflow-wrap:anywhere]">
             {subtitle}
           </p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        <div className="flex shrink-0 items-center gap-2">
           {mode === 'edit' && selected ? (
             <StatusPill tone={selected.status === 'inactive' ? 'warning' : 'success'}>
               {selected.status === 'inactive' ? '停用' : '启用'}
@@ -2402,18 +2031,18 @@ function CategoryCrudEditor({
       </div>
 
       {!canWrite ? (
-        <p className="field-error" style={{ marginTop: 12 }}>
+        <p className="field-error mt-3">
           当前账号不能维护产品分类。
         </p>
       ) : null}
       {actionError ? (
-        <p className="field-error" style={{ marginTop: 12 }}>
+        <p className="field-error mt-3">
           {actionError}
         </p>
       ) : null}
 
-      <form onSubmit={onSave} style={{ display: 'grid', gap: 12, marginTop: 16 }}>
-        <label style={{ display: 'grid', gap: 6 }}>
+      <form onSubmit={onSave} className="mt-4 grid gap-3">
+        <label className="grid gap-1.5">
           <span className="t-label">分类名称</span>
           <input
             className="input"
@@ -2424,8 +2053,8 @@ function CategoryCrudEditor({
             onChange={(event) => onDraft({ ...draft, nameCn: event.target.value })}
           />
         </label>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 12 }}>
-          <label style={{ display: 'grid', gap: 6 }}>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="grid gap-1.5">
             <span className="t-label">排序</span>
             <input
               className="input"
@@ -2438,7 +2067,7 @@ function CategoryCrudEditor({
               onChange={(event) => onDraft({ ...draft, sortOrder: event.target.value })}
             />
           </label>
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label className="grid gap-1.5">
             <span className="t-label">状态</span>
             <select
               className="input"
@@ -2456,25 +2085,12 @@ function CategoryCrudEditor({
             </select>
           </label>
         </div>
-        <label
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-            padding: '10px 12px',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--r-md)',
-            background: 'var(--surface-2)',
-          }}
-        >
+        <label className="flex items-center justify-between gap-3 rounded-md border bg-secondary px-3 py-2.5">
           <span>
-            <span className="t-label" style={{ display: 'block' }}>
+            <span className="t-label block">
               允许官网映射
             </span>
-            <span
-              style={{ display: 'block', marginTop: 3, color: 'var(--t-secondary)', fontSize: 12 }}
-            >
+            <span className="mt-[3px] block text-xs text-muted-foreground">
               关闭后，该基座分类不会作为官网分类映射来源；不会影响已录入产品，也不会触发产品自动发布。
             </span>
           </span>
@@ -2483,10 +2099,10 @@ function CategoryCrudEditor({
             checked={draft.showOnWebsite}
             disabled={disabled}
             onChange={(event) => onDraft({ ...draft, showOnWebsite: event.target.checked })}
-            style={{ width: 18, height: 18, accentColor: 'var(--brand)', flexShrink: 0 }}
+            className="h-[18px] w-[18px] shrink-0 accent-primary"
           />
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">说明</span>
           <textarea
             className="textarea"
@@ -2497,30 +2113,19 @@ function CategoryCrudEditor({
         </label>
 
         {mode === 'edit' && selected ? (
-          <div
-            className="inset"
-            style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}
-          >
-            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>已绑定产品</span>
+          <div className="inset flex flex-wrap justify-between gap-3">
+            <span className="text-xs text-muted-foreground">已绑定产品</span>
             <strong
-              style={{
-                color: usage && usage.boundProductCount > 0 ? 'var(--warning)' : 'var(--t-primary)',
-              }}
+              className={`tabular-nums ${
+                usage && usage.boundProductCount > 0 ? 'text-warning' : 'text-foreground'
+              }`}
             >
               {usage ? usage.boundProductCount : '检查中...'}
             </strong>
           </div>
         ) : null}
 
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: 10,
-            flexWrap: 'wrap',
-            marginTop: 4,
-          }}
-        >
+        <div className="mt-1 flex flex-wrap justify-between gap-2.5">
           {mode === 'create' ? (
             <button
               type="button"
@@ -2531,7 +2136,7 @@ function CategoryCrudEditor({
               取消
             </button>
           ) : (
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 className="btn btn-secondary btn-sm"

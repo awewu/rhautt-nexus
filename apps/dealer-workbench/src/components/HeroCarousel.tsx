@@ -1,4 +1,10 @@
 'use client';
+
+/**
+ * Hero 轮播（2026-08 全页 UX 重构三期 · Tailwind 化）。
+ * 唯一保留内联样式 = slide 背景渐变（数据驱动，来自 HeroSlide.bgGradient）。
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -29,81 +35,30 @@ export function HeroCarousel({ slides, autoMs = 6000 }: { slides: HeroSlide[]; a
   const s = slides[idx];
 
   return (
-    <div style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', height: 280 }}>
-      {/* Slide */}
+    <div className="relative h-[280px] overflow-hidden rounded-2xl">
+      {/* Slide（背景渐变为数据驱动：内联样式的合法例外） */}
       <a
         href={s.href || '#'}
-        style={{
-          display: 'block',
-          width: '100%',
-          height: '100%',
-          background: s.bgGradient,
-          padding: '32px 28px',
-          textDecoration: 'none',
-          position: 'relative',
-        }}
+        className="relative block h-full w-full px-7 py-8 no-underline"
+        style={{ background: s.bgGradient }}
       >
         {/* Subtle grid texture (rheem-grid-bg equivalent) */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            pointerEvents: 'none',
-            backgroundImage:
-              'linear-gradient(to right,rgba(255,255,255,0.06) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,0.06) 1px,transparent 1px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <span
-              style={{
-                fontSize: 10,
-                fontWeight: 700,
-                textTransform: 'uppercase' as const,
-                letterSpacing: '0.08em',
-                background: 'rgba(255,255,255,0.18)',
-                color: 'rgba(255,255,255,0.9)',
-                borderRadius: 9999,
-                padding: '2px 8px',
-              }}
-            >
+        <div className="hero-carousel-grid pointer-events-none absolute inset-0" />
+        <div className="relative z-1">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="rounded-full bg-white/18 px-2 py-0.5 text-[10px] font-bold tracking-widest text-white/90 uppercase">
               {s.eyebrow}
             </span>
             {s.badge && (
-              <span
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  background: 'var(--brand)',
-                  color: '#fff',
-                  borderRadius: 9999,
-                  padding: '2px 8px',
-                }}
-              >
+              <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-white">
                 {s.badge}
               </span>
             )}
           </div>
-          <h2
-            style={{
-              fontSize: 28,
-              fontWeight: 700,
-              color: '#fff',
-              letterSpacing: '-0.01em',
-              lineHeight: 1.2,
-              maxWidth: 480,
-            }}
-          >
+          <h2 className="max-w-[480px] text-[28px] leading-tight font-bold tracking-tight text-white">
             {s.title}
           </h2>
-          {s.subtitle && (
-            <p
-              style={{ marginTop: 8, fontSize: 14, color: 'rgba(255,255,255,0.78)', maxWidth: 420 }}
-            >
-              {s.subtitle}
-            </p>
-          )}
+          {s.subtitle && <p className="mt-2 max-w-[420px] text-sm text-white/75">{s.subtitle}</p>}
         </div>
       </a>
 
@@ -115,23 +70,8 @@ export function HeroCarousel({ slides, autoMs = 6000 }: { slides: HeroSlide[]; a
               e.preventDefault();
               prev();
             }}
-            style={{
-              position: 'absolute',
-              left: 12,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
-              border: 'none',
-              background: 'rgba(0,0,0,0.32)',
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              zIndex: 2,
-            }}
+            aria-label="上一张"
+            className="absolute top-1/2 left-3 z-2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-black/30 text-white"
           >
             <ChevronLeft size={16} />
           </button>
@@ -140,52 +80,22 @@ export function HeroCarousel({ slides, autoMs = 6000 }: { slides: HeroSlide[]; a
               e.preventDefault();
               next();
             }}
-            style={{
-              position: 'absolute',
-              right: 12,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
-              border: 'none',
-              background: 'rgba(0,0,0,0.32)',
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              zIndex: 2,
-            }}
+            aria-label="下一张"
+            className="absolute top-1/2 right-3 z-2 flex h-8 w-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border-0 bg-black/30 text-white"
           >
             <ChevronRight size={16} />
           </button>
 
           {/* Dots */}
-          <div
-            style={{
-              position: 'absolute',
-              bottom: 14,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              display: 'flex',
-              gap: 6,
-              zIndex: 2,
-            }}
-          >
+          <div className="absolute bottom-3.5 left-1/2 z-2 flex -translate-x-1/2 gap-1.5">
             {slides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setIdx(i)}
-                style={{
-                  width: i === idx ? 20 : 6,
-                  height: 6,
-                  borderRadius: 3,
-                  border: 'none',
-                  background: i === idx ? '#fff' : 'rgba(255,255,255,0.45)',
-                  cursor: 'pointer',
-                  transition: 'all 250ms',
-                }}
+                aria-label={`第 ${i + 1} 张`}
+                className={`h-1.5 cursor-pointer rounded-full border-0 transition-all duration-250 ${
+                  i === idx ? 'w-5 bg-white' : 'w-1.5 bg-white/45'
+                }`}
               />
             ))}
           </div>

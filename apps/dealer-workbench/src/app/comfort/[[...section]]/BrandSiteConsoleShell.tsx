@@ -10178,7 +10178,7 @@ function SiteNewsPanel({
                       </button>
                     </div>
                   </div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <label className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={draft.isFeatured}
@@ -10195,7 +10195,7 @@ function SiteNewsPanel({
                 <div className="product-edit-section-head">
                   <h3>内容编辑</h3>
                 </div>
-                <label style={{ display: 'grid', gap: 6 }}>
+                <label className="grid gap-1.5">
                   <span className="t-label">摘要</span>
                   <textarea
                     className="input"
@@ -10206,7 +10206,7 @@ function SiteNewsPanel({
                     }
                   />
                 </label>
-                <label style={{ display: 'grid', gap: 6 }}>
+                <label className="grid gap-1.5">
                   <span className="t-label">正文</span>
                   <SiteNewsRichTextEditor
                     value={draft.body}
@@ -10298,7 +10298,7 @@ function SiteNewsPanel({
                 <th>发布日期</th>
                 <th>排序</th>
                 <th>状态</th>
-                <th style={{ textAlign: 'right' }}>操作</th>
+                <th className="text-right">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -10318,11 +10318,11 @@ function SiteNewsPanel({
                       <td>
                         <strong>{article.title}</strong>
                         {article.isFeatured ? (
-                          <span className="badge badge-info" style={{ marginLeft: 8 }}>
+                          <span className="badge badge-info ml-2">
                             精选
                           </span>
                         ) : null}
-                        <div style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+                        <div className="text-xs text-muted-foreground/80">
                           {article.summary}
                         </div>
                       </td>
@@ -10335,7 +10335,7 @@ function SiteNewsPanel({
                       <td>
                         <StatusPill tone={meta.tone}>{meta.label}</StatusPill>
                       </td>
-                      <td style={{ textAlign: 'right' }}>
+                      <td className="text-right">
                         {canWrite ? (
                           <div className="row-edit-actions">
                             <button
@@ -11375,7 +11375,7 @@ function SiteInquiryPanel({ siteCode, canWrite }: { siteCode: string; canWrite: 
                   <th>咨询类型</th>
                   <th>内容摘要</th>
                   <th>提交时间</th>
-                  <th style={{ textAlign: 'right' }}>操作</th>
+                  <th className="text-right">操作</th>
                 </tr>
               ) : (
                 <tr>
@@ -11385,7 +11385,7 @@ function SiteInquiryPanel({ siteCode, canWrite }: { siteCode: string; canWrite: 
                   <th>意向区域</th>
                   <th>主营业务摘要</th>
                   <th>提交时间</th>
-                  <th style={{ textAlign: 'right' }}>操作</th>
+                  <th className="text-right">操作</th>
                 </tr>
               )}
             </thead>
@@ -11413,7 +11413,7 @@ function SiteInquiryPanel({ siteCode, canWrite }: { siteCode: string; canWrite: 
                       </>
                     )}
                     <td>{formatSubmittedAt(row.submittedAt || row.createdAt)}</td>
-                    <td style={{ textAlign: 'right' }}>
+                    <td className="text-right">
                       {canWrite ? (
                         <button
                           type="button"
@@ -11837,7 +11837,7 @@ function ProductEditModal({
                 officialDetailFlushRef.current = flush;
               }}
             />
-            <p style={{ margin: 0, color: 'var(--t-tertiary)', fontSize: 12 }}>
+            <p className="m-0 text-xs text-muted-foreground/80">
               建议上传宽度 750px 的详情图片，高度不限；官网移动端会等比例缩放。
             </p>
           </section>
@@ -11960,7 +11960,7 @@ function ProductManualPdfUploader({
             accept="application/pdf,.pdf"
             multiple
             disabled={disabled}
-            style={{ display: 'none' }}
+            className="hidden"
             onChange={(event) => {
               addFiles(event.target.files);
               event.currentTarget.value = '';

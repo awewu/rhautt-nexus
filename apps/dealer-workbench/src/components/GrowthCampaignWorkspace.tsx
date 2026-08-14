@@ -1,7 +1,10 @@
 'use client';
 
+/** 2026-08 全页 UX 重构三期 · WorkspaceKit 化：渲染层去内联样式（统计格走 MiniStat，静态布局全走 Tailwind）。 */
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertCircle, BarChart3, CheckCircle2, Loader2, Plus, RefreshCw } from 'lucide-react';
+import { MiniStat } from '@/components/StatCard';
 import { growthCampaigns } from '../lib/api';
 
 type Campaign = {
@@ -170,21 +173,12 @@ export default function GrowthCampaignWorkspace() {
   }
 
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 12,
-          alignItems: 'flex-start',
-        }}
-      >
+    <section className="card-elevated grid gap-4 p-4.5">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <p className="t-label">E4 营销自动化</p>
-          <h2 className="t-headline" style={{ marginTop: 4 }}>
-            战役归因与 ROI 看板
-          </h2>
-          <p style={{ color: 'var(--t-secondary)', fontSize: 13, marginTop: 4 }}>
+          <h2 className="t-headline mt-1">战役归因与 ROI 看板</h2>
+          <p className="mt-1 text-[13px] text-muted-foreground">
             先把 UTM 战役、手工指标和 lead.captured 自动归因接起来，形成可复盘的 CAC/CPL。
           </p>
         </div>
@@ -205,21 +199,15 @@ export default function GrowthCampaignWorkspace() {
         </div>
       )}
 
-      <div className="g4" style={{ gap: 12 }}>
+      <div className="g4 gap-3">
         <Metric label="总预算" value={fmtMoney(portfolio.spend)} />
         <Metric label="线索数" value={String(portfolio.leads || 0)} />
         <Metric label="成交数" value={String(portfolio.signed || 0)} />
         <Metric label="组合 CAC" value={fmtMoney(portfolio.blendedCac)} />
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: 14,
-        }}
-      >
-        <div className="inset" style={{ display: 'grid', gap: 10 }}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-3.5">
+        <div className="inset grid gap-2.5">
           <span className="t-label">新建战役</span>
           <input
             className="input"
@@ -257,7 +245,7 @@ export default function GrowthCampaignWorkspace() {
           </button>
         </div>
 
-        <div className="inset" style={{ display: 'grid', gap: 10 }}>
+        <div className="inset grid gap-2.5">
           <span className="t-label">录入指标</span>
           <select
             className="input"
@@ -271,9 +259,7 @@ export default function GrowthCampaignWorkspace() {
               </option>
             ))}
           </select>
-          <div
-            style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 8 }}
-          >
+          <div className="grid grid-cols-2 gap-2">
             <input
               className="input"
               type="number"
@@ -349,23 +335,23 @@ export default function GrowthCampaignWorkspace() {
           <tbody>
             {board.map((item) => (
               <tr key={item.campaignId}>
-                <td style={{ fontWeight: 700 }}>{item.name}</td>
+                <td className="font-bold">{item.name}</td>
                 <td>{item.channel}</td>
                 <td>{fmtMoney(item.spend)}</td>
                 <td>
                   {item.impressions} / {item.clicks}
                   <br />
-                  <span style={{ color: 'var(--t-tertiary)' }}>CTR {pct(item.ctr)}</span>
+                  <span className="text-muted-foreground/70">CTR {pct(item.ctr)}</span>
                 </td>
                 <td>
                   {item.leads} / {item.signed}
                   <br />
-                  <span style={{ color: 'var(--t-tertiary)' }}>留资 {pct(item.leadRate)}</span>
+                  <span className="text-muted-foreground/70">留资 {pct(item.leadRate)}</span>
                 </td>
                 <td>{fmtMoney(item.cpl)}</td>
                 <td>{fmtMoney(item.cac)}</td>
                 <td>
-                  <div style={{ display: 'grid', gap: 4 }}>
+                  <div className="grid gap-1">
                     {(item.alerts || []).map((alert) => (
                       <span
                         key={`${item.campaignId}-${alert.kind}`}
@@ -385,7 +371,7 @@ export default function GrowthCampaignWorkspace() {
             ))}
             {!board.length && (
               <tr>
-                <td colSpan={8} style={{ textAlign: 'center', color: 'var(--t-tertiary)' }}>
+                <td colSpan={8} className="text-center text-muted-foreground/70">
                   暂无战役，先创建一个 UTM 战役。
                 </td>
               </tr>
@@ -394,14 +380,7 @@ export default function GrowthCampaignWorkspace() {
         </table>
       </div>
 
-      <div
-        className="inset"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: 12,
-        }}
-      >
+      <div className="inset grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-3">
         <Metric label="累计曝光" value={String(totals.impressions)} />
         <Metric label="累计点击" value={String(totals.clicks)} />
         <Metric label="看板预警" value={String(totals.alerts)} />
@@ -423,7 +402,7 @@ export default function GrowthCampaignWorkspace() {
           <tbody>
             {campaigns.map((item) => (
               <tr key={item.id}>
-                <td style={{ fontWeight: 700 }}>{item.name}</td>
+                <td className="font-bold">{item.name}</td>
                 <td>{item.channel}</td>
                 <td>
                   <span className="badge badge-info">{item.status}</span>
@@ -435,7 +414,7 @@ export default function GrowthCampaignWorkspace() {
             ))}
             {!campaigns.length && (
               <tr>
-                <td colSpan={6} style={{ textAlign: 'center', color: 'var(--t-tertiary)' }}>
+                <td colSpan={6} className="text-center text-muted-foreground/70">
                   暂无战役。
                 </td>
               </tr>
@@ -448,20 +427,5 @@ export default function GrowthCampaignWorkspace() {
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <article className="inset" style={{ padding: 14 }}>
-      <p className="t-label">{label}</p>
-      <div
-        style={{
-          marginTop: 6,
-          fontSize: 28,
-          fontWeight: 800,
-          color: 'var(--brand)',
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
-        {value}
-      </div>
-    </article>
-  );
+  return <MiniStat label={label} value={value} accent />;
 }

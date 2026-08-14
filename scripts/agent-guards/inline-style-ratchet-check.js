@@ -15,7 +15,7 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..', '..');
 const TARGET = path.join(ROOT, 'apps', 'dealer-workbench', 'src');
 // 2026-08-13 接入 shadcn 时存量 2073；Phase 2 旗舰页重塑后收紧到 1999。只准调小，不准调大。
-const BASELINE = 977; // 2026-08-14 二期（GEO 主战场组件+10 面板+4 页+accounts 拆分）再收紧：1533 → 977
+const BASELINE = 66; // 2026-08-14 三期收官(products簇+内容套件+长尾+巨壳)再收紧:977 → 66,余量全部为动态计算值合法例外
 
 function walk(dir, out = []) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {

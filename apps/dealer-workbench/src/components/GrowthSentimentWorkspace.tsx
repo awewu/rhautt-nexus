@@ -1,7 +1,10 @@
 'use client';
 
+/** 2026-08 全页 UX 重构三期 · WorkspaceKit 化：渲染层去内联样式（统计格走 MiniStat，静态布局全走 Tailwind）。 */
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AlertCircle, CheckCircle2, Loader2, Radio, RefreshCw, Search } from 'lucide-react';
+import { MiniStat } from '@/components/StatCard';
 import { growthOpinion } from '../lib/api';
 
 type Connector = {
@@ -177,21 +180,12 @@ export default function GrowthSentimentWorkspace() {
   }
 
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 12,
-          alignItems: 'flex-start',
-        }}
-      >
+    <section className="card-elevated grid gap-4 p-4.5">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <p className="t-label">E1 舆情雷达</p>
-          <h2 className="t-headline" style={{ marginTop: 4 }}>
-            公开声量与危机预警
-          </h2>
-          <p style={{ color: 'var(--t-secondary)', fontSize: 13, marginTop: 4 }}>
+          <h2 className="t-headline mt-1">公开声量与危机预警</h2>
+          <p className="mt-1 text-[13px] text-muted-foreground">
             先接人工录入与新闻 RSS，外部社媒源按凭证逐步接入。
           </p>
         </div>
@@ -212,21 +206,15 @@ export default function GrowthSentimentWorkspace() {
         </div>
       )}
 
-      <div className="g4" style={{ gap: 12 }}>
+      <div className="g4 gap-3">
         <Metric label="入库舆情" value={String(metrics.total)} />
         <Metric label="负向条目" value={String(metrics.negative)} />
         <Metric label="未解决告警" value={String(metrics.openAlerts)} />
         <Metric label="就绪来源" value={String(metrics.ready)} />
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: 14,
-        }}
-      >
-        <div className="inset" style={{ display: 'grid', gap: 10 }}>
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-3.5">
+        <div className="inset grid gap-2.5">
           <span className="t-label">人工录入</span>
           <input
             className="input"
@@ -259,7 +247,7 @@ export default function GrowthSentimentWorkspace() {
           </button>
         </div>
 
-        <div className="inset" style={{ display: 'grid', gap: 10 }}>
+        <div className="inset grid gap-2.5">
           <span className="t-label">来源拉取</span>
           <select
             className="input"
@@ -292,7 +280,7 @@ export default function GrowthSentimentWorkspace() {
             {busy ? <Loader2 size={15} className="spin" /> : <Search size={15} />}
             拉取公开源
           </button>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          <div className="flex flex-wrap gap-1.5">
             {connectors.map((item) => (
               <span key={item.source} className={badgeClass(item.status)}>
                 {item.label}
@@ -317,7 +305,7 @@ export default function GrowthSentimentWorkspace() {
           <tbody>
             {mentions.map((item) => (
               <tr key={item.id}>
-                <td style={{ fontWeight: 700 }}>{item.source}</td>
+                <td className="font-bold">{item.source}</td>
                 <td>{item.content}</td>
                 <td>
                   <span className={badgeClass(item.sentiment)}>
@@ -333,7 +321,7 @@ export default function GrowthSentimentWorkspace() {
             ))}
             {!mentions.length && (
               <tr>
-                <td colSpan={6} style={{ textAlign: 'center', color: 'var(--t-tertiary)' }}>
+                <td colSpan={6} className="text-center text-muted-foreground/70">
                   暂无舆情，先录入或拉取新闻 RSS。
                 </td>
               </tr>
@@ -365,7 +353,7 @@ export default function GrowthSentimentWorkspace() {
                 <td>{item.playbookDraft || '-'}</td>
                 <td>{fmtDate(item.createdAt)}</td>
                 <td>
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <div className="flex flex-wrap gap-1.5">
                     <button
                       className="btn btn-ghost btn-sm"
                       onClick={() => void updateAlert(item.id, 'ack')}
@@ -386,7 +374,7 @@ export default function GrowthSentimentWorkspace() {
             ))}
             {!alerts.length && (
               <tr>
-                <td colSpan={5} style={{ textAlign: 'center', color: 'var(--t-tertiary)' }}>
+                <td colSpan={5} className="text-center text-muted-foreground/70">
                   暂无危机告警。
                 </td>
               </tr>
@@ -399,20 +387,5 @@ export default function GrowthSentimentWorkspace() {
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <article className="inset" style={{ padding: 14 }}>
-      <p className="t-label">{label}</p>
-      <div
-        style={{
-          marginTop: 6,
-          fontSize: 28,
-          fontWeight: 800,
-          color: 'var(--brand)',
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
-        {value}
-      </div>
-    </article>
-  );
+  return <MiniStat label={label} value={value} accent />;
 }

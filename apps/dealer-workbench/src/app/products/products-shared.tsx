@@ -1,6 +1,7 @@
 'use client';
 // 产品域共享类型/常量/小组件（page 与 category-manager 共用）
 // 2026-08 从 products/page.tsx（12538 行）机械化拆出：逻辑零改动，只做搬迁。
+// 2026-08 全页 UX 重构三期 · WorkspaceKit 化
 
 import {
   Suspense,
@@ -437,12 +438,11 @@ export function CategoryChip({
     <button
       type="button"
       onClick={onClick}
-      className={active ? 'pill-brand' : 'pill-neutral'}
-      style={{
-        minHeight: 28,
-        borderColor: active ? 'var(--brand-100)' : 'var(--border)',
-        fontWeight: active ? 700 : 500,
-      }}
+      className={
+        active
+          ? 'pill-brand min-h-7 border-[var(--brand-100)]! font-bold!'
+          : 'pill-neutral min-h-7 border-border! font-medium!'
+      }
     >
       {children}
     </button>
@@ -452,21 +452,12 @@ export function CategoryChip({
 
 export function Metric({ label, value, hint }: { label: string; value: string; hint: string }) {
   return (
-    <div className="card-elevated" style={{ padding: '16px 18px' }}>
+    <div className="card-elevated px-[18px]! py-4!">
       <div className="t-label">{label}</div>
-      <div
-        style={{
-          marginTop: 6,
-          fontSize: 28,
-          lineHeight: 1.1,
-          fontWeight: 700,
-          color: 'var(--t-strong)',
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
+      <div className="mt-1.5 text-[28px] leading-[1.1] font-bold text-[var(--t-strong)] tabular-nums">
         {value}
       </div>
-      <p style={{ marginTop: 4, fontSize: 12, color: 'var(--t-tertiary)' }}>{hint}</p>
+      <p className="mt-1 text-xs text-[var(--t-tertiary)]">{hint}</p>
     </div>
   );
 }
@@ -483,24 +474,14 @@ export function CategoryCountPill({
 }) {
   return (
     <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        minHeight: 30,
-        padding: '5px 10px',
-        borderRadius: 999,
-        border:
-          tone === 'success' ? '1px solid rgba(76, 175, 80, 0.28)' : '1px solid var(--border)',
-        background: tone === 'success' ? 'rgba(76, 175, 80, 0.08)' : 'var(--surface-2)',
-        color: tone === 'success' ? 'var(--success)' : 'var(--t-secondary)',
-        fontSize: 12,
-        fontWeight: 700,
-        whiteSpace: 'nowrap',
-      }}
+      className={`inline-flex min-h-[30px] items-center gap-1.5 rounded-full border px-2.5 py-[5px] text-xs font-bold whitespace-nowrap ${
+        tone === 'success'
+          ? 'border-[rgba(76,175,80,0.28)] bg-[rgba(76,175,80,0.08)] text-success'
+          : 'border-border bg-secondary text-muted-foreground'
+      }`}
     >
       {label}
-      <strong style={{ color: 'var(--t-primary)', fontSize: 14 }}>{value}</strong>
+      <strong className="text-sm text-foreground">{value}</strong>
     </span>
   );
 }
@@ -812,22 +793,22 @@ export function MappingCheckItem({
   tone?: 'success' | 'warning' | 'info' | 'neutral';
   note?: string;
 }) {
-  const color =
+  const toneClass =
     tone === 'success'
-      ? 'var(--success)'
+      ? 'text-success'
       : tone === 'warning'
-        ? 'var(--warning)'
+        ? 'text-warning'
         : tone === 'info'
-          ? 'var(--brand-500, var(--brand))'
-          : 'var(--t-secondary)';
+          ? 'text-[var(--brand-500,var(--brand))]'
+          : 'text-muted-foreground';
   return (
-    <div className="product-edit-check-item" style={{ display: 'grid', gap: 4, minWidth: 0 }}>
+    <div className="product-edit-check-item grid min-w-0 gap-1">
       <span className="t-label">{label}</span>
-      <strong style={{ color, fontSize: 13, lineHeight: 1.35, overflowWrap: 'anywhere' }}>
+      <strong className={`${toneClass} text-[13px] leading-[1.35] [overflow-wrap:anywhere]`}>
         {value || '未维护'}
       </strong>
       {note ? (
-        <span style={{ color: 'var(--t-tertiary)', fontSize: 11, lineHeight: 1.35 }}>{note}</span>
+        <span className="text-[11px] leading-[1.35] text-[var(--t-tertiary)]">{note}</span>
       ) : null}
     </div>
   );

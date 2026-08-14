@@ -3,6 +3,7 @@ import { ProductManualPdfUploader } from './media-panels';
 import { OfficialProductDetailEditor } from './site-publishing';
 // 建品簇（完备度字段/创建表单）
 // 2026-08 从 products/page.tsx 机械化拆出：逻辑零改动，只做搬迁。
+// 2026-08 全页 UX 重构三期 · WorkspaceKit 化
 
 import {
   Suspense,
@@ -83,20 +84,13 @@ export function ProductLibraryCompletenessFields({
   onPatch: (next: Partial<ProductLibraryCompletenessDraft>) => void;
 }) {
   return (
-    <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+    <section className="product-edit-section grid gap-3">
       <div className="product-edit-section-head">
         <h3>产品资料完整度</h3>
         <span className="badge badge-grey">产品库字段，不代表官网发布</span>
       </div>
-      <div
-        className="product-edit-field-grid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-          gap: 12,
-        }}
-      >
-        <label style={{ display: 'grid', gap: 6 }}>
+      <div className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3">
+        <label className="grid gap-1.5">
           <span className="t-label">产品类型</span>
           <input
             className="input"
@@ -106,7 +100,7 @@ export function ProductLibraryCompletenessFields({
             placeholder="如：燃气热水器 / 热泵 / 采暖炉"
           />
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">生命周期</span>
           <select
             className="input"
@@ -120,7 +114,7 @@ export function ProductLibraryCompletenessFields({
             <option value="withdrawn">停售</option>
           </select>
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">制造商</span>
           <input
             className="input"
@@ -130,7 +124,7 @@ export function ProductLibraryCompletenessFields({
             placeholder="如：Rheem / Everhot"
           />
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">产地</span>
           <input
             className="input"
@@ -140,7 +134,7 @@ export function ProductLibraryCompletenessFields({
             placeholder="中国"
           />
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">适用市场</span>
           <input
             className="input"
@@ -150,7 +144,7 @@ export function ProductLibraryCompletenessFields({
             placeholder="CN"
           />
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">上市日期</span>
           <input
             className="input"
@@ -160,7 +154,7 @@ export function ProductLibraryCompletenessFields({
             onChange={(event) => onPatch({ launchDate: event.target.value })}
           />
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">停售日期</span>
           <input
             className="input"
@@ -170,7 +164,7 @@ export function ProductLibraryCompletenessFields({
             onChange={(event) => onPatch({ discontinueDate: event.target.value })}
           />
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">销售单位</span>
           <input
             className="input"
@@ -181,20 +175,14 @@ export function ProductLibraryCompletenessFields({
           />
         </label>
       </div>
-      <div className="product-edit-subsection" style={{ display: 'grid', gap: 10 }}>
-        <div className="product-edit-section-head" style={{ padding: 0, border: 0 }}>
-          <h4 style={{ margin: 0, fontSize: 14 }}>基础尺寸与重量</h4>
+      <div className="product-edit-subsection grid gap-2.5">
+        {/* 全局 .product-edit-section-head 自带 padding/分隔线，此处需 ! 归零 */}
+        <div className="product-edit-section-head border-0! p-0!">
+          <h4 className="m-0 text-sm">基础尺寸与重量</h4>
           <span className="badge badge-grey">产品主表字段 · 尺寸 mm / 重量 kg</span>
         </div>
-        <div
-          className="product-edit-field-grid"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 160px), 1fr))',
-            gap: 12,
-          }}
-        >
-          <label style={{ display: 'grid', gap: 6 }}>
+        <div className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,160px),1fr))] gap-3">
+          <label className="grid gap-1.5">
             <span className="t-label">产品长 mm</span>
             <input
               className="input"
@@ -207,7 +195,7 @@ export function ProductLibraryCompletenessFields({
               placeholder="如：720"
             />
           </label>
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label className="grid gap-1.5">
             <span className="t-label">产品宽 mm</span>
             <input
               className="input"
@@ -220,7 +208,7 @@ export function ProductLibraryCompletenessFields({
               placeholder="如：450"
             />
           </label>
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label className="grid gap-1.5">
             <span className="t-label">产品高 mm</span>
             <input
               className="input"
@@ -233,7 +221,7 @@ export function ProductLibraryCompletenessFields({
               placeholder="如：260"
             />
           </label>
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label className="grid gap-1.5">
             <span className="t-label">净重 kg</span>
             <input
               className="input"
@@ -246,7 +234,7 @@ export function ProductLibraryCompletenessFields({
               placeholder="如：18.5"
             />
           </label>
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label className="grid gap-1.5">
             <span className="t-label">包装长 mm</span>
             <input
               className="input"
@@ -259,7 +247,7 @@ export function ProductLibraryCompletenessFields({
               placeholder="如：820"
             />
           </label>
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label className="grid gap-1.5">
             <span className="t-label">包装宽 mm</span>
             <input
               className="input"
@@ -272,7 +260,7 @@ export function ProductLibraryCompletenessFields({
               placeholder="如：520"
             />
           </label>
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label className="grid gap-1.5">
             <span className="t-label">包装高 mm</span>
             <input
               className="input"
@@ -285,7 +273,7 @@ export function ProductLibraryCompletenessFields({
               placeholder="如：360"
             />
           </label>
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label className="grid gap-1.5">
             <span className="t-label">毛重 kg</span>
             <input
               className="input"
@@ -300,15 +288,8 @@ export function ProductLibraryCompletenessFields({
           </label>
         </div>
       </div>
-      <div
-        className="product-edit-field-grid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-          gap: 12,
-        }}
-      >
-        <label style={{ display: 'grid', gap: 6 }}>
+      <div className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3">
+        <label className="grid gap-1.5">
           <span className="t-label">包装/配置说明</span>
           <input
             className="input"
@@ -318,7 +299,7 @@ export function ProductLibraryCompletenessFields({
             placeholder="如：整机+附件包"
           />
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">SKU 配置差异</span>
           <input
             className="input"
@@ -329,15 +310,8 @@ export function ProductLibraryCompletenessFields({
           />
         </label>
       </div>
-      <div
-        className="product-edit-field-grid"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
-          gap: 12,
-        }}
-      >
-        <label style={{ display: 'grid', gap: 6 }}>
+      <div className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-3">
+        <label className="grid gap-1.5">
           <span className="t-label">技术参数</span>
           <textarea
             className="input"
@@ -348,7 +322,7 @@ export function ProductLibraryCompletenessFields({
             placeholder={'一行一个，例如：\n容量: 16L\n能效等级: 一级\n燃气种类: 天然气'}
           />
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">产品卖点</span>
           <textarea
             className="input"
@@ -359,7 +333,7 @@ export function ProductLibraryCompletenessFields({
             placeholder={'一行一个，例如：\n恒温控制\n低噪运行\n安全防护'}
           />
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">应用场景</span>
           <textarea
             className="input"
@@ -370,7 +344,7 @@ export function ProductLibraryCompletenessFields({
             placeholder={'一行一个，例如：\n住宅热水\n公寓\n别墅'}
           />
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">安装条件</span>
           <textarea
             className="input"
@@ -381,7 +355,7 @@ export function ProductLibraryCompletenessFields({
             placeholder="如：排烟、燃气压力、水压、电源、安装空间要求"
           />
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">保修政策</span>
           <textarea
             className="input"
@@ -392,7 +366,7 @@ export function ProductLibraryCompletenessFields({
             placeholder="如：整机保修年限、核心部件保修、适用条件"
           />
         </label>
-        <label style={{ display: 'grid', gap: 6 }}>
+        <label className="grid gap-1.5">
           <span className="t-label">合规/证书</span>
           <textarea
             className="input"
@@ -476,49 +450,19 @@ export function CreateProductForm({
 
   return createPortal(
     <div
-      className="product-edit-backdrop"
+      className="product-edit-backdrop fixed inset-0 z-[1000] grid place-items-center bg-[rgba(15,23,42,0.45)] p-6"
       role="presentation"
       onMouseDown={onCancel}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 1000,
-        display: 'grid',
-        placeItems: 'center',
-        padding: 24,
-        background: 'rgba(15, 23, 42, 0.45)',
-      }}
     >
       <form
-        className="product-edit-modal"
+        className="product-edit-modal grid max-h-[min(860px,calc(100vh-48px))] w-[min(1040px,100%)] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-[var(--r-xl)] border bg-[var(--surface-1)] shadow-[var(--sh-lg)]"
         onSubmit={onSubmit}
         onMouseDown={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="product-create-title"
-        style={{
-          width: 'min(1040px, 100%)',
-          maxHeight: 'min(860px, calc(100vh - 48px))',
-          display: 'grid',
-          gridTemplateRows: 'auto minmax(0, 1fr) auto',
-          background: 'var(--surface-1)',
-          borderRadius: 'var(--r-xl)',
-          border: '1px solid var(--border)',
-          boxShadow: 'var(--sh-lg)',
-          overflow: 'hidden',
-        }}
       >
-        <header
-          className="product-edit-modal-head"
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: 16,
-            alignItems: 'flex-start',
-            padding: 18,
-            borderBottom: '1px solid var(--border)',
-          }}
-        >
+        <header className="product-edit-modal-head flex items-start justify-between gap-4 border-b p-[18px]">
           <div>
             <p className="t-label">新增产品</p>
             <h2 id="product-create-title">{draft.name || '新增产品库主数据'}</h2>
@@ -539,11 +483,8 @@ export function CreateProductForm({
           </button>
         </header>
 
-        <div
-          className="product-edit-modal-body"
-          style={{ overflow: 'auto', padding: 18, display: 'grid', gap: 14 }}
-        >
-          <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+        <div className="product-edit-modal-body grid gap-3.5 overflow-auto p-[18px]">
+          <section className="product-edit-section grid gap-3">
             <div className="product-edit-section-head">
               <h3>基础信息</h3>
               <span className={tenantId ? 'badge badge-success' : 'badge badge-warning'}>
@@ -551,29 +492,15 @@ export function CreateProductForm({
               </span>
             </div>
             <div
-              className="product-edit-field-grid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-                gap: 12,
-              }}
+              className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3"
             >
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">品牌</span>
-                <div
-                  className="inset"
-                  style={{ padding: 10, display: 'flex', gap: 10, flexWrap: 'wrap' }}
-                >
+                <div className="inset flex flex-wrap gap-2.5 p-2.5!">
                   {createBrandOptions.map((brand) => (
                     <label
                       key={brand.value}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        fontSize: 13,
-                        fontWeight: 800,
-                      }}
+                      className="inline-flex items-center gap-1.5 text-[13px] font-extrabold"
                     >
                       <input
                         type="checkbox"
@@ -584,11 +511,11 @@ export function CreateProductForm({
                     </label>
                   ))}
                 </div>
-                <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+                <span className="text-xs text-[var(--t-tertiary)]">
                   可选择一个或多个品牌；提交后只保存一条公共产品记录，并建立多个品牌绑定。
                 </span>
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">产品名称</span>
                 <input
                   className="input"
@@ -598,7 +525,7 @@ export function CreateProductForm({
                   placeholder="恒热燃气热水器 RGS-A"
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">产品型号</span>
                 <input
                   className="input"
@@ -608,7 +535,7 @@ export function CreateProductForm({
                   placeholder="RGS-A"
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">SKU / 物料编码</span>
                 <input
                   className="input"
@@ -621,50 +548,32 @@ export function CreateProductForm({
             </div>
           </section>
 
-          <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+          <section className="product-edit-section grid gap-3">
             <div className="product-edit-section-head">
               <h3>产品分类绑定</h3>
               <span className="badge badge-grey">来自当前品牌分类树</span>
             </div>
             {categoryLoading ? (
-              <div
-                className="inset"
-                style={{ padding: 12, color: 'var(--t-secondary)', fontSize: 13 }}
-              >
+              <div className="inset p-3! text-[13px] text-muted-foreground">
                 正在加载产品分类...
               </div>
             ) : categoryError ? (
-              <div
-                className="inset"
-                role="alert"
-                style={{ padding: 12, color: 'var(--danger)', fontSize: 13 }}
-              >
+              <div className="inset p-3! text-[13px] text-destructive" role="alert">
                 产品分类加载失败：{String((categoryError as Error)?.message || categoryError)}
               </div>
             ) : !draft.brand ? (
-              <div
-                className="inset"
-                style={{ padding: 12, color: 'var(--t-secondary)', fontSize: 13 }}
-              >
+              <div className="inset p-3! text-[13px] text-muted-foreground">
                 请选择品牌后加载该品牌分类。
               </div>
             ) : !categoryTree.length ? (
-              <div
-                className="inset"
-                style={{ padding: 12, color: 'var(--t-secondary)', fontSize: 13 }}
-              >
+              <div className="inset p-3! text-[13px] text-muted-foreground">
                 当前品牌暂无分类，请先在“产品分类”中维护分类树。
               </div>
             ) : (
               <div
-                className="product-edit-field-grid"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-                  gap: 12,
-                }}
+                className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3"
               >
-                <label style={{ display: 'grid', gap: 6 }}>
+                <label className="grid gap-1.5">
                   <span className="t-label">一级分类</span>
                   <select
                     className="input"
@@ -686,7 +595,7 @@ export function CreateProductForm({
                     ))}
                   </select>
                 </label>
-                <label style={{ display: 'grid', gap: 6 }}>
+                <label className="grid gap-1.5">
                   <span className="t-label">二级分类</span>
                   <select
                     className="input"
@@ -705,7 +614,7 @@ export function CreateProductForm({
                     ))}
                   </select>
                 </label>
-                <label style={{ display: 'grid', gap: 6 }}>
+                <label className="grid gap-1.5">
                   <span className="t-label">三级分类（可选）</span>
                   <select
                     className="input"
@@ -727,20 +636,15 @@ export function CreateProductForm({
 
           <ProductLibraryCompletenessFields draft={draft} disabled={submitting} onPatch={patch} />
 
-          <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+          <section className="product-edit-section grid gap-3">
             <div className="product-edit-section-head">
               <h3>价格信息</h3>
               <span className="badge badge-grey">目录价与官网展示价分开维护</span>
             </div>
             <div
-              className="product-edit-field-grid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-                gap: 12,
-              }}
+              className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3"
             >
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">产品库目录价</span>
                 <input
                   className="input"
@@ -752,7 +656,7 @@ export function CreateProductForm({
                   placeholder="不填则为 0"
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">经销商基准价</span>
                 <input
                   className="input"
@@ -764,7 +668,7 @@ export function CreateProductForm({
                   placeholder="内部供货/结算参考价，不对官网展示"
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">币种</span>
                 <input
                   className="input"
@@ -773,7 +677,7 @@ export function CreateProductForm({
                   placeholder="CNY"
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">官网价格展示方式</span>
                 <select
                   className="input"
@@ -787,7 +691,7 @@ export function CreateProductForm({
                   <option value="contact_dealer">联系经销商</option>
                 </select>
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">官网参考价</span>
                 <input
                   className="input"
@@ -800,7 +704,7 @@ export function CreateProductForm({
                   placeholder="选择显示官网参考价时填写"
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">官网最低价</span>
                 <input
                   className="input"
@@ -813,7 +717,7 @@ export function CreateProductForm({
                   placeholder="价格区间最低价"
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">官网最高价</span>
                 <input
                   className="input"
@@ -826,7 +730,7 @@ export function CreateProductForm({
                   placeholder="价格区间最高价"
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">活动价</span>
                 <input
                   className="input"
@@ -838,7 +742,7 @@ export function CreateProductForm({
                   placeholder="可选"
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">价格单位</span>
                 <input
                   className="input"
@@ -847,7 +751,7 @@ export function CreateProductForm({
                   placeholder="台 / 套 / 件"
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">价格标签</span>
                 <input
                   className="input"
@@ -856,7 +760,7 @@ export function CreateProductForm({
                   placeholder="官网参考价 / 起售价"
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">价格说明</span>
                 <input
                   className="input"
@@ -865,7 +769,7 @@ export function CreateProductForm({
                   placeholder="例如：最终成交价以经销商报价为准"
                 />
               </label>
-              <label style={{ display: 'flex', gap: 8, alignItems: 'center', paddingTop: 22 }}>
+              <label className="flex items-center gap-2 pt-[22px]">
                 <input
                   type="checkbox"
                   checked={draft.taxIncluded}
@@ -876,19 +780,14 @@ export function CreateProductForm({
             </div>
           </section>
 
-          <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+          <section className="product-edit-section grid gap-3">
             <div className="product-edit-section-head">
               <h3>官网元数据</h3>
             </div>
             <div
-              className="product-edit-field-grid"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-                gap: 12,
-              }}
+              className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3"
             >
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">公开路径</span>
                 <input
                   className="input"
@@ -898,7 +797,7 @@ export function CreateProductForm({
                   placeholder="留空则按型号生成"
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">系列</span>
                 <input
                   className="input"
@@ -906,7 +805,7 @@ export function CreateProductForm({
                   onChange={(event) => patch({ series: event.target.value })}
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">英文名</span>
                 <input
                   className="input"
@@ -914,7 +813,7 @@ export function CreateProductForm({
                   onChange={(event) => patch({ officialEnglishName: event.target.value })}
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">排序</span>
                 <input
                   className="input"
@@ -924,7 +823,7 @@ export function CreateProductForm({
                   onChange={(event) => patch({ displayOrder: event.target.value })}
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">标语</span>
                 <input
                   className="input"
@@ -932,7 +831,7 @@ export function CreateProductForm({
                   onChange={(event) => patch({ tagline: event.target.value })}
                 />
               </label>
-              <label style={{ display: 'grid', gap: 6 }}>
+              <label className="grid gap-1.5">
                 <span className="t-label">标签</span>
                 <input
                   className="input"
@@ -944,55 +843,37 @@ export function CreateProductForm({
             </div>
           </section>
 
-          <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+          <section className="product-edit-section grid gap-3">
             <div className="product-edit-section-head">
               <h3>图片 / 素材</h3>
               <span className={draft.mainImage ? 'badge badge-success' : 'badge badge-warning'}>
                 {draft.mainImage ? '已选择主图' : '未上传图片'}
               </span>
             </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '160px minmax(0, 1fr)',
-                gap: 14,
-                alignItems: 'start',
-              }}
-            >
-              <div
-                style={{
-                  width: 146,
-                  aspectRatio: '1 / 1',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--r-sm)',
-                  background: 'var(--surface-2)',
-                  display: 'grid',
-                  placeItems: 'center',
-                  overflow: 'hidden',
-                }}
-              >
+            <div className="grid grid-cols-[160px_minmax(0,1fr)] items-start gap-3.5">
+              <div className="grid aspect-square w-[146px] place-items-center overflow-hidden rounded-[var(--r-sm)] border bg-secondary">
                 {draft.mainImage ? (
                   <img
                     src={draft.mainImage.previewUrl}
                     alt="产品主图预览"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    className="h-full w-full object-cover"
                   />
                 ) : (
-                  <Image size={28} style={{ color: 'var(--t-tertiary)' }} />
+                  <Image size={28} className="text-[var(--t-tertiary)]" />
                 )}
               </div>
-              <div style={{ display: 'grid', gap: 10, alignContent: 'start' }}>
-                <p style={{ margin: 0, color: 'var(--t-secondary)', fontSize: 12 }}>
+              <div className="grid content-start gap-2.5">
+                <p className="m-0 text-xs text-muted-foreground">
                   维护产品主图，保存后会进入产品库素材引用，并在产品库列表和品牌产品页面同步读取。
                 </p>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <div className="flex flex-wrap gap-2">
                   <label className="btn btn-outline btn-sm">
                     <Image size={13} />
                     上传主图
                     <input
                       type="file"
                       accept="image/png,image/jpeg,.png,.jpg,.jpeg"
-                      style={{ display: 'none' }}
+                      className="hidden"
                       onChange={(event) => {
                         selectMainImage(event.target.files?.[0] || null);
                         event.currentTarget.value = '';
@@ -1016,7 +897,7 @@ export function CreateProductForm({
             </div>
           </section>
 
-          <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+          <section className="product-edit-section grid gap-3">
             <div className="product-edit-section-head">
               <h3>官网产品详情</h3>
               <span className="badge badge-grey">750px 长图</span>
@@ -1029,7 +910,7 @@ export function CreateProductForm({
             />
           </section>
 
-          <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+          <section className="product-edit-section grid gap-3">
             <div className="product-edit-section-head">
               <h3>产品说明 PDF</h3>
               <span className="badge badge-grey">不限数量</span>
@@ -1042,18 +923,7 @@ export function CreateProductForm({
           </section>
         </div>
 
-        <footer
-          className="product-edit-modal-actions"
-          style={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            gap: 8,
-            padding: 18,
-            borderTop: '1px solid var(--border)',
-            background: 'var(--surface-2)',
-          }}
-        >
+        <footer className="product-edit-modal-actions flex items-center justify-end gap-2 border-t bg-secondary p-[18px]">
           {error && (
             <span className="row-feedback error" role="alert">
               {error}

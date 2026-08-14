@@ -1,6 +1,7 @@
 'use client';
 // 物料/产品基座/系统包视图簇
 // 2026-08 从 products/page.tsx 机械化拆出：逻辑零改动，只做搬迁。
+// 2026-08 全页 UX 重构三期 · WorkspaceKit 化：渲染层去内联样式，静态布局全走 Tailwind 语义 token。
 
 import {
   Suspense,
@@ -93,17 +94,17 @@ export function ProductMaterialsView({ products: items }: { products: Normalized
   const withPositioning = rows.filter((row) => row.hasPositioning).length;
 
   return (
-    <section className="card-elevated" style={{ overflow: 'hidden' }}>
-      <div style={{ padding: 18, borderBottom: '1px solid var(--border)' }}>
+    <section className="card-elevated overflow-hidden">
+      <div className="border-b p-[18px]">
         <p className="t-label">Product Materials</p>
-        <h2 className="t-headline" style={{ marginTop: 4 }}>
+        <h2 className="t-headline mt-1">
           产品资料管理
         </h2>
-        <p style={{ marginTop: 6, color: 'var(--t-secondary)', fontSize: 13 }}>
+        <p className="mt-1.5 text-[13px] text-muted-foreground">
           管理每个产品编码的图片素材、定位资料和官网展示基础信息。
         </p>
       </div>
-      <div className="g4" style={{ gap: 12, padding: 16 }}>
+      <div className="g4 gap-3 p-4">
         <Metric
           label="已挂素材"
           value={`${withAssets}/${items.length}`}
@@ -138,7 +139,7 @@ export function ProductMaterialsView({ products: items }: { products: Normalized
               <tr key={row.product.id}>
                 <td>
                   <strong>{row.product.name}</strong>
-                  <div style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+                  <div className="text-xs text-muted-foreground/70">
                     {row.product.model}
                   </div>
                 </td>
@@ -187,19 +188,19 @@ export function ProductBaseView({
   const keyed = items.filter((product) => product.raw?.productKey).length;
 
   return (
-    <div style={{ display: 'grid', gap: 16 }}>
-      <section className="card-elevated" style={{ padding: 18 }}>
+    <div className="grid gap-4">
+      <section className="card-elevated p-[18px]">
         <p className="t-label">Catalog Foundation</p>
-        <h2 className="t-headline" style={{ marginTop: 4 }}>
+        <h2 className="t-headline mt-1">
           产品目录底座
         </h2>
-        <p style={{ marginTop: 6, color: 'var(--t-secondary)', fontSize: 13 }}>
+        <p className="mt-1.5 text-[13px] text-muted-foreground">
           维护分类底座、系统方案包和产品身份键，供报价、官网和设计模块复用。
-          <span style={{ color: 'var(--warning)' }}>
+          <span className="text-warning">
             （方案包为示例模板，接入 system-packs 后端后替换为真实方案；单价取自产品库真实价）
           </span>
         </p>
-        <div className="g4" style={{ gap: 12, marginTop: 16 }}>
+        <div className="g4 mt-4 gap-3">
           <Metric label="分类数" value={String(CATEGORIES.length)} hint="目录筛选底座" />
           <Metric
             label="方案包"
@@ -218,18 +219,17 @@ export function ProductBaseView({
           />
         </div>
       </section>
-      <section className="g2" style={{ gap: 16 }}>
-        <div className="card-elevated" style={{ padding: 16 }}>
+      <section className="g2 gap-4">
+        <div className="card-elevated p-4">
           <h3 className="t-headline">分类底座</h3>
-          <div style={{ display: 'grid', gap: 8, marginTop: 12 }}>
+          <div className="mt-3 grid gap-2">
             {categoryRows.map((category) => (
               <div
                 key={category.key}
-                className="inset"
-                style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}
+                className="inset flex justify-between gap-3"
               >
                 <span>{category.label}</span>
-                <strong>{category.count}</strong>
+                <strong className="tabular-nums">{category.count}</strong>
               </div>
             ))}
           </div>
@@ -243,13 +243,7 @@ export function ProductBaseView({
 
 function PackGrid({ productByModel }: { productByModel: Map<string, NormalizedProduct> }) {
   return (
-    <section
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-        gap: 16,
-      }}
-    >
+    <section className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4">
       {SYSTEM_PACKS.map((pack) => {
         const itemSum = pack.items.reduce((sum, item) => {
           const product = productByModel.get(item.model);
@@ -261,61 +255,42 @@ function PackGrid({ productByModel }: { productByModel: Map<string, NormalizedPr
         return (
           <article
             key={pack.id}
-            className="card-elevated"
-            style={{
-              padding: 18,
-              borderTop: '3px solid var(--brand)',
-            }}
+            className="card-elevated border-t-[3px] border-t-primary p-[18px]"
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+            <div className="flex justify-between gap-3">
               <div>
                 <h2 className="t-headline">{pack.name}</h2>
-                <p style={{ marginTop: 4, color: 'var(--t-secondary)', fontSize: 13 }}>
+                <p className="mt-1 text-[13px] text-muted-foreground">
                   {pack.desc}
                 </p>
               </div>
               <span
-                className="pill-neutral"
-                style={{ alignSelf: 'flex-start' }}
+                className="pill-neutral self-start"
                 title="示例套餐：单价来自产品库真实价，套餐组合为示例模板；接入 system-packs 后替换为真实方案包"
               >
                 方案包 · 示例
               </span>
             </div>
 
-            <p style={{ marginTop: 8, color: 'var(--t-tertiary)', fontSize: 12 }}>
+            <p className="mt-2 text-xs text-muted-foreground/70">
               适用场景：{pack.scenario}
             </p>
 
-            <div className="inset" style={{ marginTop: 14, display: 'grid', gap: 8 }}>
+            <div className="inset mt-3.5 grid gap-2">
               {pack.items.map((item) => {
                 const product = productByModel.get(item.model);
                 return (
                   <div
                     key={item.model}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: 12,
-                      fontSize: 12,
-                    }}
+                    className="flex items-center justify-between gap-3 text-xs"
                   >
                     <span
-                      style={{
-                        color: 'var(--t-primary)',
-                        minWidth: 0,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
+                      className="min-w-0 truncate text-foreground"
                       title={product?.name || item.model}
                     >
                       {product?.name || item.model}
                     </span>
-                    <span
-                      style={{ color: 'var(--t-tertiary)', fontVariantNumeric: 'tabular-nums' }}
-                    >
+                    <span className="text-muted-foreground/70 tabular-nums">
                       x{item.qty}
                     </span>
                   </div>
@@ -323,41 +298,18 @@ function PackGrid({ productByModel }: { productByModel: Map<string, NormalizedPr
               })}
             </div>
 
-            <div
-              style={{
-                marginTop: 14,
-                display: 'flex',
-                alignItems: 'flex-end',
-                justifyContent: 'space-between',
-                gap: 12,
-              }}
-            >
+            <div className="mt-3.5 flex items-end justify-between gap-3">
               <div>
-                <div
-                  style={{
-                    color: 'var(--t-tertiary)',
-                    fontSize: 11,
-                    textDecoration: 'line-through',
-                  }}
-                >
+                <div className="text-[11px] text-muted-foreground/70 line-through tabular-nums">
                   单品合计 {fmt(itemSum)}
                 </div>
-                <div
-                  style={{
-                    marginTop: 2,
-                    color: 'var(--brand)',
-                    fontSize: 26,
-                    lineHeight: 1.05,
-                    fontWeight: 700,
-                    fontVariantNumeric: 'tabular-nums',
-                  }}
-                >
+                <div className="mt-0.5 text-[26px] leading-[1.05] font-bold text-primary tabular-nums">
                   {fmt(pack.bundlePrice)}
                 </div>
               </div>
-              <div style={{ display: 'grid', justifyItems: 'end', gap: 4 }}>
+              <div className="grid justify-items-end gap-1">
                 <span className="pill-brand">立省 {fmt(save)}</span>
-                <span style={{ color: 'var(--t-tertiary)', fontSize: 11 }}>
+                <span className="text-[11px] text-muted-foreground/70 tabular-nums">
                   组合让利 {pct(margin)}
                 </span>
               </div>

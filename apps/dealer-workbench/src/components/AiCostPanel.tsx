@@ -49,7 +49,7 @@ export function AiCostPanel() {
   }, [items]);
 
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 14 }}>
+    <section className="card-elevated grid gap-3.5 p-4.5">
       <div className="workbench-section-header">
         <div>
           <p className="workbench-section-header__eyebrow">AI 成本 · ROI</p>
@@ -63,11 +63,11 @@ export function AiCostPanel() {
         </button>
       </div>
       {error ? (
-        <div className="inset" style={{ color: 'var(--danger)', fontSize: 13 }}>
+        <div className="inset text-[13px] text-destructive">
           {error}
         </div>
       ) : null}
-      <div className="g4" style={{ gap: 12 }}>
+      <div className="g4 gap-3">
         <Stat
           icon={Coins}
           label="累计 AI token"
@@ -94,7 +94,7 @@ export function AiCostPanel() {
         />
       </div>
       {!stat.withCost ? (
-        <p style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>
+        <p className="text-xs text-muted-foreground/80">
           暂无成本记录：生成 GEO 内容后此处显示真实 token 投入。
         </p>
       ) : null}
@@ -114,23 +114,13 @@ function Stat({
   hint: string;
 }) {
   return (
-    <article className="inset" style={{ padding: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <article className="inset p-3.5">
+      <div className="flex items-center justify-between">
         <span className="t-label">{label}</span>
-        <Icon size={15} style={{ color: 'var(--brand)' }} />
+        <Icon size={15} className="text-primary" />
       </div>
-      <div
-        style={{
-          marginTop: 6,
-          fontSize: 22,
-          fontWeight: 800,
-          color: 'var(--t-strong)',
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
-        {value}
-      </div>
-      <div style={{ marginTop: 4, fontSize: 11, color: 'var(--t-tertiary)' }}>{hint}</div>
+      <div className="mt-1.5 text-[22px] font-extrabold tabular-nums">{value}</div>
+      <div className="mt-1 text-[11px] text-muted-foreground/80">{hint}</div>
     </article>
   );
 }

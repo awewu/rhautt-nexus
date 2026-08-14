@@ -308,8 +308,8 @@ export default function DealerNav() {
 
   return (
     <>
-      <aside className="sidebar" style={{ alignItems: 'center' }}>
-        <div style={{ height: 3, width: '100%', background: 'var(--brand)', flexShrink: 0 }} />
+      <aside className="sidebar items-center">
+        <div className="h-[3px] w-full shrink-0 bg-primary" />
         {/* 文字 logo（2026-08 去白底）：logo 图是红+黑字，深色侧栏上只能垫白盒；
             改为门户同款文字标——红 Rha + 白 utt.，黑字位用白替代，品牌红锚点保留 */}
         <div
@@ -319,25 +319,9 @@ export default function DealerNav() {
           <span className="text-[color:var(--brand-400)]">Rha</span>
           <span className="text-white">utt.</span>
         </div>
-        <div
-          style={{
-            height: 1,
-            width: 32,
-            background: 'rgba(255,255,255,0.08)',
-            margin: '0 auto 8px',
-          }}
-        />
+        <div className="mx-auto mb-2 h-px w-8 bg-white/[0.08]" />
 
-        <nav
-          style={{
-            flex: 1,
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            width: '100%',
-            padding: '4px 0',
-          }}
-          aria-label="营销控制台主导航"
-        >
+        <nav className="w-full flex-1 overflow-x-hidden overflow-y-auto py-1" aria-label="营销控制台主导航">
           {visibleNav.map((item, index) => {
             const active = item.key === activeItem.key;
             const Icon = item.icon;
@@ -345,57 +329,22 @@ export default function DealerNav() {
             return (
               <div key={item.key}>
                 {previous && previous.group !== item.group && (
-                  <div
-                    style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '6px 12px' }}
-                  />
+                  <div className="mx-3 my-1.5 h-px bg-white/[0.08]" />
                 )}
                 <Link
                   href={item.href}
                   title={item.label}
                   aria-current={active ? 'page' : undefined}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 2,
-                    width: 54,
-                    minHeight: 44,
-                    borderRadius: 8,
-                    margin: '1px auto',
-                    color: active ? '#fff' : 'rgba(255,255,255,0.52)',
-                    background: active ? 'rgba(200,32,44,0.22)' : 'transparent',
-                    transition: 'all 0.12s',
-                    textDecoration: 'none',
-                    flexShrink: 0,
-                    position: 'relative',
-                  }}
+                  className={`relative mx-auto my-px flex min-h-11 w-[54px] shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg no-underline transition-all duration-100 ${
+                    active ? 'bg-primary/20 text-white' : 'text-white/50'
+                  }`}
                 >
                   {active && (
-                    <span
-                      style={{
-                        position: 'absolute',
-                        left: -4,
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        width: 3,
-                        height: 18,
-                        borderRadius: 2,
-                        background: 'var(--brand)',
-                      }}
-                    />
+                    <span className="absolute top-1/2 -left-1 h-[18px] w-[3px] -translate-y-1/2 rounded-xs bg-primary" />
                   )}
                   <Icon size={16} strokeWidth={active ? 2.2 : 1.8} />
                   <span
-                    style={{
-                      maxWidth: 52,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      fontSize: 9,
-                      lineHeight: 1.1,
-                      fontWeight: active ? 700 : 500,
-                    }}
+                    className={`max-w-[52px] truncate text-[9px] leading-[1.1] ${active ? 'font-bold' : 'font-medium'}`}
                   >
                     {item.shortLabel}
                   </span>
@@ -467,21 +416,9 @@ export default function DealerNav() {
       )}
 
       <nav
-        className="mobile-nav"
-        style={{
-          display: 'none',
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 50,
-          background: 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(16px)',
-          borderTop: '1px solid var(--border)',
-          padding: '6px 0',
-          gridTemplateColumns: `repeat(${Math.max(visibleNav.length, 1)}, minmax(58px, 1fr))`,
-          overflowX: 'auto',
-        }}
+        className="mobile-nav fixed right-0 bottom-0 left-0 z-50 hidden overflow-x-auto border-t bg-white/90 py-1.5 backdrop-blur-lg"
+        // 列数依导航项数动态计算：内联样式的合法例外
+        style={{ gridTemplateColumns: `repeat(${Math.max(visibleNav.length, 1)}, minmax(58px, 1fr))` }}
         aria-label="移动端营销导航"
       >
         {visibleNav.map((item) => {
@@ -491,17 +428,9 @@ export default function DealerNav() {
             <Link
               key={item.href}
               href={item.href}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: 3,
-                padding: '4px 0',
-                fontSize: 10,
-                fontWeight: active ? 700 : 500,
-                color: active ? 'var(--brand)' : 'var(--t-tertiary)',
-                textDecoration: 'none',
-              }}
+              className={`flex flex-col items-center gap-[3px] py-1 text-[10px] no-underline ${
+                active ? 'font-bold text-primary' : 'font-medium text-muted-foreground/70'
+              }`}
             >
               <Icon size={18} />
               {item.shortLabel}

@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * 内容工厂素材管理（2026-08 全页 UX 重构三期 · WorkspaceKit 化）。
+ * 仅重构 JSX 渲染层：40 处内联样式清零，静态布局全走 Tailwind（v4 + shadcn token），
+ * 外层卡壳换 WorkspaceSection；hooks/事件/上传逻辑保持不变。
+ */
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Archive,
@@ -13,6 +19,7 @@ import {
   Upload,
   X,
 } from 'lucide-react';
+import { WorkspaceSection } from '@/components/WorkspaceKit';
 import { fileArtifacts, growthContentAssets } from '../lib/api';
 
 type ContentAsset = {
@@ -211,447 +218,313 @@ export default function GrowthContentAssetsTable() {
   }
 
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 14,
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-        }}
-      >
-        <div>
-          <p className="t-label">内容工厂素材管理</p>
-          <h2 className="t-headline" style={{ marginTop: 4 }}>
-            文案素材库
-          </h2>
-          <p style={{ marginTop: 4, color: 'var(--t-secondary)', fontSize: 13 }}>
-            管理文案、公众号审核和发布时使用的封面图、正文配图、产品图、案例图等数字素材。
-          </p>
-        </div>
+    <WorkspaceSection
+      icon={<FileImage size={16} />}
+      title="文案素材库"
+      aside={
         <button className="btn btn-outline btn-sm" onClick={load} disabled={busy}>
           <RefreshCw size={13} />
           刷新
         </button>
-      </div>
-
-      <div className="inset" style={{ display: 'grid', gap: 12 }}>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-            gap: 10,
-          }}
-        >
-          <label style={{ display: 'grid', gap: 6 }}>
-            <span className="t-label">素材名称</span>
-            <input
-              className="input"
-              value={form.title}
-              onChange={(event) => patchForm({ title: event.target.value })}
-              placeholder="例如 公众号封面图"
-            />
-          </label>
-          <label style={{ display: 'grid', gap: 6 }}>
-            <span className="t-label">素材类型</span>
-            <input
-              className="input"
-              list="content-asset-types"
-              value={form.assetType}
-              onChange={(event) => patchForm({ assetType: event.target.value })}
-            />
-            <datalist id="content-asset-types">
-              {assetTypes.map((item) => (
-                <option key={item} value={item} />
-              ))}
-            </datalist>
-          </label>
-          <label style={{ display: 'grid', gap: 6 }}>
-            <span className="t-label">品牌</span>
-            <input
-              className="input"
-              value={form.brandSlug}
-              onChange={(event) => patchForm({ brandSlug: event.target.value })}
-              placeholder="Rheem / Ruud / Everhot"
-            />
-          </label>
-          <label style={{ display: 'grid', gap: 6 }}>
-            <span className="t-label">渠道</span>
-            <input
-              className="input"
-              value={form.channel}
-              onChange={(event) => patchForm({ channel: event.target.value })}
-              placeholder="公众号 / 小红书 / 官网"
-            />
-          </label>
+      }
+    >
+      <div className="grid gap-4">
+        <div>
+          <p className="t-label">内容工厂素材管理</p>
+          <p className="mt-1 text-[13px] text-muted-foreground">
+            管理文案、公众号审核和发布时使用的封面图、正文配图、产品图、案例图等数字素材。
+          </p>
         </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-            gap: 10,
-          }}
-        >
-          <input
-            className="input"
-            value={form.usageScene}
-            onChange={(event) => patchForm({ usageScene: event.target.value })}
-            placeholder="使用场景，例如 文案封面"
-          />
-          <input
-            className="input"
-            value={form.tags}
-            onChange={(event) => patchForm({ tags: event.target.value })}
-            placeholder="标签，用逗号分隔"
-          />
-          <label
-            className="input"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              cursor: 'pointer',
-              overflow: 'hidden',
-            }}
-          >
-            <input
-              type="file"
-              onChange={(event) => setSelectedFile(event.target.files?.[0] || null)}
-              style={{ display: 'none' }}
-            />
-            <Upload size={14} />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {selectedFile?.name ||
-                (form.fileArtifactId ? '已上传文件，可重新选择' : '选择上传文件')}
-            </span>
-          </label>
-        </div>
-        <textarea
-          className="input"
-          rows={2}
-          value={form.summary}
-          onChange={(event) => patchForm({ summary: event.target.value })}
-          placeholder="备注说明"
-        />
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <button className="btn btn-brand btn-sm" onClick={save} disabled={busy}>
-            {editingId ? <Edit3 size={14} /> : <Plus size={14} />}
-            {editingId ? '保存修改' : '新增素材'}
-          </button>
-          {editingId && (
-            <button className="btn btn-outline btn-sm" onClick={resetForm} disabled={busy}>
-              取消编辑
-            </button>
-          )}
-          {message && <span className="badge badge-success">{message}</span>}
-          {error && <span className="badge badge-warning">{error}</span>}
-        </div>
-      </div>
 
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-        <Search size={16} style={{ color: 'var(--t-tertiary)' }} />
-        <input
-          className="input"
-          value={keyword}
-          onChange={(event) => setKeyword(event.target.value)}
-          placeholder="搜索素材名称或备注"
-          style={{ width: 240 }}
-        />
-        <select
-          className="input"
-          value={assetType}
-          onChange={(event) => setAssetType(event.target.value)}
-          style={{ width: 160 }}
-        >
-          <option value="all">全部类型</option>
-          {assetTypes.map((item) => (
-            <option key={item} value={item}>
-              {item}
-            </option>
-          ))}
-        </select>
-        <label
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            fontSize: 13,
-            color: 'var(--t-secondary)',
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={includeArchived}
-            onChange={(event) => setIncludeArchived(event.target.checked)}
-          />
-          查看已归档
-        </label>
-      </div>
-
-      <div className="table-shell">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>图片</th>
-              <th>素材名称</th>
-              <th>类型</th>
-              <th>品牌</th>
-              <th>渠道</th>
-              <th>场景</th>
-              <th>格式</th>
-              <th>使用</th>
-              <th>更新</th>
-              <th>状态</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((item) => (
-              <tr key={item.id}>
-                <td>
-                  {contentAssetPreviewUrl(item) ? (
-                    <button
-                      type="button"
-                      onClick={() => setPreviewItem(item)}
-                      title="点击查看图片"
-                      style={{
-                        width: 44,
-                        height: 44,
-                        border: '1px solid var(--line)',
-                        borderRadius: 4,
-                        padding: 0,
-                        background: '#f8fafc',
-                        display: 'grid',
-                        placeItems: 'center',
-                        overflow: 'hidden',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      <img
-                        src={contentAssetPreviewUrl(item)}
-                        alt={item.title}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block',
-                        }}
-                      />
-                    </button>
-                  ) : (
-                    <div
-                      title="暂无图片"
-                      style={{
-                        width: 44,
-                        height: 44,
-                        border: '1px solid var(--line)',
-                        borderRadius: 4,
-                        background: '#f8fafc',
-                        display: 'grid',
-                        placeItems: 'center',
-                        color: 'var(--t-tertiary)',
-                      }}
-                    >
-                      <FileImage size={18} />
-                    </div>
-                  )}
-                </td>
-                <td>
-                  {contentAssetPreviewUrl(item) ? (
-                    <button
-                      type="button"
-                      onClick={() => setPreviewItem(item)}
-                      style={{
-                        appearance: 'none',
-                        border: 0,
-                        background: 'transparent',
-                        padding: 0,
-                        color: 'inherit',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                      }}
-                      title="点击查看素材图片"
-                    >
-                      <strong style={{ textDecoration: 'underline', textUnderlineOffset: 3 }}>
-                        {item.title}
-                      </strong>
-                    </button>
-                  ) : (
-                    <strong>{item.title}</strong>
-                  )}
-                  {item.summary ? (
-                    <div style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>{item.summary}</div>
-                  ) : null}
-                </td>
-                <td>
-                  <span className="badge badge-info">{item.assetType}</span>
-                </td>
-                <td>{item.brandSlug || '-'}</td>
-                <td>{item.channel || '-'}</td>
-                <td>{item.usageScene || '-'}</td>
-                <td>{item.fileFormat || '-'}</td>
-                <td>{item.usageCount || 0}</td>
-                <td>{formatDate(item.updatedAt)}</td>
-                <td>
-                  {item.archivedAt ? (
-                    <span className="badge badge-grey">已归档</span>
-                  ) : (
-                    <span className="badge badge-success">可用</span>
-                  )}
-                </td>
-                <td>
-                  <div
-                    style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap' }}
-                  >
-                    {contentAssetPreviewUrl(item) && (
-                      <button
-                        className="btn btn-outline btn-sm"
-                        onClick={() => setPreviewItem(item)}
-                        disabled={busy}
-                      >
-                        <Eye size={13} />
-                        预览
-                      </button>
-                    )}
-                    <button
-                      className="btn btn-outline btn-sm"
-                      onClick={() => edit(item)}
-                      disabled={busy}
-                    >
-                      <Edit3 size={13} />
-                      编辑
-                    </button>
-                    {!item.archivedAt && (
-                      <button
-                        className="btn btn-outline btn-sm"
-                        onClick={() => archive(item.id)}
-                        disabled={busy}
-                      >
-                        <Archive size={13} />
-                        归档
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {!busy && !items.length ? (
-              <tr>
-                <td
-                  colSpan={11}
-                  style={{ textAlign: 'center', color: 'var(--t-secondary)', padding: 28 }}
-                >
-                  <FileImage
-                    size={18}
-                    style={{ color: 'var(--brand)', verticalAlign: 'middle', marginRight: 8 }}
-                  />
-                  暂无素材
-                </td>
-              </tr>
-            ) : null}
-            {busy ? (
-              <tr>
-                <td colSpan={11} style={{ textAlign: 'center', padding: 28 }}>
-                  <Loader2
-                    size={18}
-                    className="animate-spin"
-                    style={{ color: 'var(--brand)', verticalAlign: 'middle' }}
-                  />
-                  <span style={{ marginLeft: 8 }}>加载中</span>
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
-      </div>
-      {previewItem ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="素材图片预览"
-          onClick={() => setPreviewItem(null)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 80,
-            background: 'rgba(15, 23, 42, 0.68)',
-            display: 'grid',
-            placeItems: 'center',
-            padding: 24,
-          }}
-        >
-          <div
-            onClick={(event) => event.stopPropagation()}
-            style={{
-              width: 'min(920px, 96vw)',
-              maxHeight: '88vh',
-              background: '#fff',
-              borderRadius: 8,
-              boxShadow: '0 24px 60px rgba(15, 23, 42, 0.28)',
-              display: 'grid',
-              gridTemplateRows: 'auto minmax(0, 1fr)',
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-                padding: '12px 14px',
-                borderBottom: '1px solid var(--line)',
-              }}
-            >
-              <div style={{ minWidth: 0 }}>
-                <strong
-                  style={{
-                    display: 'block',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {previewItem.title}
-                </strong>
-                <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
-                  {previewItem.fileFormat || previewItem.assetType || 'image'}
-                </span>
-              </div>
-              <button
-                className="btn btn-outline btn-sm"
-                onClick={() => setPreviewItem(null)}
-                aria-label="关闭预览"
-              >
-                <X size={14} />
-              </button>
-            </div>
-            <div
-              style={{
-                minHeight: 260,
-                maxHeight: 'calc(88vh - 58px)',
-                display: 'grid',
-                placeItems: 'center',
-                background: '#f8fafc',
-                padding: 16,
-                overflow: 'auto',
-              }}
-            >
-              <img
-                src={contentAssetPreviewUrl(previewItem)}
-                alt={previewItem.title}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: 'calc(88vh - 96px)',
-                  objectFit: 'contain',
-                  borderRadius: 6,
-                }}
+        <div className="inset grid gap-3">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2.5">
+            <label className="grid gap-1.5">
+              <span className="t-label">素材名称</span>
+              <input
+                className="input"
+                value={form.title}
+                onChange={(event) => patchForm({ title: event.target.value })}
+                placeholder="例如 公众号封面图"
               />
-            </div>
+            </label>
+            <label className="grid gap-1.5">
+              <span className="t-label">素材类型</span>
+              <input
+                className="input"
+                list="content-asset-types"
+                value={form.assetType}
+                onChange={(event) => patchForm({ assetType: event.target.value })}
+              />
+              <datalist id="content-asset-types">
+                {assetTypes.map((item) => (
+                  <option key={item} value={item} />
+                ))}
+              </datalist>
+            </label>
+            <label className="grid gap-1.5">
+              <span className="t-label">品牌</span>
+              <input
+                className="input"
+                value={form.brandSlug}
+                onChange={(event) => patchForm({ brandSlug: event.target.value })}
+                placeholder="Rheem / Ruud / Everhot"
+              />
+            </label>
+            <label className="grid gap-1.5">
+              <span className="t-label">渠道</span>
+              <input
+                className="input"
+                value={form.channel}
+                onChange={(event) => patchForm({ channel: event.target.value })}
+                placeholder="公众号 / 小红书 / 官网"
+              />
+            </label>
+          </div>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-2.5">
+            <input
+              className="input"
+              value={form.usageScene}
+              onChange={(event) => patchForm({ usageScene: event.target.value })}
+              placeholder="使用场景，例如 文案封面"
+            />
+            <input
+              className="input"
+              value={form.tags}
+              onChange={(event) => patchForm({ tags: event.target.value })}
+              placeholder="标签，用逗号分隔"
+            />
+            <label className="input flex cursor-pointer items-center gap-2 overflow-hidden">
+              <input
+                type="file"
+                onChange={(event) => setSelectedFile(event.target.files?.[0] || null)}
+                className="hidden"
+              />
+              <Upload size={14} />
+              <span className="truncate">
+                {selectedFile?.name ||
+                  (form.fileArtifactId ? '已上传文件，可重新选择' : '选择上传文件')}
+              </span>
+            </label>
+          </div>
+          <textarea
+            className="input"
+            rows={2}
+            value={form.summary}
+            onChange={(event) => patchForm({ summary: event.target.value })}
+            placeholder="备注说明"
+          />
+          <div className="flex flex-wrap items-center gap-2">
+            <button className="btn btn-brand btn-sm" onClick={save} disabled={busy}>
+              {editingId ? <Edit3 size={14} /> : <Plus size={14} />}
+              {editingId ? '保存修改' : '新增素材'}
+            </button>
+            {editingId && (
+              <button className="btn btn-outline btn-sm" onClick={resetForm} disabled={busy}>
+                取消编辑
+              </button>
+            )}
+            {message && <span className="badge badge-success">{message}</span>}
+            {error && <span className="badge badge-warning">{error}</span>}
           </div>
         </div>
-      ) : null}
-    </section>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Search size={16} className="text-muted-foreground/70" />
+          <input
+            className="input w-60"
+            value={keyword}
+            onChange={(event) => setKeyword(event.target.value)}
+            placeholder="搜索素材名称或备注"
+          />
+          <select
+            className="input w-40"
+            value={assetType}
+            onChange={(event) => setAssetType(event.target.value)}
+          >
+            <option value="all">全部类型</option>
+            {assetTypes.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+          <label className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={includeArchived}
+              onChange={(event) => setIncludeArchived(event.target.checked)}
+            />
+            查看已归档
+          </label>
+        </div>
+
+        <div className="table-shell">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>图片</th>
+                <th>素材名称</th>
+                <th>类型</th>
+                <th>品牌</th>
+                <th>渠道</th>
+                <th>场景</th>
+                <th>格式</th>
+                <th>使用</th>
+                <th>更新</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item) => (
+                <tr key={item.id}>
+                  <td>
+                    {contentAssetPreviewUrl(item) ? (
+                      <button
+                        type="button"
+                        onClick={() => setPreviewItem(item)}
+                        title="点击查看图片"
+                        className="grid size-11 cursor-pointer place-items-center overflow-hidden rounded border bg-secondary p-0"
+                      >
+                        <img
+                          src={contentAssetPreviewUrl(item)}
+                          alt={item.title}
+                          className="block size-full object-cover"
+                        />
+                      </button>
+                    ) : (
+                      <div
+                        title="暂无图片"
+                        className="grid size-11 place-items-center rounded border bg-secondary text-muted-foreground/70"
+                      >
+                        <FileImage size={18} />
+                      </div>
+                    )}
+                  </td>
+                  <td>
+                    {contentAssetPreviewUrl(item) ? (
+                      <button
+                        type="button"
+                        onClick={() => setPreviewItem(item)}
+                        className="cursor-pointer appearance-none border-0 bg-transparent p-0 text-left text-inherit"
+                        title="点击查看素材图片"
+                      >
+                        <strong className="underline underline-offset-3">{item.title}</strong>
+                      </button>
+                    ) : (
+                      <strong>{item.title}</strong>
+                    )}
+                    {item.summary ? (
+                      <div className="text-xs text-muted-foreground/70">{item.summary}</div>
+                    ) : null}
+                  </td>
+                  <td>
+                    <span className="badge badge-info">{item.assetType}</span>
+                  </td>
+                  <td>{item.brandSlug || '-'}</td>
+                  <td>{item.channel || '-'}</td>
+                  <td>{item.usageScene || '-'}</td>
+                  <td>{item.fileFormat || '-'}</td>
+                  <td className="tabular-nums">{item.usageCount || 0}</td>
+                  <td>{formatDate(item.updatedAt)}</td>
+                  <td>
+                    {item.archivedAt ? (
+                      <span className="badge badge-grey">已归档</span>
+                    ) : (
+                      <span className="badge badge-success">可用</span>
+                    )}
+                  </td>
+                  <td>
+                    <div className="flex flex-wrap justify-center gap-1.5">
+                      {contentAssetPreviewUrl(item) && (
+                        <button
+                          className="btn btn-outline btn-sm"
+                          onClick={() => setPreviewItem(item)}
+                          disabled={busy}
+                        >
+                          <Eye size={13} />
+                          预览
+                        </button>
+                      )}
+                      <button
+                        className="btn btn-outline btn-sm"
+                        onClick={() => edit(item)}
+                        disabled={busy}
+                      >
+                        <Edit3 size={13} />
+                        编辑
+                      </button>
+                      {!item.archivedAt && (
+                        <button
+                          className="btn btn-outline btn-sm"
+                          onClick={() => archive(item.id)}
+                          disabled={busy}
+                        >
+                          <Archive size={13} />
+                          归档
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {!busy && !items.length ? (
+                <tr>
+                  <td colSpan={11} className="p-7 text-center text-muted-foreground">
+                    <FileImage size={18} className="mr-2 inline align-middle text-primary" />
+                    暂无素材
+                  </td>
+                </tr>
+              ) : null}
+              {busy ? (
+                <tr>
+                  <td colSpan={11} className="p-7 text-center">
+                    <Loader2 size={18} className="inline animate-spin align-middle text-primary" />
+                    <span className="ml-2">加载中</span>
+                  </td>
+                </tr>
+              ) : null}
+            </tbody>
+          </table>
+        </div>
+        {previewItem ? (
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="素材图片预览"
+            onClick={() => setPreviewItem(null)}
+            className="fixed inset-0 z-[80] grid place-items-center bg-slate-900/70 p-6"
+          >
+            <div
+              onClick={(event) => event.stopPropagation()}
+              className="grid max-h-[88vh] w-[min(920px,96vw)] grid-rows-[auto_minmax(0,1fr)] overflow-hidden rounded-lg bg-background shadow-2xl"
+            >
+              <div className="flex items-center justify-between gap-3 border-b px-3.5 py-3">
+                <div className="min-w-0">
+                  <strong className="block truncate">{previewItem.title}</strong>
+                  <span className="text-xs text-muted-foreground">
+                    {previewItem.fileFormat || previewItem.assetType || 'image'}
+                  </span>
+                </div>
+                <button
+                  className="btn btn-outline btn-sm"
+                  onClick={() => setPreviewItem(null)}
+                  aria-label="关闭预览"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+              <div className="grid max-h-[calc(88vh-58px)] min-h-65 place-items-center overflow-auto bg-secondary p-4">
+                <img
+                  src={contentAssetPreviewUrl(previewItem)}
+                  alt={previewItem.title}
+                  className="max-h-[calc(88vh-96px)] max-w-full rounded-md object-contain"
+                />
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </WorkspaceSection>
   );
 }

@@ -33,35 +33,25 @@ export default function ListToolbar(props: ListToolbarProps) {
     onPage,
   } = props;
   return (
-    <div
-      style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginBottom: 12 }}
-    >
-      <div style={{ position: 'relative', flex: '1 1 220px', minWidth: 180 }}>
+    <div className="mb-3 flex flex-wrap items-center gap-2">
+      <div className="relative min-w-[180px] flex-[1_1_220px]">
         <Search
           size={14}
-          style={{
-            position: 'absolute',
-            left: 10,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            color: 'var(--t-tertiary)',
-          }}
+          className="absolute top-1/2 left-2.5 -translate-y-1/2 text-muted-foreground/70"
         />
         <input
-          className="input"
+          className="input w-full pl-[30px]"
           value={q}
           onChange={(e) => onSearch(e.target.value)}
           placeholder={searchPlaceholder || '搜索…'}
-          style={{ paddingLeft: 30, width: '100%' }}
         />
       </div>
       {filters.map((f) => (
         <select
           key={f.key}
-          className="input"
+          className="input w-auto min-w-[120px]"
           value={filterVals[f.key] || ''}
           onChange={(e) => onFilter(f.key, e.target.value)}
-          style={{ width: 'auto', minWidth: 120 }}
         >
           <option value="">{f.label}（全部）</option>
           {f.options.map((o) => (
@@ -71,12 +61,10 @@ export default function ListToolbar(props: ListToolbarProps) {
           ))}
         </select>
       ))}
-      <span className="t-xs" style={{ color: 'var(--t-tertiary)', marginLeft: 4 }}>
-        共 {total} 条
-      </span>
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span className="t-xs ml-1 text-muted-foreground/80">共 {total} 条</span>
+      <div className="ml-auto flex items-center gap-2">
         {pageCount > 1 && (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <span className="inline-flex items-center gap-1">
             <button
               className="btn btn-outline btn-sm"
               disabled={page <= 1}
@@ -85,10 +73,7 @@ export default function ListToolbar(props: ListToolbarProps) {
             >
               <ChevronLeft size={14} />
             </button>
-            <span
-              className="t-xs"
-              style={{ color: 'var(--t-secondary)', minWidth: 48, textAlign: 'center' }}
-            >
+            <span className="t-xs min-w-12 text-center text-muted-foreground tabular-nums">
               {page}/{pageCount}
             </span>
             <button

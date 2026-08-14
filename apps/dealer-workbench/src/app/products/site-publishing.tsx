@@ -1,6 +1,7 @@
 'use client';
 // 站点发布簇（公开投影回读/站点上架面板/官方详情编辑器）
 // 2026-08 从 products/page.tsx 机械化拆出：逻辑零改动，只做搬迁。
+// 2026-08 全页 UX 重构三期 · WorkspaceKit 化
 
 import {
   Suspense,
@@ -125,27 +126,24 @@ function ProductPublicProjectionReadback({
         : isPublished
           ? '已发布但公开接口未找到'
           : '未发布或公开接口未找到';
-  const tone =
+  const toneClass =
     error || (isPublished && (!publicProduct || !matches))
-      ? 'var(--warning)'
+      ? 'text-warning'
       : publicProduct
-        ? 'var(--success)'
-        : 'var(--t-tertiary)';
+        ? 'text-success'
+        : 'text-[var(--t-tertiary)]';
   const matchText = publicProduct ? (matches ? '一致' : '与后台保存不一致') : '';
 
   if (variant === 'panel') {
     return (
-      <div
-        className="inset"
-        style={{ padding: 10, display: 'grid', gap: 4, color: 'var(--t-secondary)', fontSize: 12 }}
-      >
-        <strong style={{ color: 'var(--t-primary)', fontSize: 12 }}>公开官网回读</strong>
+      <div className="inset grid gap-1 p-2.5! text-xs text-muted-foreground">
+        <strong className="text-xs text-foreground">公开官网回读</strong>
         <span>后台准备保存目录：{expectedCategoryPath || '未选择'}</span>
         <span>公开接口当前目录：{statusText}</span>
         {publicProduct ? (
           <span>公开 URL slug：{text(publicProduct.slug || publicSlug) || '未返回'}</span>
         ) : null}
-        <span style={{ color: tone }}>
+        <span className={toneClass}>
           {publicProduct
             ? matches
               ? '公开接口与后台目录一致'
@@ -159,7 +157,7 @@ function ProductPublicProjectionReadback({
   return (
     <span>
       公开官网接口：{statusText}
-      {matchText ? <span style={{ color: tone, marginLeft: 6 }}>{matchText}</span> : null}
+      {matchText ? <span className={`${toneClass} ml-1.5`}>{matchText}</span> : null}
     </span>
   );
 }
@@ -410,17 +408,9 @@ export function ProductSitePublishingPanel({
   }
 
   return (
-    <div style={{ display: 'grid', gap: 12 }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 10,
-          alignItems: 'center',
-          flexWrap: 'wrap',
-        }}
-      >
-        <p style={{ margin: 0, color: 'var(--t-secondary)', fontSize: 12 }}>
+    <div className="grid gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <p className="m-0 text-xs text-muted-foreground">
           一个产品可以挂载到多个官网；每个官网独立维护目录、slug、排序、推荐和展示文案。
         </p>
         <button
@@ -439,13 +429,7 @@ export function ProductSitePublishingPanel({
       </div>
 
       {liveAssignments.length ? (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
-            gap: 10,
-          }}
-        >
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,260px),1fr))] gap-2.5">
           {liveAssignments.map((assignment) => {
             const assignmentMeta = objectOrEmpty(assignment.siteMeta);
             const categoryMeta = objectOrEmpty(assignmentMeta.siteProductCategory);
@@ -459,25 +443,14 @@ export function ProductSitePublishingPanel({
                   ? '当前已隐藏，官网不会展示；点击发布后才展示。'
                   : '当前为草稿，官网不会展示；点击发布后才展示。';
             return (
-              <div
-                key={assignment.id}
-                className="inset"
-                style={{ padding: 12, display: 'grid', gap: 8 }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    gap: 8,
-                    alignItems: 'center',
-                  }}
-                >
+              <div key={assignment.id} className="inset grid gap-2 p-3!">
+                <div className="flex items-center justify-between gap-2">
                   <strong>{displayBrand(normalizeBrand(assignment.siteCode))}</strong>
                   <StatusPill tone={websitePublishingStatusMeta(assignment).tone}>
                     {websitePublishingStatusMeta(assignment).label}
                   </StatusPill>
                 </div>
-                <div style={{ display: 'grid', gap: 4, color: 'var(--t-secondary)', fontSize: 12 }}>
+                <div className="grid gap-1 text-xs text-muted-foreground">
                   <span>目录：{assignmentCategoryPath || '未选择'}</span>
                   <span>
                     slug：
@@ -498,15 +471,16 @@ export function ProductSitePublishingPanel({
                     refreshVersion={publicReadbackVersion}
                   />
                   <span
-                    style={{
-                      color:
-                        assignment.status === 'published' ? 'var(--success)' : 'var(--t-tertiary)',
-                    }}
+                    className={
+                      assignment.status === 'published'
+                        ? 'text-success'
+                        : 'text-[var(--t-tertiary)]'
+                    }
                   >
                     {visibleReason}
                   </span>
                 </div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     className="btn btn-outline btn-sm"
@@ -549,24 +523,14 @@ export function ProductSitePublishingPanel({
           })}
         </div>
       ) : (
-        <div className="inset" style={{ padding: 12, color: 'var(--t-secondary)', fontSize: 13 }}>
+        <div className="inset p-3! text-[13px] text-muted-foreground">
           当前产品还没有官网挂载配置。先点“添加官网”，选择官网目录后保存为草稿，再决定是否发布。
         </div>
       )}
 
       {showEditor ? (
-        <div
-          className="inset"
-          style={{ padding: 14, display: 'grid', gap: 12, borderColor: 'var(--brand-300)' }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: 8,
-              alignItems: 'center',
-            }}
-          >
+        <div className="inset grid gap-3 border-[var(--brand-300)]! p-3.5!">
+          <div className="flex items-center justify-between gap-2">
             <strong>{editing ? '编辑官网展示配置' : '新增官网展示配置'}</strong>
             <button
               type="button"
@@ -580,25 +544,9 @@ export function ProductSitePublishingPanel({
               收起
             </button>
           </div>
-          <div
-            className="inset"
-            style={{
-              padding: 12,
-              display: 'grid',
-              gap: 8,
-              background: 'var(--surface-subtle, #f8fafc)',
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 8,
-                alignItems: 'center',
-                flexWrap: 'wrap',
-              }}
-            >
-              <strong style={{ fontSize: 13 }}>产品库 → 官网展示映射</strong>
+          <div className="inset grid gap-2 bg-[var(--surface-subtle,#f8fafc)]! p-3!">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <strong className="text-[13px]">产品库 → 官网展示映射</strong>
               <span
                 className={
                   websiteCategoryOverridden || seriesOverridden
@@ -615,13 +563,7 @@ export function ProductSitePublishingPanel({
                       : '需要手动选择'}
               </span>
             </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))',
-                gap: 8,
-              }}
-            >
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,180px),1fr))] gap-2">
               <MappingCheckItem
                 label="产品库分类"
                 value={
@@ -674,7 +616,7 @@ export function ProductSitePublishingPanel({
                 note={editing?.status === 'published' ? '已发布后官网可见' : '保存为草稿后仍需发布'}
               />
             </div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 className={
@@ -694,7 +636,7 @@ export function ProductSitePublishingPanel({
               >
                 手动选择可覆盖
               </span>
-              <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+              <span className="text-xs text-[var(--t-tertiary)]">
                 默认跟随产品库分类；下方选择其他官网目录后按人工映射保存。
               </span>
             </div>
@@ -709,15 +651,8 @@ export function ProductSitePublishingPanel({
             refreshVersion={publicReadbackVersion}
             variant="panel"
           />
-          <div
-            className="product-edit-field-grid"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-              gap: 12,
-            }}
-          >
-            <label style={{ display: 'grid', gap: 6 }}>
+          <div className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3">
+            <label className="grid gap-1.5">
               <span className="t-label">官网</span>
               <select
                 className="input"
@@ -740,7 +675,7 @@ export function ProductSitePublishingPanel({
                 ))}
               </select>
             </label>
-            <label style={{ display: 'grid', gap: 6 }}>
+            <label className="grid gap-1.5">
               <span className="t-label">
                 官网目录{' '}
                 <span
@@ -766,21 +701,19 @@ export function ProductSitePublishingPanel({
                   </option>
                 ))}
               </select>
-              <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+              <span className="text-xs text-[var(--t-tertiary)]">
                 默认用系统建议目录；需要特殊陈列时在这里手动选择官网目录。
               </span>
               {categoryError ? (
-                <span style={{ color: 'var(--warning)', fontSize: 12 }}>
-                  官网目录加载失败，请先检查目录管理。
-                </span>
+                <span className="text-xs text-warning">官网目录加载失败，请先检查目录管理。</span>
               ) : null}
               {!categoryError && !categoryLoading && !categoryOptions.length ? (
-                <span style={{ color: 'var(--warning)', fontSize: 12 }}>
+                <span className="text-xs text-warning">
                   当前官网还没有后台目录树，请先到官网目录管理维护。
                 </span>
               ) : null}
             </label>
-            <label style={{ display: 'grid', gap: 6 }}>
+            <label className="grid gap-1.5">
               <span className="t-label">官网系列</span>
               <input
                 className="input"
@@ -791,13 +724,13 @@ export function ProductSitePublishingPanel({
                   setDraft((current) => ({ ...current, series: event.target.value }))
                 }
               />
-              <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+              <span className="text-xs text-[var(--t-tertiary)]">
                 {suggestedSeries
                   ? '默认跟随产品库系列；改写后按人工覆盖保存。'
                   : '产品库尚未维护系列，可先留空。'}
               </span>
             </label>
-            <label style={{ display: 'grid', gap: 6 }}>
+            <label className="grid gap-1.5">
               <span className="t-label">
                 URL slug <OverrideHint value={draft.publicSlug} fallback={defaults.publicSlug} />
               </span>
@@ -811,7 +744,7 @@ export function ProductSitePublishingPanel({
                 }
               />
             </label>
-            <label style={{ display: 'grid', gap: 6 }}>
+            <label className="grid gap-1.5">
               <span className="t-label">
                 官网标题 <OverrideHint value={draft.siteTitle} fallback={defaults.siteTitle} />
               </span>
@@ -824,7 +757,7 @@ export function ProductSitePublishingPanel({
                 }
               />
             </label>
-            <label style={{ display: 'grid', gap: 6 }}>
+            <label className="grid gap-1.5">
               <span className="t-label">排序</span>
               <input
                 className="input"
@@ -838,12 +771,9 @@ export function ProductSitePublishingPanel({
                 }
               />
             </label>
-            <label style={{ display: 'grid', gap: 6 }}>
+            <label className="grid gap-1.5">
               <span className="t-label">推荐</span>
-              <span
-                className="toggle-row"
-                style={{ display: 'flex', alignItems: 'center', gap: 8, minHeight: 38 }}
-              >
+              <span className="toggle-row flex min-h-[38px] items-center gap-2">
                 <input
                   type="checkbox"
                   checked={draft.isFeatured}
@@ -855,7 +785,7 @@ export function ProductSitePublishingPanel({
                 <span>在该官网推荐展示</span>
               </span>
             </label>
-            <label style={{ display: 'grid', gap: 6 }}>
+            <label className="grid gap-1.5">
               <span className="t-label">
                 官网标签 <OverrideHint value={draft.tags} fallback={defaults.tags} />
               </span>
@@ -870,7 +800,7 @@ export function ProductSitePublishingPanel({
               />
             </label>
           </div>
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label className="grid gap-1.5">
             <span className="t-label">
               官网摘要/卖点{' '}
               <OverrideHint value={draft.siteSummary} fallback={defaults.siteSummary} />
@@ -885,9 +815,7 @@ export function ProductSitePublishingPanel({
               }
             />
           </label>
-          <div
-            style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}
-          >
+          <div className="flex flex-wrap justify-between gap-2">
             <button
               type="button"
               className="btn btn-ghost btn-sm"
@@ -1122,7 +1050,7 @@ export function OfficialProductDetailEditor({
           type="file"
           accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp"
           multiple
-          style={{ display: 'none' }}
+          className="hidden"
           onChange={(event) => uploadImages(event.target.files)}
         />
       </div>
@@ -1148,7 +1076,7 @@ export function OfficialProductDetailEditor({
         }}
         dangerouslySetInnerHTML={{ __html: value || '' }}
       />
-      <p style={{ margin: 0, color: 'var(--t-tertiary)', fontSize: 12 }}>
+      <p className="m-0 text-xs text-[var(--t-tertiary)]">
         建议上传宽度 750px 的详情图片，高度不限；官网移动端会等比例缩放。
       </p>
       {floatingDialog}
@@ -1283,21 +1211,15 @@ function MetaBlock({
   compact?: boolean;
 }) {
   return (
-    <div style={{ minWidth: 0, display: 'grid', alignContent: 'center', gap: compact ? 3 : 4 }}>
-      <p className="t-label" style={compact ? { fontSize: 11 } : undefined}>
-        {label}
-      </p>
+    <div className={`grid min-w-0 content-center ${compact ? 'gap-[3px]' : 'gap-1'}`}>
+      {/* .t-label 全局即 11px，compact 原内联 fontSize:11 为冗余覆盖，直接移除 */}
+      <p className="t-label">{label}</p>
       <p
-        style={{
-          margin: 0,
-          color: 'var(--t-primary)',
-          fontSize: compact ? 12 : 13,
-          lineHeight: 1.35,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: compact ? 'nowrap' : 'normal',
-          overflowWrap: compact ? undefined : 'anywhere',
-        }}
+        className={`m-0 overflow-hidden leading-[1.35] text-ellipsis text-foreground ${
+          compact
+            ? 'text-xs whitespace-nowrap'
+            : 'text-[13px] whitespace-normal [overflow-wrap:anywhere]'
+        }`}
         title={value}
       >
         {value}

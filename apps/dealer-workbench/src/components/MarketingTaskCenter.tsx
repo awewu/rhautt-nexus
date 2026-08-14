@@ -89,7 +89,7 @@ export function MarketingTaskCenter({ brandSlug = 'rheem' }: { brandSlug?: strin
   const draftList = copies.filter((c) => c.status === 'draft').slice(0, 8);
 
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
+    <section className="card-elevated grid gap-4 p-4.5">
       <div className="workbench-section-header">
         <div>
           <p className="workbench-section-header__eyebrow">品牌运营 · 任务中枢</p>
@@ -103,18 +103,18 @@ export function MarketingTaskCenter({ brandSlug = 'rheem' }: { brandSlug?: strin
         </button>
       </div>
       {error ? (
-        <div className="inset" style={{ color: 'var(--danger)', fontSize: 13 }}>
+        <div className="inset text-[13px] text-destructive">
           {error}
         </div>
       ) : null}
 
       {/* 四阶段待办流 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+      <div className="grid grid-cols-4 gap-3">
         <FlowCard
           icon={Search}
           label="① 待补缺口"
           value={tasks.gaps}
-          tone="var(--danger)"
+          tone="danger"
           href="/growth/geo"
           hint="出现率<50%的探测"
         />
@@ -122,7 +122,7 @@ export function MarketingTaskCenter({ brandSlug = 'rheem' }: { brandSlug?: strin
           icon={PenTool}
           label="② 待审内容"
           value={tasks.toReview}
-          tone="var(--warning)"
+          tone="warning"
           href="/growth/copywriter"
           hint="draft 状态文案"
         />
@@ -130,7 +130,7 @@ export function MarketingTaskCenter({ brandSlug = 'rheem' }: { brandSlug?: strin
           icon={FlaskConical}
           label="③ 实验验证中"
           value={tasks.verifying}
-          tone="var(--brand)"
+          tone="brand"
           href="/growth/geo"
           hint="复投中/待复投"
         />
@@ -138,24 +138,20 @@ export function MarketingTaskCenter({ brandSlug = 'rheem' }: { brandSlug?: strin
           icon={Send}
           label="④ 已发布"
           value={tasks.published}
-          tone="var(--success)"
+          tone="success"
           href="/growth/wechat-drafts"
           hint="已上线内容"
         />
       </div>
 
       {/* 待审内容清单（最需要运营动作的） */}
-      <div className="inset" style={{ display: 'grid', gap: 10, padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <ClipboardList size={16} style={{ color: 'var(--brand)' }} />
-          <strong style={{ fontSize: 14, color: 'var(--t-strong)' }}>
+      <div className="inset grid gap-2.5 p-4">
+        <div className="flex items-center gap-2">
+          <ClipboardList size={16} className="text-primary" />
+          <strong className="text-sm text-foreground">
             待我审核（{draftList.length}）
           </strong>
-          <a
-            href="/growth/copywriter"
-            className="btn btn-outline btn-sm"
-            style={{ marginLeft: 'auto' }}
-          >
+          <a href="/growth/copywriter" className="btn btn-outline btn-sm ml-auto">
             去审核
           </a>
         </div>
@@ -173,7 +169,7 @@ export function MarketingTaskCenter({ brandSlug = 'rheem' }: { brandSlug?: strin
               <tbody>
                 {draftList.map((c) => (
                   <tr key={c.id}>
-                    <td style={{ fontWeight: 700 }}>{c.question || c.channel}</td>
+                    <td className="font-bold">{c.question || c.channel}</td>
                     <td>
                       <span className="badge">{c.channel}</span>
                     </td>
@@ -185,36 +181,28 @@ export function MarketingTaskCenter({ brandSlug = 'rheem' }: { brandSlug?: strin
             </table>
           </div>
         ) : (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              color: 'var(--success)',
-              fontSize: 13,
-            }}
-          >
+          <div className="flex items-center gap-2 text-[13px] text-success">
             <CheckCircle2 size={15} />
             暂无待审内容，审核队列已清空。
           </div>
         )}
       </div>
 
-      <p
-        style={{
-          fontSize: 12,
-          color: 'var(--t-tertiary)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-        }}
-      >
+      <p className="flex items-center gap-1.5 text-xs text-muted-foreground/80">
         <AlertCircle size={12} />
         闭环：GEO 探测发现缺口 → 生成内容(带策略) → 此处审核 → 发布 → 闭环实验验证 lift。
       </p>
     </section>
   );
 }
+
+/** tone 语义映射（原 CSS 变量动态色，2026-08 三期收编为类名） */
+const FLOW_TONE: Record<string, { border: string; text: string }> = {
+  danger: { border: 'border-t-destructive', text: 'text-destructive' },
+  warning: { border: 'border-t-warning', text: 'text-warning' },
+  brand: { border: 'border-t-primary', text: 'text-primary' },
+  success: { border: 'border-t-success', text: 'text-success' },
+};
 
 function FlowCard({
   icon: Icon,
@@ -227,34 +215,19 @@ function FlowCard({
   icon: any;
   label: string;
   value: number;
-  tone: string;
+  tone: 'danger' | 'warning' | 'brand' | 'success';
   href: string;
   hint: string;
 }) {
+  const t = FLOW_TONE[tone];
   return (
-    <a
-      href={href}
-      className="inset"
-      style={{
-        padding: 14,
-        display: 'grid',
-        gap: 6,
-        textDecoration: 'none',
-        borderTop: `3px solid ${tone}`,
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span className="t-label" style={{ color: 'var(--t-secondary)' }}>
-          {label}
-        </span>
-        <Icon size={15} style={{ color: tone }} />
+    <a href={href} className={`inset grid gap-1.5 border-t-[3px] p-3.5 no-underline ${t.border}`}>
+      <div className="flex items-center justify-between">
+        <span className="t-label text-muted-foreground">{label}</span>
+        <Icon size={15} className={t.text} />
       </div>
-      <div
-        style={{ fontSize: 28, fontWeight: 800, color: tone, fontVariantNumeric: 'tabular-nums' }}
-      >
-        {value}
-      </div>
-      <span style={{ fontSize: 11, color: 'var(--t-tertiary)' }}>{hint}</span>
+      <div className={`text-[28px] font-extrabold tabular-nums ${t.text}`}>{value}</div>
+      <span className="text-[11px] text-muted-foreground/80">{hint}</span>
     </a>
   );
 }

@@ -3,6 +3,7 @@ import { ProductCatalogImagePreview, ProductManualPdfUploader } from './media-pa
 import { OfficialProductDetailEditor, ProductSitePublishingPanel } from './site-publishing';
 // 目录行与网格簇（行/空态/网格）
 // 2026-08 从 products/page.tsx 机械化拆出：逻辑零改动，只做搬迁。
+// 2026-08 全页 UX 重构三期 · WorkspaceKit 化：渲染层去内联样式，静态布局全走 Tailwind 语义 token。
 
 import {
   Suspense,
@@ -445,48 +446,20 @@ export function ProductCatalogRow({
     canUpdateProduct && editing && typeof document !== 'undefined'
       ? createPortal(
           <div
-            className="product-edit-backdrop"
+            className="product-edit-backdrop fixed inset-0 z-[1000] grid place-items-center bg-[rgba(15,23,42,0.45)] p-6"
             role="presentation"
             onMouseDown={() => setEditing(false)}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              zIndex: 1000,
-              display: 'grid',
-              placeItems: 'center',
-              padding: 24,
-              background: 'rgba(15, 23, 42, 0.45)',
-            }}
           >
             <form
-              className="product-edit-modal"
+              className="product-edit-modal grid w-[min(1120px,100%)] max-h-[min(900px,calc(100vh-48px))] grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden rounded-lg border bg-card shadow-[var(--sh-lg)]"
               onSubmit={saveEdit}
               onMouseDown={(event) => event.stopPropagation()}
               role="dialog"
               aria-modal="true"
               aria-labelledby={`product-edit-title-${product.id}`}
-              style={{
-                width: 'min(1120px, 100%)',
-                maxHeight: 'min(900px, calc(100vh - 48px))',
-                display: 'grid',
-                gridTemplateRows: 'auto minmax(0, 1fr) auto',
-                background: 'var(--surface-1)',
-                borderRadius: 'var(--r-xl)',
-                border: '1px solid var(--border)',
-                boxShadow: 'var(--sh-lg)',
-                overflow: 'hidden',
-              }}
             >
               <header
-                className="product-edit-modal-head"
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 16,
-                  alignItems: 'flex-start',
-                  padding: 18,
-                  borderBottom: '1px solid var(--border)',
-                }}
+                className="product-edit-modal-head flex items-start justify-between gap-4 border-b p-[18px]"
               >
                 <div>
                   <p className="t-label">编辑产品</p>
@@ -510,8 +483,7 @@ export function ProductCatalogRow({
 
               <div
                 ref={editBodyRef}
-                className="product-edit-modal-body"
-                style={{ overflow: 'auto', padding: 18, display: 'grid', gap: 14 }}
+                className="product-edit-modal-body grid gap-3.5 overflow-auto p-[18px]"
               >
                 <ProductEditProgressStrip
                   items={editProgressItems}
@@ -524,8 +496,7 @@ export function ProductCatalogRow({
 
                 <section
                   id={`product-edit-section-master-${product.id}`}
-                  className="product-edit-section"
-                  style={{ display: 'grid', gap: 12 }}
+                  className="product-edit-section grid gap-3"
                 >
                   <div className="product-edit-section-head">
                     <h3>1. 产品主数据</h3>
@@ -534,14 +505,9 @@ export function ProductCatalogRow({
                     </span>
                   </div>
                   <div
-                    className="product-edit-field-grid"
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-                      gap: 12,
-                    }}
+                    className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3"
                   >
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">品牌</span>
                       <input
                         className="input"
@@ -550,7 +516,7 @@ export function ProductCatalogRow({
                         readOnly
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">产品名称</span>
                       <input
                         className="input"
@@ -559,7 +525,7 @@ export function ProductCatalogRow({
                         onChange={(event) => patchDraft({ name: event.target.value })}
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">型号</span>
                       <input
                         className="input"
@@ -568,7 +534,7 @@ export function ProductCatalogRow({
                         onChange={(event) => patchDraft({ model: event.target.value })}
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">分类</span>
                       <select
                         className="input"
@@ -588,7 +554,7 @@ export function ProductCatalogRow({
                         ))}
                       </select>
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">系统</span>
                       <input
                         className="input"
@@ -604,8 +570,7 @@ export function ProductCatalogRow({
 
                 <section
                   id={`product-edit-section-category-${product.id}`}
-                  className="product-edit-section"
-                  style={{ display: 'grid', gap: 12 }}
+                  className="product-edit-section grid gap-3"
                 >
                   <div className="product-edit-section-head">
                     <h3>产品分类绑定</h3>
@@ -613,36 +578,28 @@ export function ProductCatalogRow({
                   </div>
                   {categoryLoading ? (
                     <div
-                      className="inset"
-                      style={{ padding: 12, color: 'var(--t-secondary)', fontSize: 13 }}
+                      className="inset p-3 text-[13px] text-muted-foreground"
                     >
                       正在加载产品分类...
                     </div>
                   ) : categoryError ? (
                     <div
-                      className="inset"
+                      className="inset p-3 text-[13px] text-destructive"
                       role="alert"
-                      style={{ padding: 12, color: 'var(--danger)', fontSize: 13 }}
                     >
                       产品分类加载失败：{String((categoryError as Error)?.message || categoryError)}
                     </div>
                   ) : !productCategoryTree.length ? (
                     <div
-                      className="inset"
-                      style={{ padding: 12, color: 'var(--t-secondary)', fontSize: 13 }}
+                      className="inset p-3 text-[13px] text-muted-foreground"
                     >
                       当前品牌暂无可绑定的产品分类。
                     </div>
                   ) : (
                     <div
-                      className="product-edit-field-grid"
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-                        gap: 12,
-                      }}
+                      className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3"
                     >
-                      <label style={{ display: 'grid', gap: 6 }}>
+                      <label className="grid gap-1.5">
                         <span className="t-label">一级分类</span>
                         <select
                           className="input"
@@ -664,7 +621,7 @@ export function ProductCatalogRow({
                           ))}
                         </select>
                       </label>
-                      <label style={{ display: 'grid', gap: 6 }}>
+                      <label className="grid gap-1.5">
                         <span className="t-label">二级分类</span>
                         <select
                           className="input"
@@ -692,7 +649,7 @@ export function ProductCatalogRow({
                           ))}
                         </select>
                       </label>
-                      <label style={{ display: 'grid', gap: 6 }}>
+                      <label className="grid gap-1.5">
                         <span className="t-label">三级分类（可选）</span>
                         <select
                           className="input"
@@ -721,7 +678,7 @@ export function ProductCatalogRow({
                       </label>
                     </div>
                   )}
-                  <p style={{ margin: 0, color: 'var(--t-tertiary)', fontSize: 12 }}>
+                  <p className="m-0 text-xs text-muted-foreground/70">
                     当前分类路径：
                     {selectedProductCategoryPath || product.categoryPath || '未完成绑定'}
                     。运营只需要选产品库真实分类，官网目录可自动映射，也可在下方人工覆盖。
@@ -736,20 +693,15 @@ export function ProductCatalogRow({
                   />
                 </div>
 
-                <section className="product-edit-section" style={{ display: 'grid', gap: 12 }}>
+                <section className="product-edit-section grid gap-3">
                   <div className="product-edit-section-head">
                     <h3>产品库内部价格</h3>
                     {rowState.dirty && <span className="badge badge-warning">有未保存修改</span>}
                   </div>
                   <div
-                    className="product-edit-field-grid"
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-                      gap: 12,
-                    }}
+                    className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3"
                   >
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">产品库目录价</span>
                       <input
                         className="input"
@@ -762,7 +714,7 @@ export function ProductCatalogRow({
                         placeholder="不填则为 0"
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">经销商基准价</span>
                       <input
                         className="input"
@@ -775,7 +727,7 @@ export function ProductCatalogRow({
                         placeholder="内部供货/结算参考价，不对官网展示"
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">币种</span>
                       <input
                         className="input"
@@ -786,32 +738,23 @@ export function ProductCatalogRow({
                       />
                     </label>
                   </div>
-                  <p style={{ margin: 0, color: 'var(--t-tertiary)', fontSize: 12 }}>
+                  <p className="m-0 text-xs text-muted-foreground/70">
                     经销商基准价属于产品库内部价，不会进入官网展示；具体到某个经销商的协议价后续应走价格表/报价模块。
                   </p>
                 </section>
 
                 <section
                   id={`product-edit-section-website-content-${product.id}`}
-                  className="product-edit-section"
-                  style={{ display: 'grid', gap: 12 }}
+                  className="product-edit-section grid gap-3"
                 >
                   <div className="product-edit-section-head">
                     <h3>2. 官网展示内容</h3>
                     <span className="badge badge-grey">保存产品库公共内容，供官网读取</span>
                   </div>
                   <div
-                    className="inset"
-                    style={{
-                      padding: 12,
-                      display: 'grid',
-                      gap: 4,
-                      color: 'var(--t-secondary)',
-                      fontSize: 12,
-                      lineHeight: 1.5,
-                    }}
+                    className="inset grid gap-1 p-3 text-xs leading-normal text-muted-foreground"
                   >
-                    <strong style={{ color: 'var(--t-primary)' }}>
+                    <strong className="text-foreground">
                       运营填报重点：先确认官网标题/摘要/卖点，再确认价格展示方式，最后检查官网目录挂载。
                     </strong>
                     <span>
@@ -819,14 +762,9 @@ export function ProductCatalogRow({
                     </span>
                   </div>
                   <div
-                    className="product-edit-field-grid"
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-                      gap: 12,
-                    }}
+                    className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3"
                   >
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">公开路径 slug</span>
                       <input
                         className="input"
@@ -836,7 +774,7 @@ export function ProductCatalogRow({
                         placeholder="留空则按 SKU 生成"
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">系列</span>
                       <input
                         className="input"
@@ -844,7 +782,7 @@ export function ProductCatalogRow({
                         onChange={(event) => patchDraft({ series: event.target.value })}
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">英文名</span>
                       <input
                         className="input"
@@ -854,7 +792,7 @@ export function ProductCatalogRow({
                         }
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">标语</span>
                       <input
                         className="input"
@@ -862,7 +800,7 @@ export function ProductCatalogRow({
                         onChange={(event) => patchDraft({ tagline: event.target.value })}
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">官网摘要</span>
                       <input
                         className="input"
@@ -870,7 +808,7 @@ export function ProductCatalogRow({
                         onChange={(event) => patchDraft({ publicSummary: event.target.value })}
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">标签</span>
                       <input
                         className="input"
@@ -879,7 +817,7 @@ export function ProductCatalogRow({
                         placeholder="新品, 高端"
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">官网排序</span>
                       <input
                         className="input"
@@ -891,14 +829,9 @@ export function ProductCatalogRow({
                     </label>
                   </div>
                   <div
-                    className="product-edit-field-grid"
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-                      gap: 12,
-                    }}
+                    className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3"
                   >
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">官网价格展示方式</span>
                       <select
                         className="input"
@@ -914,7 +847,7 @@ export function ProductCatalogRow({
                         <option value="contact_dealer">联系经销商</option>
                       </select>
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">官网参考价</span>
                       <input
                         className="input"
@@ -927,7 +860,7 @@ export function ProductCatalogRow({
                         placeholder="选择显示官网参考价时填写"
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">官网最低价</span>
                       <input
                         className="input"
@@ -940,7 +873,7 @@ export function ProductCatalogRow({
                         placeholder="价格区间最低价"
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">官网最高价</span>
                       <input
                         className="input"
@@ -953,7 +886,7 @@ export function ProductCatalogRow({
                         placeholder="价格区间最高价"
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">活动价</span>
                       <input
                         className="input"
@@ -965,7 +898,7 @@ export function ProductCatalogRow({
                         placeholder="可选"
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">价格单位</span>
                       <input
                         className="input"
@@ -974,7 +907,7 @@ export function ProductCatalogRow({
                         placeholder="台 / 套 / 件"
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">价格标签</span>
                       <input
                         className="input"
@@ -983,7 +916,7 @@ export function ProductCatalogRow({
                         placeholder="官网参考价 / 起售价"
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">价格说明</span>
                       <input
                         className="input"
@@ -992,9 +925,7 @@ export function ProductCatalogRow({
                         placeholder="例如：最终成交价以经销商报价为准"
                       />
                     </label>
-                    <label
-                      style={{ display: 'flex', gap: 8, alignItems: 'center', paddingTop: 22 }}
-                    >
+                    <label className="flex items-center gap-2 pt-[22px]">
                       <input
                         type="checkbox"
                         checked={draft.taxIncluded}
@@ -1004,14 +935,9 @@ export function ProductCatalogRow({
                     </label>
                   </div>
                   <div
-                    className="product-edit-field-grid"
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))',
-                      gap: 12,
-                    }}
+                    className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,300px),1fr))] gap-3"
                   >
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">官网功能说明</span>
                       <textarea
                         className="input"
@@ -1023,7 +949,7 @@ export function ProductCatalogRow({
                         }
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">官网核心亮点</span>
                       <textarea
                         className="input"
@@ -1033,7 +959,7 @@ export function ProductCatalogRow({
                         placeholder={'一行一个，例如：\n热效率: 95%\n适用面积: 80-180m2'}
                       />
                     </label>
-                    <label style={{ display: 'grid', gap: 6 }}>
+                    <label className="grid gap-1.5">
                       <span className="t-label">官网常见问题</span>
                       <textarea
                         className="input"
@@ -1050,8 +976,7 @@ export function ProductCatalogRow({
 
                 <section
                   id={`product-edit-section-website-mapping-${product.id}`}
-                  className="product-edit-section"
-                  style={{ display: 'grid', gap: 12 }}
+                  className="product-edit-section grid gap-3"
                 >
                   <div className="product-edit-section-head">
                     <h3>官网目录与发布</h3>
@@ -1070,8 +995,7 @@ export function ProductCatalogRow({
 
                 <section
                   id={`product-edit-section-assets-${product.id}`}
-                  className="product-edit-section"
-                  style={{ display: 'grid', gap: 12 }}
+                  className="product-edit-section grid gap-3"
                 >
                   <div className="product-edit-section-head">
                     <h3>3. 图片 / 素材</h3>
@@ -1084,52 +1008,39 @@ export function ProductCatalogRow({
                     </span>
                   </div>
                   <div
-                    className="product-edit-media-panel"
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '160px minmax(0, 1fr)',
-                      gap: 14,
-                      alignItems: 'start',
-                    }}
+                    className="product-edit-media-panel grid grid-cols-[160px_minmax(0,1fr)] items-start gap-3.5"
                   >
                     <div
-                      className="product-edit-media-thumb"
-                      style={{
-                        width: 146,
-                        aspectRatio: '1 / 1',
-                        display: 'grid',
-                        placeItems: 'center',
-                        overflow: 'hidden',
-                      }}
+                      className="product-edit-media-thumb grid aspect-square w-[146px] place-items-center overflow-hidden"
                     >
                       {draft.mainImage ? (
                         <img
                           src={draft.mainImage.previewUrl}
                           alt="新产品主图预览"
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          className="h-full w-full object-cover"
                         />
                       ) : imageSrc ? (
                         <img
                           src={imageSrc}
                           alt={product.name || '产品主图'}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          className="h-full w-full object-cover"
                         />
                       ) : (
-                        <Image size={28} style={{ color: 'var(--t-tertiary)' }} />
+                        <Image size={28} className="text-muted-foreground/70" />
                       )}
                     </div>
-                    <div style={{ display: 'grid', gap: 10, alignContent: 'start', minWidth: 0 }}>
-                      <p style={{ margin: 0, color: 'var(--t-secondary)', fontSize: 12 }}>
+                    <div className="grid min-w-0 content-start gap-2.5">
+                      <p className="m-0 text-xs text-muted-foreground">
                         编辑产品库主图，保存后同步到产品库素材引用。
                       </p>
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <div className="flex flex-wrap gap-2">
                         <label className="btn btn-outline btn-sm">
                           <Image size={13} />
                           上传主图
                           <input
                             type="file"
                             accept="image/png,image/jpeg,.png,.jpg,.jpeg"
-                            style={{ display: 'none' }}
+                            className="hidden"
                             onChange={(event) => {
                               selectEditMainImage(event.target.files?.[0] || null);
                               event.currentTarget.value = '';
@@ -1155,8 +1066,7 @@ export function ProductCatalogRow({
 
                 <section
                   id={`product-edit-section-assets-detail-${product.id}`}
-                  className="product-edit-section"
-                  style={{ display: 'grid', gap: 12 }}
+                  className="product-edit-section grid gap-3"
                 >
                   <div className="product-edit-section-head">
                     <h3>产品公共详情 / 长图</h3>
@@ -1164,16 +1074,14 @@ export function ProductCatalogRow({
                   </div>
                   {contentLoading ? (
                     <div
-                      className="inset"
-                      style={{ padding: 12, color: 'var(--t-secondary)', fontSize: 13 }}
+                      className="inset p-3 text-[13px] text-muted-foreground"
                     >
                       正在加载官网产品详情...
                     </div>
                   ) : contentError ? (
                     <div
-                      className="inset"
+                      className="inset p-3 text-[13px] text-warning"
                       role="alert"
-                      style={{ padding: 12, color: 'var(--warning)', fontSize: 13 }}
                     >
                       官网产品详情加载失败；基础信息仍可编辑保存。
                       {String((contentError as Error)?.message || contentError)}
@@ -1189,8 +1097,7 @@ export function ProductCatalogRow({
                 </section>
                 <section
                   id={`product-edit-section-manuals-${product.id}`}
-                  className="product-edit-section"
-                  style={{ display: 'grid', gap: 12 }}
+                  className="product-edit-section grid gap-3"
                 >
                   <div className="product-edit-section-head">
                     <h3>产品说明 PDF</h3>
@@ -1205,8 +1112,7 @@ export function ProductCatalogRow({
 
                 <section
                   id={`product-edit-section-check-${product.id}`}
-                  className="product-edit-section"
-                  style={{ display: 'grid', gap: 12 }}
+                  className="product-edit-section grid gap-3"
                 >
                   <div className="product-edit-section-head">
                     <h3>4. 发布检查</h3>
@@ -1226,12 +1132,7 @@ export function ProductCatalogRow({
                     onNavigate={scrollToEditSection}
                   />
                   <div
-                    className="product-edit-field-grid"
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
-                      gap: 12,
-                    }}
+                    className="product-edit-field-grid grid grid-cols-[repeat(auto-fit,minmax(min(100%,220px),1fr))] gap-3"
                   >
                     {editProgressItems.map((item) => (
                       <MappingCheckItem
@@ -1256,21 +1157,14 @@ export function ProductCatalogRow({
                     ))}
                   </div>
                   <div
-                    className="inset"
-                    style={{
-                      padding: 12,
-                      color: rowState.success ? 'var(--success)' : 'var(--t-secondary)',
-                      fontSize: 13,
-                      lineHeight: 1.5,
-                    }}
+                    className={`inset p-3 text-[13px] leading-normal ${rowState.success ? 'text-success' : 'text-muted-foreground'}`}
                   >
                     {rowState.success || saveFeedbackPreview}
                   </div>
                   {rowState.error ? (
                     <div
-                      className="inset"
+                      className="inset p-3 text-[13px] text-destructive"
                       role="alert"
-                      style={{ padding: 12, color: 'var(--danger)', fontSize: 13 }}
                     >
                       {rowState.error}
                     </div>
@@ -1279,21 +1173,12 @@ export function ProductCatalogRow({
               </div>
 
               <footer
-                className="product-edit-modal-actions"
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 8,
-                  padding: 18,
-                  borderTop: '1px solid var(--border)',
-                  background: 'var(--surface-2)',
-                }}
+                className="product-edit-modal-actions flex items-center justify-between gap-2 border-t bg-secondary p-[18px]"
               >
                 <span className={rowState.dirty ? 'badge badge-warning' : 'badge badge-grey'}>
                   {rowState.dirty ? '有未保存修改' : '无未保存修改'}
                 </span>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     className="btn btn-outline btn-sm"
@@ -1351,66 +1236,54 @@ export function ProductCatalogRow({
           </td>
         ) : null}
         <td>
-          <div style={{ minWidth: 0, fontWeight: 800 }}>
+          <div className="min-w-0 font-extrabold">
             {product.categoryPath || websiteCategory || product.category || '未分类'}
           </div>
         </td>
         <td>
           {libraryMeta.pilot === true ? (
-            <div style={{ marginBottom: 6 }}>
+            <div className="mb-1.5">
               <StatusPill tone="info">试导入</StatusPill>
             </div>
           ) : null}
-          <div
-            style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', minWidth: 0 }}
-          >
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
             {rowState.dirty && <span className="badge badge-warning">有未保存修改</span>}
             {rowBusyText && <span className="badge badge-info">{rowBusyText}</span>}
           </div>
           <h3
-            style={{
-              margin: 0,
-              color: 'var(--t-primary)',
-              fontSize: 15,
-              lineHeight: 1.32,
-              fontWeight: 800,
-              overflow: 'hidden',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-            }}
+            className="m-0 line-clamp-2 text-[15px] leading-[1.32] font-extrabold text-foreground"
             title={product.name}
           >
             {product.name}
           </h3>
         </td>
         <td>
-          <div style={{ display: 'grid', gap: 5, minWidth: 150 }}>
+          <div className="grid min-w-[150px] gap-[5px]">
             <span className="mono-cell" title="产品型号">
               {product.model || '待补齐'}
             </span>
-            <span style={{ color: 'var(--t-tertiary)', fontSize: 11 }}>
+            <span className="text-[11px] text-muted-foreground/70">
               SKU · <span className="mono-cell">{product.sku || '待补齐'}</span>
             </span>
           </div>
         </td>
         <td>
-          <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+          <span className="text-xs text-muted-foreground">
             {text(brandMeta.series || libraryMeta.series) || '待补齐'}
           </span>
         </td>
         <td>
           {readiness.status ? (
-            <div style={{ display: 'grid', gap: 5, minWidth: 150 }} title={readiness.details}>
+            <div className="grid min-w-[150px] gap-[5px]" title={readiness.details}>
               <StatusPill tone={readiness.status === 'needs_completion' ? 'warning' : 'success'}>
                 {readiness.status === 'needs_completion' ? '待补全' : '资料就绪'}
               </StatusPill>
-              <span style={{ color: 'var(--t-secondary)', fontSize: 11 }}>
+              <span className="text-[11px] text-muted-foreground tabular-nums">
                 {readiness.ready} / {readiness.total} 个维度就绪
               </span>
               {reviewNotes.length ? (
                 <span
-                  style={{ color: 'var(--warning)', fontSize: 11, lineHeight: 1.35 }}
+                  className="text-[11px] leading-[1.35] text-warning"
                   title={reviewNotes.join('\n')}
                 >
                   {reviewNotes[0]}
@@ -1418,19 +1291,11 @@ export function ProductCatalogRow({
               ) : null}
             </div>
           ) : (
-            <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>未评估</span>
+            <span className="text-xs text-muted-foreground/70">未评估</span>
           )}
         </td>
         <td>
-          <span
-            className="pill-brand"
-            style={{
-              maxWidth: '100%',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
+          <span className="pill-brand max-w-full truncate">
             {displayBrand(product.brand)}
           </span>
         </td>
@@ -1447,7 +1312,7 @@ export function ProductCatalogRow({
           <WebsiteShelfSummaryCell assignments={assignments} productBrand={product.brand} />
         </td>
         {canUpdateProduct || canPublishProduct || canDeleteProduct ? (
-          <td style={{ textAlign: 'right' }}>
+          <td className="text-right">
             <div className="table-row-actions product-catalog-row-actions">
               {canUpdateProduct && (
                 <button
@@ -1493,12 +1358,11 @@ export function ProductCatalogRow({
       {(rowState.success || rowState.error) && (
         <tr>
           <td colSpan={feedbackColSpan}>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div className="flex flex-wrap gap-2">
               {rowState.success && (
                 <span
-                  className="badge badge-success"
+                  className="badge badge-success whitespace-normal [overflow-wrap:anywhere]"
                   role="status"
-                  style={{ whiteSpace: 'normal', overflowWrap: 'anywhere' }}
                 >
                   <CheckCircle2 size={13} />
                   {rowState.success}
@@ -1506,9 +1370,8 @@ export function ProductCatalogRow({
               )}
               {rowState.error && (
                 <span
-                  className="badge badge-warning"
+                  className="badge badge-warning whitespace-normal [overflow-wrap:anywhere]"
                   role="alert"
-                  style={{ whiteSpace: 'normal', overflowWrap: 'anywhere' }}
                 >
                   <XCircle size={13} />
                   {rowState.error}
@@ -1557,15 +1420,11 @@ function ProductGrid({
 }) {
   if (!items.length) {
     return (
-      <div
-        className="card-elevated"
-        style={{ padding: '44px 20px', textAlign: 'center', color: 'var(--t-secondary)' }}
-      >
-        <p style={{ fontSize: 14, fontWeight: 600 }}>当前筛选下暂无产品</p>
+      <div className="card-elevated px-5 py-11 text-center text-muted-foreground">
+        <p className="text-sm font-semibold">当前筛选下暂无产品</p>
         <button
           type="button"
-          className="btn btn-outline btn-sm"
-          style={{ marginTop: 12 }}
+          className="btn btn-outline btn-sm mt-3"
           onClick={onReset}
         >
           查看全部产品
@@ -1575,106 +1434,41 @@ function ProductGrid({
   }
 
   return (
-    <section
-      style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-        gap: 14,
-      }}
-    >
+    <section className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3.5">
       {items.map((product) => {
         const stock = STOCK[product.stock];
         return (
-          <article key={product.id} className="card-elevated" style={{ padding: 16 }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                justifyContent: 'space-between',
-                gap: 10,
-              }}
-            >
-              <div style={{ minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          <article key={product.id} className="card-elevated p-4">
+            <div className="flex items-start justify-between gap-2.5">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5">
                   <span className="pill-neutral">{product.brand}</span>
                   {product.isNew && <span className="pill-brand">新品</span>}
                 </div>
-                <h2
-                  style={{
-                    marginTop: 10,
-                    color: 'var(--t-primary)',
-                    fontSize: 16,
-                    lineHeight: 1.35,
-                    fontWeight: 700,
-                  }}
-                >
+                <h2 className="mt-2.5 text-base leading-[1.35] font-bold text-foreground">
                   {product.name}
                 </h2>
               </div>
-              <span className={`badge ${stock.className}`} style={{ flexShrink: 0 }}>
+              <span className={`badge ${stock.className} shrink-0`}>
                 {stock.label}
               </span>
             </div>
 
-            <div
-              style={{
-                marginTop: 8,
-                minHeight: 56,
-                color: 'var(--t-secondary)',
-                fontSize: 12,
-                lineHeight: 1.55,
-              }}
-            >
+            <div className="mt-2 min-h-14 text-xs leading-[1.55] text-muted-foreground">
               <p>{product.model || '标准型号'}</p>
               <p>{product.spec || '参数待同步'}</p>
             </div>
 
-            <div
-              style={{
-                marginTop: 14,
-                paddingTop: 14,
-                borderTop: '1px solid var(--border)',
-                display: 'flex',
-                alignItems: 'flex-end',
-                justifyContent: 'space-between',
-                gap: 12,
-              }}
-            >
+            <div className="mt-3.5 flex items-end justify-between gap-3 border-t pt-3.5">
               <div>
-                <div
-                  style={{
-                    color: 'var(--t-tertiary)',
-                    fontSize: 11,
-                    textDecoration: 'line-through',
-                  }}
-                >
+                <div className="text-[11px] text-muted-foreground/70 line-through tabular-nums">
                   指导价 {fmt(product.marketPrice)}
                 </div>
-                <div
-                  style={{
-                    marginTop: 2,
-                    color: 'var(--brand)',
-                    fontSize: 22,
-                    lineHeight: 1.1,
-                    fontWeight: 700,
-                    fontVariantNumeric: 'tabular-nums',
-                  }}
-                >
+                <div className="mt-0.5 text-[22px] leading-[1.1] font-bold text-primary tabular-nums">
                   {fmt(product.dealerPrice)}
                 </div>
               </div>
-              <span
-                style={{
-                  color: 'var(--success)',
-                  background: 'var(--success-bg)',
-                  border: '1px solid rgba(120,157,74,0.22)',
-                  borderRadius: 'var(--r-lg)',
-                  padding: '4px 8px',
-                  fontSize: 12,
-                  fontWeight: 700,
-                  whiteSpace: 'nowrap',
-                }}
-              >
+              <span className="rounded-lg border border-success/25 bg-[var(--success-bg)] px-2 py-1 text-xs font-bold whitespace-nowrap text-success tabular-nums">
                 毛利 {pct(product.marginRate)}
               </span>
             </div>

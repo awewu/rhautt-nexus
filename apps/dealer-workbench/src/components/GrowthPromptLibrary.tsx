@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * 提示词模板库（2026-08 全页 UX 重构三期 · WorkspaceKit 化）。
+ * 仅重构 JSX 渲染层：40 处内联样式清零，静态布局全走 Tailwind（v4 + shadcn token）；
+ * 外层为裸片段容器（保持裸片段），hooks/事件/api 逻辑保持不变。
+ */
+
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
@@ -248,26 +254,26 @@ export default function GrowthPromptLibrary() {
   const bodyLocked = Boolean(editing && (editing.usageCount > 0 || editing.verifiedCount > 0));
 
   return (
-    <section style={{ display: 'grid', gap: 16 }}>
+    <section className="grid gap-4">
       {message && (
-        <div className="inset" role="status" style={{ color: 'var(--success)' }}>
+        <div className="inset text-success" role="status">
           {message}
         </div>
       )}
       {error && (
-        <div className="error-state" role="alert" style={{ justifyItems: 'start', padding: 14 }}>
+        <div className="error-state justify-items-start p-3.5" role="alert">
           {error}
         </div>
       )}
 
       {editorOpen && (
-        <div className="card-flat" style={{ display: 'grid', gap: 14 }}>
-          <div className="workbench-section-header" style={{ marginBottom: 0 }}>
+        <div className="card-flat grid gap-3.5">
+          <div className="workbench-section-header mb-0">
             <div>
               <p className="workbench-section-header__eyebrow">
                 {editing ? '编辑模板' : '新建模板'}
               </p>
-              <h2 className="workbench-section-header__title" style={{ fontSize: 17 }}>
+              <h2 className="workbench-section-header__title text-[17px]">
                 {editing ? editing.name : '创建提示词'}
               </h2>
             </div>
@@ -280,14 +286,8 @@ export default function GrowthPromptLibrary() {
               <X size={17} />
             </button>
           </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: 12,
-            }}
-          >
-            <label style={{ display: 'grid', gap: 6 }}>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-3">
+            <label className="grid gap-1.5">
               <span className="t-label">名称</span>
               <input
                 className="input"
@@ -296,7 +296,7 @@ export default function GrowthPromptLibrary() {
                 maxLength={120}
               />
             </label>
-            <label style={{ display: 'grid', gap: 6 }}>
+            <label className="grid gap-1.5">
               <span className="t-label">品牌</span>
               <select
                 className="input"
@@ -311,7 +311,7 @@ export default function GrowthPromptLibrary() {
                 ))}
               </select>
             </label>
-            <label style={{ display: 'grid', gap: 6 }}>
+            <label className="grid gap-1.5">
               <span className="t-label">渠道</span>
               <select
                 className="input"
@@ -326,7 +326,7 @@ export default function GrowthPromptLibrary() {
                 ))}
               </select>
             </label>
-            <label style={{ display: 'grid', gap: 6 }}>
+            <label className="grid gap-1.5">
               <span className="t-label">品类</span>
               <input
                 className="input"
@@ -336,7 +336,7 @@ export default function GrowthPromptLibrary() {
               />
             </label>
           </div>
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label className="grid gap-1.5">
             <span className="t-label">提示词正文</span>
             <textarea
               className="textarea"
@@ -347,11 +347,11 @@ export default function GrowthPromptLibrary() {
             />
           </label>
           {bodyLocked && (
-            <span style={{ color: 'var(--t-secondary)', fontSize: 12 }}>
+            <span className="text-xs text-muted-foreground">
               该版本已有使用或验证记录，正文已锁定；名称、品牌、渠道和品类仍可维护。
             </span>
           )}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
+          <div className="flex flex-wrap justify-end gap-2">
             <button className="btn btn-ghost btn-sm" onClick={closeEditor}>
               取消
             </button>
@@ -364,25 +364,20 @@ export default function GrowthPromptLibrary() {
       )}
 
       <div className="toolbar">
-        <div style={{ position: 'relative', flex: '1 1 240px', minWidth: 180 }}>
-          <Search
-            size={15}
-            style={{ position: 'absolute', left: 11, top: 10, color: 'var(--t-tertiary)' }}
-          />
+        <div className="relative min-w-45 flex-[1_1_240px]">
+          <Search size={15} className="absolute top-2.5 left-2.75 text-muted-foreground/70" />
           <input
-            className="input"
+            className="input pl-8.5"
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
             placeholder="搜索名称、正文或品类"
-            style={{ paddingLeft: 34 }}
           />
         </div>
         <select
-          className="input"
+          className="input w-35"
           value={brandFilter}
           onChange={(event) => setBrandFilter(event.target.value)}
           aria-label="品牌筛选"
-          style={{ width: 140 }}
         >
           <option value="all">全部品牌</option>
           {BRANDS.map((brand) => (
@@ -392,11 +387,10 @@ export default function GrowthPromptLibrary() {
           ))}
         </select>
         <select
-          className="input"
+          className="input w-40"
           value={channelFilter}
           onChange={(event) => setChannelFilter(event.target.value)}
           aria-label="渠道筛选"
-          style={{ width: 160 }}
         >
           <option value="all">全部渠道</option>
           {CHANNELS.map((channel) => (
@@ -406,11 +400,10 @@ export default function GrowthPromptLibrary() {
           ))}
         </select>
         <select
-          className="input"
+          className="input w-35"
           value={evidenceFilter}
           onChange={(event) => setEvidenceFilter(event.target.value as 'all' | EvidenceState)}
           aria-label="验证状态筛选"
-          style={{ width: 140 }}
         >
           <option value="all">全部验证状态</option>
           {Object.entries(EVIDENCE).map(([value, config]) => (
@@ -419,26 +412,17 @@ export default function GrowthPromptLibrary() {
             </option>
           ))}
         </select>
-        <div className="toolbar-group" style={{ marginLeft: 'auto' }}>
-          <div
-            style={{
-              display: 'inline-flex',
-              border: '1px solid var(--border-2)',
-              borderRadius: 'var(--r-lg)',
-              overflow: 'hidden',
-            }}
-          >
+        <div className="toolbar-group ml-auto">
+          <div className="inline-flex overflow-hidden rounded-lg border">
             <button
-              className={`btn btn-sm ${status === 'active' ? 'btn-brand' : 'btn-ghost'}`}
+              className={`btn btn-sm rounded-none border-0 ${status === 'active' ? 'btn-brand' : 'btn-ghost'}`}
               onClick={() => setStatus('active')}
-              style={{ borderRadius: 0, border: 0 }}
             >
               使用中
             </button>
             <button
-              className={`btn btn-sm ${status === 'archived' ? 'btn-brand' : 'btn-ghost'}`}
+              className={`btn btn-sm rounded-none border-0 ${status === 'archived' ? 'btn-brand' : 'btn-ghost'}`}
               onClick={() => setStatus('archived')}
-              style={{ borderRadius: 0, border: 0 }}
             >
               已归档
             </button>
@@ -459,27 +443,18 @@ export default function GrowthPromptLibrary() {
         </div>
       </div>
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 16,
-          flexWrap: 'wrap',
-          color: 'var(--t-secondary)',
-          fontSize: 12,
-        }}
-      >
+      <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground tabular-nums">
         <span>
-          <strong style={{ color: 'var(--t-primary)' }}>{visibleItems.length}</strong> 条模板
+          <strong className="text-foreground">{visibleItems.length}</strong> 条模板
         </span>
         <span>
-          累计复用 <strong style={{ color: 'var(--t-primary)' }}>{summary.usage}</strong> 次
+          累计复用 <strong className="text-foreground">{summary.usage}</strong> 次
         </span>
         <span>
-          完成验证 <strong style={{ color: 'var(--t-primary)' }}>{summary.verified}</strong> 次
+          完成验证 <strong className="text-foreground">{summary.verified}</strong> 次
         </span>
         <span>
-          正向反馈 <strong style={{ color: 'var(--success)' }}>{summary.positive}</strong> 次
+          正向反馈 <strong className="text-success">{summary.positive}</strong> 次
         </span>
       </div>
 
@@ -490,7 +465,7 @@ export default function GrowthPromptLibrary() {
         </div>
       ) : visibleItems.length ? (
         <div className="workbench-table-shell">
-          <table className="table" style={{ minWidth: 1050 }}>
+          <table className="table min-w-[1050px]">
             <thead>
               <tr>
                 <th>提示词</th>
@@ -499,7 +474,7 @@ export default function GrowthPromptLibrary() {
                 <th>复用</th>
                 <th>GEO 反馈</th>
                 <th>最近使用</th>
-                <th style={{ textAlign: 'right' }}>操作</th>
+                <th className="text-right">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -508,12 +483,12 @@ export default function GrowthPromptLibrary() {
                 const lift = Number(item.averageLift || 0);
                 return (
                   <tr key={item.id}>
-                    <td style={{ maxWidth: 360 }}>
-                      <div style={{ display: 'grid', gap: 5 }}>
-                        <strong style={{ color: 'var(--t-primary)' }}>{item.name}</strong>
+                    <td className="max-w-90">
+                      <div className="grid gap-1.25">
+                        <strong className="text-foreground">{item.name}</strong>
                         <span
                           title={item.promptBody}
-                          style={{ color: 'var(--t-secondary)', lineHeight: 1.45 }}
+                          className="leading-[1.45] text-muted-foreground"
                         >
                           {item.promptBody.length > 110
                             ? `${item.promptBody.slice(0, 110)}...`
@@ -522,7 +497,7 @@ export default function GrowthPromptLibrary() {
                       </div>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                      <div className="flex flex-wrap gap-1.25">
                         <span className="pill-neutral">{brandLabel(item.brandSlug)}</span>
                         <span className="pill-neutral">{channelLabel(item.channel)}</span>
                         {item.category && <span className="pill-neutral">{item.category}</span>}
@@ -531,25 +506,24 @@ export default function GrowthPromptLibrary() {
                     <td>
                       <span className={evidence.className}>{evidence.label}</span>
                     </td>
-                    <td>
+                    <td className="tabular-nums">
                       <strong>{item.usageCount}</strong> 次
                     </td>
                     <td>
-                      <div style={{ display: 'grid', gap: 3, whiteSpace: 'nowrap' }}>
+                      <div className="grid gap-0.75 whitespace-nowrap tabular-nums">
                         <strong
-                          style={{
-                            color:
-                              lift > 0
-                                ? 'var(--success)'
-                                : lift < 0
-                                  ? 'var(--danger)'
-                                  : 'var(--t-primary)',
-                          }}
+                          className={
+                            lift > 0
+                              ? 'text-success'
+                              : lift < 0
+                                ? 'text-destructive'
+                                : 'text-foreground'
+                          }
                         >
                           {lift > 0 ? '+' : ''}
                           {lift.toFixed(1)}pp
                         </strong>
-                        <span style={{ color: 'var(--t-tertiary)', fontSize: 11 }}>
+                        <span className="text-xs text-muted-foreground/70">
                           {item.verifiedCount} 次验证 · {item.positiveCount} 正向 ·{' '}
                           {item.negativeCount} 负向
                         </span>
@@ -557,7 +531,7 @@ export default function GrowthPromptLibrary() {
                     </td>
                     <td>{formatDate(item.lastUsedAt || item.updatedAt)}</td>
                     <td>
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+                      <div className="flex justify-end gap-1.5">
                         {item.status === 'active' && (
                           <Link
                             className="btn btn-outline btn-sm"
