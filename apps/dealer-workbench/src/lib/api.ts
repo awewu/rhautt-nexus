@@ -1262,6 +1262,28 @@ export const productMgmt = {
     }),
 };
 
+// 产品目录治理（关系图谱 + 疑似重复）
+export const productGovernance = {
+  dedupeCandidates: () => apiFetch('/api/v2/product-catalog/dedupe-candidates'),
+  listRelations: (productId: string) =>
+    apiFetch(`/api/v2/product-catalog/devices/${encodeURIComponent(productId)}/relations`),
+  upsertRelation: (productId: string, data: Record<string, unknown>) =>
+    apiFetch(`/api/v2/product-catalog/devices/${encodeURIComponent(productId)}/relations`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  removeRelation: (relId: string) =>
+    apiFetch(`/api/v2/product-catalog/relations/${encodeURIComponent(relId)}`, {
+      method: 'DELETE',
+    }),
+};
+
+// 问诊报告（瑞诺瓦问诊域产生；此处只读查看——飞轮"到访"证据链）
+export const diagnosisReports = {
+  list: () => apiFetch('/api/v2/diagnosis/reports'),
+  get: (reportId: string) => apiFetch(`/api/v2/diagnosis/reports/${encodeURIComponent(reportId)}`),
+};
+
 // CDP 数据连接层（只读展示：事件自动摄取的脱敏画像与分群；不出明文 PII）
 export const cdp = {
   listProfiles: (q: { segment?: string; limit?: number } = {}) =>

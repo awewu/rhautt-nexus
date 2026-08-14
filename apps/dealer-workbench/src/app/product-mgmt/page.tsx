@@ -8,6 +8,7 @@ import { productMgmt } from '../../lib/api';
 import { useListView, exportCsv } from '../../lib/useListView';
 import ListToolbar from '../../components/ListToolbar';
 import FocusProductsPanel from '../../components/FocusProductsPanel';
+import ProductGovernancePanel from '../../components/ProductGovernancePanel';
 
 function statusOf(isLoading: boolean, error: unknown, empty: boolean): AsyncStatus {
   if (isLoading) return 'loading';
@@ -96,6 +97,7 @@ export default function ProductMgmtPage() {
       />
 
       <FocusProductsPanel />
+      <ProductGovernancePanel />
 
       <div className="card" style={{ padding: 20, marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>

@@ -31,8 +31,10 @@ const TIMEOUT_MS = Number(process.env.GUARD_TIMEOUT_MS || 90_000);
 const AGGREGATES =
   /^(guard:all|guard:all:nonvisual|guard:all:nonvisual:evidence|harness:all|guard:ledger)$/;
 // 依赖外部环境（浏览器/staging/redis/在跑的服务），默认跳过，--all 时执行
+// redis-stream-dispatch：2026-08-13 用户确认挂起——本机 Redis 需密码（NOAUTH），
+// 属开发机环境问题非代码问题；生产/CI 用 --all 仍会执行，不是永久豁免。
 const ENV_DEPENDENT =
-  /(browser-visual|staging-smoke|redis-runtime|rls-enforcement|target-api-boot-smoke)/;
+  /(browser-visual|staging-smoke|redis-runtime|redis-stream-dispatch|rls-enforcement|target-api-boot-smoke)/;
 
 // 分类用的正则必须在执行循环**之前**求值：classify() 虽被提升，但 const 有暂时性死区，
 // 若声明在循环之后，第一个失败的门禁就会抛 ReferenceError 并让整个账本崩溃（已踩过）。
