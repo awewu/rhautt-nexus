@@ -50,6 +50,13 @@ type CopyAsset = {
   status: string;
   reviewer: string | null;
   complianceFlags: string[];
+  /** 可抽取性评估（迁移 112，生成时落库）：形态启发式，通过≠必被引用 */
+  extractability?: {
+    score?: number;
+    passed?: boolean;
+    hints?: string[];
+    basis?: string;
+  } | null;
   createdAt: string;
   updatedAt: string;
   promptTemplateId: string | null;
@@ -2143,6 +2150,41 @@ export default function GrowthCopyTable() {
                     )}
                   </div>
                 </section>
+                {/* GEO 可抽取性（生成时评估，迁移 112）：形态启发式——分低≠不能发，
+                    是提示"AI 引擎摘不动这个形态"；通过≠必被引用（还取决于站点权威度）。 */}
+                {previewItem?.extractability &&
+                typeof previewItem.extractability.score === 'number' ? (
+                  <section>
+                    <div className="growth-copy-draft-workbench__section-head">
+                      <span>
+                        <Sparkles size={14} />
+                        GEO 可抽取性
+                      </span>
+                    </div>
+                    <div
+                      className={`growth-copy-compliance-card ${previewItem.extractability.passed ? 'growth-copy-compliance-card--ok' : 'growth-copy-compliance-card--danger'}`}
+                    >
+                      <strong>
+                        {previewItem.extractability.score}/100 ·{' '}
+                        {previewItem.extractability.passed
+                          ? '形态达标（可被 AI 抽取引用的结构）'
+                          : '形态偏弱——引擎摘要难以直接引用'}
+                      </strong>
+                      {(previewItem.extractability.hints?.length ?? 0) > 0 ? (
+                        <ul className="mt-1 list-disc pl-4">
+                          {previewItem.extractability.hints!.slice(0, 4).map((h, i) => (
+                            <li key={i}>{h}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>答案先行 / 直接回答句 / 可切分 / 结构化 / 事实密度 五项全过。</p>
+                      )}
+                      <p className="opacity-70">
+                        启发式形态检查：通过≠必被引用；分低不拦发布，由审核人权衡。
+                      </p>
+                    </div>
+                  </section>
+                ) : null}
                 <section>
                   <div className="growth-copy-draft-workbench__section-head">
                     <span>
