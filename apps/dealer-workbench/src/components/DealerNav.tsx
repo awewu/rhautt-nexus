@@ -310,23 +310,14 @@ export default function DealerNav() {
     <>
       <aside className="sidebar" style={{ alignItems: 'center' }}>
         <div style={{ height: 3, width: '100%', background: 'var(--brand)', flexShrink: 0 }} />
+        {/* 文字 logo（2026-08 去白底）：logo 图是红+黑字，深色侧栏上只能垫白盒；
+            改为门户同款文字标——红 Rha + 白 utt.，黑字位用白替代，品牌红锚点保留 */}
         <div
-          style={{
-            margin: '10px auto 9px',
-            width: 54,
-            height: 28,
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: '#fff',
-          }}
+          className="mx-auto mt-2.5 mb-2 flex h-7 shrink-0 items-center justify-center text-[14px] leading-none font-extrabold tracking-tight select-none"
+          aria-label="Rhautt Comfort"
         >
-          <img
-            src="/images/rhautt-group-logo-sidebar.png"
-            alt="Rhautt Comfort"
-            style={{ width: 50, height: 15, objectFit: 'contain', display: 'block' }}
-          />
+          <span className="text-[color:var(--brand-400)]">Rha</span>
+          <span className="text-white">utt.</span>
         </div>
         <div
           style={{
