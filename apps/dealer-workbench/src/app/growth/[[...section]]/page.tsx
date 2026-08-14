@@ -1,14 +1,17 @@
+/**
+ * 市场增长段落工作台（2026-08 全页 UX 重构二期 · WorkspaceKit 化）。
+ * 信息架构：段落导航（保持 <a href> 路由机制）→ 段落 Hero →
+ * 非 GEO 段落用 左 2/3 主面板 + 右 1/3 队列列；GEO 段落全宽单列（内部自带分栏）。
+ * 原版问题：40 处内联样式、手搓 hero/队列/状态格；本版收编为 Tailwind + WorkspaceKit 原语。
+ */
+
 import {
   AlertCircle,
-  BarChart3,
   Bot,
   CheckCircle2,
   Clock3,
   Download,
-  Eye,
-  FileImage,
   FileSearch,
-  FileText,
   FolderOpen,
   Loader2,
   Radio,
@@ -20,6 +23,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { PageHeader } from '@rhautt/ui';
+import { WorkspaceSection, KeyValueRows, Pill } from '@/components/WorkspaceKit';
 import { GrowthGeoWorkspace } from '../../../components/GrowthGeoWorkspace';
 import { GeoExperimentPanel } from '../../../components/GeoExperimentPanel';
 import { GeoIntelligencePanel } from '../../../components/GeoIntelligencePanel';
@@ -135,27 +139,16 @@ export default async function GrowthWorkspacePage({
   const ActiveIcon = active.icon;
 
   return (
-    <div
-      style={{
-        background: 'linear-gradient(to bottom, var(--surface-1) 0%, var(--surface-2) 100%)',
-        minHeight: '100%',
-      }}
-    >
-      <div
-        className="page-container"
-        style={{ display: 'grid', gap: 20, maxWidth: 'none', width: '100%' }}
-      >
+    <div className="min-h-full bg-gradient-to-b from-background to-secondary/30">
+      <div className="page-container grid w-full max-w-none gap-5">
         <PageHeader
           title="市场增长"
           subtitle="GEO 可见度 · 文案 Copilot · 舆情雷达 · 营销自动化 · 营销物料库"
           actions={<StatusPill kind={active.statusKind}>{active.status}</StatusPill>}
         />
 
-        <nav
-          className="card-elevated"
-          aria-label="市场增长模块"
-          style={{ padding: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}
-        >
+        {/* 段落切换保持 <a href> 路由机制（服务端组件，不引入本地 state） */}
+        <nav className="card-elevated flex flex-wrap gap-1.5 p-2" aria-label="市场增长模块">
           {SECTION_LINKS.map((item) => {
             const config = SECTIONS[item.key];
             const Icon = config.icon;
@@ -174,78 +167,47 @@ export default async function GrowthWorkspacePage({
           })}
         </nav>
 
-        <section
-          className="card-elevated"
-          style={{
-            padding: 22,
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1fr) minmax(240px, 300px)',
-            gap: 20,
-            alignItems: 'stretch',
-          }}
-        >
-          <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start', minWidth: 0 }}>
-            <div
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 'var(--r-xl)',
-                display: 'grid',
-                placeItems: 'center',
-                background: 'var(--brand-tint)',
-                color: 'var(--brand-700)',
-                flexShrink: 0,
-              }}
-            >
+        <section className="card-elevated grid items-stretch gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_minmax(240px,300px)]">
+          <div className="flex min-w-0 items-start gap-4">
+            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
               <ActiveIcon size={22} />
             </div>
-            <div style={{ minWidth: 0 }}>
-              <p className="t-label">增长引擎</p>
-              <h1
-                style={{
-                  marginTop: 4,
-                  fontSize: 24,
-                  lineHeight: 1.22,
-                  letterSpacing: 0,
-                  color: 'var(--t-strong)',
-                }}
-              >
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-muted-foreground">增长引擎</p>
+              <h1 className="mt-1 text-2xl leading-tight font-semibold text-foreground">
                 {active.title}
               </h1>
-              <p style={{ marginTop: 8, color: 'var(--t-secondary)', fontSize: 14 }}>
-                {active.subtitle}
-              </p>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
-                <span className="pill-neutral">营销面板</span>
-                <span className="pill-neutral">审核状态清晰</span>
-                <span className="pill-neutral">仅保留营销目的地</span>
+              <p className="mt-2 text-sm text-muted-foreground">{active.subtitle}</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Pill>营销面板</Pill>
+                <Pill>审核状态清晰</Pill>
+                <Pill>仅保留营销目的地</Pill>
               </div>
             </div>
           </div>
           {/* 各模块的真实指标由其真数据组件内部渲染，此处不再显示占位数字（避免假数据）。 */}
-          <div className="inset" style={{ display: 'grid', alignContent: 'center', gap: 8 }}>
-            <div className="t-label">实时指标</div>
-            <div style={{ color: 'var(--t-secondary)', fontSize: 13, lineHeight: 1.5 }}>
+          <div className="grid content-center gap-2 rounded-lg border bg-secondary/40 p-4">
+            <div className="text-xs font-semibold text-muted-foreground">实时指标</div>
+            <div className="text-[13px] leading-normal text-muted-foreground">
               见下方工作区（全部来自后端真实数据）
             </div>
           </div>
         </section>
 
-        <section
-          className="split-main"
-          style={activeKey === 'geo' ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
-        >
-          <div style={{ display: 'grid', gap: 16, minWidth: 0 }}>
-            <NativePanel activeKey={activeKey} />
-            {activeKey === 'geo' ? null : <StatePreview />}
-          </div>
-          {activeKey === 'geo' ? null : (
-            <aside style={{ display: 'grid', gap: 16 }}>
+        {activeKey === 'geo' ? (
+          <NativePanel activeKey={activeKey} />
+        ) : (
+          <section className="grid items-start gap-4 lg:grid-cols-3">
+            <div className="grid min-w-0 gap-4 lg:col-span-2">
+              <NativePanel activeKey={activeKey} />
+              <StatePreview />
+            </div>
+            <aside className="grid gap-4">
               <SideQueue />
               <PublishQueue />
             </aside>
-          )}
-        </section>
+          </section>
+        )}
       </div>
     </div>
   );
@@ -254,7 +216,7 @@ export default async function GrowthWorkspacePage({
 function NativePanel({ activeKey }: { activeKey: GrowthSection }) {
   if (activeKey === 'geo') {
     return (
-      <div style={{ display: 'grid', gap: 16 }}>
+      <div className="grid min-w-0 gap-4">
         <MarketingTaskCenter brandSlug="rheem" />
         <GrowthGeoWorkspace />
         <AiCostPanel />
@@ -283,7 +245,7 @@ function NativePanel({ activeKey }: { activeKey: GrowthSection }) {
   // 安全兜底：activeKey 恒在枚举内（sectionFromParams 默认 'geo'），正常到不了这里。
   // 一旦到达也不回落假数据，而是显示真实 GEO 工作区。
   return (
-    <div style={{ display: 'grid', gap: 16 }}>
+    <div className="grid min-w-0 gap-4">
       <GrowthGeoWorkspace />
       <GeoIntelligencePanel brandSlug="rheem" />
       <GeoExperimentPanel brandSlug="rheem" />
@@ -291,67 +253,13 @@ function NativePanel({ activeKey }: { activeKey: GrowthSection }) {
   );
 }
 
-function PanelShell({
-  icon: Icon,
-  title,
-  desc,
-  children,
-}: {
-  icon: LucideIcon;
-  title: string;
-  desc: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="card-elevated" style={{ padding: 18 }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 14,
-          alignItems: 'flex-start',
-          marginBottom: 14,
-        }}
-      >
-        <div>
-          <p className="t-label">营销模块</p>
-          <h2 className="t-headline" style={{ marginTop: 4 }}>
-            {title}
-          </h2>
-          <p style={{ marginTop: 4, color: 'var(--t-secondary)', fontSize: 13 }}>{desc}</p>
-        </div>
-        <div
-          style={{
-            width: 38,
-            height: 38,
-            borderRadius: 'var(--r-lg)',
-            display: 'grid',
-            placeItems: 'center',
-            background: 'var(--surface-2)',
-            color: 'var(--brand)',
-          }}
-        >
-          <Icon size={18} />
-        </div>
-      </div>
-      {children}
-    </section>
-  );
-}
-
 function StatePreview() {
   return (
-    <section className="card-elevated" style={{ padding: 18 }}>
-      <div className="workbench-section-header" style={{ marginBottom: 12 }}>
-        <div>
-          <p className="workbench-section-header__eyebrow">页面状态</p>
-          <h2 className="workbench-section-header__title">加载 / 空 / 错误状态</h2>
-          <p className="workbench-section-header__description">
-            用于检查营销增长数据在不同状态下的展示效果。
-          </p>
-        </div>
-      </div>
-      <div className="g3">
+    <WorkspaceSection title="加载 / 空 / 错误状态" aside="页面状态预览">
+      <p className="mb-3 text-xs text-muted-foreground">
+        用于检查营销增长数据在不同状态下的展示效果。
+      </p>
+      <div className="grid gap-2.5 md:grid-cols-3">
         <StateTile icon={Loader2} title="加载中" desc="正在同步营销增长数据" tone="loading" />
         <StateTile
           icon={FolderOpen}
@@ -366,7 +274,7 @@ function StatePreview() {
           tone="error"
         />
       </div>
-    </section>
+    </WorkspaceSection>
   );
 }
 
@@ -381,24 +289,23 @@ function StateTile({
   desc: string;
   tone: 'loading' | 'empty' | 'error';
 }) {
-  const color =
-    tone === 'error' ? 'var(--danger)' : tone === 'loading' ? 'var(--brand)' : 'var(--t-secondary)';
+  const iconClass =
+    tone === 'error'
+      ? 'text-destructive'
+      : tone === 'loading'
+        ? 'animate-spin text-primary'
+        : 'text-muted-foreground';
   return (
-    <div
-      className="inset"
-      style={{ minHeight: 116, display: 'grid', placeItems: 'center', textAlign: 'center', gap: 6 }}
-    >
-      <Icon
-        size={20}
-        className={tone === 'loading' ? 'animate-spin' : undefined}
-        style={{ color }}
-      />
+    <div className="grid min-h-[116px] place-items-center gap-1.5 rounded-lg border bg-secondary/40 p-3 text-center">
+      <Icon size={20} className={iconClass} />
       <strong
-        style={{ fontSize: 13, color: tone === 'error' ? 'var(--danger)' : 'var(--t-primary)' }}
+        className={
+          tone === 'error' ? 'text-[13px] text-destructive' : 'text-[13px] text-foreground'
+        }
       >
         {title}
       </strong>
-      <p style={{ fontSize: 12, color: 'var(--t-secondary)' }}>{desc}</p>
+      <p className="text-xs text-muted-foreground">{desc}</p>
     </div>
   );
 }
@@ -412,29 +319,22 @@ function SideQueue() {
   ];
 
   return (
-    <div className="card-elevated" style={{ padding: 16 }}>
-      <p className="t-label">本周推进</p>
-      <div style={{ marginTop: 10, display: 'grid', gap: 10 }}>
-        {items.map((item) => {
+    <WorkspaceSection title="本周推进">
+      <KeyValueRows
+        rows={items.map((item) => {
           const Icon = item.icon;
-          return (
-            <div
-              key={item.label}
-              className="inset"
-              style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-            >
-              <Icon size={16} style={{ color: 'var(--brand)' }} />
-              <div>
-                <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--t-primary)' }}>
-                  {item.label}
-                </p>
-                <p style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>{item.value}</p>
-              </div>
-            </div>
-          );
+          return {
+            label: (
+              <span className="inline-flex items-center gap-1.5">
+                <Icon size={14} className="text-primary" />
+                {item.label}
+              </span>
+            ),
+            value: item.value,
+          };
         })}
-      </div>
-    </div>
+      />
+    </WorkspaceSection>
   );
 }
 
@@ -442,55 +342,22 @@ function PublishQueue() {
   const queue = ['官网专题页', '朋友圈短文案', '经销商活动海报', '认证培训资料'];
 
   return (
-    <div className="card-elevated" style={{ padding: 16 }}>
-      <div
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}
-      >
-        <p className="t-label">发布队列</p>
+    <WorkspaceSection
+      title="发布队列"
+      aside={
         <a className="btn btn-outline btn-sm" href="/brand">
           <RefreshCw size={13} />
           刷新
         </a>
-      </div>
-      <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
-        {queue.map((item) => (
-          <div
-            key={item}
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: 10,
-              paddingBottom: 8,
-              borderBottom: '1px solid var(--border)',
-            }}
-          >
-            <span style={{ fontSize: 13, color: 'var(--t-primary)' }}>{item}</span>
-            <StatusPill kind="review">待审</StatusPill>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Meta({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <p className="t-label" style={{ marginBottom: 2 }}>
-        {label}
-      </p>
-      <p
-        style={{
-          fontSize: 12,
-          color: 'var(--t-secondary)',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {value}
-      </p>
-    </div>
+      }
+    >
+      <KeyValueRows
+        rows={queue.map((item) => ({
+          label: item,
+          value: <StatusPill kind="review">待审</StatusPill>,
+        }))}
+      />
+    </WorkspaceSection>
   );
 }
 

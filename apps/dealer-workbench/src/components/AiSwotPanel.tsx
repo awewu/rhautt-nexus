@@ -1,5 +1,7 @@
 'use client';
 
+/** 2026-08 全页 UX 重构二期 · WorkspaceKit 化 */
+
 import { useCallback, useEffect, useState } from 'react';
 import {
   AlertOctagon,
@@ -10,6 +12,7 @@ import {
   Target,
   TrendingDown,
 } from 'lucide-react';
+import { WorkspaceSection, EmptyState } from '@/components/WorkspaceKit';
 import { growthGeo } from '../lib/api';
 
 /**
@@ -70,43 +73,27 @@ function QuadrantHeader({
   tone: string;
 }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+    <div className="mb-2 flex items-center gap-2">
       {icon}
-      <strong style={{ fontSize: 13.5, color: 'var(--t-strong)' }}>{title}</strong>
-      <span className="badge" style={{ fontSize: 10, color: tone, borderColor: tone }}>
+      <strong className="text-[13px] font-semibold">{title}</strong>
+      <span
+        className={`rounded-full border border-current px-2 text-[10px] leading-4 tabular-nums ${tone}`}
+      >
         {count}
       </span>
-      <span
-        style={{ fontSize: 11, color: 'var(--t-tertiary)', marginLeft: 'auto', textAlign: 'right' }}
-      >
-        {hint}
-      </span>
+      <span className="ml-auto text-right text-[11px] text-muted-foreground">{hint}</span>
     </div>
   );
 }
 
 function ItemRow({ item, showCited }: { item: SwotItem; showCited?: boolean }) {
   return (
-    <div
-      style={{ padding: '6px 0', borderTop: '1px solid var(--border)', display: 'grid', gap: 2 }}
-    >
-      <span style={{ fontSize: 12.5, color: 'var(--t-strong)' }}>{item.question}</span>
-      <div
-        style={{
-          display: 'flex',
-          gap: 10,
-          fontSize: 11,
-          color: 'var(--t-tertiary)',
-          flexWrap: 'wrap',
-        }}
-      >
-        <span style={{ fontVariantNumeric: 'tabular-nums' }}>{item.probes} 次探测</span>
-        {showCited ? (
-          <span style={{ fontVariantNumeric: 'tabular-nums' }}>被引率 {item.citedRate}%</span>
-        ) : null}
-        {item.avgAivs ? (
-          <span style={{ fontVariantNumeric: 'tabular-nums' }}>AIVS {item.avgAivs}</span>
-        ) : null}
+    <div className="grid gap-0.5 border-t py-1.5">
+      <span className="text-xs">{item.question}</span>
+      <div className="flex flex-wrap gap-2.5 text-[11px] text-muted-foreground">
+        <span className="tabular-nums">{item.probes} 次探测</span>
+        {showCited ? <span className="tabular-nums">被引率 {item.citedRate}%</span> : null}
+        {item.avgAivs ? <span className="tabular-nums">AIVS {item.avgAivs}</span> : null}
         {item.competitors.length ? (
           <span>竞品：{item.competitors.slice(0, 3).join('、')}</span>
         ) : null}
@@ -147,17 +134,11 @@ export function AiSwotPanel({
   const hasProbes = !!data?.window.probes;
 
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
-      <div className="workbench-section-header">
-        <div>
-          <p className="workbench-section-header__eyebrow">战略分析 · AI 视角 SWOT</p>
-          <h2 className="workbench-section-header__title">可测的 SWOT（非主观自评）</h2>
-          <p className="workbench-section-header__description">
-            优势=AI 真引用了我方；劣势=AI
-            说得出竞品却说不出我方；机会=无人占位的空白；威胁=我方缺席时被引的竞品。
-          </p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+    <WorkspaceSection
+      icon={<Target size={16} className="text-primary" />}
+      title="可测的 SWOT（非主观自评）"
+      aside={
+        <span className="inline-flex items-center gap-1.5">
           {WINDOWS.map((d) => (
             <button
               key={d}
@@ -170,189 +151,168 @@ export function AiSwotPanel({
           <button className="btn btn-outline btn-sm" onClick={load} disabled={loading}>
             {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
           </button>
-        </div>
-      </div>
-      {error ? (
-        <div className="inset" style={{ color: 'var(--danger)', fontSize: 13 }}>
-          {error}
-        </div>
-      ) : null}
-
-      {data ? (
-        <div
-          className="inset"
-          style={{ padding: '10px 14px', display: 'flex', gap: 16, flexWrap: 'wrap', fontSize: 12 }}
-        >
-          <span style={{ color: 'var(--t-tertiary)' }}>
-            窗口 <strong style={{ color: 'var(--t-strong)' }}>{data.window.days}</strong> 天
-          </span>
-          <span style={{ color: 'var(--t-tertiary)' }}>
-            真实探测{' '}
-            <strong style={{ color: hasProbes ? 'var(--t-strong)' : 'var(--warning)' }}>
-              {data.window.probes}
-            </strong>{' '}
-            次
-          </span>
-          <span style={{ color: 'var(--t-tertiary)' }}>
-            覆盖问题 <strong style={{ color: 'var(--t-strong)' }}>{data.window.questions}</strong>{' '}
-            个
-          </span>
-          <span style={{ color: 'var(--t-tertiary)', marginLeft: 'auto' }}>
-            {data.scope.brandSlug || '全品牌'}
-            {data.scope.category ? ` · ${data.scope.category}` : ''}
-          </span>
-        </div>
-      ) : null}
-
-      {/* 无探测数据：如实空态，指出前置动作 */}
-      {data && !hasProbes ? (
-        <div className="inset" style={{ padding: 16, display: 'grid', gap: 6 }}>
-          <strong style={{ fontSize: 13, color: 'var(--t-strong)' }}>
-            窗口内无真实探测数据 → SWOT 为空态
-          </strong>
-          <span style={{ fontSize: 12.5, color: 'var(--t-tertiary)' }}>{data.note}</span>
-        </div>
-      ) : null}
-
-      {data && hasProbes ? (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))',
-            gap: 12,
-          }}
-        >
-          {/* S */}
-          <div className="inset" style={{ padding: 14 }}>
-            <QuadrantHeader
-              icon={<Shield size={15} style={{ color: 'var(--success)' }} />}
-              title="优势 S · AI 引用我方"
-              hint="按被引率×AIVS 排序"
-              count={data.strengths.length}
-              tone="var(--success)"
-            />
-            {data.strengths.length ? (
-              data.strengths.map((i) => <ItemRow key={i.question} item={i} showCited />)
-            ) : (
-              <p style={{ fontSize: 12.5, color: 'var(--t-tertiary)' }}>
-                窗口内 AI 未引用我方 —— 这本身就是最强的行动信号
-              </p>
-            )}
+        </span>
+      }
+    >
+      <div className="grid gap-4">
+        <div>
+          <div className="text-[11px] font-medium text-muted-foreground">
+            战略分析 · AI 视角 SWOT
           </div>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            优势=AI 真引用了我方；劣势=AI
+            说得出竞品却说不出我方；机会=无人占位的空白；威胁=我方缺席时被引的竞品。
+          </p>
+        </div>
 
-          {/* W */}
-          <div className="inset" style={{ padding: 14 }}>
-            <QuadrantHeader
-              icon={<TrendingDown size={15} style={{ color: 'var(--danger)' }} />}
-              title="劣势 W · 说得出竞品说不出我方"
-              hint="可测的真实弱点"
-              count={data.weaknesses.length}
-              tone="var(--danger)"
-            />
-            {data.weaknesses.length ? (
-              data.weaknesses.map((i) => <ItemRow key={i.question} item={i} />)
-            ) : (
-              <p style={{ fontSize: 12.5, color: 'var(--t-tertiary)' }}>
-                无「竞品被引而我方缺席」的问题
-              </p>
-            )}
-
-            {data.hallucinations.length ? (
-              <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                  <AlertOctagon size={14} style={{ color: 'var(--danger)' }} />
-                  <strong style={{ fontSize: 12.5, color: 'var(--danger)' }}>
-                    AI 错误描述我方（紧急）
-                  </strong>
-                </div>
-                {data.hallucinations.map((h, idx) => (
-                  <div
-                    key={`${h.question}-${h.engine}-${idx}`}
-                    style={{ padding: '5px 0', display: 'grid', gap: 2 }}
-                  >
-                    <span style={{ fontSize: 12, color: 'var(--t-strong)' }}>{h.question}</span>
-                    <span style={{ fontSize: 11, color: 'var(--t-tertiary)' }}>
-                      [{h.engine}] {h.reasons.join('；')}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : null}
+        {error ? (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3.5 py-2.5 text-[13px] text-destructive">
+            {error}
           </div>
+        ) : null}
 
-          {/* O */}
-          <div className="inset" style={{ padding: 14 }}>
-            <QuadrantHeader
-              icon={<Target size={15} style={{ color: 'var(--brand)' }} />}
-              title="机会 O · 无人占位的空白"
-              hint="先发即可能独占"
-              count={data.opportunities.length}
-              tone="var(--brand)"
-            />
-            {data.opportunities.length ? (
-              data.opportunities.map((i) => <ItemRow key={i.question} item={i} />)
-            ) : (
-              <p style={{ fontSize: 12.5, color: 'var(--t-tertiary)' }}>
-                无空白问题（每个问题都已有人被引）
-              </p>
-            )}
+        {data ? (
+          <div className="flex flex-wrap gap-4 rounded-lg border bg-secondary/60 px-3.5 py-2.5 text-xs text-muted-foreground">
+            <span>
+              窗口 <strong className="text-foreground tabular-nums">{data.window.days}</strong> 天
+            </span>
+            <span>
+              真实探测{' '}
+              <strong
+                className={`tabular-nums ${hasProbes ? 'text-foreground' : 'text-warning'}`}
+              >
+                {data.window.probes}
+              </strong>{' '}
+              次
+            </span>
+            <span>
+              覆盖问题{' '}
+              <strong className="text-foreground tabular-nums">{data.window.questions}</strong> 个
+            </span>
+            <span className="ml-auto">
+              {data.scope.brandSlug || '全品牌'}
+              {data.scope.category ? ` · ${data.scope.category}` : ''}
+            </span>
           </div>
+        ) : null}
 
-          {/* T */}
-          <div className="inset" style={{ padding: 14 }}>
-            <QuadrantHeader
-              icon={<Swords size={15} style={{ color: 'var(--warning)' }} />}
-              title="威胁 T · 我方缺席时被引的竞品"
-              hint="按频次排序"
-              count={data.threats.length}
-              tone="var(--warning)"
-            />
-            {data.threats.length ? (
-              data.threats.map((t) => (
-                <div
-                  key={t.competitor}
-                  style={{
-                    padding: '6px 0',
-                    borderTop: '1px solid var(--border)',
-                    display: 'grid',
-                    gap: 2,
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                    <strong style={{ fontSize: 12.5, color: 'var(--t-strong)' }}>
-                      {t.competitor}
+        {/* 无探测数据：如实空态，指出前置动作 */}
+        {data && !hasProbes ? (
+          <EmptyState title="窗口内无真实探测数据 → SWOT 为空态" hint={data.note} />
+        ) : null}
+
+        {data && hasProbes ? (
+          <div className="grid gap-3 lg:grid-cols-2">
+            {/* S */}
+            <div className="rounded-lg border bg-secondary/60 p-3.5">
+              <QuadrantHeader
+                icon={<Shield size={15} className="text-success" />}
+                title="优势 S · AI 引用我方"
+                hint="按被引率×AIVS 排序"
+                count={data.strengths.length}
+                tone="text-success"
+              />
+              {data.strengths.length ? (
+                data.strengths.map((i) => <ItemRow key={i.question} item={i} showCited />)
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  窗口内 AI 未引用我方 —— 这本身就是最强的行动信号
+                </p>
+              )}
+            </div>
+
+            {/* W */}
+            <div className="rounded-lg border bg-secondary/60 p-3.5">
+              <QuadrantHeader
+                icon={<TrendingDown size={15} className="text-destructive" />}
+                title="劣势 W · 说得出竞品说不出我方"
+                hint="可测的真实弱点"
+                count={data.weaknesses.length}
+                tone="text-destructive"
+              />
+              {data.weaknesses.length ? (
+                data.weaknesses.map((i) => <ItemRow key={i.question} item={i} />)
+              ) : (
+                <p className="text-xs text-muted-foreground">无「竞品被引而我方缺席」的问题</p>
+              )}
+
+              {data.hallucinations.length ? (
+                <div className="mt-3 border-t pt-2.5">
+                  <div className="mb-1.5 flex items-center gap-1.5">
+                    <AlertOctagon size={14} className="text-destructive" />
+                    <strong className="text-xs font-semibold text-destructive">
+                      AI 错误描述我方（紧急）
                     </strong>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: 'var(--t-tertiary)',
-                        marginLeft: 'auto',
-                        fontVariantNumeric: 'tabular-nums',
-                      }}
-                    >
-                      {t.hits} 次抢位
-                    </span>
                   </div>
-                  {t.sampleQuestions.map((q) => (
-                    <span key={q} style={{ fontSize: 11, color: 'var(--t-tertiary)' }}>
-                      · {q}
-                    </span>
+                  {data.hallucinations.map((h, idx) => (
+                    <div key={`${h.question}-${h.engine}-${idx}`} className="grid gap-0.5 py-1">
+                      <span className="text-xs">{h.question}</span>
+                      <span className="text-[11px] text-muted-foreground">
+                        [{h.engine}] {h.reasons.join('；')}
+                      </span>
+                    </div>
                   ))}
                 </div>
-              ))
-            ) : (
-              <p style={{ fontSize: 12.5, color: 'var(--t-tertiary)' }}>无竞品在我方缺席时被引</p>
-            )}
-          </div>
-        </div>
-      ) : null}
+              ) : null}
+            </div>
 
-      {data?.note && hasProbes ? (
-        <p style={{ fontSize: 11.5, color: 'var(--t-tertiary)' }}>{data.note}</p>
-      ) : null}
-      {loading && !data ? (
-        <p style={{ fontSize: 13, color: 'var(--t-tertiary)' }}>加载中…</p>
-      ) : null}
-    </section>
+            {/* O */}
+            <div className="rounded-lg border bg-secondary/60 p-3.5">
+              <QuadrantHeader
+                icon={<Target size={15} className="text-primary" />}
+                title="机会 O · 无人占位的空白"
+                hint="先发即可能独占"
+                count={data.opportunities.length}
+                tone="text-primary"
+              />
+              {data.opportunities.length ? (
+                data.opportunities.map((i) => <ItemRow key={i.question} item={i} />)
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  无空白问题（每个问题都已有人被引）
+                </p>
+              )}
+            </div>
+
+            {/* T */}
+            <div className="rounded-lg border bg-secondary/60 p-3.5">
+              <QuadrantHeader
+                icon={<Swords size={15} className="text-warning" />}
+                title="威胁 T · 我方缺席时被引的竞品"
+                hint="按频次排序"
+                count={data.threats.length}
+                tone="text-warning"
+              />
+              {data.threats.length ? (
+                data.threats.map((t) => (
+                  <div key={t.competitor} className="grid gap-0.5 border-t py-1.5">
+                    <div className="flex items-baseline gap-2">
+                      <strong className="text-xs font-semibold">{t.competitor}</strong>
+                      <span className="ml-auto text-[11px] text-muted-foreground tabular-nums">
+                        {t.hits} 次抢位
+                      </span>
+                    </div>
+                    {t.sampleQuestions.map((q) => (
+                      <span key={q} className="text-[11px] text-muted-foreground">
+                        · {q}
+                      </span>
+                    ))}
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-muted-foreground">无竞品在我方缺席时被引</p>
+              )}
+            </div>
+          </div>
+        ) : null}
+
+        {data?.note && hasProbes ? (
+          <p className="text-[11px] text-muted-foreground">{data.note}</p>
+        ) : null}
+        {loading && !data ? (
+          <p className="text-[13px] text-muted-foreground">加载中…</p>
+        ) : null}
+      </div>
+    </WorkspaceSection>
   );
 }

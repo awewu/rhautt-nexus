@@ -29,554 +29,8 @@ import {
   WorkbenchTableShell,
   WorkbenchTableState,
 } from '../../components/WorkbenchCore';
-
-type AdminUser = {
-  id: string;
-  name: string;
-  role: string;
-  roles?: string[];
-  permissions?: string[];
-  status: 'active' | 'inactive' | 'suspended';
-  identifierMasked: string;
-  identifierKind?: 'email' | 'phone' | 'unknown';
-  isLocked: boolean;
-  dealerId: string | null;
-  storeId: string | null;
-  lastLoginAt: string | null;
-  createdAt: string | null;
-};
-
-type PermissionItem = {
-  code: string;
-  name: string;
-  domain: string;
-  action: string;
-  description?: string;
-  sortOrder?: number;
-};
-
-type RoleItem = {
-  id: string;
-  code: string;
-  name: string;
-  description?: string;
-  status: 'active' | 'inactive';
-  isSystem?: boolean;
-  permissions: string[];
-  userCount?: number;
-};
-
-type EffectiveRole = {
-  id: string;
-  code: string;
-  name: string;
-  isPrimary: boolean;
-};
-
-type AuditLogRow = {
-  id: string;
-  actorUserId?: string | null;
-  actorName?: string | null;
-  action: string;
-  resourceType: string;
-  resourceId?: string | null;
-  resourceLabel?: string | null;
-  beforeState?: Record<string, unknown> | null;
-  afterState?: Record<string, unknown> | null;
-  status?: 'success' | 'failed';
-  requestId?: string | null;
-  traceId?: string | null;
-  createdAt: string;
-};
-
-type AccountsTab = 'users' | 'roles' | 'audit';
-
-const LEGACY_ROLE_LABEL: Record<string, string> = {
-  platform_admin: '平台超级管理员',
-  hq_admin: '总部管理员',
-  brand_admin: '品牌管理员',
-  regional_manager: '区域经理',
-  dealer_admin: '经销商管理员',
-  store_manager: '门店经理',
-  designer: '设计师',
-  sales: '销售',
-  engineer: '工程师',
-  installer: '安装工',
-  customer: '客户',
-};
-
-const PERMISSION_DOMAIN_LABEL: Record<string, string> = {
-  'admin.users': '账号管理',
-  'admin.roles': '角色管理',
-  'admin.permissions': '权限目录',
-  'marketing.content': '营销内容',
-  'marketing.campaigns': '营销活动',
-  'marketing.assets': '营销物料',
-  'product.catalog': '产品库',
-  'product.content': '产品内容',
-  'brand.library': '品牌库',
-  'site.documentation': '官网资料库',
-  'brand.asset': '品牌资源',
-  'analytics.dashboard': '数据看板',
-  analytics: '数据分析',
-  'system.audit': '审计日志',
-};
-
-const PERMISSION_NAME_LABEL: Record<string, string> = {
-  'admin.users.view': '查看账号权限页面',
-  'admin.users.read': '查看账号列表',
-  'admin.users.create': '新建账号',
-  'admin.users.update': '编辑账号',
-  'admin.users.delete': '删除账号',
-  'admin.users.reset_password': '重置账号密码',
-  'admin.users.assign_roles': '分配用户角色',
-  'admin.roles.view': '查看角色权限页面',
-  'admin.roles.read': '查看角色列表',
-  'admin.roles.create': '新建角色',
-  'admin.roles.update': '编辑角色',
-  'admin.roles.assign_permissions': '配置角色权限',
-  'admin.permissions.read': '查看权限点目录',
-  'marketing.content.view': '查看内容页面',
-  'marketing.content.create': '新建内容',
-  'marketing.content.update': '编辑内容',
-  'marketing.content.delete': '删除内容',
-  'marketing.campaigns.view': '查看营销活动',
-  'marketing.campaigns.create': '新建营销活动',
-  'marketing.campaigns.update': '编辑营销活动',
-  'marketing.campaigns.delete': '删除营销活动',
-  'marketing.assets.view': '查看营销物料',
-  'marketing.assets.create': '新建营销物料',
-  'marketing.assets.update': '编辑营销物料',
-  'marketing.assets.delete': '删除营销物料',
-  'product.catalog.view': '查看产品库页面',
-  'product.catalog.read': '查看产品库列表',
-  'product.catalog.create': '新增产品',
-  'product.catalog.update': '编辑产品',
-  'product.catalog.delete': '删除产品',
-  'product.catalog.publish': '发布产品内容',
-  'product.content.read': '查看产品内容',
-  'product.content.create': '新增产品内容',
-  'product.content.update': '编辑产品内容',
-  'product.content.delete': '删除产品内容',
-  'brand.library.view': '查看品牌库页面',
-  'brand.library.read': '查看品牌库列表',
-  'brand.library.create': '新增品牌库内容',
-  'brand.library.update': '编辑品牌库内容',
-  'brand.library.delete': '删除品牌库内容',
-  'brand.library.publish': '发布品牌库内容',
-  'brand.asset.update': '更新品牌资源',
-  'site.documentation.view': '查看官网资料库页面',
-  'site.documentation.read': '查看官网资料库',
-  'site.documentation.create': '新增官网资料',
-  'site.documentation.update': '编辑官网资料',
-  'site.documentation.delete': '删除官网资料',
-  'site.documentation.publish': '发布官网资料',
-  'analytics.dashboard.view': '查看数据看板',
-  'analytics.export': '导出数据',
-  'system.audit.read': '查看审计日志',
-};
-
-const PERMISSION_ACTION_LABEL: Record<string, string> = {
-  view: '页面可见',
-  read: '查看',
-  create: '新增',
-  update: '编辑',
-  delete: '删除',
-  reset_password: '重置密码',
-  assign_roles: '分配角色',
-  assign_permissions: '配置权限',
-  export: '导出',
-  publish: '发布',
-};
-
-const AUDIT_MODULE_LABEL: Record<string, string> = {
-  'admin.users': '账号管理',
-  'admin.roles': '角色权限',
-  product: '产品管理',
-  'product.catalog': '产品库',
-  'product.content': '产品内容',
-  'site-news': '资讯管理',
-  'site-product-assignment': '官网产品',
-  'site-document': '官网资料',
-  'site-document-category': '官网资料分类',
-  'site-dealer': '官网服务网点',
-  'brand-site': '官网站点',
-  'brand-site-basic-settings': '基础信息',
-  'marketing.content': '咨询/资讯',
-  'marketing.assets': '图片素材',
-  'growth.geo': 'GEO 可见度',
-  'growth.copy': 'AI 文案',
-  'growth.opinion': '舆情雷达',
-  'growth.campaigns': '营销活动',
-  'growth.materials': '营销物料',
-  'brand.library': '品牌发布',
-  'diagnosis.consultation': '咨询问诊',
-  'crm.consultation': '客户咨询',
-};
-
-const AUDIT_ACTION_LABEL: Record<string, string> = {
-  create: '新增',
-  update: '修改',
-  delete: '删除',
-  publish: '发布',
-  published: '发布',
-  draft: '草稿',
-  hidden: '隐藏',
-  upload: '上传',
-  archive: '归档/隐藏',
-  restore: '恢复',
-  reset_password: '重置密码',
-  assign_roles: '分配角色',
-  assign_permissions: '配置权限',
-};
-
-const AUDIT_MODULE_FILTER_OPTIONS = [
-  ['site-news', '资讯管理'],
-  ['site-product-assignment', '官网产品'],
-  ['site-document', '官网资料'],
-  ['site-document-category', '官网资料分类'],
-  ['site-dealer', '官网服务网点'],
-  ['brand-site-basic-settings', '基础信息'],
-  ['brand-site', '官网站点'],
-  ['product', '产品管理'],
-  ['product.catalog', '产品库'],
-  ['product.content', '产品内容'],
-  ['marketing.content', '咨询/资讯'],
-  ['marketing.assets', '图片素材'],
-  ['growth.geo', 'GEO 可见度'],
-  ['growth.copy', 'AI 文案'],
-  ['growth.opinion', '舆情雷达'],
-  ['growth.campaigns', '营销活动'],
-  ['growth.materials', '营销物料'],
-  ['brand.library', '品牌发布'],
-  ['admin.users', '账号管理'],
-  ['admin.roles', '角色权限'],
-  ['diagnosis.consultation', '咨询问诊'],
-  ['crm.consultation', '客户咨询'],
-] as const;
-
-const AUDIT_ACTION_FILTER_OPTIONS = [
-  ['create', '新增'],
-  ['update', '修改'],
-  ['delete', '删除'],
-  ['publish', '发布'],
-  ['upload', '上传'],
-  ['archive', '归档/隐藏'],
-  ['restore', '恢复'],
-  ['reset_password', '重置密码'],
-  ['assign_roles', '分配角色'],
-  ['assign_permissions', '配置权限'],
-] as const;
-
-const AUDIT_PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
-const ACCOUNT_PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
-
-const STATUS_TONE: Record<AdminUser['status'], 'success' | 'neutral' | 'danger'> = {
-  active: 'success',
-  inactive: 'neutral',
-  suspended: 'danger',
-};
-
-const PHONE_PATTERN = /^1[3-9]\d{9}$/;
-const ROLE_CODE_PATTERN = /^[a-z0-9_:-]+$/;
-
-function labelForRole(code: string, roles: RoleItem[]) {
-  const role = roles.find((item) => item.code === code);
-  if (role?.name && role.name !== role.code) return role.name;
-  return LEGACY_ROLE_LABEL[code] || code;
-}
-
-function displayRoleName(
-  role: Pick<RoleItem, 'code' | 'name'> | Pick<EffectiveRole, 'code' | 'name'>
-) {
-  if (role.name && role.name !== role.code) return role.name;
-  return LEGACY_ROLE_LABEL[role.code] || role.name || role.code;
-}
-
-function displayRoleDescription(role: RoleItem) {
-  if (role.description === 'Backfilled from users.role') return '由历史账号角色自动迁移生成';
-  return role.description || '-';
-}
-
-function displayPermissionName(permission: PermissionItem) {
-  if (permission.name && permission.name !== permission.code) return permission.name;
-  return PERMISSION_NAME_LABEL[permission.code] || permission.name || permission.code;
-}
-
-function displayPermissionDomain(domain: string) {
-  return PERMISSION_DOMAIN_LABEL[domain] || domain;
-}
-
-function displayPermissionAction(action: string) {
-  return PERMISSION_ACTION_LABEL[action] || '操作权限';
-}
-
-function displayAuditModule(resourceType: string) {
-  return AUDIT_MODULE_LABEL[resourceType] || resourceType || '-';
-}
-
-function displayAuditAction(action: string) {
-  const actionKey = action.split('.').pop() || action;
-  return AUDIT_ACTION_LABEL[actionKey] || actionKey;
-}
-
-function displayAuditSummary(action: string, resourceType: string) {
-  return `${displayAuditModule(resourceType)} · ${displayAuditAction(action)}`;
-}
-
-function displayAuditResource(log: AuditLogRow) {
-  const states = [log.afterState, log.beforeState].filter(Boolean) as Record<string, unknown>[];
-  const label = String(log.resourceLabel || '').trim();
-  const labelParts = splitAuditLabel(label);
-  const resourceName = labelParts[0] || auditResourceTitle(states) || auditResourceFallback(log);
-  const action = displayAuditAction(log.action);
-  const target = auditTargetLabel(log.resourceType);
-  const primary =
-    resourceName && resourceName !== '-'
-      ? `${action}${target}：${resourceName}`
-      : `${action}${target}`;
-  const id = String(log.resourceId || '').trim();
-  const details = auditDetailParts(states);
-  const secondaryParts = [
-    ...(details.length ? details : auditDetailsFromLabel(log.resourceType, labelParts.slice(1))),
-    id && resourceName !== id ? `ID：${id}` : '',
-  ].filter(Boolean);
-  return {
-    primary,
-    secondary: secondaryParts.join(' / '),
-  };
-}
-
-function auditTargetLabel(resourceType: string) {
-  const labels: Record<string, string> = {
-    'admin.users': '账号',
-    'admin.roles': '角色',
-    product: '产品',
-    'product.catalog': '产品',
-    'product.content': '产品内容',
-    'site-news': '资讯',
-    'site-product-assignment': '官网产品',
-    'site-document': '官网资料',
-    'site-document-category': '官网资料分类',
-    'site-dealer': '官网服务网点',
-    'brand-site': '品牌站点',
-    'brand-site-basic-settings': '官网基础信息',
-    'marketing.content': '资讯',
-    'marketing.assets': '图片素材',
-    'growth.geo': 'GEO 探测',
-    'growth.copy': 'AI 文案',
-    'growth.opinion': '舆情记录',
-    'growth.campaigns': '营销活动',
-    'growth.materials': '营销物料',
-    'brand.library': '品牌内容',
-    'diagnosis.consultation': '咨询问诊',
-    'crm.consultation': '客户咨询',
-  };
-  return labels[resourceType] || displayAuditModule(resourceType);
-}
-
-function splitAuditLabel(label: string) {
-  return label
-    .split(/\s*[·|/]\s*/g)
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-function auditDetailsFromLabel(resourceType: string, parts: string[]) {
-  if (!parts.length) return [];
-  if (resourceType === 'growth.materials') {
-    const [materialType, brandSlug, fileFormat] = parts;
-    return [
-      materialType ? `类型：${materialType}` : '',
-      brandSlug ? `品牌：${brandSlug}` : '',
-      fileFormat ? `格式：${fileFormat}` : '',
-    ].filter(Boolean);
-  }
-  if (resourceType === 'growth.geo') {
-    const [category, brandSlug, engine] = parts;
-    return [
-      category ? `品类：${category}` : '',
-      brandSlug ? `品牌：${brandSlug}` : '',
-      engine ? `引擎：${engine}` : '',
-    ].filter(Boolean);
-  }
-  if (resourceType === 'product' || resourceType === 'product.catalog') {
-    const [sku] = parts;
-    return sku ? [`SKU：${sku}`] : [];
-  }
-  return parts.map((item) => `信息：${item}`);
-}
-
-function auditDetailParts(states: Record<string, unknown>[]) {
-  for (const state of states) {
-    const current = auditDetailsFromObject(state);
-    if (current.length) return current;
-    const nested = auditNestedDetails(state);
-    if (nested.length) return nested;
-  }
-  return [];
-}
-
-function auditNestedDetails(state: Record<string, unknown>) {
-  const queue = [state];
-  const seen = new Set<unknown>();
-  while (queue.length) {
-    const current = queue.shift();
-    if (!current || seen.has(current)) continue;
-    seen.add(current);
-    const details = auditDetailsFromObject(current);
-    if (details.length) return details;
-    for (const value of Object.values(current)) {
-      if (Array.isArray(value)) {
-        for (const item of value.slice(0, 8)) {
-          if (item && typeof item === 'object') queue.push(item as Record<string, unknown>);
-        }
-      } else if (value && typeof value === 'object') {
-        queue.push(value as Record<string, unknown>);
-      }
-    }
-  }
-  return [];
-}
-
-function auditDetailsFromObject(value: Record<string, unknown>) {
-  return [
-    labeledAuditText('问题', value, ['question']),
-    labeledAuditText('引擎', value, ['engine']),
-    labeledAuditText('类型', value, ['materialType', 'category', 'kind', 'type']),
-    labeledAuditText('品牌', value, ['brandSlug', 'brand']),
-    labeledAuditText('渠道', value, ['channel']),
-    labeledAuditText('格式', value, ['fileFormat', 'mimeType']),
-    labeledAuditText('版本', value, ['versionLabel']),
-    labeledAuditText('SKU', value, ['sku']),
-    labeledAuditText('型号', value, ['model']),
-    labeledAuditText('路径', value, ['publicSlug', 'slug']),
-    labeledAuditText('AIVS', value, ['aivs']),
-  ].filter(Boolean);
-}
-
-function labeledAuditText(label: string, value: Record<string, unknown>, keys: string[]) {
-  const text = firstAuditText(value, keys);
-  return text ? `${label}：${text}` : '';
-}
-
-function auditResourceFallback(log: AuditLogRow) {
-  const id = String(log.resourceId || '').trim();
-  if (id && !isOpaqueAuditId(id)) return id;
-  return id || '-';
-}
-
-function auditResourceTitle(states: Record<string, unknown>[]) {
-  for (const state of states) {
-    const direct = auditTitleFromObject(state);
-    if (direct) return direct;
-    const nested = auditTitleFromNestedState(state);
-    if (nested) return nested;
-  }
-  return '';
-}
-
-function auditTitleFromNestedState(state: Record<string, unknown>) {
-  const queue = [state];
-  const seen = new Set<unknown>();
-  while (queue.length) {
-    const current = queue.shift();
-    if (!current || seen.has(current)) continue;
-    seen.add(current);
-    const title = auditTitleFromObject(current);
-    if (title) return title;
-    for (const value of Object.values(current)) {
-      if (Array.isArray(value)) {
-        for (const item of value.slice(0, 8)) {
-          if (item && typeof item === 'object') queue.push(item as Record<string, unknown>);
-        }
-      } else if (value && typeof value === 'object') {
-        queue.push(value as Record<string, unknown>);
-      }
-    }
-  }
-  return '';
-}
-
-function auditTitleFromObject(value: Record<string, unknown>) {
-  const name = firstAuditText(value, [
-    'displayName',
-    'productName',
-    'officialName',
-    'name',
-    'title',
-    'headline',
-    'filename',
-    'fileName',
-    'originalName',
-    'label',
-  ]);
-  const detail = firstAuditText(value, [
-    'materialType',
-    'category',
-    'sku',
-    'model',
-    'code',
-    'slug',
-    'publicSlug',
-    'brandSlug',
-    'brand',
-    'channel',
-    'fileFormat',
-  ]);
-  if (name && detail && name !== detail) return `${name} · ${detail}`;
-  if (name) return name;
-  return detail && !isOpaqueAuditId(detail) ? detail : '';
-}
-
-function firstAuditText(value: Record<string, unknown>, keys: string[]) {
-  for (const key of keys) {
-    const raw = value[key];
-    if (typeof raw !== 'string' && typeof raw !== 'number') continue;
-    const text = String(raw).trim();
-    if (text && !isRedactedAuditText(text)) return text;
-  }
-  return '';
-}
-
-function isRedactedAuditText(value: string) {
-  return value === '[Redacted]' || value === '[Truncated]';
-}
-
-function isOpaqueAuditId(value: string) {
-  return (
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value) ||
-    /^[0-9a-f]{24}$/i.test(value)
-  );
-}
-
-function displayContact(user: AdminUser) {
-  if (user.identifierMasked && user.identifierMasked !== '***') return user.identifierMasked;
-  return '未绑定联系方式';
-}
-
-function normalizeRoleCode(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9_:-]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-}
-
-function displayStatus(status: AdminUser['status']) {
-  if (status === 'active') return '正常';
-  if (status === 'suspended') return '冻结';
-  return '停用';
-}
-
-function can(mePermissions: string[], permission: string, meRole?: string | null) {
-  return (
-    meRole === 'platform_admin' ||
-    meRole === 'hq_admin' ||
-    mePermissions.includes('*') ||
-    mePermissions.includes(permission)
-  );
-}
+import { AdminUser, PermissionItem, RoleItem, AuditLogRow, AccountsTab, AUDIT_MODULE_FILTER_OPTIONS, AUDIT_ACTION_FILTER_OPTIONS, AUDIT_PAGE_SIZE_OPTIONS, ACCOUNT_PAGE_SIZE_OPTIONS, STATUS_TONE, labelForRole, displayRoleName, displayRoleDescription, displayAuditModule, displayAuditAction, displayAuditResource, displayContact, displayStatus, can } from './helpers';
+import { CreateUserModal, CreateRoleModal, AssignRolesModal, RolePermissionsModal, ResetModal, AuditDetailModal, TabButton, Metric, Banner, Center, tdClass } from './modals';
 
 export default function AccountsPage() {
   return (
@@ -591,6 +45,8 @@ export default function AccountsPage() {
     </Suspense>
   );
 }
+
+
 
 function AccountsPageContent() {
   const router = useRouter();
@@ -913,13 +369,13 @@ function AccountsPageContent() {
   }
 
   return (
-    <div className="page-container" style={{ display: 'grid', gap: 18 }}>
+    <div className="page-container grid gap-4.5">
       <WorkbenchSectionHeader
         eyebrow="营销工作台"
         title="账号权限"
         description="动态维护后台角色、页面可见性与 CRUD 操作权限。用户可绑定多个角色，权限叠加生效。"
         actions={
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <div className="flex flex-wrap justify-end gap-2.5">
             <a href="/comfort/sites" className="btn btn-outline btn-sm">
               <ArrowLeft size={14} />
               品牌官网
@@ -940,10 +396,7 @@ function AccountsPageContent() {
         }
       />
 
-      <div
-        className="card-elevated"
-        style={{ padding: 6, display: 'inline-flex', gap: 4, justifySelf: 'start' }}
-      >
+      <div className="card-elevated inline-flex justify-self-start gap-1 p-1.5">
         {canUseUsersTab && (
           <TabButton
             active={tab === 'users'}
@@ -977,19 +430,10 @@ function AccountsPageContent() {
       {msg && <Banner tone="success">{msg}</Banner>}
 
       {tab === 'users' ? (
-        <section style={{ display: 'grid', gap: 14 }}>
+        <section className="grid gap-3.5">
           <WorkbenchFilterToolbar className="accounts-filter-toolbar">
-            <div style={{ position: 'relative', flex: '1 1 360px', minWidth: 220 }}>
-              <Search
-                size={15}
-                style={{
-                  position: 'absolute',
-                  left: 12,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--t-tertiary)',
-                }}
-              />
+            <div className="relative min-w-[220px] flex-[1_1_360px]">
+              <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground/70" />
               <input
                 value={search}
                 onChange={(event) => {
@@ -1003,8 +447,7 @@ function AccountsPageContent() {
                   }
                 }}
                 placeholder="搜索姓名 / 联系方式"
-                className="input"
-                style={{ width: '100%', paddingLeft: 34 }}
+                className="input w-full pl-[34px]"
               />
             </div>
             <select
@@ -1088,19 +531,13 @@ function AccountsPageContent() {
                         <td>
                           {user.name}
                           {user.isLocked && (
-                            <span className="badge badge-warning" style={{ marginLeft: 6 }}>
+                            <span className="badge badge-warning ml-1.5">
                               <LockKeyhole size={12} />
                               锁定
                             </span>
                           )}
                         </td>
-                        <td
-                          style={{
-                            ...td,
-                            fontFamily: 'var(--font-mono)',
-                            color: 'var(--t-secondary)',
-                          }}
-                        >
+                        <td className={`${tdClass} font-mono text-muted-foreground`}>
                           {displayContact(user)}
                         </td>
                         <td>
@@ -1114,7 +551,7 @@ function AccountsPageContent() {
                             {displayStatus(user.status)}
                           </StatusPill>
                         </td>
-                        <td style={{ ...td, color: 'var(--t-tertiary)', fontSize: 12.5 }}>
+                        <td className={`${tdClass} text-[12.5px] text-muted-foreground/80`}>
                           {user.lastLoginAt
                             ? new Date(user.lastLoginAt).toLocaleDateString('zh-CN')
                             : '-'}
@@ -1169,7 +606,7 @@ function AccountsPageContent() {
                               )}
                             </div>
                           ) : (
-                            <span style={{ color: 'var(--t-tertiary)' }}>-</span>
+                            <span className="text-muted-foreground/70">-</span>
                           )}
                         </td>
                       </tr>
@@ -1203,8 +640,8 @@ function AccountsPageContent() {
           />
         </section>
       ) : tab === 'roles' ? (
-        <section style={{ display: 'grid', gap: 14 }}>
-          <div className="g3" style={{ gap: 12 }}>
+        <section className="grid gap-3.5">
+          <div className="g3 gap-3">
             <Metric label="角色" value={String(roles.length)} hint="动态配置" />
             <Metric label="权限点" value={String(permissions.length)} hint="页面与操作" />
             <Metric label="当前权限" value={String(mePermissions.length)} hint="多角色叠加" />
@@ -1247,11 +684,11 @@ function AccountsPageContent() {
                     return (
                       <tr key={role.id}>
                         <td>
-                          <div style={{ display: 'grid', gap: 3 }}>
-                            <strong style={{ color: 'var(--t-strong)' }}>
+                          <div className="grid gap-[3px]">
+                            <strong className="text-foreground">
                               {displayRoleName(role)}
                             </strong>
-                            <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+                            <span className="text-xs text-muted-foreground/80">
                               {role.isSystem ? '内置角色' : '自定义角色'}
                             </span>
                           </div>
@@ -1261,9 +698,9 @@ function AccountsPageContent() {
                             {role.status === 'active' ? '启用' : '停用'}
                           </StatusPill>
                         </td>
-                        <td style={td}>{role.permissions.length}</td>
-                        <td style={td}>{role.userCount ?? 0}</td>
-                        <td style={{ ...td, color: 'var(--t-secondary)', maxWidth: 360 }}>
+                        <td className={tdClass}>{role.permissions.length}</td>
+                        <td className={tdClass}>{role.userCount ?? 0}</td>
+                        <td className={`${tdClass} max-w-[360px] text-muted-foreground`}>
                           {displayRoleDescription(role)}
                         </td>
                         <td>
@@ -1301,7 +738,7 @@ function AccountsPageContent() {
                               )}
                             </div>
                           ) : (
-                            <span style={{ color: 'var(--t-tertiary)' }}>-</span>
+                            <span className="text-muted-foreground/70">-</span>
                           )}
                         </td>
                       </tr>
@@ -1335,7 +772,7 @@ function AccountsPageContent() {
           />
         </section>
       ) : (
-        <section style={{ display: 'grid', gap: 14 }}>
+        <section className="grid gap-3.5">
           <WorkbenchFilterToolbar className="accounts-filter-toolbar">
             <select
               value={auditModule}
@@ -1379,24 +816,14 @@ function AccountsPageContent() {
               <option value="success">成功</option>
               <option value="failed">失败</option>
             </select>
-            <div style={{ position: 'relative', flex: '1 1 320px', minWidth: 220 }}>
-              <Search
-                size={15}
-                style={{
-                  position: 'absolute',
-                  left: 12,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--t-tertiary)',
-                }}
-              />
+            <div className="relative min-w-[220px] flex-[1_1_320px]">
+              <Search size={15} className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground/70" />
               <input
                 value={auditSearch}
                 onChange={(event) => setAuditSearch(event.target.value)}
                 onKeyDown={(event) => event.key === 'Enter' && reloadAuditFromFirstPage()}
                 placeholder="搜索动作 / 对象 / 操作人"
-                className="input"
-                style={{ width: '100%', paddingLeft: 34 }}
+                className="input w-full pl-[34px]"
               />
             </div>
             <button onClick={reloadAuditFromFirstPage} className="btn btn-outline btn-sm">
@@ -1441,7 +868,7 @@ function AccountsPageContent() {
                     const resource = displayAuditResource(row);
                     return (
                       <tr key={row.id}>
-                        <td style={{ ...td, color: 'var(--t-secondary)', whiteSpace: 'nowrap' }}>
+                        <td className={`${tdClass} whitespace-nowrap text-muted-foreground`}>
                           {new Date(row.createdAt).toLocaleString('zh-CN')}
                         </td>
                         <td>
@@ -1449,35 +876,18 @@ function AccountsPageContent() {
                             {displayAuditModule(row.resourceType)}
                           </span>
                         </td>
-                        <td style={td}>{displayAuditAction(row.action)}</td>
-                        <td style={{ ...td, maxWidth: 260 }}>
-                          <div style={{ display: 'grid', gap: 2 }}>
-                            <strong
-                              title={resource.primary}
-                              style={{
-                                color: 'var(--t-strong)',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
+                        <td className={tdClass}>{displayAuditAction(row.action)}</td>
+                        <td className={`${tdClass} max-w-[260px]`}>
+                          <div className="grid gap-0.5">
+                            <strong title={resource.primary} className="truncate text-foreground">
                               {resource.primary}
                             </strong>
-                            <span
-                              title={resource.secondary}
-                              style={{
-                                color: 'var(--t-tertiary)',
-                                fontSize: 12,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
+                            <span title={resource.secondary} className="truncate text-xs text-muted-foreground/80">
                               {resource.secondary}
                             </span>
                           </div>
                         </td>
-                        <td style={td}>{row.actorName || row.actorUserId || '系统'}</td>
+                        <td className={tdClass}>{row.actorName || row.actorUserId || '系统'}</td>
                         <td>
                           <StatusPill tone={row.status === 'failed' ? 'danger' : 'success'}>
                             {row.status === 'failed' ? '失败' : '成功'}
@@ -1609,883 +1019,3 @@ async function updateRoleStatus(
     onError((error as Error).message || '角色状态更新失败');
   }
 }
-
-function CreateUserModal({
-  roles,
-  onClose,
-  onDone,
-  onError,
-}: {
-  roles: RoleItem[];
-  onClose: () => void;
-  onDone: () => void;
-  onError: (message: string) => void;
-}) {
-  const [phone, setPhone] = useState('');
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [roleId, setRoleId] = useState(roles[0]?.id || '');
-  const [busy, setBusy] = useState(false);
-  const selectedRole = roles.find((role) => role.id === roleId);
-
-  async function submit() {
-    if (!PHONE_PATTERN.test(phone)) {
-      onError('请输入正确的手机号');
-      return;
-    }
-    if (!name.trim()) {
-      onError('姓名必填');
-      return;
-    }
-    if (!selectedRole) {
-      onError('请选择角色');
-      return;
-    }
-    if (password.length < 8) {
-      onError('初始密码至少 8 位');
-      return;
-    }
-    setBusy(true);
-    onError('');
-    try {
-      const created = await adminUsers.create({
-        identifier: phone,
-        phone,
-        name,
-        password,
-        role: selectedRole.code,
-      });
-      const userId = created?.user?.id;
-      if (userId)
-        await adminUsers.setRoles(userId, {
-          roleIds: [selectedRole.id],
-          primaryRoleId: selectedRole.id,
-        });
-      onDone();
-    } catch (error) {
-      onError((error as Error).message || '创建失败');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Overlay onClose={onClose}>
-      <ModalTitle title="新建账号" subtitle="创建后会绑定所选主角色，后续可继续叠加角色。" />
-      <Field label="手机号">
-        <input
-          value={phone}
-          onChange={(event) => setPhone(event.target.value.trim())}
-          placeholder="请输入手机号"
-          className="input"
-          autoFocus
-        />
-      </Field>
-      <Field label="姓名">
-        <input
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder="显示名称"
-          className="input"
-        />
-      </Field>
-      <Field label="主角色">
-        <select
-          value={roleId}
-          onChange={(event) => setRoleId(event.target.value)}
-          className="select"
-        >
-          {roles.map((role) => (
-            <option key={role.id} value={role.id}>
-              {displayRoleName(role)}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <Field label="初始密码">
-        <input
-          type="text"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="至少 8 位"
-          className="input"
-        />
-      </Field>
-      <ModalActions onClose={onClose}>
-        <button onClick={submit} disabled={busy} className="btn btn-brand btn-sm">
-          <Plus size={14} />
-          {busy ? '创建中...' : '创建'}
-        </button>
-      </ModalActions>
-    </Overlay>
-  );
-}
-
-function CreateRoleModal({
-  permissions,
-  onClose,
-  onDone,
-  onError,
-}: {
-  permissions: PermissionItem[];
-  onClose: () => void;
-  onDone: () => void;
-  onError: (message: string) => void;
-}) {
-  const [code, setCode] = useState('');
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [selected, setSelected] = useState<string[]>([]);
-  const [busy, setBusy] = useState(false);
-
-  async function submit() {
-    if (!name.trim()) {
-      onError('角色名称必填');
-      return;
-    }
-    const normalizedCode = normalizeRoleCode(code) || `custom_role_${Date.now().toString(36)}`;
-    if (!ROLE_CODE_PATTERN.test(normalizedCode)) {
-      onError('角色编码只能使用英文小写、数字、下划线、冒号或中横线');
-      return;
-    }
-    setBusy(true);
-    onError('');
-    try {
-      await adminRbac.createRole({
-        code: normalizedCode,
-        name,
-        description,
-        permissions: selected,
-      });
-      onDone();
-    } catch (error) {
-      onError((error as Error).message || '角色创建失败');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Overlay onClose={onClose} wide>
-      <ModalTitle
-        title="新建角色"
-        subtitle="角色编码保存后作为权限判断稳定 key，建议使用英文小写。"
-      />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        <Field label="角色编码">
-          <input
-            value={code}
-            onChange={(event) => setCode(normalizeRoleCode(event.target.value))}
-            placeholder="marketing_operator"
-            className="input"
-            autoFocus
-          />
-        </Field>
-        <Field label="角色名称">
-          <input
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="营销运营"
-            className="input"
-          />
-        </Field>
-      </div>
-      <div style={{ color: 'var(--t-tertiary)', fontSize: 12, marginTop: -4 }}>
-        角色名称可以是中文；角色编码只能使用英文小写、数字、下划线、冒号或中横线。
-      </div>
-      <Field label="说明">
-        <textarea
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          placeholder="角色职责说明"
-          className="input"
-          rows={3}
-        />
-      </Field>
-      <PermissionPicker permissions={permissions} selected={selected} onChange={setSelected} />
-      <ModalActions onClose={onClose}>
-        <button onClick={submit} disabled={busy} className="btn btn-brand btn-sm">
-          <Plus size={14} />
-          {busy ? '创建中...' : '创建角色'}
-        </button>
-      </ModalActions>
-    </Overlay>
-  );
-}
-
-function AssignRolesModal({
-  user,
-  roles,
-  onClose,
-  onDone,
-  onError,
-}: {
-  user: AdminUser;
-  roles: RoleItem[];
-  onClose: () => void;
-  onDone: () => void;
-  onError: (message: string) => void;
-}) {
-  const [selected, setSelected] = useState<string[]>([]);
-  const [primary, setPrimary] = useState('');
-  const [effectiveRoles, setEffectiveRoles] = useState<EffectiveRole[]>([]);
-  const [effectivePermissions, setEffectivePermissions] = useState<string[]>([]);
-  const [busy, setBusy] = useState(false);
-  const [scopeType, setScopeType] = useState<'group' | 'business_unit'>('group');
-  const [scopeDim, setScopeDim] = useState<'brand' | 'category'>('brand');
-  const [scopeRef, setScopeRef] = useState('');
-  const [bu, setBu] = useState<{
-    brands: Array<{ code: string; name: string }>;
-    categories: Array<{ id: string; name: string; brandCode: string }>;
-  }>({ brands: [], categories: [] });
-
-  useEffect(() => {
-    let cancelled = false;
-    adminRbac
-      .businessUnits()
-      .then((res) => {
-        if (!cancelled) setBu({ brands: res.brands || [], categories: res.categories || [] });
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    adminUsers
-      .effectivePermissions(user.id)
-      .then((res) => {
-        if (cancelled) return;
-        const currentRoles: EffectiveRole[] = res.roles || [];
-        setEffectiveRoles(currentRoles);
-        setEffectivePermissions(res.permissions || []);
-        setSelected(currentRoles.map((role) => role.id));
-        setPrimary(currentRoles.find((role) => role.isPrimary)?.id || currentRoles[0]?.id || '');
-      })
-      .catch((error) => onError((error as Error).message || '加载用户权限失败'));
-    return () => {
-      cancelled = true;
-    };
-  }, [onError, user.id]);
-
-  function toggle(roleId: string) {
-    setSelected((current) => {
-      const next = current.includes(roleId)
-        ? current.filter((id) => id !== roleId)
-        : [...current, roleId];
-      if (!next.includes(primary)) setPrimary(next[0] || '');
-      return next;
-    });
-  }
-
-  async function submit() {
-    if (!selected.length) {
-      onError('至少选择一个角色');
-      return;
-    }
-    if (scopeType === 'business_unit' && !scopeRef) {
-      onError('事业部范围需选择具体品牌/品类');
-      return;
-    }
-    setBusy(true);
-    onError('');
-    try {
-      const scope =
-        scopeType === 'group'
-          ? { scopeType: 'group' as const }
-          : { scopeType: 'business_unit' as const, scopeDimension: scopeDim, scopeRef };
-      await adminUsers.setRoles(user.id, {
-        roleIds: selected,
-        primaryRoleId: primary || selected[0],
-        scope,
-      });
-      onDone();
-    } catch (error) {
-      onError((error as Error).message || '角色分配失败');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Overlay onClose={onClose} wide>
-      <ModalTitle
-        title="分配用户角色"
-        subtitle={`${user.name} 当前拥有 ${effectiveRoles.length} 个角色，合并 ${effectivePermissions.length} 个权限点。`}
-      />
-      <div style={{ display: 'grid', gap: 8, maxHeight: 360, overflow: 'auto', paddingRight: 4 }}>
-        {roles.map((role) => {
-          const checked = selected.includes(role.id);
-          return (
-            <label key={role.id} className="surface-interactive" style={choiceStyle(checked)}>
-              <input type="checkbox" checked={checked} onChange={() => toggle(role.id)} />
-              <span style={{ display: 'grid', gap: 2, minWidth: 0, flex: 1 }}>
-                <strong style={{ color: 'var(--t-strong)' }}>{displayRoleName(role)}</strong>
-                <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
-                  {role.permissions.length} 个权限点
-                </span>
-              </span>
-              <button
-                type="button"
-                disabled={!checked}
-                onClick={(event) => {
-                  event.preventDefault();
-                  setPrimary(role.id);
-                }}
-                className={primary === role.id ? 'btn btn-brand btn-sm' : 'btn btn-outline btn-sm'}
-              >
-                <Check size={13} />
-                主角色
-              </button>
-            </label>
-          );
-        })}
-      </div>
-      <div
-        style={{
-          display: 'grid',
-          gap: 8,
-          marginTop: 12,
-          paddingTop: 12,
-          borderTop: '1px solid var(--border-subtle, #e4e4e7)',
-        }}
-      >
-        <strong style={{ color: 'var(--t-strong)', fontSize: 13 }}>授权范围（scope）</strong>
-        <div style={{ display: 'flex', gap: 16 }}>
-          <label style={{ display: 'flex', gap: 4, alignItems: 'center', fontSize: 13 }}>
-            <input
-              type="radio"
-              checked={scopeType === 'group'}
-              onChange={() => setScopeType('group')}
-            />{' '}
-            集团
-          </label>
-          <label style={{ display: 'flex', gap: 4, alignItems: 'center', fontSize: 13 }}>
-            <input
-              type="radio"
-              checked={scopeType === 'business_unit'}
-              onChange={() => setScopeType('business_unit')}
-            />{' '}
-            事业部
-          </label>
-        </div>
-        {scopeType === 'business_unit' && (
-          <div style={{ display: 'flex', gap: 8 }}>
-            <select
-              value={scopeDim}
-              onChange={(e) => {
-                setScopeDim(e.target.value as 'brand' | 'category');
-                setScopeRef('');
-              }}
-            >
-              <option value="brand">品牌事业部</option>
-              <option value="category">品类事业部</option>
-            </select>
-            <select
-              value={scopeRef}
-              onChange={(e) => setScopeRef(e.target.value)}
-              style={{ flex: 1 }}
-            >
-              <option value="">请选择…</option>
-              {scopeDim === 'brand'
-                ? bu.brands.map((b) => (
-                    <option key={b.code} value={b.code}>
-                      {b.name}
-                    </option>
-                  ))
-                : bu.categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.brandCode} · {c.name}
-                    </option>
-                  ))}
-            </select>
-          </div>
-        )}
-      </div>
-      <ModalActions onClose={onClose}>
-        <button onClick={submit} disabled={busy} className="btn btn-brand btn-sm">
-          <Save size={14} />
-          {busy ? '保存中...' : '保存分配'}
-        </button>
-      </ModalActions>
-    </Overlay>
-  );
-}
-
-function RolePermissionsModal({
-  role,
-  permissions,
-  canEditRole,
-  canAssignPermissions,
-  onClose,
-  onDone,
-  onError,
-}: {
-  role: RoleItem;
-  permissions: PermissionItem[];
-  canEditRole: boolean;
-  canAssignPermissions: boolean;
-  onClose: () => void;
-  onDone: () => void;
-  onError: (message: string) => void;
-}) {
-  const [name, setName] = useState(displayRoleName(role));
-  const [description, setDescription] = useState(
-    displayRoleDescription(role) === '-' ? '' : displayRoleDescription(role)
-  );
-  const [selected, setSelected] = useState<string[]>(role.permissions);
-  const [busy, setBusy] = useState(false);
-
-  async function submit() {
-    setBusy(true);
-    onError('');
-    try {
-      if (canEditRole) await adminRbac.updateRole(role.id, { name, description });
-      if (canAssignPermissions) await adminRbac.setRolePermissions(role.id, selected);
-      onDone();
-    } catch (error) {
-      onError((error as Error).message || '角色权限保存失败');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Overlay onClose={onClose} wide>
-      <ModalTitle
-        title="配置角色权限"
-        subtitle={`${displayRoleName(role)} · 当前 ${selected.length} 个权限点`}
-      />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        <Field label="角色名称">
-          <input
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            disabled={!canEditRole}
-            className="input"
-          />
-        </Field>
-        <Field label="状态">
-          <input value={role.status === 'active' ? '启用' : '停用'} disabled className="input" />
-        </Field>
-      </div>
-      <Field label="说明">
-        <textarea
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          disabled={!canEditRole}
-          className="input"
-          rows={3}
-        />
-      </Field>
-      <PermissionPicker
-        permissions={permissions}
-        selected={selected}
-        onChange={setSelected}
-        disabled={!canAssignPermissions}
-      />
-      <ModalActions onClose={onClose}>
-        <button
-          onClick={submit}
-          disabled={busy || (!canEditRole && !canAssignPermissions)}
-          className="btn btn-brand btn-sm"
-        >
-          <Save size={14} />
-          {busy ? '保存中...' : '保存'}
-        </button>
-      </ModalActions>
-    </Overlay>
-  );
-}
-
-function PermissionPicker({
-  permissions,
-  selected,
-  onChange,
-  disabled = false,
-}: {
-  permissions: PermissionItem[];
-  selected: string[];
-  onChange: (next: string[]) => void;
-  disabled?: boolean;
-}) {
-  const groups = useMemo(() => {
-    const byDomain = new Map<string, PermissionItem[]>();
-    for (const permission of permissions) {
-      const list = byDomain.get(permission.domain) || [];
-      list.push(permission);
-      byDomain.set(permission.domain, list);
-    }
-    return [...byDomain.entries()];
-  }, [permissions]);
-
-  function toggle(code: string) {
-    if (disabled) return;
-    onChange(
-      selected.includes(code) ? selected.filter((item) => item !== code) : [...selected, code]
-    );
-  }
-
-  return (
-    <div style={{ display: 'grid', gap: 10 }}>
-      <div
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
-      >
-        <label style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--t-secondary)' }}>
-          权限点
-        </label>
-        <span className="badge badge-info">
-          {selected.length} / {permissions.length}
-        </span>
-      </div>
-      <div style={{ display: 'grid', gap: 10, maxHeight: 420, overflow: 'auto', paddingRight: 4 }}>
-        {groups.map(([domain, items]) => (
-          <div
-            key={domain}
-            className="card-elevated"
-            style={{ padding: 12, boxShadow: 'var(--sh-xs)' }}
-          >
-            <div style={{ marginBottom: 8, fontSize: 12, color: 'var(--t-secondary)' }}>
-              {displayPermissionDomain(domain)}
-            </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                gap: 8,
-              }}
-            >
-              {items.map((permission) => {
-                const checked = selected.includes(permission.code);
-                return (
-                  <label
-                    key={permission.code}
-                    className="surface-interactive"
-                    style={choiceStyle(checked, disabled)}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      disabled={disabled}
-                      onChange={() => toggle(permission.code)}
-                    />
-                    <span style={{ display: 'grid', gap: 2, minWidth: 0 }}>
-                      <strong style={{ color: 'var(--t-strong)' }}>
-                        {displayPermissionName(permission)}
-                      </strong>
-                      <span style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
-                        {displayPermissionAction(permission.action)}
-                      </span>
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ResetModal({
-  user,
-  onClose,
-  onDone,
-  onError,
-}: {
-  user: AdminUser;
-  onClose: () => void;
-  onDone: () => void;
-  onError: (message: string) => void;
-}) {
-  const [pwd, setPwd] = useState('');
-  const [busy, setBusy] = useState(false);
-
-  async function submit() {
-    if (pwd.length < 8) {
-      onError('新密码至少 8 位');
-      return;
-    }
-    setBusy(true);
-    onError('');
-    try {
-      await adminUsers.resetPassword(user.id, pwd);
-      onDone();
-    } catch (error) {
-      onError((error as Error).message || '重置失败');
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  return (
-    <Overlay onClose={onClose}>
-      <ModalTitle title="重置密码" subtitle={`为「${user.name}」设置新密码。`} />
-      <Field label="新密码">
-        <input
-          type="text"
-          value={pwd}
-          onChange={(event) => setPwd(event.target.value)}
-          placeholder="至少 8 位"
-          className="input"
-          autoFocus
-        />
-      </Field>
-      <ModalActions onClose={onClose}>
-        <button onClick={submit} disabled={busy} className="btn btn-brand btn-sm">
-          <KeyRound size={14} />
-          {busy ? '重置中...' : '确认重置'}
-        </button>
-      </ModalActions>
-    </Overlay>
-  );
-}
-
-function AuditDetailModal({ log, onClose }: { log: AuditLogRow; onClose: () => void }) {
-  const resource = displayAuditResource(log);
-  return (
-    <Overlay onClose={onClose} wide>
-      <ModalTitle
-        title="操作日志详情"
-        subtitle={`${displayAuditModule(log.resourceType)} · ${displayAuditAction(log.action)}`}
-      />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-        <Field label="操作时间">
-          <input
-            value={new Date(log.createdAt).toLocaleString('zh-CN')}
-            disabled
-            className="input"
-          />
-        </Field>
-        <Field label="操作人">
-          <input value={log.actorName || log.actorUserId || '系统'} disabled className="input" />
-        </Field>
-        <Field label="对象类型">
-          <input value={displayAuditModule(log.resourceType)} disabled className="input" />
-        </Field>
-        <Field label="操作说明">
-          <input value={resource.primary} disabled className="input" />
-        </Field>
-        <Field label="动作">
-          <input value={displayAuditAction(log.action)} disabled className="input" />
-        </Field>
-        <Field label="结果">
-          <input value={log.status === 'failed' ? '失败' : '成功'} disabled className="input" />
-        </Field>
-      </div>
-      {resource.secondary ? (
-        <Field label="补充信息">
-          <input value={resource.secondary} disabled className="input" />
-        </Field>
-      ) : null}
-      {log.resourceId && resource.primary !== log.resourceId ? (
-        <Field label="对象 ID">
-          <input value={log.resourceId} disabled className="input" />
-        </Field>
-      ) : null}
-      <Field label="操作前 / 请求上下文">
-        <pre style={auditJsonStyle}>{stringifyAuditState(log.beforeState)}</pre>
-      </Field>
-      <Field label="操作后 / 执行结果">
-        <pre style={auditJsonStyle}>{stringifyAuditState(log.afterState)}</pre>
-      </Field>
-      <ModalActions onClose={onClose} />
-    </Overlay>
-  );
-}
-
-function stringifyAuditState(value: unknown) {
-  if (!value || typeof value !== 'object') return '{}';
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
-}
-
-function TabButton({
-  active,
-  onClick,
-  icon,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={active ? 'btn btn-brand btn-sm' : 'btn btn-ghost btn-sm'}
-    >
-      {icon}
-      {children}
-    </button>
-  );
-}
-
-function Metric({ label, value, hint }: { label: string; value: string; hint: string }) {
-  return (
-    <div className="card-elevated" style={{ padding: 16 }}>
-      <div style={{ fontSize: 12, color: 'var(--t-secondary)' }}>{label}</div>
-      <div
-        style={{
-          marginTop: 6,
-          fontSize: 28,
-          lineHeight: 1,
-          fontWeight: 800,
-          color: 'var(--t-strong)',
-        }}
-      >
-        {value}
-      </div>
-      <div style={{ marginTop: 6, fontSize: 12, color: 'var(--t-tertiary)' }}>{hint}</div>
-    </div>
-  );
-}
-
-function Overlay({
-  children,
-  onClose,
-  wide = false,
-}: {
-  children: ReactNode;
-  onClose: () => void;
-  wide?: boolean;
-}) {
-  return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(17, 24, 39, 0.46)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 50,
-        padding: 20,
-      }}
-    >
-      <div
-        onClick={(event) => event.stopPropagation()}
-        className="card-elevated"
-        style={{
-          padding: 24,
-          width: wide ? 'min(100%, 860px)' : 'min(100%, 420px)',
-          maxHeight: 'min(92vh, 820px)',
-          overflow: 'auto',
-          boxShadow: 'var(--sh-modal)',
-        }}
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function ModalTitle({ title, subtitle }: { title: string; subtitle?: string }) {
-  return (
-    <div style={{ marginBottom: 16 }}>
-      <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: 'var(--t-strong)' }}>
-        {title}
-      </h3>
-      {subtitle ? (
-        <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--t-secondary)' }}>{subtitle}</p>
-      ) : null}
-    </div>
-  );
-}
-
-function ModalActions({ children, onClose }: { children?: ReactNode; onClose: () => void }) {
-  return (
-    <div style={{ display: 'flex', gap: 10, marginTop: 18, justifyContent: 'flex-end' }}>
-      <button onClick={onClose} className="btn btn-ghost btn-sm">
-        取消
-      </button>
-      {children}
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div style={{ marginBottom: 12 }}>
-      <label
-        style={{
-          display: 'block',
-          fontSize: 12.5,
-          fontWeight: 700,
-          color: 'var(--t-secondary)',
-          marginBottom: 6,
-        }}
-      >
-        {label}
-      </label>
-      {children}
-    </div>
-  );
-}
-
-function Banner({ children, tone }: { children: ReactNode; tone: 'success' | 'error' }) {
-  return (
-    <div
-      className={tone === 'success' ? 'badge badge-success' : 'badge badge-danger'}
-      style={{
-        justifyContent: 'flex-start',
-        whiteSpace: 'normal',
-        overflowWrap: 'anywhere',
-        padding: '10px 14px',
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function Center({ children }: { children: ReactNode }) {
-  return (
-    <div
-      className="page-container"
-      style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function choiceStyle(checked: boolean, disabled = false): CSSProperties {
-  return {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    padding: '10px 12px',
-    borderRadius: 8,
-    border: checked ? '1px solid var(--brand)' : '1px solid var(--border)',
-    background: checked ? 'var(--brand-50)' : 'var(--surface-1)',
-    opacity: disabled ? 0.62 : 1,
-    cursor: disabled ? 'not-allowed' : 'pointer',
-  };
-}
-
-const td: CSSProperties = { padding: '11px 16px', verticalAlign: 'middle' };
-const auditJsonStyle: CSSProperties = {
-  maxHeight: 260,
-  margin: 0,
-  overflow: 'auto',
-  padding: 12,
-  border: '1px solid var(--border)',
-  borderRadius: 8,
-  background: 'var(--surface-2)',
-  color: 'var(--t-secondary)',
-  fontFamily: 'var(--font-mono)',
-  fontSize: 12,
-  lineHeight: 1.6,
-  whiteSpace: 'pre-wrap',
-  overflowWrap: 'anywhere',
-};

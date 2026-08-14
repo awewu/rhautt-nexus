@@ -1,5 +1,7 @@
 'use client';
 
+/** 2026-08 全页 UX 重构二期 · WorkspaceKit 化 */
+
 import { useCallback, useEffect, useState } from 'react';
 import {
   CheckCircle2,
@@ -11,6 +13,7 @@ import {
   SkipForward,
   XCircle,
 } from 'lucide-react';
+import { WorkspaceSection } from '@/components/WorkspaceKit';
 import { growthGeo } from '../lib/api';
 
 /**
@@ -59,18 +62,18 @@ const AUDIENCE_LABEL: Record<string, string> = {
   installer: '安装工',
 };
 const INTENT_LABEL: Record<string, { label: string; tone: string }> = {
-  info: { label: '信息型', tone: 'var(--t-tertiary)' },
-  compare: { label: '对比型', tone: 'var(--warning)' },
-  decide: { label: '决策型', tone: 'var(--danger)' },
+  info: { label: '信息型', tone: 'text-muted-foreground' },
+  compare: { label: '对比型', tone: 'text-warning' },
+  decide: { label: '决策型', tone: 'text-destructive' },
 };
 const STEP_LABEL: Record<string, string> = {
   'seed-scenarios': '播种场景 + 派生选题',
   'baseline-probe': '基线探测（只读）',
 };
 const STATUS_META: Record<string, { icon: React.ReactNode; tone: string; label: string }> = {
-  ok: { icon: <CheckCircle2 size={14} />, tone: 'var(--success)', label: '完成' },
-  failed: { icon: <XCircle size={14} />, tone: 'var(--danger)', label: '失败' },
-  skipped: { icon: <SkipForward size={14} />, tone: 'var(--t-tertiary)', label: '跳过' },
+  ok: { icon: <CheckCircle2 size={14} />, tone: 'text-success', label: '完成' },
+  failed: { icon: <XCircle size={14} />, tone: 'text-destructive', label: '失败' },
+  skipped: { icon: <SkipForward size={14} />, tone: 'text-muted-foreground', label: '跳过' },
 };
 
 export function ScenarioLibraryPanel({ brandSlug = 'rheem' }: { brandSlug?: string }) {
@@ -144,208 +147,176 @@ export function ScenarioLibraryPanel({ brandSlug = 'rheem' }: { brandSlug?: stri
   }
 
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
-      <div className="workbench-section-header">
-        <div>
-          <p className="workbench-section-header__eyebrow">战略分析 · 场景库</p>
-          <h2 className="workbench-section-header__title">场景即 prompt · 新品类冷启动</h2>
-          <p className="workbench-section-header__description">
-            消费者不问「变频参数」，而问「北方老房没地暖怎么改」。场景 = 品类 × 角色 × 痛点 × 房型 ×
-            气候区，选题由此派生、来源可追溯。
-          </p>
-        </div>
+    <WorkspaceSection
+      icon={<Layers size={16} className="text-primary" />}
+      title="场景即 prompt · 新品类冷启动"
+      aside={
         <button className="btn btn-outline btn-sm" onClick={load} disabled={loading}>
           {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}刷新
         </button>
-      </div>
-
-      {/* 播种 / 启动序列 */}
-      <div className="inset" style={{ display: 'grid', gap: 10, padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Rocket size={16} style={{ color: 'var(--brand)' }} />
-          <strong style={{ fontSize: 14, color: 'var(--t-strong)' }}>播种 / 启动序列</strong>
-          <span
-            className="badge"
-            style={{
-              fontSize: 10,
-              color: 'var(--success)',
-              borderColor: 'var(--success)',
-              marginLeft: 'auto',
-            }}
-          >
-            green · 可自动
-          </span>
+      }
+    >
+      <div className="grid gap-4">
+        <div>
+          <div className="text-[11px] font-medium text-muted-foreground">战略分析 · 场景库</div>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            消费者不问「变频参数」，而问「北方老房没地暖怎么改」。场景 = 品类 × 角色 × 痛点 × 房型
+            × 气候区，选题由此派生、来源可追溯。
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <input
-            className="input"
-            style={{ width: 150 }}
-            placeholder="品类（如 热泵）"
-            value={form.category}
-            onChange={(e) => setForm({ ...form, category: e.target.value })}
-          />
-          <input
-            className="input"
-            style={{ flex: 1, minWidth: 220 }}
-            placeholder="痛点（逗号分隔；内置品类可留空）"
-            value={form.painPoints}
-            onChange={(e) => setForm({ ...form, painPoints: e.target.value })}
-          />
-          <input
-            className="input"
-            style={{ width: 90 }}
-            type="number"
-            min={1}
-            max={50}
-            placeholder="上限"
-            value={form.maxScenarios}
-            onChange={(e) => setForm({ ...form, maxScenarios: Number(e.target.value) })}
-          />
-          <button
-            className="btn btn-outline btn-sm"
-            onClick={() => run('dry')}
-            disabled={!!running}
-          >
-            {running === 'dry' ? <Loader2 size={14} className="animate-spin" /> : null}试算
-          </button>
-          <button
-            className="btn btn-outline btn-sm"
-            onClick={() => run('seed')}
-            disabled={!!running}
-          >
-            {running === 'seed' ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : (
-              <Play size={14} />
-            )}
-            仅播种
-          </button>
-          <button className="btn btn-brand btn-sm" onClick={() => run('boot')} disabled={!!running}>
-            {running === 'boot' ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : (
-              <Rocket size={14} />
-            )}
-            启动序列
-          </button>
+
+        {/* 播种 / 启动序列 */}
+        <div className="grid gap-2.5 rounded-lg border bg-secondary/60 p-4">
+          <div className="flex items-center gap-2">
+            <Rocket size={16} className="text-primary" />
+            <strong className="text-sm font-semibold">播种 / 启动序列</strong>
+            <span className="ml-auto rounded-full border border-current px-2 text-[10px] leading-4 text-success">
+              green · 可自动
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              className="input w-[150px]"
+              placeholder="品类（如 热泵）"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+            />
+            <input
+              className="input min-w-[220px] flex-1"
+              placeholder="痛点（逗号分隔；内置品类可留空）"
+              value={form.painPoints}
+              onChange={(e) => setForm({ ...form, painPoints: e.target.value })}
+            />
+            <input
+              className="input w-[90px]"
+              type="number"
+              min={1}
+              max={50}
+              placeholder="上限"
+              value={form.maxScenarios}
+              onChange={(e) => setForm({ ...form, maxScenarios: Number(e.target.value) })}
+            />
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => run('dry')}
+              disabled={!!running}
+            >
+              {running === 'dry' ? <Loader2 size={14} className="animate-spin" /> : null}试算
+            </button>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => run('seed')}
+              disabled={!!running}
+            >
+              {running === 'seed' ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Play size={14} />
+              )}
+              仅播种
+            </button>
+            <button
+              className="btn btn-brand btn-sm"
+              onClick={() => run('boot')}
+              disabled={!!running}
+            >
+              {running === 'boot' ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Rocket size={14} />
+              )}
+              启动序列
+            </button>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            未收录品类<strong>不会编造痛点</strong>，须自行提供真实用户痛点；启动序列 = 播种 →
+            派生选题 → 基线探测（只读）， 「缺口→生成内容」属 yellow，需人工核准，不在此触发。
+          </p>
+
+          {runError ? <div className="text-xs text-destructive">{runError}</div> : null}
+          {seedSummary ? <div className="text-xs text-success">{seedSummary}</div> : null}
+
+          {/* 启动序列步骤状态：原样呈现，失败不隐藏 */}
+          {result ? (
+            <div className="mt-1 grid gap-1.5">
+              {result.steps.map((s) => {
+                const m = STATUS_META[s.status] || STATUS_META.skipped;
+                return (
+                  <div key={s.step} className="flex items-center gap-2 text-xs">
+                    <span className={`flex ${m.tone}`}>{m.icon}</span>
+                    <span>{STEP_LABEL[s.step] || s.step}</span>
+                    <span className={`text-[11px] ${m.tone}`}>{m.label}</span>
+                    {s.error ? (
+                      <span className="text-[11px] text-muted-foreground">{s.error}</span>
+                    ) : null}
+                  </div>
+                );
+              })}
+              {result.nextActions?.length ? (
+                <div className="mt-1.5 grid gap-1 border-t pt-2">
+                  <span className="text-[11px] text-muted-foreground">后续待办</span>
+                  {result.nextActions.map((a) => (
+                    <div key={a.actionId} className="flex items-center gap-2 text-[11px]">
+                      <code className="text-[10.5px] text-muted-foreground">{a.actionId}</code>
+                      <span
+                        className={`rounded-full border border-current px-2 text-[10px] leading-4 ${
+                          a.zone === 'green' ? 'text-success' : 'text-warning'
+                        }`}
+                      >
+                        {a.zone === 'green' ? '可自动' : 'AI代行需核准'}
+                      </span>
+                      <span className="text-muted-foreground">{a.note}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
-        <p style={{ fontSize: 11.5, color: 'var(--t-tertiary)' }}>
-          未收录品类<strong>不会编造痛点</strong>，须自行提供真实用户痛点；启动序列 = 播种 →
-          派生选题 → 基线探测（只读）， 「缺口→生成内容」属 yellow，需人工核准，不在此触发。
-        </p>
 
-        {runError ? <div style={{ color: 'var(--danger)', fontSize: 12.5 }}>{runError}</div> : null}
-        {seedSummary ? (
-          <div style={{ color: 'var(--success)', fontSize: 12.5 }}>{seedSummary}</div>
-        ) : null}
-
-        {/* 启动序列步骤状态：原样呈现，失败不隐藏 */}
-        {result ? (
-          <div style={{ display: 'grid', gap: 6, marginTop: 4 }}>
-            {result.steps.map((s) => {
-              const m = STATUS_META[s.status] || STATUS_META.skipped;
+        {/* 场景清单 */}
+        <div className="grid gap-2.5 rounded-lg border bg-secondary/60 p-4">
+          <div className="flex items-center gap-2">
+            <Layers size={16} className="text-primary" />
+            <strong className="text-sm font-semibold">场景清单</strong>
+            <span className="ml-auto text-[11px] text-muted-foreground tabular-nums">
+              {scenarios.length} 个
+            </span>
+          </div>
+          {error ? <div className="text-xs text-destructive">{error}</div> : null}
+          <div className="grid gap-1">
+            {scenarios.slice(0, 40).map((s) => {
+              const im = INTENT_LABEL[s.intent] || INTENT_LABEL.compare;
               return (
-                <div
-                  key={s.step}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5 }}
-                >
-                  <span style={{ color: m.tone, display: 'flex' }}>{m.icon}</span>
-                  <span style={{ color: 'var(--t-strong)' }}>{STEP_LABEL[s.step] || s.step}</span>
-                  <span style={{ color: m.tone, fontSize: 11 }}>{m.label}</span>
-                  {s.error ? (
-                    <span style={{ color: 'var(--t-tertiary)', fontSize: 11 }}>{s.error}</span>
-                  ) : null}
+                <div key={s.id} className="flex items-center gap-2 border-t py-1.5 text-xs">
+                  <span className="min-w-[80px]">{s.category}</span>
+                  <span className="text-muted-foreground">{s.painPoint}</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    {[AUDIENCE_LABEL[s.audience] || s.audience, s.houseType, s.climateZone]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </span>
+                  <span
+                    className={`ml-auto rounded-full border border-current px-2 text-[10px] leading-4 ${im.tone}`}
+                  >
+                    {im.label}
+                  </span>
                 </div>
               );
             })}
-            {result.nextActions?.length ? (
-              <div
-                style={{
-                  marginTop: 6,
-                  paddingTop: 8,
-                  borderTop: '1px solid var(--border)',
-                  display: 'grid',
-                  gap: 4,
-                }}
-              >
-                <span style={{ fontSize: 11.5, color: 'var(--t-tertiary)' }}>后续待办</span>
-                {result.nextActions.map((a) => (
-                  <div
-                    key={a.actionId}
-                    style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5 }}
-                  >
-                    <code style={{ fontSize: 10.5, color: 'var(--t-tertiary)' }}>{a.actionId}</code>
-                    <span
-                      className="badge"
-                      style={{
-                        fontSize: 10,
-                        color: a.zone === 'green' ? 'var(--success)' : 'var(--warning)',
-                      }}
-                    >
-                      {a.zone === 'green' ? '可自动' : 'AI代行需核准'}
-                    </span>
-                    <span style={{ color: 'var(--t-tertiary)' }}>{a.note}</span>
-                  </div>
-                ))}
-              </div>
+            {!scenarios.length && !loading ? (
+              <p className="text-xs text-muted-foreground">
+                暂无场景 —— 用上方播种器为品类生成初始场景与选题
+              </p>
+            ) : null}
+            {scenarios.length > 40 ? (
+              <p className="text-[11px] text-muted-foreground tabular-nums">
+                仅显示前 40 个（共 {scenarios.length} 个）
+              </p>
             ) : null}
           </div>
-        ) : null}
-      </div>
-
-      {/* 场景清单 */}
-      <div className="inset" style={{ display: 'grid', gap: 10, padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Layers size={16} style={{ color: 'var(--brand)' }} />
-          <strong style={{ fontSize: 14, color: 'var(--t-strong)' }}>场景清单</strong>
-          <span style={{ fontSize: 11.5, color: 'var(--t-tertiary)', marginLeft: 'auto' }}>
-            {scenarios.length} 个
-          </span>
-        </div>
-        {error ? <div style={{ color: 'var(--danger)', fontSize: 12.5 }}>{error}</div> : null}
-        <div style={{ display: 'grid', gap: 4 }}>
-          {scenarios.slice(0, 40).map((s) => {
-            const im = INTENT_LABEL[s.intent] || INTENT_LABEL.compare;
-            return (
-              <div
-                key={s.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 12.5,
-                  padding: '5px 0',
-                  borderTop: '1px solid var(--border)',
-                }}
-              >
-                <span style={{ color: 'var(--t-strong)', minWidth: 80 }}>{s.category}</span>
-                <span style={{ color: 'var(--t-secondary)' }}>{s.painPoint}</span>
-                <span style={{ color: 'var(--t-tertiary)', fontSize: 11 }}>
-                  {[AUDIENCE_LABEL[s.audience] || s.audience, s.houseType, s.climateZone]
-                    .filter(Boolean)
-                    .join(' · ')}
-                </span>
-                <span
-                  className="badge"
-                  style={{ marginLeft: 'auto', fontSize: 10, color: im.tone, borderColor: im.tone }}
-                >
-                  {im.label}
-                </span>
-              </div>
-            );
-          })}
-          {!scenarios.length && !loading ? (
-            <p style={{ fontSize: 12.5, color: 'var(--t-tertiary)' }}>
-              暂无场景 —— 用上方播种器为品类生成初始场景与选题
-            </p>
-          ) : null}
-          {scenarios.length > 40 ? (
-            <p style={{ fontSize: 11, color: 'var(--t-tertiary)' }}>
-              仅显示前 40 个（共 {scenarios.length} 个）
-            </p>
-          ) : null}
         </div>
       </div>
-    </section>
+    </WorkspaceSection>
   );
 }

@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * GEO 增长主工作区（2026-08 全页 UX 重构二期 · WorkspaceKit 化）。
+ * 渲染层收敛：107 处内联样式清零，静态布局全部走 Tailwind 语义 token；
+ * 业务逻辑（探测/批次/流式生成等）保持原样，仅重写 JSX 渲染结构。
+ */
+
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
@@ -17,6 +23,7 @@ import {
   X,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { EmptyState } from '@/components/WorkspaceKit';
 import { brandSites, growthGeo } from '../lib/api';
 
 type Engine = {
@@ -259,16 +266,17 @@ function cleanAnswerText(value?: string | null) {
     .trim();
 }
 
-function qualityColor(verdict: string) {
-  if (verdict === 'usable') return 'var(--success)';
-  if (verdict === 'blocked') return 'var(--danger)';
-  return 'var(--warning)';
+/** 渲染层辅助：文案质量结论 → Tailwind 语义类（替代原 CSS 变量内联色）。 */
+function qualityVerdictClass(verdict: string) {
+  if (verdict === 'usable') return 'text-success border-success';
+  if (verdict === 'blocked') return 'text-destructive border-destructive';
+  return 'text-warning border-warning';
 }
 
-function qualityStatusColor(status: string) {
-  if (status === 'good') return 'var(--success)';
-  if (status === 'bad') return 'var(--danger)';
-  return 'var(--warning)';
+function qualityStatusClass(status: string) {
+  if (status === 'good') return 'text-success';
+  if (status === 'bad') return 'text-destructive';
+  return 'text-warning';
 }
 
 function normalizeQuestionKey(value?: string | null) {
@@ -1128,8 +1136,8 @@ export function GrowthGeoWorkspace() {
     : [];
 
   return (
-    <div style={{ display: 'grid', gap: 16 }}>
-      <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 14 }}>
+    <div className="grid gap-4">
+      <section className="card-elevated grid gap-3.5 p-4.5">
         <div className="workbench-section-header">
           <div>
             <p className="workbench-section-header__eyebrow">GEO 总览</p>
@@ -1149,20 +1157,13 @@ export function GrowthGeoWorkspace() {
           </button>
         </div>
         {error ? (
-          <div
-            className="inset"
-            style={{ color: 'var(--danger)', display: 'flex', gap: 8, alignItems: 'center' }}
-          >
+          <div className="inset flex items-center gap-2 text-destructive">
             <AlertCircle size={16} />
             {error}
           </div>
         ) : null}
-        {notice ? (
-          <div className="inset" style={{ color: 'var(--success)', fontSize: 13 }}>
-            {notice}
-          </div>
-        ) : null}
-        <div className="g4" style={{ gap: 12 }}>
+        {notice ? <div className="inset text-[13px] text-success">{notice}</div> : null}
+        <div className="g4 gap-3">
           <MetricCard
             icon={Database}
             label="累计探测"
@@ -1219,7 +1220,7 @@ export function GrowthGeoWorkspace() {
             <tbody>
               {(report?.visibility || []).map((item) => (
                 <tr key={item.engine}>
-                  <td style={{ fontWeight: 700 }}>{engineLabel(engines, item.engine)}</td>
+                  <td className="font-bold">{engineLabel(engines, item.engine)}</td>
                   <td>{item.probes}</td>
                   <td>{item.cited}</td>
                   <td>{pct(item.citedRate)}</td>
@@ -1234,7 +1235,7 @@ export function GrowthGeoWorkspace() {
         </div>
       </section>
 
-      <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 14 }}>
+      <section className="card-elevated grid gap-3.5 p-4.5">
         <div className="workbench-section-header">
           <div>
             <p className="workbench-section-header__eyebrow">问题池</p>
@@ -1243,7 +1244,7 @@ export function GrowthGeoWorkspace() {
               统一维护监测问题、推荐问题、手动回答和 Hermes 批量探测。
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="flex flex-wrap gap-2">
             <button
               className="btn btn-outline btn-sm"
               type="button"
@@ -1273,14 +1274,8 @@ export function GrowthGeoWorkspace() {
             </button>
           </div>
         </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-            gap: 12,
-          }}
-        >
-          <label style={{ display: 'grid', gap: 6 }}>
+        <div className="grid gap-3 md:grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
+          <label className="grid gap-1.5">
             <span className="t-label">品牌官网</span>
             <select
               className="input"
@@ -1294,7 +1289,7 @@ export function GrowthGeoWorkspace() {
               ))}
             </select>
           </label>
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label className="grid gap-1.5">
             <span className="t-label">品类</span>
             <input
               className="input"
@@ -1302,7 +1297,7 @@ export function GrowthGeoWorkspace() {
               onChange={(event) => setCategory(event.target.value)}
             />
           </label>
-          <label style={{ display: 'grid', gap: 6 }}>
+          <label className="grid gap-1.5">
             <span className="t-label">阶段</span>
             <select
               className="input"
@@ -1317,13 +1312,7 @@ export function GrowthGeoWorkspace() {
             </select>
           </label>
         </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '140px minmax(0, 1fr) 110px 160px',
-            gap: 10,
-          }}
-        >
+        <div className="grid gap-2.5 md:grid-cols-[140px_minmax(0,1fr)_110px_160px]">
           <select
             className="input"
             value={questionForm.stage}
@@ -1372,7 +1361,7 @@ export function GrowthGeoWorkspace() {
                 <th>探测问题</th>
                 <th>优先级</th>
                 <th>状态</th>
-                <th style={{ minWidth: 220, whiteSpace: 'nowrap' }}>操作</th>
+                <th className="min-w-[220px] whitespace-nowrap">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -1381,21 +1370,13 @@ export function GrowthGeoWorkspace() {
                   <td>
                     <span className="badge">{stageLabels[item.stage] || item.stage}</span>
                   </td>
-                  <td style={{ fontWeight: 700 }}>{item.question}</td>
+                  <td className="font-bold">{item.question}</td>
                   <td>{item.priority}</td>
                   <td>
                     <span className="badge">{item.enabled ? '启用' : '停用'}</span>
                   </td>
-                  <td style={{ minWidth: 220 }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: 8,
-                        flexWrap: 'nowrap',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
+                  <td className="min-w-[220px]">
+                    <div className="flex flex-nowrap items-center justify-center gap-2">
                       <button
                         className="btn btn-outline btn-sm"
                         type="button"
@@ -1442,17 +1423,10 @@ export function GrowthGeoWorkspace() {
         </div>
         {(questionSet?.generated || []).length ? (
           <details className="inset">
-            <summary
-              style={{
-                cursor: 'pointer',
-                color: 'var(--t-secondary)',
-                fontSize: 13,
-                fontWeight: 700,
-              }}
-            >
+            <summary className="cursor-pointer text-[13px] font-bold text-muted-foreground">
               待保存推荐问题（{questionSet?.generated?.length || 0}）
             </summary>
-            <div className="table-shell" style={{ marginTop: 10 }}>
+            <div className="table-shell mt-2.5">
               <table className="table">
                 <thead>
                   <tr>
@@ -1466,7 +1440,7 @@ export function GrowthGeoWorkspace() {
                       <td>
                         <span className="badge">{stageLabels[item.stage] || item.stage}</span>
                       </td>
-                      <td style={{ fontWeight: 700 }}>{item.question}</td>
+                      <td className="font-bold">{item.question}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1475,22 +1449,13 @@ export function GrowthGeoWorkspace() {
           </details>
         ) : null}
         <details className="inset">
-          <summary
-            style={{
-              cursor: 'pointer',
-              color: 'var(--t-secondary)',
-              fontSize: 13,
-              fontWeight: 700,
-            }}
-          >
+          <summary className="cursor-pointer text-[13px] font-bold text-muted-foreground">
             即时探测与手动补录
           </summary>
-          <div style={{ display: 'grid', gap: 12, marginTop: 12 }}>
+          <div className="mt-3 grid gap-3">
             <div className="workbench-section-header">
               <div>
-                <h3 className="workbench-section-header__title" style={{ fontSize: 16 }}>
-                  真实模型探测
-                </h3>
+                <h3 className="workbench-section-header__title text-base">真实模型探测</h3>
                 <p className="workbench-section-header__description">
                   输入目标问题，查看品牌露出、引用位次和竞品占位。
                 </p>
@@ -1536,18 +1501,9 @@ export function GrowthGeoWorkspace() {
               generating={Boolean(generatingKind)}
               generatedOptimization={generatedOptimization}
             />
-            <div
-              style={{
-                display: 'grid',
-                gap: 10,
-                borderTop: '1px solid var(--line)',
-                paddingTop: 12,
-              }}
-            >
-              <strong style={{ color: 'var(--t-primary)' }}>手动补录 AI 回答</strong>
-              <div
-                style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 180px', gap: 12 }}
-              >
+            <div className="grid gap-2.5 border-t pt-3">
+              <strong className="text-foreground">手动补录 AI 回答</strong>
+              <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px]">
                 <input
                   className="input"
                   placeholder="Example: Which home heat pump water heater brands are worth recommending?"
@@ -1579,14 +1535,13 @@ export function GrowthGeoWorkspace() {
                 }
               />
               <textarea
-                className="input"
+                className="input resize-y"
                 rows={4}
                 placeholder="粘贴真实 AI 回答。没有回答时也可以先保存问题和引擎。"
                 value={probeForm.answerSnapshot}
                 onChange={(event) =>
                   setProbeForm((current) => ({ ...current, answerSnapshot: event.target.value }))
                 }
-                style={{ resize: 'vertical' }}
               />
               <div>
                 <button
@@ -1606,12 +1561,12 @@ export function GrowthGeoWorkspace() {
             </div>
           </div>
         </details>
-        <p style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>
+        <p className="text-xs text-muted-foreground/70">
           当前可探测问题：{worklist?.total || 0} 条，真实运行引擎固定为 Hermes 中心 AI。
         </p>
       </section>
 
-      <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 14 }}>
+      <section className="card-elevated grid gap-3.5 p-4.5">
         <div className="workbench-section-header">
           <div>
             <p className="workbench-section-header__eyebrow">结果诊断</p>
@@ -1630,16 +1585,7 @@ export function GrowthGeoWorkspace() {
           </button>
         </div>
         {selectedBatch?.batch && ['pending', 'running'].includes(selectedBatch.batch.status) ? (
-          <div
-            className="inset"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 12,
-              color: 'var(--t-secondary)',
-            }}
-          >
+          <div className="inset flex items-center justify-between gap-3 text-muted-foreground">
             <span>
               Hermes 批量探测进行中：{selectedBatch.batch.completedProbes || 0}/
               {selectedBatch.batch.totalProbes || 0}
@@ -1648,14 +1594,7 @@ export function GrowthGeoWorkspace() {
           </div>
         ) : null}
         {batchComparison ? (
-          <div
-            className="inset"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-              gap: 10,
-            }}
-          >
+          <div className="inset grid gap-2.5 md:grid-cols-[repeat(auto-fit,minmax(160px,1fr))]">
             <MetricCard
               icon={BarChart3}
               label="出现率变化"
@@ -1713,7 +1652,7 @@ export function GrowthGeoWorkspace() {
             <tbody>
               {dedupedBatchJobs.map((job) => (
                 <tr key={job.id}>
-                  <td style={{ fontWeight: 700 }}>{job.question}</td>
+                  <td className="font-bold">{job.question}</td>
                   <td>
                     <span className="badge">
                       {job.stage ? stageLabels[job.stage] || job.stage : '-'}
@@ -1740,7 +1679,7 @@ export function GrowthGeoWorkspace() {
                     <span className="badge">{riskLabel(job.riskLevel)}</span>
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <div className="flex flex-wrap gap-2">
                       <button
                         className="btn btn-outline btn-sm"
                         type="button"
@@ -1778,7 +1717,7 @@ export function GrowthGeoWorkspace() {
           </table>
         </div>
         {batches.length ? (
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="flex flex-wrap gap-2">
             {batches.slice(0, 6).map((batch) => (
               <button
                 key={batch.id}
@@ -1793,17 +1732,10 @@ export function GrowthGeoWorkspace() {
         ) : null}
         {realProbeJobs.length ? (
           <details className="inset">
-            <summary
-              style={{
-                cursor: 'pointer',
-                color: 'var(--t-secondary)',
-                fontSize: 13,
-                fontWeight: 700,
-              }}
-            >
+            <summary className="cursor-pointer text-[13px] font-bold text-muted-foreground">
               即时与历史探测记录（{realProbeJobs.length}）
             </summary>
-            <div className="table-shell" style={{ marginTop: 10 }}>
+            <div className="table-shell mt-2.5">
               <table className="table">
                 <thead>
                   <tr>
@@ -1818,7 +1750,7 @@ export function GrowthGeoWorkspace() {
                 <tbody>
                   {realProbeJobs.slice(0, 21).map((job) => (
                     <tr key={job.id}>
-                      <td style={{ fontWeight: 700 }}>{job.question}</td>
+                      <td className="font-bold">{job.question}</td>
                       <td>{engineLabel(engines, job.engine)}</td>
                       <td>
                         <span className="badge">{statusLabel(job.status)}</span>
@@ -1845,14 +1777,8 @@ export function GrowthGeoWorkspace() {
         ) : null}
       </section>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'minmax(0, 1fr) minmax(280px, 380px)',
-          gap: 16,
-        }}
-      >
-        <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 12 }}>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,380px)]">
+        <section className="card-elevated grid content-start gap-3 p-4.5">
           <div className="workbench-section-header">
             <div>
               <p className="workbench-section-header__eyebrow">优化任务</p>
@@ -1862,23 +1788,18 @@ export function GrowthGeoWorkspace() {
           {(report?.playbook || []).map((item) => (
             <div
               key={item.priority + '-' + item.kind + '-' + item.action}
-              className="inset"
-              style={{ display: 'grid', gap: 6 }}
+              className="inset grid gap-1.5"
             >
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div className="flex items-center gap-2">
                 <span className="badge">{item.priority}</span>
-                <strong style={{ color: 'var(--t-primary)', fontSize: 13 }}>
-                  {item.engine || item.kind}
-                </strong>
+                <strong className="text-[13px] text-foreground">{item.engine || item.kind}</strong>
               </div>
-              <p style={{ color: 'var(--t-secondary)', fontSize: 13 }}>{item.action}</p>
+              <p className="text-[13px] text-muted-foreground">{item.action}</p>
             </div>
           ))}
-          {!report?.playbook?.length ? (
-            <p style={{ color: 'var(--t-tertiary)', fontSize: 13 }}>暂无优化任务。</p>
-          ) : null}
+          {!report?.playbook?.length ? <EmptyState title="暂无优化任务。" /> : null}
         </section>
-        <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 12 }}>
+        <section className="card-elevated grid content-start gap-3 p-4.5">
           <div className="workbench-section-header">
             <div>
               <p className="workbench-section-header__eyebrow">站内可引用度</p>
@@ -1887,18 +1808,10 @@ export function GrowthGeoWorkspace() {
           </div>
           <div className="inset">
             <div className="t-label">就绪站点</div>
-            <div
-              style={{
-                marginTop: 6,
-                fontSize: 28,
-                fontWeight: 800,
-                color: 'var(--brand)',
-                fontVariantNumeric: 'tabular-nums',
-              }}
-            >
+            <div className="mt-1.5 text-[28px] leading-none font-extrabold text-primary tabular-nums">
               {report?.onSite?.ready || 0}/{report?.onSite?.total || 0}
             </div>
-            <p style={{ marginTop: 6, color: 'var(--t-tertiary)', fontSize: 12 }}>
+            <p className="mt-1.5 text-xs text-muted-foreground/70">
               查询时间：{report?.onSite?.generatedAt ? fmtDate(report.onSite.generatedAt) : '-'}
               {report?.onSite?.sourceTables?.length
                 ? ' · ' + report.onSite.sourceTables.join(' / ')
@@ -1917,7 +1830,7 @@ export function GrowthGeoWorkspace() {
               <tbody>
                 {(report?.onSite?.sites || []).slice(0, 6).map((site, index) => (
                   <tr key={String(site.site || site.url || index)}>
-                    <td style={{ fontWeight: 700 }}>
+                    <td className="font-bold">
                       {String(site.siteName || site.siteCode || site.url || site.name || '-')}
                     </td>
                     <td>{String(site.publishedProducts || 0)}</td>
@@ -1980,28 +1893,8 @@ function ProbeDetailModal({
   const copyQuality = detail.copyQuality;
   const suggestions = buildGeoSuggestions(detail);
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 50,
-        background: 'rgba(15, 23, 42, 0.36)',
-        display: 'grid',
-        placeItems: 'center',
-        padding: 24,
-      }}
-    >
-      <section
-        className="card-elevated"
-        style={{
-          width: 'min(960px, 96vw)',
-          maxHeight: '88vh',
-          overflow: 'auto',
-          padding: 18,
-          display: 'grid',
-          gap: 14,
-        }}
-      >
+    <div className="fixed inset-0 z-50 grid place-items-center bg-[rgba(15,23,42,0.36)] p-6">
+      <section className="card-elevated grid max-h-[88vh] w-[min(960px,96vw)] gap-3.5 overflow-auto p-4.5">
         <div className="workbench-section-header">
           <div>
             <p className="workbench-section-header__eyebrow">探测详情</p>
@@ -2011,7 +1904,7 @@ function ProbeDetailModal({
               {fmtDate(job.finishedAt || job.createdAt)}
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="flex gap-2">
             <button className="btn btn-outline btn-sm" type="button" onClick={onRerun}>
               <RefreshCw size={14} />
               重新探测
@@ -2027,7 +1920,7 @@ function ProbeDetailModal({
           </div>
         </div>
 
-        <div className="g4" style={{ gap: 12 }}>
+        <div className="g4 gap-3">
           <MetricCard
             icon={Search}
             label="我方出现"
@@ -2055,85 +1948,53 @@ function ProbeDetailModal({
         </div>
 
         {job.errorMessage ? (
-          <div className="inset" style={{ color: 'var(--danger)', display: 'grid', gap: 4 }}>
+          <div className="inset grid gap-1 text-destructive">
             <strong>失败原因</strong>
             <span>{job.errorMessage}</span>
           </div>
         ) : null}
 
         {copyQuality ? (
-          <div className="inset" style={{ display: 'grid', gap: 12 }}>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                justifyContent: 'space-between',
-                gap: 12,
-              }}
-            >
-              <div style={{ display: 'grid', gap: 4 }}>
-                <strong style={{ color: 'var(--t-primary)' }}>文案风格质量</strong>
-                <p style={{ color: 'var(--t-secondary)', fontSize: 13 }}>{copyQuality.summary}</p>
+          <div className="inset grid gap-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="grid gap-1">
+                <strong className="text-foreground">文案风格质量</strong>
+                <p className="text-[13px] text-muted-foreground">{copyQuality.summary}</p>
               </div>
-              <span
-                className="badge"
-                style={{
-                  color: qualityColor(copyQuality.verdict),
-                  borderColor: qualityColor(copyQuality.verdict),
-                }}
-              >
+              <span className={`badge ${qualityVerdictClass(copyQuality.verdict)}`}>
                 {copyQuality.verdictLabel}
               </span>
             </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-                gap: 10,
-              }}
-            >
+            <div className="grid gap-2.5 md:grid-cols-[repeat(auto-fit,minmax(170px,1fr))]">
               {copyQuality.dimensions.map((item) => (
-                <div
-                  key={item.key}
-                  className="inset"
-                  style={{ display: 'grid', gap: 6, padding: 12 }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      gap: 8,
-                      alignItems: 'center',
-                    }}
-                  >
-                    <strong style={{ color: 'var(--t-primary)', fontSize: 13 }}>
-                      {item.label}
-                    </strong>
-                    <span style={{ color: qualityStatusColor(item.status), fontWeight: 800 }}>
+                <div key={item.key} className="inset grid gap-1.5 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <strong className="text-[13px] text-foreground">{item.label}</strong>
+                    <span
+                      className={`font-extrabold tabular-nums ${qualityStatusClass(item.status)}`}
+                    >
                       {item.score}
                     </span>
                   </div>
-                  <p style={{ color: 'var(--t-tertiary)', fontSize: 12, lineHeight: 1.5 }}>
-                    {item.summary}
-                  </p>
+                  <p className="text-xs leading-normal text-muted-foreground/70">{item.summary}</p>
                 </div>
               ))}
             </div>
             {copyQuality.risks.length ? (
-              <div style={{ display: 'grid', gap: 6 }}>
-                <strong style={{ color: 'var(--danger)', fontSize: 13 }}>主要风险</strong>
+              <div className="grid gap-1.5">
+                <strong className="text-[13px] text-destructive">主要风险</strong>
                 {copyQuality.risks.map((item) => (
-                  <p key={item} style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
+                  <p key={item} className="text-[13px] text-muted-foreground">
                     {item}
                   </p>
                 ))}
               </div>
             ) : null}
             {copyQuality.suggestions.length ? (
-              <div style={{ display: 'grid', gap: 6 }}>
-                <strong style={{ color: 'var(--t-primary)', fontSize: 13 }}>修改建议</strong>
+              <div className="grid gap-1.5">
+                <strong className="text-[13px] text-foreground">修改建议</strong>
                 {copyQuality.suggestions.map((item) => (
-                  <p key={item} style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
+                  <p key={item} className="text-[13px] text-muted-foreground">
                     {item}
                   </p>
                 ))}
@@ -2142,58 +2003,49 @@ function ProbeDetailModal({
           </div>
         ) : null}
 
-        <div className="inset" style={{ display: 'grid', gap: 8 }}>
-          <strong style={{ color: 'var(--t-primary)' }}>完整 AI 回答</strong>
-          <p
-            style={{
-              whiteSpace: 'pre-wrap',
-              color: 'var(--t-secondary)',
-              lineHeight: 1.7,
-              fontSize: 13,
-            }}
-          >
+        <div className="inset grid gap-2">
+          <strong className="text-foreground">完整 AI 回答</strong>
+          <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-muted-foreground">
             {snapshot?.answerText || '暂无回答'}
           </p>
         </div>
 
-        <div
-          style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 12 }}
-        >
-          <div className="inset" style={{ display: 'grid', gap: 8 }}>
-            <strong style={{ color: 'var(--t-primary)' }}>竞品占位</strong>
-            <p style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="inset grid content-start gap-2">
+            <strong className="text-foreground">竞品占位</strong>
+            <p className="text-[13px] text-muted-foreground">
               {probe?.competitorsCited?.length
                 ? probe.competitorsCited.join('、')
                 : '本次回答未命中已配置竞品。'}
             </p>
           </div>
-          <div className="inset" style={{ display: 'grid', gap: 8 }}>
-            <strong style={{ color: 'var(--t-primary)' }}>引用链接</strong>
+          <div className="inset grid content-start gap-2">
+            <strong className="text-foreground">引用链接</strong>
             {(snapshot?.citations || []).length ? (
-              <div style={{ display: 'grid', gap: 6 }}>
+              <div className="grid gap-1.5">
                 {(snapshot?.citations || []).slice(0, 8).map((item, index) => (
                   <span
                     key={`${String(item.url || index)}`}
-                    style={{ color: 'var(--t-secondary)', fontSize: 13 }}
+                    className="text-[13px] text-muted-foreground"
                   >
                     {String(item.title || item.domain || item.url || '-')}
                   </span>
                 ))}
               </div>
             ) : (
-              <p style={{ color: 'var(--t-secondary)', fontSize: 13 }}>暂无引用链接。</p>
+              <p className="text-[13px] text-muted-foreground">暂无引用链接。</p>
             )}
           </div>
         </div>
 
-        <div className="inset" style={{ display: 'grid', gap: 8 }}>
-          <strong style={{ color: 'var(--t-primary)' }}>优化建议</strong>
+        <div className="inset grid gap-2">
+          <strong className="text-foreground">优化建议</strong>
           {suggestions.map((item) => (
-            <p key={item} style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
+            <p key={item} className="text-[13px] text-muted-foreground">
               {item}
             </p>
           ))}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+          <div className="mt-1 flex flex-wrap gap-2">
             <button
               className="btn btn-outline btn-sm"
               type="button"
@@ -2237,20 +2089,13 @@ function ProbeDetailModal({
         </div>
 
         {generatedOptimization ? (
-          <div className="inset" style={{ display: 'grid', gap: 8 }}>
-            <strong style={{ color: 'var(--t-primary)' }}>{generatedOptimization.title}</strong>
-            <p
-              style={{
-                color: 'var(--t-secondary)',
-                fontSize: 13,
-                lineHeight: 1.7,
-                whiteSpace: 'pre-wrap',
-              }}
-            >
+          <div className="inset grid gap-2">
+            <strong className="text-foreground">{generatedOptimization.title}</strong>
+            <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-muted-foreground">
               {cleanAnswerText(generatedOptimization.draft)}
             </p>
             {generatedOptimization.assetId ? (
-              <p style={{ color: 'var(--t-tertiary)', fontSize: 12 }}>已保存为草稿。</p>
+              <p className="text-xs text-muted-foreground/70">已保存为草稿。</p>
             ) : null}
           </div>
         ) : null}
@@ -2433,7 +2278,7 @@ function LatestProbeCard({
 }) {
   if (!job) {
     return (
-      <div className="inset" style={{ color: 'var(--t-tertiary)', fontSize: 13 }}>
+      <div className="inset text-[13px] text-muted-foreground/70">
         {loading ? '正在加载最新探测任务' : '暂无最新探测任务。'}
       </div>
     );
@@ -2441,37 +2286,24 @@ function LatestProbeCard({
   const answerText = cleanAnswerText(job.answerPreview);
   const running = job.status === 'running' || job.status === 'pending';
   return (
-    <div className="inset" style={{ display: 'grid', gap: 12 }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          gap: 12,
-        }}
-      >
-        <div style={{ display: 'grid', gap: 6, minWidth: 0 }}>
+    <div className="inset grid gap-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="grid min-w-0 gap-1.5">
           <span className="t-label">最新探测</span>
-          <strong style={{ color: 'var(--t-primary)', fontSize: 16 }}>{job.question}</strong>
-          <p style={{ color: 'var(--t-secondary)', fontSize: 13 }}>
+          <strong className="text-base text-foreground">{job.question}</strong>
+          <p className="text-[13px] text-muted-foreground">
             {engineLabel(engines, job.engine)} · {fmtDate(job.finishedAt || job.createdAt)}
           </p>
         </div>
         <span className="badge">{running ? '生成中' : job.status}</span>
       </div>
       {job.errorMessage ? (
-        <div style={{ color: 'var(--danger)', fontSize: 13 }}>{job.errorMessage}</div>
+        <div className="text-[13px] text-destructive">{job.errorMessage}</div>
       ) : null}
-      <p style={{ color: 'var(--t-secondary)', fontSize: 13, lineHeight: 1.7 }}>
+      <p className="text-[13px] leading-relaxed text-muted-foreground">
         {answerText || (running ? '正在生成回答...' : '暂无回答摘要')}
       </p>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: 10,
-        }}
-      >
+      <div className="grid gap-2.5 md:grid-cols-[repeat(auto-fit,minmax(160px,1fr))]">
         <FlowStep title="我方是否出现" desc={running ? '待分析' : probe?.weCited ? '是' : '否'} />
         <FlowStep
           title="引用位次"
@@ -2488,7 +2320,7 @@ function LatestProbeCard({
           }
         />
       </div>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      <div className="flex flex-wrap gap-2">
         <button
           className="btn btn-outline btn-sm"
           type="button"
@@ -2518,18 +2350,9 @@ function LatestProbeCard({
         </button>
       </div>
       {generatedOptimization?.jobId === job.id ? (
-        <div className="inset" style={{ display: 'grid', gap: 8 }}>
-          <strong style={{ color: 'var(--t-primary)', fontSize: 13 }}>
-            {generatedOptimization.title}
-          </strong>
-          <p
-            style={{
-              color: 'var(--t-secondary)',
-              fontSize: 13,
-              lineHeight: 1.7,
-              whiteSpace: 'pre-wrap',
-            }}
-          >
+        <div className="inset grid gap-2">
+          <strong className="text-[13px] text-foreground">{generatedOptimization.title}</strong>
+          <p className="text-[13px] leading-relaxed whitespace-pre-wrap text-muted-foreground">
             {cleanAnswerText(generatedOptimization.draft)}
           </p>
         </div>
@@ -2541,8 +2364,8 @@ function LatestProbeCard({
 function FlowStep({ title, desc }: { title: string; desc: string }) {
   return (
     <div>
-      <strong style={{ color: 'var(--t-primary)', fontSize: 13 }}>{title}</strong>
-      <p style={{ marginTop: 4, color: 'var(--t-secondary)', fontSize: 12 }}>{desc}</p>
+      <strong className="text-[13px] text-foreground">{title}</strong>
+      <p className="mt-1 text-xs text-muted-foreground">{desc}</p>
     </div>
   );
 }
@@ -2550,10 +2373,7 @@ function FlowStep({ title, desc }: { title: string; desc: string }) {
 function EmptyRow({ colSpan, text }: { colSpan: number; text: string }) {
   return (
     <tr>
-      <td
-        colSpan={colSpan}
-        style={{ textAlign: 'center', color: 'var(--t-tertiary)', padding: 22 }}
-      >
+      <td colSpan={colSpan} className="p-5.5 text-center text-muted-foreground/70">
         {text}
       </td>
     </tr>

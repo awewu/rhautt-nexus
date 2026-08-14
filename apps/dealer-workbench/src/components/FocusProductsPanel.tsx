@@ -1,6 +1,8 @@
 'use client';
 
 /**
+ * 2026-08 全页 UX 重构二期 · WorkspaceKit 化
+ *
  * 主销产品面板：声明（三闸预检 → 声明）· 生效清单 · 后验分歧镜子 · 型号级 GEO 选题派生。
  *
  * 诚实原则（与后端口径一致，不在前端加戏）：
@@ -13,6 +15,7 @@ import { useState } from 'react';
 import useSWR from 'swr';
 import { Crosshair, Scale, ListTree } from 'lucide-react';
 import { AsyncBoundary, useToast, type AsyncStatus } from '@rhautt/ui';
+import { WorkspaceSection } from '@/components/WorkspaceKit';
 import { productMgmt, products } from '../lib/api';
 
 function statusOf(isLoading: boolean, error: unknown, empty: boolean): AsyncStatus {
@@ -119,19 +122,17 @@ export default function FocusProductsPanel() {
   const deviceItems: any[] = catalog.data?.data?.items || catalog.data?.items || [];
 
   return (
-    <div className="card" style={{ padding: 20, marginTop: 20 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-        <Crosshair size={16} />
-        <span className="t-lg" style={{ fontWeight: 600 }}>
-          主销产品 · 策略声明与后验镜子
-        </span>
-      </div>
-      <div className="t-xs" style={{ color: 'var(--t-tertiary)', marginBottom: 16 }}>
+    <WorkspaceSection
+      icon={<Crosshair size={16} />}
+      title="主销产品 · 策略声明与后验镜子"
+      className="mt-5"
+    >
+      <p className="mb-4 text-xs text-muted-foreground">
         主销是品牌方策略声明（须过毛利/生命周期/卖点证据三闸），不是市场热度事实；是否真好卖由下方镜子对照渠道报价/成交后验。
-      </div>
+      </p>
 
       {/* 范围选择 */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
+      <div className="mb-4 flex flex-wrap gap-2">
         <select className="input" value={brandSlug} onChange={(e) => setBrandSlug(e.target.value)}>
           {BRANDS.map((b) => (
             <option key={b} value={b}>
@@ -140,24 +141,22 @@ export default function FocusProductsPanel() {
           ))}
         </select>
         <input
-          className="input"
+          className="input w-[200px]"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           placeholder="品类（可选，如 中央热水）"
-          style={{ width: 200 }}
         />
       </div>
 
       {/* 声明区 */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+      <div className="mb-2 flex flex-wrap gap-2">
         <select
-          className="input"
+          className="input min-w-[220px]"
           value={productId}
           onChange={(e) => {
             setProductId(e.target.value);
             setPrecheck(null);
           }}
-          style={{ minWidth: 220 }}
         >
           <option value="">选择产品…</option>
           {deviceItems.map((p: any) => (
@@ -192,20 +191,17 @@ export default function FocusProductsPanel() {
         </button>
       </div>
       <input
-        className="input"
+        className="input mb-2 w-full"
         value={rationale}
         onChange={(e) => setRationale(e.target.value)}
         placeholder="为什么推它（必填——政策必须留下理由）"
-        style={{ width: '100%', marginBottom: 8 }}
       />
       {precheck && (
-        <div style={{ display: 'grid', gap: 4, marginBottom: 12 }}>
+        <div className="mb-3 grid gap-1">
           {(precheck.eligibility?.checks || []).map((c: any) => (
-            <div key={c.id} className="t-sm" style={{ display: 'flex', gap: 8 }}>
+            <div key={c.id} className="flex gap-2 text-xs">
               <span>{c.passed ? '✅' : '⛔'}</span>
-              <span style={{ color: c.passed ? 'var(--t-secondary)' : 'var(--t-strong)' }}>
-                {c.reason}
-              </span>
+              <span className={c.passed ? 'text-muted-foreground' : 'font-medium'}>{c.reason}</span>
             </div>
           ))}
         </div>
@@ -219,25 +215,16 @@ export default function FocusProductsPanel() {
         emptyTitle="当前无生效中的主销声明"
         emptyDescription="声明须过三闸：毛利达标 + 非停产 + 有带证据的卖点。"
       >
-        <div style={{ display: 'grid', gap: 4, marginBottom: 8 }}>
+        <div className="mb-2 grid gap-1">
           {rows.map((d: any) => (
             <div
               key={d.id}
-              className="t-sm"
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '6px 0',
-                borderTop: '1px solid var(--border)',
-              }}
+              className="flex items-center justify-between gap-3 border-t py-1.5 text-xs first:border-t-0"
             >
-              <span>
-                <span style={{ color: 'var(--t-strong)' }}>{d.sku || d.product_id}</span> ·{' '}
-                {d.category} · {d.period_start}~{d.period_end}
-                <span className="t-xs" style={{ color: 'var(--t-tertiary)', marginLeft: 8 }}>
-                  {d.rationale}
-                </span>
+              <span className="min-w-0 tabular-nums">
+                <span className="font-medium">{d.sku || d.product_id}</span> · {d.category} ·{' '}
+                {d.period_start}~{d.period_end}
+                <span className="ml-2 text-[11px] text-muted-foreground">{d.rationale}</span>
               </span>
               <button className="btn btn-outline btn-sm" onClick={() => revoke(d.id)}>
                 撤销
@@ -248,13 +235,13 @@ export default function FocusProductsPanel() {
       </AsyncBoundary>
 
       {/* 后验镜子 + 选题派生 */}
-      <div style={{ display: 'flex', gap: 8, margin: '12px 0' }}>
+      <div className="my-3 flex flex-wrap gap-2">
         <button className="btn btn-outline" onClick={runMirror} disabled={mirrorLoading}>
-          <Scale size={14} style={{ marginRight: 4 }} />
+          <Scale size={14} className="mr-1" />
           {mirrorLoading ? '对照中…' : '后验镜子：声明 vs 渠道实况'}
         </button>
         <button className="btn btn-outline" onClick={() => deriveTopics(true)}>
-          <ListTree size={14} style={{ marginRight: 4 }} />
+          <ListTree size={14} className="mr-1" />
           预览型号级 GEO 选题
         </button>
         <button className="btn btn-brand" onClick={() => deriveTopics(false)}>
@@ -263,28 +250,26 @@ export default function FocusProductsPanel() {
       </div>
 
       {mirror && (
-        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12, marginBottom: 8 }}>
+        <div className="mb-2 border-t pt-3">
           {(mirror.signals || []).length > 0 ? (
-            <div style={{ display: 'grid', gap: 4, marginBottom: 8 }}>
+            <div className="mb-2 grid gap-1">
               {mirror.signals.map((s: any, i: number) => (
-                <div key={i} className="t-sm" style={{ color: 'var(--t-strong)' }}>
+                <div key={i} className="text-xs font-medium">
                   ⚠️ {s.detail}
                 </div>
               ))}
             </div>
           ) : (mirror.focus || []).length > 0 ? (
-            <div className="t-sm" style={{ marginBottom: 8 }}>
-              无分歧信号
-            </div>
+            <div className="mb-2 text-xs">无分歧信号</div>
           ) : null}
           {(mirror.focus || []).map((f: any) => (
-            <div key={f.sku} className="t-sm" style={{ padding: '4px 0' }}>
+            <div key={f.sku} className="py-1 text-xs tabular-nums">
               主销 {f.sku} · 报价 {f.quotedQty} 台 / ¥{f.quotedAmount} · 成交 {f.signedQty} 台 / ¥
               {f.signedAmount}
             </div>
           ))}
           {(mirror.topNonFocus || []).length > 0 && (
-            <div className="t-sm" style={{ color: 'var(--t-secondary)', padding: '4px 0' }}>
+            <div className="py-1 text-xs text-muted-foreground tabular-nums">
               渠道实际在报（非主销 Top）：
               {mirror.topNonFocus
                 .slice(0, 5)
@@ -292,7 +277,7 @@ export default function FocusProductsPanel() {
                 .join(' · ')}
             </div>
           )}
-          <div className="t-xs" style={{ color: 'var(--t-tertiary)', marginTop: 6 }}>
+          <div className="mt-1.5 text-[11px] text-muted-foreground tabular-nums">
             {mirror.unmatchedQuoteLines > 0 &&
               `另有 ${mirror.unmatchedQuoteLines} 行报价 SKU 无法匹配产品目录（不猜归属）。`}
             {mirror.note}
@@ -301,24 +286,22 @@ export default function FocusProductsPanel() {
       )}
 
       {topics && (
-        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
-          <div className="t-sm" style={{ marginBottom: 6 }}>
+        <div className="border-t pt-3">
+          <div className="mb-1.5 text-xs tabular-nums">
             型号级选题 {topics.topics?.length ?? 0} 条{topics.dryRun ? '（预览未落库）' : `（新落库 ${topics.saved}）`}
             · 覆盖主销产品 {topics.focusProducts}
           </div>
           {(topics.topics || []).slice(0, 8).map((t: any, i: number) => (
-            <div key={i} className="t-sm" style={{ padding: '2px 0' }}>
-              <span style={{ color: 'var(--t-strong)' }}>{t.question}</span>
-              <span className="t-xs" style={{ color: 'var(--t-tertiary)', marginLeft: 8 }}>
+            <div key={i} className="py-0.5 text-xs">
+              <span className="font-medium">{t.question}</span>
+              <span className="ml-2 text-[11px] text-muted-foreground tabular-nums">
                 {t.stage}/{t.intent} · priority {t.priority} · 主销权重 {t.factors?.focus ?? 0}
               </span>
             </div>
           ))}
-          <div className="t-xs" style={{ color: 'var(--t-tertiary)', marginTop: 6 }}>
-            {topics.note}
-          </div>
+          <div className="mt-1.5 text-[11px] text-muted-foreground">{topics.note}</div>
         </div>
       )}
-    </div>
+    </WorkspaceSection>
   );
 }

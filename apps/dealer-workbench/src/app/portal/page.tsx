@@ -1,15 +1,14 @@
 'use client';
 
+/**
+ * 经销商门户预留页（2026-08 全页 UX 重构二期 · WorkspaceKit 化）。
+ * 信息架构：EmptyState 承载「建设中」主态 + 四大规划能力密排卡（sm 2 列 / lg 4 列）。
+ * 原版问题：11 处内联样式、手搓 CSSProperties 卡对象；本版收编为 Tailwind + WorkspaceKit 原语。
+ */
+
 import { FolderOpen, Megaphone, Inbox, GraduationCap, HardHat } from 'lucide-react';
 import { PageHeader } from '@rhautt/ui';
-
-const card: React.CSSProperties = {
-  background: 'var(--surface-1)',
-  border: '1px solid var(--border)',
-  borderRadius: 'var(--r-lg)',
-  boxShadow: 'var(--sh-card)',
-  padding: 20,
-};
+import { EmptyState, Pill } from '@/components/WorkspaceKit';
 
 // 经销商门户 —— 端口预留(Under Construction)。数据将按 RBAC scope(dealerId)隔离。
 // 承接北极星副指标「经销商成交率」;规划中的四大自助能力见下方预览。
@@ -44,79 +43,28 @@ export default function DealerPortalPage() {
         subtitle="B端赋能自助前台 —— 承接北极星副指标「经销商成交率」"
       />
 
-      <div
-        style={{
-          ...card,
-          textAlign: 'center',
-          padding: 40,
-          marginBottom: 16,
-          borderStyle: 'dashed',
-          borderColor: 'var(--brand)',
-        }}
-      >
-        <div
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 56,
-            height: 56,
-            borderRadius: '50%',
-            background: 'var(--surface-2)',
-            color: 'var(--brand)',
-            marginBottom: 12,
-          }}
-        >
-          <HardHat size={26} />
-        </div>
-        <div className="t-lg" style={{ fontWeight: 800, color: 'var(--t-strong)' }}>
-          门户建设中 · Under Construction
-        </div>
-        <p
-          className="t-sm"
-          style={{
-            color: 'var(--t-secondary)',
-            maxWidth: 560,
-            margin: '10px auto 0',
-            lineHeight: 1.7,
-          }}
-        >
-          经销商自助门户入口已预留。将开放:物料领取、政策返利查询、线索认领、培训认证 ——
-          数据按网点(RBAC scope)隔离,动作与成交回流总部驾驶舱。敬请期待。
-        </p>
+      <div className="mb-4">
+        <EmptyState
+          icon={<HardHat size={26} />}
+          title="门户建设中 · Under Construction"
+          hint="经销商自助门户入口已预留。将开放:物料领取、政策返利查询、线索认领、培训认证 —— 数据按网点(RBAC scope)隔离,动作与成交回流总部驾驶舱。敬请期待。"
+        />
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: 16,
-        }}
-      >
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {PLANNED.map((s) => (
-          <div key={s.title} style={{ ...card, opacity: 0.72 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-              <span style={{ color: 'var(--brand)' }}>{s.icon}</span>
-              <span className="t-sm" style={{ fontWeight: 700, color: 'var(--t-strong)' }}>
-                {s.title}
-              </span>
-              <span
-                className="t-xs"
-                style={{
-                  marginLeft: 'auto',
-                  padding: '1px 8px',
-                  borderRadius: 999,
-                  background: 'var(--surface-2)',
-                  color: 'var(--t-tertiary)',
-                  fontWeight: 600,
-                }}
-              >
-                规划中
+          <div
+            key={s.title}
+            className="rounded-lg border bg-card p-5 opacity-70 shadow-sm transition-opacity duration-200 hover:opacity-100"
+          >
+            <div className="mb-2 flex items-center gap-2.5">
+              <span className="text-primary">{s.icon}</span>
+              <span className="text-[13px] font-bold text-foreground">{s.title}</span>
+              <span className="ml-auto">
+                <Pill>规划中</Pill>
               </span>
             </div>
-            <p className="t-xs" style={{ color: 'var(--t-secondary)', lineHeight: 1.6, margin: 0 }}>
-              {s.desc}
-            </p>
+            <p className="text-xs leading-relaxed text-muted-foreground">{s.desc}</p>
           </div>
         ))}
       </div>

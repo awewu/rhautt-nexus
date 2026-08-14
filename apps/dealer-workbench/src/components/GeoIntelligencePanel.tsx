@@ -1,7 +1,10 @@
 'use client';
 
+/** 2026-08 全页 UX 重构二期 · WorkspaceKit 化 */
+
 import { useCallback, useEffect, useState } from 'react';
 import { Cpu, Layers, Loader2, RefreshCw, ShieldCheck, TrendingUp } from 'lucide-react';
+import { WorkspaceSection } from '@/components/WorkspaceKit';
 import { growthGeo } from '../lib/api';
 
 /**
@@ -35,15 +38,15 @@ interface EvoSummary {
 }
 
 const SOURCE_META: Record<string, { label: string; tone: string }> = {
-  brand: { label: '学自本品牌', tone: 'var(--success)' },
-  category: { label: '继承品类经验', tone: 'var(--brand)' },
-  none: { label: '研究基线', tone: 'var(--t-tertiary)' },
+  brand: { label: '学自本品牌', tone: 'text-success' },
+  category: { label: '继承品类经验', tone: 'text-primary' },
+  none: { label: '研究基线', tone: 'text-muted-foreground' },
 };
 
 const ZONE_META: Record<string, { label: string; tone: string }> = {
-  green: { label: '可自动', tone: 'var(--success)' },
-  yellow: { label: 'AI代行需核准', tone: 'var(--warning)' },
-  red: { label: '永不自动', tone: 'var(--danger)' },
+  green: { label: '可自动', tone: 'text-success' },
+  yellow: { label: 'AI代行需核准', tone: 'text-warning' },
+  red: { label: '永不自动', tone: 'text-destructive' },
 };
 
 interface ActionDef {
@@ -83,206 +86,155 @@ export function GeoIntelligencePanel({ brandSlug = 'rheem' }: { brandSlug?: stri
   }, [load]);
 
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
-      <div className="workbench-section-header">
-        <div>
-          <p className="workbench-section-header__eyebrow">GEO 智能层 · AgenticGEO</p>
-          <h2 className="workbench-section-header__title">研究策略库 · 自进化 · 受治理动作</h2>
-          <p className="workbench-section-header__description">
-            内容生成用研究实证有效的策略组合；实验 lift 反哺哪个策略更有效；AI 与人走同一套治理闸。
-          </p>
-        </div>
+    <WorkspaceSection
+      icon={<Cpu size={16} className="text-primary" />}
+      title="研究策略库 · 自进化 · 受治理动作"
+      aside={
         <button className="btn btn-outline btn-sm" onClick={load} disabled={loading}>
           {loading ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}刷新
         </button>
-      </div>
-      {error ? (
-        <div className="inset" style={{ color: 'var(--danger)', fontSize: 13 }}>
-          {error}
+      }
+    >
+      <div className="grid gap-4">
+        <div>
+          <div className="text-[11px] font-medium text-muted-foreground">
+            GEO 智能层 · AgenticGEO
+          </div>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            内容生成用研究实证有效的策略组合；实验 lift 反哺哪个策略更有效；AI
+            与人走同一套治理闸。
+          </p>
         </div>
-      ) : null}
 
-      {/* ① 策略库 + 自进化权重 */}
-      <div className="inset" style={{ display: 'grid', gap: 10, padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Layers size={16} style={{ color: 'var(--brand)' }} />
-          <strong style={{ fontSize: 14, color: 'var(--t-strong)' }}>
-            研究支撑策略库 · 自进化权重
-          </strong>
-          <span
-            className="badge"
-            style={{
-              marginLeft: 'auto',
-              fontSize: 10,
-              color: summary.scoredExperiments ? 'var(--success)' : 'var(--t-tertiary)',
-              borderColor: summary.scoredExperiments ? 'var(--success)' : 'var(--border)',
-            }}
-          >
-            {summary.scoredExperiments
-              ? `已从 ${summary.scoredExperiments} 个已验证实验学习 · ${summary.learnedStrategies} 策略被调权${summary.inheritedFromCategory ? ` · ${summary.inheritedFromCategory} 项继承品类经验` : ''}`
-              : '尚未学习（无已验证 lift 实验）'}
-          </span>
-        </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))',
-            gap: 8,
-          }}
-        >
-          {strategies.map((s) => {
-            const d = s.learnedDelta;
-            return (
-              <div
-                key={s.key}
-                style={{
-                  border: '1px solid var(--surface-3)',
-                  borderRadius: 8,
-                  padding: '10px 12px',
-                  display: 'grid',
-                  gap: 4,
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--t-strong)' }}>
-                    {s.label}
-                  </span>
-                  {s.alwaysOn ? (
-                    <span
-                      className="badge"
-                      style={{
-                        fontSize: 10,
-                        color: 'var(--success)',
-                        borderColor: 'var(--success)',
-                      }}
-                    >
-                      保底
-                    </span>
-                  ) : null}
-                  {d !== 0 ? (
-                    <span
-                      className="badge"
-                      style={{
-                        fontSize: 10,
-                        marginLeft: 'auto',
-                        color: d > 0 ? 'var(--success)' : 'var(--danger)',
-                      }}
-                    >
-                      <TrendingUp size={10} /> {d > 0 ? '+' : ''}
-                      {d}
-                    </span>
-                  ) : null}
-                </div>
+        {error ? (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3.5 py-2.5 text-[13px] text-destructive">
+            {error}
+          </div>
+        ) : null}
+
+        {/* ① 策略库 + 自进化权重 */}
+        <div className="grid gap-2.5 rounded-lg border bg-secondary/60 p-4">
+          <div className="flex items-center gap-2">
+            <Layers size={16} className="text-primary" />
+            <strong className="text-sm font-semibold">研究支撑策略库 · 自进化权重</strong>
+            <span
+              className={`ml-auto rounded-full border px-2 text-[10px] leading-4 tabular-nums ${
+                summary.scoredExperiments
+                  ? 'border-current text-success'
+                  : 'border-border text-muted-foreground'
+              }`}
+            >
+              {summary.scoredExperiments
+                ? `已从 ${summary.scoredExperiments} 个已验证实验学习 · ${summary.learnedStrategies} 策略被调权${summary.inheritedFromCategory ? ` · ${summary.inheritedFromCategory} 项继承品类经验` : ''}`
+                : '尚未学习（无已验证 lift 实验）'}
+            </span>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            {strategies.map((s) => {
+              const d = s.learnedDelta;
+              return (
                 <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    gap: 6,
-                    fontVariantNumeric: 'tabular-nums',
-                  }}
+                  key={s.key}
+                  className="grid gap-1 rounded-lg border bg-background px-3 py-2.5"
                 >
-                  <span style={{ fontSize: 11, color: 'var(--t-tertiary)' }}>权重</span>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      color: 'var(--t-tertiary)',
-                      textDecoration: d !== 0 ? 'line-through' : 'none',
-                    }}
-                  >
-                    {s.base}
-                  </span>
-                  {d !== 0 ? (
-                    <>
-                      <span style={{ fontSize: 11, color: 'var(--t-tertiary)' }}>→</span>
-                      <strong style={{ fontSize: 14, color: 'var(--brand)' }}>{s.effective}</strong>
-                    </>
-                  ) : null}
-                  {s.source && s.source !== 'none' ? (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[13px] font-bold">{s.label}</span>
+                    {s.alwaysOn ? (
+                      <span className="rounded-full border border-current px-2 text-[10px] leading-4 text-success">
+                        保底
+                      </span>
+                    ) : null}
+                    {d !== 0 ? (
+                      <span
+                        className={`ml-auto inline-flex items-center gap-0.5 rounded-full border border-current px-2 text-[10px] leading-4 tabular-nums ${
+                          d > 0 ? 'text-success' : 'text-destructive'
+                        }`}
+                      >
+                        <TrendingUp size={10} /> {d > 0 ? '+' : ''}
+                        {d}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="flex items-baseline gap-1.5 tabular-nums">
+                    <span className="text-[11px] text-muted-foreground">权重</span>
                     <span
-                      style={{
-                        fontSize: 10.5,
-                        color: SOURCE_META[s.source].tone,
-                        marginLeft: 'auto',
-                      }}
+                      className={`text-xs text-muted-foreground ${d !== 0 ? 'line-through' : ''}`}
                     >
-                      {SOURCE_META[s.source].label}
-                      {s.source === 'brand' && s.brandExperiments
-                        ? `(${s.brandExperiments})`
-                        : null}
-                      {s.source === 'category' && s.categoryExperiments
-                        ? `(${s.categoryExperiments})`
-                        : null}
+                      {s.base}
                     </span>
-                  ) : s.experiments ? (
-                    <span style={{ fontSize: 11, color: 'var(--t-tertiary)', marginLeft: 'auto' }}>
-                      {s.experiments} 实验
-                    </span>
-                  ) : null}
+                    {d !== 0 ? (
+                      <>
+                        <span className="text-[11px] text-muted-foreground">→</span>
+                        <strong className="text-sm font-bold text-primary">{s.effective}</strong>
+                      </>
+                    ) : null}
+                    {s.source && s.source !== 'none' ? (
+                      <span className={`ml-auto text-[10.5px] ${SOURCE_META[s.source].tone}`}>
+                        {SOURCE_META[s.source].label}
+                        {s.source === 'brand' && s.brandExperiments
+                          ? `(${s.brandExperiments})`
+                          : null}
+                        {s.source === 'category' && s.categoryExperiments
+                          ? `(${s.categoryExperiments})`
+                          : null}
+                      </span>
+                    ) : s.experiments ? (
+                      <span className="ml-auto text-[11px] text-muted-foreground tabular-nums">
+                        {s.experiments} 实验
+                      </span>
+                    ) : null}
+                  </div>
+                  <span className="text-[11px] text-muted-foreground">{s.evidence}</span>
                 </div>
-                <span style={{ fontSize: 11.5, color: 'var(--t-tertiary)' }}>{s.evidence}</span>
-              </div>
-            );
-          })}
-          {!strategies.length ? (
-            <p style={{ fontSize: 13, color: 'var(--t-tertiary)' }}>
-              {loading ? '加载中…' : '无策略数据'}
-            </p>
-          ) : null}
+              );
+            })}
+            {!strategies.length ? (
+              <p className="text-[13px] text-muted-foreground">
+                {loading ? '加载中…' : '无策略数据'}
+              </p>
+            ) : null}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            有效权重 = 基础权重 + 三层收缩（研究基线 → 品类 → 品牌）学到的增减。 新品牌开局
+            <strong className="text-primary">继承品类经验</strong>
+            而非从零；小样本由先验主导，避免单次实验噪声冒充经验。
+          </p>
         </div>
-        <p style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>
-          有效权重 = 基础权重 + 三层收缩（研究基线 → 品类 → 品牌）学到的增减。 新品牌开局
-          <strong style={{ color: 'var(--brand)' }}>继承品类经验</strong>
-          而非从零；小样本由先验主导，避免单次实验噪声冒充经验。
-        </p>
-      </div>
 
-      {/* ② 受治理动作引擎 */}
-      <div className="inset" style={{ display: 'grid', gap: 10, padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <ShieldCheck size={16} style={{ color: 'var(--brand)' }} />
-          <strong style={{ fontSize: 14, color: 'var(--t-strong)' }}>
-            受治理动作引擎（Foundry 式）
-          </strong>
-          <span style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>
-            人与 AI Agent 走同一套治理闸
-          </span>
-        </div>
-        <div style={{ display: 'grid', gap: 8 }}>
-          {actions.map((a) => {
-            const zm = ZONE_META[a.zone] || { label: a.zone, tone: 'var(--t-secondary)' };
-            return (
-              <div
-                key={a.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  border: '1px solid var(--surface-3)',
-                  borderRadius: 8,
-                  padding: '10px 12px',
-                }}
-              >
-                <Cpu size={14} style={{ color: 'var(--t-tertiary)' }} />
-                <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--t-strong)' }}>
-                  {a.label}
-                </span>
-                <code style={{ fontSize: 11, color: 'var(--t-tertiary)' }}>{a.id}</code>
-                <span
-                  className="badge"
-                  style={{ marginLeft: 'auto', color: zm.tone, borderColor: zm.tone }}
+        {/* ② 受治理动作引擎 */}
+        <div className="grid gap-2.5 rounded-lg border bg-secondary/60 p-4">
+          <div className="flex items-center gap-2">
+            <ShieldCheck size={16} className="text-primary" />
+            <strong className="text-sm font-semibold">受治理动作引擎（Foundry 式）</strong>
+            <span className="text-xs text-muted-foreground">人与 AI Agent 走同一套治理闸</span>
+          </div>
+          <div className="grid gap-2">
+            {actions.map((a) => {
+              const zm = ZONE_META[a.zone] || { label: a.zone, tone: 'text-muted-foreground' };
+              return (
+                <div
+                  key={a.id}
+                  className="flex items-center gap-2.5 rounded-lg border bg-background px-3 py-2.5"
                 >
-                  {zm.label}
-                </span>
-              </div>
-            );
-          })}
-          {!actions.length ? (
-            <p style={{ fontSize: 13, color: 'var(--t-tertiary)' }}>
-              {loading ? '加载中…' : '无已注册动作'}
-            </p>
-          ) : null}
+                  <Cpu size={14} className="text-muted-foreground" />
+                  <span className="text-[13px] font-bold">{a.label}</span>
+                  <code className="text-[11px] text-muted-foreground">{a.id}</code>
+                  <span
+                    className={`ml-auto rounded-full border border-current px-2 text-[10px] leading-4 ${zm.tone}`}
+                  >
+                    {zm.label}
+                  </span>
+                </div>
+              );
+            })}
+            {!actions.length ? (
+              <p className="text-[13px] text-muted-foreground">
+                {loading ? '加载中…' : '无已注册动作'}
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
-    </section>
+    </WorkspaceSection>
   );
 }

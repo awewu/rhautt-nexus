@@ -1,5 +1,16 @@
 'use client';
 
+/**
+ * 2026-08 全页 UX 重构二期 · WorkspaceKit 化
+ *
+ * GEO 第 7 层 · 闭环实验面板
+ * 探测(基线) → 缺口 → 补内容 → 复投 → 验证 lift。
+ * 视觉重心 = lift：before→after 对比 + 结论色带，一眼看出"这内容让 AI 出现率涨没涨"。
+ *
+ * 设计：复用 WorkspaceKit / StatCard 原语 + Tailwind 语义 token，
+ * 零内联样式（无动态坐标场景），不引入第二套视觉。
+ */
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
@@ -16,16 +27,10 @@ import {
   TrendingUp,
   X,
 } from 'lucide-react';
+import { WorkspaceSection, EmptyState } from '@/components/WorkspaceKit';
+import { MiniStat } from '@/components/StatCard';
+import { cn } from '@/lib/utils';
 import { growthCopy, growthGeo } from '../lib/api';
-
-/**
- * GEO 第 7 层 · 闭环实验面板
- * 探测(基线) → 缺口 → 补内容 → 复投 → 验证 lift。
- * 视觉重心 = lift：before→after 对比 + 结论色带，一眼看出"这内容让 AI 出现率涨没涨"。
- *
- * 设计：严格复用工作台设计系统（card-elevated / workbench-section-header / inset /
- * badge / btn / CSS 变量），不引入第二套视觉。
- */
 
 type ExperimentStatus =
   'baseline' | 'content-linked' | 'verifying' | 'improved' | 'no-change' | 'regressed' | 'killed';
@@ -71,14 +76,60 @@ interface GeoQuestion {
   stage?: string;
 }
 
-const STATUS_META: Record<ExperimentStatus, { label: string; tone: string; bg: string }> = {
-  baseline: { label: '基线已测', tone: 'var(--t-secondary)', bg: 'var(--surface-2)' },
-  'content-linked': { label: '内容已补', tone: 'var(--warning)', bg: 'var(--warning-bg, #FFF7ED)' },
-  verifying: { label: '复投中', tone: 'var(--brand)', bg: 'var(--brand-50)' },
-  improved: { label: '已验证 · 有效', tone: 'var(--success)', bg: 'var(--success-bg, #F0FDF4)' },
-  'no-change': { label: '已验证 · 无变化', tone: 'var(--t-secondary)', bg: 'var(--surface-2)' },
-  regressed: { label: '已验证 · 下降', tone: 'var(--danger)', bg: 'var(--danger-bg, #FEF2F2)' },
-  killed: { label: '已终止', tone: 'var(--t-tertiary)', bg: 'var(--surface-3)' },
+/** 状态视觉映射：Tailwind 语义 token（取代原 CSS 变量内联）。 */
+const STATUS_META: Record<
+  ExperimentStatus,
+  { label: string; text: string; bg: string; border: string; stripe: string }
+> = {
+  baseline: {
+    label: '基线已测',
+    text: 'text-muted-foreground',
+    bg: 'bg-secondary',
+    border: 'border-border',
+    stripe: 'bg-muted-foreground',
+  },
+  'content-linked': {
+    label: '内容已补',
+    text: 'text-warning',
+    bg: 'bg-warning/10',
+    border: 'border-warning/40',
+    stripe: 'bg-warning',
+  },
+  verifying: {
+    label: '复投中',
+    text: 'text-primary',
+    bg: 'bg-primary/10',
+    border: 'border-primary/40',
+    stripe: 'bg-primary',
+  },
+  improved: {
+    label: '已验证 · 有效',
+    text: 'text-success',
+    bg: 'bg-success/10',
+    border: 'border-success/40',
+    stripe: 'bg-success',
+  },
+  'no-change': {
+    label: '已验证 · 无变化',
+    text: 'text-muted-foreground',
+    bg: 'bg-secondary',
+    border: 'border-border',
+    stripe: 'bg-muted-foreground',
+  },
+  regressed: {
+    label: '已验证 · 下降',
+    text: 'text-destructive',
+    bg: 'bg-destructive/10',
+    border: 'border-destructive/40',
+    stripe: 'bg-destructive',
+  },
+  killed: {
+    label: '已终止',
+    text: 'text-muted-foreground/70',
+    bg: 'bg-muted',
+    border: 'border-border',
+    stripe: 'bg-muted-foreground/60',
+  },
 };
 
 const pct = (v?: number | null) => (v === null || v === undefined ? '—' : `${Math.round(v)}%`);
@@ -308,16 +359,18 @@ export function GeoExperimentPanel({
   }, [experiments]);
 
   return (
-    <section className="card-elevated" style={{ padding: 18, display: 'grid', gap: 16 }}>
-      <div className="workbench-section-header">
-        <div>
-          <p className="workbench-section-header__eyebrow">GEO 闭环实验 · 第 7 层</p>
-          <h2 className="workbench-section-header__title">内容有没有用，用 lift 说话</h2>
-          <p className="workbench-section-header__description">
-            补内容前测一次基线，发布后复投再测一次，出现率之差（lift）即证明品牌建设是否有效。
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+    <WorkspaceSection
+      icon={<FlaskConical size={16} />}
+      title={
+        <span className="block">
+          <span className="block text-[11px] font-medium tracking-wide text-muted-foreground">
+            GEO 闭环实验 · 第 7 层
+          </span>
+          内容有没有用，用 lift 说话
+        </span>
+      }
+      aside={
+        <span className="flex flex-wrap items-center gap-2">
           <button
             className="btn btn-outline btn-sm"
             type="button"
@@ -343,152 +396,171 @@ export function GeoExperimentPanel({
             {showForm ? <X size={14} /> : <Plus size={14} />}
             {showForm ? '取消' : '开启实验'}
           </button>
-        </div>
-      </div>
+        </span>
+      }
+    >
+      <div className="grid gap-4">
+        <p className="text-xs text-muted-foreground">
+          补内容前测一次基线，发布后复投再测一次，出现率之差（lift）即证明品牌建设是否有效。
+        </p>
 
-      {error ? (
-        <div
-          className="inset"
-          style={{
-            color: 'var(--danger)',
-            display: 'flex',
-            gap: 8,
-            alignItems: 'center',
-            fontSize: 13,
-          }}
-        >
-          <X size={16} />
-          {error}
-        </div>
-      ) : null}
-      {notice ? (
-        <div className="inset" style={{ color: 'var(--success)', fontSize: 13 }}>
-          {notice}
-        </div>
-      ) : null}
-
-      {/* 概览指标 */}
-      <div className="g4" style={{ gap: 12 }}>
-        <MiniStat icon={FlaskConical} label="实验总数" value={String(summary.total)} />
-        <MiniStat icon={CheckCircle2} label="已验证" value={String(summary.verified)} />
-        <MiniStat
-          icon={TrendingUp}
-          label="有效实验"
-          value={String(summary.improved)}
-          tone={summary.improved ? 'var(--success)' : undefined}
-        />
-        <MiniStat
-          icon={Target}
-          label="平均 lift"
-          value={summary.avgLift > 0 ? `+${summary.avgLift}%` : `${summary.avgLift}%`}
-          tone={
-            summary.avgLift > 0
-              ? 'var(--success)'
-              : summary.avgLift < 0
-                ? 'var(--danger)'
-                : undefined
-          }
-        />
-      </div>
-
-      {/* 开启实验表单 */}
-      {showForm ? (
-        <div className="inset" style={{ display: 'grid', gap: 12, padding: 16 }}>
-          <div style={{ display: 'grid', gap: 6 }}>
-            <label className="t-label">监测问题</label>
-            <div style={{ position: 'relative' }}>
-              <select
-                value={form.questionId}
-                onChange={(e) => setForm((f) => ({ ...f, questionId: e.target.value }))}
-                style={selectStyle}
-              >
-                <option value="">选择一个问题…</option>
-                {questions.map((q) => (
-                  <option key={q.id} value={q.id}>
-                    {q.question}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                size={15}
-                style={{
-                  position: 'absolute',
-                  right: 12,
-                  top: 12,
-                  pointerEvents: 'none',
-                  color: 'var(--t-tertiary)',
-                }}
-              />
-            </div>
-          </div>
-          <div style={{ display: 'grid', gap: 6 }}>
-            <label className="t-label">假设（补什么内容 → 期望提升）</label>
-            <input
-              value={form.hypothesis}
-              onChange={(e) => setForm((f) => ({ ...f, hypothesis: e.target.value }))}
-              placeholder="例：补一篇选型技术页，让 AI 推荐时提到我们"
-              style={inputStyle}
-            />
-          </div>
-          <div style={{ display: 'grid', gap: 6 }}>
-            <label className="t-label">杀死准则（预注册，避免自我安慰）</label>
-            <input
-              value={form.killCriteria}
-              onChange={(e) => setForm((f) => ({ ...f, killCriteria: e.target.value }))}
-              style={inputStyle}
-            />
-          </div>
-          <div>
-            <button
-              className="btn btn-brand btn-sm"
-              type="button"
-              onClick={startExperiment}
-              disabled={submitting || !form.questionId}
-            >
-              {submitting ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <FlaskConical size={14} />
-              )}
-              开启并跑基线探测
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      {/* 实验卡片列表 */}
-      <div style={{ display: 'grid', gap: 12 }}>
-        {experiments.map((exp) => (
-          <ExperimentCard
-            key={exp.id}
-            exp={exp}
-            busy={busyId === exp.id}
-            onGenerate={() => generateContent(exp)}
-            onApprove={() => approveContent(exp)}
-            onPublish={() => recordPublication(exp)}
-            onVerify={() => verify(exp.id)}
-            onSavePrompt={() => savePrompt(exp)}
-          />
-        ))}
-        {!experiments.length ? (
-          <div
-            className="inset"
-            style={{ textAlign: 'center', padding: 32, color: 'var(--t-tertiary)' }}
-          >
-            {loading ? (
-              <Loader2 size={20} className="animate-spin" />
-            ) : (
-              <>
-                <FlaskConical size={28} style={{ color: 'var(--t-tertiary)', marginBottom: 8 }} />
-                <p style={{ fontSize: 14 }}>
-                  还没有实验。选一个 AI 不推荐我们的问题，开启第一个闭环实验。
-                </p>
-              </>
-            )}
+        {error ? (
+          <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-[13px] text-destructive">
+            <X size={16} />
+            {error}
           </div>
         ) : null}
+        {notice ? (
+          <div className="rounded-lg border bg-secondary/60 px-3 py-2.5 text-[13px] text-success">
+            {notice}
+          </div>
+        ) : null}
+
+        {/* 概览指标 */}
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <MiniStat
+            label={
+              <span className="inline-flex items-center gap-1">
+                <FlaskConical size={13} />
+                实验总数
+              </span>
+            }
+            value={summary.total}
+          />
+          <MiniStat
+            label={
+              <span className="inline-flex items-center gap-1">
+                <CheckCircle2 size={13} />
+                已验证
+              </span>
+            }
+            value={summary.verified}
+          />
+          <MiniStat
+            label={
+              <span className="inline-flex items-center gap-1">
+                <TrendingUp size={13} />
+                有效实验
+              </span>
+            }
+            value={
+              <span className={cn(summary.improved > 0 && 'text-success')}>
+                {summary.improved}
+              </span>
+            }
+          />
+          <MiniStat
+            label={
+              <span className="inline-flex items-center gap-1">
+                <Target size={13} />
+                平均 lift
+              </span>
+            }
+            value={
+              <span
+                className={cn(
+                  summary.avgLift > 0 && 'text-success',
+                  summary.avgLift < 0 && 'text-destructive'
+                )}
+              >
+                {summary.avgLift > 0 ? `+${summary.avgLift}%` : `${summary.avgLift}%`}
+              </span>
+            }
+          />
+        </div>
+
+        {/* 开启实验表单 */}
+        {showForm ? (
+          <div className="grid gap-3 rounded-lg border bg-secondary/40 p-4">
+            <div className="grid gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">监测问题</label>
+              <div className="relative">
+                <select
+                  className="input w-full cursor-pointer appearance-none pr-9"
+                  value={form.questionId}
+                  onChange={(e) => setForm((f) => ({ ...f, questionId: e.target.value }))}
+                >
+                  <option value="">选择一个问题…</option>
+                  {questions.map((q) => (
+                    <option key={q.id} value={q.id}>
+                      {q.question}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={15}
+                  className="pointer-events-none absolute top-3 right-3 text-muted-foreground/70"
+                />
+              </div>
+            </div>
+            <div className="grid gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                假设（补什么内容 → 期望提升）
+              </label>
+              <input
+                className="input w-full"
+                value={form.hypothesis}
+                onChange={(e) => setForm((f) => ({ ...f, hypothesis: e.target.value }))}
+                placeholder="例：补一篇选型技术页，让 AI 推荐时提到我们"
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground">
+                杀死准则（预注册，避免自我安慰）
+              </label>
+              <input
+                className="input w-full"
+                value={form.killCriteria}
+                onChange={(e) => setForm((f) => ({ ...f, killCriteria: e.target.value }))}
+              />
+            </div>
+            <div>
+              <button
+                className="btn btn-brand btn-sm"
+                type="button"
+                onClick={startExperiment}
+                disabled={submitting || !form.questionId}
+              >
+                {submitting ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <FlaskConical size={14} />
+                )}
+                开启并跑基线探测
+              </button>
+            </div>
+          </div>
+        ) : null}
+
+        {/* 实验卡片列表 */}
+        <div className="grid gap-3">
+          {experiments.map((exp) => (
+            <ExperimentCard
+              key={exp.id}
+              exp={exp}
+              busy={busyId === exp.id}
+              onGenerate={() => generateContent(exp)}
+              onApprove={() => approveContent(exp)}
+              onPublish={() => recordPublication(exp)}
+              onVerify={() => verify(exp.id)}
+              onSavePrompt={() => savePrompt(exp)}
+            />
+          ))}
+          {!experiments.length ? (
+            loading ? (
+              <div className="flex justify-center rounded-lg border bg-secondary/40 px-6 py-8 text-muted-foreground">
+                <Loader2 size={20} className="animate-spin" />
+              </div>
+            ) : (
+              <EmptyState
+                icon={<FlaskConical size={28} />}
+                title="还没有实验。选一个 AI 不推荐我们的问题，开启第一个闭环实验。"
+              />
+            )
+          ) : null}
+        </div>
       </div>
-    </section>
+    </WorkspaceSection>
   );
 }
 
@@ -513,113 +585,54 @@ function ExperimentCard({
   const lift = exp.lift;
   const hasLift = lift !== null && lift !== undefined;
   const liftTone = !hasLift
-    ? 'var(--t-tertiary)'
+    ? 'text-muted-foreground/70'
     : lift > 0
-      ? 'var(--success)'
+      ? 'text-success'
       : lift < 0
-        ? 'var(--danger)'
-        : 'var(--t-secondary)';
+        ? 'text-destructive'
+        : 'text-muted-foreground';
   const LiftIcon = !hasLift ? Minus : lift > 0 ? TrendingUp : lift < 0 ? TrendingDown : Minus;
 
   return (
-    <article
-      className="inset"
-      style={{
-        padding: 0,
-        overflow: 'hidden',
-        display: 'grid',
-        gridTemplateColumns: '4px 1fr',
-        borderRadius: 'var(--r-lg, 12px)',
-      }}
-    >
+    <article className="grid grid-cols-[4px_1fr] overflow-hidden rounded-xl border bg-secondary/40">
       {/* 状态色带 */}
-      <div style={{ background: meta.tone, opacity: 0.85 }} />
-      <div style={{ padding: 16, display: 'grid', gap: 14 }}>
+      <div className={cn('opacity-85', meta.stripe)} />
+      <div className="grid gap-3.5 p-4">
         {/* 头部 */}
-        <div
-          style={{
-            display: 'flex',
-            gap: 12,
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-          }}
-        >
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ fontWeight: 700, fontSize: 15, color: 'var(--t-strong)', lineHeight: 1.4 }}>
-              {exp.question}
-            </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[15px] leading-snug font-bold">{exp.question}</p>
             {exp.hypothesis ? (
-              <p style={{ marginTop: 4, fontSize: 12.5, color: 'var(--t-tertiary)' }}>
-                假设：{exp.hypothesis}
-              </p>
+              <p className="mt-1 text-xs text-muted-foreground">假设：{exp.hypothesis}</p>
             ) : null}
           </div>
           <span
-            className="badge"
-            style={{
-              color: meta.tone,
-              borderColor: meta.tone,
-              background: meta.bg,
-              whiteSpace: 'nowrap',
-            }}
+            className={cn(
+              'rounded-full border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap',
+              meta.text,
+              meta.border,
+              meta.bg
+            )}
           >
             {meta.label}
           </span>
         </div>
 
         {/* before → lift → after 视觉对比 */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto 1fr auto 1fr',
-            gap: 10,
-            alignItems: 'center',
-          }}
-        >
+        <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-2.5">
           <RatePill label="基线" value={pct(exp.baselineCitedRate)} sub={fmtDate(exp.createdAt)} />
-          <ArrowRight size={16} style={{ color: 'var(--t-tertiary)', justifySelf: 'center' }} />
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '8px 4px',
-              background: hasLift ? meta.bg : 'transparent',
-              borderRadius: 8,
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 4,
-                color: liftTone,
-              }}
-            >
+          <ArrowRight size={16} className="justify-self-center text-muted-foreground/70" />
+          <div className={cn('rounded-lg px-1 py-2 text-center', hasLift && meta.bg)}>
+            <div className={cn('flex items-center justify-center gap-1', liftTone)}>
               <LiftIcon size={18} />
-              <span
-                style={{
-                  fontSize: 26,
-                  fontWeight: 800,
-                  fontVariantNumeric: 'tabular-nums',
-                  lineHeight: 1,
-                }}
-              >
+              <span className="text-[26px] leading-none font-extrabold tabular-nums">
                 {hasLift ? `${lift > 0 ? '+' : ''}${lift}` : '—'}
               </span>
-              {hasLift ? (
-                <span
-                  style={{ fontSize: 13, color: liftTone, alignSelf: 'flex-end', marginBottom: 2 }}
-                >
-                  pt
-                </span>
-              ) : null}
+              {hasLift ? <span className="mb-0.5 self-end text-[13px]">pt</span> : null}
             </div>
-            <div className="t-label" style={{ marginTop: 2 }}>
-              lift
-            </div>
+            <div className="mt-0.5 text-xs text-muted-foreground">lift</div>
           </div>
-          <ArrowRight size={16} style={{ color: 'var(--t-tertiary)', justifySelf: 'center' }} />
+          <ArrowRight size={16} className="justify-self-center text-muted-foreground/70" />
           <RatePill
             label="复投"
             value={pct(exp.verifyCitedRate)}
@@ -630,31 +643,19 @@ function ExperimentCard({
         {/* 结论 */}
         {exp.conclusion ? (
           <p
-            style={{
-              fontSize: 13,
-              color: 'var(--t-secondary)',
-              padding: '8px 12px',
-              background: meta.bg,
-              borderRadius: 8,
-              lineHeight: 1.6,
-            }}
+            className={cn(
+              'rounded-lg px-3 py-2 text-[13px] leading-relaxed text-muted-foreground',
+              meta.bg
+            )}
           >
             {exp.conclusion}
           </p>
         ) : null}
 
         {/* 下一步操作 */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="flex flex-wrap items-center gap-2">
           {exp.loop?.nextAction === 'wait-for-baseline' ? (
-            <span
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                fontSize: 13,
-                color: 'var(--t-secondary)',
-              }}
-            >
+            <span className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
               <Loader2 size={14} className="animate-spin" />
               千问基线探测进行中
             </span>
@@ -704,15 +705,7 @@ function ExperimentCard({
             </button>
           ) : null}
           {exp.status === 'verifying' ? (
-            <span
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                fontSize: 13,
-                color: 'var(--brand)',
-              }}
-            >
+            <span className="flex items-center gap-1.5 text-[13px] text-primary">
               <Loader2 size={14} className="animate-spin" />
               复投探测进行中，稍后自动回填 lift
             </span>
@@ -730,13 +723,14 @@ function ExperimentCard({
           ) : null}
           {exp.promptTemplate ? (
             <span
-              className={
+              className={cn(
+                'inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold tabular-nums',
                 exp.promptTemplate.evidenceState === 'proven'
-                  ? 'badge badge-success'
+                  ? 'border-success/40 bg-success/10 text-success'
                   : exp.promptTemplate.evidenceState === 'negative'
-                    ? 'badge badge-danger'
-                    : 'badge badge-info'
-              }
+                    ? 'border-destructive/40 bg-destructive/10 text-destructive'
+                    : 'border-info/40 bg-info/10 text-info'
+              )}
             >
               提示词：{exp.promptTemplate.name} · 验证 {exp.promptTemplate.verifiedCount} 次 · 平均
               lift {exp.promptTemplate.averageLift > 0 ? '+' : ''}
@@ -744,13 +738,13 @@ function ExperimentCard({
             </span>
           ) : null}
           {exp.copyAsset ? (
-            <span style={{ fontSize: 12, color: 'var(--t-tertiary)' }}>
+            <span className="text-xs text-muted-foreground">
               内容：{exp.copyAsset.status} · {exp.copyAsset.factRefs?.length || 0} 条事实引用 ·{' '}
               {exp.copyAsset.model || exp.probeProvider || 'qwen'}
             </span>
           ) : null}
           {exp.killCriteria ? (
-            <span style={{ fontSize: 12, color: 'var(--t-tertiary)', marginLeft: 'auto' }}>
+            <span className="ml-auto text-xs text-muted-foreground">
               杀死准则：{exp.killCriteria}
             </span>
           ) : null}
@@ -762,71 +756,10 @@ function ExperimentCard({
 
 function RatePill({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div style={{ textAlign: 'center' }}>
-      <div className="t-label">{label}出现率</div>
-      <div
-        style={{
-          fontSize: 24,
-          fontWeight: 800,
-          color: 'var(--t-strong)',
-          fontVariantNumeric: 'tabular-nums',
-          lineHeight: 1.1,
-        }}
-      >
-        {value}
-      </div>
-      {sub ? (
-        <div style={{ fontSize: 11, color: 'var(--t-tertiary)', marginTop: 2 }}>{sub}</div>
-      ) : null}
+    <div className="text-center">
+      <div className="text-xs text-muted-foreground">{label}出现率</div>
+      <div className="text-2xl leading-tight font-extrabold tabular-nums">{value}</div>
+      {sub ? <div className="mt-0.5 text-[11px] text-muted-foreground">{sub}</div> : null}
     </div>
   );
 }
-
-function MiniStat({
-  icon: Icon,
-  label,
-  value,
-  tone,
-}: {
-  icon: any;
-  label: string;
-  value: string;
-  tone?: string;
-}) {
-  return (
-    <article className="inset" style={{ padding: 14 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span className="t-label">{label}</span>
-        <Icon size={15} style={{ color: tone || 'var(--brand)' }} />
-      </div>
-      <div
-        style={{
-          marginTop: 6,
-          fontSize: 26,
-          fontWeight: 800,
-          color: tone || 'var(--t-strong)',
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
-        {value}
-      </div>
-    </article>
-  );
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '9px 12px',
-  borderRadius: 8,
-  border: '1px solid var(--surface-3)',
-  background: 'var(--surface-1)',
-  color: 'var(--t-strong)',
-  fontSize: 14,
-  outline: 'none',
-};
-const selectStyle: React.CSSProperties = {
-  ...inputStyle,
-  appearance: 'none',
-  paddingRight: 34,
-  cursor: 'pointer',
-};
