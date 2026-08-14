@@ -1762,6 +1762,14 @@ button {
   background: var(--brand-50);
   color: var(--brand);
 }
+.content-factory-stage--neutral .content-factory-stage__icon {
+  background: var(--surface-2);
+  color: var(--t-secondary);
+}
+.content-factory-stage--danger .content-factory-stage__icon {
+  background: var(--danger-bg, var(--surface-2));
+  color: var(--danger);
+}
 .content-factory-stage--warning .content-factory-stage__icon {
   background: var(--warning-bg);
   color: var(--warning);

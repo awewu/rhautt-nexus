@@ -1,9 +1,9 @@
 'use client';
 
 /**
- * 营销控制台首页（2026-08 全页 UX 重构 · WorkspaceKit 化）。
- * 重排思路：顶部信息条 + lg 双列（左 2/3 控制台 KPI 卡 · 右 1/3 快捷入口九宫格），
- * 底部运营路径收进标准卡容器；tone 色改语义 Tailwind 映射；26 处内联样式清零。
+ * 营销控制台首页（2026-08 全页 UX 重构 · WorkspaceKit 化 · 内容生产台范式对齐）。
+ * 重排思路：任务 Hero + 运营路径流水线（点击即跳转）+ 控制台卡与快捷入口双列。
+ * 顺带更正陈旧数字：品牌官网原写死 3，主数据已是 5 站（rhautt-group/rheem/ruud/everhot/lithnova）。
  */
 
 import {
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { WorkQueueHero, PipelineStages } from '@/components/WorkspaceKit';
 
 type ConsoleCard = {
   href: string;
@@ -32,8 +33,8 @@ const CONSOLE_CARDS: ConsoleCard[] = [
   {
     href: '/comfort/sites',
     label: '品牌官网',
-    value: '3',
-    hint: 'Rheem / Ruud / Everhot 官网与内容资产',
+    value: '5',
+    hint: '集团站 + Rheem / Ruud / Everhot / Lithnova 官网与内容资产',
     icon: Globe2,
     tone: 'brand',
   },
@@ -130,6 +131,35 @@ export default function Dashboard() {
           </span>
         </div>
 
+        {/* 内容生产台范式：任务 Hero + 运营路径流水线（点击即跳转） */}
+        <section className="card-elevated content-factory-workbench">
+          <WorkQueueHero
+            title="今天从哪里开始"
+            desc="品牌官网内容 → 增长动作 → 产品资料 → 账号权限，按运营路径推进。"
+            metrics={[
+              { value: CONSOLE_CARDS.length, label: '控制台' },
+              { value: QUICK_LINKS.length, label: '快捷入口' },
+            ]}
+          />
+          <PipelineStages
+            label="运营路径"
+            stages={CONSOLE_CARDS.map((card, index) => {
+              const Icon = card.icon;
+              return {
+                key: card.href,
+                label: `${String(index + 1).padStart(2, '0')} ${card.label}`,
+                hint: card.hint,
+                value: card.value,
+                icon: <Icon size={16} />,
+                tone: card.tone === 'neutral' ? 'neutral' : card.tone,
+                onClick: () => {
+                  window.location.href = card.href;
+                },
+              };
+            })}
+          />
+        </section>
+
         <div className="grid items-start gap-7 lg:grid-cols-3">
           <section className="lg:col-span-2">
             <SectionHeader title="营销控制台" subtitle="品牌官网 · 市场增长 · 产品 · 账号权限" />
@@ -165,31 +195,7 @@ export default function Dashboard() {
           </section>
         </div>
 
-        <section>
-          <SectionHeader
-            title="运营路径"
-            subtitle="从品牌官网内容到增长动作，再到产品资料和营销账号权限。"
-          />
-          <div className="rounded-xl border bg-card p-5 shadow-sm">
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              {CONSOLE_CARDS.map((card, index) => (
-                <a
-                  key={card.href}
-                  href={card.href}
-                  className="flex items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3.5 no-underline transition-colors duration-150 hover:bg-secondary/50"
-                >
-                  <span className="inline-flex min-w-0 items-center gap-2.5">
-                    <span className="text-xs font-bold text-primary tabular-nums">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <span className="truncate text-[13px] font-bold">{card.label}</span>
-                  </span>
-                  <ArrowRight size={14} className="shrink-0 text-primary" />
-                </a>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* 原「运营路径」段已上移为 Hero 下的流水线，不再重复 */}
       </div>
     </div>
   );

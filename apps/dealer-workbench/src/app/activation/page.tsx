@@ -4,13 +4,15 @@
  * 活动运营页（2026-08 全页 UX 重构二期 · WorkspaceKit 化）。
  * 信息架构：左 2/3 = 活动清单主工作区（工具栏 + 行卡）；右 1/3 = 新建活动表单。
  * 原版问题：12 处内联样式、全宽单列卡叠放；本版收编为 Tailwind + WorkspaceKit 原语。
+ * 2026-08 内容生产台范式对齐：页首任务 Hero（活动总数/进行中/裂变盘子等真实计数）+
+ * 活动类型流水线（点击即接活动清单既有类型筛选），API 调用不动。
  */
 
 import { useState } from 'react';
 import useSWR from 'swr';
-import { ListChecks, Zap } from 'lucide-react';
+import { ListChecks, Zap, Ticket, Users, Timer, Share2, UserPlus } from 'lucide-react';
 import { PageHeader, AsyncBoundary, useToast, type AsyncStatus } from '@rhautt/ui';
-import { WorkspaceSection } from '@/components/WorkspaceKit';
+import { WorkspaceSection, WorkQueueHero, PipelineStages } from '@/components/WorkspaceKit';
 import { activation } from '../../lib/api';
 import { useListView, exportCsv } from '../../lib/useListView';
 import ListToolbar from '../../components/ListToolbar';
@@ -21,6 +23,13 @@ const TYPES: Array<[string, string]> = [
   ['flashsale', '秒杀'],
   ['fission', '裂变'],
   ['referral', '转介绍'],
+];
+const TYPE_STAGES = [
+  { key: 'coupon', label: '优惠券', hint: '促成交的价格钩子', icon: Ticket, tone: 'neutral' as const },
+  { key: 'groupon', label: '拼团', hint: '拉人成团的社交转化', icon: Users, tone: 'info' as const },
+  { key: 'flashsale', label: '秒杀', hint: '限时冲量清库存', icon: Timer, tone: 'warning' as const },
+  { key: 'fission', label: '裂变', hint: '老带新，线索计入飞轮', icon: Share2, tone: 'brand' as const },
+  { key: 'referral', label: '转介绍', hint: '转介线索回流归因', icon: UserPlus, tone: 'success' as const },
 ];
 const NEXT: Record<string, string> = { draft: 'running', running: 'paused', paused: 'running' };
 function statusOf(isLoading: boolean, error: unknown, empty: boolean): AsyncStatus {
@@ -82,6 +91,43 @@ export default function ActivationPage() {
         title="活动运营"
         subtitle="优惠券 · 拼团 · 秒杀 · 裂变 · 转介绍 —— 裂变/转介绍带来的线索计入线索飞轮"
       />
+
+      <div className="mb-4">
+        <WorkQueueHero
+          title="今天要跑哪些活动"
+          desc="先盯进行中的活动启停与预算，再看裂变/转介绍的线索回流是否进飞轮。"
+          metrics={[
+            { value: rows.length, label: '活动' },
+            { value: rows.filter((a) => a.status === 'running').length, label: '进行中' },
+            {
+              value: rows.filter((a) => a.type === 'fission' || a.type === 'referral').length,
+              label: '裂变/转介绍',
+            },
+            {
+              value: rows.reduce((sum, a) => sum + Number(a.metrics?.referredLeads ?? 0), 0),
+              label: '转介线索',
+            },
+          ]}
+        />
+      </div>
+      <div className="mb-4">
+        <PipelineStages
+          label="活动类型流水线"
+          stages={TYPE_STAGES.map((s) => {
+            const Icon = s.icon;
+            return {
+              key: s.key,
+              label: s.label,
+              hint: s.hint,
+              value: rows.filter((a) => a.type === s.key).length,
+              icon: <Icon size={16} />,
+              tone: s.tone,
+              active: av.filterVals.type === s.key,
+              onClick: () => av.setFilter('type', av.filterVals.type === s.key ? '' : s.key),
+            };
+          })}
+        />
+      </div>
 
       <div className="grid items-start gap-4 lg:grid-cols-3">
         {/* ── 左 2/3：活动清单主工作区 ─────────────────────────── */}

@@ -5,18 +5,26 @@
  * 信息架构：聚焦产品面板 + 治理面板（嵌入组件不动）→
  * 左 1/3 = NPI 上市计划（录入 + 清单）；右 2/3 = 定价审批毛利闸（提报 + 工具栏 + 清单）。
  * 原版问题：20 处内联样式、两块全宽单列卡叠放；本版收编为 Tailwind + WorkspaceKit 原语。
+ * 2026-08 内容生产台范式对齐：页首任务 Hero（NPI/定价审批真实计数）+
+ * 定价闸状态流水线（点击即接定价清单既有筛选），面板组件与 API 调用不动。
  */
 
 import { useState } from 'react';
 import useSWR from 'swr';
-import { Rocket, BadgeDollarSign } from 'lucide-react';
+import { Rocket, BadgeDollarSign, Clock3, CheckCircle2, XCircle } from 'lucide-react';
 import { PageHeader, AsyncBoundary, useToast, type AsyncStatus } from '@rhautt/ui';
-import { WorkspaceSection } from '@/components/WorkspaceKit';
+import { WorkspaceSection, WorkQueueHero, PipelineStages } from '@/components/WorkspaceKit';
 import { productMgmt } from '../../lib/api';
 import { useListView, exportCsv } from '../../lib/useListView';
 import ListToolbar from '../../components/ListToolbar';
 import FocusProductsPanel from '../../components/FocusProductsPanel';
 import ProductGovernancePanel from '../../components/ProductGovernancePanel';
+
+const PRICING_STAGES = [
+  { key: 'submitted', label: '待审', hint: '等待毛利闸复核与批准', icon: Clock3, tone: 'warning' as const },
+  { key: 'approved', label: '已批', hint: '已过毛利闸，可执行', icon: CheckCircle2, tone: 'success' as const },
+  { key: 'rejected', label: '已驳', hint: '毛利闸或口径未过', icon: XCircle, tone: 'danger' as const },
+];
 
 function statusOf(isLoading: boolean, error: unknown, empty: boolean): AsyncStatus {
   if (isLoading) return 'loading';
@@ -103,6 +111,36 @@ export default function ProductMgmtPage() {
         title="产品管理"
         subtitle="生命周期 · 新品上市 NPI · 卖点体系 · 定价审批（毛利闸·基座3）· 主销声明与后验镜子"
       />
+
+      <div className="mb-4">
+        <WorkQueueHero
+          title="今天要审什么"
+          desc="先清待审定价（毛利闸不放水），再推进 NPI 上市计划；主销声明看后验镜子。"
+          metrics={[
+            { value: lRows.length, label: 'NPI 计划' },
+            { value: pRows.filter((p) => p.status === 'submitted').length, label: '待审定价' },
+            { value: pRows.filter((p) => p.status === 'approved').length, label: '已批定价' },
+          ]}
+        />
+      </div>
+      <div className="mb-4">
+        <PipelineStages
+          label="定价审批流水线"
+          stages={PRICING_STAGES.map((s) => {
+            const Icon = s.icon;
+            return {
+              key: s.key,
+              label: s.label,
+              hint: s.hint,
+              value: pRows.filter((p) => p.status === s.key).length,
+              icon: <Icon size={16} />,
+              tone: s.tone,
+              active: pv.filterVals.status === s.key,
+              onClick: () => pv.setFilter('status', pv.filterVals.status === s.key ? '' : s.key),
+            };
+          })}
+        />
+      </div>
 
       <FocusProductsPanel />
       <ProductGovernancePanel />

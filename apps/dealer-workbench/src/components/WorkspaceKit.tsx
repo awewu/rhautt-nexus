@@ -198,6 +198,78 @@ export function EmptyState({
   );
 }
 
+/* ── 内容生产台版式基因（2026-08 用户钦定为全站作业页范式）──────────────
+   要素：任务语气 Hero（真实指标内联）+ 可点击流水线阶段（点击即筛选）。
+   样式复用 globals.css 的 content-factory-* 全局类（响应式与 token 已就绪）。 */
+
+/** 任务 Hero：执行队列语气 + 内联真实指标。 */
+export function WorkQueueHero({
+  eyebrow = '执行队列',
+  title,
+  desc,
+  metrics,
+}: {
+  eyebrow?: ReactNode;
+  title: ReactNode;
+  desc?: ReactNode;
+  metrics: { value: ReactNode; label: string }[];
+}) {
+  return (
+    <div className="content-factory-hero">
+      <div>
+        <p className="t-label">{eyebrow}</p>
+        <h2 className="t-headline mt-1">{title}</h2>
+        {desc && <p>{desc}</p>}
+      </div>
+      <div className="content-factory-metrics">
+        {metrics.map((m) => (
+          <span key={m.label}>
+            <strong>{m.value}</strong> {m.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export type PipelineStage = {
+  key: string;
+  label: ReactNode;
+  hint: ReactNode;
+  value: ReactNode;
+  icon: ReactNode;
+  tone?: 'neutral' | 'warning' | 'info' | 'success' | 'brand' | 'danger';
+  active?: boolean;
+  onClick?: () => void;
+};
+
+/** 流水线阶段：可点击（点击即筛选/跳转）的阶段格。 */
+export function PipelineStages({ stages, label }: { stages: PipelineStage[]; label?: string }) {
+  return (
+    <div className="content-factory-pipeline" aria-label={label}>
+      {stages.map((stage) => (
+        <button
+          key={stage.key}
+          type="button"
+          className={cn(
+            `content-factory-stage content-factory-stage--${stage.tone || 'neutral'}`,
+            stage.active && 'ring-2 ring-ring',
+            !stage.onClick && 'cursor-default'
+          )}
+          onClick={stage.onClick}
+        >
+          <span className="content-factory-stage__icon">{stage.icon}</span>
+          <span className="content-factory-stage__body">
+            <strong>{stage.label}</strong>
+            <span>{stage.hint}</span>
+          </span>
+          <span className="content-factory-stage__value">{stage.value}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 /** 软标签：说明性 pill（非交互）。 */
 export function Pill({ children }: { children: ReactNode }) {
   return (

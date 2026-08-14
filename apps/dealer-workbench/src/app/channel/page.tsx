@@ -2,16 +2,17 @@
 
 /**
  * 渠道与伙伴营销（2026-08 全页 UX 重构 · WorkspaceKit 化）。
- * 重排思路：顶部 4 格渠道健康 KPI（StatCard），下方 lg 双列并排
+ * 重排思路：顶部渠道健康任务 Hero（原 4 格 StatCard 收编），下方 lg 双列并排
  * 「招募/分层认证」与「返利审批·毛利闸」两大工作区，消灭全宽单列叠放；30 处内联样式清零。
+ * 2026-08 内容生产台范式对齐：页首任务 Hero（真实渠道健康/待审指标）+
+ * 返利状态流水线（点击即接返利清单既有筛选），业务逻辑与面板组件不动。
  */
 
 import { useState } from 'react';
 import useSWR from 'swr';
-import { Store, Gift } from 'lucide-react';
+import { Store, Gift, Clock3, CheckCircle2, XCircle, BadgeCheck } from 'lucide-react';
 import { PageHeader, AsyncBoundary, useToast, type AsyncStatus } from '@rhautt/ui';
-import { WorkspaceSection } from '@/components/WorkspaceKit';
-import { StatCard } from '@/components/StatCard';
+import { WorkspaceSection, WorkQueueHero, PipelineStages } from '@/components/WorkspaceKit';
 import { channel } from '../../lib/api';
 import { useListView, exportCsv } from '../../lib/useListView';
 import ListToolbar from '../../components/ListToolbar';
@@ -95,6 +96,13 @@ export default function ChannelPage() {
   const pRows: any[] = partners.data?.partners || [];
   const rRows: any[] = rebates.data?.rebates || [];
   const hh = health.data;
+  const pendingRebates = rRows.filter((r) => r.status === 'submitted').length;
+  const REBATE_STAGES = [
+    { key: 'submitted', label: '待审', hint: '等待毛利闸复核与批准', icon: Clock3, tone: 'warning' as const },
+    { key: 'approved', label: '已批', hint: '已过毛利闸，待支付', icon: CheckCircle2, tone: 'success' as const },
+    { key: 'rejected', label: '已驳', hint: '毛利闸或口径未过', icon: XCircle, tone: 'danger' as const },
+    { key: 'paid', label: '已付', hint: '返利已支付闭环', icon: BadgeCheck, tone: 'brand' as const },
+  ];
 
   const pv = useListView(pRows, {
     searchFields: ['name', 'code', 'region'],
@@ -139,13 +147,38 @@ export default function ChannelPage() {
         errorMessage="渠道健康加载失败（需 API + 数据库）"
         onRetry={() => health.mutate()}
       >
-        <div className="mb-4 grid grid-cols-2 gap-4 md:grid-cols-4">
-          <StatCard label="经销商总数" value={hh?.partners ?? 0} emphasis />
-          <StatCard label="活跃" value={hh?.active ?? 0} />
-          <StatCard label="活跃盈利" value={hh?.activeProfitable ?? 0} />
-          <StatCard label="网络 GMV" value={yuan(hh?.networkGmv ?? 0)} />
+        <div className="mb-4">
+          <WorkQueueHero
+            title="今天要盘哪些渠道动作"
+            desc="先看网络健康，再清待审返利；招募与分层认证保持节奏，毛利闸不放水。"
+            metrics={[
+              { value: hh?.partners ?? 0, label: '经销商' },
+              { value: hh?.active ?? 0, label: '活跃' },
+              { value: pendingRebates, label: '待审返利' },
+              { value: yuan(hh?.networkGmv ?? 0), label: '网络 GMV' },
+            ]}
+          />
         </div>
       </AsyncBoundary>
+
+      <div className="mb-4">
+        <PipelineStages
+          label="返利审批流水线"
+          stages={REBATE_STAGES.map((s) => {
+            const Icon = s.icon;
+            return {
+              key: s.key,
+              label: s.label,
+              hint: s.hint,
+              value: rRows.filter((r) => r.status === s.key).length,
+              icon: <Icon size={16} />,
+              tone: s.tone,
+              active: rv.filterVals.status === s.key,
+              onClick: () => rv.setFilter('status', rv.filterVals.status === s.key ? '' : s.key),
+            };
+          })}
+        />
+      </div>
 
       <div className="grid items-start gap-4 lg:grid-cols-2">
         <WorkspaceSection icon={<Store size={16} />} title="招募 / 分层认证">

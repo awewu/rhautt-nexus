@@ -18,8 +18,9 @@ import {
   FunnelSteps,
   KeyValueRows,
   ProgressStat,
+  WorkQueueHero,
+  PipelineStages,
 } from '@/components/WorkspaceKit';
-import { MiniStat } from '@/components/StatCard';
 import { agenticGeo, geoFocus } from '../../lib/api';
 
 const CATEGORIES = [
@@ -249,21 +250,32 @@ export default function GeoFocusPage() {
               errorMessage="探测池加载失败（需 API + 数据库）"
               onRetry={() => pool.mutate()}
             >
-              <div className="mb-3.5 grid grid-cols-2 gap-2.5 md:grid-cols-4">
-                <MiniStat label="探测点" value={summary.total ?? tRows.length} accent />
-                <MiniStat label="高价值点" value={highPriorityTargets} accent />
-                <MiniStat label="已探测" value={summary.probed ?? 0} />
-                <MiniStat label="覆盖率" value={pct(summary.coverageRate ?? 0)} />
+              {/* 内容生产台版式：任务 Hero + 可点流水线（点击即按探测类型筛选） */}
+              <div className="mb-3.5">
+                <WorkQueueHero
+                  title="今天要打哪场仗"
+                  desc="先找 AI 答案战场，再对高价值点做千问引爆；缺口回流认知资产。"
+                  metrics={[
+                    { value: summary.total ?? tRows.length, label: '探测点' },
+                    { value: highPriorityTargets, label: '高价值点' },
+                    { value: summary.probed ?? 0, label: '已探测' },
+                    { value: pct(summary.coverageRate ?? 0), label: '覆盖率' },
+                  ]}
+                />
               </div>
               <div className="mb-3.5">
-                <FilterChips
-                  options={PROBE_TYPES.map((p) => ({
-                    value: p.key,
+                <PipelineStages
+                  label="探测类型流水线"
+                  stages={PROBE_TYPES.filter((p) => p.key).map((p) => ({
+                    key: p.key,
                     label: p.label,
-                    count: p.key ? summary.byType?.[p.key] || 0 : (summary.total ?? tRows.length),
+                    hint: `${PROBE_TYPE_LABEL[p.key]}问题`,
+                    value: summary.byType?.[p.key] || 0,
+                    icon: <Target size={16} />,
+                    tone: probeType === p.key ? 'brand' : 'neutral',
+                    active: probeType === p.key,
+                    onClick: () => setProbeType(probeType === p.key ? '' : p.key),
                   }))}
-                  value={probeType}
-                  onChange={setProbeType}
                 />
               </div>
 
