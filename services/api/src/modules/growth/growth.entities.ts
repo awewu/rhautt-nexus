@@ -436,7 +436,14 @@ export class GrowthGeoExperimentEntity {
   @Column({ type: 'text', nullable: true }) hypothesis: string | null;
   @Column({ type: 'varchar', default: 'baseline' })
   status:
-    'baseline' | 'content-linked' | 'verifying' | 'improved' | 'no-change' | 'regressed' | 'killed';
+    | 'baseline'
+    | 'content-linked'
+    | 'verifying'
+    | 'improved'
+    | 'no-change'
+    | 'regressed'
+    | 'killed'
+    | 'insufficient-data'; // 任一臂探测 <5 次：拒绝下结论（迁移 114 统计闸）
   @Column({ name: 'baseline_batch_id', type: 'uuid', nullable: true }) baselineBatchId:
     string | null;
   @Column({ name: 'baseline_cited_rate', type: 'int', nullable: true }) baselineCitedRate:
@@ -454,6 +461,9 @@ export class GrowthGeoExperimentEntity {
     number | null;
   @Column({ name: 'verify_at', type: 'timestamptz', nullable: true }) verifyAt: Date | null;
   @Column({ type: 'int', nullable: true }) lift: number | null;
+  /** 统计评估全量（迁移 114）：{verdict, ci95, baseline, verify, design:'before-after'}，可复算。 */
+  @Column({ name: 'lift_ci', type: 'jsonb', default: () => "'{}'::jsonb" })
+  liftCi: Record<string, unknown>;
   @Column({ name: 'kill_criteria', type: 'text', nullable: true }) killCriteria: string | null;
   @Column({ type: 'text', nullable: true }) conclusion: string | null;
   @Column({ name: 'prompt_feedback_applied_at', type: 'timestamptz', nullable: true })

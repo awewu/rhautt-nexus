@@ -67,6 +67,7 @@ import {
   GrowthScenarioEntity,
 } from './growth.entities';
 import { assessExtractability } from './content-extractability';
+import { evaluateLift } from './experiment-stats';
 import {
   deriveTopics,
   deriveProductTopics,
@@ -3038,7 +3039,8 @@ export class GrowthGeoService {
           });
           if (b && b.status === 'succeeded') exp.baselineCitedRate = b.citedRate;
         }
-        // 回填复投出现率 + 算 lift + 判结论
+        // 回填复投出现率 + 统计闸判结论（迁移 114：Wilson/Newcombe 95%CI + 最小样本闸，
+        // 替换此前 verify-baseline>0 即 improved 的裸判定——1对1探测也敢下结论是噪声冒充证据）
         if (exp.verifyBatchId && exp.verifyCitedRate === null) {
           const v = await batchRepo.findOne({
             where: { tenantId: user.tenantId, id: exp.verifyBatchId } as any,
@@ -3046,15 +3048,23 @@ export class GrowthGeoService {
           if (v && v.status === 'succeeded') {
             exp.verifyCitedRate = v.citedRate;
             if (exp.baselineCitedRate !== null) {
-              exp.lift = exp.verifyCitedRate - exp.baselineCitedRate;
-              exp.status = exp.lift > 0 ? 'improved' : exp.lift < 0 ? 'regressed' : 'no-change';
-              exp.conclusion =
-                `基线出现率 ${exp.baselineCitedRate}% → 复投 ${exp.verifyCitedRate}%，` +
-                (exp.lift > 0
-                  ? `提升 ${exp.lift} 个百分点，内容有效。`
-                  : exp.lift < 0
-                    ? `下降 ${-exp.lift} 个百分点，需复核。`
-                    : '无变化，需换内容策略。');
+              const b = exp.baselineBatchId
+                ? await batchRepo.findOne({
+                    where: { tenantId: user.tenantId, id: exp.baselineBatchId } as any,
+                  })
+                : null;
+              const baselineTotal = b?.completedProbes ?? 0;
+              const verifyTotal = v.completedProbes ?? 0;
+              const evaluation = evaluateLift({
+                baselineCited: Math.round(((exp.baselineCitedRate ?? 0) / 100) * baselineTotal),
+                baselineTotal,
+                verifyCited: Math.round(((v.citedRate ?? 0) / 100) * verifyTotal),
+                verifyTotal,
+              });
+              exp.lift = evaluation.liftPoints;
+              exp.status = evaluation.verdict;
+              exp.conclusion = evaluation.conclusion;
+              exp.liftCi = evaluation as unknown as Record<string, unknown>;
             }
           }
         }
@@ -3116,8 +3126,12 @@ export class GrowthGeoService {
           where: { tenantId: user.tenantId } as any,
           take: 500,
         });
+        // 统计闸（迁移 114）：只有过了显著性判定的实验才能反哺权重。
+        // insufficient-data / no-change（CI 跨 0）的 lift 是噪声候选——
+        // 让噪声进自学习正是此前"随机方向漂移"的病根。
+        const LEARNABLE = new Set(['improved', 'regressed']);
         const scored = experiments.filter(
-          (e) => e.lift !== null && e.lift !== undefined && e.copyAssetId
+          (e) => e.lift !== null && e.lift !== undefined && e.copyAssetId && LEARNABLE.has(e.status)
         );
         const assetRepo = em.getRepository(GrowthCopyAssetEntity);
         type Acc = Record<string, { sum: number; n: number }>;
