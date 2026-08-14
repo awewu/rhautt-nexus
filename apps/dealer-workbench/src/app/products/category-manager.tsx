@@ -68,7 +68,7 @@ import {
   type Product,
 } from '../../lib/products-data';
 
-import { CategoryChip, CategoryCountPill, DEFAULT_CREATE_BRAND_OPTIONS, FloatingDialog, FloatingDialogOptions, FloatingDialogState, FloatingPromptOptions, Metric, ProductBrand, ProductCategoryDraft, ProductCategoryNode, ProductCategoryUsage, SiteProductCategoryResponse, SiteProductCategoryRow, SiteProductCategoryTreeNode, categoryDraftFromNode, categoryDraftPayload, displayBrand, emptyCategoryDraft, errorMessage, flattenRawCategoryItems, internalCategoryCode, nonNegativeInt, normalizeProductCategoryTree, productCategoryItems, slug, text, useFloatingDialog } from './products-shared';
+import { CategoryChip, CategoryCountPill, DEFAULT_CREATE_BRAND_OPTIONS, FloatingDialog, FloatingDialogOptions, FloatingDialogState, FloatingPromptOptions, Metric, ProductBrand, ProductCategoryDraft, ProductCategoryNode, ProductCategoryUsage, SiteProductCategoryResponse, SiteProductCategoryRow, SiteProductCategoryTreeNode, buildSiteProductCategoryTree, categoryDraftFromNode, categoryDraftPayload, displayBrand, emptyCategoryDraft, errorMessage, flattenRawCategoryItems, internalCategoryCode, nonNegativeInt, normalizeProductCategoryTree, productCategoryItems, slug, text, useFloatingDialog } from './products-shared';
 
 function ProductCategoryManagerView() {
   const [brandCode, setBrandCode] = useState<ProductBrand>('rheem');
@@ -1584,115 +1584,6 @@ function flattenLazyCategoryRows(
   };
   visit(roots);
   return out;
-}
-
-
-function emptySiteCategoryRow(category: string): SiteProductCategoryRow {
-  return {
-    websiteCategory: category,
-    menuGroups: [],
-    assignmentIds: [],
-    productCount: 0,
-    publishedCount: 0,
-    hiddenCount: 0,
-    draftCount: 0,
-    featuredCount: 0,
-    displayOrder: 0,
-  };
-}
-
-
-function splitWebsiteCategoryPath(value: string): string[] {
-  return String(value || '')
-    .split('/')
-    .map((part) => part.trim())
-    .filter(Boolean);
-}
-
-
-export function buildSiteProductCategoryTree(
-  rows: SiteProductCategoryRow[]
-): SiteProductCategoryTreeNode[] {
-  if (rows.some((row) => row.id)) {
-    const byId = new Map<string, SiteProductCategoryTreeNode>();
-    rows.forEach((row) => {
-      const id = text(row.id || row.websiteCategory);
-      if (!id) return;
-      byId.set(id, {
-        ...row,
-        id,
-        name: row.name || row.websiteCategory,
-        path: id,
-        level: Number(row.level || 1),
-        children: [],
-        sortOrder: Number(row.sortOrder ?? row.displayOrder ?? 0),
-        displayOrder: Number(row.displayOrder ?? row.sortOrder ?? 0),
-        menuGroups: row.menuGroups?.length ? row.menuGroups : row.menuGroup ? [row.menuGroup] : [],
-      });
-    });
-    const roots: SiteProductCategoryTreeNode[] = [];
-    byId.forEach((node) => {
-      if (node.parentId && byId.has(node.parentId)) byId.get(node.parentId)!.children.push(node);
-      else roots.push(node);
-    });
-    const sortNodes = (items: SiteProductCategoryTreeNode[]) => {
-      items.sort(
-        (a, b) =>
-          (a.sortOrder || 0) - (b.sortOrder || 0) || a.name.localeCompare(b.name, 'zh-Hans-CN')
-      );
-      items.forEach((item) => sortNodes(item.children));
-    };
-    sortNodes(roots);
-    return roots;
-  }
-  const root: SiteProductCategoryTreeNode[] = [];
-  const byPath = new Map<string, SiteProductCategoryTreeNode>();
-  for (const row of rows) {
-    const parts = splitWebsiteCategoryPath(row.websiteCategory);
-    const normalizedParts = parts.length ? parts : [row.websiteCategory || '未设置官网分类'];
-    normalizedParts.forEach((part, index) => {
-      const pathValue = normalizedParts.slice(0, index + 1).join(' / ');
-      let node = byPath.get(pathValue);
-      if (!node) {
-        node = {
-          ...emptySiteCategoryRow(pathValue),
-          id: pathValue,
-          name: part,
-          path: pathValue,
-          level: index + 1,
-          children: [],
-        };
-        byPath.set(pathValue, node);
-        if (index === 0) root.push(node);
-        else byPath.get(normalizedParts.slice(0, index).join(' / '))?.children.push(node);
-      }
-      node.productCount += row.productCount;
-      node.publishedCount += row.publishedCount;
-      node.hiddenCount += row.hiddenCount;
-      node.draftCount += row.draftCount;
-      node.featuredCount += row.featuredCount;
-      node.displayOrder = Math.min(
-        node.displayOrder || row.displayOrder || 0,
-        row.displayOrder || 0
-      );
-      row.menuGroups.forEach((group) => {
-        if (group && !node.menuGroups.includes(group)) node.menuGroups.push(group);
-      });
-      if (index === normalizedParts.length - 1) {
-        node.websiteCategory = row.websiteCategory;
-        node.assignmentIds = row.assignmentIds;
-        node.displayOrder = row.displayOrder;
-      }
-    });
-  }
-  const sortNodes = (items: SiteProductCategoryTreeNode[]) => {
-    items.sort(
-      (a, b) => a.displayOrder - b.displayOrder || a.name.localeCompare(b.name, 'zh-Hans-CN')
-    );
-    items.forEach((item) => sortNodes(item.children));
-  };
-  sortNodes(root);
-  return root;
 }
 
 
