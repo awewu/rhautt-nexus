@@ -273,10 +273,9 @@ button {
 
 /* ── Layout ───────────────────────────────────────────────────────────────
    grid areas:
-     sidebar  | topbar
      sidebar  | content
    columns: 64px [sidebar] · 1fr [main area]
-   rows:    48px [topbar]  · 1fr [content]
+   rows:    1fr [content]（2026-08 顶栏行已删）
 ───────────────────────────────────────────────────────────────────────── */
 .layout {
   display: grid;
@@ -310,68 +309,14 @@ button {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-.topbar {
-  grid-area: topbar;
-  height: 48px;
-  background: var(--sidebar);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 12px;
-  position: sticky;
-  top: 0;
-  z-index: 40;
-}
-/* 顶部面包屑（单行·导航定位）——不与内容区 PageHeader 标题重复 */
-.dealer-topbar-crumb {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 13px;
-  font-weight: 600;
-  overflow: hidden;
-  white-space: nowrap;
-}
-.dealer-topbar-crumb .crumb-section {
-  flex: 0 0 auto;
-}
-.dealer-topbar-crumb .crumb-current {
-  color: rgba(255, 255, 255, 0.55);
-  font-weight: 500;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.dealer-topbar-crumb svg {
-  color: rgba(255, 255, 255, 0.35);
-  flex: 0 0 auto;
-}
-.dealer-topbar-icon {
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: var(--r-lg);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.52);
-}
-.dealer-topbar-icon:hover,
-.dealer-topbar-icon:focus-visible {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-  outline: none;
-}
+/* .topbar/.dealer-topbar-* 死规则已删（2026-08 顶栏行移除；通知铃移入侧栏 NotificationBell）*/
 .content {
   grid-area: content;
   min-width: 0;
   min-height: 0;
-  height: calc(100vh - 48px);
-  height: calc(100dvh - 48px);
+  /* 顶栏行已删：内容区占满整个视口高 */
+  height: 100vh;
+  height: 100dvh;
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
@@ -383,7 +328,8 @@ button {
 /* 二级菜单横向 tab 栏（取代竖向 subnav）——一级菜单占满工作区 */
 .workbench-tabbar {
   position: fixed;
-  top: 48px;
+  /* 2026-08 顶栏行已删：二级 tab 上移到视口顶（原锚在 48px 顶栏之下，删后悬空出一条缝） */
+  top: 0;
   left: 64px;
   right: 0;
   height: 44px;
@@ -441,11 +387,11 @@ button {
 .workbench-subnav {
   position: fixed;
   left: 64px;
-  top: 48px;
+  top: 0;
   bottom: auto;
   z-index: 38;
   width: 244px;
-  height: calc(100vh - 48px);
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: #ffffff;
@@ -743,7 +689,8 @@ button {
   color: var(--danger);
 }
 .embedded-workspace {
-  height: calc(100vh - 48px);
+  /* 顶栏已删：对齐二级 tab 栏(44px)之下 */
+  height: calc(100vh - 44px);
   min-height: 520px;
   background: var(--surface-2);
   overflow: hidden;
@@ -4074,9 +4021,6 @@ button {
   }
   .sidebar {
     display: none;
-  }
-  .topbar {
-    grid-area: topbar;
   }
   .workbench-tabbar {
     display: none !important;
