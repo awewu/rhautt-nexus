@@ -8,6 +8,7 @@ import { clearToken } from '@rhautt/shared-auth';
 import { WORKBENCH_NAV, canSeeNavItem, navItemForPath } from '../lib/workbench-navigation';
 import type { WorkbenchChild } from '../lib/workbench-navigation';
 import { adminUsers, auth, brandSites } from '../lib/api';
+import NotificationBell from './NotificationBell';
 
 type BrandSiteNavItem = {
   id: string;
@@ -406,6 +407,8 @@ export default function DealerNav() {
             );
           })}
         </nav>
+
+        <NotificationBell />
 
         <div className="account-menu-wrap">
           {accountOpen && (

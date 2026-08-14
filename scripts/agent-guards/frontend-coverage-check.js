@@ -45,7 +45,8 @@ const EXEMPT_ROUTES = {
   'PUT /stores/:id': '同上',
   'POST auth/refresh-token': '前端刻意采用会话过期重登（安全决策），不静默续期',
   'GET workflow': '工作流查询由具体业务页内嵌，不设独立入口',
-  'GET notification': '通知走站内铃铛组件的独立通道',
+  // 更正 2026-08-13：此前豁免理由"通知走站内铃铛组件的独立通道"是错的——当时铃铛是
+  // 无事件的死按钮。现侧栏 NotificationBell 已接真数据，本豁免删除（由特征匹配覆盖）。
   'GET dispatch/decisions': '已有工作台面板（channel 页）——特征词与面板文件名不同故登记',
   'GET metrics/gtm-digest':
     '机器对机器端点（StratOS 感知回传，Bearer 令牌鉴权非用户 JWT）——不该有人工界面。更正 2026-08-13：此前误登记为"待接驾驶舱卡片 P2"，读源码后确认是 M2M 契约',

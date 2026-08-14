@@ -1262,6 +1262,13 @@ export const productMgmt = {
     }),
 };
 
+// 站内通知（侧栏铃铛——2026-08 起为真数据，此前顶栏铃铛是无事件的死按钮）
+export const notifications = {
+  list: () => apiFetch('/api/v2/notification'),
+  markRead: (id: string) =>
+    apiFetch(`/api/v2/notification/${encodeURIComponent(id)}/read`, { method: 'PUT' }),
+};
+
 // 产品目录治理（关系图谱 + 疑似重复）
 export const productGovernance = {
   dedupeCandidates: () => apiFetch('/api/v2/product-catalog/dedupe-candidates'),

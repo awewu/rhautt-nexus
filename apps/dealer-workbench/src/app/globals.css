@@ -281,10 +281,9 @@ button {
 .layout {
   display: grid;
   grid-template-columns: 64px 1fr;
-  grid-template-rows: 48px 1fr;
-  grid-template-areas:
-    'sidebar topbar'
-    'sidebar content';
+  /* topbar 行已删（2026-08 冗余治理）：面包屑与侧栏高亮/二级 tab/PageHeader 三重重复 */
+  grid-template-rows: 1fr;
+  grid-template-areas: 'sidebar content';
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
@@ -4070,10 +4069,8 @@ button {
 @media (max-width: 768px) {
   .layout {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      'topbar'
-      'content';
+    grid-template-rows: 1fr;
+    grid-template-areas: 'content';
   }
   .sidebar {
     display: none;
