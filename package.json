@@ -122,6 +122,7 @@
     "guard:ontology-alignment": "node scripts/agent-guards/ontology-alignment-check.js",
     "guard:geo-next": "node scripts/agent-guards/geo-next-readiness-check.js",
     "guard:frontend-coverage": "node scripts/agent-guards/frontend-coverage-check.js",
+    "guard:inline-style-ratchet": "node scripts/agent-guards/inline-style-ratchet-check.js",
     "guard:permission-domain": "node scripts/agent-guards/permission-domain-check.js",
     "guard:product-fact-base": "node scripts/agent-guards/product-fact-base-check.js",
     "guard:product-authoring": "node scripts/agent-guards/product-authoring-check.js",

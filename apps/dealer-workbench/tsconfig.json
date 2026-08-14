@@ -5,6 +5,8 @@
     "moduleResolution": "bundler",
     "jsx": "preserve",
     "plugins": [{ "name": "next" }],
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] },
     "outDir": "../../dist/apps/dealer-workbench"
   },
   "include": ["src/**/*", ".next/types/**/*.ts"],

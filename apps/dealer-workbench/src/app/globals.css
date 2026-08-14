@@ -4,6 +4,98 @@
    ⚠️ 这是【内部工具】识别色 #C8202C，≠ 对外品牌站 Rheem 官方红 #E4002B。
       对外站各守 packages/tokens/<brand>.css，禁用本色。
    ────────────────────────────────────────────────────────────── */
+
+/* ── Tailwind v4 + shadcn/ui 组件基座（2026-08 决策：shadcn 路线 + 保留暖色系）──
+   增量接入：**刻意不引 preflight**（tailwindcss/preflight.css），
+   避免元素级 reset 冲击存量 3986 行自有 CSS —— 迁移期两套并存，
+   新组件走 @/components/ui/*（utilities 分层），旧页面样式不受影响。 */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'tw-animate-css';
+
+/* preflight 被跳过后必须补的最小 base（shadcn 组件依赖）：
+   v4 的 border 工具类默认色是 currentColor → 不补这条所有边框都是墨黑。
+   本规则在 base 层——存量未分层 CSS 永远压过它，不影响旧页面。 */
+@layer base {
+  * {
+    border-color: var(--border);
+    outline-color: color-mix(in oklab, var(--ring) 50%, transparent);
+  }
+  /* 表单控件 UA 默认样式清零（preflight 缺席时按钮是 2px outset 的 90 年代边框）。
+     存量 .btn/.input（未分层）与新组件 utilities（更高层）都会压过这里。 */
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    /* 不用 border:0 简写——简写会把 border-color 重置回 currentColor（墨黑） */
+    border-width: 0;
+    border-style: solid;
+    border-color: var(--border);
+    border-radius: 0;
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+/* shadcn 语义变量 ← 既有暖色 token（只分层映射，不换色；单一真相源仍是上面的 Tandem 镜像） */
+:root {
+  --radius: var(--r-xl, 8px);
+  --background: var(--bg);
+  --foreground: var(--t-primary);
+  --card: var(--surface);
+  --card-foreground: var(--t-primary);
+  --popover: var(--surface);
+  --popover-foreground: var(--t-primary);
+  --primary: var(--brand-500);
+  --primary-foreground: #ffffff;
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--t-primary);
+  --muted: var(--surface-2);
+  --muted-foreground: var(--t-secondary);
+  --accent: var(--rhautt-aux-tint);
+  --accent-foreground: var(--rhautt-aux-hover);
+  --destructive: var(--danger);
+  --destructive-foreground: #ffffff;
+  --input: var(--border);
+  --ring: var(--brand-300);
+}
+
+@theme inline {
+  --font-sans: var(--font);
+  --font-mono: var(--font-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
 :root {
   /* ── 内部工具品牌阶梯（Tandem token 镜像）── */
   --brand-50: #fce9eb;
@@ -138,12 +230,17 @@
   --r-xl: 8px;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* 全局 reset 收进 base 层（2026-08 shadcn 接入时移入）：
+   未分层的 * 规则会压过所有 cascade layer——曾把 Tailwind 的 padding/margin 工具类全部杀死。
+   放进 base 层后语义不变：任何带类名的存量规则特异性都高于 *，旧页面行为不受影响。 */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 }
 html {
   height: 100%;
