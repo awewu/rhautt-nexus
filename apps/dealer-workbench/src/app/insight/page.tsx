@@ -8,6 +8,7 @@ import { insight } from '../../lib/api';
 import { useListView, exportCsv } from '../../lib/useListView';
 import ListToolbar from '../../components/ListToolbar';
 import { CompetitiveLandscapePanel } from '../../components/CompetitiveLandscapePanel';
+import { CdpConnectionPanel } from '../../components/CdpConnectionPanel';
 
 const CATEGORIES = [
   { code: 'central-hot-water', name: '中央热水' },
@@ -282,6 +283,7 @@ export default function InsightPage() {
           </div>
         </AsyncBoundary>
       </div>
+      <CdpConnectionPanel />
     </div>
   );
 }

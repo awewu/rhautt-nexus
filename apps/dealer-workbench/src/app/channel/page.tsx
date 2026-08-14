@@ -7,6 +7,7 @@ import { PageHeader, AsyncBoundary, useToast, type AsyncStatus } from '@rhautt/u
 import { channel } from '../../lib/api';
 import { useListView, exportCsv } from '../../lib/useListView';
 import ListToolbar from '../../components/ListToolbar';
+import { DispatchDecisionsPanel } from '../../components/DispatchDecisionsPanel';
 
 const TIERS = ['prospect', 'bronze', 'silver', 'gold', 'platinum'];
 const NEXT: Record<string, string> = { draft: 'running', running: 'paused', paused: 'running' };
@@ -437,6 +438,7 @@ export default function ChannelPage() {
           </div>
         </AsyncBoundary>
       </div>
+      <DispatchDecisionsPanel />
     </div>
   );
 }

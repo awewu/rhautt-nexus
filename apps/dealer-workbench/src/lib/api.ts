@@ -1262,6 +1262,32 @@ export const productMgmt = {
     }),
 };
 
+// CDP 数据连接层（只读展示：事件自动摄取的脱敏画像与分群；不出明文 PII）
+export const cdp = {
+  listProfiles: (q: { segment?: string; limit?: number } = {}) =>
+    apiFetch(
+      '/api/v2/cdp/profiles?' +
+        new URLSearchParams(
+          Object.fromEntries(
+            Object.entries(q)
+              .filter(([, v]) => v != null)
+              .map(([k, v]) => [k, String(v)])
+          )
+        ).toString()
+    ),
+  listSegments: () => apiFetch('/api/v2/cdp/segments'),
+};
+
+// 线索派单（获客→经销商交接层）
+export const dispatchApi = {
+  decisions: (limit = 50) => apiFetch(`/api/v2/dispatch/decisions?limit=${limit}`),
+};
+
+// 事件管道可观测（死信 = 成效回流断点）
+export const eventOps = {
+  deadLetters: () => apiFetch('/api/v2/mdm/event-bus/dead-letters'),
+};
+
 // 内容工厂（模块8）
 export const content = {
   list: (q: Record<string, string> = {}) =>

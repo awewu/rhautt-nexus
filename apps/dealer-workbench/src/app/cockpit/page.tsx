@@ -4,6 +4,7 @@ import useSWR from 'swr';
 import { Filter, Gauge, Route, Search, TrendingUp, ShieldCheck, Users } from 'lucide-react';
 import { PageHeader, AsyncBoundary, type AsyncStatus } from '@rhautt/ui';
 import { cockpit } from '../../lib/api';
+import { EventDeadLetterPanel } from '../../components/EventDeadLetterPanel';
 
 type ChannelSlice = { channel: string; label: string; count: number };
 type NorthStar = {
@@ -409,6 +410,8 @@ export default function CockpitPage() {
           </table>
         </AsyncBoundary>
       </div>
+
+      <EventDeadLetterPanel />
     </>
   );
 }
