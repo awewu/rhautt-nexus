@@ -1,10 +1,26 @@
 'use client';
 
+/**
+ * GTM AI 驾驶舱（Phase 2 重塑：shadcn 组件层 + 统一 Stat 词汇 + 等宽数字）。
+ * 数据逻辑与既有口径完全不动——只换视觉层；空态/错误态仍由 AsyncBoundary 诚实呈现。
+ */
+
 import useSWR from 'swr';
-import { Filter, Gauge, Route, Search, TrendingUp, ShieldCheck, Users } from 'lucide-react';
+import { Filter, Gauge, Route, Search, ShieldCheck, Sparkles, TrendingUp, Users } from 'lucide-react';
 import { PageHeader, AsyncBoundary, type AsyncStatus } from '@rhautt/ui';
 import { cockpit } from '../../lib/api';
 import { EventDeadLetterPanel } from '../../components/EventDeadLetterPanel';
+import { StatCard, MiniStat, SectionCardHeader } from '../../components/StatCard';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 type ChannelSlice = { channel: string; label: string; count: number };
 type NorthStar = {
@@ -95,102 +111,66 @@ export default function CockpitPage() {
         onRetry={() => ns.mutate()}
       >
         {/* 主指标：GEO→高意向线索数（宪章锁定的当期北极星，真实按渠道归因） */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 16,
-            marginBottom: 16,
-          }}
-        >
-          <Kpi
-            icon={<Search size={16} />}
-            label="⭐ GEO 高意向线索 · 北极星"
-            value={String(ns.data?.geoAttributedLeads ?? 0)}
+        <div className="mb-4 grid grid-cols-3 gap-4">
+          <StatCard
+            emphasis
+            icon={<Sparkles size={15} />}
+            label="GEO 高意向线索 · 北极星"
+            value={ns.data?.geoAttributedLeads ?? 0}
             hint={
               ns.data?.geoAttributionRate == null
                 ? `周期 ${ns.data?.period ?? '-'} · GEO 渠道线索计数`
                 : `占高意向线索 ${ns.data.geoAttributionRate}% · GEO 渠道：${(ns.data?.geoAttributedChannels ?? []).join('/')}`
             }
           />
-          <Kpi
-            icon={<Users size={16} />}
+          <StatCard
+            icon={<Users size={15} />}
             label="高意向线索总数"
-            value={String(ns.data?.highIntentLeads ?? 0)}
+            value={ns.data?.highIntentLeads ?? 0}
             hint={`已归因 ${ns.data?.attributedLeads ?? 0} · 漏斗 lead 真实计数`}
           />
-          <Kpi
-            icon={<Route size={16} />}
+          <StatCard
+            icon={<Route size={15} />}
             label="GEO 触达数 · 领先"
-            value={String(ns.data?.geoReach ?? 0)}
+            value={ns.data?.geoReach ?? 0}
             hint="AI 回答被引触达（漏斗 reach）"
           />
         </div>
+
         {/* 高意向线索获客渠道拆分（口径透明：GEO 集 = geo/ai-diagnosis） */}
         {(ns.data?.channelBreakdown?.length ?? 0) > 0 && (
-          <div
-            className="card"
-            style={{
-              padding: '12px 20px',
-              marginBottom: 16,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              flexWrap: 'wrap',
-            }}
-          >
-            <span
-              className="t-xs"
-              style={{ color: 'var(--t-secondary, #6B7280)', whiteSpace: 'nowrap' }}
-            >
-              线索获客渠道
-            </span>
-            {ns.data!.channelBreakdown.map((c) => {
-              const isGeo = (ns.data?.geoAttributedChannels ?? []).includes(c.channel);
-              return (
-                <span
-                  key={c.channel}
-                  className="t-xs"
-                  style={{
-                    padding: '3px 10px',
-                    borderRadius: 999,
-                    whiteSpace: 'nowrap',
-                    background: isGeo ? 'rgba(200,32,44,0.08)' : 'var(--surface-2, #F3F4F6)',
-                    color: isGeo ? 'var(--brand-500)' : 'var(--t-secondary, #6B7280)',
-                    fontWeight: isGeo ? 700 : 500,
-                  }}
-                >
-                  {c.label} {c.count}
-                  {isGeo ? ' · GEO' : ''}
-                </span>
-              );
-            })}
-          </div>
+          <Card className="mb-4">
+            <CardContent className="flex flex-wrap items-center gap-2 px-5 py-3">
+              <span className="text-xs whitespace-nowrap text-muted-foreground">线索获客渠道</span>
+              {ns.data!.channelBreakdown.map((c) => {
+                const isGeo = (ns.data?.geoAttributedChannels ?? []).includes(c.channel);
+                return (
+                  <Badge key={c.channel} variant={isGeo ? 'default' : 'secondary'} className="tabular-nums">
+                    {c.label} {c.count}
+                    {isGeo ? ' · GEO' : ''}
+                  </Badge>
+                );
+              })}
+            </CardContent>
+          </Card>
         )}
+
         {/* 副指标：经销商侧 + 领先指标 */}
-        <div
-          className="g3"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 16,
-            marginBottom: 24,
-          }}
-        >
-          <Kpi
-            icon={<Users size={16} />}
+        <div className="mb-6 grid grid-cols-3 gap-4">
+          <StatCard
+            icon={<Users size={15} />}
             label="活跃盈利经销商 · 副"
-            value={String(ns.data?.activeProfitableDealers ?? 0)}
+            value={ns.data?.activeProfitableDealers ?? 0}
             hint={`共 ${ns.data?.dealers ?? 0} 家在册`}
           />
-          <Kpi
-            icon={<TrendingUp size={16} />}
+          <StatCard
+            icon={<TrendingUp size={15} />}
             label="网络月度 GMV · 副"
             value={yuan(ns.data?.networkGmv ?? 0)}
             hint={`周期 ${ns.data?.period ?? '-'}`}
           />
-          <Kpi
-            icon={<Gauge size={16} />}
+          <StatCard
+            icon={<Gauge size={15} />}
             label="AI 被引率 · 领先指标"
             value={`${bh.data?.citedRate ?? 0}%`}
             hint={`SoV ${bh.data?.sov ?? 0}% · 正声量 ${bh.data?.positiveSentiment ?? 0}% · ${bh.data?.probes ?? 0} 探测`}
@@ -200,255 +180,167 @@ export default function CockpitPage() {
 
       {/* 北极星趋势（日快照） */}
       {(gmvTrend.data?.series?.length ?? 0) > 1 && (
-        <div
-          className="card"
-          style={{
-            padding: '12px 20px',
-            marginBottom: 24,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 16,
-          }}
-        >
-          <span
-            className="t-xs"
-            style={{ color: 'var(--t-secondary, #6B7280)', whiteSpace: 'nowrap' }}
-          >
-            网络 GMV · 近 {gmvTrend.data!.series.length} 日
-          </span>
-          <Sparkline points={gmvTrend.data!.series.map((s) => s.value)} />
-          <span className="t-num" style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>
-            {yuan(gmvTrend.data!.series[gmvTrend.data!.series.length - 1]?.value ?? 0)}
-          </span>
-        </div>
+        <Card className="mb-6">
+          <CardContent className="flex items-center gap-4 px-5 py-3">
+            <span className="text-xs whitespace-nowrap text-muted-foreground">
+              网络 GMV · 近 {gmvTrend.data!.series.length} 日
+            </span>
+            <Sparkline points={gmvTrend.data!.series.map((s) => s.value)} />
+            <span className="font-bold whitespace-nowrap tabular-nums">
+              {yuan(gmvTrend.data!.series[gmvTrend.data!.series.length - 1]?.value ?? 0)}
+            </span>
+          </CardContent>
+        </Card>
       )}
 
       {/* AARRR 增长漏斗 */}
-      <div className="card" style={{ padding: 20, marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Filter size={16} />
-          <span className="t-lg" style={{ fontWeight: 600 }}>
-            AARRR 增长漏斗
-          </span>
-          <span className="t-xs" style={{ opacity: 0.6, marginLeft: 'auto' }}>
-            周期 {fn.data?.period ?? '-'}
-          </span>
-        </div>
-        <AsyncBoundary
-          status={statusOf(
-            fn.isLoading,
-            fn.error,
-            (fn.data?.stages?.reduce((s, x) => s + x.count, 0) ?? 0) === 0
-          )}
-          errorMessage="漏斗数据加载失败"
-          onRetry={() => fn.mutate()}
-          emptyTitle="暂无漏斗数据"
-          emptyDescription="线索(lead.created)/方案(opportunity.signed)/签约(crm.deal.signed)/转介绍事件将自动归集。"
-        >
-          <FunnelBars stages={fn.data?.stages ?? []} />
-        </AsyncBoundary>
-      </div>
+      <Card className="mb-6">
+        <CardContent className="p-5">
+          <SectionCardHeader
+            icon={<Filter size={16} />}
+            title="AARRR 增长漏斗"
+            aside={`周期 ${fn.data?.period ?? '-'}`}
+          />
+          <AsyncBoundary
+            status={statusOf(
+              fn.isLoading,
+              fn.error,
+              (fn.data?.stages?.reduce((s, x) => s + x.count, 0) ?? 0) === 0
+            )}
+            errorMessage="漏斗数据加载失败"
+            onRetry={() => fn.mutate()}
+            emptyTitle="暂无漏斗数据"
+            emptyDescription="线索(lead.created)/方案(opportunity.signed)/签约(crm.deal.signed)/转介绍事件将自动归集。"
+          >
+            <FunnelBars stages={fn.data?.stages ?? []} />
+          </AsyncBoundary>
+        </CardContent>
+      </Card>
 
       {/* GEO 内容闭环（A 造需求） */}
-      <div className="card" style={{ padding: 20, marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Search size={16} />
-          <span className="t-lg" style={{ fontWeight: 600 }}>
-            GEO 内容闭环
-          </span>
-          <span className="t-xs" style={{ opacity: 0.6, marginLeft: 'auto' }}>
-            缺口 → 生成 → 审核 → 发布 → 复测
-          </span>
-        </div>
-        <AsyncBoundary
-          status={statusOf(gl.isLoading, gl.error, false)}
-          errorMessage="GEO 闭环数据加载失败"
-          onRetry={() => gl.mutate()}
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 12 }}>
-            <LoopStat
-              label="被引率"
-              value={`${gl.data?.citedRate ?? 0}%`}
-              hint={`${gl.data?.cited ?? 0}/${gl.data?.probes ?? 0} 探测`}
-            />
-            <LoopStat
-              label="可见度缺口"
-              value={String(gl.data?.gaps ?? 0)}
-              hint="未被引问题"
-              accent
-            />
-            <LoopStat
-              label="内容草稿"
-              value={String(gl.data?.content?.drafts ?? 0)}
-              hint="待审核"
-            />
-            <LoopStat
-              label="已审核"
-              value={String(gl.data?.content?.approved ?? 0)}
-              hint="待发布"
-            />
-            <LoopStat
-              label="已发布"
-              value={String(gl.data?.content?.published ?? 0)}
-              hint="喂 AI 复测"
-            />
-          </div>
-        </AsyncBoundary>
-      </div>
+      <Card className="mb-6">
+        <CardContent className="p-5">
+          <SectionCardHeader
+            icon={<Search size={16} />}
+            title="GEO 内容闭环"
+            aside="缺口 → 生成 → 审核 → 发布 → 复测"
+          />
+          <AsyncBoundary
+            status={statusOf(gl.isLoading, gl.error, false)}
+            errorMessage="GEO 闭环数据加载失败"
+            onRetry={() => gl.mutate()}
+          >
+            <div className="grid grid-cols-5 gap-3">
+              <MiniStat
+                label="被引率"
+                value={`${gl.data?.citedRate ?? 0}%`}
+                hint={`${gl.data?.cited ?? 0}/${gl.data?.probes ?? 0} 探测`}
+              />
+              <MiniStat label="可见度缺口" value={gl.data?.gaps ?? 0} hint="未被引问题" accent />
+              <MiniStat label="内容草稿" value={gl.data?.content?.drafts ?? 0} hint="待审核" />
+              <MiniStat label="已审核" value={gl.data?.content?.approved ?? 0} hint="待发布" />
+              <MiniStat label="已发布" value={gl.data?.content?.published ?? 0} hint="喂 AI 复测" />
+            </div>
+          </AsyncBoundary>
+        </CardContent>
+      </Card>
 
       {/* 线索分配（B 转化 · 派单引擎） */}
-      <div className="card" style={{ padding: 20, marginBottom: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Route size={16} />
-          <span className="t-lg" style={{ fontWeight: 600 }}>
-            线索分配
-          </span>
-          <span className="t-xs" style={{ opacity: 0.6, marginLeft: 'auto' }}>
-            地域 + 品类 + 合同等级 − 负载 打分派单
-          </span>
-        </div>
-        <AsyncBoundary
-          status={statusOf(lr.isLoading, lr.error, false)}
-          errorMessage="线索分配数据加载失败"
-          onRetry={() => lr.mutate()}
-        >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 12,
-              marginBottom: (lr.data?.unroutedSamples?.length ?? 0) ? 14 : 0,
-            }}
+      <Card className="mb-6">
+        <CardContent className="p-5">
+          <SectionCardHeader
+            icon={<Route size={16} />}
+            title="线索分配"
+            aside="地域 + 品类 + 合同等级 − 负载 打分派单"
+          />
+          <AsyncBoundary
+            status={statusOf(lr.isLoading, lr.error, false)}
+            errorMessage="线索分配数据加载失败"
+            onRetry={() => lr.mutate()}
           >
-            <LoopStat
-              label="分配成功率"
-              value={`${lr.data?.routingRate ?? 0}%`}
-              hint={`${lr.data?.routed ?? 0}/${lr.data?.total ?? 0} 已派`}
-            />
-            <LoopStat label="已分配" value={String(lr.data?.routed ?? 0)} hint="命中经销商" />
-            <LoopStat
-              label="未能分配"
-              value={String(lr.data?.unrouted ?? 0)}
-              hint="无经销商可服务"
-              accent
-            />
-          </div>
-          {(lr.data?.unroutedSamples?.length ?? 0) > 0 && (
-            <div>
-              <div
-                className="t-xs"
-                style={{ color: 'var(--t-secondary, #6B7280)', marginBottom: 6 }}
-              >
-                未覆盖地域/品类（拓商信号）
-              </div>
-              {(lr.data?.unroutedSamples ?? []).map((s, i) => (
-                <div
-                  key={i}
-                  style={{
-                    fontSize: 12,
-                    color: 'var(--t-secondary, #6B7280)',
-                    padding: '4px 0',
-                    borderBottom: '1px solid var(--border, #E5E7EB)',
-                  }}
-                >
-                  {[s.province, s.city, s.category].filter(Boolean).join(' · ') || '—'}　
-                  <span style={{ opacity: 0.7 }}>{s.reason}</span>
-                </div>
-              ))}
+            <div className="grid grid-cols-3 gap-3">
+              <MiniStat
+                label="分配成功率"
+                value={`${lr.data?.routingRate ?? 0}%`}
+                hint={`${lr.data?.routed ?? 0}/${lr.data?.total ?? 0} 已派`}
+              />
+              <MiniStat label="已分配" value={lr.data?.routed ?? 0} hint="命中经销商" />
+              <MiniStat
+                label="未能分配"
+                value={lr.data?.unrouted ?? 0}
+                hint="无经销商可服务"
+                accent
+              />
             </div>
-          )}
-        </AsyncBoundary>
-      </div>
+            {(lr.data?.unroutedSamples?.length ?? 0) > 0 && (
+              <div className="mt-4">
+                <div className="mb-1.5 text-xs text-muted-foreground">
+                  未覆盖地域/品类（拓商信号）
+                </div>
+                {(lr.data?.unroutedSamples ?? []).map((s, i) => (
+                  <div key={i} className="border-b py-1 text-xs text-muted-foreground">
+                    {[s.province, s.city, s.category].filter(Boolean).join(' · ') || '—'}
+                    <span className="ml-2 opacity-70">{s.reason}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </AsyncBoundary>
+        </CardContent>
+      </Card>
 
       {/* 经销商成功度明细 */}
-      <div className="card" style={{ padding: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <ShieldCheck size={16} />
-          <span className="t-lg" style={{ fontWeight: 600 }}>
-            经销商成功度
-          </span>
-        </div>
-        <AsyncBoundary
-          status={statusOf(ds.isLoading, ds.error, (ds.data?.length ?? 0) === 0)}
-          errorMessage="经销商数据加载失败"
-          onRetry={() => ds.mutate()}
-          emptyTitle="暂无经销商成交数据"
-          emptyDescription="成交(crm.deal.signed)后自动归集；也可在测试环境触发重算。"
-        >
-          <table className="table" style={{ width: '100%' }}>
-            <thead>
-              <tr>
-                <th>经销商</th>
-                <th>状态</th>
-                <th>GMV</th>
-                <th>利润(口径)</th>
-                <th>成交率</th>
-                <th>单数</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(ds.data ?? []).map((r) => (
-                <tr key={r.dealerId}>
-                  <td>{r.dealerId}</td>
-                  <td>
-                    <span className={`badge ${r.active ? 'badge-green' : 'badge-grey'}`}>
-                      {r.active ? '活跃' : '沉默'}
-                    </span>
-                  </td>
-                  <td className="t-num">{yuan(r.gmv)}</td>
-                  <td className="t-num">
-                    {yuan(r.profit)}{' '}
-                    <span className="t-xs" style={{ opacity: 0.6 }}>
-                      {r.profitSource === 'actual' ? '实核' : '估算'}
-                    </span>
-                  </td>
-                  <td className="t-num">{(r.closeRate * 100).toFixed(1)}%</td>
-                  <td className="t-num">{r.deals}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </AsyncBoundary>
-      </div>
+      <Card>
+        <CardContent className="p-5">
+          <SectionCardHeader icon={<ShieldCheck size={16} />} title="经销商成功度" />
+          <AsyncBoundary
+            status={statusOf(ds.isLoading, ds.error, (ds.data?.length ?? 0) === 0)}
+            errorMessage="经销商数据加载失败"
+            onRetry={() => ds.mutate()}
+            emptyTitle="暂无经销商成交数据"
+            emptyDescription="成交(crm.deal.signed)后自动归集；也可在测试环境触发重算。"
+          >
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>经销商</TableHead>
+                  <TableHead>状态</TableHead>
+                  <TableHead className="text-right">GMV</TableHead>
+                  <TableHead className="text-right">利润(口径)</TableHead>
+                  <TableHead className="text-right">成交率</TableHead>
+                  <TableHead className="text-right">单数</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {(ds.data ?? []).map((r) => (
+                  <TableRow key={r.dealerId}>
+                    <TableCell className="font-mono text-xs">{r.dealerId}</TableCell>
+                    <TableCell>
+                      <Badge variant={r.active ? 'default' : 'secondary'}>
+                        {r.active ? '活跃' : '沉默'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">{yuan(r.gmv)}</TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {yuan(r.profit)}{' '}
+                      <span className="text-xs text-muted-foreground">
+                        {r.profitSource === 'actual' ? '实核' : '估算'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {(r.closeRate * 100).toFixed(1)}%
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">{r.deals}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </AsyncBoundary>
+        </CardContent>
+      </Card>
 
       <EventDeadLetterPanel />
     </>
-  );
-}
-
-function Kpi({
-  icon,
-  label,
-  value,
-  hint,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  hint: string;
-}) {
-  return (
-    <div className="inset" style={{ padding: '16px 18px' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 6,
-          color: 'var(--t-secondary, #6B7280)',
-          fontSize: 13,
-        }}
-      >
-        {icon}
-        <span>{label}</span>
-      </div>
-      <div
-        className="t-num"
-        style={{ fontSize: 28, fontWeight: 800, marginTop: 8, lineHeight: 1.1 }}
-      >
-        {value}
-      </div>
-      <div style={{ fontSize: 12, color: 'var(--t-secondary, #6B7280)', marginTop: 4 }}>{hint}</div>
-    </div>
   );
 }
 
@@ -467,11 +359,11 @@ function Sparkline({ points }: { points: number[] }) {
     )
     .join(' ');
   return (
-    <svg width={w} height={h} style={{ flex: 1, overflow: 'visible' }} aria-hidden>
+    <svg width={w} height={h} className="flex-1 overflow-visible" aria-hidden>
       <polyline
         points={path}
         fill="none"
-        stroke="var(--brand, #C8102E)"
+        stroke="var(--brand)"
         strokeWidth={1.75}
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -480,89 +372,24 @@ function Sparkline({ points }: { points: number[] }) {
   );
 }
 
-function LoopStat({
-  label,
-  value,
-  hint,
-  accent,
-}: {
-  label: string;
-  value: string;
-  hint: string;
-  accent?: boolean;
-}) {
-  return (
-    <div
-      style={{
-        padding: '12px 14px',
-        borderRadius: 8,
-        background: 'var(--surface-2, #F3F4F6)',
-        border: '1px solid var(--border, #E5E7EB)',
-      }}
-    >
-      <div style={{ fontSize: 12, color: 'var(--t-secondary, #6B7280)' }}>{label}</div>
-      <div
-        className="t-num"
-        style={{
-          fontSize: 22,
-          fontWeight: 800,
-          marginTop: 4,
-          color: accent ? 'var(--brand, #C8102E)' : 'inherit',
-        }}
-      >
-        {value}
-      </div>
-      <div style={{ fontSize: 11, color: 'var(--t-tertiary, #9CA3AF)', marginTop: 2 }}>{hint}</div>
-    </div>
-  );
-}
-
 function FunnelBars({ stages }: { stages: FunnelStage[] }) {
   const max = Math.max(1, ...stages.map((s) => s.count));
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <div className="flex flex-col gap-2.5">
       {stages.map((s, i) => {
         const prev = i > 0 ? stages[i - 1].count : null;
         const conv = prev && prev > 0 ? `${Math.round((s.count / prev) * 100)}%` : null;
         return (
-          <div key={s.stage} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span
-              style={{
-                width: 56,
-                flexShrink: 0,
-                fontSize: 13,
-                color: 'var(--t-secondary, #6B7280)',
-              }}
-            >
-              {s.label}
-            </span>
-            <div
-              style={{
-                flex: 1,
-                height: 22,
-                borderRadius: 4,
-                background: 'var(--surface-2, #F3F4F6)',
-                overflow: 'hidden',
-              }}
-            >
+          <div key={s.stage} className="flex items-center gap-3">
+            <span className="w-14 shrink-0 text-[13px] text-muted-foreground">{s.label}</span>
+            <div className="h-[22px] flex-1 overflow-hidden rounded bg-secondary">
               <div
-                style={{
-                  width: `${Math.round((s.count / max) * 100)}%`,
-                  minWidth: s.count > 0 ? 2 : 0,
-                  height: '100%',
-                  background: 'var(--brand, #C8102E)',
-                  borderRadius: 4,
-                  transition: 'width .3s',
-                }}
+                className="h-full rounded bg-primary transition-[width] duration-300"
+                style={{ width: `${Math.round((s.count / max) * 100)}%`, minWidth: s.count > 0 ? 2 : 0 }}
               />
             </div>
-            <span className="t-num" style={{ width: 48, textAlign: 'right', fontWeight: 600 }}>
-              {s.count}
-            </span>
-            <span
-              className="t-xs"
-              style={{ width: 52, textAlign: 'right', color: 'var(--t-tertiary, #9CA3AF)' }}
-            >
+            <span className="w-12 text-right font-semibold tabular-nums">{s.count}</span>
+            <span className="w-[52px] text-right text-xs tabular-nums text-muted-foreground">
               {conv ?? '—'}
             </span>
           </div>

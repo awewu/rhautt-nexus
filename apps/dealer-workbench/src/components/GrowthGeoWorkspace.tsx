@@ -2387,27 +2387,17 @@ function MetricCard({
   value: string;
   hint: string;
 }) {
+  // Phase 2 视觉统一：与驾驶舱 StatCard 同一词汇（等宽数字/过渡/muted 层级），零内联样式
   return (
-    <article className="inset" style={{ padding: 14 }}>
-      <div
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
-      >
-        <span className="t-label">{label}</span>
-        <Icon size={16} style={{ color: 'var(--brand)' }} />
+    <article className="rounded-lg border bg-card px-4 py-3.5 transition-shadow duration-200 hover:shadow-sm">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[13px] text-muted-foreground">{label}</span>
+        <Icon size={15} className="shrink-0 text-primary" />
       </div>
-      <div
-        style={{
-          marginTop: 8,
-          fontSize: 28,
-          lineHeight: 1,
-          fontWeight: 800,
-          color: 'var(--t-strong)',
-          fontVariantNumeric: 'tabular-nums',
-        }}
-      >
+      <div className="mt-2 text-[28px] leading-none font-bold tracking-tight tabular-nums">
         {value}
       </div>
-      <p style={{ marginTop: 8, color: 'var(--t-tertiary)', fontSize: 12 }}>{hint}</p>
+      <p className="mt-2 text-xs text-muted-foreground/80">{hint}</p>
     </article>
   );
 }

@@ -14,8 +14,8 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..');
 const TARGET = path.join(ROOT, 'apps', 'dealer-workbench', 'src');
-// 2026-08-13 接入 shadcn 时的存量（全量递归扫描）。只准调小，不准调大。
-const BASELINE = 2073;
+// 2026-08-13 接入 shadcn 时存量 2073；Phase 2 旗舰页重塑后收紧到 1999。只准调小，不准调大。
+const BASELINE = 1999;
 
 function walk(dir, out = []) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
