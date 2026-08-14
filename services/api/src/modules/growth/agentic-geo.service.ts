@@ -42,6 +42,8 @@ export class AgenticGeoService {
         `按策略[${strategies.join(', ')}]生成${kind}内容(千问千面)。严格依据产品事实/国标，禁绝对化，无据写"待补充"。`;
       const draft = await this.ai.generateDraft({
         prompt,
+        // 兜底生成器的主题 = 目标查询本身，而非整段指令（防指令回声）。
+        theme: t.query,
         provider: 'hermes-center-ai',
         bannedTerms: [],
         requireRealProvider: false,

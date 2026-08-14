@@ -15,6 +15,9 @@ import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common'
 export interface AiDraftRequest {
   system?: string;
   prompt: string;
+  /** 兜底生成器用的主题词（用户可读）。prompt 是给模型的完整指令——两者语义不同：
+   *  不提供时兜底器会尝试从 prompt 的「…」引号中提取，避免把指令文本回声成内容。 */
+  theme?: string;
   channel?: string;
   brandSlug?: string | null;
   bannedTerms?: string[];
@@ -510,7 +513,10 @@ export class AiGatewayService {
     const channel = (req.channel || 'generic').toLowerCase();
     const brand = req.brand || {};
     const name = brand.name || '瑞合瑞德';
-    const theme = (req.prompt || '').trim();
+    // 主题 ≠ 指令：优先显式 theme；否则从 prompt 的「…」中提取用户可读主题。
+    // 修复（2026-08-14）：此前直接用整段 prompt 当主题，编排器传入的生成指令
+    // （如【品类引爆·…】按策略[…]生成…）被原样回声进钩子与卖点，草稿沦为指令复读。
+    const theme = (req.theme || '').trim() || this.extractTheme(req.prompt);
     const banned = new Set([...(req.bannedTerms || [])]);
     const facts = (brand.facts || [])
       .filter(Boolean)
@@ -548,6 +554,19 @@ export class AiGatewayService {
   private violates(text: string, banned: Set<string>): boolean {
     for (const t of banned) if (t && text.includes(t)) return true;
     return false;
+  }
+
+  /** 从完整指令 prompt 中提取用户可读主题：取首个「…」引号内容；没有引号则判断是否
+   *  像指令（含【】/策略/生成 等指令特征），像则返回空（让调用方兜到 positioning/name），
+   *  不像则截前 40 字直接用。 */
+  private extractTheme(prompt: string | undefined): string {
+    const p = (prompt || '').trim();
+    if (!p) return '';
+    const quoted = p.match(/「([^」]{2,60})」/);
+    if (quoted) return quoted[1];
+    const looksLikeInstruction = /【|按策略|生成|输出|要求[:：]/.test(p);
+    if (looksLikeInstruction) return '';
+    return p.slice(0, 40);
   }
 }
 

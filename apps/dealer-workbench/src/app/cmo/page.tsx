@@ -1,5 +1,11 @@
 'use client';
 
+/**
+ * CMO 营销管理驾驶舱（2026-08 全页 UX 重构 · WorkspaceKit 化）。
+ * 重排思路：九屏面板改为 md:2 / xl:3 列 WorkspaceSection 网格（aside 显「已接/待建」状态签），
+ * 面板内关键指标统一 tabular-nums 小统计；多触点归因区模型切换收进卡头；27 处内联样式清零。
+ */
+
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 import {
@@ -18,6 +24,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { PageHeader, AsyncBoundary, useToast, type AsyncStatus } from '@rhautt/ui';
+import { WorkspaceSection } from '@/components/WorkspaceKit';
 import { cockpit, metrics } from '../../lib/api';
 
 const MODEL_LABEL: Record<string, string> = {
@@ -225,92 +232,57 @@ export default function CmoCockpitPage() {
         errorMessage="驾驶舱数据加载失败（需 API + 数据库）"
         onRetry={() => mutate()}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-          <Gauge size={15} style={{ color: 'var(--t-tertiary)' }} />
-          <span className="t-xs" style={{ color: 'var(--t-secondary)' }}>
+        <div className="mb-4 flex items-center gap-2">
+          <Gauge size={15} className="text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">
             当前范围：
             {data?.bu?.type === 'group' || !data?.bu
               ? '集团'
               : `事业部 ${data.bu.type}:${data.bu.id}`}
           </span>
         </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-            gap: 16,
-          }}
-        >
+        <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
           {PANELS.map(({ key: k, label, icon }) => {
             const panel = data?.panels?.[k];
             const todo = panel?.status === 'todo';
             return (
-              <div
+              <WorkspaceSection
                 key={k}
-                className="card"
-                style={{ padding: 18, minHeight: 132, display: 'flex', flexDirection: 'column' }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                  {icon}
-                  <span className="t-sm" style={{ fontWeight: 600, color: 'var(--t-strong)' }}>
-                    {label}
-                  </span>
+                icon={icon}
+                title={<span className="text-[13px]">{label}</span>}
+                aside={
                   <span
-                    className="t-xs"
-                    style={{
-                      marginLeft: 'auto',
-                      padding: '1px 8px',
-                      borderRadius: 999,
-                      background: todo ? 'var(--surface-2)' : 'rgba(16,185,129,0.10)',
-                      color: todo ? 'var(--t-tertiary)' : 'var(--semantic-success, #10b981)',
-                      fontWeight: 600,
-                    }}
+                    className={
+                      todo
+                        ? 'rounded-full bg-secondary px-2 py-0.5 text-[11px] font-semibold text-muted-foreground'
+                        : 'rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-600'
+                    }
                   >
                     {todo ? '待建' : '已接'}
                   </span>
-                </div>
+                }
+              >
                 {todo ? (
-                  <p className="t-xs" style={{ color: 'var(--t-tertiary)', margin: 0 }}>
-                    {panel?.note}
-                  </p>
+                  <p className="m-0 text-xs text-muted-foreground">{panel?.note}</p>
                 ) : (
                   (() => {
                     const stats = panelStats(k, panel?.data);
                     if (!stats.length)
-                      return (
-                        <p className="t-xs" style={{ color: 'var(--t-tertiary)', margin: 0 }}>
-                          （暂无数据）
-                        </p>
-                      );
+                      return <p className="m-0 text-xs text-muted-foreground">（暂无数据）</p>;
                     return (
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexWrap: 'wrap',
-                          gap: 14,
-                          flex: 1,
-                          alignContent: 'flex-start',
-                        }}
-                      >
+                      <div className="flex flex-wrap content-start gap-3.5">
                         {stats.map((s, i) => (
-                          <div key={i} style={{ minWidth: 72 }}>
+                          <div key={i} className="min-w-[72px]">
                             <div
-                              className="t-num"
-                              style={{
-                                fontSize: 20,
-                                fontWeight: 700,
-                                color: s.accent ? 'var(--brand)' : 'var(--t-strong)',
-                                lineHeight: 1.2,
-                              }}
+                              className={
+                                s.accent
+                                  ? 'text-xl leading-tight font-bold text-primary tabular-nums'
+                                  : 'text-xl leading-tight font-bold tabular-nums'
+                              }
                             >
                               {s.value}
                             </div>
-                            <div
-                              className="t-xs"
-                              style={{ color: 'var(--t-tertiary)', marginTop: 2 }}
-                            >
-                              {s.label}
-                            </div>
+                            <div className="mt-0.5 text-xs text-muted-foreground">{s.label}</div>
                           </div>
                         ))}
                       </div>
@@ -318,100 +290,76 @@ export default function CmoCockpitPage() {
                   })()
                 )}
                 {panel?.source && (
-                  <div
-                    className="t-xs"
-                    style={{ marginTop: 8, color: 'var(--t-tertiary)', opacity: 0.7 }}
-                  >
-                    源：{panel.source}
-                  </div>
+                  <div className="mt-2 text-xs text-muted-foreground/70">源：{panel.source}</div>
                 )}
-              </div>
+              </WorkspaceSection>
             );
           })}
         </div>
       </AsyncBoundary>
 
       {/* 多触点归因（度量中台读模型：RLS 读模型 + 线性/位置/时间衰减，替代直查 OLTP） */}
-      <div className="card" style={{ padding: 18, marginTop: 20 }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            marginBottom: 14,
-            flexWrap: 'wrap',
-          }}
-        >
-          <GitBranch size={16} style={{ color: 'var(--brand)' }} />
-          <span className="t-lg" style={{ fontWeight: 700 }}>
-            多触点归因 · {period}
-          </span>
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
-            {(['linear', 'position', 'time_decay'] as const).map((m) => (
-              <button
-                key={m}
-                className={model === m ? 'btn btn-brand btn-sm' : 'btn btn-outline btn-sm'}
-                onClick={() => setModel(m)}
-              >
-                {MODEL_LABEL[m]}
-              </button>
-            ))}
-            <button
-              className="btn btn-outline btn-sm"
-              disabled={refreshing}
-              onClick={refreshMetrics}
-            >
-              <RefreshCw size={13} />
-              {refreshing ? '刷新中…' : '重算读模型'}
-            </button>
-          </div>
-        </div>
-        <AsyncBoundary
-          status={statusOf(attr.isLoading, attr.error, attrChannels.length === 0)}
-          errorMessage="归因加载失败（需 API + 数据库）"
-          onRetry={() => attr.mutate()}
-          emptyTitle="暂无归因数据"
-          emptyDescription="点「重算读模型」从漏斗旅程重建；有已签约旅程后显示各渠道信用份额。"
-        >
-          <div style={{ display: 'grid', gap: 10 }}>
-            {attrChannels.map((c) => (
-              <div key={c.channel}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }} className="t-sm">
-                  <span>
-                    {c.channel}{' '}
-                    <span className="t-xs" style={{ color: 'var(--t-tertiary)' }}>
-                      · {c.touches} 触点
-                    </span>
-                  </span>
-                  <span className="t-num" style={{ color: 'var(--brand)' }}>
-                    {(c.share * 100).toFixed(1)}% · {c.creditedConversions.toFixed(2)} 信用
-                  </span>
-                </div>
-                <div
-                  style={{
-                    background: 'var(--surface-3)',
-                    borderRadius: 4,
-                    height: 8,
-                    overflow: 'hidden',
-                    marginTop: 4,
-                  }}
+      <div className="mt-5">
+        <WorkspaceSection
+          icon={<GitBranch size={16} className="text-primary" />}
+          title={`多触点归因 · ${period}`}
+          aside={
+            <span className="flex flex-wrap items-center gap-1.5">
+              {(['linear', 'position', 'time_decay'] as const).map((m) => (
+                <button
+                  key={m}
+                  className={model === m ? 'btn btn-brand btn-sm' : 'btn btn-outline btn-sm'}
+                  onClick={() => setModel(m)}
                 >
-                  <div
-                    style={{
-                      width: `${Math.min(c.share * 100, 100)}%`,
-                      background: 'var(--brand)',
-                      height: '100%',
-                    }}
-                  />
+                  {MODEL_LABEL[m]}
+                </button>
+              ))}
+              <button
+                className="btn btn-outline btn-sm"
+                disabled={refreshing}
+                onClick={refreshMetrics}
+              >
+                <RefreshCw size={13} />
+                {refreshing ? '刷新中…' : '重算读模型'}
+              </button>
+            </span>
+          }
+        >
+          <AsyncBoundary
+            status={statusOf(attr.isLoading, attr.error, attrChannels.length === 0)}
+            errorMessage="归因加载失败（需 API + 数据库）"
+            onRetry={() => attr.mutate()}
+            emptyTitle="暂无归因数据"
+            emptyDescription="点「重算读模型」从漏斗旅程重建；有已签约旅程后显示各渠道信用份额。"
+          >
+            <div className="grid gap-2.5">
+              {attrChannels.map((c) => (
+                <div key={c.channel}>
+                  <div className="flex items-center justify-between text-[13px]">
+                    <span>
+                      {c.channel}{' '}
+                      <span className="text-xs text-muted-foreground">· {c.touches} 触点</span>
+                    </span>
+                    <span className="font-semibold text-primary tabular-nums">
+                      {(c.share * 100).toFixed(1)}% · {c.creditedConversions.toFixed(2)} 信用
+                    </span>
+                  </div>
+                  <div className="mt-1 h-2 overflow-hidden rounded bg-muted">
+                    {/* 动态宽度是内联样式的合法场景（棘轮口径） */}
+                    <div
+                      className="h-full bg-primary transition-[width] duration-300"
+                      style={{ width: `${Math.min(c.share * 100, 100)}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </AsyncBoundary>
+          <div className="mt-2.5 text-xs text-muted-foreground/80">
+            源：metric_channel_attribution（RLS 读模型）· 信用按 {MODEL_LABEL[model]}{' '}
+            模型跨触点分配,和=转化数
           </div>
-        </AsyncBoundary>
-        <div className="t-xs" style={{ color: 'var(--t-tertiary)', marginTop: 10, opacity: 0.8 }}>
-          源：metric_channel_attribution（RLS 读模型）· 信用按 {MODEL_LABEL[model]}{' '}
-          模型跨触点分配,和=转化数
-        </div>
+        </WorkspaceSection>
       </div>
     </div>
   );

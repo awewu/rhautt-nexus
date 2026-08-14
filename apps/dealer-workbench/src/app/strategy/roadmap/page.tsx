@@ -1,16 +1,15 @@
 'use client';
 
+/**
+ * 营销战略路线图（2026-08 全页 UX 重构 · WorkspaceKit 化）。
+ * 重排：上部 lg:grid-cols-3 = 左 2/3 关键路径打法 + 右 1/3（里程碑/品牌定位/使命愿景）；
+ * 下部全宽路线图矩阵（泳道 × 两阶段），消灭 35 处内联样式。
+ */
+
 import { Fragment } from 'react';
 import { PageHeader } from '@rhautt/ui';
 import { Target, Flag, Rocket, Route } from 'lucide-react';
-
-const card: React.CSSProperties = {
-  background: 'var(--surface-1)',
-  border: '1px solid var(--border)',
-  borderRadius: 'var(--r-lg)',
-  boxShadow: 'var(--sh-card)',
-  padding: 18,
-};
+import { WorkspaceSection, Pill } from '@/components/WorkspaceKit';
 
 const POSITIONING = [
   { brand: 'RHEEM · EVERHOT', pos: '大户型选恒热 · 商用级大水量' },
@@ -57,6 +56,14 @@ const LANES = [
     ],
   },
 ];
+const CREED = [
+  {
+    k: '使命',
+    v: '以「创新高效低碳技术 + 数智化服务」为核，为每一个空间赋予更舒适、高效、可持续的生活环境',
+  },
+  { k: '愿景', v: '成为受人尊重的水和空气产品及解决方案可持续发展的引领者' },
+  { k: '价值观', v: '客户满意 ┃ 股东满意 ┃ 社会满意 ┃ 员工满意' },
+];
 
 export default function StrategyRoadmapPage() {
   return (
@@ -66,173 +73,98 @@ export default function StrategyRoadmapPage() {
         subtitle="品牌定位 · 关键路径 · 2026–2030 里程碑 —— 全员对齐方向(源自品牌涡轮&营销战略路线图)"
       />
 
-      {/* 里程碑 + 定位 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 16, marginBottom: 16 }}>
-        <div style={{ ...card, borderLeft: '3px solid var(--brand)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Flag size={16} style={{ color: 'var(--brand)' }} />
-            <span className="t-lg" style={{ fontWeight: 700 }}>
-              里程碑目标
-            </span>
-          </div>
-          <div
-            className="t-num"
-            style={{ fontSize: 30, fontWeight: 800, color: 'var(--brand)', margin: '10px 0 4px' }}
-          >
-            2030 · 销售额 5 亿
-          </div>
-          <div className="t-sm" style={{ color: 'var(--t-secondary)' }}>
-            成为受人尊重的热水解决方案可持续发展的引领者
-          </div>
-        </div>
-        <div style={card}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <Target size={16} />
-            <span className="t-lg" style={{ fontWeight: 600 }}>
-              品牌定位
-            </span>
-          </div>
-          {POSITIONING.map((p) => (
-            <div key={p.brand} style={{ marginBottom: 8 }}>
-              <div className="t-sm" style={{ fontWeight: 700, color: 'var(--brand)' }}>
-                {p.brand}
+      <div className="mb-4 grid items-start gap-4 lg:grid-cols-3">
+        {/* ── 左 2/3：关键路径打法主区 ─────────────────────────────── */}
+        <WorkspaceSection
+          icon={<Route size={16} />}
+          title="关键路径 · 战略打法"
+          className="lg:col-span-2"
+        >
+          <div className="grid gap-3 md:grid-cols-2">
+            {PLAYS.map((p, i) => (
+              <div key={p.t} className="rounded-lg border bg-secondary/40 p-3.5">
+                <div className="text-[13px] font-bold">
+                  <span className="text-primary tabular-nums">{i + 1}.</span> {p.t}
+                </div>
+                <p className="m-0 mt-1.5 text-xs leading-6 text-muted-foreground">{p.d}</p>
               </div>
-              <div className="t-xs" style={{ color: 'var(--t-secondary)' }}>
-                {p.pos}
+            ))}
+          </div>
+          <div className="mt-3.5 flex flex-wrap gap-2">
+            {CATEGORIES.map((c) => (
+              <Pill key={c}>{c}</Pill>
+            ))}
+          </div>
+        </WorkspaceSection>
+
+        {/* ── 右 1/3：里程碑 / 定位 / 使命愿景 ─────────────────────── */}
+        <div className="grid gap-4">
+          <WorkspaceSection icon={<Flag size={16} className="text-primary" />} title="里程碑目标">
+            <div className="rounded-lg border bg-secondary/60 px-4 py-4 text-center">
+              <div className="text-[26px] leading-none font-extrabold text-primary tabular-nums">
+                2030 · 销售额 5 亿
+              </div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                成为受人尊重的热水解决方案可持续发展的引领者
               </div>
             </div>
-          ))}
+          </WorkspaceSection>
+
+          <WorkspaceSection icon={<Target size={16} />} title="品牌定位">
+            <div className="grid gap-2.5">
+              {POSITIONING.map((p) => (
+                <div key={p.brand} className="border-l-2 border-primary pl-3">
+                  <div className="text-[13px] font-bold text-primary">{p.brand}</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">{p.pos}</div>
+                </div>
+              ))}
+            </div>
+          </WorkspaceSection>
+
+          <WorkspaceSection icon={<Flag size={16} />} title="使命 · 愿景 · 价值观">
+            <div className="grid gap-2.5">
+              {CREED.map((c) => (
+                <div key={c.k} className="text-xs leading-6 text-muted-foreground">
+                  <strong className="mr-2 text-primary">{c.k}</strong>
+                  {c.v}
+                </div>
+              ))}
+            </div>
+          </WorkspaceSection>
         </div>
       </div>
 
-      {/* 关键路径打法 */}
-      <div style={{ ...card, marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-          <Route size={16} />
-          <span className="t-lg" style={{ fontWeight: 600 }}>
-            关键路径 · 战略打法
-          </span>
-        </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: 12,
-          }}
-        >
-          {PLAYS.map((p, i) => (
-            <div key={p.t} className="inset">
-              <div className="t-sm" style={{ fontWeight: 700, color: 'var(--t-strong)' }}>
-                <span style={{ color: 'var(--brand)' }}>{i + 1}.</span> {p.t}
+      {/* ── 全宽：路线图矩阵（两泳道 × 两阶段） ─────────────────────── */}
+      <WorkspaceSection icon={<Rocket size={16} />} title="路线图 · 两阶段推进">
+        <div className="grid items-stretch gap-3 md:grid-cols-[120px_1fr_1fr]">
+          <div className="hidden md:block" />
+          <div className="py-1.5 text-center text-[13px] font-bold text-primary tabular-nums">
+            2026–2028 · 聚焦突破，打造样板
+          </div>
+          <div className="py-1.5 text-center text-[13px] font-bold text-primary tabular-nums">
+            2029–2030 · 生态构建，品牌引领
+          </div>
+          {LANES.map((l) => (
+            <Fragment key={l.lane}>
+              <div className="flex items-center text-[13px] font-bold">{l.lane}</div>
+              <div className="rounded-lg border p-3.5">
+                <ul className="m-0 list-disc pl-4 text-xs leading-6 text-muted-foreground">
+                  {l.phase1.map((x, i) => (
+                    <li key={i}>{x}</li>
+                  ))}
+                </ul>
               </div>
-              <p
-                className="t-xs"
-                style={{ color: 'var(--t-secondary)', lineHeight: 1.6, margin: '6px 0 0' }}
-              >
-                {p.d}
-              </p>
-            </div>
+              <div className="rounded-lg border bg-secondary/60 p-3.5">
+                <ul className="m-0 list-disc pl-4 text-xs leading-6 text-muted-foreground">
+                  {l.phase2.map((x, i) => (
+                    <li key={i}>{x}</li>
+                  ))}
+                </ul>
+              </div>
+            </Fragment>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
-          {CATEGORIES.map((c) => (
-            <span
-              key={c}
-              className="t-xs"
-              style={{
-                background: 'var(--surface-2)',
-                color: 'var(--t-secondary)',
-                borderRadius: 999,
-                padding: '4px 12px',
-              }}
-            >
-              {c}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* 路线图矩阵：两泳道 × 两阶段 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 0 12px' }}>
-        <Rocket size={16} />
-        <span className="t-lg" style={{ fontWeight: 600 }}>
-          路线图 · 两阶段推进
-        </span>
-      </div>
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '120px 1fr 1fr',
-          gap: 12,
-          alignItems: 'stretch',
-        }}
-      >
-        <div />
-        <div
-          className="t-sm"
-          style={{ fontWeight: 700, textAlign: 'center', color: 'var(--brand)', padding: '6px 0' }}
-        >
-          2026–2028 · 聚焦突破，打造样板
-        </div>
-        <div
-          className="t-sm"
-          style={{ fontWeight: 700, textAlign: 'center', color: 'var(--brand)', padding: '6px 0' }}
-        >
-          2029–2030 · 生态构建，品牌引领
-        </div>
-        {LANES.map((l) => (
-          <Fragment key={l.lane}>
-            <div
-              className="t-sm"
-              style={{
-                fontWeight: 700,
-                color: 'var(--t-strong)',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              {l.lane}
-            </div>
-            <div style={card}>
-              <ul
-                className="t-xs"
-                style={{ color: 'var(--t-secondary)', lineHeight: 1.7, margin: 0, paddingLeft: 16 }}
-              >
-                {l.phase1.map((x, i) => (
-                  <li key={i}>{x}</li>
-                ))}
-              </ul>
-            </div>
-            <div style={{ ...card, background: 'var(--surface-2)' }}>
-              <ul
-                className="t-xs"
-                style={{ color: 'var(--t-secondary)', lineHeight: 1.7, margin: 0, paddingLeft: 16 }}
-              >
-                {l.phase2.map((x, i) => (
-                  <li key={i}>{x}</li>
-                ))}
-              </ul>
-            </div>
-          </Fragment>
-        ))}
-      </div>
-
-      <div style={{ ...card, marginTop: 16, borderLeft: '3px solid var(--brand)' }}>
-        <div className="t-xs" style={{ color: 'var(--t-secondary)', lineHeight: 1.9 }}>
-          <div>
-            <strong style={{ color: 'var(--brand)' }}>使命</strong>　以「创新高效低碳技术 +
-            数智化服务」为核，为每一个空间赋予更舒适、高效、可持续的生活环境
-          </div>
-          <div>
-            <strong style={{ color: 'var(--brand)' }}>愿景</strong>
-            　成为受人尊重的水和空气产品及解决方案可持续发展的引领者
-          </div>
-          <div>
-            <strong style={{ color: 'var(--brand)' }}>价值观</strong>　客户满意 ┃ 股东满意 ┃
-            社会满意 ┃ 员工满意
-          </div>
-        </div>
-      </div>
+      </WorkspaceSection>
     </div>
   );
 }

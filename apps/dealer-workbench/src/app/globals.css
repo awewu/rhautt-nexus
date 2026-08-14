@@ -4064,3 +4064,24 @@ button {
     overflow-x: auto;
   }
 }
+
+/* 品牌运营页返点激励 promo（2026-08 内联样式收编：渐变与点阵是视觉资产，集中定义） */
+.brand-promo-gradient {
+  background: linear-gradient(135deg, #1f1f1f 0%, #680014 56%, #c8202c 100%);
+}
+.brand-promo-dots {
+  background-image: radial-gradient(circle, #ffffff 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* 登录页（2026-08 内联样式收编）：左品牌栏深底 + 员工入口深色门 */
+.login-brand-panel {
+  background: var(--sidebar, #111827);
+}
+.login-gate-staff {
+  background: var(--sidebar, #111827);
+  color: #ffffff;
+}
+.login-gate-staff:hover {
+  background: var(--sidebar-hover, #1f2937);
+}

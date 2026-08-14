@@ -1,7 +1,15 @@
 'use client';
 
+/**
+ * 品牌涡轮（2026-08 全页 UX 重构 · WorkspaceKit 化）。
+ * 重排：品牌切换改 FilterChips；核心价值收窄为强调横幅；
+ * 八维辐条改 2/4 列自适应网格卡，消灭 11 处内联样式。
+ */
+
 import { useState } from 'react';
 import { PageHeader } from '@rhautt/ui';
+import { Sparkles } from 'lucide-react';
+import { WorkspaceSection, FilterChips } from '@/components/WorkspaceKit';
 
 type Spoke = { k: string; en: string; v: string };
 type Brand = {
@@ -95,14 +103,6 @@ const BRANDS: Record<string, Brand> = {
   },
 };
 
-const card: React.CSSProperties = {
-  background: 'var(--surface-1)',
-  border: '1px solid var(--border)',
-  borderRadius: 'var(--r-lg)',
-  boxShadow: 'var(--sh-card)',
-  padding: 16,
-};
-
 export default function BrandTurbinePage() {
   const [key, setKey] = useState<'everhot' | 'rheem' | 'ruud'>('everhot');
   const b = BRANDS[key];
@@ -113,76 +113,45 @@ export default function BrandTurbinePage() {
         title="品牌涡轮 · 核心价值体系"
         subtitle="以「核心价值」为轴，八维定义品牌：使命 / 传承 / 功能利益 / 理想用户 / 品牌角色 / 个性 / 情感利益 / 符号"
         actions={
-          <div style={{ display: 'flex', gap: 6 }}>
-            {(['everhot', 'rheem', 'ruud'] as const).map((kk) => (
-              <button
-                key={kk}
-                className={key === kk ? 'btn btn-brand btn-sm' : 'btn btn-outline btn-sm'}
-                onClick={() => setKey(kk)}
-              >
-                {BRANDS[kk].code} {BRANDS[kk].cn}
-              </button>
-            ))}
-          </div>
+          <FilterChips
+            size="md"
+            options={(['everhot', 'rheem', 'ruud'] as const).map((kk) => ({
+              value: kk,
+              label: `${BRANDS[kk].code} ${BRANDS[kk].cn}`,
+            }))}
+            value={key}
+            onChange={setKey}
+          />
         }
       />
 
-      {/* 涡轮中心：核心价值 */}
-      <div
-        style={{
-          ...card,
-          textAlign: 'center',
-          marginBottom: 16,
-          background: 'var(--brand-50, var(--surface-2))',
-          borderColor: 'var(--brand)',
-        }}
-      >
-        <div
-          className="t-xs"
-          style={{ color: 'var(--brand)', letterSpacing: '0.1em', fontWeight: 700 }}
-        >
-          CORE VALUE · 核心价值
-        </div>
-        <div
-          className="t-lg"
-          style={{ fontSize: 22, fontWeight: 800, color: 'var(--brand)', margin: '6px 0' }}
-        >
-          {b.core}
-        </div>
-        <div className="t-sm" style={{ color: 'var(--t-secondary)' }}>
+      {/* 涡轮中心：核心价值横幅 */}
+      <div className="mb-4 rounded-lg border border-primary/40 bg-primary/5 px-6 py-5 text-center">
+        <div className="text-xs font-bold tracking-widest text-primary">CORE VALUE · 核心价值</div>
+        <div className="mt-1.5 text-[22px] leading-tight font-extrabold text-primary">{b.core}</div>
+        <div className="mt-1.5 text-[13px] text-muted-foreground">
           {b.tagline} · {b.origin}
         </div>
       </div>
 
-      {/* 八维价值涡轮 */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: 14,
-        }}
+      {/* 八维价值涡轮：2/4 列自适应辐条网格 */}
+      <WorkspaceSection
+        icon={<Sparkles size={16} />}
+        title="八维价值涡轮"
+        aside={`${b.code} ${b.cn} · ${b.spokes.length} 维`}
       >
-        {b.spokes.map((s) => (
-          <div key={s.k} style={{ ...card, borderTop: '3px solid var(--brand)' }}>
-            <div
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}
-            >
-              <span className="t-sm" style={{ fontWeight: 700, color: 'var(--t-strong)' }}>
-                {s.k}
-              </span>
-              <span className="t-xs" style={{ color: 'var(--t-tertiary)' }}>
-                {s.en}
-              </span>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {b.spokes.map((s) => (
+            <div key={s.k} className="rounded-lg border border-t-2 border-t-primary p-3.5">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-[13px] font-bold">{s.k}</span>
+                <span className="truncate text-xs text-muted-foreground">{s.en}</span>
+              </div>
+              <p className="m-0 mt-2 text-xs leading-6 text-muted-foreground">{s.v}</p>
             </div>
-            <p
-              className="t-sm"
-              style={{ color: 'var(--t-secondary)', lineHeight: 1.7, margin: '8px 0 0' }}
-            >
-              {s.v}
-            </p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </WorkspaceSection>
     </div>
   );
 }
