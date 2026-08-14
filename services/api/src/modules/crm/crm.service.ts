@@ -11,6 +11,7 @@ import { JwtPayload } from '../auth/auth.service';
 import { encryptPII, hashPII } from '../compliance/compliance.pii';
 import { AuditLogEntity } from '../governance/governance.entity';
 import { LifecycleLinkEntity } from '../delivery/delivery.entity';
+import { QuotationEntity } from '../quote/quote.entity';
 import { EventBusService } from '../mdm/event-bus.service';
 import { withRlsTransaction } from '../common/rls';
 import { TenantScope } from '../common/tenant-context';
@@ -273,7 +274,23 @@ export class CrmService {
           },
         });
         // 飞轮 B②→C：成交事件（带金额）驱动增长中枢 cockpit 重算北极星/网络GMV。
-        // 金额取 opp.estimatedValue（商机自带），避免跨域读报价 OLTP。
+        // 金额取 opp.estimatedValue（商机自带），口径不变。
+        // 产品行（迁移 111 配套）：签单本质上就是对这份报价的确认，故同事务读取
+        // 该报价 BOM 把 SKU 级明细带出——此前成交只有金额不知型号，产品维度的飞轮
+        // （GEO 推了 A 型号 → A 型号成交上升）无从证明。报价缺失时 products 为空数组
+        // 并注明原因，不编造明细、不阻断签单。
+        const quotation = await em
+          .getRepository(QuotationEntity)
+          .findOne({ where: { id: quotationId, tenantId } as any })
+          .catch(() => null);
+        const products = (Array.isArray(quotation?.items) ? quotation!.items : [])
+          .map((it: any) => ({
+            sku: it?.sku ?? it?.model ?? null,
+            name: it?.name ?? null,
+            quantity: Number(it?.quantity ?? 1) || 1,
+            unitPrice: Number(it?.unitPrice ?? it?.price ?? 0) || 0,
+          }))
+          .filter((p) => p.sku || p.name);
         await this.eventBus.publishInTx(em, {
           tenantId,
           eventType: 'crm.deal.signed',
@@ -281,8 +298,13 @@ export class CrmService {
           aggregateId: opportunityId,
           payload: {
             opportunityId,
+            quotationId,
             dealerId: opp?.dealerId ?? null,
             amount: Number((opp as any)?.estimatedValue) || 0,
+            products,
+            productsBasis: quotation
+              ? ('quotation-bom' as const)
+              : ('quotation-missing' as const),
             signedAt: new Date().toISOString(),
           },
         });

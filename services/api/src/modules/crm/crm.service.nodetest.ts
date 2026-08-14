@@ -4,6 +4,7 @@ import { AuditLogEntity } from '../governance/governance.entity';
 import { hashPII } from '../compliance/compliance.pii';
 import { CustomerEntity, InteractionEntity, OpportunityEntity } from './crm.entity';
 import { LifecycleLinkEntity } from '../delivery/delivery.entity';
+import { QuotationEntity } from '../quote/quote.entity';
 import { CrmService } from './crm.service';
 
 type Row = Record<string, any>;
@@ -58,6 +59,7 @@ function fixture() {
   const audits = repository([], 'audit');
   // 项目主线（迁移037 起 opportunities.project_id NOT NULL，建单即开 lifecycle_links）
   const projects = repository([], 'project');
+  const quotations = repository([], 'quotation');
   const events: Row[] = [];
   const manager = {
     async query() {
@@ -69,6 +71,7 @@ function fixture() {
       if (entity === InteractionEntity) return interactions;
       if (entity === AuditLogEntity) return audits;
       if (entity === LifecycleLinkEntity) return projects;
+      if (entity === QuotationEntity) return quotations;
       throw new Error('unexpected repository');
     },
   };
@@ -97,7 +100,7 @@ function fixture() {
     permissions: [],
     modules: [],
   } as any;
-  return { service, user, customers, opportunities, interactions, audits, events };
+  return { service, user, customers, opportunities, interactions, audits, quotations, events };
 }
 
 test('lead creation takes ownership from JWT, encrypts PII, and writes audit plus outbox', async () => {
@@ -243,4 +246,89 @@ test('sign writes audit and outbox in the opportunity transaction', async () => 
   const signEventTypes = f.events.map((e) => e.eventType);
   assert.ok(signEventTypes.includes('opportunity.signed'), 'should emit opportunity.signed');
   assert.ok(signEventTypes.includes('crm.deal.signed'), 'should emit crm.deal.signed');
+});
+
+test('crm.deal.signed 携带报价 BOM 产品行（sku/数量/单价），成交在产品维度可归因', async () => {
+  const f = fixture();
+  f.opportunities.rows.push({
+    id: 'opp-a',
+    tenantId: 'tenant-a',
+    dealerId: 'dealer-a',
+    storeId: 'store-a',
+    customerId: 'customer-a',
+    ownerUserId: 'seller-a',
+    stage: 'quote',
+    estimatedValue: 32000,
+  });
+  f.quotations.rows.push({
+    id: 'quote-1',
+    tenantId: 'tenant-a',
+    items: [
+      { sku: 'AP-500', name: 'Rheem AP-500 空气源热泵', quantity: 1, unitPrice: 22000 },
+      { model: 'EH-200', name: 'Everhot EH-200 电热水器', quantity: 2, price: 4000 }, // 字段别名 model/price
+      { note: '安装辅材' }, // 无 sku 无 name → 不计入产品行
+    ],
+  });
+
+  await f.service.sign(f.user, 'opp-a', 'quote-1');
+  const deal = f.events.find((e) => e.eventType === 'crm.deal.signed');
+  assert.ok(deal, 'crm.deal.signed emitted');
+  assert.equal(deal!.payload.quotationId, 'quote-1');
+  assert.equal(deal!.payload.productsBasis, 'quotation-bom');
+  assert.equal(deal!.payload.amount, 32000, '金额口径不变（仍取商机 estimatedValue）');
+  const products = deal!.payload.products;
+  assert.equal(products.length, 2, '无 sku/name 的行不得计入');
+  assert.deepEqual(products[0], {
+    sku: 'AP-500',
+    name: 'Rheem AP-500 空气源热泵',
+    quantity: 1,
+    unitPrice: 22000,
+  });
+  assert.deepEqual(
+    products[1],
+    { sku: 'EH-200', name: 'Everhot EH-200 电热水器', quantity: 2, unitPrice: 4000 },
+    'model/price 字段别名应归一为 sku/unitPrice（与价格护栏同口径）'
+  );
+});
+
+test('报价缺失时 products 为空数组并如实标注 quotation-missing，不编造明细不阻断签单', async () => {
+  const f = fixture();
+  f.opportunities.rows.push({
+    id: 'opp-a',
+    tenantId: 'tenant-a',
+    dealerId: 'dealer-a',
+    storeId: 'store-a',
+    customerId: 'customer-a',
+    ownerUserId: 'seller-a',
+    stage: 'quote',
+  });
+
+  const result = await f.service.sign(f.user, 'opp-a', 'quote-ghost');
+  assert.equal(result.signed, true, '报价缺失不阻断签单');
+  const deal = f.events.find((e) => e.eventType === 'crm.deal.signed');
+  assert.deepEqual(deal!.payload.products, []);
+  assert.equal(deal!.payload.productsBasis, 'quotation-missing');
+});
+
+test('跨租户报价不得读出（RLS 语义）：他租户 quotation 视同缺失', async () => {
+  const f = fixture();
+  f.opportunities.rows.push({
+    id: 'opp-a',
+    tenantId: 'tenant-a',
+    dealerId: 'dealer-a',
+    storeId: 'store-a',
+    customerId: 'customer-a',
+    ownerUserId: 'seller-a',
+    stage: 'quote',
+  });
+  f.quotations.rows.push({
+    id: 'quote-1',
+    tenantId: 'tenant-b', // 他租户
+    items: [{ sku: 'X', name: 'x', quantity: 1, unitPrice: 1 }],
+  });
+
+  await f.service.sign(f.user, 'opp-a', 'quote-1');
+  const deal = f.events.find((e) => e.eventType === 'crm.deal.signed');
+  assert.equal(deal!.payload.productsBasis, 'quotation-missing');
+  assert.deepEqual(deal!.payload.products, []);
 });

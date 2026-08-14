@@ -85,15 +85,18 @@
       "eventType": "crm.deal.signed",
       "status": "implemented",
       "aggregateType": "opportunity",
-      "producer": "B/crm（金额取 opportunity.estimatedValue，避免跨域读报价 OLTP）",
+      "producer": "B/crm（金额取 opportunity.estimatedValue 口径不变；产品行同事务读签单报价 BOM——签单本质是对该报价的确认）",
       "consumers": ["A/cockpit（北极星+经销商成功度+AARRR 签约，经 dealer_deal_inbox 幂等求和）"],
       "payload": {
         "opportunityId": "string",
+        "quotationId": "string",
         "dealerId": "string|null",
         "amount": "number",
+        "products": "[{sku:string|null, name:string|null, quantity:number, unitPrice:number}]（源自签单报价 BOM；无 sku 且无 name 的行不计入）",
+        "productsBasis": "'quotation-bom' | 'quotation-missing'（报价缺失时 products=[] 并如实标注，不编造明细）",
         "signedAt": "string(iso)"
       },
-      "purpose": "成交→活跃盈利经销商数/网络GMV（北极星）+ 漏斗「签约」"
+      "purpose": "成交→活跃盈利经销商数/网络GMV（北极星）+ 漏斗「签约」+ 产品维度成交归因（GEO 推 A 型号→A 型号成交，飞轮产品级闭合）"
     },
     {
       "eventType": "deposit.intent.created",
