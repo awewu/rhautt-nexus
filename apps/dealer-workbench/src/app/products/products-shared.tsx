@@ -1281,3 +1281,1172 @@ export function emptySiteCategoryRow(category: string): SiteProductCategoryRow {
 }
 
 
+
+// ── 第三刀追加 ──
+export type ProductStock = Product['stock'];
+
+export type CatalogCategoryFilter = 'all' | string;
+
+export type WebsiteShelfTransition = 'publishing' | 'hiding';
+
+export type CreateProductDraft = {
+  brand: ProductBrand | '';
+  brands: ProductBrand[];
+  name: string;
+  model: string;
+  materialCode: string;
+  skuSeed: string;
+  categoryLevel1Id: string;
+  categoryLevel2Id: string;
+  categoryLevel3Id: string;
+  productType: string;
+  lifecycleStage: string;
+  manufacturer: string;
+  countryOfOrigin: string;
+  marketCode: string;
+  launchDate: string;
+  discontinueDate: string;
+  salesUnit: string;
+  lengthMm: string;
+  widthMm: string;
+  heightMm: string;
+  netWeightKg: string;
+  packageLengthMm: string;
+  packageWidthMm: string;
+  packageHeightMm: string;
+  grossWeightKg: string;
+  packageSpec: string;
+  configurationNotes: string;
+  installationRequirement: string;
+  warrantyPolicy: string;
+  technicalSpecs: string;
+  sellingPoints: string;
+  applicationScenarios: string;
+  complianceCertificates: string;
+  listPrice: string;
+  costPrice: string;
+  currency: string;
+  websitePriceDisplayMode: string;
+  websitePrice: string;
+  websitePriceMin: string;
+  websitePriceMax: string;
+  promoPrice: string;
+  priceUnit: string;
+  priceLabel: string;
+  priceNote: string;
+  taxIncluded: boolean;
+  publicSlug: string;
+  series: string;
+  tagline: string;
+  publicSummary: string;
+  featureBenefits: string;
+  highlightMetrics: string;
+  faqs: string;
+  websiteCategory: string;
+  displayOrder: string;
+  badges: string;
+  officialEnglishName: string;
+  officialDetailHtml: string;
+  mainImage: ProductPendingImageDraft | null;
+  manualPdfs: ProductManualPdfDraft[];
+};
+
+export type ProductPendingImageDraft = {
+  file: File;
+  previewUrl: string;
+};
+
+export type EditProductDraft = {
+  name: string;
+  model: string;
+  category: string;
+  system: string;
+  categoryLevel1Id: string;
+  categoryLevel2Id: string;
+  categoryLevel3Id: string;
+  productType: string;
+  lifecycleStage: string;
+  manufacturer: string;
+  countryOfOrigin: string;
+  marketCode: string;
+  launchDate: string;
+  discontinueDate: string;
+  salesUnit: string;
+  lengthMm: string;
+  widthMm: string;
+  heightMm: string;
+  netWeightKg: string;
+  packageLengthMm: string;
+  packageWidthMm: string;
+  packageHeightMm: string;
+  grossWeightKg: string;
+  packageSpec: string;
+  configurationNotes: string;
+  installationRequirement: string;
+  warrantyPolicy: string;
+  technicalSpecs: string;
+  sellingPoints: string;
+  applicationScenarios: string;
+  complianceCertificates: string;
+  listPrice: string;
+  costPrice: string;
+  currency: string;
+  websitePriceDisplayMode: string;
+  websitePrice: string;
+  websitePriceMin: string;
+  websitePriceMax: string;
+  promoPrice: string;
+  priceUnit: string;
+  priceLabel: string;
+  priceNote: string;
+  taxIncluded: boolean;
+  publicSlug: string;
+  series: string;
+  tagline: string;
+  publicSummary: string;
+  featureBenefits: string;
+  highlightMetrics: string;
+  faqs: string;
+  websiteCategory: string;
+  displayOrder: string;
+  badges: string;
+  officialEnglishName: string;
+  officialDetailHtml: string;
+  mainImage: ProductPendingImageDraft | null;
+  manualPdfs: ProductManualPdfDraft[];
+};
+
+export type RowActionState = {
+  dirty: boolean;
+  saving: boolean;
+  savingAction?: 'save' | 'status' | 'archive';
+  success: string;
+  error: string;
+};
+
+export type ProductPilotSummary = {
+  products: number;
+  categories: number;
+  websitePublished: number;
+  needsCompletion: number;
+};
+
+export const CATEGORY_KEYS = new Set<string>(CATEGORIES.map((category) => category.key));
+
+export const PRODUCT_BASE_CATEGORY_BRAND = 'common';
+
+export const STOCK: Record<ProductStock, { label: string; className: string; tone: string }> = {
+  in: { label: '现货', className: 'badge-success', tone: 'var(--success)' },
+  low: { label: '低库存', className: 'badge-warning', tone: 'var(--warning)' },
+  order: { label: '需订货', className: 'badge-danger', tone: 'var(--danger)' },
+};
+
+export const PRODUCT_DETAIL_LOCALE = 'zh-CN';
+
+export const fmt = (value: number) => `￥${Math.round(value || 0).toLocaleString('zh-CN')}`;
+
+export const pct = (value: number) => `${Math.round(value || 0)}%`;
+
+
+export function productCategoryNodeValue(node: ProductCategoryNode | null | undefined): string {
+  return text(node?.code || node?.slug || node?.nameCn || node?.name || node?.id);
+}
+
+
+export function productCategoryDisplayLabel(value: unknown, tree: ProductCategoryNode[] = []): string {
+  const raw = text(value);
+  if (!raw) return '';
+  const flat = flattenCategoryTree(tree);
+  const matched = flat.find((node) =>
+    [node.id, node.code, node.slug, node.nameCn, node.name, node.nameEn].some(
+      (item) => text(item) === raw
+    )
+  );
+  if (matched) return categoryOptionLabel(matched);
+  const builtin = CATEGORIES.find((category) => category.key === raw);
+  return builtin?.label || raw;
+}
+
+
+export function statusLabel(status: string): string {
+  if (status === 'active') return '启用';
+  if (status === 'inactive') return '停用';
+  if (status === 'archived') return '已归档';
+  return status || '未知';
+}
+
+
+export function statusTone(status: string): 'success' | 'warning' | 'neutral' | 'info' {
+  if (status === 'active') return 'success';
+  if (status === 'inactive') return 'warning';
+  if (status === 'archived') return 'neutral';
+  return 'info';
+}
+
+
+export function productDetailContentItems(result: unknown): Array<Record<string, any>> {
+  const payload = (result as any)?.data ?? result;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload)) return payload;
+  return [];
+}
+
+
+export function productContentItem(result: unknown): Record<string, any> {
+  return (
+    productDetailContentItems(result).find((row) => row?.locale === PRODUCT_DETAIL_LOCALE) ||
+    productDetailContentItems(result)[0] ||
+    {}
+  );
+}
+
+
+export function featureBenefitLines(value: unknown): string {
+  const items = Array.isArray(value) ? value : [];
+  return items
+    .map((item) => {
+      const row = objectOrEmpty(item);
+      const title = text(row.title || row.feature);
+      const desc = text(row.desc || row.description || row.benefit);
+      return desc ? `${title}: ${desc}` : title;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
+
+export function highlightMetricLines(value: unknown): string {
+  const items = Array.isArray(value) ? value : [];
+  return items
+    .map((item) => {
+      if (typeof item === 'string') return text(item);
+      const row = objectOrEmpty(item);
+      const label = text(row.label || row.k || row.key);
+      const metric = text(row.value || row.v);
+      return metric ? `${label}: ${metric}` : label;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
+
+export function faqLines(value: unknown): string {
+  const items = Array.isArray(value) ? value : [];
+  return items
+    .map((item) => {
+      const row = objectOrEmpty(item);
+      const question = text(row.q || row.question);
+      const answer = text(row.a || row.answer);
+      return question && answer ? `${question}: ${answer}` : question;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
+
+export function contentDraftPatchFromResult(result: unknown): Partial<EditProductDraft> {
+  const item = productContentItem(result);
+  const marketing = objectOrEmpty(item.marketing);
+  const patch: Partial<EditProductDraft> = {};
+  if ('officialDetailHtml' in item) patch.officialDetailHtml = text(item.officialDetailHtml);
+  if ('series' in marketing) patch.series = text(marketing.series);
+  if ('headline' in marketing) patch.tagline = text(marketing.headline);
+  if ('subhead' in marketing) patch.publicSummary = text(marketing.subhead);
+  if ('officialEnglishName' in marketing)
+    patch.officialEnglishName = text(marketing.officialEnglishName);
+  if ('badges' in marketing)
+    patch.badges = Array.isArray(marketing.badges)
+      ? marketing.badges.map(text).filter(Boolean).join(', ')
+      : '';
+  if ('certs' in marketing)
+    patch.complianceCertificates = Array.isArray(marketing.certs)
+      ? marketing.certs.map(text).filter(Boolean).join('\n')
+      : '';
+  if ('features' in marketing || 'featureBenefits' in marketing)
+    patch.featureBenefits = featureBenefitLines(marketing.features || marketing.featureBenefits);
+  if ('highlights' in marketing)
+    patch.highlightMetrics = highlightMetricLines(marketing.highlights);
+  if ('faq' in marketing) patch.faqs = faqLines(marketing.faq);
+  return patch;
+}
+
+
+export function assignmentKey(productId: string, tenantId: string): string {
+  return `${tenantId || '-'}:${productId}`;
+}
+
+
+export function assignmentsForProduct(
+  map: Map<string, WebsiteShelfAssignment[]>,
+  product: NormalizedProduct
+): WebsiteShelfAssignment[] {
+  const byTenant = map.get(assignmentKey(product.id, tenantIdForProduct(product))) || [];
+  const byProduct = map.get(product.id) || [];
+  const seen = new Set<string>();
+  return [...byTenant, ...byProduct].filter((assignment) => {
+    const key =
+      assignment.id ||
+      `${assignment.siteCode || ''}:${assignment.productTenantId || ''}:${assignment.productId || ''}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return !assignment.deletedAt;
+  });
+}
+
+
+export function activeWebsiteAssignments(assignments: WebsiteShelfAssignment[]): WebsiteShelfAssignment[] {
+  return assignments.filter(
+    (assignment) => !assignment.deletedAt && assignment.status !== 'hidden'
+  );
+}
+
+
+export function websiteShelfMeta(
+  assignment?: WebsiteShelfAssignment,
+  transition?: WebsiteShelfTransition
+) {
+  if (transition === 'publishing') return { label: '官网发布中', tone: 'info' as const };
+  if (transition === 'hiding') return { label: '官网隐藏中', tone: 'warning' as const };
+  if (!assignment) return { label: '未配置官网', tone: 'neutral' as const };
+  if (assignment.deletedAt || assignment.status === 'hidden')
+    return { label: '官网已隐藏', tone: 'warning' as const };
+  if (assignment.status === 'published') return { label: '官网已发布', tone: 'success' as const };
+  return { label: '草稿待发布', tone: 'neutral' as const };
+}
+
+
+export function websiteShelfSummary(assignments: WebsiteShelfAssignment[]) {
+  const active = activeWebsiteAssignments(assignments);
+  if (!active.length) return { label: '未配置官网', tone: 'neutral' as const };
+  const published = active.filter((assignment) => assignment.status === 'published').length;
+  if (active.length === 1) return websiteShelfMeta(active[0]);
+  if (published === active.length)
+    return { label: `已发布 ${active.length} 个官网`, tone: 'success' as const };
+  if (published > 0)
+    return { label: `部分发布 ${published}/${active.length}`, tone: 'info' as const };
+  return { label: `待发布 ${active.length} 个官网`, tone: 'neutral' as const };
+}
+
+
+export function assignmentWebsiteCategoryPath(assignment: WebsiteShelfAssignment): string {
+  const meta = objectOrEmpty(assignment.siteMeta);
+  const categoryMeta = objectOrEmpty(meta.siteProductCategory);
+  return text(meta.websiteCategoryPath || categoryMeta.path || assignment.websiteCategory);
+}
+
+
+export function preferredWebsiteAssignment(
+  assignments: WebsiteShelfAssignment[],
+  productBrand?: string
+): WebsiteShelfAssignment | null {
+  const active = activeWebsiteAssignments(assignments);
+  const brand = normalizeBrand(productBrand);
+  return (
+    active.find(
+      (assignment) =>
+        assignment.status === 'published' && normalizeBrand(assignment.siteCode) === brand
+    ) ||
+    active.find((assignment) => assignment.status === 'published') ||
+    active.find((assignment) => normalizeBrand(assignment.siteCode) === brand) ||
+    active[0] ||
+    null
+  );
+}
+
+
+export function productReadinessSummary(product: NormalizedProduct) {
+  const libraryMeta = productLibraryMeta(product);
+  const dimensions = objectOrEmpty(libraryMeta.readinessDimensions);
+  const entries = Object.entries(PRODUCT_READINESS_LABELS).map(([key, label]) => {
+    const value = dimensions[key];
+    const detail = typeof value === 'string' ? { status: value } : objectOrEmpty(value);
+    return { key, label, status: text(detail.status) || 'incomplete', note: text(detail.note) };
+  });
+  const ready = entries.filter(
+    (item) => item.status === 'ready' || item.status === 'not_applicable'
+  ).length;
+  return {
+    status: text(libraryMeta.dataReadinessStatus),
+    ready,
+    total: entries.length,
+    details: entries
+      .map(
+        (item) =>
+          `${item.label}：${item.status === 'ready' ? '就绪' : item.status === 'not_applicable' ? '不适用' : '待补全'}${item.note ? `（${item.note}）` : ''}`
+      )
+      .join('\n'),
+  };
+}
+
+
+export function productPublishRequiredReadiness(product: NormalizedProduct): {
+  ready: boolean;
+  missing: string[];
+} {
+  const categoryBinding = productCategoryBinding(product);
+  const content = productContentItem(
+    product.raw?.publicContent || product.raw?.content || product.raw
+  );
+  const marketing = objectOrEmpty(content.marketing || product.raw?.marketing);
+  const brandMeta = productBrandMeta(product);
+  const libraryMeta = productLibraryMeta(product);
+  const positioning = objectOrEmpty(product.raw?.positioning);
+  const features = marketing.features || marketing.featureBenefits;
+  const hasFeatureCopy = Array.isArray(features)
+    ? features.length > 0
+    : Boolean(
+        text(features || marketing.sellingPoints) ||
+        (Array.isArray(positioning.sellingPoints) && positioning.sellingPoints.length > 0) ||
+        (Array.isArray(libraryMeta.sellingPoints) && libraryMeta.sellingPoints.length > 0)
+      );
+  const hasSummary = Boolean(
+    text(
+      marketing.subhead ||
+        marketing.summary ||
+        marketing.description ||
+        product.raw?.publicSummary ||
+        brandMeta.tagline ||
+        product.spec
+    )
+  );
+  const missing = [
+    !text(product.name) ? '产品名称' : '',
+    !text(product.model) ? '型号' : '',
+    !(categoryBinding.categoryLevel1Id && categoryBinding.categoryLevel2Id) ? '产品库分类' : '',
+    !hasSummary ? '官网摘要' : '',
+    !hasFeatureCopy ? '官网卖点' : '',
+    !productImageSrc(product) ? '产品主图' : '',
+  ].filter(Boolean);
+  return { ready: missing.length === 0, missing };
+}
+
+
+export function optionalNonNegativeNumber(value: unknown): number | undefined {
+  const raw = text(value);
+  if (!raw) return undefined;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : undefined;
+}
+
+
+export function nullableNonNegativeNumber(value: unknown): number | null {
+  const raw = text(value);
+  if (!raw) return null;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+
+export function splitLines(value: string): string[] {
+  return value
+    .split(/\r?\n|[;；]/g)
+    .map(text)
+    .filter(Boolean);
+}
+
+
+export function parseKeyValueLines(value: string): Array<{ k: string; v: string }> {
+  return splitLines(value).map((line) => {
+    const parts = line.split(/[:：=]/);
+    const k = text(parts.shift());
+    const v = text(parts.join(':'));
+    return k && v ? { k, v } : { k: line, v: '' };
+  });
+}
+
+
+export function keyValueLines(value: unknown): string {
+  if (!Array.isArray(value)) return '';
+  return value
+    .map((item) => {
+      const row = objectOrEmpty(item);
+      const k = text(row.k || row.label || row.name || row.key);
+      const v = text(row.v || row.value || row.desc || row.description);
+      return v ? `${k}: ${v}` : k;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
+
+export function productUpdatePayload(
+  product: NormalizedProduct,
+  draft: EditProductDraft,
+  status?: 'active' | 'inactive'
+): Record<string, unknown> {
+  const name = text(draft.name);
+  const model = text(draft.model);
+  const category = text(draft.category);
+  const system = text(draft.system);
+  const categoryLevel1Id = text(draft.categoryLevel1Id);
+  const categoryLevel2Id = text(draft.categoryLevel2Id);
+  const categoryLevel3Id = text(draft.categoryLevel3Id);
+  const primaryCategoryId = categoryLevel3Id || categoryLevel2Id || categoryLevel1Id;
+  if (!name) throw new Error('请填写产品名称。');
+  if (!model) throw new Error('请填写产品型号。');
+  if (!category) throw new Error('请选择分类。');
+  if (!system) throw new Error('请填写系统。');
+  if (!categoryLevel1Id) throw new Error('请选择一级产品分类。');
+  if (!categoryLevel2Id) throw new Error('请选择二级产品分类。');
+  const previousSpec = objectOrEmpty(product.raw?.spec);
+  const brand = normalizeBrand(product.brand);
+  const previousMeta = objectOrEmpty(product.raw?.meta);
+  const previousBrandMeta = objectOrEmpty(previousMeta[brand]);
+  const publicSlug = slug(draft.publicSlug);
+  const websiteCategory = text(draft.websiteCategory);
+  const displayOrder = nonNegativeInt(draft.displayOrder);
+  const tenantId = tenantIdForProduct(product);
+  const previousLibraryMeta = objectOrEmpty(previousMeta.productLibrary);
+  const listPrice = optionalNonNegativeNumber(draft.listPrice);
+  const costPrice = optionalNonNegativeNumber(draft.costPrice);
+  const websitePrice = optionalNonNegativeNumber(draft.websitePrice);
+  const websitePriceMin = optionalNonNegativeNumber(draft.websitePriceMin);
+  const websitePriceMax = optionalNonNegativeNumber(draft.websitePriceMax);
+  const promoPrice = optionalNonNegativeNumber(draft.promoPrice);
+  const lengthMm = nullableNonNegativeNumber(draft.lengthMm);
+  const widthMm = nullableNonNegativeNumber(draft.widthMm);
+  const heightMm = nullableNonNegativeNumber(draft.heightMm);
+  const netWeightKg = nullableNonNegativeNumber(draft.netWeightKg);
+  const packageLengthMm = nullableNonNegativeNumber(draft.packageLengthMm);
+  const packageWidthMm = nullableNonNegativeNumber(draft.packageWidthMm);
+  const packageHeightMm = nullableNonNegativeNumber(draft.packageHeightMm);
+  const grossWeightKg = nullableNonNegativeNumber(draft.grossWeightKg);
+  const technicalSpecs = parseKeyValueLines(draft.technicalSpecs);
+  const sellingPoints = splitLines(draft.sellingPoints);
+  const applicationScenarios = splitLines(draft.applicationScenarios);
+  const complianceCertificates = splitLines(draft.complianceCertificates);
+  return {
+    ...(tenantId ? { tenantId } : {}),
+    name,
+    category,
+    ...(listPrice !== undefined ? { listPrice } : {}),
+    ...(costPrice !== undefined ? { costPrice } : {}),
+    lengthMm,
+    widthMm,
+    heightMm,
+    netWeightKg,
+    packageLengthMm,
+    packageWidthMm,
+    packageHeightMm,
+    grossWeightKg,
+    currency: text(draft.currency) || 'CNY',
+    websitePricing: {
+      brandCode: brand,
+      siteCode: brand,
+      locale: PRODUCT_DETAIL_LOCALE,
+      priceDisplayMode: text(draft.websitePriceDisplayMode) || 'not_shown',
+      ...(websitePrice !== undefined ? { websitePrice } : {}),
+      ...(websitePriceMin !== undefined ? { websitePriceMin } : {}),
+      ...(websitePriceMax !== undefined ? { websitePriceMax } : {}),
+      ...(promoPrice !== undefined ? { promoPrice } : {}),
+      currency: text(draft.currency) || 'CNY',
+      priceUnit: text(draft.priceUnit),
+      priceLabel: text(draft.priceLabel),
+      priceNote: text(draft.priceNote),
+      taxIncluded: draft.taxIncluded,
+    },
+    lifecycleStage: text(draft.lifecycleStage) || 'intro',
+    primaryCategoryId,
+    categoryLevel1Id,
+    categoryLevel2Id,
+    categoryLevel3Id: categoryLevel3Id || null,
+    ...(status ? { status } : {}),
+    spec: {
+      ...previousSpec,
+      officialModel: model,
+      model,
+      system,
+      productType: text(draft.productType),
+      manufacturer: text(draft.manufacturer),
+      countryOfOrigin: text(draft.countryOfOrigin),
+      marketCode: text(draft.marketCode) || 'CN',
+      technicalSpecs,
+    },
+    positioning: {
+      ...(objectOrEmpty(product.raw?.positioning) as any),
+      sellingPoints,
+      scenarios: applicationScenarios,
+    },
+    meta: {
+      ...previousMeta,
+      productLibrary: {
+        ...previousLibraryMeta,
+        productType: text(draft.productType),
+        manufacturer: text(draft.manufacturer),
+        countryOfOrigin: text(draft.countryOfOrigin),
+        marketCode: text(draft.marketCode) || 'CN',
+        lifecycle: {
+          ...objectOrEmpty(previousLibraryMeta.lifecycle),
+          stage: text(draft.lifecycleStage) || 'intro',
+          launchDate: text(draft.launchDate),
+          discontinueDate: text(draft.discontinueDate),
+        },
+        sku: {
+          ...objectOrEmpty(previousLibraryMeta.sku),
+          salesUnit: text(draft.salesUnit),
+          packageSpec: text(draft.packageSpec),
+          configurationNotes: text(draft.configurationNotes),
+        },
+        sellingPoints,
+        applicationScenarios,
+        installationRequirement: text(draft.installationRequirement),
+        warrantyPolicy: text(draft.warrantyPolicy),
+        compliance: {
+          ...objectOrEmpty(previousLibraryMeta.compliance),
+          certificates: complianceCertificates,
+        },
+      },
+      [brand]: {
+        ...previousBrandMeta,
+        slug: publicSlug,
+        name,
+        model,
+        cat: websiteCategory || category,
+        websiteCategory,
+        websiteMenuCategory: websiteCategory,
+        sys: system,
+        displayOrder,
+        sortOrder: displayOrder,
+        primaryCategoryId,
+        categoryLevel1Id,
+        categoryLevel2Id,
+        categoryLevel3Id: categoryLevel3Id || null,
+        series: text(draft.series),
+        tagline: text(draft.tagline),
+        en: text(draft.officialEnglishName),
+        badges: splitBadges(draft.badges),
+      },
+    },
+  };
+}
+
+
+export function productStatusPayload(
+  product: NormalizedProduct,
+  status: 'active' | 'inactive'
+): Record<string, unknown> {
+  const tenantId = tenantIdForProduct(product);
+  return { status, ...(tenantId ? { tenantId } : {}) };
+}
+
+
+export function productImageSrc(product: NormalizedProduct): string {
+  return productMainImageSrc(product);
+}
+
+
+export function productAssetUrl(ref: Record<string, any>): string {
+  return text(
+    ref.contentUrl ||
+      ref.base64Url ||
+      ref.url ||
+      ref.src ||
+      ref.previewUrl ||
+      ref.href ||
+      artifactContentUrl(ref.artifactId || ref.id)
+  );
+}
+
+
+export function isImageAsset(ref: Record<string, any>) {
+  const role = text(ref.role).toLowerCase();
+  const mimeType = text(ref.mimeType || ref.type).toLowerCase();
+  const name = text(ref.filename || ref.name || ref.url || ref.src).toLowerCase();
+  return (
+    role === 'main' ||
+    role === 'card' ||
+    role === 'image' ||
+    mimeType.startsWith('image/') ||
+    /\.(png|jpe?g|webp|gif|avif)(?:$|\?)/i.test(name)
+  );
+}
+
+
+export function isManualPdfAsset(ref: Record<string, any>) {
+  const role = text(ref.role).toLowerCase();
+  const mimeType = text(ref.mimeType || ref.type).toLowerCase();
+  const name = text(ref.filename || ref.name || ref.url || ref.src).toLowerCase();
+  return (
+    role === 'doc' ||
+    role === 'manual' ||
+    role === 'pdf' ||
+    mimeType === 'application/pdf' ||
+    /\.pdf(?:$|\?)/i.test(name)
+  );
+}
+
+
+export function productMainImageSrc(product: NormalizedProduct): string {
+  const raw = objectOrEmpty(product.raw);
+  const meta = objectOrEmpty(raw.meta);
+  const brandMeta = productBrandMeta(product);
+  const assetRefs = Array.isArray(raw.assetRefs) ? raw.assetRefs : [];
+  const imageRef = assetRefs.find((item: Record<string, any>) => isImageAsset(item)) || {};
+  return text(
+    productAssetUrl(imageRef) ||
+      artifactContentUrl(
+        meta.imageArtifactId || brandMeta.imageArtifactId || raw.imageArtifactId
+      ) ||
+      brandMeta.image ||
+      brandMeta.imageUrl ||
+      meta.imageUrl ||
+      meta.mainImageUrl ||
+      raw.imageUrl ||
+      raw.image
+  );
+}
+
+
+export function savedProductManualPdfs(product: NormalizedProduct): ProductManualPdfDraft[] {
+  const raw = objectOrEmpty(product.raw);
+  const assetRefs = Array.isArray(raw.assetRefs) ? raw.assetRefs : [];
+  return assetRefs
+    .filter((ref: Record<string, any>) => isManualPdfAsset(ref))
+    .sort(
+      (left: Record<string, any>, right: Record<string, any>) =>
+        Number(left.sortOrder || 0) - Number(right.sortOrder || 0)
+    )
+    .map((ref: Record<string, any>, index: number) => {
+      const artifactId = text(ref.artifactId || ref.id);
+      const name =
+        text(ref.filename || ref.name || ref.originalName) || `产品说明 ${index + 1}.pdf`;
+      return {
+        id: artifactId || text(ref.objectKey) || `${name}-${index}`,
+        artifactId,
+        objectKey: text(ref.objectKey || ref.fileKey),
+        name,
+        mimeType: text(ref.mimeType) || 'application/pdf',
+        previewUrl: productAssetUrl(ref) || artifactContentUrl(artifactId),
+        saved: true,
+        sortOrder: Number(ref.sortOrder || index),
+      };
+    });
+}
+
+
+export async function uploadProductMainImageRef(
+  mainImage: ProductPendingImageDraft | null,
+  entityId: string
+) {
+  if (!mainImage?.file) return null;
+  const artifact = await fileArtifacts.uploadBase64({
+    entityType: 'product-main-image',
+    entityId,
+    filename: mainImage.file.name || `${entityId}-main-image.png`,
+    mimeType: mainImage.file.type || 'image/png',
+    dataBase64: await readBrowserFileBase64(mainImage.file),
+  });
+  const artifactId = text((artifact as any)?.id || (artifact as any)?.artifactId);
+  if (!artifactId) throw new Error('Main image upload did not return an artifact id.');
+  return {
+    role: 'main',
+    artifactId,
+    objectKey: text((artifact as any)?.fileKey || (artifact as any)?.objectKey),
+    filename: text((artifact as any)?.originalName) || mainImage.file.name,
+    mimeType: text((artifact as any)?.mimeType) || mainImage.file.type || 'image/png',
+    sortOrder: 0,
+    url:
+      text((artifact as any)?.contentUrl) ||
+      `/api/v2/file-artifact/${encodeURIComponent(artifactId)}/content`,
+  };
+}
+
+
+export async function uploadProductManualPdfRefs(manualPdfs: ProductManualPdfDraft[], sku: string) {
+  return Promise.all(
+    manualPdfs.map(async (manual, index) => {
+      if (!manual.file && manual.saved) {
+        return {
+          role: 'doc',
+          artifactId: manual.artifactId,
+          objectKey: manual.objectKey,
+          filename: manual.name,
+          mimeType: manual.mimeType || 'application/pdf',
+          sortOrder: index,
+          url: manual.previewUrl,
+        };
+      }
+      if (!manual.file) return null;
+      const artifact = await fileArtifacts.uploadBase64({
+        entityType: 'product-manual-pdf',
+        entityId: sku,
+        filename: manual.name || manual.file.name || `${sku}-manual-${index + 1}.pdf`,
+        mimeType: manual.file.type || 'application/pdf',
+        dataBase64: await readBrowserFileBase64(manual.file),
+      });
+      const artifactId = text((artifact as any)?.id || (artifact as any)?.artifactId);
+      if (!artifactId) throw new Error('PDF upload did not return an artifact id.');
+      return {
+        role: 'doc',
+        artifactId,
+        objectKey: text((artifact as any)?.fileKey || (artifact as any)?.objectKey),
+        filename: text((artifact as any)?.originalName) || manual.name || manual.file.name,
+        mimeType: text((artifact as any)?.mimeType) || manual.file.type || 'application/pdf',
+        sortOrder: index,
+        url:
+          text((artifact as any)?.contentUrl) ||
+          `/api/v2/file-artifact/${encodeURIComponent(artifactId)}/content`,
+      };
+    })
+  ).then((refs) => refs.filter(Boolean));
+}
+
+
+export function productPublicContentPayload(
+  product: NormalizedProduct | null,
+  draft: Pick<
+    CreateProductDraft,
+    | 'name'
+    | 'currency'
+    | 'series'
+    | 'tagline'
+    | 'publicSummary'
+    | 'officialEnglishName'
+    | 'badges'
+    | 'technicalSpecs'
+    | 'sellingPoints'
+    | 'featureBenefits'
+    | 'highlightMetrics'
+    | 'faqs'
+    | 'complianceCertificates'
+    | 'officialDetailHtml'
+  >
+) {
+  const specs = parseKeyValueLines(draft.technicalSpecs);
+  const featureBenefits = parseKeyValueLines(draft.featureBenefits || draft.sellingPoints).map(
+    (item) => ({
+      title: item.k,
+      desc: item.v,
+    })
+  );
+  const highlights = parseKeyValueLines(draft.highlightMetrics).map((item) => ({
+    label: item.k,
+    value: item.v,
+  }));
+  const faq = parseKeyValueLines(draft.faqs)
+    .map((item) => ({
+      q: item.k,
+      a: item.v,
+    }))
+    .filter((item) => item.q && item.a);
+  return {
+    name: text(draft.name),
+    locale: PRODUCT_DETAIL_LOCALE,
+    status: 'published',
+    displayCurrency: text(draft.currency) || 'CNY',
+    officialDetailHtml: sanitizeOfficialProductDetailHtml(draft.officialDetailHtml),
+    marketing: {
+      headline: text(draft.tagline),
+      subhead: text(draft.publicSummary),
+      series: text(draft.series),
+      officialEnglishName: text(draft.officialEnglishName),
+      badges: splitBadges(draft.badges),
+      certs: splitLines(draft.complianceCertificates),
+      specs,
+      features: featureBenefits,
+      featureBenefits: featureBenefits.map((item) => ({ feature: item.title, benefit: item.desc })),
+      highlights,
+      faq,
+    },
+    seo: {
+      metaTitle: text(product?.name || draft.name),
+      metaDescription: text(draft.publicSummary || draft.tagline),
+      canonical: '',
+      ogImage: '',
+      keywords: splitBadges(draft.badges),
+    },
+  };
+}
+
+
+export function productPublicContentSignature(value: unknown): string {
+  const item = productContentItem(value);
+  return JSON.stringify({
+    officialDetailHtml: text(item.officialDetailHtml),
+    marketing: objectOrEmpty(item.marketing),
+  });
+}
+
+
+export async function saveProductPublicContent(
+  productId: string,
+  tenantId: string,
+  product: NormalizedProduct | null,
+  draft: Pick<
+    CreateProductDraft,
+    | 'name'
+    | 'currency'
+    | 'series'
+    | 'tagline'
+    | 'publicSummary'
+    | 'officialEnglishName'
+    | 'badges'
+    | 'technicalSpecs'
+    | 'sellingPoints'
+    | 'featureBenefits'
+    | 'highlightMetrics'
+    | 'faqs'
+    | 'complianceCertificates'
+    | 'officialDetailHtml'
+  >
+) {
+  await products.upsertContent(productId, {
+    ...(tenantId ? { tenantId } : {}),
+    ...productPublicContentPayload(product, draft),
+  });
+}
+
+
+export function createCategorySelection(draft: CreateProductDraft, tree: ProductCategoryNode[]) {
+  const flat = flattenCategoryTree(tree);
+  const level1 = flat.find((item) => item.id === draft.categoryLevel1Id) || null;
+  const level2 = flat.find((item) => item.id === draft.categoryLevel2Id) || null;
+  const level3 = flat.find((item) => item.id === draft.categoryLevel3Id) || null;
+  const leaf = level3 || level2 || level1;
+  const path = [level1, level2, level3]
+    .filter(Boolean)
+    .map((item) => item?.name || item?.code)
+    .join(' / ');
+  return { level1, level2, level3, leaf, path };
+}
+
+
+export function createProductPayload(
+  draft: CreateProductDraft,
+  categoryTree: ProductCategoryNode[],
+  brandOverride?: ProductBrand,
+  options: { includeCategoryBinding?: boolean } = {}
+): Record<string, unknown> {
+  const brand = brandOverride || draft.brand;
+  if (!brand) throw new Error('请选择产品品牌。');
+  const selectedBrands = draft.brands.length ? draft.brands : [brand];
+  const includeCategoryBinding = options.includeCategoryBinding !== false;
+  const tenantId = PRODUCT_LIBRARY_TENANT_ID;
+  const name = text(draft.name);
+  const model = text(draft.model || draft.skuSeed);
+  const materialCode = text(draft.materialCode) || model;
+  const categorySelection = createCategorySelection(draft, categoryTree);
+  const category = text(categorySelection.leaf?.code);
+  const categoryLevel1Id = text(categorySelection.level1?.id);
+  const categoryLevel2Id = text(categorySelection.level2?.id);
+  const categoryLevel3Id = text(categorySelection.level3?.id);
+  const primaryCategoryId = text(categorySelection.leaf?.id);
+  const publicSlug = slug(draft.publicSlug || model);
+  const websiteCategory = text(draft.websiteCategory) || category;
+  const displayOrder = nonNegativeInt(draft.displayOrder);
+  if (!name) throw new Error('请填写产品名称。');
+  if (!model) throw new Error('请填写产品型号。');
+  if (!materialCode) throw new Error('请填写 SKU/物料编码。');
+  if (!categoryLevel1Id) throw new Error('请选择一级产品分类。');
+  if (!categoryLevel2Id) throw new Error('请选择二级产品分类。');
+  if (!category) throw new Error('请选择产品分类。');
+  const system = category;
+  const sku = materialCode;
+  const listPrice = optionalNonNegativeNumber(draft.listPrice);
+  const costPrice = optionalNonNegativeNumber(draft.costPrice);
+  const websitePrice = optionalNonNegativeNumber(draft.websitePrice);
+  const websitePriceMin = optionalNonNegativeNumber(draft.websitePriceMin);
+  const websitePriceMax = optionalNonNegativeNumber(draft.websitePriceMax);
+  const promoPrice = optionalNonNegativeNumber(draft.promoPrice);
+  const lengthMm = nullableNonNegativeNumber(draft.lengthMm);
+  const widthMm = nullableNonNegativeNumber(draft.widthMm);
+  const heightMm = nullableNonNegativeNumber(draft.heightMm);
+  const netWeightKg = nullableNonNegativeNumber(draft.netWeightKg);
+  const packageLengthMm = nullableNonNegativeNumber(draft.packageLengthMm);
+  const packageWidthMm = nullableNonNegativeNumber(draft.packageWidthMm);
+  const packageHeightMm = nullableNonNegativeNumber(draft.packageHeightMm);
+  const grossWeightKg = nullableNonNegativeNumber(draft.grossWeightKg);
+  const technicalSpecs = parseKeyValueLines(draft.technicalSpecs);
+  const sellingPoints = splitLines(draft.sellingPoints);
+  const applicationScenarios = splitLines(draft.applicationScenarios);
+  const complianceCertificates = splitLines(draft.complianceCertificates);
+  return {
+    ...(tenantId ? { tenantId } : {}),
+    sku,
+    materialCode: sku,
+    name,
+    brand,
+    brandCode: brand,
+    brands: selectedBrands,
+    brandCodes: selectedBrands,
+    model,
+    category,
+    primaryCategoryId,
+    productType: text(draft.productType),
+    lifecycleStage: text(draft.lifecycleStage) || 'intro',
+    ...(includeCategoryBinding
+      ? {
+          primaryCategoryId,
+          categoryLevel1Id,
+          categoryLevel2Id,
+          categoryLevel3Id: categoryLevel3Id || null,
+          categoryPath: categorySelection.path,
+        }
+      : {}),
+    ...(listPrice !== undefined ? { listPrice } : {}),
+    ...(costPrice !== undefined ? { costPrice } : {}),
+    lengthMm,
+    widthMm,
+    heightMm,
+    netWeightKg,
+    packageLengthMm,
+    packageWidthMm,
+    packageHeightMm,
+    grossWeightKg,
+    currency: text(draft.currency) || 'CNY',
+    websitePricing: {
+      brandCode: brand,
+      siteCode: brand,
+      locale: PRODUCT_DETAIL_LOCALE,
+      priceDisplayMode: text(draft.websitePriceDisplayMode) || 'not_shown',
+      ...(websitePrice !== undefined ? { websitePrice } : {}),
+      ...(websitePriceMin !== undefined ? { websitePriceMin } : {}),
+      ...(websitePriceMax !== undefined ? { websitePriceMax } : {}),
+      ...(promoPrice !== undefined ? { promoPrice } : {}),
+      currency: text(draft.currency) || 'CNY',
+      priceUnit: text(draft.priceUnit),
+      priceLabel: text(draft.priceLabel),
+      priceNote: text(draft.priceNote),
+      taxIncluded: draft.taxIncluded,
+    },
+    status: 'active',
+    spec: {
+      officialModel: model,
+      model,
+      system,
+      productType: text(draft.productType),
+      manufacturer: text(draft.manufacturer),
+      countryOfOrigin: text(draft.countryOfOrigin),
+      marketCode: text(draft.marketCode) || 'CN',
+      technicalSpecs,
+    },
+    positioning: {
+      sellingPoints,
+      scenarios: applicationScenarios,
+    },
+    meta: {
+      productLibrary: {
+        productType: text(draft.productType),
+        manufacturer: text(draft.manufacturer),
+        countryOfOrigin: text(draft.countryOfOrigin),
+        marketCode: text(draft.marketCode) || 'CN',
+        lifecycle: {
+          stage: text(draft.lifecycleStage) || 'intro',
+          launchDate: text(draft.launchDate),
+          discontinueDate: text(draft.discontinueDate),
+        },
+        sku: {
+          salesUnit: text(draft.salesUnit),
+          packageSpec: text(draft.packageSpec),
+          configurationNotes: text(draft.configurationNotes),
+        },
+        sellingPoints,
+        applicationScenarios,
+        installationRequirement: text(draft.installationRequirement),
+        warrantyPolicy: text(draft.warrantyPolicy),
+        compliance: {
+          certificates: complianceCertificates,
+        },
+      },
+      [brand]: {
+        slug: publicSlug || slug(sku),
+        name,
+        model,
+        cat: websiteCategory,
+        websiteCategory,
+        websiteMenuCategory: websiteCategory,
+        sys: system,
+        displayOrder,
+        sortOrder: displayOrder,
+        ...(includeCategoryBinding
+          ? {
+              primaryCategoryId,
+              categoryLevel1Id,
+              categoryLevel2Id,
+              categoryLevel3Id: categoryLevel3Id || null,
+            }
+          : {}),
+        series: text(draft.series),
+        tagline: text(draft.tagline),
+        en: text(draft.officialEnglishName),
+        badges: splitBadges(draft.badges),
+      },
+    },
+  };
+}
+
+
+export function isProductModelExistsError(error: unknown): boolean {
+  const details = (error as any)?.details;
+  return Number((error as any)?.status) === 409 && details?.code === 'PRODUCT_MODEL_EXISTS';
+}
+
+
+export function productModelExistsMessage(error: unknown): string {
+  const details = (error as any)?.details || {};
+  const existing = details?.data?.existingProduct || {};
+  const proposed = details?.data?.proposedSku || {};
+  const lines = [
+    String(details.message || (error as Error)?.message || '产品型号已存在。'),
+    existing.name ? `已有产品：${existing.name}` : '',
+    existing.model ? `已有型号：${existing.model}` : '',
+    proposed.skuCode ? `本次 SKU/物料编码：${proposed.skuCode}` : '',
+    '确认后会更新该产品资料，并追加/更新本次 SKU；取消则不写入。',
+  ].filter(Boolean);
+  return lines.join('\n');
+}
+
+
+export type ProductLibraryCompletenessDraft = Pick<
+  CreateProductDraft,
+  | 'productType'
+  | 'lifecycleStage'
+  | 'manufacturer'
+  | 'countryOfOrigin'
+  | 'marketCode'
+  | 'launchDate'
+  | 'discontinueDate'
+  | 'salesUnit'
+  | 'lengthMm'
+  | 'widthMm'
+  | 'heightMm'
+  | 'netWeightKg'
+  | 'packageLengthMm'
+  | 'packageWidthMm'
+  | 'packageHeightMm'
+  | 'grossWeightKg'
+  | 'packageSpec'
+  | 'configurationNotes'
+  | 'installationRequirement'
+  | 'warrantyPolicy'
+  | 'technicalSpecs'
+  | 'sellingPoints'
+  | 'applicationScenarios'
+  | 'complianceCertificates'
+>;
+
+
+export function flattenCategoryTree(tree: ProductCategoryNode[]): ProductCategoryNode[] {
+  return tree.flatMap((item) => [item, ...flattenCategoryTree(item.children)]);
+}
+
+
+
+export function categoryOptionLabel(item: ProductCategoryNode): string {
+  return `${item.name || item.code}${item.status === 'inactive' ? '（已停用）' : ''}`;
+}
+
+
+
+export const PRODUCT_READINESS_LABELS: Record<string, string> = {
+  identity: '身份',
+  taxonomy: '分类',
+  sku: 'SKU',
+  technical: '技术',
+  compliance: '合规',
+  content: '内容',
+  assets: '素材',
+  market: '市场',
+};
+
+

@@ -68,7 +68,7 @@ import {
   type Product,
 } from '../../lib/products-data';
 
-import { CategoryChip, CategoryCountPill, DEFAULT_CREATE_BRAND_OPTIONS, FloatingDialog, FloatingDialogOptions, FloatingDialogState, FloatingPromptOptions, Metric, ProductBrand, ProductCategoryDraft, ProductCategoryNode, ProductCategoryUsage, SiteProductCategoryResponse, SiteProductCategoryRow, SiteProductCategoryTreeNode, buildSiteProductCategoryTree, categoryDraftFromNode, categoryDraftPayload, displayBrand, emptyCategoryDraft, errorMessage, flattenRawCategoryItems, internalCategoryCode, nonNegativeInt, normalizeProductCategoryTree, productCategoryItems, slug, text, useFloatingDialog } from './products-shared';
+import { CategoryChip, CategoryCountPill, DEFAULT_CREATE_BRAND_OPTIONS, FloatingDialog, FloatingDialogOptions, FloatingDialogState, FloatingPromptOptions, Metric, ProductBrand, ProductCategoryDraft, ProductCategoryNode, ProductCategoryUsage, SiteProductCategoryResponse, SiteProductCategoryRow, SiteProductCategoryTreeNode, buildSiteProductCategoryTree, categoryDraftFromNode, categoryDraftPayload, displayBrand, emptyCategoryDraft, errorMessage, flattenCategoryTree, flattenRawCategoryItems, internalCategoryCode, nonNegativeInt, normalizeProductCategoryTree, productCategoryItems, slug, text, useFloatingDialog } from './products-shared';
 
 function ProductCategoryManagerView() {
   const [brandCode, setBrandCode] = useState<ProductBrand>('rheem');
@@ -212,11 +212,6 @@ function ProductCategoryManagerView() {
 }
 
 
-export function flattenCategoryTree(tree: ProductCategoryNode[]): ProductCategoryNode[] {
-  return tree.flatMap((item) => [item, ...flattenCategoryTree(item.children)]);
-}
-
-
 export function activeCategoryOptions(
   items: ProductCategoryNode[],
   selected?: ProductCategoryNode | null
@@ -224,11 +219,6 @@ export function activeCategoryOptions(
   const options = items.filter((item) => item.status !== 'inactive');
   if (selected && !options.some((item) => item.id === selected.id)) return [...options, selected];
   return options;
-}
-
-
-export function categoryOptionLabel(item: ProductCategoryNode): string {
-  return `${item.name || item.code}${item.status === 'inactive' ? '（已停用）' : ''}`;
 }
 
 
