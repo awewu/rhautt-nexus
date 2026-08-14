@@ -130,6 +130,17 @@ export class ProductCatalogController {
     return this.mgmt.revokeFocusProduct(req.user, id, reason);
   }
 
+  /** 后验校验（只读）：主销声明 vs 渠道报价/成交实况的分歧镜子。 */
+  @Get('focus-products/reality-check')
+  @Permissions('product.catalog.read')
+  focusRealityCheck(
+    @Req() req: AuthRequest,
+    @Query('brandSlug') brandSlug?: string,
+    @Query('category') category?: string
+  ) {
+    return this.mgmt.focusRealityCheck(req.user, { brandSlug, category });
+  }
+
   @Get('taxonomy')
   @Permissions('product.catalog.read')
   taxonomy() {

@@ -534,4 +534,177 @@ export class ProductMgmtService {
       this.scope(actor)
     );
   }
+
+  /**
+   * 主销后验校验（只读分析）——给总部的镜子：你声明推 A，渠道实际在报/在签什么？
+   *
+   * 数据口径（每条都如实标注，不冒充更强的口径）：
+   * - 渠道报价 = quotations.bom 行级展开（quotation-bom）：渠道行为的**领先信号**，非成交事实。
+   * - 成交 = opportunities.stage='signed' 关联报价的 BOM 行（signed-quotation-bom）：
+   *   以报价 created_at 落生效期内为近似时间口径（签单时刻未单独建模，如实注明）。
+   * - BOM 的 sku 是自由文本，与产品目录按 sku 精确匹配；匹配不上的行**如实计入 unmatched**，
+   *   不猜测归属。
+   *
+   * 分歧信号（只报事实，不下结论"主销定错了"——季节/铺货/激励都可能是原因）：
+   * - declared-but-not-quoted：主销型号在生效期内一条报价都没有。
+   * - channel-prefers-nonfocus：同品类非主销型号的报价量超过了所有主销型号。
+   */
+  async focusRealityCheck(actor: JwtPayload, q: { brandSlug?: string; category?: string } = {}) {
+    const brandSlug = String(q.brandSlug || '').trim();
+    if (!brandSlug) throw new BadRequestException('brandSlug is required');
+    const category = String(q.category || '').trim() || null;
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        // ① 生效中的主销声明
+        const fParams: unknown[] = [actor.tenantId, brandSlug];
+        let fSql = `
+          SELECT f.product_id, f.sku, f.category, f.period_start, f.period_end, p.name AS product_name
+            FROM rhautt_nexus.product_focus_declaration f
+            JOIN rhautt_nexus.products p ON p.id = f.product_id
+           WHERE f.tenant_id = $1 AND f.brand_slug = $2 AND f.status = 'active'
+             AND CURRENT_DATE BETWEEN f.period_start AND f.period_end`;
+        if (category) {
+          fParams.push(category);
+          fSql += ` AND f.category = $${fParams.length}`;
+        }
+        const focus: Array<{
+          product_id: string;
+          sku: string | null;
+          category: string;
+          period_start: string;
+          period_end: string;
+          product_name: string;
+        }> = await em.query(fSql, fParams);
+        if (!focus.length) {
+          return {
+            focus: [],
+            topNonFocus: [],
+            signals: [],
+            note: '无生效中的主销声明，无从对比——先声明主销再做后验校验。',
+          };
+        }
+
+        // 观察窗 = 各声明生效期的并集（分析窗口，不改变声明各自的生效期语义）
+        const windowStart = focus.map((f) => f.period_start).sort()[0];
+        const windowEnd = focus
+          .map((f) => f.period_end)
+          .sort()
+          .at(-1)!;
+        const categories = [...new Set(focus.map((f) => f.category))];
+
+        // ② 报价 BOM 行级聚合（含成交子口径），限本租户 + 观察窗 + 主销涉及的品类
+        const aggParams: unknown[] = [actor.tenantId, windowStart, windowEnd, categories];
+        const agg: Array<{
+          sku: string;
+          category: string | null;
+          product_name: string | null;
+          quote_lines: string;
+          quoted_qty: string;
+          quoted_amount: string;
+          signed_lines: string;
+          signed_qty: string;
+          signed_amount: string;
+        }> = await em.query(
+          `
+          WITH lines AS (
+            SELECT COALESCE(item->>'sku', item->>'model') AS sku,
+                   COALESCE((item->>'quantity')::numeric, 1) AS qty,
+                   COALESCE((item->>'unitPrice')::numeric, (item->>'price')::numeric, 0) AS unit_price,
+                   EXISTS (
+                     SELECT 1 FROM rhautt_nexus.opportunities o
+                      WHERE o.quotation_id::text = q.id::text AND o.stage = 'signed'
+                   ) AS signed
+              FROM rhautt_nexus.quotations q, jsonb_array_elements(q.bom) item
+             WHERE q.tenant_id = $1 AND q.created_at::date BETWEEN $2 AND $3
+               AND COALESCE(item->>'sku', item->>'model') IS NOT NULL
+          )
+          SELECT l.sku, p.category, p.name AS product_name,
+                 COUNT(*) AS quote_lines,
+                 SUM(l.qty) AS quoted_qty,
+                 SUM(l.qty * l.unit_price) AS quoted_amount,
+                 COUNT(*) FILTER (WHERE l.signed) AS signed_lines,
+                 COALESCE(SUM(l.qty) FILTER (WHERE l.signed), 0) AS signed_qty,
+                 COALESCE(SUM(l.qty * l.unit_price) FILTER (WHERE l.signed), 0) AS signed_amount
+            FROM lines l
+            LEFT JOIN rhautt_nexus.products p ON p.sku = l.sku
+           WHERE p.category = ANY($4) OR p.category IS NULL
+           GROUP BY l.sku, p.category, p.name
+           ORDER BY quoted_qty DESC
+           LIMIT 200`,
+          aggParams
+        );
+
+        const num = (v: unknown) => Number(v) || 0;
+        const bySku = new Map(agg.map((r) => [r.sku, r]));
+        const focusSkus = new Set(focus.map((f) => f.sku).filter(Boolean) as string[]);
+
+        const focusItems = focus.map((f) => {
+          const r = f.sku ? bySku.get(f.sku) : undefined;
+          return {
+            sku: f.sku,
+            productName: f.product_name,
+            category: f.category,
+            period: { start: f.period_start, end: f.period_end },
+            quotedLines: num(r?.quote_lines),
+            quotedQty: num(r?.quoted_qty),
+            quotedAmount: num(r?.quoted_amount),
+            signedQty: num(r?.signed_qty),
+            signedAmount: num(r?.signed_amount),
+          };
+        });
+        const topNonFocus = agg
+          .filter((r) => !focusSkus.has(r.sku) && r.category)
+          .slice(0, 10)
+          .map((r) => ({
+            sku: r.sku,
+            productName: r.product_name,
+            category: r.category,
+            quotedLines: num(r.quote_lines),
+            quotedQty: num(r.quoted_qty),
+            quotedAmount: num(r.quoted_amount),
+            signedQty: num(r.signed_qty),
+            signedAmount: num(r.signed_amount),
+          }));
+        const unmatched = agg
+          .filter((r) => !r.category)
+          .reduce((s, r) => s + num(r.quote_lines), 0);
+
+        // ③ 分歧信号（只报事实）
+        const signals: Array<{ kind: string; detail: string }> = [];
+        for (const f of focusItems) {
+          if (f.quotedQty === 0)
+            signals.push({
+              kind: 'declared-but-not-quoted',
+              detail: `主销「${f.productName}」(${f.sku ?? '无SKU'}) 在生效期内没有任何渠道报价`,
+            });
+        }
+        const maxFocusQty = Math.max(0, ...focusItems.map((f) => f.quotedQty));
+        for (const r of topNonFocus) {
+          if (r.quotedQty > maxFocusQty)
+            signals.push({
+              kind: 'channel-prefers-nonfocus',
+              detail: `非主销「${r.productName ?? r.sku}」报价量 ${r.quotedQty} 超过全部主销型号（最高 ${maxFocusQty}）`,
+            });
+        }
+
+        return {
+          window: { start: windowStart, end: windowEnd },
+          categories,
+          focus: focusItems,
+          topNonFocus,
+          unmatchedQuoteLines: unmatched,
+          signals,
+          basis: {
+            quoted: 'quotation-bom（渠道报价行为，领先信号非成交事实）',
+            signed:
+              'signed-quotation-bom（商机 stage=signed 关联报价的 BOM；时间口径为报价创建日落窗内的近似）',
+            matching: 'BOM sku 与产品目录精确匹配；匹配不上的行计入 unmatchedQuoteLines，不猜测归属',
+          },
+          note: '分歧信号只报事实，不判定"主销定错了"——季节、铺货、渠道激励都可能是原因；处置属经营决策。',
+        };
+      },
+      this.scope(actor)
+    );
+  }
 }
