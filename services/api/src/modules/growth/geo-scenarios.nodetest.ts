@@ -200,3 +200,38 @@ test('产品级选题：非主销(isFocus 缺省) focus 因子为 0', () => {
   const topics = deriveProductTopics(product, {});
   assert.ok(topics.every((t) => t.factors.focus === 0));
 });
+
+// ── 规格侧 B2B（工程师/承包商决策段）──
+
+test('B2B 模板只对 engineer/contractor 可见，业主不应看到规格书问题', () => {
+  const owner = deriveTopics({ ...base, audience: 'owner' });
+  assert.ok(!owner.some((t) => t.templateId.startsWith('b2b-')), '业主不应产出 B2B 问题');
+
+  const engineer = deriveTopics({ ...base, audience: 'engineer', climateZone: '寒冷' });
+  const ids = engineer.map((t) => t.templateId);
+  assert.ok(ids.includes('b2b-spec-params'), '应有参数/认证核对问题');
+  assert.ok(ids.includes('b2b-tender-clause'), '应有招标条款问题');
+  assert.ok(ids.includes('b2b-zone-check'), '有气候区时应有低温工况校核问题');
+  assert.ok(ids.includes('b2b-ashrae'), '应有 ASHRAE 90.1 问题');
+});
+
+test('B2B 问题使用真实规范词汇（COP/IPLV/ASHRAE/BIM），非杜撰', () => {
+  const engineer = deriveTopics({ ...base, audience: 'engineer' });
+  const all = engineer.map((t) => t.question).join('\n');
+  for (const term of ['COP', 'IPLV', 'ASHRAE 90.1', 'BIM']) {
+    assert.ok(all.includes(term), `应含真实规范词 ${term}`);
+  }
+});
+
+test('contractor 看到验收资料问题，engineer 专属条款问题对其隐藏', () => {
+  const contractor = deriveTopics({ ...base, audience: 'contractor' });
+  const ids = contractor.map((t) => t.templateId);
+  assert.ok(ids.includes('b2b-acceptance'), '总包应有验收资料问题');
+  assert.ok(!ids.includes('b2b-tender-clause'), '招标条款是设计院动作，总包不产出');
+});
+
+test('B2B 痛点词表存在且为工程视角（区别于 C 端体验痛点）', async () => {
+  const { B2B_PAIN_POINTS } = await import('./geo-scenarios');
+  assert.ok(B2B_PAIN_POINTS.length >= 5);
+  assert.ok(B2B_PAIN_POINTS.some((p: string) => p.includes('审图') || p.includes('验收')));
+});

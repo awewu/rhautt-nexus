@@ -65,6 +65,8 @@ export class GrowthCopyAssetEntity {
   @Column({ name: 'tokens_cost', type: 'numeric', precision: 12, scale: 4, default: 0 })
   tokensCost: string;
   @Column({ name: 'compliance_flags', type: 'jsonb', default: [] }) complianceFlags: string[]; // 命中的合规词
+  /** 可抽取性评估（迁移 112）：{score,passed,checks,hints,basis}——形态启发式，不阻断生成。 */
+  @Column({ type: 'jsonb', default: () => "'{}'::jsonb" }) extractability: Record<string, unknown>;
   // 生成该内容所用的 GEO 策略键（AgenticGEO 归因基础：实验 lift → 归因到策略 → 反哺权重）
   @Column({ name: 'strategy_keys', type: 'jsonb', default: [] }) strategyKeys: string[];
   @Column({ name: 'fact_refs', type: 'jsonb', default: [] }) factRefs: Array<{
@@ -161,7 +163,7 @@ export class GrowthScenarioEntity {
   @Column({ name: 'tenant_id' }) @Index() tenantId: string;
   @Column({ type: 'varchar' }) category: string;
   @Column({ type: 'varchar', default: 'owner' }) audience:
-    'owner' | 'decorator' | 'designer' | 'installer';
+    'owner' | 'decorator' | 'designer' | 'installer' | 'engineer' | 'contractor';
   @Column({ name: 'pain_point', type: 'varchar' }) painPoint: string;
   @Column({ name: 'house_type', type: 'varchar', nullable: true }) houseType: string | null;
   @Column({ name: 'climate_zone', type: 'varchar', nullable: true }) climateZone: string | null;

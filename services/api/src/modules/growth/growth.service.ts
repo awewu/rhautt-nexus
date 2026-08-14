@@ -66,6 +66,7 @@ import {
   GrowthOpinionMentionEntity,
   GrowthScenarioEntity,
 } from './growth.entities';
+import { assessExtractability } from './content-extractability';
 import {
   deriveTopics,
   deriveProductTopics,
@@ -597,6 +598,8 @@ export class GrowthCopyService {
       draft,
       brandCtx ? brandCtx.bannedClaims : this.brandBrain.globalBannedClaims()
     );
+    // GEO 因果链第三环：可抽取性形态检查（启发式，不阻断——形态差的草稿仍落库，由审核人决定）
+    const extractability = assessExtractability(draft);
     return withRlsTransaction(
       this.ds,
       async (em) => {
@@ -614,6 +617,7 @@ export class GrowthCopyService {
             model: result.model,
             tokensCost: String(result.tokensCost),
             complianceFlags,
+            extractability: extractability as unknown as Record<string, unknown>,
           })
         );
         if (template) {
@@ -2498,7 +2502,7 @@ export class GrowthGeoService {
         `品类「${category}」无内置词表，请在 painPoints 中提供该品类的真实用户痛点后重试（系统不编造痛点）。`
       );
     }
-    const validAudiences = ['owner', 'decorator', 'designer', 'installer'];
+    const validAudiences = ['owner', 'decorator', 'designer', 'installer', 'engineer', 'contractor'];
     const audiences = (Array.isArray(dto?.audiences) ? dto!.audiences! : [])
       .map((a) => String(a || '').trim())
       .filter((a) => validAudiences.includes(a)) as ScenarioAudience[];

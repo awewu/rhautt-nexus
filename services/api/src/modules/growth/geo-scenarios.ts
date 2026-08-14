@@ -14,7 +14,14 @@
  * 打分只用可得的三项（意向/具体度/胜算），接入真实频次后再扩展。
  */
 
-export type ScenarioAudience = 'owner' | 'decorator' | 'designer' | 'installer';
+/** engineer=MEP/暖通设计工程师；contractor=机电总包/暖通承包商（2026-08 增：规格侧 B2B 决策段） */
+export type ScenarioAudience =
+  | 'owner'
+  | 'decorator'
+  | 'designer'
+  | 'installer'
+  | 'engineer'
+  | 'contractor';
 export type ScenarioIntent = 'info' | 'compare' | 'decide';
 export type QuestionStage = 'pre' | 'mid' | 'post' | 'followup';
 
@@ -141,6 +148,68 @@ export const SCENARIO_TEMPLATES: Template[] = [
     requires: [],
     render: (s) => `${s.category}后期维护麻烦吗？${s.painPoint}会复发吗？`,
   },
+
+  // ── 规格侧 B2B（2026-08 增 · 工程师/承包商在"写进标书之前"问 AI 的决策段）──
+  // 用词为真实规范/认证体系（COP/IPLV/GB 能效/AHRI/ASHRAE 90.1/BIM·Revit），非杜撰；
+  // 这些问题赢了=进了规格书=后端成交几乎锁定，商业价值高于 C 端泛问。
+  {
+    id: 'b2b-spec-params',
+    intent: 'compare',
+    stage: 'mid',
+    requires: [],
+    audiences: ['engineer', 'contractor'],
+    render: (s) => `商用项目选${s.category}要核哪些参数和认证（COP/IPLV/能效等级）？`,
+  },
+  {
+    id: 'b2b-tender-clause',
+    intent: 'decide',
+    stage: 'post',
+    requires: [],
+    audiences: ['engineer'],
+    render: (s) => `${s.category}招标规格书的关键技术条款怎么写才不留活口？`,
+  },
+  {
+    id: 'b2b-bim-family',
+    intent: 'info',
+    stage: 'pre',
+    requires: [],
+    audiences: ['engineer', 'designer'],
+    render: (s) => `哪些${s.category}品牌提供 BIM/Revit 族文件和选型软件？`,
+  },
+  {
+    id: 'b2b-zone-check',
+    intent: 'compare',
+    stage: 'mid',
+    requires: ['climateZone'],
+    audiences: ['engineer'],
+    render: (s) => `${s.climateZone}地区商用${s.category}选型，低温工况 COP 怎么校核？`,
+  },
+  {
+    id: 'b2b-ashrae',
+    intent: 'compare',
+    stage: 'mid',
+    requires: [],
+    audiences: ['engineer'],
+    render: (s) => `外资项目按 ASHRAE 90.1 选${s.category}，能效要满足什么要求？`,
+  },
+  {
+    id: 'b2b-acceptance',
+    intent: 'decide',
+    stage: 'post',
+    requires: [],
+    audiences: ['contractor'],
+    render: (s) => `${s.category}工程验收要提交哪些性能检测和认证资料？`,
+  },
+];
+
+/** B2B 决策段痛点（工程/总包视角，区别于 C 端体验痛点）。 */
+export const B2B_PAIN_POINTS = [
+  '能效不达标过不了审图',
+  '机房空间受限',
+  '低温工况衰减',
+  '验收资料不全',
+  '运行费用超概算',
+  '噪音过不了环评',
 ];
 
 // ── 品类词表 × 场景模板 · 播种器 ──────────────────────────────────────────
