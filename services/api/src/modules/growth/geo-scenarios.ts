@@ -229,32 +229,40 @@ export function planSeedScenarios(input: {
 
 const INTENT_SCORE: Record<ScenarioIntent, number> = { info: 20, compare: 50, decide: 80 };
 
+/** 主销权重上限。政策权重刻意小于意向档差(30)：主销只能在同意向档内提权，不能把
+ *  低意向问题抬过高意向问题——商业价值的主导因子仍是用户意向，政策不得凌驾。 */
+export const FOCUS_WEIGHT = 12;
+
 export interface TopicScore {
   /** 0-100，越高越有商业价值 */
   score: number;
   /** 落库用的 priority：**数字越小越优先**（与 growth_geo_question 的 ASC 排序一致） */
   priority: number;
-  factors: { intent: number; specificity: number; winnability: number };
+  factors: { intent: number; specificity: number; winnability: number; focus: number };
 }
 
 /**
  * 选题商业价值打分。
- * score = 意向强度(主导) + 具体度 + 我方胜算；priority = 100 - score（越小越优先）。
+ * score = 意向强度(主导) + 具体度 + 我方胜算 + 主销权重；priority = 100 - score（越小越优先）。
  * @param winnability 0-20，我方胜算（由调用方按该品类我方被引率换算；未知传 10）
+ * @param isFocus 该选题针对的产品是否处于**生效中的主销声明**（过了三道闸，见 focus-gate.ts）。
+ *   ⚠️ 这是**政策权重**（品牌方决定推谁），不是市场事实权重——不得对外表述为"该型号更热门"。
  */
 export function scoreTopic(input: {
   intent: ScenarioIntent;
   hasHouseType?: boolean;
   hasClimateZone?: boolean;
   winnability?: number;
+  isFocus?: boolean;
 }): TopicScore {
   const intent = INTENT_SCORE[input.intent] ?? INTENT_SCORE.compare;
   // 具体度：更具体的问题竞争度低、意向更明确
   const specificity = (input.hasHouseType ? 8 : 0) + (input.hasClimateZone ? 8 : 0);
   const winnability = Math.min(Math.max(Number(input.winnability ?? 10), 0), 20);
-  const score = Math.min(100, intent + specificity + winnability);
+  const focus = input.isFocus ? FOCUS_WEIGHT : 0;
+  const score = Math.min(100, intent + specificity + winnability + focus);
   const priority = Math.min(Math.max(100 - score, 1), 199);
-  return { score, priority, factors: { intent, specificity, winnability } };
+  return { score, priority, factors: { intent, specificity, winnability, focus } };
 }
 
 export interface DerivedTopic {
@@ -299,5 +307,84 @@ export function deriveTopics(
     });
   }
   // 商业价值高者在前（priority 小者在前）
+  return out.sort((a, b) => a.priority - b.priority || a.question.localeCompare(b.question));
+}
+
+// ── 产品级选题（主销产品 → 型号级 prompt 簇）───────────────────────────────
+
+/** 卖点入题的长度上限：过长的 claim 拼进问句会不像真人提问，宁可跳过不硬凑。 */
+const PRODUCT_CLAIM_MAX_LEN = 24;
+
+export interface ProductTopicInput {
+  /** 型号展示名（如 "Rheem AP-500 空气源热泵"）——必填，空则不派生 */
+  productName: string;
+  category: string;
+  sku?: string | null;
+  /** 带证据的卖点（调用方只应传 evidenceRef 非空的——无证据卖点不得入题，基座4） */
+  sellingPoints?: { claim: string }[];
+}
+
+/**
+ * 由产品派生型号级问题。模板刻意少而准：
+ *  - 型号级问题是真实用户决策后段的高意向问法（"XX 值得买吗"），数量堆多反而稀释探测预算；
+ *  - 卖点问句只收编短 claim（≤24 字），避免生成不像人话的问题。
+ * ⚠️ 事实边界：问题文本只使用调用方给定的产品名/品类/卖点 claim，不发明参数不编造对比对象。
+ */
+export function deriveProductTopics(
+  input: ProductTopicInput,
+  opts: { winnability?: number; isFocus?: boolean } = {}
+): DerivedTopic[] {
+  const name = (input.productName || '').trim();
+  const category = (input.category || '').trim();
+  if (!name || !category) return [];
+  const base = { winnability: opts.winnability, isFocus: opts.isFocus };
+
+  const candidates: { templateId: string; question: string; stage: QuestionStage; intent: ScenarioIntent }[] = [
+    {
+      templateId: 'product-decide-worth',
+      question: `${name} 值得买吗？有什么优缺点？`,
+      stage: 'mid',
+      intent: 'decide',
+    },
+    {
+      templateId: 'product-compare-peers',
+      question: `${name} 和其他品牌的${category}相比怎么样？`,
+      stage: 'mid',
+      intent: 'compare',
+    },
+    {
+      templateId: 'product-info-experience',
+      question: `${name} 的真实使用体验如何？`,
+      stage: 'pre',
+      intent: 'info',
+    },
+  ];
+  for (const p of input.sellingPoints || []) {
+    const claim = (p?.claim || '').trim();
+    if (!claim || claim.length > PRODUCT_CLAIM_MAX_LEN) continue;
+    candidates.push({
+      templateId: 'product-claim-verify',
+      question: `${name} 的「${claim}」是真的吗？`,
+      stage: 'mid',
+      intent: 'compare',
+    });
+  }
+
+  const out: DerivedTopic[] = [];
+  const seen = new Set<string>();
+  for (const c of candidates) {
+    if (seen.has(c.question)) continue;
+    seen.add(c.question);
+    const scored = scoreTopic({ intent: c.intent, ...base });
+    out.push({
+      templateId: c.templateId,
+      question: c.question,
+      stage: c.stage,
+      intent: c.intent,
+      score: scored.score,
+      priority: scored.priority,
+      factors: scored.factors,
+    });
+  }
   return out.sort((a, b) => a.priority - b.priority || a.question.localeCompare(b.question));
 }

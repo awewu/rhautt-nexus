@@ -68,6 +68,7 @@ import {
 } from './growth.entities';
 import {
   deriveTopics,
+  deriveProductTopics,
   planSeedScenarios,
   resolveVocabulary,
   type ScenarioAudience,
@@ -2218,6 +2219,129 @@ export class GrowthGeoService {
             saved: toSave.length,
             skippedExisting: topics.length - toSave.length,
             note: '问题已落 GEO 问题库并回填 sourceScenarioId（选题来源可追溯）；priority 越小越优先。',
+          },
+        };
+      },
+      rls(user)
+    );
+  }
+
+  /**
+   * 主销产品 → 型号级选题（产品级 GEO 评价的入口，与迁移 110/111 联动）。
+   * 只处理**生效中的主销声明**（过了三道闸且在生效期内）——GEO 探测预算有限，
+   * 型号级选题只给品牌方明确要推、且不明显自伤的产品。
+   * 卖点入题只用带 evidenceRef 的（基座4：无证据的说法不得进对外问题）。
+   * dryRun=true 只预览不落库。
+   */
+  async deriveFocusProductTopics(
+    user: JwtPayload,
+    dto: { brandSlug?: string; category?: string; dryRun?: boolean } = {}
+  ) {
+    const brandSlug = cleanGeoBrand(dto?.brandSlug);
+    if (!brandSlug) throw new BadRequestException('brandSlug required');
+    const category = cleanNullable(dto?.category);
+    return withRlsTransaction(
+      this.ds,
+      async (em) => {
+        // 生效中的主销声明 + 产品名 + 带证据卖点（一次查清，避免 N+1）
+        const params: unknown[] = [user.tenantId, brandSlug];
+        let sql = `
+          SELECT f.product_id, f.sku, f.category, f.rationale, p.name AS product_name,
+                 COALESCE(
+                   (SELECT jsonb_agg(jsonb_build_object('claim', sp.claim))
+                      FROM rhautt_nexus.product_selling_point sp
+                     WHERE sp.tenant_id = f.tenant_id AND sp.product_id = f.product_id
+                       AND COALESCE(TRIM(sp.evidence_ref), '') <> ''),
+                   '[]'::jsonb
+                 ) AS selling_points
+            FROM rhautt_nexus.product_focus_declaration f
+            JOIN rhautt_nexus.products p ON p.id = f.product_id
+           WHERE f.tenant_id = $1 AND f.brand_slug = $2 AND f.status = 'active'
+             AND CURRENT_DATE BETWEEN f.period_start AND f.period_end`;
+        if (category) {
+          params.push(category);
+          sql += ` AND f.category = $${params.length}`;
+        }
+        const focusRows: Array<{
+          product_id: string;
+          sku: string | null;
+          category: string;
+          product_name: string;
+          selling_points: { claim: string }[];
+        }> = await em.query(sql, params);
+
+        if (!focusRows.length) {
+          return {
+            success: true,
+            data: {
+              brandSlug,
+              category: category ?? null,
+              focusProducts: 0,
+              topics: [],
+              saved: 0,
+              note: '无生效中的主销声明——型号级选题只给过闸的主销产品（先到产品目录声明主销）。',
+            },
+          };
+        }
+
+        const qRepo = em.getRepository(GrowthGeoQuestionEntity);
+        const allTopics: Array<Record<string, unknown>> = [];
+        let saved = 0;
+        let skippedExisting = 0;
+        for (const row of focusRows) {
+          const winnability = await this.categoryWinnability(em, user.tenantId, row.category);
+          const topics = deriveProductTopics(
+            {
+              productName: row.product_name,
+              category: row.category,
+              sku: row.sku,
+              sellingPoints: row.selling_points || [],
+            },
+            { winnability, isFocus: true }
+          );
+          for (const t of topics)
+            allTopics.push({ ...t, productId: row.product_id, sku: row.sku, category: row.category });
+          if (dto?.dryRun) continue;
+
+          // 去重：同品牌+品类下同一问题只落一次（重跑幂等）
+          const existing = await qRepo.find({
+            where: { tenantId: user.tenantId, brandSlug, category: row.category } as any,
+            take: 500,
+          });
+          const seen = new Set(existing.map((q) => q.question.trim()));
+          for (const t of topics) {
+            if (seen.has(t.question)) {
+              skippedExisting += 1;
+              continue;
+            }
+            await qRepo.save(
+              qRepo.create({
+                tenantId: user.tenantId,
+                brandSlug,
+                category: row.category,
+                stage: t.stage,
+                question: t.question,
+                priority: t.priority,
+                enabled: true,
+                sourceScenarioId: null,
+                productId: row.product_id,
+                sku: row.sku,
+              })
+            );
+            saved += 1;
+          }
+        }
+        return {
+          success: true,
+          data: {
+            brandSlug,
+            category: category ?? null,
+            focusProducts: focusRows.length,
+            topics: allTopics,
+            saved,
+            skippedExisting,
+            dryRun: dto?.dryRun === true,
+            note: '主销权重为**政策权重**（品牌方决定推谁，非市场热度事实）；卖点入题仅限带 evidenceRef 的（基座4）。',
           },
         };
       },

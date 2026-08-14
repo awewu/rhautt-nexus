@@ -141,6 +141,10 @@ export class GrowthGeoQuestionEntity {
   /** 选题可追溯：由哪个场景派生（NULL = 人工录入的历史问题）。 */
   @Column({ name: 'source_scenario_id', type: 'uuid', nullable: true }) sourceScenarioId:
     string | null;
+  /** 产品维度（迁移 111）：NULL = 品类级问题；有值 = 针对具体型号（产品级 GEO 评价入口）。 */
+  @Column({ name: 'product_id', type: 'uuid', nullable: true }) productId: string | null;
+  /** 冗余留痕：产品改名/下架后仍可追溯当时针对的型号。 */
+  @Column({ type: 'varchar', nullable: true }) sku: string | null;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
 }

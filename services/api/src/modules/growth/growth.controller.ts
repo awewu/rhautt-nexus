@@ -134,6 +134,16 @@ export class GrowthController {
     return this.geoFocus.reallocate(req.user, body?.adjustments);
   }
 
+  /** 主销产品 → 型号级选题（只处理生效中的主销声明；主销权重为政策权重非市场事实）。 */
+  @UseGuards(AuthGuard)
+  @Post('geo/focus-products/derive-topics')
+  deriveFocusProductTopics(
+    @Req() req: AuthRequest,
+    @Body() body: { brandSlug?: string; category?: string; dryRun?: boolean }
+  ) {
+    return this.geo.deriveFocusProductTopics(req.user, body ?? {});
+  }
+
   // ── E1 舆情监测 ──
   @UseGuards(AuthGuard)
   @Post('opinion/mentions')

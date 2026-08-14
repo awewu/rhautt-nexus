@@ -2,7 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   deriveTopics,
+  deriveProductTopics,
   scoreTopic,
+  FOCUS_WEIGHT,
   SCENARIO_TEMPLATES,
   resolveVocabulary,
   planSeedScenarios,
@@ -129,4 +131,72 @@ test('派生结果按商业价值排序（priority 升序）', () => {
   for (let i = 1; i < topics.length; i += 1) {
     assert.ok(topics[i - 1].priority <= topics[i].priority, '结果应按 priority 升序');
   }
+});
+
+// ── 主销权重（政策权重，非市场事实）──
+
+test('主销权重：同意向下主销选题 priority 更优，factors.focus 如实记录', () => {
+  const plain = scoreTopic({ intent: 'compare' });
+  const focus = scoreTopic({ intent: 'compare', isFocus: true });
+  assert.equal(focus.factors.focus, FOCUS_WEIGHT);
+  assert.equal(plain.factors.focus, 0);
+  assert.ok(focus.priority < plain.priority, '主销应更优先');
+  assert.equal(focus.score - plain.score, FOCUS_WEIGHT);
+});
+
+test('主销权重不得凌驾意向：低意向+主销 仍排在 高意向 之后', () => {
+  const infoFocus = scoreTopic({ intent: 'info', isFocus: true }); // 20 + 12
+  const decidePlain = scoreTopic({ intent: 'decide' }); // 80
+  assert.ok(
+    infoFocus.priority > decidePlain.priority,
+    '政策权重(12)必须小于意向档差(30)，主销不能把闲聊问题抬过决策问题'
+  );
+});
+
+// ── 产品级选题派生 ──
+
+const product = {
+  productName: 'Rheem AP-500 空气源热泵',
+  category: '中央热水',
+  sku: 'AP-500',
+  sellingPoints: [{ claim: 'COP 4.2 实测' }],
+};
+
+test('产品级选题：产出型号级问题且含卖点验证问句', () => {
+  const topics = deriveProductTopics(product, { isFocus: true });
+  assert.ok(topics.length >= 4, '3 个固定模板 + 1 个卖点问句');
+  assert.ok(topics.every((t) => t.question.includes('Rheem AP-500')), '每个问题都应含型号名');
+  const claimQ = topics.find((t) => t.templateId === 'product-claim-verify');
+  assert.ok(claimQ && claimQ.question.includes('COP 4.2 实测'), '卖点应入题');
+  assert.ok(topics.every((t) => t.factors.focus === FOCUS_WEIGHT), '主销权重应生效');
+});
+
+test('产品级选题：过长卖点(>24字)不入题——宁可跳过不硬凑', () => {
+  const topics = deriveProductTopics(
+    { ...product, sellingPoints: [{ claim: '这是一条超过二十四个字符长度上限的卖点描述文本示例内容' }] },
+    {}
+  );
+  assert.ok(!topics.some((t) => t.templateId === 'product-claim-verify'), '长 claim 不应生成问句');
+});
+
+test('产品级选题：产品名或品类为空 → 返回空数组（不产出残缺问题）', () => {
+  assert.deepEqual(deriveProductTopics({ productName: '', category: '中央热水' }), []);
+  assert.deepEqual(deriveProductTopics({ productName: 'X', category: '  ' }), []);
+});
+
+test('产品级选题：重复卖点去重，结果按 priority 升序', () => {
+  const topics = deriveProductTopics(
+    { ...product, sellingPoints: [{ claim: 'COP 4.2 实测' }, { claim: 'COP 4.2 实测' }] },
+    {}
+  );
+  const claimQs = topics.filter((t) => t.templateId === 'product-claim-verify');
+  assert.equal(claimQs.length, 1, '相同卖点只应产出一个问句');
+  for (let i = 1; i < topics.length; i += 1) {
+    assert.ok(topics[i - 1].priority <= topics[i].priority);
+  }
+});
+
+test('产品级选题：非主销(isFocus 缺省) focus 因子为 0', () => {
+  const topics = deriveProductTopics(product, {});
+  assert.ok(topics.every((t) => t.factors.focus === 0));
 });
